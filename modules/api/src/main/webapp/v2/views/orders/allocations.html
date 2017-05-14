@@ -1,0 +1,170 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="modal-header ws">
+    <h3 class="modal-title">{{resourceBundle['allocate.order']}} {{dItem.oid}}</h3>
+</div>
+<div class="panel-body ws" style="background: #ffffff">
+    <table class="table" ng-show="dItem.isBa">
+    <thead>
+    <tr>
+        <th>{{resourceBundle['batch']}}</th>
+        <th>{{resourceBundle['batch']}} {{resourceBundle['expiry.lower']}}</th>
+        <th class="text-center">{{resourceBundle['available.stock']}}</th>
+        <th class="text-center">{{resourceBundle['allocated']}}</th>
+        <th class="text-center">{{resourceBundle['quantity']}}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="data in demandTable">
+        <td class="col-sm-1">{{data.bid}}</td>
+        <td class="col-sm-1">{{data.bexp}}</td>
+        <td class="col-sm-2 text-center">{{data.batpstk}}</td>
+        <td class="col-sm-2 text-center">{{data.aQty}}</td>
+        <td class="col-sm-2">
+            <span class="row noLRpad noMargin">
+                <p class="noMargin text-center" ng-hide="edit">{{data.bQty}}</p>
+                <span class="litetext text-center" ng-show="isDef(data.mst) && !edit && data.bQty > 0">{{data.mst}}</span>
+                <input ng-if="!dItem.isBn && edit" class="form-control" type="text" only-digits ng-model="data.qty"
+                        maxlength="12"
+                       id="at{{data.matId}}{{$index}}"
+                       ng-class="{'red-border':data.invalidPopup}"
+                       uib-popover="{{data.popupMsg}}" popover-trigger="showpopup"
+                       ng-focus="hidePop(data,$index, 'at')"
+                       ng-blur="validate(data,$index, 'at')" maxlength="12">
+                <div class="form-group row mt10" ng-show="edit && data.qty > 0">
+                    <span class="litetext ml15" ng-class="{'required' : transConfig.ism}" ng-show="(!dItem.tm && isDef(matstatus)) || (dItem.tm && isDef(tempmatstatus))">{{resourceBundle['inventory.material.status']}}</span>
+                    <div class="col-sm-12">
+                        <select class="form-control" ng-model="data.mst" ng-show="isDef(matstatus) && !dItem.tm"
+                                id="bm{{data.matId}}{{$index}}"
+                                ng-class="{'red-border':data.sinvalidPopup}"
+                                uib-popover="{{data.sPopupMsg}}" popover-trigger="showpopup"
+                                ng-blur="data.isVisitedStatus = true; validateStatus(data,$index,'bm')"
+                                ng-focus="hidePop(data,$index, 'bm', false, true)">
+                            <option ng-repeat="status in matstatus" value="{{status}}"
+                                    ng-selected="data.mst == status">{{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                            </option>
+                        </select>
+                        <select class="form-control" ng-model="data.mst" ng-show="isDef(tempmatstatus) && dItem.tm"
+                                id="bmt{{data.matId}}{{$index}}"
+                                ng-class="{'red-border':data.sinvalidPopup}"
+                                uib-popover="{{data.aPopupMsg}}" popover-trigger="showpopup"
+                                ng-blur="data.isVisitedStatus = true; validateStatus(data,$index,'bmt')"
+                                ng-focus="hidePop(data,$index, 'bmt', false, true)">
+                            <option ng-repeat="status in tempmatstatus" value="{{status}}"
+                                    ng-selected="data.mst == status">{{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </span>
+            <table class="table table-logistimo table-bordered table-order-batch" ng-show="isDef(data.allocations)">
+                <thead>
+                    <tr style="font-size: x-small;">
+                        <th class="text-center">{{resourceBundle['shipment.id']}}</th>
+                        <th class="text-center">{{resourceBundle['allocated']}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr style="font-size: x-small;" ng-repeat="(key,value) in data.allocations">
+                    <td class="text-center">{{key}}</td>
+                    <td class="text-center">{{value}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+    </table>
+    <div ng-hide="dItem.isBa">
+        <div class="row">
+            <label class="col-sm-3 cbx control-label">{{resourceBundle['allocate.quantity']}}</label>
+            <div class="col-sm-6">
+                <span ng-hide="edit">
+                    <p class="cbx">{{demandTable[0].oQty ? demandTable[0].oQty : 0}}
+                        <span class="litetext" ng-show="isDef(demandTable[0].mst) && !edit && demandTable[0].oQty > 0">{{demandTable[0].mst}}</span>
+                    </p>
+                </span>
+                <input ng-show="edit" class="form-control" type="text" only-digits ng-model="demandTable[0].qty"
+                       id="a{{demandTable[0].matId}}{{$index}}"
+                       ng-class="{'red-border':demandTable[0].invalidPopup}"
+                       uib-popover="{{demandTable[0].popupMsg}}" popover-trigger="showpopup"
+                       ng-focus="hidePop(demandTable[0],$index, 'a')"
+                       ng-blur="validate(demandTable[0],$index, 'a')" maxlength="12">
+            </div>
+        </div>
+        <div class="form-group row mt18" ng-show="edit">
+            <label class="col-sm-3 control-label cbx" ng-class="{'required' : transConfig.ism}" ng-show="isDef(matstatus)">{{resourceBundle['inventory.material.status']}}</label>
+            <div class="col-sm-6">
+                <select class="form-control" ng-model="demandTable[0].mst" ng-show="isDef(matstatus) && !dItem.tm"
+                        id="m{{demandTable[0].matId}}0"
+                        ng-class="{'red-border':demandTable[0].ainvalidPopup}"
+                        uib-popover="{{demandTable[0].aPopupMsg}}" popover-trigger="showpopup"
+                        ng-blur="demandTable[0].isVisitedStatus = true; validateStatus(demandTable[0],0,'m')"
+                        ng-focus="hidePop(demandTable[0],0, 'm', true)">
+                    <option ng-repeat="status in matstatus" value="{{status}}" ng-selected="demandTable[0].mst == status">
+                        {{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                    </option>
+                </select>
+                <select class="form-control" ng-model="demandTable[0].mst" ng-show="isDef(tempmatstatus) && dItem.tm"
+                        id="mt{{demandTable[0].matId}}0"
+                        ng-class="{'red-border':demandTable[0].ainvalidPopup}"
+                        uib-popover="{{demandTable[0].aPopupMsg}}" popover-trigger="showpopup"
+                        ng-blur="demandTable[0].isVisitedStatus = true; validateStatus(demandTable[0],0,'mt')"
+                        ng-focus="hidePop(demandTable[0],0, 'mt', true)">
+                    <option ng-repeat="status in tempmatstatus" value="{{status}}" ng-selected="demandTable[0].mst == status">
+                        {{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt18 mlr0" ng-hide="hideShipments" style="border-top: 1px solid #ddd;">
+            <div class="row">
+                <div class="col-sm-12">
+                    <p class="mt10"><b>{{resourceBundle['shipment.allocations']}}</b></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                        <table class="table table-condensed table-logistimo table-bordered" style="margin-left: auto; margin-right: auto;">
+                            <tbody>
+                            <tr>
+                                <th class="text-center">{{resourceBundle['shipment.id']}}</th>
+                                <th class="text-center">{{resourceBundle['allocated']}}</th>
+                            </tr>
+                            <tr ng-repeat="(key,value) in demandTable[0].allocations">
+                                <td class="text-center">{{key}}</td>
+                                <td class="text-center">{{value}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer ws">
+    <button class="btn btn-primary" ng-show="!edit" ng-click="toggleAllocate()">{{resourceBundle['edit']}}</button>
+    <button class="btn btn-primary" ng-show="edit" ng-click="proceed()">{{resourceBundle['save']}}</button>
+    <button class="btn btn-default" ng-click="cancel()">{{resourceBundle['cancel']}}</button>
+</div>

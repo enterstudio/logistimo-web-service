@@ -1,0 +1,192 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="NewShipmentController">
+    <h3>Create shipment for order <a ng-href="#/orders/detail/{{orderId}}/">{{order.id}}</a></h3>
+    <hr/>
+    <div class="row mt10">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{resourceBundle['customer']}}
+                </div>
+                <div class="panel-body">
+                    <div class="row lPad5 mb5">
+                        <div class="col-sm-12">
+                            <p><a class="capitalize"
+                                  ng-href="#/setup/entities/detail/{{order.eid}}" target="_blank">{{order.enm}}</a></p>
+
+                            <p class="capitalize">{{order.eadd}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{resourceBundle['vendor']}}
+                </div>
+                <div class="panel-body">
+                    <div class="row lPad5 mb5">
+                        <div class="col-sm-12">
+                            <p><a class="capitalize"
+                                  ng-href="#/setup/entities/detail/{{order.vid}}" target="_blank">{{order.vnm}}</a></p>
+
+                            <p class="capitalize">{{order.vadd}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Details
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="row mb10">
+                                <label class="col-sm-4 cbx control-label ml10">Transporter</label>
+
+                                <div class="col-sm-7">
+                                    <input class="form-control" ng-model="transporter" placeholder="Transporter">
+                                </div>
+                            </div>
+                            <div class="row mb10">
+                                <label class="col-sm-4 cbx control-label ml10"> Tracking Id</label>
+
+                                <div class="col-sm-7">
+                                    <input class="form-control" ng-model="trackingId" placeholder="Tracking Id">
+                                </div>
+                            </div>
+                            <div class="row mb10">
+                                <label class="col-sm-4 cbx control-label ml10"> {{resourceBundle['eda']}}</label>
+
+                                <div class="col-sm-7">
+                                    <date-picker date-model="ead" min-date="today" place-holder="{{resourceBundle['eda']}}"></date-picker>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <label class="col-sm-4 control-label cbx ml10" ng-class="{'required': oCfg.psrm}">
+                                    {{resourceBundle['reason.shipment']}} </label>
+
+                                <div class="col-sm-7">
+                                    <select class="form-control" ng-model="rsn"
+                                            ng-change="mrsn = ''"
+                                            ng-show="isDef(reasons)">
+                                        <option ng-repeat="reason in reasons" value="{{reason}}">
+                                            {{reason|| resourceBundle['select'] + ' ' + resourceBundle['reason.lowercase']}}
+                                        </option>
+                                    </select>
+                                    <textarea type="text" class="form-control" ng-show="isUndef(reasons) || rsn == 'Others'"
+                                      ng-model="mrsn" placeholder="{{resourceBundle['enterreason']}}" maxlength="160"
+                                      style="margin-top: 4px;"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mt10" ng-show="rsn == 'o'">
+                                <label class="col-sm-4 control-label cbx ml10">Message </label>
+
+                                <div class="col-sm-7">
+                                    <textarea class="form-control" rows="4" ng-model="rsnTxt"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 mt10">
+                            <div class="row">
+                                <label class="col-sm-4 control-label cbx ml10">{{resourceBundle['packagesize']}}</label>
+                                <div class="col-sm-7 mb10">
+                                    <select class="form-control" ng-model="ps" ng-show="isDef(packageSize)">
+                                        <option ng-repeat="psize in packageSize" value="{{psize}}"
+                                                ng-selected="ps == psize">
+                                            {{psize || resourceBundle['select'] + ' ' + resourceBundle['packagesize']}}
+                                        </option>
+                                    </select>
+                                    <input type="text"class="form-control" ng-show="isUndef(packageSize)" ng-model="ps">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Items
+                </div>
+                <div class="panel-body">
+                    <table class="table table-condensed table-hover table-logistimo">
+                        <tr>
+                            <th class="col-sm-1 text-center">SI.No.</th>
+                            <th class="col-sm-2 ">Material</th>
+                            <th class="col-sm-1 text-center">Ordered</th>
+                            <th class="col-sm-1 text-center" ng-show="allocate">Allocated</th>
+                            <th class="col-sm-1 text-center">Shipped</th>
+                            <th class="col-sm-1 text-center">Yet to ship</th>
+                            <th class="col-sm-2 text-center">On shipments</th>
+                            <th class="col-sm-2 text-center">Ship</th>
+                            <th class="col-sm-1 text-center" ng-show="allocate">Allocate from Order</th>
+                        </tr>
+                        <tr ng-repeat="item in sMTShip">
+                            <td class="text-center"><p class="cbx">{{$index + 1}}</p></td>
+                            <td><a href="#/setup/materials/all/detail/{{item.id}}" target="_blank" class="alignBaseLine">{{item.nm}}</a></td>
+                            <td class="text-center"><p class="cbx">{{item.q}}</p></td>
+                            <td class="text-center" ng-show="allocate"><p class="cbx">{{item.astk}}</p></td>
+                            <td class="text-center"><p class="cbx">{{item.sq}}</p></td>
+                            <td class="text-center"><p class="cbx">{{item.yts}}</p></td>
+                            <td class="text-center"><p class="cbx">{{item.isq}}</p></td>
+                            <td>
+                                <input class="form-control" only-digits ng-model="item.nq"
+                                       id="{{item.id}}{{$index}}"
+                                       ng-class="{'red-border':item.invalidPopup}"
+                                       uib-popover="{{item.popupMsg}}" popover-trigger="showpopup"
+                                       ng-focus="hidePop(item,$index)"
+                                       ng-blur="validate(item,$index)">
+                            </td>
+                            <td class="text-center" ng-show="allocate"><div class="cbx"><input type="checkbox" ng-model="item.ta" ng-disabled="isUndef(item.astk)"></div></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <button type="button" class="btn btn-sm btn-primary" ng-click="create()">{{resourceBundle['submit']}}</button>
+                    <button type="button" class="btn btn-sm btn-default" ng-click="cancelNewShipment()">{{resourceBundle['cancel']}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

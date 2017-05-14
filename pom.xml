@@ -1,0 +1,124 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.logistimo</groupId>
+    <artifactId>web</artifactId>
+    <packaging>pom</packaging>
+    <version>2.4.0</version>
+    <name>Logistimo web Parent Project</name>
+
+    <modules>
+        <module>modules/common</module>
+        <module>modules/materials</module>
+        <module>modules/auth</module>
+        <module>modules/accounting</module>
+        <module>modules/activity</module>
+        <module>modules/api</module>
+        <module>modules/assets</module>
+        <module>modules/config</module>
+        <module>modules/communications</module>
+        <module>modules/conversations</module>
+        <module>modules/customreports</module>
+        <module>modules/dashboards</module>
+        <module>modules/domains</module>
+        <module>modules/entities</module>
+        <module>modules/event-handlers</module>
+        <module>modules/events-core</module>
+        <module>modules/exports</module>
+        <module>modules/inventory</module>
+        <module>modules/media</module>
+        <module>modules/mnltransactions</module>
+        <module>modules/optimization</module>
+        <module>modules/orders</module>
+        <module>modules/predictions</module>
+        <module>modules/tags</module>
+        <module>modules/users</module>
+        <module>modules/reports</module>
+        <module>modules/bulkuploads</module>
+        <module>modules/logi</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-core</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-api-jdo</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-rdbms</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-cache</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-enhancer</artifactId>
+            <version>3.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>myrepo</id>
+            <name>LogistimoRepository</name>
+            <url>file://${project.basedir}/repo</url>
+        </repository>
+    </repositories>
+</project>

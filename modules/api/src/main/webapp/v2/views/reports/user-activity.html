@@ -1,0 +1,291 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane pt45" ng-if="!hbUTag">
+<div ng-controller="UsrActController" id="cid">
+    <div class="filter-box">
+        <div ng-include="'views/common/reset-filters.html'"></div>
+        <div class="row">
+            <div class="col-sm-3">
+                <span class="filter-label required">{{resourceBundle['user']}} {{resourceBundle['name.lower']}}</span>
+                <user-select users-model="rep.usr" include-child-domain-users=true multiple="'false'"></user-select>
+            </div>
+            <div class="col-sm-12">
+                <span ng-show="tm" class="caption pull-right">
+                    {{resourceBundle['asof']}} {{tm}}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="row action-bar">
+        <div class="col-sm-7 noLRpad">
+            <form class="form-inline" role="form">
+                <div class="form-group">
+                    <label class="filter-label cbx">{{resourceBundle['from']}}</label>
+                    <date-picker date-model="from" place-holder="From" mode="'month'"
+                                 noclear="noclear" max-date="today"></date-picker>
+                    <span class="lPad"></span>
+                    <label class="filter-label cbx">{{resourceBundle['to']}}</label>
+                    <date-picker date-model="to" place-holder="To" mode="'month'" noclear="noclear" min-date="from" max-date="today"></date-picker>
+                </div>
+            </form>
+        </div>
+        <div class="pull-right">
+            <button type="button" ng-click="getFChartData()" class="btn btn-sm btn-primary">
+                {{resourceBundle['report.get']}}
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <span class="pull-right mb5" ng-hide="cLabel == undefined">
+                <a ng-hide="showExport" ng-click="openExportOptions()">{{resourceBundle['show.export.options']}}</a>
+                <a ng-show="showExport" ng-click="closeExportOptions()">{{resourceBundle['hide.export.options']}}</a>
+            </span>
+        </div>
+    </div>
+    <div ng-show="showExport" class="tron form-group">
+        <div class="row">
+            <div class="col-sm-3">
+                <span class="filter-label required">{{resourceBundle['aggregateuppercase']}}</span>
+                <div clas="form-control">
+                    <div ng-day-month-switch vw="dm"></div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <span class="filter-label" >{{resourceBundle['from']}}</span>
+
+                <date-picker ng-show="dm == 'm'" date-model="startDate" place-holder="From"
+                             mode="'month'" noclear="noclear"></date-picker>
+                <date-picker ng-show="dm == 'd'" date-model="startDate" place-holder="From" noclear="noclear"></date-picker>
+            </div>
+            <div class="col-sm-3">
+                <span class="filter-label">{{resourceBundle['to']}}</span>
+                <date-picker ng-show="dm == 'm'" date-model="endDate" place-holder="To"
+                             mode="'month'" noclear="noclear"></date-picker>
+                <date-picker ng-show="dm == 'd'" date-model="endDate" place-holder="To" noclear="noclear"></date-picker>
+            </div>
+            <!--<div ng-include="'views/reports/export-filters.html'"/>-->
+            <div ng-if="mailId != undefined && mailId != null" class="col-sm-3" style="top:23px;">
+                <export-data mail-id="mailId" frequency="dm" report-type="useractivity" export-type="reports"
+                                   export-callback="exportUserActivityReports('useractivity')"></export-data>
+                <button type="button" class="btn btn-sm btn-default" ng-click="closeExportOptions()">
+                    {{resourceBundle['cancel']}}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <p class=" alert alert-warning" ng-show="showChart && cLabel == undefined">
+                {{resourceBundle['data.notavailable']}}</p>
+        </div>
+    </div>
+    <div class="row" ng-show="showChart">
+        <div class="col-sm-12" ng-hide="cLabel == undefined">
+            <div>
+                <ul class="tabb nav nav-tabs subnav-tabs">
+                    <li ng-class="{active: cView == 'l'}"><a ng-click="setCView('l')" class="clickable">{{resourceBundle['logins']}}</a>
+                    </li>
+                    <li ng-class="{active: cView == 'i'}"><a ng-click="setCView('i')" class="clickable">{{resourceBundle['inventory']}}</a>
+                    </li>
+                    <li ng-class="{active: cView == 'o'}" ng-show="ordersTabEnabled"><a ng-click="setCView('o')" class="clickable">{{resourceBundle['orders']}}</a>
+                    </li>
+                    <li ng-class="{active: cView == 'r'}" ng-show="ordersTabEnabled && rpe"><a ng-click="setCView('r')"
+                                                                                               class="clickable">{{resourceBundle['revenue']}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="!loading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="pull-right padding5">
+                            <div ng-chart-tab-switch vw="vw"></div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="cView=='l'" class="row">
+                    <div class="col-sm-12">
+                        <div ng-if="cLabel != undefined" align="center">
+                            <div ng-if="vw == 'c'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_l" chart-options="cOptions"
+                                              chart-id="c1"></fusion-chart>
+                                <p class="litetext">({{resourceBundle['month.barselect']}})</p>
+                            </div>
+                            <div ng-if="vw == 't'">
+                                <chart-table caption="cOptions.caption" heading="tHead_l"
+                                             row="tData_l"></chart-table>
+                            </div>
+                            <p class="padding5" ng-show="isDef(sData_l)"><b>{{resourceBundle['total']}}: </b>{{sData_l}} </p>
+                            <a ng-click="exportAsCSV()">{{resourceBundle['download.csv']}}</a>
+
+                            <div ng-show="showDaily" class="fcminheight">
+                                <div ng-if="!dLoading">
+                                    <div ng-if="vw == 'c'">
+                                        <fusion-chart type="cType" height="cHeight" width="cWidth"
+                                                      chart-label="dcLabel"
+                                                      chart-data="dcData_l" chart-options="dcOptions"
+                                                      chart-id="c2"></fusion-chart>
+                                    </div>
+                                    <div ng-if="vw == 't'">
+                                        <chart-table caption="dcOptions.caption" heading="tHead_l"
+                                                     row="dtData_l"></chart-table>
+                                    </div>
+                                    <p class="padding5" ng-show="isDef(dsData_l)"><b>{{resourceBundle['total']}}: </b>{{dsData_l}} </p>
+                                    <a ng-click="exportAsCSV(true)">{{resourceBundle['download.csv']}}</a>
+                                </div>
+                                <p class="padding5" ng-show="dLoading == true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                    {{resourceBundle['loading']}}...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="cView=='i'" class="row">
+                    <div class="col-sm-12">
+                        <div ng-if="cLabel != undefined" align="center">
+                            <div ng-if="vw == 'c'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_i" chart-options="cOptions"
+                                              chart-id="c3"></fusion-chart>
+                                <p class="litetext">({{resourceBundle['month.barselect']}})</p>
+                            </div>
+                            <div ng-if="vw == 't'">
+                                <chart-table caption="cOptions.caption" heading="tHead_i"
+                                             row="tData_i"></chart-table>
+                            </div>
+                            <p class="padding5" ng-show="isDef(sData_i)"><b>{{resourceBundle['total']}}: </b>{{sData_i}} </p>
+                            <a ng-click="exportAsCSV()">{{resourceBundle['download.csv']}}</a>
+
+                            <div ng-show="showDaily" class="fcminheight">
+                                <div ng-if="!dLoading">
+                                    <div ng-if="vw == 'c'">
+                                        <fusion-chart type="cType" height="cHeight" width="cWidth"
+                                                      chart-label="dcLabel"
+                                                      chart-data="dcData_i" chart-options="dcOptions"
+                                                      chart-id="c4"></fusion-chart>
+                                    </div>
+                                    <div ng-if="vw == 't'">
+                                        <chart-table caption="dcOptions.caption" heading="tHead_i"
+                                                     row="dtData_i"></chart-table>
+                                    </div>
+                                    <p class="padding5" ng-show="isDef(dsData_i)"><b>{{resourceBundle['total']}}: </b>{{dsData_i}} </p>
+                                    <a ng-click="exportAsCSV(true)">{{resourceBundle['download.csv']}}</a>
+                                </div>
+                                <p class="padding5" ng-show="dLoading == true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                    {{resourceBundle['loading']}}...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="cView=='o'" class="row">
+                    <div class="col-sm-12">
+                        <div ng-if="cLabel != undefined" align="center">
+                            <div ng-if="vw == 'c'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_o" chart-options="cOptions"
+                                              chart-id="c5"></fusion-chart>
+                                <p class="litetext">({{resourceBundle['month.barselect']}})</p>
+                            </div>
+                            <div ng-if="vw == 't'">
+                                <chart-table caption="cOptions.caption" heading="tHead_o"
+                                             row="tData_o"></chart-table>
+                            </div>
+                            <p class="padding5" ng-show="isDef(sData_o)"><b>{{resourceBundle['total']}}: </b>{{sData_o}} </p>
+                            <a ng-click="exportAsCSV()">{{resourceBundle['download.csv']}}</a>
+
+                            <div ng-show="showDaily" class="fcminheight">
+                                <div ng-if="!dLoading">
+                                    <div ng-if="vw == 'c'">
+                                        <fusion-chart type="cType" height="cHeight" width="cWidth"
+                                                      chart-label="dcLabel"
+                                                      chart-data="dcData_o" chart-options="dcOptions"
+                                                      chart-id="c6"></fusion-chart>
+                                    </div>
+                                    <div ng-if="vw == 't'">
+                                        <chart-table caption="dcOptions.caption" heading="tHead_o"
+                                                     row="dtData_o"></chart-table>
+                                    </div>
+                                    <p class="padding5" ng-show="isDef(dsData_o)"><b>{{resourceBundle['total']}}: </b>{{dsData_o}} </p>
+                                    <a ng-click="exportAsCSV(true)">{{resourceBundle['download.csv']}}</a>
+                                </div>
+                                <p class="padding5" ng-show="dLoading == true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                    {{resourceBundle['loading']}}...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="cView=='r'" class="row">
+                    <div class="col-sm-12">
+                        <span class="litetext">{{resourceBundle['report.useractivity.revenue.subnote']}}</span>
+                        <div ng-if="cLabel != undefined" align="center">
+                            <div ng-if="vw == 'c'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_r" chart-options="cOptions"
+                                              chart-id="c7"></fusion-chart>
+                                <p class="litetext">({{resourceBundle['month.barselect']}})</p>
+                            </div>
+                            <div ng-if="vw == 't'">
+                                <chart-table caption="cOptions.caption" heading="tHead_r"
+                                             row="tData_r"></chart-table>
+                            </div>
+                            <p class="padding5" ng-show="isDef(sData_r)"><b>{{resourceBundle['total']}}: </b>{{sData_r}} </p>
+                            <a ng-click="exportAsCSV()">{{resourceBundle['download.csv']}}</a>
+
+                            <div ng-show="showDaily" class="fcminheight">
+                                <div ng-if="!dLoading">
+                                    <div ng-if="vw == 'c'">
+                                        <fusion-chart type="cType" height="cHeight" width="cWidth"
+                                                      chart-label="dcLabel"
+                                                      chart-data="dcData_r" chart-options="dcOptions"
+                                                      chart-id="c8"></fusion-chart>
+                                    </div>
+                                    <div ng-if="vw == 't'">
+                                        <chart-table caption="dcOptions.caption" heading="tHead_r"
+                                                     row="dtData_r"></chart-table>
+                                    </div>
+                                    <p class="padding5" ng-show="isDef(dsData_r)"><b>{{resourceBundle['total']}}: </b>{{dsData_r}} </p>
+                                    <a ng-click="exportAsCSV(true)">{{resourceBundle['download.csv']}}</a>
+                                </div>
+                                <p class="padding5" ng-show="dLoading == true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                    {{resourceBundle['loading']}}...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="padding5" ng-show="loading == true">
+                <span class="glyphicons glyphicons-cogwheel spin"></span> {{resourceBundle['loading']}}...
+            </p>
+        </div>
+    </div>
+</div>
+</div>

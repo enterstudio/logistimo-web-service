@@ -1,0 +1,404 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-if="iSU" class="box topbox" ng-controller="DomainFormCtrl" >
+    <div ng-controller="DomainDetailController">
+        <div class="row" >
+            <div class="col-sm-12">
+                <div class="filter-box">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <a href="#/manage/domains/list">
+                                <button class="btn btn-sm">
+                                    <span class="glyphicons glyphicons-unshare"></span>
+                                </button>
+                            </a>
+                        </div>
+                        <div class="col-sm-8  word-wrap ">
+                            <div class="filter-title">
+                                {{domainbyidDets.name}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <span class="caption pull-right cbx">
+                    <span ng-show="isDef(domainbyidDets.createdOn)">
+                    {{resourceBundle['createdon']}} {{domainbyidDets.createdOn}}
+                    </span>
+                    <span ng-show="isDef(domainbyidDets.ownerId)">{{resourceBundle['by']}}
+                    <a href="#/setup/users/all/details?userId={{domainbyidDets.ownerId}}" target="_new" >
+                        {{ isDef(domainbyidDets.ownerName) ? domainbyidDets.ownerName: domainbyidDets.ownerId }}</a>
+                    </span>
+                    <span ng-show="isDef(domainbyidDets.lastUpdatedOn)">,{{resourceBundle['material.lastupdated']}}&nbsp;{{resourceBundle['on']}}
+                         {{domainbyidDets.lastUpdatedOn}}
+                         <span ng-show="isDef(domainbyidDets.lastUpdatedBy)">
+                           {{resourceBundle['by']}}
+                             <a href="#/setup/users/all/details?userId={{domainbyidDets.lastUpdatedBy}}" target="_new">
+                                 {{isDef(domainbyidDets.lastUpdatedByn) ? domainbyidDets.lastUpdatedByn : domainbyidDets.lastUpdatedBy}}
+                             </a>
+                         </span>
+                  </span>
+                </span>
+            </div>
+         </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['domain.info']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mt10">
+                            <div class="col-sm-12">
+                                <div class="row word-wrap mt10">
+                                    <div class="col-sm-3">
+                                        <label class="control-label">{{resourceBundle['name']}}:</label>
+                                    </div>
+                                    <div class="col-sm-8 left-10 mh30"  >
+                                        <span editable-box ng-show="!nedit" ng-click="setName()" class="fullSpan word-wrap p2 mh25" >
+                                            {{domainbyidDets.name }} <span ng-show="updatingName" class="glyphicons glyphicons-cogwheel spin"></span>
+                                        </span>
+                                        <div ng-show="nedit">
+                                            <editable-text edit-model="name"
+                                                           on-ok="updateName()"
+                                                           on-cancel="cancelName()"
+                                                           set-focus="{{nedit}}">
+                                            </editable-text>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row word-wrap mt10" >
+                                    <div class="col-sm-3">
+                                        <label class="control-label">{{resourceBundle['description']}}:</label>
+                                    </div>
+                                    <div class="col-sm-8 left-10 mh30"  >
+                                        <span editable-box ng-show="!dedit" ng-click="setDesc()" class="fullSpan word-wrap p2 mh25"  >
+                                            {{domainbyidDets.description }} <span ng-show="updatingDesc" class="glyphicons glyphicons-cogwheel spin"></span>
+                                        </span>
+                                        <div ng-show="dedit">
+                                            <editable-text edit-model="desc"
+                                                           on-ok="updateDesc()"
+                                                           on-cancel="cancelDesc()"
+                                                           set-focus="{{dedit}}">
+                                            </editable-text>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt10 ">
+                                    <div class="col-sm-3">
+                                        <label class="control-label">{{resourceBundle['domain.owner']}}:</label>
+                                    </div>
+                                    <div class="col-sm-9 left-10" >
+                                        <a href="#/setup/users/all/details?userId={{domainbyidDets.ownerId}}">{{ isDef(domainbyidDets.ownerName) ? domainbyidDets.ownerName: domainbyidDets.ownerId }}</a>
+                                    </div>
+                                </div>
+                                <div class="row mt10">
+                                    <div class="col-sm-3">
+                                        <label class="control-label"> {{resourceBundle['domain.active']}}?:</label>
+                                    </div>
+                                    <div class="col-sm-9 left-10" >
+                                        {{domainbyidDets.isActive}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 mt10">
+                            <form class="form-horizontal" role="form" name="linkedDomainAddForm">
+                                <div class="col-sm-12">
+                                    <div class="form-group"  >
+                                        <label class="col-sm-3 control-label">{{resourceBundle['permissions']}}</label>
+                                        <div class="col-sm-8">
+                                            <table
+                                                    class="table table-bordered table-condensed table-hover table-striped table-logistimo w95">
+                                                <tbody>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>{{resourceBundle['prm.view']}}</th>
+                                                    <th>{{resourceBundle['prm.add']}}</th>
+                                                    <th>{{resourceBundle['prm.edit']}}</th>
+                                                    <th>{{resourceBundle['prm.remove']}}</th>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-center">{{resourceBundle['prm.master.data']}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.users.management']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.uv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.uv" ng-model="dperm.ua"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.uv" ng-model="dperm.ue"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.uv" ng-model="dperm.ur"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.entities.management']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.ev" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.ev" ng-model="dperm.ea"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.ev" ng-model="dperm.ee"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.ev" ng-model="dperm.er"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.entity.groups.management']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.egv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.egv" ng-model="dperm.ega"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.egv" ng-model="dperm.ege"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.egv" ng-model="dperm.egr"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.entity.relationships.management']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.erv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.erv" ng-model="dperm.era"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.erv" ng-model="dperm.ere"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.erv" ng-model="dperm.err"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['prm.inventory']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.iv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.iv" ng-model="dperm.ia"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.iv" ng-model="dperm.ie"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.iv" ng-model="dperm.ir"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['prm.materials']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.mv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.mv" ng-model="dperm.ma"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.mv" ng-model="dperm.me"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.mv" ng-model="dperm.mr"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['assets']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.av" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.av" ng-model="dperm.aa"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.av" ng-model="dperm.ae"></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.av" ng-model="dperm.ar"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-center">{{resourceBundle['domain.configuration']}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['domain.configuration']}}</td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm" ng-model="dperm.cv" ng-change="checkPermission()"></td>
+                                                    <td></td>
+                                                    <td><input type="checkbox" ng-disabled="!editPerm || !dperm.cv" ng-model="dperm.ce"></td>
+                                                    <td></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row pt10 pb10 "  ng-show="iSU">
+                                        <div class="col-sm-10">
+                                            <div class="pull-right">
+                                                <button ng-click="updateChild()" name="update" ng-show="editPerm"
+                                                        class="btn btn-sm btn-primary">{{resourceBundle['update']}}
+                                                </button>
+                                                <button ng-click="cancelEdit()"  name="cancel" ng-show="editPerm"
+                                                        class="btn btn-sm btn-default">{{resourceBundle['cancel']}}
+                                                </button>
+                                                <button  ng-click="openEdit()"  name="edit" ng-show="!editPerm"
+                                                         class="btn btn-sm btn-primary">{{resourceBundle['domain.permissions']}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div ng-controller="DomainDetailController">
+                <form class="form-horizontal" role="form" name="linkedDomainListForm">
+                    <div class="col-sm-6 mt10">
+                        <div class="row ">
+                            <div class="col-sm-12">
+                                <ul class="breadcrumb domain-bread-crumb ">
+                                    <li  ng-repeat="item in domainParents | reverse">
+                                        <span ng-if="currentDomain != item.dId" class="title domain-child text-justify" ng-click="switchDomain(item.dId, item.name)" uib-tooltip="Switch to {{item.name}}" style="padding-left: 0px; word-break: break-all !important;">{{item.name}}</span>
+                                        <span ng-if="currentDomain == item.dId" style="color: #F56C64;padding-left: 0px;word-break: break-all !important;" class="title domain-child text-justify">{{item.name}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="row mt18" ng-show="!hasChild">
+                            <div class="col-sm-12">
+                                <p class=" alert alert-warning">
+                                    {{resourceBundle['domain.child.none']}}</p>
+                            </div>
+                        </div>
+                        <div class="row overflow-x overflow-y" style="max-height:400px;">
+                            <div class="col-sm-12">
+                                <div ng-include="'views/manage/manage-child.html'" ng-init="_index=0;editDomains=true"></div>
+                            </div>
+                        </div>
+                        <div class="row pt10" ng-show="!open && iSU">
+                            <div class="col-sm-12">
+                                <button type="button" ng-click="openForm()" class="btn btn-sm btn-primary"
+                                        value="{{resourceBundle.add}}">{{resourceBundle.add}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div ng-controller="AddChildDomainsController">
+                <form class="form-horizontal" role="form" name="linkedDomainAddForm">
+                    <div class="col-sm-6 mt10" ng-show="open">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="domain-title-heading marginlr0">
+                                    <h4 ng-show="edit == false"> {{resourceBundle['linked.child']}} {{resourceBundle.domains}}</h4>
+                                    <h4 ng-show="edit == true">{{nchld.name}}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt18">
+                            <div class="col-sm-12">
+                                <div class="form-group" ng-show="edit == false">
+                                    <label class="col-sm-3 control-label">{{resourceBundle['linkeddomains.inputtext']}}</label>
+
+                                    <div class="col-sm-6">
+                                        <child-domain-select child-domain-model="nchld.ldl"
+                                                             place-holder="Choose Domains"
+                                                domain-id="domId">
+                                        </child-domain-select>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-show="edit == false">
+                                    <label class="col-sm-3 control-label">{{resourceBundle['linked.domains.copy.options']}}</label>
+
+                                    <div class="col-sm-8 cbx">
+                                        <input type="checkbox" ng-model="nchld.cm">&nbsp;{{resourceBundle['linkeddomains.inheritmaterialsfrom']}}
+                                        {{resourceBundle['linked.parent.lowercase']}}<br/>
+                                        <input type="checkbox" ng-model="nchld.cc">&nbsp;{{resourceBundle['linkeddomains.inheritconfigfrom']}}
+                                        {{resourceBundle['linked.parent.lowercase']}}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">{{resourceBundle['permissions']}}</label>
+
+                                    <div class="col-sm-8">
+                                        <label class="pull-left mt5">{{resourceBundle['prm.master.data']}}</label>
+                                        <table
+                                                class="table table-bordered table-condensed table-hover table-striped table-logistimo w95">
+                                            <tbody>
+                                            <tr>
+                                                <th></th>
+                                                <th>{{resourceBundle['prm.view']}}</th>
+                                                <th>{{resourceBundle['prm.add']}}</th>
+                                                <th>{{resourceBundle['prm.edit']}}</th>
+                                                <th>{{resourceBundle['prm.remove']}}</th>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['linked.domains.allow.users.management']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.uv" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ua" ng-disabled="!nchld.uv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ue" ng-disabled="!nchld.uv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ur" ng-disabled="!nchld.uv"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['linked.domains.allow.entities.management']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.ev" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ea" ng-disabled="!nchld.ev"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ee" ng-disabled="!nchld.ev"></td>
+                                                <td><input type="checkbox" ng-model="nchld.er" ng-disabled="!nchld.ev"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['linked.domains.allow.entity.groups.management']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.egv" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ega" ng-disabled="!nchld.egv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ege" ng-disabled="!nchld.egv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.egr" ng-disabled="!nchld.egv"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['linked.domains.allow.entity.relationships.management']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.erv" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.era" ng-disabled="!nchld.erv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ere" ng-disabled="!nchld.erv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.err" ng-disabled="!nchld.erv"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['prm.inventory']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.iv" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ia" ng-disabled="!nchld.iv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ie" ng-disabled="!nchld.iv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ir" ng-disabled="!nchld.iv"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['prm.materials']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.mv" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ma" ng-disabled="!nchld.mv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.me" ng-disabled="!nchld.mv"></td>
+                                                <td><input type="checkbox" ng-model="nchld.mr" ng-disabled="!nchld.mv"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{resourceBundle['asset']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.av" ng-change="checkPermission()"></td>
+                                                <td><input type="checkbox" ng-model="nchld.aa" ng-disabled="!nchld.av"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ae" ng-disabled="!nchld.av"></td>
+                                                <td><input type="checkbox" ng-model="nchld.ar" ng-disabled="!nchld.av"></td>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="5">{{resourceBundle['domain.configuration']}}</th>
+                                            <tr>
+                                                <td>{{resourceBundle['domain.configuration']}}</td>
+                                                <td><input type="checkbox" ng-model="nchld.cv" ng-change="checkPermission()"></td>
+                                                <td></td>
+                                                <td><input type="checkbox" ng-model="nchld.ce" ng-disabled="!nchld.cv"></td>
+                                                <td></td>
+                                            </tr>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row mt10" ng-show="iSU">
+                                    <div class="col-sm-6">
+                                        <div class="pull-right">
+                                            <button ng-show="!edit" ng-click="addChildrenToDomain()" name="save"
+                                                    class="btn btn-sm btn-primary">{{resourceBundle['save']}}
+                                            </button>
+                                            <button ng-show="edit" ng-click="updateChild()" name="update"
+                                                    class="btn btn-sm btn-primary">{{resourceBundle['update']}}
+                                            </button>
+                                            <button ng-click="openForm()" name="cancel"
+                                                    class="btn btn-sm btn-default">{{resourceBundle['cancel']}}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

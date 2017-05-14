@@ -1,0 +1,131 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="DeviceInfoController">
+    <div class="row mg-hori-zero" ng-hide="infoEditable">
+        <div class="row action-bar-temp">
+            <button type="button" ng-click="editInfo()" class="btn btn-sm btn-primary">{{resourceBundle['edit']}}</button>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['device.info']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.trId)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['transmitter.id']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.trId}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.dev.mdl)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['device.model']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.dev.mdl}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.dev.dVr)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['firmware.version']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.dev.dVr}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.dev.mVr)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['gsm.module.version']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.dev.mVr}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.dev.imei)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['imei']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.dev.imei}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.sim.sid)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['sim.id']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.sim.sid}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row" ng-if="isDef(deviceInfo.sim.phn)">
+                        <div class="col-sm-2 cbx">
+                            <label class="control-label">{{resourceBundle['mobile.number']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{deviceInfo.sim.phn}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mg-hori-zero" ng-show="infoEditable">
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['edit']}} {{resourceBundle['device.info'] | lowercase}}
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div ng-include="'views/temperature/edit-device-info.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

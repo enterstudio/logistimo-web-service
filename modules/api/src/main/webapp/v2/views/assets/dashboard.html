@@ -1,0 +1,159 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="AssetsDashboardController">
+    <!--<div ng-controller="SimpleMenuController" ng-init="init('temperature.dashboard')">
+        <div class="row mg-hori-zero">
+            <div class="filter-box form-group">
+                <div class="row">
+                    <div class="col-sm-1 cbx">
+                        <span class="glyphicons glyphicons-filter"></span>&nbsp;
+                    </div>
+                    <div class="col-sm-4 cbx">
+                        <span class="lPad5 filter-label">{{resourceBundle['asset.type']}}: </span>
+                        <div class="btn-group btn-group-blk btn-group-top" dropdown is-open="istypeopen">
+                            <button type="button" class="btn btn-outline dropdown-toggle" dropdown-toggle>
+                                {{assetFilters[assetTypeFilter].dV}} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" ng-show="istypeopen">
+                                <li ng-repeat="assetFilter in assetFilters" ng-show="assetFilter.value == 1 || assetFilter.value == 2">
+                                    <a ng-click="updateTypeFilter(assetFilter.value)">{{assetFilter.dV}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 cbx" ng-show="view == 'map'">
+                        <span class="lPad5 filter-label">Alarms: </span>
+                        <div class="btn-group btn-group-blk btn-group-top" dropdown is-open="isopen">
+                            <button type="button" class="btn btn-outline dropdown-toggle" dropdown-toggle ng-disabled="!isMapSupported || true">
+                                {{resourceBundle[filterResourceBundleKey[currentFilter-1]]}} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" ng-show="isopen">
+                                <li>
+                                    <a ng-click="filterChange(1)">{{resourceBundle['temperature.alarms']}}</a>
+                                </li>
+                                <li>
+                                    <a ng-click="filterChange(2)">{{resourceBundle['device.alarms']}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <div class="box topbox">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-3 col-xs-6 ph40">
+                            <a href="#/assets/all?alrm=1&dur=0">
+                                <div class="small-box bd-red c-red">
+                                    <div class="inner-box">
+                                        <h3>
+                                            {{tagSummary.nAbnormalDevices-0}}
+                                        </h3>
+
+                                        <p>
+                                            {{resourceBundle['state.alarm']}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-3 col-xs-6 ph40">
+                            <a href="#/assets/all?alrm=4&dur=0">
+                                <div class="small-box bd-green c-green">
+                                    <div class="inner-box">
+                                        <h3>
+                                            {{tagSummary.nDevices-(tagSummary.nAbnormalDevices + tagSummary.nIActDevices)}}
+                                        </h3>
+
+                                        <p>
+                                            {{resourceBundle['state.normal']}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-3 col-xs-6 ph40">
+                            <a href="#/assets/all?alrm=3&dur=0">
+                                <div class="small-box bd-grey c-grey">
+                                    <div class="inner-box">
+                                        <h3>
+                                            {{tagSummary.nIActDevices-0}}
+                                        </h3>
+
+                                        <p>
+                                            {{resourceBundle['status.unknown']}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-3 col-xs-6 ph40">
+                            <a href="#/assets/all?dur=0">
+                                <div class="small-box bd-blue c-blue">
+                                    <div class="inner-box">
+                                        <h3>
+                                            {{tagSummary.nDevices-0}}
+                                        </h3>
+
+                                        <p>
+                                            {{resourceBundle['items.monitored']}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10 mrn10">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <a ng-click="view='map'" ng-class="{active: view == 'map'}" class="btn btn-sm btn-default" uib-tooltip="Map view">
+                            <span class="glyphicons glyphicons-globe"></span>
+                        </a>
+                        <a ng-click="view='table'" ng-class="{active: view == 'table'}" class="btn btn-sm btn-default" uib-tooltip="Table view">
+                            <span class="glyphicons glyphicons-table"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-12">
+                <div ng-show="view == 'map'">
+                    <div ng-include="'views/assets/dashboard-map.html'"></div>
+                </div>
+                <div ng-show="view == 'table'">
+                    <div ng-include="'views/assets/dashboard-table.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

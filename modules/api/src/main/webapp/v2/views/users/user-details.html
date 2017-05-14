@@ -1,0 +1,491 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('setup.users.all.details')">
+    <div class="box topbox">
+        <div ng-controller="UserDetailsController" ng-hide="isUndef(user)">
+            <form class="form-horizontal" role="form" name="addUserForm" novalidate>
+                <div class="filter-box">
+                    <div class="row">
+                        <div class="col-sm-10 filter-title capbold">{{user.fnm}} {{user.lnm}}</div>
+                        <div class="col-sm-2" ng-if="!isUserEditable">
+                            <span class="pull-right glyphicons glyphicons-bring-to-front tglyph"
+                                  ng-click="switchDomain(user.sdid,user.sdname)" uib-tooltip="{{user.sdname}}">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row action-bar">
+                    <a ng-show="(iSU || dp.ue) && isUserEditable"
+                       href="#/setup/users/all/edit/?userId={{userId}}" class="btn btn-sm btn-primary">{{resourceBundle['edit']}}</a>
+                    <a ng-show="curUser == userId && (iAdm || dp.ue) && isUserEditable"
+                       href="#/setup/users/all/updatepassword/?userId={{userId}}&type=update"
+                       class="btn btn-sm btn-primary">{{resourceBundle['changepassword']}}</a>
+                    <a ng-show="curUser != userId && (iAdm || dp.ue) && !dp.vp && isUserEditable"
+                       href="#/setup/users/all/updatepassword/?userId={{userId}}&type=reset"
+                       class="btn btn-sm btn-primary">{{resourceBundle['resetpassword']}}</a>
+                    <button ng-show="!user.en && (iSU || dp.ue) && isUserEditable" type="button"
+                            class="btn btn-sm btn-primary"
+                            confirmed-click="enableDisableUser('e')"
+                            ng-confirm-click="Are you sure you want to Enable user?">
+                        {{resourceBundle['enable']}}
+                    </button>
+                    <button ng-show="iAdm && (dp.ua || dp.ue || dp.ur) && isUserEditable" type="button"
+                            class="btn btn-sm btn-primary"
+                            ng-confirm-click="Are you sure you want to force logout this user?"
+                            confirmed-click="forceLogout()">{{resourceBundle['mobile.force.logout']}}
+                    </button>
+                    <button ng-show="user.en && (iSU || dp.ue) && isUserEditable" type="button"
+                            class="btn btn-sm btn-default" confirmed-click="enableDisableUser('d')"
+                            ng-confirm-click="Are you sure you want to Disable user?">
+                        {{resourceBundle['disable']}}
+                    </button>
+                    <span class="caption pull-right cbx">
+                        <span ng-show="isDef(user.msn)">
+                            {{resourceBundle['createdon']}} {{user.msn}}<span ng-show="isUndef(user.regBy) && isDef(user.updaOn)">,</span>
+                        </span>
+                        <span ng-show="isDef(user.regBy)">
+                            {{resourceBundle['by']}}
+                            <a href="#/setup/users/all/details?userId={{user.regBy}}" target="_new" >{{isDef(user.regByn) ? user.regByn : user.regBy}}</a><span ng-show="isDef(user.updaOn)">,</span>
+                        </span>
+                        <span ng-show="isDef(user.updaOn)">
+                            {{resourceBundle['lastupdated']}}&nbsp;{{resourceBundle['on']}}
+                            {{user.updaOn}}
+                            <span ng-show="isDef(user.updaBy)">
+                                {{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{user.updaBy}}" target="_blank">{{isDef(user.updaByn) ? user.updaByn : user.updaBy}}</a>
+                            </span>
+                        </span>
+                    </span>
+                </div>
+
+                <div class="row ">
+                    <div class="col-sm-9">
+                        <div class="bgr" ng-if="isDef(user.ron) || isDef(user.id) || isDef(user.cid) || isDef(user.msn) || isDef(user.lln) || isDef(user.lrn) || isDef(user.vp)">
+                            <div class="title-heading">
+                                {{resourceBundle['user.infotitle']}}
+                            </div>
+                            <div class="row" ng-if="isDef(user.ron)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.role']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.ron}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.id)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.id']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.id}} <span ng-hide="user.en"> [{{resourceBundle['disabled']}}]</span>
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.tgs)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['tags']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx word-wrap">
+                                    <div ng-logi-tags tgs="user.tgs"></div>
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.pd)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['permission']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.pd}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.cid)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['customid']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.cid}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.lln)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['lastlogin']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.lln}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.lrn)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['lastreconnected']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.lrn}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bgr" ng-if="isDef(user.fnm) || isDef(user.lnm) || isDef(user.genn) || isDef(user.age)">
+                            <div class="title-heading">
+                                {{resourceBundle['user.persdetailstitle']}}
+                            </div>
+                            <div class="row" ng-if="isDef(user.fnm)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.firstname']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.fnm}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.lnm)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.lastname']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.lnm}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.genn)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.gender']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.genn}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.age)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.age']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.age}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bgr" ng-if="isDef(user.phm) || isDef(user.phl) || isDef(user.em)">
+                            <div class="title-heading">
+                                {{resourceBundle['user.contactinfotitle']}}
+                            </div>
+                            <div class="row" ng-show="isDef(user.phm)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.mobile']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.phm}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isNotNullEmpty(user.phl)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.landline']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.phl}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isNotNullEmpty(user.em)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.email']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.em}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bgr" ng-if="isDef(user.cnt) || isDef(user.st) || isDef(user.ds) || isDef(user.tlk) ||
+                         isDef(user.ct) || isDef(user.stn) || isDef(user.pin)|| isDef(user.lngn)|| isDef(user.tzn)">
+                            <div class="title-heading">
+                                {{resourceBundle['location']}}
+                            </div>
+                            <div class="row" ng-if="isDef(user.cnt)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['country']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.cnt}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.st)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['state']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.st}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isDef(user.ds)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['district']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.ds}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isDef(user.tlk)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['taluk']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.tlk}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isDef(user.ct)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['village']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.ct}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isDef(user.stn)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['streetaddress']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.stn}}
+                                </div>
+                            </div>
+                            <div class="row" ng-show="isDef(user.pin)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['zipcode']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.pin}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.lngn)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['language']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.lngn}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.tzn)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['preferredtimezone']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.tzn}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bgr">
+                            <div class="title-heading">
+                                {{resourceBundle['user.deviceinfotitle']}}
+                            </div>
+                            <div class="row" ng-if="isDef(user.ua)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.devicedetails']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.ua}}<br/><i ng-if="checkNotNullEmpty(user.pua)">{{resourceBundle['previous.details']}}:
+                                    {{user.pua}}</i>
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.ip)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.ipaddress']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.ip}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.av)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.mobileappversion']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.av}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.br)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.mobilebrand']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.br}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.mo)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.mobilemodel']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.mo}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.imei)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.imei']}}</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.imei}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.sp)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.mobileoperator']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.sp}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(user.sId)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['user.simId']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.sId}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['config.loginasreconnect']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    <p ng-if="user.lgr == -1">{{resourceBundle['config.usedomaindefault']}}</p>
+                                    <p ng-if="user.lgr == 0">{{resourceBundle['config.loginasreconnectmessage']}}</p>
+                                    <p ng-if="user.lgr == 1">{{resourceBundle['config.loginasnotreconnectmessage']}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="isDef(user.pk)" class="bgr">
+                            <div class="title-heading">
+                                {{resourceBundle['primaryentity']}}
+                            </div>
+                            <div class="row" >
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['primaryentity']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{user.pk}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 noleftpad" ng-show="loadimage">
+                        <span class="glyphicons glyphicons-cogwheel spin"></span>
+                    </div>
+                    <div class="col-sm-3 noleftpad" ng-show="isDef(userImages.items) && userImages.items.length > 0 && !loadimage">
+                        <div  class="bgr image-upload">
+                            <div ng-repeat="image in userImages.items|limitTo:1"  ng-mouseover="hoverEdit=true" ng-mouseleave="hoverEdit=false">
+                                <span class="btn btn-primary user-image-close-button" ng-show="hoverEdit"
+                                      ng-if="iAdm && !dp.vp && isUserEditable"
+                                      ng-click="removeImage(image.id)"
+                                      uib-tooltip="{{resourceBundle['deleteimage']}}"><span class="glyphicons glyphicons-bin" ></span>
+                                </span>
+                                <a href="{{image.servingUrl}}" target="_blank">
+                                    <img ng-src="{{image.servingUrl}}" class="image-upload-img" ng-style="hoverEdit && {'opacity':'0.2'}">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 noleftpad" ng-show="isUndef(userImages.items) || userImages.items.length == 0 && !loadimage">
+                        <form class="form-inline" role="form" name="uploadForm" novalidate>
+                            <div class="col-sm-12">
+                                <div class="bgr" style="min-height: 250px;background-color: #f5f5f5">
+                                   <span ng-show="iSU || dp.ue && isUserEditable"
+                                         class="btn btn-primary image-add-button no-img-tr" ng-click="doAddImage=true"
+                                         uib-tooltip="{{resourceBundle['addimage']}}">
+                                       <span class="glyphicons glyphicons-plus"></span>
+                                    </span>
+                                    <p ng-show="iSU || dp.ue" class="text-center" style="margin-top:10px;color:#9d9d9d">{{resourceBundle['image.unavailable']}}</p>
+                                    <p ng-hide="iSU || dp.ue" class="text-center" style="margin-top:100px;color:#9d9d9d">{{resourceBundle['image.unavailable']}}</p>
+                                </div>
+                                <div ng-show="doAddImage" style="padding:5px">
+                                    <div class="form-group mgh0">
+                                        <input type="file" id="userFileupload" ng-model="imageData" class="form-control" accept=".png,.jpg,.jpeg" maxsize="5000" base-sixty-four-input/>
+                                        <span ng-show="uploadForm.imageData.$error.maxsize">{{resourceBundle['uploadsizemessage']}}</span>
+                                    </div>
+                                    <span class="litetext">{{resourceBundle['uploadmessage']}}</span>
+                                    <div class="mt10">
+                                        <input type="button" ng-click="validateImage() && uploadImage()" class="btn btn-primary" value="Upload">
+                                        <input type="button" ng-click="cancel()" class="btn btn-default" value="{{resourceBundle['cancel']}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-sm-12">
+                        <ul class="nav nav-tabs">
+                            <li  ng-class="{active: subview == 'kiosks' }" ><a
+                                    href="#/setup/users/all/details/kiosks?userId={{user.id}}">{{resourceBundle.kiosks}}</a>
+                            </li>
+                            <li ng-show="iSU && user.isAdm" ng-class="{active: subview == 'domains' }" ><a
+                                    href="#/setup/users/all/details/domains?userId={{user.id}}"> {{resourceBundle.domains}}	</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row mainbox">
+                    <div class="col-sm-12">
+                        <!-- Nav tabs -->
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div ng-switch="subview">
+                                <div  class="tab-pane" ng-switch-when="kiosks">
+                                    <div ng-include="'views/users/user-entities.html'"></div>
+                                </div>
+                                <div class="tab-pane" ng-switch-when="domains">
+                                    <div ng-if="user.accDsm">
+                                        <div ng-init="accDsm=user.accDsm;" ng-include="'views/users/user-domains.html'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt10">
+                    <div class="col-sm-12">
+                        <a ng-show="(iSU || dp.ue) && isUserEditable"
+                           href="#/setup/users/all/edit/?userId={{userId}}" class="btn btn-sm btn-primary">{{resourceBundle['edit']}}</a>
+                        <a ng-show="curUser == userId && (iAdm || dp.ue) && isUserEditable"
+                           href="#/setup/users/all/updatepassword/?userId={{userId}}&type=update"
+                           class="btn btn-sm btn-primary">{{resourceBundle['changepassword']}}</a>
+                        <a ng-show="curUser != userId && (iAdm || dp.ue) && !dp.vp && isUserEditable"
+                           href="#/setup/users/all/updatepassword/?userId={{userId}}&type=reset"
+                           class="btn btn-sm btn-primary">{{resourceBundle['resetpassword']}}</a>
+                        <button ng-show="!user.en && (iSU || dp.ue) && isUserEditable" type="button"
+                                class="btn btn-sm btn-primary"
+                                confirmed-click="enableDisableUser('e')"
+                                ng-confirm-click="Are you sure you want to Enable user?">
+                            {{resourceBundle['enable']}}
+                        </button>
+                        <button ng-show="iAdm && (dp.ua || dp.ue || dp.ur) && isUserEditable"
+                                type="button" class="btn btn-sm btn-primary"
+                                ng-confirm-click="Are you sure you want to force logout this user?"
+                                confirmed-click="forceLogout()">{{resourceBundle['mobile.force.logout']}}
+                        </button>
+                        <button ng-show="user.en && (iSU || dp.ue) && isUserEditable" type="button"
+                                class="btn btn-sm btn-default" confirmed-click="enableDisableUser('d')"
+                                ng-confirm-click="Are you sure you want to Disable user?">
+                            {{resourceBundle['disable']}}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

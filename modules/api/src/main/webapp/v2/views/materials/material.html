@@ -1,0 +1,244 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="MaterialDetailMenuController">
+        <div class="row" ng-show="loading == false">
+            <div class="col-sm-12">
+                <form class="form-horizontal">
+                    <div class="filter-box">
+                        <div class="filter-title">
+                            {{material.mnm}}
+                        </div>
+                    </div>
+                    <div class="row action-bar">
+                        <a ng-if="currentDomain == material.dId && (iSU ||(iAdm && dp.me))" href="#/setup/materials/all/edit?mid={{material.mId}}" class="btn btn-sm btn-primary"
+                           ng-click="editMaterial()">{{resourceBundle['edit']}}</a>
+                        <!--<a ng-click="$back()" class="btn btn-sm btn-default">{{resourceBundle['back']}}</a>-->
+                         <span class="caption pull-right cbx">
+                            <span ng-show="isDef(material.creOn)">
+                                 {{resourceBundle['createdon']}} {{material.creOn}}<span ng-show="isUndef(material.creBy) && isDef(material.t)">,</span>
+                            </span>
+                            <span ng-show="isDef(material.creBy)">{{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{material.creBy}}" target="_new" >{{isDef(material.creByn) ? material.creByn : material.creBy}}</a><span ng-show="isDef(material.t)">,</span>
+                            </span>
+                            <span ng-show="isDef(material.t)">
+                                {{resourceBundle['material.lastupdated']}}&nbsp;{{resourceBundle['on']}}
+                                {{material.t}}
+                                <span ng-show="isDef(material.ludBy)">
+                                     {{resourceBundle['by']}}
+                                    <a href="#/setup/users/all/details?userId={{material.ludBy}}" target="_new">{{isDef(material.ludByn) ? material.ludByn : material.ludBy }}</a>
+                                </span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="bgr">
+                                    <div class="title-heading">
+                                        {{resourceBundle['material.infotitle']}}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['material.name']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{material.mnm}}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.snm)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['shortname']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{material.snm}}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.cId)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['customid']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{material.cId}}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.info)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label" style="text-align: left;">{{resourceBundle['material.addinfo']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx  word-wrap">
+                                            {{material.info}}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.dsc)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['description']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{material.dsc}}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.tgs)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['tags']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx word-wrap">
+                                            <div ng-logi-tags tgs="material.tgs"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row" ng-if="isDef(material.b)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['batch.management']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            <span class="capbold">{{batchEnabled}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.ib)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['isbinaryvalued']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx capbold">
+                                            {{material.ib}}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="isDef(material.snl)">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['material.seasonal']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx capbold">
+                                            {{material.snl}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="bgr">
+                                    <div class="title-heading">
+                                        {{resourceBundle['material.pricinginfotitle']}}
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['material.msrp']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{material.cur}} {{material.msrp| number : 2}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['material.retailerprice']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{material.cur}} {{material.rp| number : 2}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="material.tm=='yes'">
+                            <div class="col-sm-12">
+                                <div class="bgr">
+                                    <div class="title-heading">
+                                        {{resourceBundle['temperature']}}
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['temperature.sensitive']}}&nbsp;({{resourceBundle['enabled']}}):</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{resourceBundle['min']}}: {{material.tmin}} &#8451; &nbsp;&nbsp;{{resourceBundle['max']}}: {{material.tmax}} &#8451;
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" ng-if="material.huName != null">
+                            <div class="col-sm-12">
+                                <div class="bgr">
+                                    <div class="title-heading">
+                                        Handling unit
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12 cbx">
+                                            <a href="#/setup/handlingunits/all/detail/{{material.huId}}">{{material.huName}}</a>: {{material.huQty}} units of {{material.mnm}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 noleftpad" ng-show="loadimage"><span class="glyphicons glyphicons-cogwheel spin"></span></div>
+                    <div class="col-sm-3 noleftpad" ng-show="isDef(materialImages) && materialImages.length > 0 && !loadimage">
+                        <div class="bgr image-upload" ><!--style="height: 202px;margin-top: 5px; margin-right: 10px-->
+                            <div ng-hide="loadimage" uib-carousel active="active" interval="5000" no-wrap="noWrapSlides" class="logiCarousel">
+                                <div uib-slide ng-repeat="slide in materialImages track by $index" index="$index" ng-mouseover="hoverEdit=true" ng-mouseleave="hoverEdit=false">
+                                    <!--<img class="uploadImage" ng-src="{{slide.servingUrl}}" style="margin:auto;" ng-style="hoverEdit && {'opacity':'0.2'}">-->
+                                    <span class="btn btn-primary image-add-button img-tr" ng-click="addImage()" ng-show="currentDomain == material.dId && hoverEdit && (iSU || dp.me)" uib-tooltip="{{resourceBundle['addimage']}}">
+                                       <span class="glyphicons glyphicons-plus" ></span>
+                                    </span>
+                                    <span class="btn btn-primary image-close-button" ng-show="currentDomain == material.dId && hoverEdit && (iSU || dp.me)" ng-click="removeImage(slide.id)"
+                                        uib-tooltip="{{resourceBundle['deleteimage']}}">
+
+                                        <span class="glyphicons glyphicons-bin" ></span>
+                                    </span>
+                                    <a href="{{slide.servingUrl}}" target="_blank">
+                                        <img class="uploadImage" ng-src="{{slide.servingUrl}}" ng-style="hoverEdit && {'opacity':'0.2'}">
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 noleftpad" >
+                        <div ng-show="(isUndef(materialImages) || materialImages.length == 0) && !loadimage">
+                            <div class="bgr" style="min-height: 250px;background-color: #f5f5f5" >
+                                <span ng-show="currentDomain == material.dId && (iSU || dp.me)" class="btn btn-primary image-add-button no-img-tr" ng-click="addImage()" uib-tooltip="{{resourceBundle['addimage']}}" >
+                                        <span class="glyphicons glyphicons-plus " ></span>
+                                </span>
+                                <p ng-show="iSU || dp.me" class="text-center" style="margin-top:10px;color:#9d9d9d">{{resourceBundle['image.unavailable']}}</p>
+                                <p ng-hide="iSU || dp.me" class="text-center" style="margin-top:100px;color:#9d9d9d">{{resourceBundle['image.unavailable']}}</p>
+                            </div>
+                        </div>
+                        <div ng-show="doAddImage" style="padding:5px">
+                            <div class="form-group mgh0" >
+                                <input type="file" id="matFileupload" ng-model="imageData" class="form-control" accept=".png,.jpg,.jpeg" base-sixty-four-input/>
+                            </div>
+                            <span class="litetext">{{resourceBundle['uploadmessage']}}</span>
+                            <div class="mt10">
+                                <input type="button" ng-click="validateImage() && uploadImage()" class="btn btn-primary" value="{{resourceBundle['upload']}}">
+                                <input type="button" ng-click="cancel()" class="btn btn-default" value="{{resourceBundle['cancel']}}">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

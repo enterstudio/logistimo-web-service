@@ -1,0 +1,64 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="ConfigDashboardController">
+        <div class="filter-box">
+            <div class="filter-title capbold" style="line-height: 30px">
+                {{db.nm}}
+            </div>
+        <span class="float-right" style="top: -40px;position: relative;right: -10px;">
+            <button ng-click="saveDashboardConfig()" name="saveDBConfig" class="btn btn-sm btn-primary">Save</button>
+            <a href="#/setup/dashboard" class="btn btn-sm btn-default">{{resourceBundle['cancel']}}</a>
+        </span>
+        </div>
+        <div class="row mt18">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <div class="col-sm-5"></div>
+                    <label class="col-sm-2 cbx control-label"><span class="pull-right">Widget</span></label>
+
+                    <div class="col-sm-4">
+                        <lg-uib-select query="query(q)" ui-model="widget" place-holder="Select widget"> </lg-uib-select>
+                    </div>
+                    <div class="col-sm-1">
+                        <input class="btn btn-primary" ng-click="addWidget()"type="button" value="Add">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt18 padding5">
+            <ul style="list-style-type: none; padding: 0; display: block; margin: 0; position: relative; min-height: {{maxHeight}}" id = "allWid">
+                <li class="dummy noLRpad" id="panel_{{item.wid}}"
+                    style="z-index: 1; position: absolute; padding:5px; display:list-item; width: {{item.cx}}px; left: {{item.cc}}px; top: {{item.cr}}px;"
+                    ng-repeat="item in dashWidgets">
+                    <span ng-include="'views/dashboard/widget.html'"></span>
+                </li>
+                <span class="noLRpad" id="ghost_{{item.wid}}"
+                      style="z-index: 0; position:absolute; width: {{item.cx - 10}}px; left: {{item.cc + 5}}px; top: {{item.cr + 5}}px; height: {{item.cy}}px;"
+                      ng-repeat="item in dashWidgets">
+                </span>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,166 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="BulletinBoardConfigurationController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="addBulletinForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <div class="pull-left">
+                                <h5>{{resourceBundle['bulletinboard']}}</h5>
+                                <span ng-show="bb.lastUpdated" class="caption pull-left">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{bb.lastUpdated}} {{resourceBundle['by']}}
+                                  <a href="#/setup/users/all/details?userId={{bb.createdBy}}" target="_new">{{bb.fn}}</a>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 norightpad">
+                            <div class="pull-right">
+                                <a href="/pub/board?domainid={{bb.did}}" target="_blank" class="btn btn-sm btn-default"><b>{{resourceBundle['goto']}} {{resourceBundle['bulletinboard']}}</b></a>&nbsp;&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['enable']}} {{resourceBundle['bulletinboard']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext">{{resourceBundle['config.bulletinboard.info']}}</span>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['enable']}}</label>
+                                <div class="col-sm-9 cbx">
+                                        <input type="radio" name="enable" ng-model="bb.ecl" value="0"> {{resourceBundle['disabled.upper']}}<br/>
+                                        <input type="radio" name="enable" ng-model="bb.ecl" value="1"> {{resourceBundle['config.board.visibilityprivate']}}<br/>
+                                        <input type="radio" name="enable" ng-model="bb.ecl" value="2" checked> {{resourceBundle['config.board.visibilitypublic']}}<br/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.board.dataoptions']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    {{resourceBundle['config.bulletinboard.dataduration']}}
+                                </label>
+                                <div class="col-sm-9">
+                                    <input only-digits type="text" class="form-control" ng-model="bb.dd" autocomplete="off"
+                                           placeholder="60" maxlength="50" style="width:15%;display: inline-block;">&nbsp;&nbsp;{{resourceBundle['days']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    {{resourceBundle['config.board.maxitemsonboard']}}
+                                </label>
+                                <div class="col-sm-9">
+                                    <input only-digits type="text" class="form-control" ng-model="bb.iob" autocomplete="off"
+                                           placeholder="100" maxlength="50" style="width:15%;display: inline-block;">
+                                    <span class="litetext vmiddle" style="display: inline">
+                                        &nbsp;&nbsp;({{resourceBundle['config.board.maxitemsonboardmsg']}} 100)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    {{resourceBundle['config.board.refreshduration']}}
+                                </label>
+                                <div class="col-sm-9">
+                                    <input only-digits type="text" class="form-control" ng-model="bb.rd" autocomplete="off"
+                                           placeholder="3600" maxlength="50" style="width:15%;display: inline-block;">&nbsp;&nbsp;{{resourceBundle['seconds']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.board.displayoptions']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    {{resourceBundle['config.board.scrollinterval']}}
+                                </label>
+                                <div class="col-sm-9">
+                                    <input only-digits type="text" class="form-control" ng-model="bb.si" autocomplete="off"
+                                           placeholder="2000" maxlength="50" style="width:15%;display: inline-block;">&nbsp;&nbsp;ms
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    {{resourceBundle['config.bulletinboard.showslidenavigator']}}
+                                </label>
+                                <div class="col-sm-9 cbx">
+                                    <input type="checkbox" value="true" ng-model="bb.sn">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div data-ng-switch on="omtb">
+                    <div data-ng-switch-when="open" class="row"  style="padding-top:20px;">
+                            <div ng-include=" 'views/configuration/message-to-board.html' "></div>
+                    </div>
+                </div>
+                <div class="row mt10">
+                    <div class="col-sm-12  ml5">
+                        <button ng-click="saveBulletinBoardConfiguration()" class="btn btn-primary" ng-if="iSU || dp.ce">{{resourceBundle['save']}}</button>
+                        <button ng-click="openMessageToBoard()" class="btn btn-default">{{resourceBundle['config.bulletinboard.posttoboard']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

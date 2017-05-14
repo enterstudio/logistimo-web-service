@@ -1,0 +1,6 @@
+<suite name="Suite of suites">
+    <suite-files>
+        <suite-file path="unit-tests.xml"></suite-file>
+        <suite-file path="local-tests.xml"></suite-file>
+    </suite-files>
+</suite>

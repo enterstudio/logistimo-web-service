@@ -1,0 +1,98 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="DomainHierarchyController" class="pt15">
+    <div class="row" ng-show="hierarchyData.length > 0 && !loading && isDef(ht.lrt)">
+        <div class="col-sm-12">
+            <span class="caption pull-right mb5">{{resourceBundle['lastupdated']}}&nbsp;{{resourceBundle['on']}} {{ht.lrt}}</span>
+        </div>
+    </div>
+    <table ng-show="hierarchyData.length > 0 && !loading" class="table table-striped table-bordered" width="100%" id="fixTable">
+        <thead>
+        <tr>
+            <th class="text-center" rowspan="2">{{resourceBundle['domain']}}</th>
+            <th class="text-center" rowspan="2">{{resourceBundle['users']}}</th>
+            <th class="text-center" colspan="3">{{resourceBundle['kiosks']}}</th>
+            <th class="text-center" colspan="3">{{resourceBundle['da.monitored.assets']}}</th>
+            <th class="text-center" rowspan="2">{{resourceBundle['da.monitoring.assets']}}</th>
+        </tr>
+        <tr>
+            <th class="text-center">{{resourceBundle['kiosks']}}</th>
+            <th class="text-center">{{resourceBundle['da.live']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.live']}}"></span></th>
+            <th class="text-center">{{resourceBundle['da.active']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.active']}}"></span></th>
+            <th class="text-center">{{resourceBundle['assets']}}</th>
+            <th class="text-center">{{resourceBundle['da.live']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['da.monitored.assets']}} {{resourceBundle['da.monitored.assets.live']}}"></span></th>
+            <th class="text-center">{{resourceBundle['da.active']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['da.monitored.assets']}} {{resourceBundle['da.monitored.assets.active']}}"></span></th>
+        </tr>
+        </thead>
+        <tbody ng-repeat="item in hierarchyData track by $index">
+        <tr>
+            <td class="hierarchy-domain-td" ng-style="getStyle(item.level)">
+            <span class="glyphicons glyphicons-plus-sign click-element expand-collapse-btn" ng-if="item.hc && !item.expand && item.level != 1"
+                  ng-click="item.expand = true; fetchChildData(item.did, item.level)" title="Expand"></span>
+                <span class="glyphicons glyphicons-minus-sign expand-collapse-btn" ng-if="item.expand"
+                      ng-click="item.expand = false; removeChildData(item.did, item.level, $index)" title="Collapse" style="color:#285379 !important;"></span>
+                <span class="glyphicon-ring expand-collapse-btn" ng-if="!item.hc && item.level > 1"></span>
+                <span class="title domain-parent" ng-show="item.hc">&nbsp;&nbsp;{{item.dnm}}</span>
+                <span class="title domain-child" ng-show="!item.hc">&nbsp;{{item.dnm}}</span>
+            </td>
+            <td class="text-center">{{item.uc}}</td>
+            <td class="text-center"><span  id="b{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('b',$index)" uib-tooltip-html="item.toolText['kc']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.kc, 'ktag', 'kc','b',$index)">{{item.kc}}</span></td>
+            <td class="text-center">
+                <span id="c{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('c',$index)" uib-tooltip-html="item.toolText['lkc']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.lkc, 'ktag', 'lkc','c',$index)">
+                    {{item.lkc}}
+                </span>
+                <div class="litetext">{{item.lkcp}}%</div>
+            </td>
+            <td class="text-center">
+                <span id="d{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('d',$index)" uib-tooltip-html="item.toolText['akc']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.akc, 'ktag', 'akc','d', $index)">
+                    {{item.akc}}
+                </span>
+                <div class="litetext">{{item.akcp}}%</div>
+            </td>
+            <td class="text-center"><span id="e{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('e',$index)" uib-tooltip-html="item.toolText['mac']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.mac, 'atype', 'mac', 'e', $index)">{{item.mac}}</span></td>
+            <td class="text-center">
+                <span id="f{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('f',$index)" uib-tooltip-html="item.toolText['mlwa']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.mlwa, 'atype', 'mlwa', 'f', $index)">
+                {{item.mlwa}}
+                </span>
+                <div class="litetext">{{item.mlwap}}%</div>
+            </td>
+            <td class="text-center">
+                <span id="g{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('g',$index)" uib-tooltip-html="item.toolText['mawa']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.mawa, 'atype', 'mawa', 'g', $index)">
+                {{item.mawa}}
+                </span>
+                <div class="litetext">{{item.mawap}}%</div>
+            </td>
+            <td class="text-center">{{item.miac}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <div ng-show="hierarchyData.length == 0 && !loading">
+        <div class="row mt18">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning"> No data available
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

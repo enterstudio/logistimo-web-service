@@ -1,0 +1,85 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="row" ng-controller="ConversationController">
+    <div class="col-sm-12 mb10 mt10">
+        <div ng-if="messages.numFound > messages.results.length" class="collapseMsgs">
+            <a ng-click="loadMessages()" ng-disabled="mLoading">
+                        <span class="loadbutton">
+                        <p><span
+                                ng-hide="mLoading">{{messages.numFound - messages.results.length}} older message(s)</span>
+                            <span ng-show="mLoading" class="cbx"><span
+                                    class="glyphicons glyphicons-cogwheel spin"></span></span></p>
+                    </span>
+
+                <div class="mtbox"></div>
+                <div class="mtbox"></div>
+                <div class="mtbox"></div>
+            </a>
+        </div>
+        <div ng-repeat="message in messages.results | orderBy : 'cts'" class="col-sm-12 noLRpad">
+            <div class="col-sm-12 mbox">
+                <a ng-href="#/setup/users/all/details?userId={{message.userId}}" target="_blank">
+                    <span class="glyphicons glyphicons-user"></span>
+                    {{message.userName}}</a>
+                <span class="litetext"> added a message - {{message.createDate}}</span>
+
+                <p class="msg" style="">{{message.message}}</p>
+            </div>
+        </div>
+        <div ng-if="messages.results.length == 0 && !addMsg">
+            <p class="alert alert-warning">There are no comments yet.</p>
+        </div>
+    </div>
+    <div class="col-sm-12 mt10">
+        <button ng-hide="addMsg || mLoading || dp.vp" type="button" class="btn btn-sm btn-primary mb5 pull-right"
+                ng-click="addMessage()">Add comment
+        </button>
+        <form role="form" name="addMessageForm" ng-show="addMsg">
+            <div class="row">
+                <label class="col-sm-12 control-label">Comment</label>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <textarea maxlength="2048" ng-model="newMsg" ng-disabled="lLoading" class="form-control" rows="8"
+                              id="orderMsgArea"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="pull-right pb10 pt10">
+                        <button class="btn btn-sm btn-primary"
+                                ng-disabled="lLoading || isUndef(newMsg)" ng-click="saveMessage(newMsg)">
+                                    <span ng-show="lLoading" style="padding: 3px"
+                                          class="glyphicons glyphicons-cogwheel spin"></span>{{resourceBundle['save']}}
+                        </button>
+                        <button class="btn btn-sm btn-default"
+                                ng-disabled="lLoading" ng-click="cancel()">
+                            {{resourceBundle['cancel']}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

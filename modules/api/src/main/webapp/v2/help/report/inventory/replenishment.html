@@ -1,0 +1,89 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Cache-Control" content="max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Logistimo</title>
+    <link rel="stylesheet" href="../../../css/3rdparty/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../css/logistimo.css">
+    <link rel="stylesheet" href="../../../css/help.css">
+    <link rel="shortcut icon" href="../../../../titleiconnew.ico">
+</head>
+<body class="mainbody">
+<div class="container" style="border-bottom: 2px solid #F56C64;padding:10px 0">
+    <div>
+        <div class="row">
+            <div class="col-sm-12">
+                <img style="max-height: 60px;max-width: 360px;" src="../../../images/acquia_marina_logo.png">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:15px;min-height: 90%">
+    <div class="mh300">
+        <div class="page-header" style="margin-top: 20px">
+            <div class="heading">Replenishment</div>
+        </div>
+        <p>
+            Replenishment response time report provides an understanding of the average amount of time taken to
+            replenish stock from either a zero stock level to a non-zero stock level, or a < min level to a normal
+            (in-range) or >= max stock level, or a change from a > max stock level (to either normal, < min or even zero
+            stock).
+        </p>
+
+        <p>
+            The metrics in this report as described below:
+        </p>
+        <ul>
+            <li>
+                <b>Replenish from zero stock:</b> This metric represents the time taken for a stock
+                level of an inventory item to go from zero stock level to a non-zero stock level, which could be either
+                normal stock level, < min or > max stock levels. At aggregate levels, the average time across closed
+                zero stock events is computed. The replenishment duration is attributed to the period in which the zero
+                stock item was replenished (or the event was closed).
+            </li>
+            <li>
+                <b>Replenish from < min:</b> This metric represents the (average) time taken
+                for a stock level of an inventory item to go from < min stock level to either a normal (in-range) stock
+                level or > max levels. At aggregate levels, the average time across closed < min stock events is
+                computed. The replenishment duration is attributed to the period in which the < min stock item was
+                replenished (or the event was closed).
+            </li>
+            <li>
+                <b>Change from > max:</b> This metric represents the (average) time taken for
+                a stock level of an inventory item to go from a > max stock level to either a = max, normal (in-range),
+                < min or zero stock level. At aggregate levels, the average time across closed > max stock events is
+                computed. The change duration is attributed to the period in which the > max stock item changed to go
+                below the max level (or the event was closed).
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

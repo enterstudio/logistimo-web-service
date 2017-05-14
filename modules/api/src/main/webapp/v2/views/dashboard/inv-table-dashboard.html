@@ -1,0 +1,257 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div>
+    <div ng-if="isDef(dcntry)" ng-controller="InvntryDashboardCtrl">
+        <div class="box topbox">
+            <div class=" filter-box form-group">
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-sm-3 norightpad">
+                            <label class="filter-label">{{resourceBundle['material']}} {{resourceBundle['multiple.tags']}}</label>
+                            <tag-select tags-model="fvmtag" place-holder="All"
+                                        type="'material'"
+                                        force-no-udf="'true'"></tag-select>
+                        </div>
+                        <div class="col-sm-3 norightpad">
+                            <label class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}</label>
+                            <tag-select tags-model="etag" place-holder="All"
+                                        type="'entity'"
+                                        multiple="'false'" force-no-udf="'true'"></tag-select>
+                        </div>
+                        <div class="col-sm-3 norightpad">
+                            <span ng-show="!iDis">
+                                <label class="control-label">Status</label>
+                                <lg-uib-select query="getTypes(q)" ui-model="invType"> </lg-uib-select>
+                            </span>
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="control-label">Period</label>
+                            <select ng-model="period" class="form-control input-sm">
+                                <option value="0">Now</option>
+                                <option value="1">1 day</option>
+                                <option value="2">2 days</option>
+                                <option value="3">3 days</option>
+                                <option value="7">7 days</option>
+                                <option value="30">30 days</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div class="mt5">
+        <div class="box topbox tabminheight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb col-sm-12 domain-bread-crumb mb0">
+                        <li ng-if="isUndef(dstate)">
+                            <a ng-if="isSt" class="title domain-child" ng-href="#/dashboard/inventory/?p={{period}}&eTag={{eTag}}"
+                               style="padding-left: 0px;">{{getCountryNameByCode(dcntry)}}</a>
+                            <span ng-if="!isSt" style="padding-left: 0px;" class="title domain-child"><b>{{getCountryNameByCode(dcntry)}}</b></span>
+                        </li>
+                        <li ng-if="isSt && isUndef(ddist)">
+                            <a ng-if="isDt" class="title domain-child"
+                               ng-href="#/dashboard/inventory/?st={{state}}&p={{period}}&eTag={{eTag}}" style="padding-left: 0px;">{{state}}</a>
+                            <span ng-if="!isDt" style="padding-left: 0px;" class="title domain-child"><b>{{state}}</b></span>
+                        </li>
+                        <li ng-if="iDis">
+                            <span style="padding-left: 0px;"
+                                  class="title domain-child"><b>{{district}}</b></span>
+                        </li>
+                        <div class="pull-right">
+                            <button type="button" ng-click="hardRefreshDashboard()" class="btn btn-sm btn-default pull-right" tooltip-placement="top" uib-tooltip="{{resourceBundle['upgrade']}}">
+                                <span class="glyphicons pt2 glyphicons-refresh"></span>
+                            </button>
+                            <span class="litetext pull-right cbx rPad10">{{resourceBundle['asof']}} {{dbdata.ut}}</span>
+                        </div>
+                    </ul>
+                    <h4 class="text-center mb0 col-sm-12">Inventory <span uib-tooltip="% of inventory items that are normal or abnormal (zero stock, < min. or > max) across all {{resourceBundle['kiosks.lowercase']}} in this jurisdiction. An inventory item is a material at a {{resourceBundle['kiosk.lowercase']}}." style="display: inline" class="litetext glyphicons glyphicons-info-sign"></span></h4>
+                        <p class="text-center litetext">
+                            <span ng-show="fvmtag.text"><b>Material tag:</b> {{fvmtag.text}}, </span>
+                            <span ng-show="etag.text"><b>{{resourceBundle['kiosk']}} tag:</b> {{etag.text}}, </span>
+                            <span ng-show="period>0"><b>Period:</b> {{period}} day(s), </span>
+                            <b>Status:</b> {{invType.text}}
+                        </p>
+                         <span class="pull-right" ng-show="iDis">
+                        <span class="alert-danger paddinglr10"></span>
+                        &nbsp;&nbsp;Zero stock&nbsp;&nbsp;
+                        <span class="alert-warning  paddinglr10"></span>
+                        &nbsp;&nbsp;Min&nbsp;&nbsp;
+                        <span class="alert-info  paddinglr10"></span>
+                        &nbsp;&nbsp;Max&nbsp;&nbsp;
+                    </span>
+                    <span ng-hide="iDis || filteredMaterials.length == 0 || invByMatEmpty" class="pull-right">
+                        <span ng-repeat="value in range[updInvType.id]" ng-if="!($first)" class="mr10">
+                            <span class="paddinglr5" ng-style="{'background-color':colors[updInvType.id][$index-1]}">
+                                </span>
+                            <span style="font-size: 80%">&nbsp; {{range[invType.id][$index-1]}}-{{value}}%</span>
+                        </span>
+                    </span>
+                </div>
+            </div>
+
+                <div class="row" ng-if="!iDis">
+                    <div class="col-sm-12" ng-show="filteredMaterials.length > 0 && !invByMatEmpty ">
+                        <div class="outer">
+                            <div class="overflow-x" id="runGrid">
+                                <table class="table table-condensed table-centered table-logistimo table-stock inner">
+                                    <tbody class="overflow-x">
+                                    <tr ng-show="materials.results.length > 0">
+                                        <th class="outer-col outer-col0 outer-header"></th>
+                                        <th class="outer-col outer-col1 outer-header">
+                                            <span>{{resourceBundle.serialnum}}</span></th>
+                                        <th class="outer-col outer-col2 outer-header" ng-style="!tempEnabled && {'width':'210px','max-width':'210px'}" style="text-align: left">
+                                            <span ng-if="iCnt">{{resourceBundle.state}}</span>
+                                            <span ng-if="iState">{{resourceBundle.district}}</span>
+                                            <span ng-if="iDis">{{resourceBundle.kiosk}}</span>
+                                        </th>
+                                        <th class="outer-col outer-col3 outer-header" ng-if="tempEnabled">
+                                            <span class="glyphicons glyphicons-temperature large" uib-tooltip="Temperature"></span>
+                                        </th>
+                                        <th ng-repeat="mat in filteredMaterials track by mat.mId"
+                                            class="stock-col">
+                                            <span uib-tooltip="{{mat.mnm}}">{{mat.mnm}}</span>
+                                        </th>
+                                    </tr>
+                                    <tr ng-repeat="item in dbdata.invByMat track by item.dim">
+                                        <td class="outer-col outer-col0"></td>
+                                        <td class="outer-col outer-col1"><span>{{$index+1}}</span></td>
+                                        <td class="outer-col outer-col2" ng-style="!tempEnabled && {'width':'210px','max-width':'210px'}" style="text-align: left">
+                                            <a ng-if="iCnt"
+                                               ng-href="#/dashboard/inventory/?st={{item.dim}}&p={{period}}&eTag={{eTag}}">{{item.dim}}</a>
+                                            <a ng-if="iState"
+                                               ng-href="#/dashboard/inventory/?st={{state}}&dt={{item.dim}}&p={{period}}&eTag={{eTag}}">{{item.dim}}</a>
+                                        </td>
+                                        <td class="outer-col outer-col3" ng-if="tempEnabled">
+                                            <div temp-distribution
+                                                 pie-data="item.assetPieData"
+                                                 pie-icon-data="item.assetPieIconData"
+                                                 pie-opts="pieOpts" pie-icon-opts="tPieOpts"
+                                                 pie-id="{{item.dim}}"
+                                                 is-temp = 'true'>
+                                            </div>
+                                        </td>
+                                        <td class="stock-col"
+                                            ng-repeat="mat in filteredMaterials track by mat.mId"
+                                            ng-style="{'background-color':item['eve'][mat.mId][invType.id+'bc'] || '#E5E5E5'}"
+                                            ng-style="{'color':item['eve'][mat.mId][invType.id+'c'] || 'black';}">
+                                            <div event-distribution material="mat.mnm" stock="item['eve'][mat.mId]['q']"
+                                                 pie-data="item['eve'][mat.mId]['pieData']" pie-opts="pieOpts"
+                                                 percentage="{{isDef(item['eve'][mat.mId]) ? item['eve'][mat.mId][invType.id+'p']+'%' : 'NA'}}"
+                                                 eve-title="item.dim" eve-color="">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="outer-col outer-col1" style="border:0">&nbsp;</td>
+                                        <td class="outer-col outer-col2" style="border:0">&nbsp;</td>
+                                        <td style="border:0" ng-repeat="mat in materials.results  track by mat.mId" class="stock-col">
+                                            &nbsp;</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="row" ng-if="iDis">
+                <div class="col-sm-12" ng-show="filteredMaterials.length > 0 && !invByMatEmpty">
+                    <div class="outer">
+                        <div class="overflow-x" id="runGrid">
+                            <table class="table table-condensed table-centered table-logistimo table-stock inner">
+                                <tbody class="overflow-x">
+                                <tr ng-show="materials.results.length > 0">
+                                    <th class="outer-col outer-col0 outer-header"></th>
+                                    <th class="outer-col outer-col1 outer-header">
+                                        <span>{{resourceBundle.serialnum}}</span></th>
+                                    <th class="outer-col outer-col2 outer-header" ng-style="!tempEnabled && {'width':'210px','max-width':'210px'}" style="text-alilign: left">
+                                        <span ng-if="iCnt">{{resourceBundle.state}}</span>
+                                        <span ng-if="iState">{{resourceBundle.district}}</span>
+                                        <span ng-if="iDis">{{resourceBundle.kiosk}}</span>
+                                    </th>
+                                    <th class="outer-col outer-col3 outer-header" ng-if="tempEnabled">
+                                        <span class="glyphicons glyphicons-temperature large" uib-tooltip="Temperature"></span>
+                                    </th>
+                                    <th ng-repeat="mat in filteredMaterials track by mat.mId"
+                                        class="stock-col">
+                                        <span uib-tooltip="{{mat.mnm}}">{{mat.mnm}}</span>
+                                    </th>
+                                </tr>
+                                <tr ng-repeat="item in dbdata.invByMat track by item.dim">
+                                    <td class="outer-col outer-col0"></td>
+                                    <td class="outer-col outer-col1"><span>{{$index+1}}</span></td>
+                                    <td class="outer-col outer-col2" ng-style="!tempEnabled && {'width':'210px','max-width':'210px'}" style="text-align: left">
+                                        <a once-if="iDis" ng-href="#/setup/entities/detail/{{item.id}}" target="_blank" once-text="item.dim"></a>
+                                    </td>
+                                    <td class="outer-col outer-col3" ng-if="tempEnabled">
+                                        <div temp-distribution
+                                             pie-data="item.assetPieData"
+                                             pie-icon-data="item.assetPieIconData"
+                                             pie-opts="pieOpts" pie-icon-opts="tPieOpts"
+                                             pie-id="{{item.dim}}"
+                                             is-temp = 'true'>
+                                        </div>
+                                    </td>
+                                    <td class="stock-col" once-class="[item['eve'][mat.mId].cclass]"
+                                        ng-repeat="mat in filteredMaterials track by mat.mId">
+                                            <span once-show="isDef(item['eve'][mat.mId])"
+                                                  once-title="'Min: '+item['eve'][mat.mId].min+', Max: '+item['eve'][mat.mId].max +'&#013;'+item['eve'][mat.mId].t" once-text="item['eve'][mat.mId]['q']"></span>
+                                        <span once-hide="isDef(item['eve'][mat.mId])">NA</span>
+                                    </td>
+                                </tr>
+                                <!-- using this extra row to make sure single/small set of material wont get expanded to full screen-->
+                                <tr>
+                                    <td class="outer-col outer-col1" style="border:0;height: 0 !important;"></td>
+                                    <td class="outer-col outer-col2" style="border:0;height: 0 !important;"></td>
+                                    <td style="border:0" ng-repeat="mat in materials.results  track by mat.mId" class="stock-col"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col-sm-12 pt10">
+                        <p class="alert alert-warning" ng-show="(filteredMaterials.length == 0 || invByMatEmpty) && !loading">
+                            {{resourceBundle.nodataavailable}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-if="isUndef(dcntry)">
+        <div class="mt5">
+            <div class="box topbox tabminheight">
+                <div class="row">
+                    <div class="col-sm-12 mt10">
+                        <div class="alert alert-warning">Please choose default country for the domain to enable dashboards.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

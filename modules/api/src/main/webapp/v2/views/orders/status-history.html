@@ -1,0 +1,67 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <b>Status history</b>
+    </div>
+    <div class="panel-body" ng-show="loading">
+        <span class="glyphicons glyphicons-cogwheel spin"></span>
+    </div>
+    <div ng-show="!loading">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12 pb10" ng-repeat="data in history">
+                    <div style="display: inline;">
+                        <span class="glyphicons glyphicons-ok-circle pt2 pr5"></span>
+                    </div>
+                    <div style="display: inline-block">
+                        <span ng-show="data.objectType == 'ORDER'">Order</span>
+                        <span ng-hide="data.objectType == 'ORDER'">Shipment
+                            <a ng-hide="isShip" href="#orders/shipment/detail/{{data.objectId}}" target="_blank">({{data.objectId}})</a>
+                        </span>
+                        <b ng-if="!$last && data.newValue == ORDER.PENDING">re-opened</b>
+                        <b ng-if="$last || data.newValue == ORDER.OPEN">opened</b>
+                        <b ng-if="ORDER.statusTxt[data.newValue] != 'Pending'" class="text-lowercase" >{{ORDER.statusTxt[data.newValue]}}</b>
+                        on {{data.createDate}} by
+                        <a href="#/setup/users/all/details?userId={{data.userId}}" target="_blank">{{data.userName}}</a>
+                        <br/>
+                        <span class="codegray">{{data.message}}</span>
+                    </div>
+                    <hr/>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="pull-right">
+                        <button ng-click="toggleStatusHistory()" class="btn btn-sm btn-default">
+                            {{resourceBundle['close']}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

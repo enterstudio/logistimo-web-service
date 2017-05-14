@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <theme>
+    <name>Tabs</name>
+    <predefined>true</predefined>
+    <baseTheme>Tabs</baseTheme>
+    <baseVersion>1.11.7</baseVersion>
+  </theme>
+  <general>
+    <favicon>images/titleicon.ico</favicon>
+  </general>
+</settings>

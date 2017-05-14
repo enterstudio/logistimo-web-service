@@ -1,0 +1,167 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="row mt18">
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Title</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" maxlength="20" autocomplete="off"
+                               ng-model="wid.tit" name="heading" placeholder="{{wid.nm | limitTo: 20}}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Sub-Title</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" maxlength="20" autocomplete="off"
+                               ng-model="wid.stit" name="heading">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label required">Aggregation Type</label>
+
+                    <div class="col-sm-8">
+                        <select ng-model="wid.agTy" ng-change="setAggregations(wid.agTy)"
+                                class="form-control"
+                                name="aggTy">
+                            <option value="">-- Select --</option>
+                            <option value="a">Activity</option>
+                            <option value="r">Revenue</option>
+                            <option value="o">Orders</option>
+                            <option value="i">Inventory</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label required">Aggregation</label>
+
+                    <div class="col-sm-8">
+                        <select ng-model="wid.ag" ng-change="setChartTypeOptions()" class="form-control"
+                                name="aggr">
+                            <option value="">-- Select --</option>
+                            <option value="{{opt[0]}}" ng-selected="{{opt[0] == wid.ag}}"
+                                    ng-repeat="opt in aggrOpt">{{opt[1]}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label required">Type</label>
+
+                    <div class="col-sm-8">
+                        <select ng-model="wid.ty" class="form-control" name="ty">
+                            <option value="">-- Select --</option>
+                            <option value="{{opt[0]}}" ng-selected="{{opt[0] == wid.ty}}"
+                                    ng-repeat="opt in cTypeOpt">{{opt[1]}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Frequency</label>
+
+                    <div class="col-sm-8">
+                        <select ng-model="wid.fq" ng-change="resetPeriod()" class="form-control" name="freq">
+                            <option value="d">Daily</option>
+                            <option value="m">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">No of Periods</label>
+
+                    <div class="col-sm-8">
+                        <select ng-model="wid.nop" class="form-control" name="period">
+                            <option ng-repeat="n in [] | range:(wid.fq=='d'?30:12):(wid.fq=='d'?6:3)" value="{{n}}" ng-selected="wid.nop == n">{{n}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Y-axis label</label>
+
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" maxlength="20" autocomplete="off"
+                               ng-model="wid.ya" name="heading"
+                               placeholder="{{(wid.tit || wid.nm) | limitTo: 20}}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Enable export</label>
+
+                    <div class="col-sm-8 cbx">
+                        <input type="checkbox" value="true" ng-model="wid.ee">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Hide values</label>
+
+                    <div class="col-sm-8 cbx">
+                        <input type="checkbox" value="true" ng-model="wid.hv">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

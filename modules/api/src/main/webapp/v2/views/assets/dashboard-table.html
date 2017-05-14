@@ -1,0 +1,70 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="minbox">
+    <table class="table table-striped table-hover table-custom table-logistimo">
+        <tr>
+            <th ng-show="stateCode != 'null'">{{resourceBundle['district.uppercase']}}</th>
+            <th ng-hide="stateCode != 'null'">{{resourceBundle['state']}}</th>
+            <th># {{resourceBundle['items']}}</th>
+        </tr>
+        <tr ng-repeat="tag in dataJson" ng-show="isDef(tag.nDevices) && tag.nDevices > 0">
+            <td>
+                <a ng-click="handleAlertClick(0, tag.location)">{{tag.location}}</a>
+            </td>
+            <td style="width:700px;">
+                <table style="width:100%; height: 14px; text-align: center; color:#FFF;font-size: smaller">
+                    <tr>
+                        <td class="bg-red clickable"
+                            ng-click="handleAlertClick(1, tag.location)"
+                            ng-show="tag.nAbnormalDevices > 0"
+                            ng-style="{'width': (tag.nAbnormalDevices * 100/tag.nDevices) + '%'}"
+                            data-toggle="tooltip" data-placement="top"
+                            title="# Devices in alert state">
+                            {{tag.nAbnormalDevices}}&nbsp;({{tag.nAbnormalDevices * 100/tag.nDevices | number : 0}}%)
+                        </td>
+                        <td class="bg-green clickable"
+                            ng-click="handleAlertClick(4, tag.location, isDef(stateCode) ? 'dis' : 'st')"
+                            ng-show="(tag.nDevices - (tag.nAbnormalDevices + tag.nIActDevices)) > 0"
+                            ng-style="{'width':((tag.nDevices  - (tag.nAbnormalDevices + tag.nIActDevices)) * 100/tag.nDevice) + '%'}"
+                            data-toggle="tooltip" data-placement="top"
+                            title="# Devices in normal state">
+                            {{(tag.nDevices - (tag.nAbnormalDevices + tag.nIActDevices))}}&nbsp;({{(tag.nDevices  - (tag.nAbnormalDevices + tag.nIActDevices)) *
+                            100/tag.nDevices | number : 0}}%)
+                        </td>
+                        <td ng-show="(tag.nIActDevices) > 0"
+                            ng-click="handleAlertClick(3, tag.location, isDef(stateCode) ? 'dis' : 'st')"
+                            class="bg-grey clickable"
+                            ng-style="{'width': (tag.nIActDevices * 100/tag.nDevices) + '%'}" data-toggle="tooltip"
+                            data-placement="top" title="# No data">
+                            {{tag.nIActDevices}}&nbsp;({{tag.nIActDevices * 100/tag.nDevices | number: 0}}%)
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr ng-show="dataJson.length == 0">
+            <td colspan="2">{{resourceBundle['no.data.available']}}</td>
+        </tr>
+    </table>
+</div>

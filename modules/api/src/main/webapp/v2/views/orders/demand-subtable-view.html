@@ -1,0 +1,107 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="panel-body">
+    <table class="table table-condensed table-hover table-logistimo">
+        <thead><b>{{title}}</b>
+        <tr>
+            <th class="text-center">{{resourceBundle['serialnum']}}</th>
+            <th class="col-sm-2">
+                <span ng-show="oty=='prc'">{{resourceBundle['vendor']}}</span>
+                <span ng-show="oty== 'sle'">{{resourceBundle['customer']}}</span>
+            </th>
+            <th class="text-center">{{resourceBundle['order.id']}}</th>
+            <th class="text-center">{{resourceBundle['ordered']}}</th>
+            <th ng-show="allocate && oty=='sle'" class="text-center">{{resourceBundle['allocated']}}</th>
+            <th ng-show="allocate && oty=='sle'" class="text-center">{{resourceBundle['yet.to.allocate']}}</th>
+            <th class="text-center">{{resourceBundle['shipped']}}</th>
+            <th class="text-center">{{resourceBundle['yet.to.ship']}}</th>
+            <th class="text-center">{{resourceBundle['status']}}</th>
+            <th class="text-center">
+                {{resourceBundle['stockonhand.lowercase']}}
+            </th>
+            <th ng-show="allocate && oty=='sle' && !dp.vp" class="text-center">{{resourceBundle['actions']}}</th>
+        </tr>
+        </thead>
+        <tbody ng-repeat="dItem in demanddata" ng-controller="DemandTableController">
+        <tr>
+            <td class="text-center">{{$index + 1}}</td>
+            <td><a ng-href="#/setup/entities/detail/{{dItem.e.id}}/" target="_blank">{{dItem.e.nm}}</a>
+                <span class=" litetext">{{dItem.e.add}}</span></td>
+            <td class="text-center">
+                <a ng-href="#/orders/detail/{{dItem.oid}}/" target="_blank">{{dItem.oid}}</a>
+            </td>
+            <td class="text-center">{{dItem.q}}</td>
+            <td ng-show="allocate && oty=='sle'" class="text-center">{{dItem.astk}}
+                <span class="litetext" ng-show="dItem.astk > 0 && !dItem.isBa">{{dItem.allocations[0].mst}}</span>
+                <table class="table table-bordered table-order-batch" ng-show="dItem.astk > 0 && dItem.isBa"
+                       style="margin-left: auto; margin-right: auto;">
+                    <thead>
+                    <tr style="font-size: x-small;">
+                        <th class=" text-center">{{resourceBundle['batch']}}</th>
+                        <th class=" text-center">{{resourceBundle['expiry']}}</th>
+                        <th class=" text-center">{{resourceBundle['quantity']}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="font-size: xx-small;" ng-repeat="bi in dItem.allocations" ng-hide="isUndef(bi.bQty) || bi.bQty == 0">
+                        <td class=" text-center">{{bi.bid}}</td>
+                        <td class=" text-center">{{bi.bexp}}</td>
+                        <td class=" text-center">{{bi.bQty}}
+                            <span class="litetext" ng-show="isDef(bi.mst)">{{bi.mst}}</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+            <td ng-show="allocate && oty=='sle'" class="text-center">{{dItem.yta}}</td>
+            <td class="text-center">{{dItem.sq}}</td>
+            <td class="text-center">{{dItem.yts}}</td>
+            <td class="text-center">{{ORDER.statusTxt[dItem.st]}}</td>
+            <td class="text-center" ng-class=" {'alert-danger' : dItem.event == 200,
+												 'alert-info alert-info-dark' : dItem.event == 202,
+												 'alert-warning alert-warning-dark' : dItem.event == 201} ">{{dItem.stk}}
+                <span class="litetext" ng-show="dItem.e.nm">({{dItem.min}},{{dItem.max}})</span>
+                <span class="litetext" ng-show="dItem.csavibper > 0 && isDef(mmdt)">{{dItem.csavibper | roundNoTrailZeros:2}} {{mmdt}}</span>
+            </td>
+            <td ng-show="allocate && oty=='sle' && !dp.vp">
+                <div class="pull-right">
+                    <note-data>
+                        <ul class="nav navbar-nav">
+                            <li>
+                                <a class="dropdown-toggle clickable no-background act_icons" data-toggle="dropdown" ng-if="dItem.q!=dItem.sq">
+                                    <button class=" center-block subnav-form-control glyphicons glyphicons-show-lines medium" style="color: #000101"></button>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a href="" class="no-background" ng-click="allocateData(dItem.astk)">{{resourceBundle['allocate']}}</a></li>
+                                    <li ng-show="dItem.astk > 0"><a href="" class="no-background" ng-click="open('alloc')">{{resourceBundle['deallocate']}}</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </note-data>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

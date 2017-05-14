@@ -1,0 +1,104 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane">
+<div ng-controller="EditDashboardController">
+    <div class="filter-box">
+        <div class="filter-title capbold">
+            {{db.nm}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+        <div class="bgr">
+            <div class="title-heading">
+                Dashboard information
+            </div>
+            <div class="row">
+            <div class="col-sm-12">
+            <div class="col-sm-12">
+                <div class="row mh30">
+                    <div class="col-sm-3">
+                        <label class="control-label">Dashboard Name:</label>
+                    </div>
+                    <div class="col-sm-4 lPad5">
+                        <span editable-box ng-show="!nmedit" ng-click="setName()" class="fullSpan">
+                            {{db.nm}} <span ng-show="updatingName" class="glyphicons glyphicons-cogwheel spin"></span>
+                        </span>
+                        <div ng-show="nmedit">
+                            <editable-text edit-model="enm"
+                                           on-ok="updateName()"
+                                           on-cancel="cancelName()"
+                                           set-focus="{{nmedit}}">
+                            </editable-text>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mh30">
+                    <div class="col-sm-3">
+                        <label class="control-label">Dashboard Description:</label>
+                    </div>
+                    <div class="col-sm-4 lPad5">
+                        <span editable-box ng-show="!descedit" ng-click="setDesc()" class="fullSpan">
+                            {{db.desc}} <span ng-show="updatingDesc" class="glyphicons glyphicons-cogwheel spin"></span>
+                        </span>
+                        <div ng-show="descedit">
+                            <editable-text edit-model="edesc"
+                                           on-ok="updateDesc()"
+                                           on-cancel="cancelDesc()"
+                                           set-focus="{{descedit}}">
+                            </editable-text>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mh30">
+                    <div class="col-sm-3">
+                        <label class="control-label">Created by:</label>
+                    </div>
+                    <div class="col-sm-4 cbx mh25">
+                        {{db.cBy}}
+                    </div>
+                </div>
+                <div class="row mh30">
+                    <div class="col-sm-3">
+                        <label class="control-label">Created on:</label>
+                    </div>
+                    <div class="col-sm-4 cbx mh25">
+                        {{db.cOn}}
+                    </div>
+                </div>
+                <div class="row mt10">
+                    <div class="col-sm-5">
+                        <div class="pull-right">
+                            <a href="#/setup/dashboard" class="btn btn-default">{{resourceBundle['back']}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</div>

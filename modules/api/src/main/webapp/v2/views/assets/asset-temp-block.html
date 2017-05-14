@@ -1,0 +1,49 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="info-box">
+    <div class="info-box-content">
+        <div class="info-box-top">
+            <span class="pull-left info-box-litetext info-box-loc" ng-show="isDef(currentAsset) && currentAsset.at == 2 && getObjectLength(currentAsset.mps) > 1">
+                {{getMonitoringPointName(t.mpId,asset.typ)}}<span ng-show="isDef(relation) && isDef(relation[t.mpId]) && isDef(relation[t.mpId].sId)">:&nbsp;
+                    <span ng-style="{'color': getSensorColorCode(relation[t.mpId].vId, relation[t.mpId].meta.dev.mdl, relation[t.mpId].sId)}">{{relation[t.mpId].sId}}</span>
+                </span>
+            </span>
+            <span ng-show="t.time > 0 && t.isActive && t.st == 0" class="pull-right info-box-tmp" ng-class="{'c-grey': !t.isActive, 'c-green': t.st == 0}">
+                {{t.tmp | number: 1}} &#8451;
+            </span>
+            <span ng-show="t.time > 0 && (t.st > 0 || !t.isActive)" class="pull-right info-box-tmp" ng-class="{'c-grey': !t.isActive, 'c-orange': t.st == 1 || t.st == 2, 'c-red': t.st == 3 && t.aSt == 2, 'c-aqua': t.st == 3 && t.aSt == 1}"
+                  tooltip-placement="right" uib-tooltip="{{!t.isActive ? resourceBundle['status.unknown'] : temperatureAlarmType[t.st]}} {{resourceBundle['since']}} {{t.fstut}}" tooltip-class="tooltip-inner-temp">
+                {{t.tmp | number: 1}} &#8451;
+            </span>
+            <span ng-show="t.time == 0" class="pull-right info-box-tmp c-grey" tooltip-placement="right" uib-tooltip="{{resourceBundle['status.unknown']}}">
+                <span class="glyphicons glyphicons-question-sign tglyph"></span>
+            </span>
+        </div>
+        <div class="info-box-bottom">
+            <span class="pull-right info-box-status info-box-litetext" ng-show="t.time > 0">
+                {{t.ftime}}
+            </span>
+        </div>
+    </div>
+</div>

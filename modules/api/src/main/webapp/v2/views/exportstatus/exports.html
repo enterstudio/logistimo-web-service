@@ -1,0 +1,74 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane">
+    <div ng-controller="ExportListController" ng-init="init('export');">
+        <div class="filter-box form-group">
+            <div class="row">
+                <div class="col-sm-3">
+                    <div ng-show="iSU || iAdm" class="cbx">
+                        <input type="checkbox" id="sae" ng-model="sae" ng-change="showAllExportsInDomain()" name="sae"> {{resourceBundle['showallexportsindomain']}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x mt18">
+            <div class="row" ng-hide="noExportJobs">
+                <div class="col-sm-12">
+                    <table class="table table-striped table-condensed table-hover table-logistimo">
+                        <tbody>
+                        <tr>
+                            <th class="text-center">{{resourceBundle['serialnum']}}</th>
+                            <th class="text-center">{{resourceBundle['job.id']}}</th>
+                            <th>{{resourceBundle['type']}}</th>
+                            <th>{{resourceBundle['exportedon']}}</th>
+                            <th>{{resourceBundle['status']}}</th>
+                            <th>{{resourceBundle['download']}}</th>
+                            <th><div ng-show="sae">{{resourceBundle['exportedby']}}</div></th>
+                        </tr>
+                        <tr ng-repeat="item in exportJobs.results">
+                            <td class="text-center">{{item.sno}}</td>
+                            <td class="text-center">{{item.id}}</td>
+                            <td>{{item.sbtyd}}</td>
+                            <td>{{item.sttStr}}</td>
+                            <td>{{item.std}}
+                                <span class = "litetext">{{item.utStr}}</span>
+                            </td>
+                            <td><div ng-show="{{item.on != null}}"><a href="{{item.ofl}}">{{item.on}}</a></div>
+                                <div ng-show="{{item.on == null}}">{{item.rsn}}</div>
+                            </td>
+                            <td><div ng-show="sae && {{item.crby != null}}"><a href="#/setup/users/all/details?userId={{item.crby}}">{{item.crbyFn}}</a></div><div ng-show="{{item.crby==null && sae}} ">{{resourceBundle.scheduledbythesystem}}</div></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div class="row mt18" ng-show="noExportJobs">
+                <div class="col-sm-12">
+                    <p class=" alert alert-warning">{{resourceBundle.noexports}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

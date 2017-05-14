@@ -1,0 +1,165 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="FullInventoryCtrl">
+    <div class="row">
+        <div class="col-sm-12">
+            <span class="col-sm-4" ng-show="!loading">
+                <span class="filter-label pull-left lPad5">{{resourceBundle['kiosk']}} {{resourceBundle['multiple.tags']}} : </span>
+                <span ng-show="entityTags.length" class="lPad5"><span ng-repeat="tag in entityTags track by $index" class="label label-default dinline">{{tag}}</span><span class="caret" ng-click="toggleFilter()"></span></span>
+                <span ng-show="!entityTags.length" class="lPad5"><span class="dinline">{{resourceBundle['all']}}</span><span class="caret" ng-click="toggleFilter()"></span></span>
+                <span ng-show="eLoading"><span class="glyphicons glyphicons-cogwheel spin"></span></span>
+            </span>
+            <span class="col-sm-4" ng-show="!loading">
+                <span class="filter-label pull-left">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                <tag-filter ng-model="fvmtag" tag-type="material" class="pull-left"></tag-filter>
+            </span>
+            <span class="pull-right ml5" ng-show="filtered.length == maxSize || maxDataReached"><b>{{count}}</b>
+                <span class="pull-right ml5 mt5 litetext glyphicons glyphicons-info-sign" ng-show="(filtered.length == maxSize || maxDataReached) && count > filtered.length" uib-tooltip="{{resourceBundle['limit.data']}}" tooltip-placement="left"></span>
+            </span>
+            <span ng-show="loading"><span class="glyphicons glyphicons-cogwheel spin"></span></span>
+            <div class="pull-right" ng-show="filtered.length > 0 && filteredMaterials.length > 0">
+                <div ng-include="'views/load-more-paginator.html'"></div>
+            </div>
+        </div>
+        <div class="col-sm-6 pt5">
+            <div class="pop_filter_box col-sm-8 ws" id="filter" ng-show="showFilter">
+                <div class="row pb10 pt10">
+                    <div class="col-sm-12">
+                        <label class="col-sm-4 noLRpad control-label cbx">{{resourceBundle['kiosk']}} {{resourceBundle['multiple.tags']}}</label>
+                                    <span class="col-sm-8 noLRpad lPad5">
+                                        <tag-select  tags-model="eTgs" type="'entity'" force-no-udf="'true'"></tag-select>
+                                    </span>
+                    </div>
+                </div>
+                <div class="row pb10">
+                    <div class="col-sm-12">
+                                    <span class="pull-right">
+                                        <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilters()" value="Filter">
+                                        <input type="button" class="btn btn-sm btn-default" ng-click="cancelFilter()" value="Cancel">
+                                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" ng-show="filtered.length > 0 && filteredMaterials.length > 0">
+            <div class="outer">
+                <div class="overflow-x">
+                    <table class="table table-condensed table-centered table-logistimo table-stock inner">
+                        <tbody class="overflow-x">
+                        <tr ng-show="materials.results.length > 0">
+                            <th class="outer-col outer-col0 outer-header"></th>
+                            <th class="outer-col outer-col1 outer-header"><span>{{resourceBundle.serialnum}}</span></th>
+                            <th class="outer-col outer-col2 outer-header" ng-style="!tempEnabled && {'width':'210px','max-width':'210px'}" style="text-align: left">
+                                <span>{{resourceBundle.kiosk}}</span>
+                            </th>
+                            <th class="outer-col outer-col3 outer-header" ng-if="tempEnabled">
+                                <span class="glyphicons glyphicons-temperature large" uib-tooltip="Temperature"></span>
+                            </th>
+                            <th ng-repeat="mat in filteredMaterials"
+                                class="stock-col">
+                                <span>{{mat.mnm}}</span>
+                            </th>
+                        </tr>
+                        <tr ng-repeat="item in filtered | orderBy:'sno'">
+                            <td class="outer-col outer-col0"><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                            <td class="outer-col outer-col1"><span>{{$index+1}}</span></td>
+                            <td class="outer-col outer-col2" ng-style="!tempEnabled && {'width':'210px','max-width':'210px'}" style="text-align: left"><a ng-href="#/inventory/?eid={{item.id}}">{{item.nm}}</a><span class="litetext">{{item.add}}</span></td>
+                            <td class="outer-col outer-col3" ng-if="tempEnabled">
+                                <div temp-distribution
+                                     pie-data="item.assetPieData"
+                                     pie-icon-data="item.assetPieIconData"
+                                     pie-opts="pieOpts" pie-icon-opts="tPieOpts"
+                                     pie-id="{{item.nm}}"
+                                     is-temp = 'true'>
+                                </div>
+                            </td>
+                            <td class="stock-col" ng-repeat="mat in filteredMaterials"
+                                ng-class=" {'alert-danger' : item[mat.mId]['event'] == 200,
+												 'alert-info alert-info-dark' : item[mat.mId]['event'] == 202,
+												 'alert-warning alert-warning-dark' : item[mat.mId]['event'] == 201} " ng-controller="TempPageSlideController">
+                                <span ng-show="item[mat.mId]['anmCnt'] > 0 && mat.tm == 'yes'">
+                                    {{item[mat.mId]!=null ? item[mat.mId]['anmCnt'] : 'NA'}}
+                                    <span ng-click="updateChecked()"
+                                          class="glyphicons glyphicons-exclamation-sign clickable codered"></span>
+                                    <span ng-hide="item[mat.mId]['stk'] == item[mat.mId]['anmCnt']">
+                                        <br/>
+                                        {{item[mat.mId]!=null ? item[mat.mId]['stk'] - item[mat.mId]['anmCnt'] : 'NA'}}
+                                        <span ng-click="updateChecked()"
+                                              class="glyphicons glyphicons-ok-circle clickable codegreen"></span>
+                                    </span>
+                                </span>
+                                <span ng-hide="item[mat.mId]['anmCnt'] > 0">
+                                    <span ng-if="item[mat.mId]!=null" title="Min: {{item[mat.mId].reord}}, Max: {{item[mat.mId].max}} &#013; {{item[mat.mId].t}}">
+                                    {{item[mat.mId]['stk'] | number}} </span>
+                                    <span ng-if="item[mat.mId] == null">NA</span>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr class="text-bold" ng-hide="filtered.length == 0 && filteredMaterials.length > 0">
+                            <td class="outer-col outer-col0"></td>
+                            <td class="outer-col outer-col1"></td>
+                            <td class="outer-col outer-col2">{{resourceBundle['total']}}</td>
+                            <td class="outer-col outer-col3"></td>
+                            <td ng-repeat="mat in filteredMaterials"
+                                class="stock-col">{{getTotalMaterials(filtered,mat.mId) | number}}
+                            </td>
+                        </tr>
+                        <!-- using this extra row to make sure single/small set of material wont get expanded to full screen-->
+                        <tr>
+                            <td class="outer-col outer-col1" style="border:0; height: 0!important;"></td>
+                            <td class="outer-col outer-col2" style="border:0; height: 0!important;"></td>
+                            <td style="border:0; height: 0" ng-repeat="mat in materials.results" class="stock-col"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <p class="alert alert-warning pt10" ng-show="(filtered.length == 0 || filteredMaterials.length == 0) && loading != true">
+                {{resourceBundle['entities.notavailable']}}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 pb10" ng-show="filtered.length > 0 && filteredMaterials.length > 0">
+            <div class="col-sm-8">
+                <div ng-include="'views/inventory/inv-event-legend.html'"></div>
+            </div>
+             <span class="pull-right ml5" ng-show="filtered.length == maxSize || maxDataReached"><b>{{count}}</b>
+                <span class="pull-right ml5 mt5 litetext glyphicons glyphicons-info-sign" ng-show="(filtered.length == maxSize || maxDataReached) && count > filtered.length" uib-tooltip="{{resourceBundle['limit.data']}}" tooltip-placement="left"></span>
+            </span>
+            <div class="pull-right" ng-show="filtered.length > 0 && filteredMaterials.length > 0">
+                <div ng-include="'views/load-more-paginator.html'"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

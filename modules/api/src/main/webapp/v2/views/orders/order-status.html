@@ -1,0 +1,110 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-show="!statusLoading">
+    <div class="modal-header ws">
+        <h3 class="modal-title">{{ORDERSTATUSTEXT.statusTxt[nStatus]}}</h3>
+    </div>
+    <div class="modal-body bg-white">
+        <form class="form-horizontal" role="form" name="addEntityForm">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{resourceBundle['order.new.status']}}</label>
+
+                <div class="col-sm-8 cbx">
+                    {{ORDER.statusTxt[nStatus]}}
+                </div>
+            </div>
+            <div class="form-group" ng-show="nStatus == 'cn'">
+                <label class="col-sm-4 control-label" ng-class="{'required' : oCfg.corm}">{{resourceBundle['providereason']}}</label>
+                <div class="col-sm-7">
+                    <select class="form-control"
+                            ng-change="newStatus.cmrsn = ''"
+                            ng-model="newStatus.ncdrsn" ng-show="isDef(cancelReasons)">
+                        <option ng-repeat="reason in cancelReasons" value="{{reason}}">{{reason|| resourceBundle['select'] + ' ' +
+                            resourceBundle['reason.lowercase'] }}
+                        </option>
+                    </select>
+                    <textarea type="text" class="form-control"
+                              ng-show="isUndef(cancelReasons) || newStatus.ncdrsn == 'Others'"
+                              ng-model="newStatus.cmrsn" placeholder="{{resourceBundle['enterreason']}}" maxlength="160"
+                              style="margin-top: 4px;"></textarea>
+                </div>
+            </div>
+
+            <div class="row mb10" ng-show="nStatus == 'cm'">
+                <label class="col-sm-4 control-label" ng-class="{'required':oCfg.tm}"> Transporter </label>
+
+                <div class="col-sm-7" >
+                    <input class="form-control" ng-model="newStatus.t">
+                </div>
+            </div>
+            <div class="row mb10" ng-show="nStatus == 'cm'">
+                <label class="col-sm-4 control-label"> Tracking Id</label>
+
+                <div class="col-sm-7">
+                    <input class="form-control" ng-model="newStatus.tid">
+                </div>
+            </div>
+            <div class="row mb10" ng-show="nStatus == 'cm'">
+                <label class="col-sm-4 control-label"> {{resourceBundle['eda']}}</label>
+
+                <div class="col-sm-7">
+                    <date-picker date-model="newStatus.efd" min-date="today"></date-picker>
+                </div>
+            </div>
+            <div class="row mb10" ng-show="nStatus == 'cm'">
+                <label class="col-sm-4 control-label">{{resourceBundle['packagesize']}}</label>
+                <div class="col-sm-7">
+                    <select class="form-control" ng-model="newStatus.ps" ng-show="isDef(packageSize)">
+                        <option ng-repeat="psize in packageSize" value="{{psize}}"
+                                ng-selected="ps == psize">
+                            {{psize || resourceBundle['select'] + ' ' + resourceBundle['packagesize']}}
+                        </option>
+                    </select>
+                    <input type="text" class="form-control" ng-show="isUndef(packageSize)" ng-model="newStatus.ps">
+                </div>
+            </div>
+            <div class="row mt10">
+                <label class="col-sm-4 control-label cbx"> Comment </label>
+
+                <div class="col-sm-7">
+                    <textarea class="form-control" maxlength="2048" rows="4" ng-model="newStatus.msg"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer ws">
+        <div class="col-sm-12">
+            <div class="pull-right">
+                <button class="btn btn-sm btn-primary"
+                        ng-click="saveStatus()" ng-disabled="statusLoading">
+                    {{resourceBundle['save']}}
+                </button>
+                <button class="btn btn-sm btn-default"
+                        ng-click="cancel()">
+                    {{resourceBundle['cancel']}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

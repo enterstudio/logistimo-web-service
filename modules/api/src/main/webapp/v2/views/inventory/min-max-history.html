@@ -1,0 +1,62 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="MinMaxHistoryCtrl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <b>Min/Max history for {{mnm}}</b>
+        </div>
+        <div class="panel-body">
+            <div class="row" ng-show="invHis.length > 0">
+                <div class="col-sm-12" style="max-height: 200px;overflow-y:scroll;">
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <th class="text-center">{{resourceBundle['min']}}</th>
+                            <th class="text-center">{{resourceBundle['max']}}</th>
+                            <th class="text-center">{{resourceBundle['min.max.cr']}}</th>
+                            <th>{{resourceBundle['updatedon']}}</th>
+                            <th>{{resourceBundle['updatedby']}}</th>
+                        </tr>
+                        <tr ng-repeat="item in invHis">
+                            <td class="text-center">
+                                <span>{{item.min | number : 0}}</span>
+                                <span ng-show="item.minDur > 0" class="litetext">{{item.minDur}} {{item.freq}}</span>
+                            </td>
+                            <td class="text-center">
+                                <span>{{item.max | number : 0}}</span>
+                                <span ng-show="item.maxDur > 0" class="litetext">{{item.maxDur}} {{item.freq}}</span>
+                            </td>
+                            <td class="text-center">{{item.cr | roundNoTrailZeros:2}}</td>
+                            <td>{{item.t}}</td>
+                            <td ng-if="item.source == 'u'"><a href="#/setup/users/all/details?userId={{item.uid}}" target="_blank">{{item.username}}</a></td>
+                            <td ng-if="item.source == 's'">SYSTEM</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p ng-show="invHis.length == 0" class="alert alert-warning">{{resourceBundle['data.missing']}}</p>
+        </div>
+    </div>
+</div>

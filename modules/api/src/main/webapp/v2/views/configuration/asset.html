@@ -1,0 +1,216 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="TemperatureConfigurationController">
+            <div class="alert alert-warning" ng-show="tscNotConfigured">
+                {{resourceBundle['temperature.config']}}
+            </div>
+            <form ng-if="!loading && !tscNotConfigured" class="form-horizontal" role="form" name="assetConfigForm" novalidate>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading marginlr0">
+                            <h4>{{resourceBundle['asset']}} {{resourceBundle['configuration']}}</h4>
+                            <span ng-show="postdata.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{postdata.lastUpdated}} {{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{postdata.createdBy}}" target="_new">{{postdata.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr" ng-show="iSU">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['temperature.enablemonitoring']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['temperature.enablemonitoring']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="radio" name="enableoptions" ng-model="postdata.enable" value="0"
+                                           checked>&nbsp;{{resourceBundle['no']}}&nbsp;{{resourceBundle['temperature.monitoring']}}<br/>
+                                    <input type="radio" name="enableoptions" ng-model="postdata.enable" value="1">&nbsp;{{resourceBundle['temperature.enable.monitoring']}}<br/>
+                                    <input type="radio" name="enableoptions" ng-model="postdata.enable" value="2">&nbsp;{{resourceBundle['temperature.enable.all']}}<br/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-show="(postdata.enable == 1 || postdata.enable == 2) && iSU">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['namespace.config']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['namespace.config']}}</label>
+                                <div class="col-sm-8">
+                                    <input name="smsGyKey" class="form-control" type="text"
+                                           ng-model="postdata.namespace"
+                                           placeholder="{{resourceBundle['namespace.config']}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr"  ng-if="(postdata.enable == 1 || postdata.enable == 2) && iSU">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['asset']}}&nbsp;{{resourceBundle['manufacturer'] | lowercase}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="bizinfo bizinfo-last">
+                                <div class="row overflowYHide">
+                                    <div class="col-sm-2 " style="min-height:280px;">
+                                        <ul class="nav nav-tabs-left extend">
+                                            <li ng-class="{active : asset.id == currentAssetId}" ng-repeat="asset in postdata.assets"><a href="" ng-click="tabContent(asset.id)">{{asset.an}}</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <div class="row"  ng-repeat="asset in postdata.assets" ng-show="asset.id == currentAssetId">
+                                            <div ng-class="{'col-sm-8': asset.at == 2, 'col-sm-9': asset.at == 1}">
+                                                <div class="row">
+                                                    <div class="col-sm-12" ng-show="asset.at == 1">
+                                                        <p class="desc">{{resourceBundle['monitoring.asset.manufacturer.config.message']}} <b>{{asset.an}}</b></p>
+                                                    </div>
+                                                    <div class="col-sm-12" ng-show="asset.at != 1">
+                                                        <p class="desc">{{resourceBundle['monitored.asset.manufacturer.config.message']}} <b>{{asset.an}}</b></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group" ng-show="asset.at != 1">
+                                                        <label class="col-sm-5 control-label required">
+                                                            <th>{{resourceBundle['manufacturers']}}</th>
+                                                        </label>
+                                                        <div class="col-sm-7 pl0">
+                                                            <div ng-repeat="item in asset.mcs">
+                                                                <input type="checkbox" ng-model="item.iC"> {{item.name}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <table class="table table-bordered table-hover table-striped table-logistimo" ng-show="asset.at == 1">
+                                                            <thead>
+                                                            <tr>
+                                                                <th><input type="checkbox"  ng-change="selectAll(selAll, asset.mcs)" ng-model='selAll'></th>
+                                                                <th class="required">{{resourceBundle['manufacturer']}} {{resourceBundle['name'] | lowercase}}</th>
+                                                                <th class="required">{{resourceBundle['asset.model']}}</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr ng-repeat="item in asset.mcs">
+                                                                <td><input type="checkbox" class="mt0" ng-model="item.iC"></td>
+                                                                <td>{{item.name}}</td>
+                                                                <td>
+                                                                    <div class="row mb5" ng-repeat="mdl in item.model">
+                                                                        <div class="col-sm-1 pr0">
+                                                                            <input type="checkbox" class="mt0" ng-model="mdl.iC" ng-disabled="!item.iC">
+                                                                        </div>
+                                                                        <div class="col-sm-3">
+                                                                            {{mdl.name}}
+                                                                        </div>
+                                                                        <div class="col-sm-8">
+                                                                            <div class="row mgh0">
+                                                                                <div class="form-group">
+                                                                                    <label class="col-sm-5 pr0">
+                                                                                        <span class="pull-right required">{{resourceBundle['default.caps']}} {{resourceBundle['sensor'] | lowercase}}</span>
+                                                                                    </label>
+                                                                                    <div class="col-sm-7">
+                                                                                        <select ng-model="mdl.dS" class="form-control" ng-disabled="!item.iC || !mdl.iC">
+                                                                                            <option value="">&#45;&#45; {{resourceBundle['select']}} {{resourceBundle['sensor'] | lowercase}} &#45;&#45;</option>
+                                                                                            <option ng-repeat="sns in mdl.sns" value="{{sns.name}}" ng-selected="mdl.dS == sns.name">{{sns.name}}</option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="row" ng-show="asset.at == 2">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-5 control-label required">
+                                                            {{resourceBundle['default.caps']}} {{resourceBundle['monitoringpoint'] | lowercase}}
+                                                        </label>
+                                                        <div class="col-sm-3 pl0">
+                                                            <select ng-model="asset.dMp" class="form-control">
+                                                                <option value="">&#45;&#45; {{resourceBundle['select']}} {{resourceBundle['monitoringpoint'] | lowercase}} &#45;&#45;</option>
+                                                                <option ng-repeat="mp in asset.mps" ng-value="{{mp.mpId}}" ng-selected="asset.dMp == mp.mpId">{{mp.name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-show="(postdata.enable == 1 || postdata.enable == 2) && (iSU || iAdm)">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['asset.temperature.device']}} {{resourceBundle['configuration'] | lowercase}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div ng-include="'views/configuration/temperature-device-config.html'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-show="iSU || (iAdm && dp.ce && (postdata.enable == 1 || postdata.enable == 2))">
+                    <div class="col-sm-12  ml5">
+                        <button type="button" ng-click="setUvisited(); (postdata.enable == 0 || (assetConfigForm.$valid && !checkFormValidity()) || showValidationError()) && setTemperatureConfiguration()"
+                                class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+                <div ng-show="!iSU && iAdm && postdata.enable == 0">
+                    <div class="alert alert-warning">
+                        {{resourceBundle['temperature.config.notenabled']}}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

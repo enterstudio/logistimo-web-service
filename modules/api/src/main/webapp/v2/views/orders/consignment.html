@@ -1,0 +1,349 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="row" ng-controller="ConsignmentController">
+    <div class="col-sm-12 mb10 mt10">
+        <div class="row">
+            <div class="col-sm-12 pull-left mb10" ng-show="!edit.mat">
+                <button type="button" class="btn btn-sm btn-primary"
+                        ng-click="createShipment()"
+                        ng-if="order.its.length > 0"
+                        ng-hide="generalconfig.dcs || dp.vp || isUndef(vendor) || !order.atv || !showStock"
+                        ng-disabled="sel.selectedRows.length<=0">{{resourceBundle['create.shipment']}}
+                </button>
+                <button type="button" class="btn btn-sm btn-primary ml10"
+                        ng-show="!dp.vp && ( (order.st == ORDER.PENDING && ( order.oty!=0  || order.atv ))) ||
+                        ((order.st == ORDER.BACKORDERED || order.st == ORDER.CONFIRMED) && order.atv)"
+                        ng-click="startEditMats()">{{resourceBundle['edit']}}
+                </button>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-sm-12">
+                <div ng-if="order.its.length == 0 && !edit.mat" class="mt10">
+                    <p class="alert alert-warning">No materials available.</p>
+                </div>
+                <table class="table table-condensed table-hover table-logistimo" ng-if="order.its.length > 0 || edit.mat ">
+                    <tr>
+                        <th class="col-sm-0-1" ng-show="!edit.mat && isDef(vendor) && !dp.vp && order.atv && showStock && !generalconfig.dcs"><input type="checkbox" ng-change="selectAll(selAll)" ng-model="selAll" class="ng-pristine ng-valid"></th>
+                        <th class="col-sm-2">{{resourceBundle['material']}}</th>
+                        <th class="text-center col-sm-2">{{resourceBundle['ordered']}}</th>
+                        <th class="text-center col-sm-2" ng-hide="!allocate || isUndef(vendor) || !showStock || !order.atvv">{{resourceBundle['allocated']}}</th>
+                        <th class="text-center" ng-hide="isUndef(vendor)" ng-class="{'col-sm-3':order.st == ORDER.COMPLETED || order.st == ORDER.FULFILLED}">{{resourceBundle['shipped']}}</th>
+                        <th class="text-center col-sm-3" ng-show="order.st == ORDER.FULFILLED">{{resourceBundle['fulfilled']}}</th>
+                        <th class="text-center" ng-hide="isUndef(vendor) || !showStock || !order.atvv">{{resourceBundle['yet.to.ship']}}</th>
+                        <th class="text-center" ng-hide="isUndef(vendor) || !showStock || !order.atvv || !edit.mat">{{resourceBundle['in.shipment']}}(s)</th>
+                        <th class="text-center" ng-hide="isUndef(vendor) || !showStock || !order.atvv || !edit.mat">{{resourceBundle['yet.to.createshipment']}}</th>
+                        <th ng-hide="oCfg.dop || isUndef(vendor)" class="text-center">{{resourceBundle['price']}}</th>
+                        <th ng-hide="oCfg.dop || isUndef(vendor)" class="text-center">{{resourceBundle['amount']}}</th>
+                        <th class="text-center" ng-hide="!showStock || !order.atvc">{{resourceBundle['material.stockonhand']}}
+                            <span class="litetext">{{order.enm | limitTo:17}}
+                                <span ng-show="order.enm.length > 17">...</span>
+                            </span>
+                        </th>
+                        <th ng-show="oCfg.agi && isDef(vendor) && showStock && order.atvv"class="text-center">{{resourceBundle['available.stock']}}
+                            <span class="litetext">{{order.vnm | limitTo:17}}
+                                <span ng-show="order.vnm.length > 17">...</span>
+                            </span>
+                        </th>
+                        <th ng-if="edit.mat"></th>
+                    </tr>
+                    <tbody ng-repeat="item in order.its" ng-controller="DemandItemController" data-ng-switch on="exRow[$index]">
+                    <tr>
+                        <td ng-show="!edit.mat && isDef(vendor) && !dp.vp && order.atv && showStock && !generalconfig.dcs">
+                            <input type="checkbox" checklist-model="sel.selectedRows" checklist-value="$index" id="item.id"
+                                   class="ng-scope ng-pristine ng-valid" ng-hide="item.q == item.isq">
+                        </td>
+                        <td class="col-sm-2">
+                            <a href="#/setup/materials/all/detail/{{item.id}}" target="_blank" class="alignBaseLine">{{item.nm}}</a>
+                        </td>
+                        <td class="text-center col-sm-2 pr30">
+                            <span ng-hide="edit.mat && order.alc"
+                                  ng-class="{'fc-color-red':(item.oq > 0 && item.q != item.oq && showStock) || (item.rq >=0 && item.oq != item.rq)}" class="col-sm-8 pr0 text-right">
+                                {{item.q}}
+                            </span>
+                            <span ng-if="!edit.mat && isDef(item.drsn)"
+                                  uib-tooltip-html="item.drsn"
+                                  class="col-sm-3 litetext glyphicons glyphicons-info-sign lnk"
+                                  tooltip-append-to-body="true">
+                            </span>
+                            <div ng-show="edit.mat && order.alc">
+                                <input ng-if="!item.isBn" class="form-control" type="text" only-digits ng-model="item.q"
+                                       ng-change="item.nrsn = isDef(item.nrsn)?item.nrsn:reasons[0]"
+                                       id="{{item.id}}{{$index}}"
+                                       ng-class="{'red-border':item.invalidPopup}"
+                                       uib-popover="{{item.popupMsg}}" popover-trigger="showpopup"
+                                       ng-focus="hidePop(item,$index)"
+                                       ng-blur="validate(item,$index,'a')" maxlength="12">
+                                <select class="form-control" ng-if="item.isBn" ng-model="item.q">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                </select>
+                                <div ng-show="order.atv && item.q != item.oq && item.oq != 0" class="mt5">
+                                    <span class="litetext pull-left" ng-class="{'required': oCfg.eqrm}">{{resourceBundle['reason']}}</span>
+                                    <select class="form-control"
+                                            ng-change="item.mrsn = ''"
+                                            ng-model="item.nrsn" ng-show="isDef(reasons)">
+                                        <option ng-repeat="reason in reasons" value="{{reason}}" ng-selected="item.nrsn == reason">{{reason|| resourceBundle['select'] + ' ' + resourceBundle['reason.lowercase'] }}</option>
+                                    </select>
+                                    <textarea type="text" class="form-control"  ng-show="isUndef(reasons) || item.nrsn.toLowerCase() == 'others'"
+                                              ng-model="item.mrsn" placeholder="{{resourceBundle['enterreason']}}" maxlength="160" style="margin-top: 4px;"></textarea>
+                                </div>
+                                <div ng-show="(item.added || !order.atv) && item.q != item.rq && item.rq != -1" class="mt5">
+                                    <span class="litetext pull-left" ng-class="{'required': oCfg.orrm}">{{resourceBundle['reason']}}</span>
+                                    <select class="form-control"
+                                            ng-change="item.mrsn=''"
+                                            ng-model="item.nrsn" ng-show="isDef(oReasons)">
+                                        <option ng-repeat="reason in oReasons" value="{{reason}}" ng-selected="item.nrsn == reason">{{reason|| resourceBundle['select'] + ' ' + resourceBundle['reason.lowercase'] }}</option>
+                                    </select>
+                                    <textarea type="text" class="form-control"  ng-show="isUndef(oReasons) || item.nrsn.toLowerCase() == 'others'"
+                                              ng-model="item.mrsn" placeholder="{{resourceBundle['enterreason']}}" maxlength="160" style="margin-top: 4px;"></textarea>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center col-sm-2" ng-hide="!allocate || isUndef(vendor) || !showStock || !order.atvv">
+                            <div ng-hide="edit.mat" class="col-sm-12 pr30">
+                                <span class="col-sm-9 ng-binding text-right">{{item.astk}}</span>
+                                <span ng-show="item.isBa && item.astk > 0" class="col-sm-3 pl0 pr30 glyphicons glyphicons-list-alt" style="vertical-align:middle;" ng-click="toggleBatch('sBDetail',$index)"></span>
+                                <span ng-show="!edit.mat && isDef(item.mst) && item.astk > 0 && !item.isBa" class="litetext col-sm-9 text-right">{{item.mst}}</span>
+                            </div>
+                            <div ng-show="item.sBDetail || edit.mat">
+                                <div ng-switch on="item.isBa">
+                                    <div ng-switch-when="true">
+                                        <table class="table table-bordered table-order-batch" ng-show="item.bts" style="margin-left: auto; margin-right: auto;">
+                                            <thead>
+                                            <tr style="font-size: x-small;" id="at{{item.id}}{{$index}}" uib-popover="{{item.aPopupMsg}}" popover-trigger="showpopup">
+                                                <th class=" text-center">{{resourceBundle['batch']}}</th>
+                                                <th class=" text-center">{{resourceBundle['expiry']}}</th>
+                                                <th class=" text-center">{{resourceBundle['quantity']}}</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr style="font-size: xx-small;" ng-repeat="bi in item.bts" ng-hide="isUndef(bi.q) || bi.q == 0">
+                                                <td class=" text-center">{{bi.id}}</td>
+                                                <td class=" text-center">{{bi.e}}</td>
+                                                <td class=" text-center">{{bi.q}}
+                                                   <span ng-show="isDef(bi.mst)" class="litetext small-font">{{bi.mst}}</span>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="edit.mat && order.atv">
+                                <a ng-disabled="(item.atpstk == 0 && item.astk == 0) || item.q == item.sq" ng-show="item.isBa" ng-click="select($index,'show');hidePop(item,$index,true,true)" class="btn btn-sm btn-primary">{{resourceBundle['allocate.batch']}}</a>
+                                <input ng-if="!item.isBa" class="form-control" type="text" only-digits ng-model="item.nastk"
+                                       id="a{{item.id}}{{$index}}"
+                                       ng-disabled="(item.atpstk == 0 && item.astk == 0) || item.q == item.sq"
+                                       ng-class="{'red-border':item.ainvalidPopup}"
+                                       uib-popover="{{item.aPopupMsg}}" popover-trigger="showpopup"
+                                       ng-focus="hidePop(item,$index,true)"
+                                       ng-blur="validate(item,$index,'a',true)" maxlength="12">
+                                <div ng-show="!item.isBa && item.nastk > 0" class="mt5">
+                                    <span class="litetext float-left" ng-class="{'required' : transConfig.ism}" ng-show="(!item.tm && isDef(matstatus)) || (item.tm && isDef(tempmatstatus))">{{resourceBundle['inventory.material.status']}}</span>
+                                    <select ng-show="isDef(matstatus) && !item.tm" ng-model="item.mst" class="form-control"
+                                            ng-class="{'red-border': item.sinvalidPopup}"
+                                            uib-popover="{{item.sPopupMsg}}"
+                                            ng-blur="item.isVisitedStatus = true; validateStatus(item,$index,'cm')"
+                                            ng-focus="hidePop(item,$index,true,false,'cm')"
+                                            id="cm{{item.id}}{{$index}}"
+                                            popover-trigger="showpopup">
+                                        <option ng-repeat="status in matstatus" value="{{status}}"
+                                                ng-selected="item.mst == status">{{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                                        </option>
+                                    </select>
+                                    <select class="form-control" ng-model="item.mst" ng-show="isDef(tempmatstatus) && item.tm"
+                                            ng-class="{'red-border': item.sinvalidPopup}"
+                                            uib-popover="{{item.sPopupMsg}}"
+                                            ng-blur="item.isVisitedStatus = true; validateStatus(item,$index,'cmt')"
+                                            ng-focus="hidePop(item,$index,true,false,'cmt')"
+                                            id="cmt{{item.id}}{{$index}}"
+                                            popover-trigger="showpopup">
+                                        <option ng-repeat="status in tempmatstatus" value="{{status}}"
+                                                ng-selected="item.mst == status">{{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center pr30" ng-hide="isUndef(vendor)">
+                            <span ng-class="{'fc-color-red': !showStock && item.oq != item.sq}" class="col-sm-8 text-right">
+                                {{item.sq}}
+                            </span>
+                            <span ng-if="!showStock && isDef(item.osdrsn)" uib-tooltip-html="item.osdrsn"
+                                  class="litetext glyphicons glyphicons-info-sign lnk col-sm-1 pl0 pr0"
+                                  tooltip-append-to-body="true">
+                            </span>
+                            <span ng-if="allocate && (order.st == ORDER.COMPLETED || order.st == ORDER.FULFILLED)" class="col-sm-2 pr0 pl0 text-left">
+                                <span ng-show="item.isBa && item.sq > 0"
+                                      class="glyphicons glyphicons-list-alt"
+                                      style="vertical-align:middle;"
+                                      ng-click="toggleBatch('sBDetail',$index)">
+                                </span>
+                            </span>
+                            <span ng-if="allocate && (order.st == ORDER.COMPLETED || order.st == ORDER.FULFILLED)">
+                                <div ng-show="item.sBDetail || edit.mat">
+                                    <div ng-switch on="item.isBa">
+                                        <div ng-switch-when="true">
+                                            <table class="table table-bordered table-order-batch" ng-show="item.bts" style="margin-left: auto; margin-right: auto;">
+                                                <thead>
+                                                <tr style="font-size: x-small;">
+                                                    <th class=" text-center">{{resourceBundle['batch']}}</th>
+                                                    <th class=" text-center">{{resourceBundle['expiry']}}</th>
+                                                    <th class=" text-center">{{resourceBundle['quantity']}}</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr style="font-size: xx-small;" ng-repeat="bi in item.bts" ng-hide="isUndef(bi.q) || bi.q == 0">
+                                                    <td class=" text-center">{{bi.id}}</td>
+                                                    <td class=" text-center">{{bi.e}}</td>
+                                                    <td class=" text-center">{{bi.q}}
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </span>
+                        </td>
+                        <td class="text-center pr30" ng-show="order.st == ORDER.FULFILLED">
+                            <span ng-class="{'fc-color-red':isDef(item.isDisc)}" class="col-sm-8 text-right">{{item.fq}}</span>
+                            <span ng-if="allocate">
+                                <span ng-if="!item.isBa && isDef(item.fdrsn)"
+                                      uib-tooltip-html="item.fdrsn"
+                                      class="litetext glyphicons glyphicons-info-sign lnk col-sm-1 pl0 pr0"
+                                      tooltip-append-to-body="true">
+                                </span>
+                            </span>
+                            <span ng-show="item.isBa && item.fq > 0"
+                                  class="glyphicons glyphicons-list-alt col-sm-2 pl0  pr0 text-left"
+                                  style="vertical-align:middle;"
+                                  ng-click="toggleBatch('fBDetail',$index)">
+                            </span>
+                            <div ng-if="allocate && (item.fBDetail || edit.mat)">
+                                <div ng-switch on="item.isBa">
+                                    <div ng-switch-when="true">
+                                        <table class="table table-bordered table-order-batch" ng-show="item.bts" style="margin-left: auto; margin-right: auto;">
+                                            <thead>
+                                            <tr style="font-size: x-small;">
+                                                <th class=" text-center">{{resourceBundle['batch']}}</th>
+                                                <th class=" text-center">{{resourceBundle['expiry']}}</th>
+                                                <th class=" text-center">{{resourceBundle['quantity']}}</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr style="font-size: xx-small;" ng-repeat="bi in item.bts"
+                                                ng-hide="isUndef(bi.fq) || bi.fq == 0"    >
+                                                <td class=" text-center">{{bi.id}}</td>
+                                                <td class=" text-center">{{bi.e}}</td>
+                                                <td class=" text-center">
+                                                    <span ng-class="{'fc-color-red':isDef(bi.fdrsn)}">{{bi.fq}}</span>
+                                                        <span ng-if="isDef(bi.fdrsn)"
+                                                              uib-tooltip-html="bi.fdrsn"
+                                                              class="litetext glyphicons glyphicons-info-sign lnk"
+                                                              tooltip-append-to-body="true">
+                                                        </span>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <!--<td ng-show="order.st == ORDER.FULFILLED">
+                            <span ng-show="item.isBa && item.fq > 0"
+                                  class="ml10 glyphicons glyphicons-list-alt"
+                                  style="vertical-align:middle;"
+                                  ng-click="toggleBatch('fBDetail',$index)">
+                            </span>
+                        </td>-->
+                        <td class="text-center" ng-hide="isUndef(vendor) || !showStock || !order.atvv">{{item.yts}}</td>
+                        <td class="text-center" ng-hide="isUndef(vendor) || !showStock || !order.atvv || !edit.mat">{{item.isq}}</td>
+                        <td class="text-center" ng-hide="isUndef(vendor) || !showStock || !order.atvv || !edit.mat">{{item.ytcs}}</td>
+                        <td ng-hide="oCfg.dop || isUndef(vendor)" class="text-center">{{item.p}}</td>
+                        <td ng-hide="oCfg.dop || isUndef(vendor)" class="text-center">{{item.a}}</td>
+                        <td ng-class=" {'alert-danger' : item.event == 200,
+												 'alert-info alert-info-dark' : item.event == 202,
+												 'alert-warning alert-warning-dark' : item.event == 201} " class="text-center" ng-hide="!showStock || !order.atvc">{{item.stk}}
+                            <span class="litetext"><span uib-tooltip="(min,max)">({{item.min}},{{item.max}})</span></span>
+                            <span class="litetext" ng-show="item.csavibper > 0 && isDef(mmdt)">{{item.csavibper | roundNoTrailZeros:2}} {{mmdt}}</span>
+                        </td>
+                        <td ng-class=" {'alert-danger' : item.vevent == 200,
+												 'alert-info alert-info-dark' : item.vevent == 202,
+												 'alert-warning alert-warning-dark' : item.vevent == 201} " ng-show="oCfg.agi && isDef(vendor) && showStock && order.atvv" class="text-center">{{item.atpstk}}
+                            <span class="litetext" ng-show="isDef(item.vmax)"><span uib-tooltip="(min,max)">({{item.vmin}},{{item.vmax}})</span></span>
+                            <span class="litetext">{{resourceBundle['material.stockonhand']}}: {{item.vs}}</span>
+                            <span class="litetext" ng-show="isDef(item.itstk)">In-transit: {{item.itstk}}</span>
+                        </td>
+                        <td ng-if="edit.mat" class="text-center">
+                            <a ng-show="item.added" ng-click="removeRow($index)" uib-tooltip="{{resourceBundle['remove']}}" tooltip-append-to-body="true"><span
+                                class="glyphicons glyphicons-bin"></span></a>
+                        </td>
+                    </tr>
+                    <tr data-ng-switch-when="show">
+                        <td colspan=100% class="partialview">
+                            <div ng-init="view='views/transactions/batch-transaction.html';index = $index;
+                            huName = item.huName; huQty = item.huQty; mnm = item.nm; mid = item.id ;
+                            kid = order.vid ; bdata = item.bdata; obts = item.obts; exBatches = item.bts;
+                            allocq = isDef(item.bdata)?0: (isDef(item.astk)?item.astk: item.q-item.sq);
+                            material = item; msm = transConfig.ism;"
+                                 ng-include="'views/partial.html'"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tr ng-show="edit.mat && order.alc" ng-controller="orders.MaterialController">
+                        <td colspan="2">
+                            <div class="form-group has-feedback">
+                                <input type="text"
+                                    typeahead-template-url="views/materials/materialTemplate.html"
+                                    ng-model="mModel"
+                                    class="form-control"
+                                    placeholder="Type to Add Material"
+                                       uib-typeahead="item as item.mnm for item in getFilteredInvntry($viewValue)"
+                                    typeahead-editable="false"
+                                    typeahead-loading="loadingMat"
+                                    class="form-control" maxlength="50"/>
+                                <span ng-show="loadingMat" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                            </div>
+                        </td>
+                        <td colspan="100%"></td>
+                    </tr>
+                </table>
+                <div ng-show="edit.mat" class="col-sm-12">
+                    <div class="pull-right">
+                        <button class="btn btn-sm btn-primary" ng-disabled="saveDisable" ng-click="saveMaterials()">
+                            {{resourceBundle['save']}}
+                        </button>
+                        <button class="btn btn-sm btn-default" ng-click="cancelEditMats()">
+                            {{resourceBundle['cancel']}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

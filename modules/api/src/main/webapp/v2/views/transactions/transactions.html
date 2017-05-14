@@ -1,0 +1,51 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController"
+	ng-init="init('inventory.transactions')">
+	<ul class="nav nav-tabs subnav-tabs">
+		<li ng-class="{active: subview == 'view' }"><a
+			href="#/inventory/transactions/">{{resourceBundle.transactions}}</a></li>
+		<li ng-hide="dp.vp" ng-class="{active: subview == 'add' }"><a
+			href="#/inventory/transactions/add/">{{resourceBundle['trans.create']}}
+				</a></li>
+		<li  ng-hide="dp.vp" ng-class="{active: subview == 'upload' }"><a
+			href="#/inventory/transactions/upload/">{{resourceBundle['bulkupload.uploadinbulk']}}</a></li>
+		<li ng-controller="CheckUploadController" ng-show="manualUpload" ng-class="{active: subview == 'viewupload' }"><a
+			href="#/inventory/transactions/viewupload/">{{resourceBundle['manualtransactions.uploadeddata']}}</a></li>
+	</ul>
+	<div ng-switch="subview">
+		<div class="tab-pane" ng-switch-when="view">
+			<div ng-include="'views/transactions/transactions-list.html'"></div>
+		</div>
+		<div  ng-hide="dp.vp" class="tab-pane" ng-switch-when="add">
+			<div ng-include="'views/transactions/new-transaction.html'"></div>
+		</div>
+		<div  ng-hide="dp.vp" class="tab-pane" ng-switch-when="upload">
+			<div ng-init="uploadType='transactions'" ng-include="'views/bulkupload.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="viewupload">
+			<div ng-include="'views/transactions/viewupload.html'"></div>
+		</div>
+	</div>
+</div>

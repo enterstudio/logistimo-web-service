@@ -1,0 +1,128 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="ViewBulkUploadController">
+        <div class="filter-box form-group">
+            <div ng-include="'views/common/reset-filters.html'"/>
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['kiosk']}}</span>
+                    <entity-select ent-model="entity" classes="form-control"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle.kiosks}}">
+                    </entity-select>
+                </div>
+
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.from}}</span>
+                    <date-picker date-model="from" place-holder="From"></date-picker>
+
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.to}}</span>
+                    <date-picker date-model="to" place-holder="To"></date-picker>
+                </div>
+            </div>
+        </div>
+        <div class="row action-bar">
+            <div class="col-sm-12 noLRpad">
+                <div class="pull-right">
+                    <export-data mail-id="mailId" export-type="manualtransactions" entity-id="entity.id" rows="numFound"></export-data>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-show="filtered.length > 0">
+            <div class="col-sm-12 pt10">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x">
+        <table class="table table-condensed table-hover table-logistimo">
+            <tbody>
+            <tr class="small">
+                <th>{{resourceBundle['serialnum']}}</th>
+                <th>{{resourceBundle['material']}}</th>
+                <th>{{resourceBundle['kiosk']}}</th>
+                <th>{{resourceBundle['openingstock']}}</th>
+                <th>{{resourceBundle['transactions.receipt.upper']}} {{resourceBundle['quantity']}}</th>
+                <th>{{resourceBundle['transactions.issue.upper']}} {{resourceBundle['quantity']}}</th>
+                <th>{{resourceBundle['transactions.wastage.upper']}} {{resourceBundle['quantity']}}</th>
+                <th>{{resourceBundle['closingstock']}}</th>
+                <th>{{resourceBundle['stockout']}} {{resourceBundle['duration']}} {{resourceBundle['days']}}</th>
+                <!--<th>{{resourceBundle['numberofstockouts']}}</th>-->
+                <th>{{resourceBundle['manual']}} {{resourceBundle['consumption']}}</th>
+                <th>{{resourceBundle['computed']}} {{resourceBundle['consumption']}}</th>
+                <th>{{resourceBundle['ordered']}} {{resourceBundle['quantity']}}</th>
+                <th>{{resourceBundle['fulfilled']}} {{resourceBundle['quantity']}}</th>
+                <th>{{resourceBundle['tags']}}</th>
+                <!--<th>{{resourceBundle['vendor']}}</th>-->
+                <th>{{resourceBundle['reportingperiod']}}</th>
+                <th>{{resourceBundle['manualtransactions.uploadedby']}}</th>
+                <th>{{resourceBundle['manualtransactions.uploadtime']}}</th>
+            </tr>
+            </tbody>
+            <tbody ng-repeat="item in filtered">
+            <tr class="small">
+                <td>{{offset*1 + $index*1 + 1}}</td>
+                <td>{{item.mnm}}</td>
+                <td>{{item.enm}}</td>
+                <td>{{item.ost}}</td>
+                <td>{{item.rQty}}</td>
+                <td>{{item.iQty}}</td>
+                <td>{{item.dQty}}</td>
+                <td>{{item.cst}}</td>
+                <td>{{item.stodur}}</td>
+                <!--<td>{{item.noSto}}</td>-->
+                <td><font color="{{item.mcrc}}">{{item.mcr}}</font></td>
+                <td>{{item.ccr}}</td>
+                <td><font color="{{item.moqc}}">{{item.moq}}</font></td>
+                <td>{{item.coq}}</td>
+                <td>
+                    <div ng-logi-tags tgs="item.tag"></div>
+                </td>
+                <!--<td>{{item.ven}}</td>-->
+                <td>{{item.repPer}}</td>
+                <td>{{item.upBy}}</td>
+                <td>{{item.upTm}}</td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning" ng-hide="filtered.length > 0">
+                    {{resourceBundle['manualtransactions.none']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

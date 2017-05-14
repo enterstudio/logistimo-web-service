@@ -1,0 +1,60 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<table
+	class="table table-condensed table-hover table-striped table-logistimo" id="fixTable">
+	<thead>
+		<tr>
+			<th></th>
+			<th><input type="checkbox"  ng-change="selectAll(selAll)" ng-model='$parent.selAll'></th>
+			<th>{{resourceBundle.serialnum}}</th>
+			<th>{{resourceBundle.material}}</th>
+			<th>{{resourceBundle.description}}</th>
+			<th>{{resourceBundle.tags}}</th>
+			<th>{{resourceBundle['material.retailerprice']}}<span ng-show="isDef(defaultCur)"> ({{defaultCur}})</span> </th>
+			<th>{{resourceBundle['material.msrp']}}<span ng-show="isDef(defaultCur)"> ({{defaultCur}})</span></th>
+			<th>{{resourceBundle['batch']}}</th>
+			<th>{{resourceBundle['lastupdated']}}</th>
+			<th></th>
+		</tr>
+        </thead>
+    <tbody>
+		<tr
+			ng-repeat="item in $parent.$parent.filtered = materials">
+			<td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+			<td><input ng-if="currentDomain == item.sdid" type="checkbox" ng-model="item.selected"></td>
+			<td class="text-center">{{item.sno}}</td>
+			<td class="word-break"><a href="#/setup/materials/all/detail/{{item.mId}}">{{item.mnm}}</a></td>
+			<td class="word-break">{{item.dsc | limitTo:40}}<span ng-if="item.dsc.length > 40">...</span></td>
+			<td><div ng-logi-tags tgs="item.tgs"></div></td>
+			<td class="text-center">{{item.rp}}</td>
+			<td class="text-center">{{item.msrp}}</td>
+			<td class="capbold">{{item.b}}</td>
+			<td class="text">
+				<a href="#setup/users/all/details?userId={{item.ludBy}}" target="_blank">{{item.ludByn}}</a>
+				<span class="litetext">{{item.t}}</span>
+			</td>
+			<td><a ng-show="currentDomain == item.dId && (iSU || dp.me)" ng-href="#/setup/materials/all/edit?mid={{item.mId}}" uib-tooltip="{{resourceBundle['edit']}}"><span class="glyphicons glyphicons-edit tglyph"></span></a></td>
+		</tr>
+	</tbody>
+</table>

@@ -1,0 +1,208 @@
+<configurations>
+    <configuration name="DeleteAllEntities">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.TableDropper</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional"></value>
+        </property>
+        <!-- Pass in the domain ID to specify domain-specific removing of entities -->
+        <property>
+            <name human="Domain ID">mapreduce.mapper.counter.domainid</name>
+            <value template="optional"></value>
+        </property>
+    </configuration>
+    <configuration name="StockEventCleanser">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.StockEventCleanser</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">InvntryEvntLog</value>
+        </property>
+    </configuration>
+    <configuration name="Optimizer">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.Optimizer</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">Domain</value>
+        </property>
+    </configuration>
+    <configuration name="BulkImporter">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.BulkImportMapper</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.BlobstoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Blob Keys to Map Over">mapreduce.mapper.inputformat.blobstoreinputformat.blobkeys</name>
+            <value template="optional">blobkeyhere</value>
+        </property>
+        <property>
+            <name human="User ID">userid</name>
+            <value template="optional"></value>
+        </property>
+        <property>
+            <name human="Domain ID">domainid</name>
+            <value template="optional"></value>
+        </property>
+        <property>
+            <name human="Type">type</name>
+            <value template="optional"></value>
+        </property>
+        <property>
+            <name human="Donecallback">mapreduce.appengine.donecallback.url</name>
+            <value template="optional">/task/upload</value>
+        </property>
+        <property>
+            <name human="Number of shards to use in parallel">mapreduce.mapper.shardcount</name>
+            <value template="optional">8</value>
+        </property>
+        <property>
+            <name human="Number of entities per second by all mappers">mapreduce.mapper.inputprocessingrate</name>
+            <value template="optional">100</value>
+        </property>
+    </configuration>
+    <configuration name="ScheduleTransactionDataExport">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.DataExportScheduler</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">Domain</value>
+        </property>
+    </configuration>
+    <configuration name="ScheduleCustomReportsExport">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.CustomReportsExportScheduler</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">Domain</value>
+        </property>
+    </configuration>
+    <configuration name="DailyEventsCreator">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.DailyEventsCreator</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">Domain</value>
+        </property>
+    </configuration>
+    <configuration name="BatchEventNotifier">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.BatchEventNotifier</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">Domain</value>
+        </property>
+    </configuration>
+    <configuration name="SimplySaveEntity">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.mappers.SimplySaveEntity</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">BBoard</value>
+        </property>
+    </configuration>
+	<!-- Migration of domain Ids to lists -->
+	<configuration name="DomainIdListMigrator">
+  		<property>
+    	<name>mapreduce.map.class</name>
+    	<!--  Set this to be your Mapper class  -->
+    	<value>com.logistimo.mappers.migrators.DomainIdListMigrator</value>
+  		</property>
+  		<!--  This is a default tool that lets us iterate over datastore entities -->
+  		<property>
+  		  <name>mapreduce.inputformat.class</name>
+   		  <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+  		</property>
+  		<property>
+    	  <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+      	  <value template="optional">All</value>
+  		</property>
+	</configuration>
+    <configuration name="EntityHierarchy">
+        <property>
+            <name>mapreduce.map.class</name>
+            <!--  Set this to be your Mapper class  -->
+            <value>com.logistimo.api.mappers.EntityHierarchy</value>
+        </property>
+        <!--  This is a default tool that lets us iterate over datastore entities -->
+        <property>
+            <name>mapreduce.inputformat.class</name>
+            <value>com.google.appengine.tools.mapreduce.DatastoreInputFormat</value>
+        </property>
+        <property>
+            <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind</name>
+            <value template="optional">Domain</value>
+        </property>
+    </configuration>
+</configurations>

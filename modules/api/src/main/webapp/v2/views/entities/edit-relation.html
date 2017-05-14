@@ -1,0 +1,167 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+<div class="bizinfo bizinfo-last">
+<div ng-controller="EntityRelationEditController" ng-show="allRTags != ''">
+<form class="form-horizontal" role="form" name="editRelationForm" novalidate>
+    <div class="bgr">
+        <h5>{{resourceBundle['edit']}} {{resourceBundle['routesof']}} {{entityName}}</h5>
+        <hr/>
+
+        <div class="row" style="padding-bottom: 15px">
+            <div class="col-sm-9">
+                <ul class="nav nav-tabs">
+                    <li ng-if="!(iMan && !cnff.enableCs)" ng-class="{active: linkType == 'c'}"><a ng-click="fetchLinks('c')" class="clickable">{{resourceBundle['customers']}}
+                        <span class="badge">{{customerCount}}</span></a></li>
+                    <li ng-if="!(iMan && !cnff.enableVs)" ng-class="{active: linkType == 'v'}"><a ng-click="fetchLinks('v')" class="clickable">{{resourceBundle['vendors']}}
+                        <span class="badge">{{vendorCount}}</span></a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="pull-right">
+                            <button ng-disabled="!routeUpdated || dp.vp" type="button" ng-click="updateEntityOrder()" class="btn btn-primary btn">{{resourceBundle['routing.save']}}</button>
+                            <a href="#/setup/entities/detail/{{entityId}}/relationships/" style="color: #000000;" class="btn btn-default" >{{resourceBundle['back']}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="padding-bottom: 10px;">
+            <div class="col-sm-12">
+                <div class="col-sm-4 nopad">
+                    <div>
+                        <ul class="nav nav-tabs-primary">
+                            <li class="active">
+                                <a class="clickable">{{resourceBundle['untagged']}} <span class="badge">{{countTags['--notag--'] || 0}}</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="primary-tabs-div-border">
+                        <table class="table table-mat table-logistimo table-nobot-mar">
+                            <thead>
+                            <tr>
+                                <th class="col-sm-1 text-center">
+                                    <input type="checkbox" ng-change="selectAll(LeftSelAll,'l')" ng-model='LeftSelAll'/>
+                                </th>
+                                <th class="col-sm-5">{{resourceBundle['kiosk.name']}}</th>
+                                <th class="col-sm-6">{{resourceBundle['location']}}</th>
+                            </tr>
+                            </thead>
+                            <tbody style="height: 300px;">
+                            <tr class="clickable" ng-click="tagEntity($index)" ng-repeat="ent in leftFiltered = (rData | filter:{rt:'--notag--'})">
+                                <td class="col-sm-1 text-center"><input type="checkbox" ng-model="ent.selected"/></td>
+                                <td class="col-sm-5">{{ent.nm}}</td>
+                                <td class="col-sm-6">{{ent.loc}}</td>
+                            </tr>
+                            <tr ng-show="leftFiltered.length === 0">
+                                <td colspan="100%" width="100%">
+                                    <p class="alert alert-warning">{{resourceBundle['entities.notavailable']}}</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-sm-1 nopad text-center" style="padding-top:15%;">
+                    <span ng-click="moveRight()" class="clickable glyphicons glyphicons-arrow-right editBtn large"></span><br/><br/><br/>
+                    <span ng-click="moveLeft()" class="clickable glyphicons glyphicons-arrow-left editBtn large"></span>
+                </div>
+
+                <div class="col-sm-7 nopad">
+                    <div>
+                        <ul class="nav nav-tabs-primary">
+                            <li ng-class="{active: tag == rTag}" ng-repeat="rTag in allRTags">
+                                <a ng-click="setTag(rTag)" class="clickable">{{rTag}} <span class="badge">{{countTags[rTag] || 0}}</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="primary-tabs-div-border">
+                        <table class="table table-mat table-logistimo table-nobot-mar">
+                            <thead>
+                            <tr>
+                                <th class="col-sm-1 text-center">
+                                    <input type="checkbox" ng-change="selectAll(RightSelAll,'r')" ng-model='RightSelAll'/>
+                                </th>
+                                <th class="col-sm-4">{{resourceBundle['kiosk.name']}}</th>
+                                <th class="col-sm-4">{{resourceBundle['location']}}</th>
+                                <th class="col-sm-1 text-center">{{resourceBundle['move']}}</th>
+                                <th class="col-sm-2 text-center">{{resourceBundle['reorder']}}</th>
+                            </tr>
+                            </thead>
+                            <tbody style="height: 300px;">
+                            <tr ng-class="{'greenbg':!ent.rhc && ent.hc, 'reorderbg' : ent.rhc}" class="clickable" ng-click="untagEntity($index)" ng-repeat="ent in rightFiltered = (rData | filter:{rt:tag} | orderBy:'osno')">
+                                <td class="col-sm-1 text-center"><input type="checkbox" ng-model="ent.selected"/></td>
+                                <td class="col-sm-4">{{ent.nm}}</td>
+                                <td class="col-sm-4">{{ent.loc}}</td>
+                                <td class="col-sm-1 text-center">
+                                    <span class="clickable glyphicons glyphicons-arrow-up"
+                                          ng-click="moveUp($index)"></span>
+                                    <span class="clickable glyphicons glyphicons-arrow-down"
+                                          ng-click="moveDown($index)"></span>
+                                </td>
+                                <td class="col-sm-2">
+                                    <span editable-box ng-show="!ent.edit" ng-click="setPosition($index)" class="fullSpan">
+                                        {{ent.osno}}
+                                    </span>
+                                    <div ng-show="ent.edit">
+                                        <editable-text edit-model="ent.esno"
+                                                       on-ok="updatePosition($index)"
+                                                       on-cancel="cancelPosition($index)"
+                                                       set-focus="{{ent.edit}}">
+                                        </editable-text>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr ng-show="rightFiltered.length === 0">
+                                <td colspan="100%" width="100%">
+                                    <p class="alert alert-warning">{{resourceBundle['entities.notavailable']}}</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="pull-right">
+                            <button ng-disabled="!routeUpdated || dp.vp" type="button" ng-click="updateEntityOrder()" class="btn btn-primary">{{resourceBundle['routing.save']}}</button>
+                            <a href="#/setup/entities/detail/{{entityId}}/relationships/" style="color: #000000;" class="btn btn-default" >{{resourceBundle['back']}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+</div>
+</div>

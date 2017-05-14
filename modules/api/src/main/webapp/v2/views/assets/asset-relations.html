@@ -1,0 +1,123 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="AssetRelationsController">
+    <div class="pane">
+        <form class="form-horizontal" role="form" name="addAssetRelationForm" novalidate ng-hide="loadingAr">
+            <div class="row action-bar" ng-show="(iSU || dp.ae) && currentDomain == assetDetails.sdid && !edit && isDef(currentAsset) && currentAsset.at == 2 && !iMan">
+                <button type="button" ng-click="editRelations()"
+                        class="btn btn-sm btn-primary">{{resourceBundle['edit']}}
+                </button>
+                <button type="button" ng-click="deleteRelations()"
+                        class="btn btn-sm btn-default">{{resourceBundle['remove']}}
+                </button>
+            </div>
+            <div class="row mg-hori-zero">
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['relationships']}}
+                    </div>
+                    <div class="row" ng-show="edit && isDef(currentAsset) && currentAsset.at == 2 && !iMan">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['asset.related']}}</label>
+                                <div class="col-sm-8">
+                                    <div class="form-group has-feedback">
+                                        <input name="relAssetId" type="text" ng-model="arModel.relAsset"
+                                               typeahead-template-url="assetTemplate"
+                                               autocomplete="off"
+                                               placeholder="{{resourceBundle['asset.serial.number']}}"
+                                               ng-blur="uVisited.relAssetId = true"
+                                               ng-class="{'c-visited' : uVisited.relAssetId}"
+                                               typeahead-wait-ms="300"
+                                               ng-class="{'c-visited' : submitted}"
+                                               typeahead-on-select="updateAssetRelations($item)"
+                                               uib-typeahead="item as item.dId for item in getFilteredAssets($viewValue)"
+                                               class="form-control" typeahead-editable="false"
+                                               typeahead-loading="loadingAsset"
+                                               required
+                                               maxlength="50" />
+                                        <span ng-show="loadingAsset" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" ng-if="noResults">
+                            <div class="has-error">
+                                <span class="help-block">{{noResultMessage}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="edit && isDef(currentAsset) && currentAsset.at == 2 && !iMan">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['asset.default.config']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input ng-model="arModel.useDefault" type="checkbox" ng-disabled="isUndef(arModel.relAsset)"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="isDef(assetRelations) && getObjectLength(assetRelations) > 0">
+                        <div class="col-sm-12">
+                            <table class="table table-logistimo">
+                                <tr>
+                                    <th>{{resourceBundle['serialnum']}}</th>
+                                    <th>{{resourceBundle['monitoringpoint']}}</th>
+                                    <th>{{resourceBundle['sensor']}}</th>
+                                    <th>{{resourceBundle['asset.related']}}</th>
+                                </tr>
+                                <tr ng-repeat="(key, value) in assetRelations">
+                                    <td>{{$index + 1}}</td>
+                                    <td>{{getMonitoringPointName(value.mpId)}}</td>
+                                    <td ng-hide="edit && !arModel.useDefault">{{value.sId}}</td>
+                                    <td ng-show="edit && !arModel.useDefault && isDef(currentAsset) && currentAsset.at == 2 && !iMan">
+                                        <select ng-model="value.sId" id="asset-model" class="form-control">
+                                            <option value="">-- {{resourceBundle['select'] | lowercase}} {{resourceBundle['sensor'] | lowercase}} --</option>
+                                            <option ng-repeat="sensor in sns" value="{{sensor.name}}" ng-selected="value.sId == sensor.name">{{sensor.name}}</option>
+                                        </select>
+                                    </td>
+                                    <td ng-show="isDef(currentAsset) && currentAsset.at == 2"><a href="#/assets/detail/{{value.vId}}/{{encodeURIParam(value.dId)}}" target="_blank">{{value.dId}} ({{assetVendorMapping[value.vId]}})</a></td>
+                                    <td ng-show="isDef(currentAsset) && currentAsset.at == 1"><a href="#/assets/detail/{{relatedAsset.vId}}/{{encodeURIParam(relatedAsset.dId)}}" target="_blank">{{relatedAsset.dId}} ({{assetVendorMapping[relatedAsset.vId]}})</a></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="(isUnDef(assetRelations) || getObjectLength(assetRelations) == 0) && ((isDef(currentAsset) && currentAsset.at == 1) || iMan)">
+                        <div class="col-sm-12 text-center">
+                            <div class="alert alert-warning">
+                                {{resourceBundle['no.data.available']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10" ng-if="(iSU || dp.ae) && edit && currentDomain == assetDetails.sdid && isDef(currentAsset) && currentAsset.at == 2 && !iMan">
+                        <div class="col-sm-6  ml5">
+                            <button ng-click="createOrEditAssetRelations()" class="btn btn-primary" ng-disabled="addAssetRelationForm.$invalid">{{resourceBundle['save']}}</button>
+                            <button ng-click="cancelEdit()" ng-show="isDef(assetRelations) && getObjectLength(assetRelations) > 0" class="btn btn-default">{{resourceBundle['cancel']}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

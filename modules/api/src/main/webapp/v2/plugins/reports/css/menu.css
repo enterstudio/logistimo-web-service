@@ -1,0 +1,187 @@
+/*
+ * Copyright © 2017 Logistimo.
+ *
+ * This file is part of Logistimo.
+ *
+ * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+ * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * You can be released from the requirements of the license by purchasing a commercial license. To know more about
+ * the commercial license, please contact us at opensource@logistimo.com
+ */
+
+.report-pane {
+    position: absolute;
+    margin-top: -5px;
+    margin-bottom: 5px;
+    top: 10px;
+    bottom: 0;
+    right: 15px;
+    left: 15px;
+}
+
+.report-menu {
+    position: absolute;
+    width: 100%;
+    margin-left: 0;
+    z-index:4;
+    overflow:visible;
+    background-color: #FFF;
+    border-bottom:1px #ddd solid;
+    -webkit-transition: all 0.25s ease-out;
+    -o-transition: all 0.25s ease-out;
+    transition: all 0.25s ease-out;
+}
+
+.report-menu>.row {
+    overflow-y: hidden;
+    max-height: 1000px;
+    margin-bottom: 5px;
+    -webkit-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+.report-menu.hide-menu>.row:first-child {
+    margin-bottom: 0;
+}
+
+.report-menu>.row:first-child {
+    margin: 0 0 10px;
+}
+
+.report-menu .row:not(:first-child) {
+    margin:0;
+}
+
+.report-menu.hide-menu .row:not(:first-child) {
+    overflow-y: hidden;
+    max-height: 0;
+    margin-bottom: 0;
+}
+
+.reports-active-menu {
+    padding: 7px 7px 7px 15px;
+    color: #204d74;
+    font-size: medium;
+    cursor: pointer;
+}
+
+.reports-active-menu:hover {
+    color: #F56C64;
+}
+
+.report-menu .reports-active-menu span.glyphicons-chevron-up{
+    margin-top: 3px;
+    -webkit-transition: transform 0.25s;
+    -o-transition: transform 0.25s;
+    transition: transform 0.25s;
+}
+
+.report-menu.hide-menu .reports-active-menu span.glyphicons-chevron-up {
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.reports-heading {
+    padding: 7px;
+    font-size: large;
+    text-align: center;
+    color: #204d74;
+}
+
+.menu-close {
+    text-align: center;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.accordion {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /*background: #FFF;*/
+    -webkit-border-radius: 5px 0 0 5px;
+    -moz-border-radius: 5px 0 0 5px;
+    border-radius: 5px 0 0 5px;
+}
+
+.accordion .link {
+    cursor: default;
+    display: block;
+    padding: 10px 10px 10px 20px;
+    color: #204d74;
+    font-size: medium;
+    /*background-color: #EEEEEE;*/
+    border-top: 1px solid #AAA;
+    position: relative;
+    -webkit-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+.accordion li:first-child .link {
+    border-top: 0;
+}
+.accordion li:last-child {
+    padding-bottom: 10px;
+}
+
+.accordion li span {
+    position: absolute;
+    left: 12px;
+    color: #204d74;
+    -webkit-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    transition: all 0.4s ease;
+}
+
+/**
+ * Submenu
+ -----------------------------*/
+
+.accordion .submenu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    /*background: #f8f8f8;*/
+}
+
+.accordion .submenu a {
+    display: block;
+    text-decoration: none;
+    font-weight: 200;
+    font-family: sans-serif;
+    color: #000;
+    padding: 3px 5px 3px 20px;
+    -webkit-transition: color 0.25s ease, background 0.25s;
+    -o-transition: color 0.25s ease, background 0.25s;
+    transition: color 0.25s ease, background 0.25s;
+}
+
+.accordion .submenu a.current-report-menu {
+    font-weight: bold;
+    cursor: default;
+}
+
+.accordion .submenu a:hover {
+    color: #F56C64;
+}
+
+.report-canvas {
+    min-height: 600px;
+}

@@ -1,0 +1,213 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="TagsConfigurationController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="temperatureConfigForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading marginlr0">
+                            <h4>{{resourceBundle['tags']}} {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                            <span ng-show="tags.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{tags.lastUpdated}} {{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{tags.createdBy}}" target="_new">{{tags.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.tagsinfotitle']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext mb10">{{resourceBundle['config.tagsinfo']}}</span>
+                            <div class="form-group">
+                                <div class="col-sm-8">
+                                    <multi-select id="matTg" ng-model="mtags.mt" name="matTg"></multi-select>
+                                </div>
+                                <div class="col-sm-8 tg-enable">
+                                    <input type="checkbox" checked="true" class="tg-enable" ng-model="tags.emt"> {{resourceBundle['config.allowtagsmessage']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['kiosk']}} {{resourceBundle['tags.lower']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext mb10">{{resourceBundle['config.tagsinfo.entity']}}</span>
+                            <div class="form-group">
+                                <div class="col-sm-8">
+                                    <multi-select id="entTg" ng-model="mtags.et" name="entTg"></multi-select>
+                                </div>
+                                <div class="col-sm-8 tg-enable">
+                                    <input type="checkbox" checked="true" class="tg-enable" ng-model="tags.eet"> {{resourceBundle['config.allowtagsmessage']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr" ng-if="!isTempMonOnly">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['order']}} {{resourceBundle['tags.lower']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext mb10">{{resourceBundle['config.tagsinfo.order']}}</span>
+                            <div class="form-group">
+                                <div class="col-sm-8">
+                                    <multi-select id="ordTg" ng-model="mtags.ot" name="ordTg"></multi-select>
+                                </div>
+                                <div class="col-sm-8 tg-enable">
+                                    <input type="checkbox" checked="true" class="tg-enable" ng-model="tags.eot"> {{resourceBundle['config.allowtagsmessage']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr" ng-if="!isTempMonOnly">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.routetagsinfotitle']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext mb10">{{resourceBundle['config.routetagsinfo']}}</span>
+                            <div class="form-group">
+                                <div class="col-sm-8">
+                                    <multi-select id="rtTg" ng-model="mtags.rt" name="rtTg"></multi-select>
+                                </div>
+                                <div class="col-sm-8 tg-enable">
+                                    <h8>{{resourceBundle['config.routeactualinfo']}}</h8>
+                                    <input type="radio" ng-model="tags.en" value="orders"> {{resourceBundle['orders']}}
+                                    <input type="radio" ng-model="tags.en" value="inventory"> {{resourceBundle['inventory']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['user']}} {{resourceBundle['tags.lower']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext mb10">{{resourceBundle['config.tagsinfo.user']}}</span>
+                            <div class="form-group">
+                                <div class="col-sm-8">
+                                    <multi-select id="matTg" ng-model="mtags.ut" name="usrTg"></multi-select>
+                                </div>
+                                <div class="col-sm-8 tg-enable">
+                                    <input type="checkbox" checked="true" class="tg-enable" ng-model="tags.eut"> {{resourceBundle['config.allowtagsmessage']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['entity.tag.rank']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext mb10">{{resourceBundle['entity.tag.rank.info']}}</span>
+                            <div class="form-group">
+                                <div class="col-sm-6">
+                                    <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                        <tbody>
+                                        <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                            <th class="col-sm-2 text-center">{{resourceBundle['kiosk']}} {{resourceBundle['tags']}}</th>
+                                            <th class="col-sm-1 text-center">Rank</th>
+                                            <th class="col-sm-0-2 text-center"></th>
+                                        </tr>
+                                        </tbody>
+                                        <tbody>
+                                        <tr ng-repeat="itag in tags.etr" data-ng-switch on="exRow[$index]" ng-class="{'alert alert-info' : exRow[$index]}" >
+                                            <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                            <td>
+                                                <input ng-hide="tags.etr.length>$index+1" ng-model="itag.etg" type="text"
+                                                       autocomplete="off"
+                                                       typeahead-on-select="setEtg($item)"
+                                                       class="form-control" id="etg"
+                                                       placeholder="Enter the entity tag"
+                                                       typeahead-editable="false"
+                                                       uib-typeahead="item for item in eTags| filter:$viewValue |limitTo:8"
+                                                       class="form-control" maxlength="50"
+                                                       typeahead-append-to-body="true" />
+                                                <p ng-show="tags.etr.length>$index+1" class="temp">{{itag.etg}}</p>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control text-center" id="ernk" ng-model="itag.rnk"
+                                                       autocomplete="off" maxlength="100" only-digits>
+                                            </td>
+                                            <td class="text-center">
+                                                <a ng-show="(itag.length -1 !== $index)" href="" ng-click="deleteRow($index)">
+                                                    <span class="glyphicons glyphicons-bin temp"></span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-if="iSU || dp.ce">
+                    <div class="col-sm-12  ml5">
+                        <button type="button" ng-click="setTags()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,205 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="navbar-static-top whitebox">
+    <div class="logonavbar">
+        <div class="row">
+            <div class="col-sm-4">
+                <div ng-if="headerImage != undefined && headerImage != ''">
+                    <div class="imagewrapper">
+                        <div ng-bind-html="headerImage"></div>
+                    </div>
+                </div>
+                <div ng-if="headerImage == undefined || headerImage == ''">
+                    <img class="mainlogo" src="images/acquia_marina_logo.png">
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="float-right rPad5 userinfo">
+                    <span ng-if="iOCEnabled && !onlyNewUI && subview != 'manage' " class="userdomaininfo" ng-click="switchConsole()">{{resourceBundle['switch.console']}}</span>
+                    <!--<span ng-if="subview !='manage'" class="userdomaininfo"><a ng-href="#/setup/users/all/details?userId={{curUser}}">{{curUserName}}</a> {{resourceBundle['in']}} <b>{{domainName}}</b></span>-->
+                    <span ng-if="subview !='manage'" class="userdomaininfo"><b>{{domainName}}</b></span>
+                    <span class="userdomaininfo" ng-if="iSU && subview != 'manage'"><a href="#/manage/domains">{{resourceBundle['manage']}}</a></span>
+                    <span class="userdomaininfo" ng-if="iSU && subview == 'manage'"><a href="#/">{{resourceBundle['home']}}</a></span>
+                    <span ng-if="subview !='manage'" class="userdomaininfo br0" style="padding-right:0">
+                        <a class="dropdown-toggle clickable" data-toggle="dropdown">{{curUserName}} <span class="caret"></span></a>
+                        <ul class="dropdown-menu dropdown-menu-right" style="top:17px; right:25px;" role="menu">
+                            <li><a ng-href="#/setup/users/all/details?userId={{curUser}}"><span class="glyphicons glyphicons-user c-grey"></span>&nbsp;&nbsp;{{resourceBundle['myaccount']}}</a></li>
+                            <li ng-hide="iAU"><a href="#/exportstatus/exports/"><span class="glyphicons glyphicons-download-alt c-grey"></span>&nbsp;&nbsp;{{resourceBundle['myexports']}}</a></li>
+                            <li><a ng-click="logout()"><span class="glyphicons glyphicons-exit c-grey"></span>&nbsp;&nbsp;{{resourceBundle['signout']}}</a></li>
+                        </ul>
+                    </span>
+                    <span><a ng-show="subview == 'manage'" ng-click="logout()">{{resourceBundle['signout']}}</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="navbar navbar-default navbar-custom" role="navigation" ng-hide="subview == 'manage'">
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li ng-class="{active:subview == 'dashboard' }" ng-show="hasDashbaccess">
+                    <a class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.dashboard}}s
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/dashboard/">Overview</a></li>
+                        <li ng-if="hasDashbaccess && !tempOnlyAU"><a href="#/dashboard/inventory">Inventory</a></li>
+                        <li ng-if="hasDashbaccess && !tempOnlyAU && !hbUTag && (dashboardConfig.ape || dashboardConfig.ipe)"><a href="#/dashboard/activity">Activity</a></li>
+                        <li ng-if="hasDashbaccess && !tempOnlyAU && (dashboardConfig.ope || dashboardConfig.rpe)"><a href="#/dashboard/orders">Orders</a></li>
+                        <li ng-repeat="item in dashboards" ng-show="item.isConfd"><a href="#/dashboard/view/{{item.dbId}}">{{item.nm}}</a></li>
+                    </ul>
+                </li>
+                <li ng-if="ordersTabEnabled" ng-class="{active:subview == 'orders' }">
+                    <a class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.orders}}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li ng-if="!isDmdOnly && !vo"><a href="#/orders/">{{resourceBundle.orders}}</a></li>
+                        <li ng-if="!vt"><a href="#/orders/transfers/">
+                            <span ng-hide="transRelease">{{resourceBundle['transfers']}}</span>
+                            <span ng-show="transRelease">{{resourceBundle['releases']}}</span>
+                        </a></li>
+                        <li><a href="#/orders/shipment/">{{resourceBundle.shipments}}</a></li>
+                        <li><a href="#/orders/discrepancies/">{{resourceBundle.discrepancies}}</a></li>
+                        <li><a href="#/orders/demand/">{{resourceBundle.demand}}</a></li>
+                    </ul>
+                </li>
+                <li ng-if="invTabEnabled" ng-class="{active:subview == 'inventory' }">
+                    <a class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.inventory}}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/inventory/">{{resourceBundle.stock}}
+                            {{resourceBundle['views.lowercase']}}</a></li>
+                        <li><a href="#/inventory/abnormalstock/">{{resourceBundle.abnormal}} {{resourceBundle['stock.lowercase']}}</a></li>
+                        <li><a href="#/inventory/transactions/">{{resourceBundle.transactions}}</a></li>
+                    </ul>
+                </li>
+                <li ng-if="accountTabEnabled" ng-class="{active:subview == 'accounts' }">
+                    <a class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.accounts}}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/accounts/receivable/">{{resourceBundle.receivables}}</a></li>
+                        <li><a href="#/accounts/payable/">{{resourceBundle.payables}}</a></li>
+                    </ul>
+                </li>
+                <!--<li ng-if="repTabEnabled" ng-class="{active:subview == 'oldreports' }">
+                    <a class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.reports}}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/reports/inv/">{{resourceBundle['report.consumptiontrends']}}</a></li>
+                        <li ng-show="ordersTabEnabled"><a href="#/reports/ort/">{{resourceBundle['report.orderresponsetimes']}}</a></li>
+                        <li><a href="#/reports/rrt/">{{resourceBundle['report.replenishmentresponsetimes']}}</a></li>
+                        <li><a href="#/reports/tc/">{{resourceBundle['report.transactioncounts']}}</a></li>
+                        <li ng-hide = "hbUTag"><a href="#/reports/ua/">{{resourceBundle['report.useractivity']}}</a></li>
+                        <li ng-hide = "hbUTag"><a href="#/reports/ht">{{resourceBundle['domain.activity']}}</a></li>
+                        <li><a href="#/reports/cr/">{{resourceBundle['report.customreports']}}</a></li>
+                    </ul>
+                </li>-->
+                <li ng-if="repTabEnabled" ng-class="{active:subview == 'newreports' }">
+                    <a href="#/newreports">{{resourceBundle.reports}}</a>
+                </li>
+                <li ng-if="tempEnabled && (iSU || (iAdm && dp.av))" ng-class="{active:subview == 'assets' }">
+                    <a href="#/assets/all">{{resourceBundle['assets']}}</a>
+                </li>
+                <li ng-if="configTabEnabled && (iSU || dp.cv) " ng-class="{active:subview == 'configuration' }">
+                    <a class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.configuration}}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/configuration/general/">{{resourceBundle.general}}</a></li>
+                        <li ng-if="!isTempMonOnly"><a href="#/configuration/capabilities/">{{resourceBundle.capabilities}}</a>
+                        </li>
+                        <li ng-if="!isTempMonOnly"><a href="#/configuration/inventory/">{{resourceBundle.inventory}}</a>
+                        </li>
+                        <li ng-if="!isTempMonOnly"><a href="#/configuration/orders/">{{resourceBundle.orders}}</a></li>
+                        <li ng-show="isTempMonOnly"><a href="#/configuration/notifications/event/assets">{{resourceBundle.notifications}}</a></li>
+                        <li ng-hide="isTempMonOnly"><a href="#/configuration/notifications/">{{resourceBundle.notifications}}</a></li>
+                        <li><a href="#/configuration/tags">{{resourceBundle.tags}}</a></li>
+                        <li ng-if="!isTempMonOnly"><a
+                                href="#/configuration/accounting/">{{resourceBundle.accounting}}</a></li>
+                        <li ng-if="!isTempMonOnly"><a
+                                href="#/configuration/custom/">{{resourceBundle['report.customreports']}}</a></li>
+                        <li><a ng-show="iSU || (iAdm && dp.av)" href="#/configuration/asset/">{{resourceBundle['assets']}}</a></li>
+                        <li><a ng-hide="isTempMonOnly" href="#/configuration/dashboard/">{{resourceBundle['dashboard']}}</a></li>
+                        <li><a ng-if="hasChild && (iAdm || dp.ce)" href="#/configuration/options/">{{resourceBundle['configuration.options']}}</a></li>
+                    </ul>
+                </li>
+                <li ng-class="{active:subview == 'setup'}" ng-if="((iSU || dp.uv || dp.mv || dp.ev || dp.egv || dp.iv) && !tempOnlyAU) || (tempOnlyAU && tempEnabled)"><a
+                        class="dropdown-toggle clickable" data-toggle="dropdown">{{resourceBundle.setup}} <span
+                        class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li ng-show="iSU || dp.uv"><a href="#/setup/users/">{{resourceBundle.users}}</a></li>
+                        <li ng-show="iSU || (iAdm && dp.mv)"><a href="#/setup/materials/">{{resourceBundle.materials}}</a></li>
+                        <li ng-show="iSU || (iAdm && dp.mv)"><a href="#/setup/handlingunits/">Handling units</a></li>
+                        <li ng-show="iSU || dp.ev"><a href="#/setup/entities/">{{resourceBundle.kiosks}}</a></li>
+                        <li ng-show="iSU || dp.egv"><a href="#/setup/ent-grps/">{{resourceBundle['linked.domains.allow.entity.groups.management']}}</a></li>
+                        <li ng-show="!iMan && (iSU || dp.ia || dp.ie || dp.ir)"><a href="#/setup/inventory/">{{resourceBundle.inventory}}</a></li>
+                        <li ng-show="iAdm"><a href="#/setup/domains/">{{resourceBundle.domains}}</a></li>
+                        <li ng-show="tempEnabled && (iSU || (iAdm && dp.av))"><a href="#/setup/assets/">{{resourceBundle.assets}}</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div ng-if="accd" class="pull-right paddinglr10">
+                <div class="nav navbar-nav">
+                    <div class="search" style="left: 0px;">
+                        <domain-select is-super-user="iSU"></domain-select>
+                    </div>
+                </div>
+                <domain-tree></domain-tree>
+            </div>
+            <div class="share_box help">
+                <a href="/s/help/index.html" target="_blank" class="clickable pad3 db" title="Help"><span class="glyphicons glyphicons-info-sign qm"></span></a>
+            </div>
+            <div class="share_box shortcuts" ng-if="!iAU">
+                <div class="scmenu">
+                    <a href="" target="_blank" class="clickable pad3 db ok" title="Help"><span
+                            class="scmenu"><span
+                            class="glyphicons glyphicons-chevron-left qm"></span></span></a>
+                    <div class="show" >
+                        <div ng-include="'views/home/right-menu.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="navbar navbar-default navbar-custom" role="navigation" ng-show="subview == 'manage'">
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li ng-class="{active:subview =='manage'}"><a
+                        href="#/manage/domains">{{resourceBundle['domains']}}</a>
+                </li>
+                <li><a href="/s/admin/data.jsp">{{resourceBundle['manage.data']}}</a></li>
+                <li><a href="/s/admin/system_configuration.jsp">{{resourceBundle['manage.systemconf']}}</a></li>
+            </ul>
+            <div class="share_box">
+                <a href="/s/help/index.html" target="_blank" class="clickable pad3 db" title="Help"><span class="glyphicons glyphicons-info-sign qm"></span></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

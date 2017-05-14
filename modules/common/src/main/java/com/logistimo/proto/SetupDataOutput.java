@@ -1,0 +1,144 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.logistimo.proto;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Enumeration;
+import java.util.Vector;
+
+/**
+ * @author Vani
+ *
+ *         Represents the output JSON of User-Entity create/update operation
+ */
+public class SetupDataOutput extends OutputMessageBean implements JsonBean {
+
+  private String userId = null;
+  private String entityId = null;
+  private Vector errors = null;
+
+  public SetupDataOutput(String locale) throws ProtocolException {
+    super(locale);
+  }
+
+  public SetupDataOutput(boolean status, String userId, String entityId, String errMsg,
+                         Vector errors, String locale, String version) throws ProtocolException {
+    super(status, errMsg, locale, version);
+    this.userId = userId;
+    this.entityId = entityId;
+    this.errors = errors;
+  }
+
+  // Accessor methods
+  public String getUserId() {
+    return userId;
+  }
+
+  public String getEntityId() {
+    return entityId;
+  }
+
+  public Vector getErrors() {
+    return errors;
+  }
+
+  public void fromMessageString(Vector messages) throws ProtocolException {
+  }
+
+  public Vector toMessageString() throws ProtocolException {
+    return null;
+  }
+
+  public void fromJSONString(String jsonString) throws ProtocolException {
+    try {
+      JSONObject json = new JSONObject(jsonString);
+      try {
+        this.version = (String) json.get(JsonTagsZ.VERSION);
+      } catch (JSONException e) {
+        // do nothing, if no version is present
+      }
+      loadFromJSON(json);
+    } catch (JSONException e) {
+      throw new ProtocolException(e.getMessage());
+    }
+  }
+
+  public String toJSONString() throws ProtocolException {
+    String jsonString = null;
+    try {
+      jsonString = toJSONObject().toString();
+    } catch (JSONException e) {
+      throw new ProtocolException(e.getMessage());
+    }
+    return jsonString;
+  }
+
+  // Get the JSON object
+  private JSONObject toJSONObject() throws JSONException {
+    JSONObject json = new JSONObject();
+    // Add version
+    json.put(JsonTagsZ.VERSION, version);
+    // Add the status code
+    json.put(JsonTagsZ.STATUS, this.statusCode);
+    if (JsonTagsZ.STATUS_FALSE.equals(this.statusCode)) {
+      // Error message
+      json.put(JsonTagsZ.MESSAGE, this.errMsg);
+      // Errors
+      if (errors != null && !errors.isEmpty()) {
+        addErrorData(json, this.errors);
+      }
+    } else { // success
+      // Add userId
+      json.put(JsonTagsZ.USER_ID, this.userId);
+      // Add kiosk/entity id
+      json.put(JsonTagsZ.KIOSK_ID, this.entityId);
+    }
+    return json;
+  }
+
+  private void addErrorData(JSONObject json, Vector errors) throws JSONException {
+    JSONArray array = new JSONArray();
+    Enumeration en = errors.elements();
+    while (en.hasMoreElements()) {
+      array.put(en.nextElement());
+    }
+    // Add to json object
+    json.put(JsonTagsZ.ERRORS, array);
+  }
+
+  private void loadFromJSON(JSONObject json) throws JSONException {
+    // Get the status code
+    this.statusCode = (String) json.get(JsonTagsZ.STATUS);
+    if (JsonTagsZ.STATUS_TRUE.equals(this.statusCode)) {
+      this.status = true;
+    } else {
+      this.status = false;
+    }
+
+    if (!status) {
+      this.errMsg = (String) json.opt(JsonTagsZ.MESSAGE);
+      this.errors = getErrorData(json);
+    } else {
+      // Load the userId
+      this.userId = (String) json.get(JsonTagsZ.USER_ID);
+      // Load the kiosk Id
+      this.entityId = (String) json.get(JsonTagsZ.KIOSK_ID);
+    }
+  }
+
+  private Vector getErrorData(JSONObject json) throws JSONException {
+    Vector errors = new Vector();
+    JSONArray array = (JSONArray) json.opt(JsonTagsZ.ERRORS);
+    for (int i = 0; i < array.length(); i++) {
+      String e = (String) array.get(i);
+      // Add to vector
+      errors.addElement(e.toString());
+    }
+    return errors;
+  }
+}

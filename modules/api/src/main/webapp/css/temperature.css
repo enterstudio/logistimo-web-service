@@ -1,0 +1,573 @@
+/*
+ * Copyright © 2017 Logistimo.
+ *
+ * This file is part of Logistimo.
+ *
+ * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+ * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * You can be released from the requirements of the license by purchasing a commercial license. To know more about
+ * the commercial license, please contact us at opensource@logistimo.com
+ */
+
+.content {
+    padding-top: 10px;
+    overflow: hidden;
+}
+
+.small-box {
+    box-sizing: border-box;
+    border: 1px solid;
+    display: block;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    box-sizing: border-box;
+    bottom: 5px;
+    color: rgba(0, 0, 0, 0.15);
+    font-size: 50px;
+    position: absolute;
+    right: 8px;
+    top: 5px;
+    z-index: 0;
+}
+
+.small-box > .small-box-footer {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.1);
+    color: #000000;
+    display: block;
+    padding: 3px 0;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    z-index: 10;
+}
+
+.small-box h3 {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 0 0 10px;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.small-box p {
+    font-size: 15px;
+}
+
+.lg-row {
+    padding-left: 10px;
+}
+
+.row a {
+    text-decoration: none;
+}
+
+.row a:hover {
+    text-decoration: none;
+}
+
+.row a:visited {
+    text-decoration: none;
+}
+
+.alert-no-data {
+    background-color: lightgrey;
+    border-color: darkgray;
+    color: #000000
+}
+
+.alert-info hr {
+    border-top-color: #a6e1ec
+}
+
+.alert-info .alert-link {
+    color: #245269
+}
+
+.bg-no-data {
+    background-color: lightgray
+}
+
+a.bg-success:hover {
+    background-color: darkgray
+}
+
+.mg-hori-zero {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.pd-hori-zero {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.pd-right-zero {
+    padding-right: 0px;
+}
+
+.pd-left-zero {
+    padding-left: 0px;
+}
+
+.pd-top-zero {
+    padding-top: 0px;
+}
+
+.pd-right-5 {
+    padding-right: 5px;
+}
+
+.pd-vert-7 {
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.mg-bottom-zero {
+    margin-bottom: 0px;
+}
+
+.mg-top-zero {
+    margin-top: 0px;
+}
+
+.pd-zero {
+    padding: 0;
+}
+
+.box {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 5px 5px;
+    background-color: #ffffff;
+}
+
+.topbox {
+    border-top: none;
+}
+
+.bg-aqua {
+    background-color: #00c0ef !important;
+}
+
+.bg-green {
+    background-color: #00a65a !important;
+}
+
+.bg-red {
+    background-color: #f56954 !important;
+}
+
+.bg-grey {
+    background-color: darkgrey !important;
+}
+
+.bg-black {
+    background-color: #363636 !important;
+}
+
+.c-aqua {
+    color: #00c0ef !important;
+}
+
+.c-green {
+    color: #00a65a !important;
+}
+
+.c-red {
+    color: #f56954 !important;
+}
+
+.c-yellow {
+    color: #f0ad4e !important;
+}
+
+.c-grey {
+    color: darkgrey !important;
+}
+
+.c-white {
+    color: #FFF !important;
+}
+
+.c-black {
+    color: #000 !important;
+}
+
+.bd-aqua {
+    border-color: #00c0ef;
+}
+
+.bd-red {
+    border-color: #f56954;
+}
+
+.bd-green {
+    border-color: #00a65a;
+}
+
+.bd-grey {
+    border-color: darkgray;
+}
+
+.bd-black {
+    border-color: #363636;
+}
+
+.horiz-ul {
+    padding-left: 5px;
+    list-style-type: none;
+    margin-bottom: 0px;
+}
+
+.horiz-ul li {
+    display: inline;
+    text-decoration: none;
+    padding: 0px 10px 0px 0px;
+}
+
+.inline span, .inline div, .inline ul {
+    display: inline-block;
+}
+
+.minbox {
+    border: 1px solid #dddddd;
+    padding: 5px;
+    border-bottom: none;
+}
+
+.tab-pane {
+    margin-top: 3px;
+}
+
+.map-meta-text {
+    font-size: 20px;
+    font-style: oblique;
+}
+
+.mg-top-10 {
+    margin-top: 10px;
+}
+
+.mg-bottom-10 {
+    margin-bottom: 10px;
+}
+
+.borderless {
+    border: none;
+}
+
+.temp-status {
+    font-size: larger;
+}
+
+.todo-list {
+    list-style: outside none none;
+    margin: 0;
+    padding: 0;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.hiddenRow {
+    padding: 0 !important;
+}
+
+.collapse.in {
+    border: 10px solid lightgray;
+    border-right-width: 5px;
+    border-left-width: 5px;
+}
+
+.collapsing {
+    border: 10px solid lightgray;
+    border-right-width: 5px;
+    border-left-width: 5px;
+}
+
+.temp-table-list {
+    margin-bottom: 10px;
+}
+
+.temp-table-prod {
+    padding: 5px;
+    margin-right: 3px;
+}
+
+.temp-table-status {
+    padding: 4px;
+    margin-right: 5px;
+    font-size: 0.85em;
+}
+
+.temp-dash-status {
+    padding: 5px;
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+.temp-dash-items {
+    padding: 7px 0px 20px 7px;
+    margin-right: 2px;
+    margin-top: 10px;
+    font-size: 1em;
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid;
+    display: block;
+}
+
+.temp-list-items {
+    padding: 5px 5px 5px 5px;
+    margin-right: 2px;
+    font-size: 1em;
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid;
+    display: block;
+}
+
+.temp-table-time {
+    font-size: smaller;
+    font-style: italic;
+}
+
+.label {
+    border: 1px solid;
+    border-radius: 0;
+}
+
+.label-inverse {
+    background-color: darkgrey !important;
+    border-color: darkgrey;
+}
+
+.label-warning {
+    border: 0px;
+    background-color: #f0ad4e;
+}
+
+.label-warning[href]:hover, .label-warning[href]:focus {
+    border-color: #f0ad4e;
+    background-color: #f0ad4e
+}
+
+.label-tags {
+    display: inline-block;
+    float: left;
+    padding: 5px;
+}
+
+a {
+    color: #337ab7;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:visited {
+    color: #337ab7;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.pager {
+    margin: 0px 0px 0px 0px;
+    padding-right: 5px;
+}
+
+.pager > li {
+    margin: 2px;
+    display: inline-block;
+}
+
+.pager li>a {
+    display: inline;
+    padding: 0px 10px 1px 10px;
+    background-color: #f5f5f5;
+}
+
+.pager li>a>span {
+    padding-top: 2px;
+}
+
+.spin {
+    -webkit-animation: spin 1s infinite linear;
+    -moz-animation: spin 1s infinite linear;
+    -o-animation: spin 1s infinite linear;
+    animation: spin 1s infinite linear;
+    -webkit-transform-origin: 50% 50%;
+    transform-origin: 50% 50%;
+    -ms-transform-origin: 50% 50%; /* IE 9 */
+}
+
+@-moz-keyframes spin {
+    from {
+        -moz-transform: rotate(0deg);
+    }
+    to {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.inline span,.inline div,.inline ul {
+    display: inline-block;
+}
+
+.datepickerreadonly {
+    background-color: transparent !important;
+    cursor: pointer !important;
+}
+
+.inputwrap {
+    width: 90%;
+    padding-left: 5px;
+}
+
+.datepicker {
+    position: relative;
+}
+.datepicker .dropdown-menu {
+    left: auto !important;
+    right: 0px;
+}
+
+.medium {
+    font-size: medium;
+}
+
+.desc {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #808080;
+}
+.sub-desc {
+    font-size: xx-small;
+    color: #808080;
+}
+
+p {
+    margin: 0 0 0 0;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.table-bordered-less {
+    border: none;
+}
+
+.table-bordered-less > thead > tr > th, .table-bordered-less > tbody > tr > th, .table-bordered-less > tfoot > tr > th, .table-bordered-less > thead > tr > td, .table-bordered-less > tbody > tr > td, .table-bordered-less > tfoot > tr > td {
+    border: none;
+}
+
+.table-bordered-less > thead > tr > th, .table-bordered-less > thead > tr > td {
+    border-bottom-width: 0;
+}
+
+h5{
+    font-weight: bold;
+}
+
+hr{
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.form-label {
+    float: right;
+    font-weight: bold;
+}
+
+.required::after{
+    content: " *";
+    color: #F56C64;
+}
+
+.form-desc {
+    margin-bottom: 10px;
+    font-size: small;
+}
+
+.tab-pane{
+    margin-top: 0;
+}
+
+.collapse.in{
+    border: none;
+}
+
+.collapsing{
+    border: none;
+}
+
+.inputbox {
+    display: block;
+    min-height: 20px;
+    margin-bottom: 10px;
+    padding-left: 0px;
+}
+
+.angular-google-map-container {
+    height: 300px;
+}
+
+.info-label{
+    color: #707070;
+}
+
+.config-warning {
+    color: #f0ad4e !important;
+    margin-left: 10px;
+}
+
+.a-desc {
+    cursor: default;
+    background: none;
+}
+
+.top-3 {
+    top: 3px;
+}

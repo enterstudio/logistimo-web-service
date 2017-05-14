@@ -1,0 +1,50 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="domain-title-heading mb10">
+    <h5>{{resourceBundle['notifications.configured']}}</h5>
+</div>
+<div ng-show="shownotf">
+    <div class="col-sm-12 nopad">
+        <div>
+            <table class="table table-bordered table-condensed table-hover table-logistimo">
+                <tbody>
+                <tr>
+                    <th>{{resourceBundle['events']}}</th>
+                    <th>{{resourceBundle['notification.whom']}} {{resourceBundle['notification.when']}}</th>
+                    <th ng-show="iSU || dp.ce">{{resourceBundle['shortcuts']}}</th>
+                </tr>
+                <tr ng-repeat="item in event">
+                    <td>{{item.name}}</td>
+                    <td>{{nfy[$index]}}</td>
+                    <td ng-show="iSU || dp.ce"><span class="glyphicons glyphicons-edit lPad10" ng-click="editNotifications(item.key, item.name)" title="{{resourceBundle['edit']}}"></span>&nbsp;&nbsp;
+                    <span class="glyphicons glyphicons-bin" ng-click="deleteNotification(item.key, item.name)" title="{{resourceBundle['delete']}}"></span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div ng-hide="shownotf">
+    <div class="alert alert-warning">{{resourceBundle['events.none']}}</div>
+</div>

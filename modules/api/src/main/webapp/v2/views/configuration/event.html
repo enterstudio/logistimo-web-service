@@ -1,0 +1,104 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="SimpleMenuController" ng-init="init('configuration.notifications.event')">
+            <form class="form-horizontal" role="form" name="inventoryConfigForm">
+                <div ng-controller="NotifController">
+                    <span ng-show="uinfo.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{uinfo.lastUpdated}} {{resourceBundle['by']}}
+                        <a href="#/setup/users/all/details?userId={{uinfo.createdBy}}" target="_new">{{uinfo.fn}}</a>
+                    </span>
+                    <br/>
+                    <p class="litetext">
+                        {{resourceBundle['notifications.overview']}}
+                    </p>
+                    <div class="row" ng-controller="NotificationsExportController">
+                        <p class="col-sm-10">{{resourceBundle['note']}}: {{resourceBundle['event.bulletininfo']}} <a
+                                href="#/configuration/notifications/bulletin/"> {{resourceBundle['bulletinboard']}}</a>
+                            {{resourceBundle['isenabled']}}</p>
+                        <div class="col-sm-2">
+                            <span class="pull-right">
+                                <export-data mail-id="mailId" report-type="configuration" export-type="events" rows="numFound"></export-data>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="bizinfo bizinfo-last">
+                        <div class="row overflowYHide">
+                            <div class="col-sm-2 mh300">
+                                <ul class="nav nav-tabs-left extend">
+                                    <li ng-if="!isTempMonOnly && (iSU || dp.cv)" ng-class="{active: subview == 'orders'}"><a
+                                            href="#/configuration/notifications/event/orders/">{{resourceBundle['orders']}}</a>
+                                    </li>
+                                    <li ng-if="!isTempMonOnly && (iSU || dp.cv)" ng-class="{active: subview == 'shipments'}"><a
+                                            href="#/configuration/notifications/event/shipments/">{{resourceBundle['shipments']}}</a>
+                                    </li>
+                                    <li ng-if="!isTempMonOnly && (iSU || dp.cv)" ng-class="{active: subview == 'inventory'}"><a
+                                            href="#/configuration/notifications/event/inventory/">{{resourceBundle['inventory']}}</a>
+                                    </li>
+                                    <li ng-if="!isTempMonOnly && (iSU || dp.cv)" ng-class="{active: subview == 'setup'}"><a
+                                            href="#/configuration/notifications/event/setup/">{{resourceBundle['setup']}}</a>
+                                    </li>
+                                    <li ng-if="!isTempMonOnly && accountTabEnabled && (iSU || dp.cv)" ng-class="{active: subview == 'accounts'}"><a
+                                            href="#/configuration/notifications/event/accounts/">{{resourceBundle['accounts']}}</a>
+                                    </li>
+                                    <li ng-if="(iSU || dp.cv) && (isTempMonOnly || isTempMonWLg)"
+                                        ng-class="{active: subview == 'temperature'}">
+                                        <a href="#/configuration/notifications/event/assets/">{{resourceBundle['assets']}}</a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div class="col-sm-10">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                <div ng-switch="subview">
+                                    <div ng-switch-when="orders" style="border:none;">
+                                        <div ng-if="iSU || dp.cv" ng-include="'views/configuration/notification-orders.html'"></div>
+                                    </div>
+                                    <div ng-switch-when="shipments" style="border:none;">
+                                        <div ng-if="iSU || dp.cv" ng-include="'views/configuration/notification-shipments.html'"></div>
+                                    </div>
+                                    <div ng-switch-when="inventory" style="border:none;">
+                                        <div ng-if="iSU || dp.cv" ng-include="'views/configuration/notification-inventory.html'"></div>
+                                    </div>
+                                    <div ng-switch-when="setup" style="border:none;">
+                                        <div ng-if="iSU || dp.cv" ng-include="'views/configuration/notification-setup.html'"></div>
+                                    </div>
+                                    <div ng-switch-when="temperature" style="border:none;">
+                                        <div ng-if="iSU || dp.cv" ng-include="'views/configuration/notification-temperature.html'"></div>
+                                    </div>
+                                    <div ng-switch-when="accounts" style="border:none">
+                                        <div  ng-if="iSU || dp.cv" ng-include="'views/configuration/notification-accounts.html'"></div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

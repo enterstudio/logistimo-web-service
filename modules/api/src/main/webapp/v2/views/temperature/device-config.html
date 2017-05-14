@@ -1,0 +1,386 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="DeviceConfigController">
+    <div class="row mg-hori-zero" ng-if="!configEditable">
+        <div class="row action-bar-temp">
+            <div class="pull-left">
+                <button type="button" ng-click="editConfig()" class="btn btn-sm btn-primary">{{resourceBundle['edit']}}</button>
+                <button type="button" class="btn btn-sm btn-default"confirmed-click="pushConfiguration()"
+                        ng-confirm-click="{{resourceBundle['temperature.config.push.confirm']}}" ng-disabled="pushingConfig">
+                    <span ng-show="pushingConfig" class="glyphicons glyphicons-cogwheel spin"></span>
+                    {{resourceBundle['temperature.push.config']}}
+                </button>
+                <button type="button" class="btn btn-sm btn-default" confirmed-click="sendConfigPullRequest()"
+                        ng-confirm-click="{{resourceBundle['temperature.config.pull.confirm']}}" ng-disabled="sendingConfigPullRequest">
+                    <span ng-show="sendingConfigPullRequest" class="glyphicons glyphicons-cogwheel spin"></span>
+                    {{resourceBundle['temperature.pull.config']}}
+                </button>
+            </div>
+            <div class="pull-right  mini-desc">
+                <div ng-show="isDef(deviceInfo.cfg) && isDef(deviceInfo.cfg.time)">
+                    {{resourceBundle['configuration']}} {{resourceBundle['lastupdated'] | lowercase}} {{resourceBundle['on']}} {{deviceInfo.cfg.formattedTime}}<span ng-show="isDef(deviceInfo.drdy) && isDef(deviceInfo.drdy.time)">,
+                                 {{resourceBundle['temperature.device.confirmed']}} {{deviceInfo.drdy.formattedTime}}
+                    </span>
+                </div>
+                <div ng-show="isUndef(deviceInfo.cfg) && isUndef(deviceInfo.cfg.time)">
+                    <span class="glyphicons glyphicons-warning-sign medium config-warning"></span>
+                    {{resourceBundle['temperature.device.not.configured']}}
+                </div>
+            </div>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['temperature.device.config.highalarm']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.temp']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.highAlarm.temp}} &#8451;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.duration']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.highAlarm.dur}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['temperature.device.config.lowalarm']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.temp']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.lowAlarm.temp}} &#8451;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.duration']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.lowAlarm.dur}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['temperature.device.config.highwarn']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.temp']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.highWarn.temp}} &#8451;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.duration']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.highWarn.dur}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['temperature.device.config.lowwarn']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.temp']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.lowWarn.temp}} &#8451;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.duration']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.lowWarn.dur}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['temperature.device.config.comm']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.chnl']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{configCommChannelArray[deviceConfig.comm.chnl]}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.tmpUrl']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.tmpUrl}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.cfgUrl)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.cfgUrl']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.cfgUrl}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.alrmUrl)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.almUrl']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.alrmUrl}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.statsUrl)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.statsUrl']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.statsUrl}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.devRyUrl)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.devRyUrl']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.devRyUrl}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.smsGyPh']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.smsGyPh}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.smsGyKey)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.smsGyKey']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.smsGyKey}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.senderId)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.sender']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.senderId}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.samplingInt']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.samplingInt}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.pushInt']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.comm.pushInt}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isDef(deviceConfig.comm.usrPhones)">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['temperature.device.config.comm.usrPhones']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            <span ng-repeat="usrPhone in usrPhones track by $index"><span ng-hide="$index==0">, </span>{{usrPhone}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['notifications']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx pt0">
+                            <span class="label label-tags label-default" ng-show="deviceConfig.comm.tmpNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['raw.temperature']}}</span>
+                            <span class="label label-tags label-default" ng-show="deviceConfig.comm.incExcNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['incursion.excursion']}} </span>
+                            <span class="label label-tags label-default" ng-show="deviceConfig.comm.statsNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['daily.statistics']}}</span>
+                            <span class="label label-tags label-default" ng-show="deviceConfig.comm.devAlrmsNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['device.alarm']}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['temperature.device.config.locale']}}
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['timezone']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.locale.tznm ? allTimezones[deviceConfig.locale.tznm] : 'None'}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['country']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.locale.cn ? countries[deviceConfig.locale.cn].name : 'None'}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-3 cbx">
+                            <label class="control-label">{{resourceBundle['language']}}:</label>
+                        </div>
+                        <div class="col-sm-9 cbx">
+                            {{deviceConfig.locale.ln ? allLanguages[deviceConfig.locale.ln] : 'None'}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mg-hori-zero" ng-if="configEditable">
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['edit']}} {{resourceBundle['configuration'] | lowercase}}
+            </div>
+            <div class="row">
+                <div class="col-sm-9">
+                    <div ng-include="'views/temperature/edit-device-config.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

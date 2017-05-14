@@ -1,0 +1,735 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+<div class="bizinfo bizinfo-last">
+<div ng-controller="AddUserController">
+<form ng-if="loading == false" class="form-horizontal" role="form" name="addUserForm" novalidate>
+
+<!-- Added next two lines to avoid auto suggestion for user id and password in chrome -->
+<input type="text" style="display:none">
+<input type="password" style="display:none">
+
+<div class=" bgr">
+    <div class="title-heading">
+        {{resourceBundle['user.infotitle']}}
+    </div>
+    <p class="litetext">{{resourceBundle['user.info']}}</p>
+
+    <div class="row"> <!--User ID-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrID" class="col-sm-4 control-label required">{{resourceBundle['user.id']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrID"
+                           ng-readonly="{{edit}}"
+                           autocomplete="off"
+                           ng-model="user.id"
+                           name="id"
+                           user-id
+                           placeholder="{{resourceBundle['user.id']}}"
+                           ng-focus="uidCheck = false"
+                           ng-class="{'c-visited' : uVisited.id, 'u-na' : uVisited.id && (!uidLengthVerified || uidVerified && uidStatus)}"
+                           ng-blur="uVisited.id = true; uidCheck = true; checkUserAvailability(user.id); checkUserSize()" maxlength="20" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.id && addUserForm.id.$error.required">
+                    <span class="help-block">{{resourceBundle['user.id']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+                <div class="" ng-show="uVisited.id && !addUserForm.id.$error.required && uidCheck && uidVerified && !uidStatus && uidLengthVerified">
+                    <span class="help-block">{{resourceBundle['user.useridavailable']}}</span>
+                </div>
+                <div class="has-error" ng-show="uVisited.id && !addUserForm.id.$error.required && uidCheck && uidVerified && uidStatus">
+                    <span class="help-block">{{resourceBundle['user.useridnotavailable']}}</span>
+                </div>
+                <div class="has-error" ng-show="uVisited.id && !addUserForm.id.$error.required &&  uidVerified && !uidStatus && !uidLengthVerified">
+                    <span class="help-block">{{resourceBundle['user.length.condition']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-hide="edit"> <!--Password-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrPw" class="col-sm-4 control-label required">{{resourceBundle['login.password']}}</label>
+                <div class="col-sm-8">
+                    <input type="password" class="form-control" id="usrPw"
+                           ng-model="user.pw"
+                           autocomplete="new-password"
+                           name="pw"
+                           placeholder="{{resourceBundle['login.password']}}"
+                           maxlength="18"
+                           ng-keyup="uVisited.pw && uVisited.cpw && validatePassword()"
+                           ng-class="{'c-visited' : uVisited.pw,'u-na' : uVisited.pw && uVisited.cpw && uPasswordInvalid}"
+                           ng-blur="uVisited.pw = true;validatePassword()" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error">
+                    <span ng-show="uVisited.pw && addUserForm.pw.$error.required" class="help-block">{{resourceBundle['login.password']}} {{resourceBundle['isrequired']}}</span>
+                    <span ng-show="uVisited.pw && !addUserForm.pw.$error.required && uPasswordInvalid && uPasswordInvalidType == 'l'" style="display:inline" class="help-block">{{resourceBundle['passwordvalidationmsg']}}: 6 - 18</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-hide="edit"> <!--Confirm Password-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrCPw" class="col-sm-4 control-label required">{{resourceBundle['user.confirmpassword']}}</label>
+                <div class="col-sm-8">
+                    <input type="password" class="form-control" id="usrCPw"
+                           ng-model="user.cpw"
+                           autocomplete="off"
+                           name="cpw"
+                           placeholder="{{resourceBundle['user.confirmpassword']}}"
+                           maxlength="18"
+                           ng-keyup="uVisited.pw && uVisited.cpw && validatePassword()"
+                           ng-class="{'c-visited' : uVisited.cpw,'u-na' : uVisited.pw && uVisited.cpw && uPasswordInvalid}"
+                           ng-blur="uVisited.cpw = true;validatePassword()" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" >
+                    <span ng-show="uVisited.cpw && addUserForm.cpw.$error.required" style="display:inline" class="help-block">{{resourceBundle['user.confirmpassword']}} {{resourceBundle['isrequired']}}</span>
+                    <span ng-show="uVisited.pw && uVisited.cpw && !addUserForm.cpw.$error.required && uPasswordInvalid && uPasswordInvalidType == ''" style="display:inline" class="help-block">{{resourceBundle['confirmpasswordmsg']}}</span>
+                    <span ng-show="uVisited.pw && uVisited.cpw && !addUserForm.cpw.$error.required && uPasswordInvalid && uPasswordInvalidType == 'm'" style="display:inline" class="help-block">{{resourceBundle['user.pwd.mismatch']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Role-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrRole" class="col-sm-4 control-label required">{{resourceBundle['user.role']}}</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.ro" class="form-control" id="usrRole"
+                            name="role"
+                            ng-class="{'c-visited' : uVisited.role}"
+                            ng-blur="uVisited.role = true" required>
+                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['user.role']}} -- </option>
+                        <option ng-repeat="(val,label) in roles" value="{{val}}" ng-selected="val === user.ro">{{resourceBundle['role.'+label]}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.role && addUserForm.role.$error.required">
+                    <span class="help-block">{{resourceBundle['user.role']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row"> <!--Custom ID-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrCID" class="col-sm-4 control-label">{{resourceBundle['customid']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrCID"
+                           autocomplete="off"
+                           ng-model="user.cid"
+                           name="cid"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['customid']}}"
+                           ng-focus="ucidCheck = false"
+                           ng-class="{'c-visited' : uVisited.cid, 'u-na' : uVisited.cid && ucidVerified && ucidStatus}"
+                           ng-blur="uVisited.cid = true; ucidCheck = true; checkCustomIDAvailability(user.cid,user.id)" maxlength="50">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.cid && ucidCheck && ucidVerified && ucidStatus">
+                    <span class="help-block">{{resourceBundle['user.customidnotavailable']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{resourceBundle['tags']}}</label>
+                <div class="col-sm-8">
+                    <tag-select  tags-model="user.tgObjs" type="'user'"></tag-select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bgr">
+    <div class="title-heading">
+        {{resourceBundle['user.permissions']}}
+    </div>
+    <div class="row"> <!-- Permission -->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{resourceBundle['permission']}}</label>
+                <div class="col-sm-8">
+                    <select class="form-control" id="usrPer" ng-model="user.per">
+                        <option value="d">{{resourceBundle['default.caps']}}</option>
+                        <option value="v">{{resourceBundle['user.permission.view']}}</option>
+                        <option value="a">{{resourceBundle['user.permission.asset']}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row"> <!-- Token Expiry -->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{resourceBundle['user.token.expiry']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="atexp"
+                           autocomplete="off"
+                           ng-model="user.atexp"
+                           maxlength="3"
+                           only-digits style="width: 20%; display: inline;"/>&nbsp;&nbsp;day(s)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class=" bgr">
+    <div class="title-heading">
+        {{resourceBundle['user.persdetailstitle']}}
+    </div>
+    <p class="litetext">{{resourceBundle['user.persdetails']}}</p>
+
+    <div class="row"> <!--First Name-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrFnm" class="col-sm-4 control-label required">{{resourceBundle['user.firstname']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrFnm"
+                           autocomplete="off"
+                           ng-model="user.fnm"
+                           name="fnm"
+                           maxlength="50"
+                           only-alphabets
+                           placeholder="{{resourceBundle['user.firstname']}}"
+                           ng-class="{'c-visited' : uVisited.fnm}"
+                           ng-blur="uVisited.fnm = true" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.fnm && addUserForm.fnm.$error.required">
+                    <span class="help-block">{{resourceBundle['user.firstname']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Last Name-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrLnm" class="col-sm-4 control-label">{{resourceBundle['user.lastname']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrLnm"
+                           autocomplete="off"
+                           ng-model="user.lnm"
+                           name="lnm"
+                           only-alphabets
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.lastname']}}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Gender-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrGen" class="col-sm-4 control-label">{{resourceBundle['user.gender']}}</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.gen" class="form-control" id="usrGen"
+                            name="gen"
+                            ng-class="{'c-visited' : uVisited.gen}"
+                            ng-blur="uVisited.gen = true">
+                        <option value="m" selected>{{resourceBundle['gender.male']}}</option>
+                        <option value="f">{{resourceBundle['gender.female']}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Age-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrAge" class="col-sm-4 control-label">{{resourceBundle['user.age']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrAge"
+                           autocomplete="off"
+                           ng-model="user.age"
+                           name="age"
+                           maxlength="2"
+                           only-digits
+                           placeholder="{{resourceBundle['user.age']}}">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class=" bgr">
+    <div class="title-heading">
+        {{resourceBundle['user.contactinfotitle']}}
+    </div>
+    <p class="litetext">{{resourceBundle['user.contactinfo']}}</p>
+
+    <div class="row"> <!--Mobile Phone-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrPhm" class="col-sm-4 control-label required">{{resourceBundle['user.mobile']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrPhm"
+                           autocomplete="off"
+                           ng-model="user.phm"
+                           name="phm"
+                           maxlength="20"
+                           placeholder="{{resourceBundle['user.mobile']}}"
+                           ng-class="{'c-visited' : uVisited.phm}"
+                           contact
+                           ng-blur="uVisited.phm = true; validateMobilePhone()" required>
+                    <span class="litetext">+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}&gt; &lt;{{resourceBundle['user.mobile']}}&gt;<br/>{{resourceBundle['eg']}} +91 9844360948 [{{resourceBundle['india']}}], +1 5404569089 [{{resourceBundle['usa']}}]</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.phm && (addUserForm.phm.$error.required || invalidPhm == 'r')">
+                    <span class="help-block">{{resourceBundle['user.mobile']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+                <div class="has-error" ng-show="uVisited.phm && invalidPhm == 's'">
+                    <span class="help-block">{{resourceBundle['phoneformatmsg']}}</span>
+                </div>
+                <div class="has-error" ng-show="uVisited.phm && invalidPhm == 'f'">
+                    <span class="help-block">{{resourceBundle['followformatmsg']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Land Line Number-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrPhl" class="col-sm-4 control-label">{{resourceBundle['user.landline']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrPhl"
+                           autocomplete="off"
+                           ng-model="user.phl"
+                           name="phl"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.landline']}}"
+                           ng-class="{'c-visited' : uVisited.phl}"
+                           contact
+                           ng-blur="uVisited.phl = true; validateMobilePhone('LL')">
+                    <span class="litetext">+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}&gt; &lt;{{resourceBundle['user.mobile']}}&gt;<br/>{{resourceBundle['eg']}} +91 08023418743 [{{resourceBundle['india']}}], +1 5105015555 [{{resourceBundle['usa']}}]</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.phl && invalidPhl == 's'">
+                    <span class="help-block">{{resourceBundle['phoneformatmsg']}}</span>
+                </div>
+                <div class="has-error" ng-show="uVisited.phl && invalidPhl == 'f'">
+                    <span class="help-block">{{resourceBundle['followformatmsg']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Email-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrEm" class="col-sm-4 control-label" ng-class="{'required':user.ro != 'ROLE_ko'}">{{resourceBundle['user.email']}}</label>
+                <div class="col-sm-8">
+                    <input type="email" class="form-control" id="usrEm"
+                           autocomplete="off"
+                           ng-model="user.em"
+                           name="em"
+                           maxlength="100"
+                           placeholder="{{resourceBundle['user.email']}}"
+                           ng-class="{'c-visited' : uVisited.em}"
+                           ng-blur="uVisited.em = true" ng-required="user.ro != 'ROLE_ko'">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error">
+                    <span ng-show="uVisited.em && !addUserForm.em.$error.required && addUserForm.em.$invalid" class="help-block">{{resourceBundle['email.format.invalid']}}</span>
+                    <span ng-show="uVisited.em && addUserForm.em.$error.required" class="help-block">{{resourceBundle['user.email']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class=" bgr">
+    <div class="title-heading">
+        {{resourceBundle['location']}}
+    </div>
+    <p class="litetext">{{resourceBundle['kiosk.locationmsg']}}</p>
+
+    <div class="row"> <!--Country-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrCtr" class="col-sm-4 control-label required">{{resourceBundle['country']}}</label>
+                <div class="col-sm-8">
+                    <select id="usrCtr" ng-model="user.cnt" name="ctry" class="form-control" ng-class="{'c-visited' : uVisited.cnt}" ng-blur="uVisited.cnt = true;setCountry(user.cnt)" required>
+                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['country']}} -- </option>
+                        <option ng-repeat="(name,val) in sCountries" value="{{val.code}}" ng-selected="val.code === user.cnt">{{val.name}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.cnt && user.cnt == undefined">
+                    <span class="help-block">{{resourceBundle['country']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--State-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrSt" class="col-sm-4 control-label required">{{resourceBundle['state']}}</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.st" name="st" id="usrSt" class="form-control" ng-class="{'c-visited' : uVisited.st}" ng-blur="uVisited.st = true;setState(user.st)" required>
+                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['state']}} -- </option>
+                        <option ng-repeat="(key,item) in states" value="{{key}}" ng-selected="key == user.st">{{key}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.st && isUndef(user.st)">
+                    <span class="help-block">{{resourceBundle['state']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--District-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrDs" class="col-sm-4 control-label">{{resourceBundle['district']}}</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.ds" name="ds" ng-blur="setDistrict(user.ds)" ng-change="setDistrict(user.ds)"  class="form-control" id="usrDs" >
+                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['district']}} -- </option>
+                        <option ng-repeat="(key,item) in districts" value="{{key}}" ng-selected="key == user.ds">{{key}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Taluk-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrTlk" class="col-sm-4 control-label">{{resourceBundle['taluk']}}</label>
+                <div class="col-sm-8">
+                    <select  ng-model="user.tlk" name="tk" class="form-control" id="usrTlk" >
+                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['taluk']}} -- </option>
+                        <option ng-repeat="(key,item) in taluks" value="{{item}}" ng-selected="item == user.tlk">{{item}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--City-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrCt" class="col-sm-4 control-label">{{resourceBundle['village']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrCt"
+                           autocomplete="off"
+                           ng-model="user.ct"
+                           name="ct"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['village']}}"
+                           ng-class="{'c-visited' : uVisited.ct}"
+                           ng-blur="uVisited.ct = true">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Street-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrStn" class="col-sm-4 control-label">{{resourceBundle['streetaddress']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrStn"
+                           autocomplete="off"
+                           ng-model="user.stn"
+                           name="stn"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['streetaddress']}}"
+                           ng-class="{'c-visited' : uVisited.stn}"
+                           ng-blur="uVisited.stn = true">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--PIN code-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrPin" class="col-sm-4 control-label">{{resourceBundle['zipcode']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrPin"
+                           autocomplete="off"
+                           ng-model="user.pin"
+                           name="pin"
+                           zip-code
+                           maxlength="50"
+                           placeholder="{{resourceBundle['zipcode']}}"
+                           ng-class="{'c-visited' : uVisited.pin}"
+                           ng-blur="uVisited.pin = true">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Language-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrLng" class="col-sm-4 control-label required">{{resourceBundle['language']}}</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.lng" class="form-control" id="usrLng"
+                            name="lng"
+                            ng-class="{'c-visited' : uVisited.lng}"
+                            ng-blur="uVisited.lng = true" required>
+                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['language']}} --</option>
+                        <option ng-repeat="(value,key) in allLanguages" ng-selected="value === user.lng" value="{{value}}">
+                            {{key}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.lng && addUserForm.lng.$error.required">
+                    <span class="help-block">{{resourceBundle['language']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Timezone-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrTz" class="col-sm-4 control-label required">{{resourceBundle['preferredtimezone']}}</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.tz" class="form-control" id="usrTz"
+                            name="tz"
+                            ng-class="{'c-visited' : uVisited.tz}"
+                            ng-blur="uVisited.tz = true" required>
+                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['preferredtimezone']}} --</option>
+                        <option ng-repeat="(key,value) in allTimezones" ng-selected="value === user.tz" value="{{value}}">
+                            {{key}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="has-error" ng-show="uVisited.tz && addUserForm.tz.$error.required">
+                    <span class="help-block">{{resourceBundle['preferredtimezone']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-show="edit && user.entities.length > 1" class="bgr">
+    <div class="title-heading">
+        {{resourceBundle['primaryentity']}}
+    </div>
+    <div class="row"> <!--Timezone-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrTz" class="col-sm-4 control-label">{{resourceBundle['primaryentity']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" ng-model="user.pk"
+                           autocomplete="off"
+                           class="form-control"
+                           placeholder="{{resourceBundle['primaryentity']}}"
+                           uib-typeahead="ent as ent.nm for ent in user.entities | filter:{nm:$viewValue} | limitTo:8"
+                           class="form-control" typeahead-editable="true" maxlength="50"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bgr">
+    <div class="title-heading">
+        {{resourceBundle['user.deviceinfotitle']}}
+    </div>
+
+    <div ng-show="edit && user.ua" class="row"> <!-- Details captured from device/User-agent -->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label  class="col-sm-4 control-label">{{resourceBundle['user.devicedetails']}}</label>
+                <div class="col-sm-8">
+                    {{user.ua}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Mobile Phone Brand-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrMb" class="col-sm-4 control-label">{{resourceBundle['user.mobilebrand']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrMb"
+                           autocomplete="off"
+                           ng-model="user.br"
+                           name="mobilebrand"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.mobilebrand']}}">
+                    <span class="litetext">({{resourceBundle['eg']}}{{resourceBundle['user.phonebrand']}})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Mobile Phone Model-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrMm" class="col-sm-4 control-label">{{resourceBundle['user.mobilemodel']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrMm"
+                           autocomplete="off"
+                           ng-model="user.mo"
+                           name="mobilemodel"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.mobilemodel']}}">
+                    <span class="litetext">({{resourceBundle['eg']}}{{resourceBundle['user.phonemodel']}})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--IMEI Number-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrSimId" class="col-sm-4 control-label">{{resourceBundle['user.imei']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="userImei"
+                           autocomplete="off"
+                           ng-model="user.imei"
+                           name="imei"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.imei']}}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"> <!--Mobile Phone Operator-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrMp" class="col-sm-4 control-label">{{resourceBundle['user.mobileoperator']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrMp"
+                           autocomplete="off"
+                           ng-model="user.sp"
+                           name="mobileoperator"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.mobileoperator']}}">
+                    <span class="litetext">({{resourceBundle['eg']}}{{resourceBundle['user.phoneoperator']}})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row"> <!--SIM Id-->
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="usrSimId" class="col-sm-4 control-label">{{resourceBundle['user.simId']}}</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="usrSimId"
+                           autocomplete="off"
+                           ng-model="user.sId"
+                           name="sId"
+                           maxlength="50"
+                           placeholder="{{resourceBundle['user.simId']}}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{resourceBundle['config.loginasreconnect']}}</label>
+                <div class="col-sm-8 cbx">
+                    <p><input type="radio" name="lgr" ng-model="user.lgr" ng-value="-1">
+                        {{resourceBundle['config.usedomaindefault']}}</p>
+                    <p class="litetext">{{resourceBundle['config.overridedomaindefault']}}</p>
+                    <p><input type="radio" ng-model="user.lgr" ng-value="0"> {{resourceBundle['config.loginasreconnectmessage']}}</p>
+                    <p><input type="radio" ng-model="user.lgr" ng-value="1"> {{resourceBundle['config.loginasnotreconnectmessage']}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="sbt">
+    <div class="col-sm-6">
+        <div class="pull-right">
+            <button type="button" ng-hide="edit" ng-click="setAllVisited(); validate() && addUserForm.$valid && createUser()" name="save" class="btn btn-primary">{{resourceBundle['save']}}</button>
+            <button type="button" ng-show="edit" ng-click="setAllVisited(); validateUpdate() && addUserForm.$valid && updateUser()" name="update" class="btn btn-primary ml5">{{resourceBundle['update']}}</button>
+            <!--<button ng-hide="edit" ng-click="resetForm()" name="reset" class="btn btn-default">{{resourceBundle['reset']}}</button>-->
+            <a ng-show="edit" href="#/setup/users/all/details?userId={{editUserId}}" name="cancel" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+            <a ng-hide="edit" href="#/setup/users/" name="cancel" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+        </div>
+    </div>
+</div>
+
+</form>
+</div>
+</div>
+</div>

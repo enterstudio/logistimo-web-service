@@ -1,0 +1,60 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="TransMapCtrl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <span ng-if="loading" class="glyphicons glyphicons-cogwheel spin"></span>
+                <b>
+                    <span ng-if="mtype=='o'">{{resourceBundle['order']}} </span>
+                    <span ng-if="mtype!='o'">{{resourceBundle['transaction']}} </span>
+                    <span ng-show="address !== ''">{{resourceBundle['at']}} {{address}}</span>
+                </b>
+            <a class="pull-right" ng-show="isToggleMap" ng-click="toggleMap()"><span class="glyphicons glyphicons-remove-2"></span></a>
+        </div>
+        <div class="min-panel-body" ng-if="markers.length>0">
+            <div class="row">
+                <div class="col-sm-12" ng-class="{'sm-map':mtype=='o','mp':mtype!='o'}">
+                    <div ng-show="distance !== ''">
+                        {{resourceBundle['transaction.distance.msg']}}<span ng-show="ltype==='e'"> {{resourceBundle['kiosk']}}</span><span ng-show="ltype==='c'"> {{resourceBundle['customer.lower']}}</span><span ng-show="ltype==='v'"> {{resourceBundle['vendor.lower']}}</span>: {{distance}}
+                        <span ng-show="isDef(accuracy)" class="pull-right">
+                            {{resourceBundle['accuracy']}}: {{accuracy}} {{resourceBundle['meters']}}
+                        </span>
+                    </div>
+                    <ui-gmap-google-map
+                        options = "lmap.options"
+                        center="lmap.center"
+                        control="lmap.control"
+                        zoom="lmap.zoom"
+                        >
+                        <ui-gmap-markers idKey="'id'" coords="'self'" models="markers" icon="'icon'" options="{draggable:true}" fit="true">
+                            <ui-gmap-windows show="show">
+                                <div ng-non-bindable>{{add}}</div>
+                            </ui-gmap-windows>
+                        </ui-gmap-markers>
+                    </ui-gmap-google-map>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

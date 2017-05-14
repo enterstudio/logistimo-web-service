@@ -1,0 +1,209 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="MatInventoryCtrl" class="pb20">
+    <div class="row">
+        <div class="col-sm-8">
+            <div class="title-heading marginlr0">
+                <a ng-href="#/setup/materials/all/detail/{{material.mId}}/" target="_blank">{{material.mnm}}</a>
+            </div>
+        </div>
+        <div ng-hide="vw == 'm'" class="col-sm-4">
+            <div class="pull-right">
+                <div ng-include="'views/paginator.html'"></div>
+            </div>
+        </div>
+        <div ng-show="vw == 'm'" class="col-sm-4">
+            <div class="pull-right">
+                <div ng-include="'views/load-more-paginator.html'"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div ng-switch="vw">
+                <div ng-switch-when="t">
+                    <table class="table table-condensed table-hover table-striped table-logistimo" id="fixTable">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th class="text-center">{{resourceBundle['serialnum']}}</th>
+                            <th>{{resourceBundle['kiosk']}}</th>
+                            <th class="text-center">{{resourceBundle['material.stockonhand']}}</th>
+                            <th></th>
+                            <th class="text-center" ng-show="ordersTabEnabled">{{resourceBundle['allocated']}}</th>
+                            <th class="text-center" ng-show="ordersTabEnabled">{{resourceBundle['available']}}</th>
+                            <th class="text-center" ng-show="ordersTabEnabled">{{resourceBundle['intransit']}}</th>
+                            <th class="text-center" ng-show="invCnf.cr">{{resourceBundle['availability']}} [{{invCnf.cu}}]</th>
+                            <th>{{resourceBundle['min']}}<span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                            <th>{{resourceBundle['max']}}<span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                           <th>{{resourceBundle['lastupdated']}}</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody data-ng-switch on="exRow[$index]" ng-repeat="item in filtered" ng-hide="loading">
+                        <tr ng-class=" {'alert   alert-danger' : item.event == 200, 'alert   alert-info alert-info-dark' : item.event == 202, 'alert   alert-warning alert-warning-dark' : item.event == 201} "
+                            >
+                            <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                            <td class="text-center">{{item.sno}}</td>
+                            <td><a ng-href="#/setup/entities/detail/{{item.kId}}/" target="_blank">{{item.enm}}</a><span class="litetext">{{item.add}}</span></td>
+                            <td class="text-center">{{item.stk | roundNoTrailZeros:2}}
+                                <div ng-if="isDef(item.period)" class="small">{{item.period | timeStr:false:true}}</div>
+                            </td>
+                            <td class="text-center">
+                                <div ng-show="item.be" class="clickable" ng-click="select($index,'batch')">
+                                    <span class="glyphicons glyphicons-list-alt" uib-tooltip="{{resourceBundle['batch']}}"></span>
+                                </div>
+                            </td>
+                            <td class="text-center" ng-show="ordersTabEnabled">{{item.astk |roundNoTrailZeros:2}}
+                                <span ng-show="item.astk > 0" ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index,'allocated')"></span>
+                            </td>
+                            <td class="text-center" ng-show="ordersTabEnabled">{{item.atpstk |roundNoTrailZeros:2}}</td>
+                            <td class="text-center" ng-show="ordersTabEnabled">{{item.tstk |roundNoTrailZeros:2}}
+                                <span ng-show="item.tstk > 0" ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index,'transit')"></span>
+                            </td>
+                            <td class="text-center" ng-show="invCnf.cr">
+                                <div class="inline">
+                                    {{item.sap>0?(item.sap | roundNoTrailZeros:2):"NA"}}
+                                   <div class="clickable" ng-click="select($index,'inventory')" ng-show="item.sap>0">
+                                       <span ng-show="exRow[$index] === 'inventory'" class="glyphicons glyphicons-collapse-top"></span>
+                                       <span ng-show="exRow[$index] !== 'inventory'" class="glyphicons glyphicons-expand"></span>
+                                   </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="display: inline-block;">{{item.reord}}
+                                    <span ng-show="mmdt && item.minDur > 0" class="litetext">{{item.minDur}} {{mmdt}}</span>
+                                </span>
+                                <span ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index, 'matHis')"></span>
+                            </td>
+                            <td>
+                                <span style="display: inline-block;">{{item.max}}
+                                    <span ng-show="mmdt && item.maxDur > 0" class="litetext">{{item.maxDur}} {{mmdt}}</span>
+                                </span>
+                                <span ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index, 'matHis')"></span>
+                            </td>
+                            <td>{{item.t}}</td>
+                            <td class="text-center">
+                                <div ng-if="item.eventType !== -1" class="clickable" ng-click="select($index,'history')">
+                                    <span class="glyphicons glyphicons-history" uib-tooltip="{{resourceBundle['history']}}"></span></div>
+                            </td>
+                        </tr>
+                        <tr data-ng-switch-when="batch">
+                            <td colspan=100% class="partialview">
+                                <div ng-init="view='views/inventory/view-batch.html' ; mnm = item.mnm ; mid = item.mId ; kid = item.kId ; index = $index ; showAll = true;"
+                                     ng-include="'views/partial.html'"></div>
+                            </td>
+                        </tr>
+                        <tr data-ng-switch-when="temp">
+                            <td colspan=100% class="partialview">
+                                <div ng-init="view='views/inventory/view-temp.html' ; mnm = item.mnm ; mid = item.mId; kid = item.kId; index = $index; enm = item.enm;"
+                                     ng-include="'views/partial.html'"></div>
+                            </td>
+                        </tr>
+                        <tr data-ng-switch-when="history">
+                            <td colspan=100% class="partialview">
+                                <div ng-init="view='views/inventory/view-history.html' ; mnm = item.mnm ; et=item.eventType; index = $index ; url='/s2/api/inventory/history?type=stev&kioskid='+item.kId+'&materialid='+item.mId+'&eventtype='+item.eventType+'&size=50'; color=item.cColor; heading=item.cHeading"
+                                     ng-include="'views/partial.html'"></div>
+                            </td>
+                        </tr>
+                        <tr data-ng-switch-when="inventory">
+                            <td colspan=100% class="partialview">
+                                <div ng-init="view='views/inventory/view-message.html' ; mid = item.mId ; kid = item.kId ; index = $index ;min = item.reord; max = item.max;"
+                                     ng-include="'views/partial.html'"></div>
+                            </td>
+                        </tr>
+                        <tr data-ng-switch-when="matHis">
+                            <td colspan=100% class="partialview">
+                                <div ng-init="view='views/inventory/min-max-history.html' ; invid = item.invId; mid = item.mId ; mnm = item.mnm ; index = $index ; min = item.reord; max = item.max;"
+                                     ng-include="'views/partial.html'"></div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div ng-switch-when="m">
+                    <div class="bigmap">
+                        <div ng-if="filtered.length > 0">
+                            <ui-gmap-google-map center="lmap.center" zoom="lmap.zoom"
+                                                bounds="lmap.bounds" draggable="true"
+                                                ng-hide="resSize == 0"
+                                                options="{styles: [{featureType: 'poi',stylers: [{ visibility: 'off' }]},{featureType: 'transit',stylers: [{ visibility: 'off' }]}]}">
+                                <ui-gmap-markers
+                                        idKey="'id'"
+                                        icon="'icon'"
+                                        models="filtered"
+                                        coords="'self'" modelsbyref="true" options="'options'" doRebuildAll="false">
+                                    <ui-gmap-windows
+                                            show="'show'"
+                                            templateUrl="'tu'"
+                                            templateParameter="'tp'"
+                                            ></ui-gmap-windows>
+                                </ui-gmap-markers>
+                            </ui-gmap-google-map>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <p class=" alert alert-warning" ng-show="!loading && filtered.length == 0">
+                {{resourceBundle['materials.none']}}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div ng-show="vw == 'm'">
+            <div class="col-sm-8" >
+                <img src="https://chart.googleapis.com/chart?chst=d_map_spin&chld=0.25|0|FFFF66|10|_|"/>
+                {{resourceBundle['inventory.lessthanmin']}}
+                <span class="lPad"></span>
+                <img src="https://chart.googleapis.com/chart?chst=d_map_spin&chld=0.25|0|33CCFF|10|_|"/>
+                {{resourceBundle['inventory.morethanmax']}}
+                <span class="lPad"></span>
+                <img src="https://chart.googleapis.com/chart?chst=d_map_spin&chld=0.25|0|FF0000|10|_|"/>
+                {{resourceBundle['stockout']}}
+                <span class="lPad"></span>
+                <img src="https://chart.googleapis.com/chart?chst=d_map_spin&chld=0.25|0|FFFFFF|10|_|"/>
+                {{resourceBundle['normal']}}
+            </div>
+            <div class="col-sm-4">
+                <div class="pull-right">
+                    <div ng-include="'views/load-more-paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+        <div ng-hide="vw == 'm'">
+            <div class="col-sm-8" >
+                <div ng-include="'views/inventory/inv-event-legend.html'"></div>
+            </div>
+            <div class="col-sm-4">
+                <span class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

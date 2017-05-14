@@ -1,0 +1,20 @@
+> Copy the template and paste in json-generator.com
+
+Transactions:
+
+[
+    '{{repeat(80, 100)}}',
+    {
+        id: '{{index()}}',
+        material: '{{random("Albendazol 400mg","Crocin 400mg","Calpol","Vicks","TusqD","Azithromycin 500","Atarax XC")}}',
+        entity: 'Jagannath Stores',
+        custVend: '{{random("Raghu Distributors","Apple Store","Lakshmi Pharmaceuticals","Sony Style Store")}}',
+        type: '{{random("issue","receipt","stock counts","discards","transfers")}}',
+        quantity: '{{integer(0, 100)}}',
+        batch: '',
+        closingStock: '{{integer(0, 4000)}}',
+        updBy: '{{firstName()}} {{surname()}}',
+        updDate: '{{date(new Date(2014, 0, 1), new Date(), "YYYY-MM-dd hh:mm:ss ")}}',
+        tag: '{{random("Antibiotics","General","Stationary","Emergency")}}'
+    }
+]

@@ -1,0 +1,157 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="TempDashboardController" ng-if="isTempMonOnly || isTempMonWLg">
+    <div class="row">
+        <div class="col-lg-9">
+            <div class="bgr mlr0">
+                <div class="row">
+                    <div class="col-lg-4 col-xs-6 ph40">
+                        <a href="#/temperature/assets?cf=1&dur=0">
+                            <div class="small-box bd-red c-red">
+                                <div class="inner-box">
+                                    <h3>
+                                        {{tagSummary.nAbnormalTemps-0}}
+                                    </h3>
+
+                                    <p>
+                                        {{resourceBundle['state.alarm']}}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-4 col-xs-6 ph40">
+                        <a href="#/temperature/assets?cf=4&dur=0">
+                            <div class="small-box bd-green c-green">
+                                <div class="inner-box">
+                                    <h3>
+                                        {{tagSummary.nDevices-tagSummary.nAbnormalTemps}}
+                                    </h3>
+
+                                    <p>
+                                        {{resourceBundle['state.normal']}}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-4 col-xs-6 ph40">
+                        <a href="#/temperature/assets?dur=0">
+                            <div class="small-box bd-blue c-blue">
+                                <div class="inner-box">
+                                    <h3>
+                                        {{tagSummary.nDevices-0}}
+                                    </h3>
+
+                                    <p>
+                                        {{resourceBundle['items.monitored']}}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="bgr mlr0">
+                <div class="row">
+                    <div class="col-lg-12 col-xs-6 ph40">
+                        <a href="#/temperature/assets?cf=3&dur=0">
+                            <div class="small-box bd-grey c-grey">
+                                <div class="inner-box">
+                                    <h3>
+                                        {{tagSummary.nIActDevices-0}}
+                                    </h3>
+
+                                    <p>
+                                        {{resourceBundle['temperature.inactive.devices']}}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mg-hori-zero mt10">
+        <div ng-controller="SimpleMenuController" ng-init="init('temperature.dashboard')">
+            <div class="filter-box form-group">
+                <div class="row">
+                    <div class="col-sm-7 cbx">
+                        <div class="pull-left" ng-show="view == 'map'">
+                            <span class="glyphicons glyphicons-filter"></span>&nbsp;
+                            <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isopen">
+                                <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle ng-disabled="!isMapSupported">
+                                    {{resourceBundle[filterResourceBundleKey[currentFilter-1]]}} <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" ng-show="isopen">
+                                    <li>
+                                        <a ng-click="filterChange(1)">{{resourceBundle['temperature.alarms']}}</a>
+                                    </li>
+                                    <li>
+                                        <a ng-click="filterChange(2)">{{resourceBundle['device.alarms']}}</a>
+                                    </li>
+                                    <!--<li>
+                                        <a ng-click="filterChange(3)">No data</a>
+                                    </li>-->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="pull-right">
+                            <div class="btn-group">
+                                <a ng-click="view='map'" ng-class="{active: view == 'map'}" class="btn btn-sm btn-default" uib-tooltip="Map view">
+                                    <span class="glyphicons glyphicons-globe"></span>
+                                </a>
+                                <a ng-click="view='table'" ng-class="{active: view == 'table'}" class="btn btn-sm btn-default" uib-tooltip="Table view">
+                                    <span class="glyphicons glyphicons-table"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="view == 'map'">
+                <div ng-include="'views/temperature/dashboard-map.html'"></div>
+            </div>
+            <div ng-show="view == 'table'">
+                <div ng-include="'views/temperature/dashboard-table.html'"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-if="!iTempMonOnly && !isTempMonWLg && iAU">
+    <div class="mt5">
+        <div class="box topbox tabminheight">
+            <div class="row">
+                <div class="col-sm-12 mt10">
+                    <div class="alert alert-warning">{{resourceBundle['assetuser']}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

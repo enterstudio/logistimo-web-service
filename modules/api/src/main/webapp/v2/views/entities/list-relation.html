@@ -1,0 +1,190 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+<div class="bizinfo bizinfo-last">
+<div ng-controller="RelationListController">
+    <div class="filter-box form-group">
+        <div class="row">
+            <div class="col-sm-3">
+                <span class="filter-label">{{resourceBundle['kiosks']}}</span>
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="searchkey" name="searchkey" maxlength="50"
+                           ng-disabled="vw == 'm'"
+                           placeholder="{{resourceBundle['filterby']}} {{resourceBundle['kiosks.lower']}}"
+                           ng-enter="searchEntity()">
+							<span class="input-group-btn">
+							<button class="btn btn-default" ng-click="searchEntity()" type="button"
+                                    ng-disabled="(searchkey == null && searchkey == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}">
+                                <span class="glyphicons glyphicons-search"></span>
+                            </button>
+							</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row action-bar">
+            <div class=" bizinfo-last" ng-hide="hideAllRelActions">
+                <a href="#/setup/entities/detail/{{entityId}}/relationships/add" class="btn btn-sm btn-primary" ng-show="iSU || (dp.era && perm > 1)">{{resourceBundle['add']}}</a>
+                <a ng-if="(currentDomain == entity.sdid) && (iSU || (iAdm && dp.era) && perm > 1)" href="#/setup/entities/detail/{{entityId}}/relationships/setpermission" class="btn btn-sm btn-primary">{{resourceBundle['setpermissions']}}</a>
+                <a ng-show="isDef(allRTags) && (iSU || (dp.ere && perm > 1))" href="#/setup/entities/detail/{{entityId}}/relationships/edit" class="btn btn-sm btn-primary">{{resourceBundle['edit.route']}}</a>
+                <button type="button" class="btn btn-sm btn-default" ng-click="removeEntityRelation()" ng-show="(iSU || (dp.err && perm > 1)) && !hideDeleteRel">{{resourceBundle['remove']}}</button>
+            </div>
+    </div>
+    <div class="bizinfo bizinfo-last">
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="tabb nav nav-tabs">
+                    <li ng-class="{active: linkType == 'c'}"><a ng-click="fetchLinks('c')" class="clickable">{{resourceBundle['customers']}}
+                        <span class="badge">{{customerCount}}</span></a></li>
+                    <li ng-class="{active: linkType == 'v'}"><a ng-click="fetchLinks('v')" class="clickable">{{resourceBundle['vendors']}}
+                        <span class="badge">{{vendorCount}}</span></a></li>
+                    <li class="pull-right">
+                        <div ng-map-tab-switch vw="vw"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="noLRpad tab-pane nb">
+        <div class="row">
+            <div class="col-sm-12">
+                <div ng-show="isDef(allRTags)" class="col-sm-2">
+                    <ul class="tabb nav nav-tabs-left nav-stacked">
+                        <li ng-class="{active: tag == '--notag--'}">
+                            <a ng-click="setTag('--notag--')" class="clickable"><span class="badge">{{countTags['--notag--'] || 0}}</span> {{resourceBundle['untagged']}}</a>
+                        </li>
+                        <li ng-class="{active: tag == rTag}" ng-repeat="rTag in allRTags">
+                            <a ng-click="setTag(rTag)" class="clickable"><span class="badge">{{countTags[rTag] || 0}}</span> {{rTag}}</a>
+                        </li>
+                    </ul>
+                </div>
+                <div ng-if="vw == 't'" ng-controller="RelationListTableController">
+                    <div ng-class="{'col-sm-12':isUndef(allRTags),'col-sm-10 noleftpad':isDef(allRTags)}">
+                        <div ng-show = "isDef(filtered) && filtered.length > 0" class="pull-right">
+                            <div class="mb5">
+                                <div ng-include="'views/load-more-paginator.html'"></div>
+                            </div>
+                        </div>
+                        <table class="table table-striped table-condensed table-hover table-logistimo">
+                            <tbody>
+                            <tr>
+                                <th class="col-sm-0-1"></th>
+                                <th class="col-sm-0-1 text-center">
+                                    <input type="checkbox" ng-change="selectAll(selAll)"
+                                          ng-model='selAll'/>
+                                </th>
+                                <th class="col-sm-0-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                <th class="col-sm-2">
+                                    <span ng-show="linkType == 'c'">{{resourceBundle['customer']}}</span>
+                                    <span ng-show="linkType == 'v'">{{resourceBundle['vendor']}}</span>
+                                </th>
+                                <th class="col-sm-2">{{resourceBundle['location']}}</th>
+                                <th class="col-sm-1" ng-show="linkType == 'c' && accountTabEnabled">{{resourceBundle['creditlimit']}} (INR)</th>
+                                <th class="col-sm-2">{{resourceBundle['description']}}</th>
+                                <th ng-show="(isUndef(allRTags)|| tag != '--notag--') && isUndef(hideReorder)" class="col-sm-0-2 text-center">{{resourceBundle['move']}}</th>
+                                <th ng-show="(isUndef(allRTags)|| tag != '--notag--') && isUndef(hideReorder)" class="col-sm-0-5 text-center">{{resourceBundle['reorder']}}</th>
+                            </tr>
+                            <tr ng-class="{'reorderbg' : item.rhc}" ng-repeat="item in filtered = (rData | filter:{rt:tag} | orderBy:'osno')">
+                                <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                                <td class="text-center"><input type="checkbox" ng-model="item.selected"/></td>
+                                <td class="text-center">{{item.sno}}</td>
+                                <td>
+                                    <a ng-if="item.perm > 0" href="#/setup/entities/detail/{{item.id}}">{{item.nm}}</a>
+                                    <a class="link-disabled" ng-if="item.perm == 0">{{item.nm}}</a>
+                                </td>
+                                <td>{{item.loc}}</td>
+                                <td ng-show="linkType == 'c' && accountTabEnabled">
+                                    <span editable-box ng-show="!item.cedit && (iSU || dp.ere)" ng-click="setCredit($index)" class="fullSpan">
+                                        {{item.cl || (item.cl === 0?0:'&nbsp;')}} <span ng-show="item.updatingEntityCredit" class="glyphicons glyphicons-cogwheel spin"></span>
+                                    </span>
+                                    <div ng-show="item.cedit && (iSU || dp.ere)">
+                                        <editable-text edit-model="item.ecl"
+                                                       on-ok="updateCredit($index)"
+                                                       on-cancel="cancelCredit($index)"
+                                                       set-focus="{{item.cedit}}">
+                                        </editable-text>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span editable-box ng-show="!item.dedit && (iSU || dp.ere)" ng-click="setDesc($index)" class="fullSpan">
+                                        {{item.desc || '&nbsp;'}} <span ng-show="item.updatingEntityDesc" class="glyphicons glyphicons-cogwheel spin"></span>
+                                    </span>
+                                    <div ng-show="item.dedit && (iSU || dp.ere)">
+                                        <editable-text edit-model="item.edesc"
+                                                        on-ok="updateDesc($index)"
+                                                        on-cancel="cancelDesc($index)"
+                                                        set-focus="{{item.dedit}}">
+                                        </editable-text>
+                                    </div>
+                                </td>
+                                <td ng-show="(isUndef(allRTags)|| tag != '--notag--') && isUndef(hideReorder)" class="text-center">
+                                    <span class="clickable glyphicons glyphicons-arrow-up"
+                                          ng-click="moveUp($index)"></span>
+                                    <span class="clickable glyphicons glyphicons-arrow-down"
+                                          ng-click="moveDown($index)"></span>
+                                </td>
+                                <td ng-show="(isUndef(allRTags)|| tag != '--notag--') && isUndef(hideReorder)">
+                                    <span editable-box ng-show="!item.redit" ng-click="setPosition($index)" class="fullSpan">
+                                        {{item.osno}}
+                                    </span>
+                                    <div ng-show="item.redit">
+                                        <editable-text edit-model="item.esno"
+                                                       on-ok="updatePosition($index)"
+                                                       on-cancel="cancelPosition($index)"
+                                                       set-focus="{{item.redit}}">
+                                        </editable-text>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr ng-show="isUndef(filtered) || filtered.length == 0" class="mt5">
+                                <td colspan="100%" width="100%">
+                                    <p class="alert alert-warning">{{resourceBundle['entities.notavailable']}}</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div ng-show = "isDef(filtered) && filtered.length > 0" class="pull-right">
+                            <div class="mb5">
+                                <div ng-include="'views/load-more-paginator.html'"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pull-right">
+                        <div ng-class="{'col-sm-12':isUndef(allRTags),'col-sm-10':isDef(allRTags)}">
+                            <button ng-disabled="!routeUpdated || (dp.vp && perm < 2)" type="button" ng-click="updateEntityOrder()" class="btn btn-primary">{{resourceBundle['routing.save']}}</button>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="vw == 'm' && isDef(orData)">
+                    <div ng-class="{'col-sm-12':isUndef(allRTags),'col-sm-10 noleftpad':isDef(allRTags)}">
+                        <div ng-include="'views/entities/view-map-route.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>

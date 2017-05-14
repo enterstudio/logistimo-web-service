@@ -1,0 +1,48 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<table
+	class="table table-bordered table-condensed table-hover table-striped table-logistimo" id="fixTable">
+	<thead>
+		<tr>
+			<th></th>
+			<th><input type="checkbox"></th>
+			<th ng-repeat="col in entityMetadata">{{col.title}}</th>
+		</tr>
+        </thead>
+    <tbody>
+		<tr ng-repeat="item in $parent.$parent.filtered = materials">
+			<td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+			<td><input ng-if="currentDomain != item.sdid" type="checkbox"></td>
+			<td class="text-center">{{item.sno}}</td>
+			<td><a href="#/setup/materials/all/detail/{{item.mId}}">{{item.mnm}}</a></td>
+			<td>{{item.reord}}</td>
+			<td>{{item.max}}</td>
+			<td>{{item.crMnl}}</td>
+			<td>{{item.rp}}</td>
+			<td>{{item.tx}}</td>
+			<td>{{item.tmn}}</td>
+			<td>{{item.tmx}}</td>
+		</tr>
+	</tbody>
+</table>

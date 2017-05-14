@@ -1,0 +1,310 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="AddEntController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="addEntityForm" novalidate>
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['kiosk.infotitle']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['kiosk.name']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control"
+                                           ng-model="entity.nm"
+                                           name="etname"
+                                           placeholder="{{resourceBundle['kiosk.name']}}"
+                                           ng-focus="idCheck = false"
+                                           ng-class="{'c-visited' : uVisited.id}"
+                                           ng-blur="uVisited.id = true; idCheck = true; checkEntityAvailability(entity.nm)" maxlength="50" autocomplete="off" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.id && addEntityForm.etname.$error.required">
+									<span class="help-block"> {{resourceBundle['kiosk.name']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                                <div class="has-error" ng-show="uVisited.id && !addEntityForm.etname.$error.required && idCheck && idVerified && idStatus">
+                                    <span class="help-block">'{{entity.nm}}' {{resourceBundle['already.exists']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="users" class="col-sm-4 control-label required">{{resourceBundle['users']}}</label>
+                                <div class="col-sm-8" id="users">
+                                    <user-select only-active="true" users-model="entity.usrs" blur-callback="setUserVisited()" ng-class="{'c-visited' : uVisited.usrs,'u-na' : entity.usrs == undefined || entity.usrs.length == 0}"></user-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error"
+                                     ng-show="uVisited.usrs && (entity.usrs == undefined || entity.usrs.length == 0 )">
+                                    <span class="help-block">{{resourceBundle['users']}} {{resourceBundle['arerequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="tags" class="col-sm-4 control-label">{{resourceBundle['tags']}}</label>
+                                <div class="col-sm-8" id="tags">
+                                    <tag-select  tags-model="entity.tgObjs" type="'entity'"></tag-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['customid']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" ng-model="entity.cid"
+                                           name="cId" placeholder="{{resourceBundle['customid']}}" maxlength="50">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['location']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['country']}}</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="entity.ctr" name="country" class="form-control" ng-change="setCountry(entity.ctr)"
+                                            ng-blur="uVisited.ctr = true" required>
+                                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['country']}} -- </option>
+                                        <option ng-repeat="(name,val) in sCountries" value="{{val.code}}" ng-selected="val.code === ctr">{{val.name}}</option>
+                                    </select>
+                                    <div class="has-error" ng-show="uVisited.ctr && addEntityForm.country.$error.required">
+                                        <span class="help-block ent-title">{{resourceBundle['country']}} {{resourceBundle['isrequired']}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['state']}}</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="entity.st" name="state" ng-class="{'c-visited' : uVisited.st}" ng-blur="uVisited.st = true"
+                                            class="form-control" ng-change="setState(entity.st)" required>
+                                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['state']}}-- </option>
+                                        <option ng-repeat="(key,item) in states" value="{{key}}" ng-selected="key == entity.st">{{key}}</option>
+                                    </select>
+                                    <div class="has-error" ng-show="uVisited.st && addEntityForm.state.$error.required">
+									    <span class="help-block ent-title">{{resourceBundle['state']}} {{resourceBundle['isrequired']}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="entDs" class="col-sm-4 control-label">{{resourceBundle['district']}}</label>
+                                <div class="col-sm-8">
+                                    <select name="district" ng-model="entity.ds" ng-blur="setDistrict(entity.ds)" ng-change="setDistrict(entity.ds)" class="form-control" id="entDs">
+                                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['district']}} -- </option>
+                                        <option ng-repeat="(key,item) in districts" value="{{key}}" ng-selected="key == entity.ds">{{key}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="taluk" class="col-sm-4 control-label">{{resourceBundle['taluk']}}</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="entity.tlk" class="form-control" id="taluk" name="taluk">
+                                        <option value=""> -- {{resourceBundle['select']}} {{resourceBundle['taluk']}} -- </option>
+                                        <option ng-repeat="(key,item) in taluks" value="{{item}}" ng-selected="item == entity.tlk">{{item}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="village" class="col-sm-4 control-label required">{{resourceBundle['village']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="village" id="village" name="vil"
+                                           ng-model="entity.ct" autocomplete="off"
+                                           ng-class="{'c-visited' : uVisited.vil}"
+                                           ng-blur="uVisited.vil = true"
+                                           placeholder="{{resourceBundle['village']}}" maxlength="50" required>
+                                    <div class="has-error" ng-show="uVisited.vil && addEntityForm.village.$error.required">
+                                        <span class="help-block ent-title">{{resourceBundle['village']}} {{resourceBundle['name']}} {{resourceBundle['isrequired']}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="zipcode" class="col-sm-4 control-label">{{resourceBundle['zipcode']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="zipcode"
+                                           ng-model="entity.zip" name="zip"  autocomplete="off" zip-code
+                                           placeholder="{{resourceBundle['zipcode']}}" maxlength="50">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="streetaddress" class="col-sm-4 control-label">{{resourceBundle['streetaddress']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="streetaddress"
+                                           ng-model="entity.str" name="address" autocomplete="off"
+                                           placeholder="{{resourceBundle['streetaddress']}}" maxlength="50">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lt" class="col-sm-4 control-label">{{resourceBundle['latitude']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="lt" ng-blur="setManualGeo()"
+                                           ng-model="entity.lt" name="lat" autocomplete="off" only-digits allow-decimal allow-negative
+                                           placeholder="{{resourceBundle['latitude']}}" maxlength="50">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ln" class="col-sm-4 control-label">{{resourceBundle['longitude']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="ln" ng-blur="setManualGeo()"
+                                           ng-model="entity.ln" name="lon" autocomplete="off" only-digits allow-decimal allow-negative
+                                           placeholder="{{resourceBundle['longitude']}}" maxlength="50">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <button type="button" ng-click="validateGeo() && getGeoCodes()" class="btn btn-default" name="getgeo">{{resourceBundle['get']}}
+                                {{resourceBundle['geocodes.lowercase']}}</button>
+                            <hr />
+                            <div class="has-error" ng-show="invalidGeo">
+                                <span class="help-block ent-title">{{resourceBundle['geocodes.specifylocationmsg']}}</span>
+                            </div>
+                            <span class="litetext">{{resourceBundle["geocodes.geocodeentity"]}}({{resourceBundle["geocodes.ensure"]}})</span>
+                            <div ng-if="isDef(lmap.markers)">
+                                <ui-gmap-google-map center="lmap.center" zoom="lmap.zoom" bounds="lmap.bounds" pan="true">
+                                    <ui-gmap-markers idKey="id" models="lmap.markers" coords="'self'" events="events" click="setGeo" options="'options'"></ui-gmap-markers>
+                                </ui-gmap-google-map>
+                            </div>
+                            <span ng-hide="isUndef(entity.lt) && isUndef(entity.ln)">{{resourceBundle["latitude"]}}: {{entity.lt}}, {{resourceBundle["longitude"]}}: {{entity.ln}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle["financialdetails"]}}
+                    </div>
+                <p class="litetext">{{resourceBundle["financialdetails.prompt"]}}</p>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="cur" class="col-sm-4 control-label">{{resourceBundle['currency']}}</label>
+                            <div class="col-sm-8">
+                                <select ng-model="entity.cur" class="form-control" id="cur" name="cur">
+                                    <option value=""> -- {{resourceBundle['select']}} -- </option>
+                                    <option ng-repeat="(key,val) in currencies" value="{{key}}" ng-selected="key === entity.cur">{{val}}({{key}})</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">{{resourceBundle['tax']}} (%)</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" ng-model="entity.tx" name="tx" only-digits allow-decimal
+                                       placeholder="{{resourceBundle['tax']}}" maxlength="5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="txid" class="col-sm-4 control-label">{{resourceBundle['tax.id']}}</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" ng-model="entity.txid" name="txid" autocomplete="off"
+                                       id="txid" placeholder="{{resourceBundle['tax.id']}}" maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle["inventory.policy"]}}
+                    </div>
+                <p class="litetext">{{resourceBundle["inventorypolicy.prompt"]}}</p>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inv" class="col-sm-4 control-label">{{resourceBundle['inventory.policy']}}</label>
+                            <div class="col-sm-8">
+                                <select ng-model="entity.inv" class="form-control" id="inv" name="inv">
+                                    <option value="">{{resourceBundle['inventorypolicy.none']}}</option>
+                                    <option value="sq" ng-if="isEOQ">{{resourceBundle['inventorypolicy.sq']}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group" ng-if="isEOQ && entity.inv == 'sq'">
+                            <label for="sl" class="col-sm-4 control-label">{{resourceBundle['inventory.servicelevel']}}</label>
+                            <div class="col-sm-8">
+                                <select ng-model="entity.sl" class="form-control" id="sl">
+                                    <option ng-repeat="item in serviceLevels" value={{item}} ng-selected="item === entity.sl">{{item}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['batch.management']}}</label>
+                                <div class="col-sm-8">
+                                    <div class="cbx">
+                                        <input type="checkbox" id="ebm" ng-model="entity.be" name="ebm" inverted> {{resourceBundle['batch.disable']}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10">
+                    <div class="col-sm-6">
+                        <div class="pull-right">
+                            <button type="button" ng-show="edit == false"  ng-click="setAllVisited(); validate(addEntityForm) && createEntity()" name="save" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                            <button type="button" ng-show="edit == true" ng-click="setAllVisited(); validate(addEntityForm) && updateEntity()" name="update" class="btn btn-primary">{{resourceBundle['update']}}</button>
+                            <!--<button ng-hide="edit" ng-click="resetEntity()" name="reset" class="btn btn-default">{{resourceBundle['reset']}}</button>-->
+                            <a ng-show="edit" ng-click="$back()" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                            <a ng-hide="edit" href="#/setup/entities/" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

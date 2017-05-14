@@ -1,0 +1,236 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="TempAssetsController">
+    <div class="filter-box form-group">
+        <div ng-include="'views/common/reset-filters.html'"/>
+        <div class="row">
+            <div class="col-sm-3">
+                <p class="codegray ent-title lPad5">{{resourceBundle['kiosk']}}</p>
+                <div class="inputwrap">
+                    <entity-select ent-model="entity" classes="form-control"></entity-select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <p class="codegray ent-title lPad5">{{resourceBundle['device']}}</p>
+                <div class="inputwrap">
+                    <input type="text" ng-model="device"
+                           typeahead-on-select="setDeviceId($item)" class="form-control" maxlength="50"
+                           uib-typeahead="item.id for item in devices | filter:{id: $viewValue} | limitTo:8"
+                           class="form-control" ng-change="checkDevice()" typeahead-editable="false"/>
+                </div>
+            </div>
+            <div class="col-sm-3 pt20 mh40">
+                <span class="filter-label">Alarms</span>
+                <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isopen">
+                    <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                        {{filters[currentFilter].displayValue}} <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" ng-show="isopen">
+                        <li ng-repeat="filter in filters">
+                            <a ng-click="onAlarmFilterChange(filter.value)">{{filter.displayValue}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-3 pt20 mh40">
+                <span ng-show="currentFilter != 0 && currentFilter != 4">
+                    <form class="form-inline">
+                        <div class="col-sm-2 pd-vert-7">
+                            {{resourceBundle['over.uppercase']}}
+                        </div>
+                        <div class="col-sm-4 pd-right-zero">
+                            <input type="text" class="form-control w-100" ng-model="duration" maxlength="4">
+                        </div>
+                        <div class="col-sm-3 pd-vert-7">
+                            {{resourceBundle['minutes']}}
+                        </div>
+                        <div class="col-sm-3 pd-right-zero">
+                            <a class="btn btn-default" type="button" ng-click="onDurationFilterChange()">
+                                <span class="glyphicons glyphicons-filter"></span>
+                            </a>
+                        </div>
+                    </form>
+                </span>
+            </div>
+            <!--<div class="col-sm-3">
+                <p class="codegray ent-title lPad5">{{resourceBundle['devicevendor']}}</p>
+                <div class="inputwrap">
+                    <input type="text" ng-model="vendor"
+                           typeahead-on-select="setVendorId($item)" class="form-control" maxlength="50"
+                           typeahead="item.vname for item in vendors | filter:{vname: $viewValue} | limitTo:8"
+                           class="form-control" ng-change="checkVendor()" typeahead-editable="false"/>
+                </div>
+            </div>-->
+        </div>
+    </div>
+    <div class="box topbox">
+        <div class="row mg-hori-zero mt10">
+            <div class="col-sm-6">
+                <h5 class="sgHeading" ng-show="location" style="margin-left: 0px; margin-right: 0px;">
+                    {{resourceBundle['assets']}} {{resourceBundle['in']}} {{location}}
+                </h5>
+            </div>
+            <div class="col-sm-6">
+                <span class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </span>
+            </div>
+        </div>
+        <table class="table table-striped table-hover mg-bottom-zero table-logistimo">
+            <tr>
+                <th></th>
+                <th>#</th>
+                <th nowrap>{{resourceBundle['deviceid']}} ({{resourceBundle['vendor']}})</th>
+                <th nowrap>{{resourceBundle['kiosk']}}</th>
+                <th nowrap>{{resourceBundle['status']}}</th>
+            </tr>
+            <tr ng-show="invntryItems.results.length == 0">
+                <td class="text-center" colspan="5">{{resourceBundle['data.unavailable']}}</td>
+            </tr>
+            <tr ng-repeat="invntryItem in invntryItems.results"
+                ng-show="invntryItems.results.length > 0">
+                <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != invntryItem.sdid" ng-click="switchDomain(invntryItem.sdid,invntryItem.sdname)" uib-tooltip="{{invntryItem.sdname}}"></span></td>
+                <td>
+                    {{$index+1}}
+                </td>
+                <td nowrap>
+                    <a href="#/temperature/device/{{invntryItem.vid}}/{{invntryItem.id}}">
+                        {{invntryItem.id}} ({{invntryItem.vid | uppercase}})
+                    </a>
+                </td>
+                <td nowrap><a href="#/setup/entities/detail/{{invntryItem.kId}}" target="_blank">{{invntryItem.kName}}</a><span class="litetext">{{invntryItem.add}}</span></td>
+                <td>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <span ng-show="invntryItem.st == 0" class="c-green">
+                                <span class="glyphicons glyphicons-ok-circle medium"></span>
+                            </span>
+                            <span ng-show="invntryItem.st == 1 || invntryItem.st == 2" class="c-orange">
+                                <span class="glyphicons glyphicons-exclamation-sign medium"></span>
+                            </span>
+                            <span ng-show="invntryItem.st == 3 && invntryItem.tmp >= invntryItem.min && invntryItem.tmp <= invntryItem.max" class="temp-list-items c-red pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-remove-circle"></span>
+                                    <span>{{invntryItem.tmp}} &#8451;</span>
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #000000;">
+                                    {{invntryItem.fStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.tmp < invntryItem.min && invntryItem.st == 3"
+                                  class="temp-list-items c-aqua pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-remove-circle"></span>
+                                    <span>{{invntryItem.tmp}} &#8451;</span>
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #000000;">
+                                    {{invntryItem.fStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.tmp > invntryItem.max && invntryItem.st == 3"
+                                  class="temp-list-items c-red pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-remove-circle"></span>
+                                    <span>{{invntryItem.tmp}} &#8451;</span>
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #000000;">
+                                    {{invntryItem.fStt}}
+                                </p>
+                            </span>
+                        </div>
+                        <div class="col-sm-9 ml5">
+                            <span ng-show="invntryItem.bSt == 1" class="temp-list-items temp-list-items-inverse pull-left">
+                                    <div>
+                                        <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['battery.warning']}} &nbsp;
+                                    </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #FFFFFF;margin-top:3px;"
+                                   ng-show="invntryItem.bStt != undefined">
+                                    {{invntryItem.fbStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.bSt == 2" class="temp-list-items temp-list-items-inverse pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['battery.alarm']}} &nbsp;
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #FFFFFF;margin-top:3px;"
+                                   ng-show="invntryItem.bStt != undefined">
+                                    {{invntryItem.fbStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.bSt == 3" class="temp-list-items temp-list-items-inverse pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['battery.charging']}} &nbsp;
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #FFFFFF;margin-top:3px;"
+                                   ng-show="invntryItem.bStt != undefined">
+                                    {{invntryItem.fbStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.cnSt == 1" class="temp-list-items temp-list-items-inverse pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['device.noconnection']}} &nbsp;
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #FFFFFF;margin-top:3px;"
+                                   ng-show="invntryItem.cnStt != undefined">
+                                    {{invntryItem.fcnStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.sSt == 1" class="temp-list-items temp-list-items-inverse pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['sensor.noconnection']}} &nbsp;
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #FFFFFF;margin-top:3px;"
+                                   ng-show="invntryItem.sStt != undefined">
+                                    {{invntryItem.fsStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.aSt == 1" class="temp-list-items temp-list-items-inverse pull-left">
+                                <div>
+                                    <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.device.inactive']}} &nbsp;
+                                </div>
+                                <p class="pull-left" style="font-size: xx-small;position: relative; color: #FFFFFF;margin-top:3px;"
+                                   ng-show="invntryItem.faStt != undefined">
+                                    {{invntryItem.faStt}}
+                                </p>
+                            </span>
+                            <span ng-show="invntryItem.sysErrs" class="temp-list-items temp-list-items-inverse-o pull-left pt12">
+                                <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['firmware.error']}} &nbsp;
+                            </span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div class="row mg-hori-zero">
+            <div class="col-sm-8">
+
+            </div>
+            <div class="col-sm-4">
+                <span class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

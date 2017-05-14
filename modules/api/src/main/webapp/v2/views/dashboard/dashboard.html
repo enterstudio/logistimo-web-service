@@ -1,0 +1,61 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('dashboard')">
+    <div class="subnavbar navbar navbar-default" role="navigation">
+        <ul class="nav navbar-nav subnav">
+            <li ng-class="{enable: subview == 'overview'}"><a
+                    href="#/dashboard/overview/">Overview</a>
+            </li>
+            <li ng-class="{enable: subview == 'inventory'}"><a
+                    href="#/dashboard/inventory/" ng-show="hasDashbaccess && !tempOnlyAU">Inventory</a>
+            </li>
+            <li ng-hide="hbUTag" ng-class="{enable: subview == 'activity'}"><a
+                    href="#/dashboard/activity/" ng-show="hasDashbaccess && !tempOnlyAU && (dashboardConfig.ape || dashboardConfig.ipe)">Activity</a>
+            </li>
+            <!--<li ng-class="{enable: subview == 'hierarchy'}"><a
+                    href="#/dashboard/hierarchy/" ng-show="iAdm && !tempOnlyAU && (dashboardConfig.ope || dashboardConfig.rpe)">Hierarchy chart</a>
+            </li>-->
+            <li ng-class="{enable: (subview == 'view' && dbid == item.dbId)}" ng-repeat="item in dashboards" ng-show="item.isConfd">
+                <a href="#/dashboard/view/{{item.dbId}}">{{item.nm}}</a>
+            </li>
+        </ul>
+    </div>
+    <div ng-switch="subview">
+        <div ng-switch-when="overview">
+            <div ng-if="hasDashbaccess" ng-include="'views/dashboard/main-dashboard.html'"></div>
+        </div>
+        <div ng-switch-when="inventory">
+            <div ng-include="'views/dashboard/inventory.html'"></div>
+        </div>
+        <div ng-switch-when="activity">
+            <div ng-include="'views/dashboard/dashboard-activity.html'"></div>
+        </div>
+        <!--<div ng-switch-when="hierarchy">
+            <div ng-include="'views/home/hierarchy.html'"></div>
+        </div>-->
+        <div ng-switch-when="view">
+            <div ng-init="dbid = dbid" ng-include="'views/dashboard/view-dashboard.html'"></div>
+        </div>
+    </div>
+</div>

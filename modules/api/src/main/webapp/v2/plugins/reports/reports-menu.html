@@ -1,0 +1,134 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<!-- @if NODE_ENV == 'LOCAL' -->
+<link rel="stylesheet" type="text/css" href='plugins/reports/css/menu.css'/>
+<link rel="stylesheet" type="text/css" href='plugins/reports/css/widget.css'/>
+<!-- @endif -->
+<div ng-controller="SimpleMenuController" ng-init="init('newreports')">
+    <div class="row">
+        <div class="col-sm-12">
+                <div ng-controller="rptCoreController">
+                    <div class="report-pane">
+                        <div class="report-menu" ng-class="{'hide-menu':hideMenu}">
+                            <div class="row" id="fixedMenu">
+                                <div class="col-sm-2 reports-active-menu link" ng-click="toggleMenu()">{{report}}
+                                    <span ng-show="report" class="glyphicons glyphicons-chevron-up"></span>
+                                </div>
+                                <div class="col-sm-8 reports-heading">
+                                    <span ng-if="hideMenu">
+                                        {{heading}}
+                                        <a ng-show="helpURL" target="_blank" ng-click="stopPropagation();" ng-href="{{helpURL}}">
+                                            <span class="pt5 codegray small glyphicons glyphicons-question-sign"></span>
+                                        </a>
+                                    </span>
+                                    <span ng-if="!hideMenu">Reports</span>
+                                </div>
+                            </div>
+                            <div class="row" ng-if="!loadingConfig">
+                                <div class="col-sm-3">
+                                    <ul class="accordion">
+                                        <li ng-repeat="(key,value) in getReportMenu(1)">
+                                            <div class="link">{{key}}</div>
+                                            <ul class="submenu">
+                                                <li ng-repeat="item in value">
+                                                    <a ng-class="{'current-report-menu': item.id == rptid}" href="#/newreports/{{item.id}}">{{item.subReport}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-3">
+                                    <ul class="accordion">
+                                        <li ng-repeat="(key,value) in getReportMenu(2)">
+                                            <div class="link">{{key}}</div>
+                                            <ul class="submenu">
+                                                <li ng-repeat="item in value">
+                                                    <a ng-class="{'current-report-menu': item.id == rptid}" href="#/newreports/{{item.id}}">{{item.subReport}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-3">
+                                    <ul class="accordion">
+                                        <li ng-repeat="(key,value) in getReportMenu(3)">
+                                            <div class="link">{{key}}</div>
+                                            <ul class="submenu">
+                                                <li ng-repeat="item in value">
+                                                    <a ng-class="{'current-report-menu': item.id == rptid}" href="#/newreports/{{item.id}}">{{item.subReport}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-3">
+                                    <ul class="accordion">
+                                        <li ng-repeat="(key,value) in getReportMenu(4)">
+                                            <div class="link">{{key}}</div>
+                                            <ul class="submenu">
+                                                <li ng-repeat="item in value">
+                                                    <a ng-class="{'current-report-menu': item.id == rptid}" href="#/newreports/{{item.id}}">{{item.subReport}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="pt10">
+                                        <ul class="accordion">
+                                            <li>
+                                                <div class="link">Custom reports</div>
+                                                <ul class="submenu">
+                                                    <li>
+                                                        <a ng-class="{'current-report-menu': rptid == 'cr'}" href="#/newreports/cr">Custom reports</a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" ng-hide="isUndef(rptid)" ng-click="toggleMenu()">
+                                <div class="col-sm-12">
+                                    <div class="menu-close">
+                                        <span class="glyphicons glyphicons-chevron-up"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row overflowYHide">
+                            <div class="col-sm-12 mh">
+                                <div ng-if="report">
+                                    <div class="box nb" ng-init="rptid = rptid"
+                                         ng-include="'plugins/reports/reports-template.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>

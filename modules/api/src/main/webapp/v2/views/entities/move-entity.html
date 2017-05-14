@@ -1,0 +1,207 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="MoveEntityController" ng-if="iSU">
+        <div style="padding: 15px 25px;">
+            <div class="row">
+            <div class="col-sm-5 nolrpad bgr" style="margin-left: 0;">
+                <div class="row pb10">
+                    <div class="col-sm-3">
+                        <label class="control-label required">{{resourceBundle['type']}}</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="radio" ng-model="moveType" value="move"> {{resourceBundle['move.entities']}}
+                        <span class="lPad"></span>
+                        <input type="radio" ng-model="moveType" value="add"> {{resourceBundle['add.entities']}}
+                    </div>
+                </div>
+                <div class="row pb10">
+                    <div class="col-sm-3">
+                        <label class="control-label">{{resourceBundle['all.entities']}}</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="checkbox" ng-change="switchTable()" ng-model='allEntity'/> Select all {{resourceBundle['kiosks.lowercase']}}
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="row" ng-hide="allEntity">
+                <div class="col-sm-5 noLRpad pt10 bgr" style="margin: 0">
+                    <div class="title-heading">
+                        {{resourceBundle['source.domain']}}: {{domainName}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="filter-box filter-box-fit">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <span class="filter-label">{{resourceBundle['kiosks']}}</span>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" ng-model="search.key" name="search.key" maxlength="50"
+                                                   ng-disabled="vw == 'm'" placeholder="{{resourceBundle['filterby']}} {{resourceBundle['kiosks.lower']}}" ng-enter="searchEntity()">
+                                            <span class="input-group-btn">
+                                            <button class="btn btn-default" ng-click="searchEntity()" type="button"
+                                                    ng-disabled="(search.key == null && search.key == '')"
+                                                    uib-tooltip="{{resourceBundle['search']}}">
+                                                <span class="glyphicons glyphicons-search"></span>
+                                            </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div ng-show="(search.nm == undefined || search.nm == '')">
+                                            <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}</span>
+                                            <div class="cbx">
+                                                <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt18 col-sm-2">
+                                        <span class="pull-right" >
+                                        <button type="reset" ng-click="reset()" class="btn btn-sm btn-default">
+                                            {{resourceBundle['reset']}}
+                                        </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding-right: 20px;">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="pull-right">
+                                    <div ng-include="'views/paginator.html'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-mat table-nobot-mar table-logistimo">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-1">
+                                <input type="checkbox" ng-change="selectAll(selAll)" ng-model='selAll'/>
+                            </th>
+                            <th class="col-sm-5">{{resourceBundle['kiosk.name']}}</th>
+                            <th class="col-sm-6">{{resourceBundle['location']}}</th>
+                        </tr>
+                        </thead>
+                        <tbody style="height: 300px;">
+                        <tr ng-repeat="item in filtered = entities">
+                            <td class="col-sm-1">
+                                <div ng-hide="item.nCheck">
+                                    <input type="checkbox" ng-model="item.selected"/>
+                                </div>
+                                <div ng-show="item.nCheck" style="padding-top: 18px;"></div>
+                            </td>
+                            <td class="col-sm-5">
+                                <a ng-hide="isTempMonOnly" href="#/setup/entities/detail/{{item.id}}">{{item.nm}}</a>
+                                <a ng-show="isTempMonOnly"
+                                   href="#/setup/entities/detail/{{item.id}}/materials/">{{item.nm}}</a>
+                            </td>
+                            <td class="col-sm-6">{{getAddress(item)}}</td>
+                        </tr>
+                        <tr ng-show="!loading && entities.length == 0">
+                            <td colspan="100%" width="100%">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <p class=" alert alert-warning" ng-show="!loading && filtered.length == 0">
+                                        {{resourceBundle['entities.notavailable']}}</p>
+                                </div>
+                            </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div style="padding-right: 20px;">
+                    <div class="row" ng-show="entities.length>9">
+                        <div class="col-sm-12">
+                            <div class="pull-right">
+                                <div ng-include="'views/paginator.html'"></div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-sm-2 nopad text-center" style="padding-top:15%;">
+                    <span ng-click="moveRight()" class="clickable glyphicons glyphicons-arrow-right editBtn large"></span><br/><br/><br/>
+                    <span ng-click="moveLeft()" class="clickable glyphicons glyphicons-arrow-left editBtn large"></span>
+                </div>
+                <div class="col-sm-5 noLRpad pt10 bgr" style="margin: 0;">
+                    <div class="title-heading">
+                        {{resourceBundle['target.domain']}}:
+                        <div class="navbar-right pr30 col-sm-8" style="bottom: 4px">
+                            <move-domain-select model="destDomainId"></move-domain-select>
+                        </div>
+                    </div>
+                    <table class="table table-mat table-nobot-mar table-logistimo move">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-1">
+                                <input type="checkbox" ng-change="mSelectAll(mSelAll)" ng-model='mSelAll'/>
+                            </th>
+                            <th class="col-sm-5">{{resourceBundle['kiosk.name']}}</th>
+                            <th class="col-sm-6">{{resourceBundle['location']}}</th>
+                        </tr>
+                        </thead>
+                        <tbody style="height: 420px;">
+                        <tr ng-repeat="item in mEntities">
+                            <td class="col-sm-1"><input type="checkbox" ng-model="item.selected"/></td>
+                            <td class="col-sm-5">
+                                <a ng-hide="isTempMonOnly" href="#/setup/entities/detail/{{item.id}}">{{item.nm}}</a>
+                                <a ng-show="isTempMonOnly"
+                                   href="#/setup/entities/detail/{{item.id}}/materials/">{{item.nm}}</a>
+                            </td>
+                            <td class="col-sm-6">{{getAddress(item)}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row" ng-show="allEntity">
+                <div class="noLRpad col-sm-2 cbx filter-label">
+                    {{resourceBundle['target.domain']}}
+                </div>
+                <div class="col-sm-3">
+                    <move-domain-select model="allDestDomainId"></move-domain-select>
+                </div>
+            </div>
+            <div class="row pt10">
+                <div class="noLRpad col-sm-2" ng-class="{'float-right':!allEntity}">
+                    <div ng-class="{'float-right':!allEntity}">
+                    <button ng-show="moveType == 'move'" ng-disabled="!entityMoved" type="button" class="btn btn-sm btn-primary" ng-click="moveEntity()">
+                        {{resourceBundle['move.entities']}}
+                    </button>
+                    <button ng-show="moveType == 'add'" ng-disabled="!entityMoved" type="button" class="btn btn-sm btn-primary" ng-click="addEntity()">
+                        {{resourceBundle['add.entities']}}
+                    </button>
+                    <a ng-hide="edit" href="#/setup/entities/" class="btn btn-sm btn-default">{{resourceBundle['cancel']}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

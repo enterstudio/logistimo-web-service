@@ -1,0 +1,292 @@
+/*
+ * Copyright © 2017 Logistimo.
+ *
+ * This file is part of Logistimo.
+ *
+ * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+ * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * You can be released from the requirements of the license by purchasing a commercial license. To know more about
+ * the commercial license, please contact us at opensource@logistimo.com
+ */
+
+html,
+body
+{
+    width: 100%;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    background-color: #003143;
+    font-family: Georgia;
+    font-size: 12px;
+    color: #000000;
+    /* height: 100%; */
+}
+
+
+/* required styles for carouSlide */
+.slider-wrapper {position:relative; overflow:hidden; width:400px; height:400px;}
+.slider-holder {overflow:hidden;width:400px;display:block;height:400px;padding: 8px;margin: 0px;}
+.slider-holder li {/* padding: 15px; *//* margin: 15px; *//* display:block; *//* height: 507px; */float:left;list-style:none;color:#000;} /* earlier padding:10px */
+.slider-holder ul ul {height:auto; padding-left:18px;}
+.slider-holder li li {padding:0; margin:0; display:list-item; width:auto; height:auto; float:none; list-style:disc;}
+.s-active {position:relative; top:0; left:0;}
+/* custom style */
+.board {/* position: relative; *//* min-height: 500px; *//* border: 3px solid red; */height: 42vw;}
+.board .slider-wrapper {/* border: 0px solid #ccc; *//* position:relative; */width:100%;height: 100%;}
+.board .slider-holder {display:block;width:auto;/* height:500px; */height: 100%;} /* width:30% */
+.board .slider-holder li {
+    /* background-color: #003143; */
+    border-radius: 10px;
+}
+.board .slider-nav {position:absolute; bottom:5px; z-index:100; margin-bottom:0; }
+.board .slider-nav li {list-style:none; float:left; }
+.board .slider-nav a:link,
+.board .slider-nav a:visited {border:none;overflow:hidden; width:25px; height:25px; display:block; margin:3px 11px 3px 3px;text-decoration:none;color:#FFFF66;text-align:center;}
+.board .slider-nav .active a:link,
+.board .slider-nav .active a:visited,
+.board .slider-nav a:hover,
+.board .slider-nav a:focus,
+.board .slider-nav a:active {margin:0 2px 0 0; border:3px solid #FFCC33;}
+
+/* Style for the sticky notes */
+#notes li {
+    position: relative;
+    top: 3vw;
+    right: 10px;
+    width: 25vw;
+    min-height: 34vw;
+    line-height: 225px;
+    /* margin: 25px auto; */
+    margin-right: 3px;
+    padding: 40px 20px 15px 15px;
+    background-color: #FFFFFF;
+    -webkit-transform: rotate(-.5deg);
+    -moz-transform: rotate(-.5deg);
+    -o-transform: rotate(-.5deg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    /*-webkit-box-shadow: -5px 5px 14px 1px #004b66;
+    -moz-box-shadow: -5px 5px 14px 1px #004b66;*/
+    height: 6rem;
+    display: flex;  /* enables centering for modern non-webkit browsers */
+    flex-direction: column;
+    justify-content: space-around; /* centers for modern non-webkit browsers */
+    display: -webkit-box;
+    -webkit-box-pack: center; /* centers in -webkit-box automatically! */
+}
+
+#notes li:nth-child(even) {
+    -webkit-transform: rotate(.5deg);
+    -moz-transform: rotate(.5deg);
+    -o-transform: rotate(.5deg);
+}
+
+#notes li.default:before {
+    font-family: "Glyphicons Regular";
+    content:"\E196";
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li.org_lggi_samaanguru_entity_Order:before {
+    font-family: "Glyphicons Regular";
+    content:"\E459";
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li.org_lggi_samaanguru_entity_Transaction:before{
+    font-family: "Glyphicons Regular";
+    content:"\E458";
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li.org_lggi_samaanguru_entity_Invntry:before{
+    font-family: "Glyphicons Regular";
+    content:"\E060"; /* j6 */
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+
+#notes li.org_lggi_samaanguru_entity_UserAccount:before{
+    font-family: "Glyphicons Regular";
+    content:"\E004";
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li.org_lggi_samaanguru_entity_Material:before{
+    font-family: "Glyphicons Regular";
+    content:"\E412";
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li.org_lggi_samaanguru_entity_Kiosk:before{
+    font-family: "Glyphicons Regular";
+    content:"\E454"; /* j62 /  E451 */
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li.org_lggi_samaanguru_entity_Account:before{
+    font-family: "Glyphicons Regular";
+    content:"\E268";
+    position: absolute;
+    top:-78px;
+    font-size: xx-large;
+}
+#notes li._201 { color: #8a6d3b !important; background-color: #faf3d1; border-color: #faebcc;} /* over stock - alert.png */
+#notes li._202 { color: #31708f !important; background-color: #d5ebf6; border-color: #bce8f1;} /* under stock - alert.png */
+#notes li._200 { color: #a94442 !important; background-color: #f2dede; border-color: #ebccd1;} /* stock out - no.png */
+/*
+#notes li._1 { background-image: url(/images/icon/created.png);}
+#notes li._2 { background-image: url(/images/icon/modified.png); }
+#notes li._3 { background-image: url(/images/icon/deleted.png); }
+#notes li._4 li._201 li._202 { background-image: url(/images/icon/alert.png); background-color:#FFFF00;}
+#notes li._5 { background-image: url(/images/icon/expired.png); }
+#notes li._6 { background-image: url(/images/icon/noactivity.png); }
+#notes li._100 { background-image: url(/images/icon/due.png); }
+#notes li._101 { background-image: url(/images/icon/changed.png);}
+#notes li._200 { background-image: url(/images/icon/no.png); background-color:#FFCC33; }
+#notes li._203 { background-image: url(/images/icon/differs.png); }
+#notes li._204 { background-image: url(/images/icon/counted.png); }
+#notes li._205 { background-image: url(/images/icon/issue.png); }
+#notes li._206 { background-image: url(/images/icon/receive.png); }
+#notes li._207 { background-image: url(/images/icon/waste.png); }
+#notes li._300 { background-image: url(/images/icon/credit.png); }
+#notes li._301 { background-image: url(/images/icon/paymentdue.png); }
+#notes li._302 { background-image: url(/images/icon/payment.png); }
+*/
+
+#notes li p {
+    text-align: center;
+    font: normal 26px/40px Helvetica, sans-serif;
+    overflow:hidden;
+    position: relative;
+    top: -15px;
+}
+
+#notes li .date {
+    font-size: 22px;
+    float: right;
+    top: -80px;
+    position: absolute;
+    font-family: Helvitica, sans-serif;
+    right: 8px;
+}
+
+#notes li .number {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    border-radius: 50%;
+    color: #9d9d9d;
+    width: 20px;
+    height: 20px;
+    padding: 6px;
+    text-align: center;
+    font: 15px Helvetica, sans-serif;
+}
+
+/*#notes li::before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 115px;
+    top: -15px;
+    width: 75px;
+    height: 25px;
+    z-index: 2;
+    background-color: rgba(243,245,228,0.5);
+    border: 2px solid rgba(255,255,255,0.5);
+    -webkit-box-shadow: 0 0 5px #888;
+    -moz-box-shadow: 0 0 5px #888;
+    box-shadow: 2px 2px 2px #000;
+    -webkit-transform: rotate(-6deg);
+    -moz-transform: rotate(-6deg);
+    -o-transform: rotate(-6deg);
+}*/
+
+#notes li:nth-child(even)::before {
+    -webkit-transform: rotate(6deg);
+    -moz-transform: rotate(6deg);
+    -o-transform: rotate(6deg);
+}
+
+.banner {
+    background-color: white;
+    position: relative;
+    top: -5px;
+}
+
+.banner .nav {
+    float: right;
+    margin-top: -55px;
+    margin-right: 20px;
+    font-family: helvetica, sans-serif;
+    font-size:12pt;
+    height: 100%;
+}
+
+body {
+    font-family: 'liquid_crystalregular', sans-serif;
+    user-select: none;
+    user-drag: none;
+}
+
+.items{
+    float: right;
+    font-family: helvetica, sans-serif;
+    font-size: 22px;
+    color: white;
+    position: relative;
+    top: 10px;
+    right: 1vw;
+}
+
+.bannerShadow{
+    /*box-shadow: 0 3px 3px 1px #ed1c24;*/
+    /*box-shadow: 0 3px 3px 1px #004b66;*/
+    box-shadow: 0 1px 0 1px #000;
+}
+
+.domainName {
+    margin-left: 35px;
+    font-family: helvetica, sans-serif;
+    font-size: 22px;
+    top: 1vw;
+    position: relative;
+    z-index: 1;
+    color: white;
+}
+
+#txt{
+    /* color: white; */
+    font-size: 22px;
+}
+
+.imagewrapper, .imagewrapper img {
+    max-height: 60px;
+    padding: 7px;
+    margin-left: 0px;
+    margin-top: 8px;
+    /*background-color: white;*/
+}

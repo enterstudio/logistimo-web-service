@@ -1,0 +1,242 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+<div class="bizinfo bizinfo-last">
+<div ng-controller="AddMatController">
+<form class="form-horizontal" role="form" name="addMatForm" novalidate>
+    <div class="bgr">
+        <div class="title-heading">
+            {{resourceBundle['material.infotitle']}}
+        </div>
+        <p class="litetext">{{resourceBundle["material.info"]}}</p>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label required">{{resourceBundle['material.name']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" maxlength="50" autocomplete="off"
+                               ng-model="material.mnm" name="matnm" placeholder="{{resourceBundle['material.name']}}"
+                               ng-class="{'c-visited' : uVisited.mnm, 'u-na' : uVisited.mnm && idVerified && idStatus}"
+                               ng-focus="idCheck = false"
+                               ng-blur="uVisited.mnm = true; idCheck = true; checkMaterialAvailability(material.mnm)" required>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="has-error">
+                    <span ng-show="uVisited.mnm && addMatForm.matnm.$error.required" class="help-block">{{resourceBundle['material.name']}} {{resourceBundle['isrequired']}}</span>
+                </div>
+                <div class="has-error">
+                    <span ng-show="uVisited.mnm && !addMatForm.matnm.$error.required && idCheck && idVerified && idStatus" class="help-block">'{{material.mnm}}' {{resourceBundle['already.exists']}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="srtNm" class="col-sm-4 control-label">{{resourceBundle['shortname']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" maxlength=6 name="shortName" id="srtNm" ng-model="material.snm" class="form-control"
+                               placeholder="{{resourceBundle['shortname']}}"/>
+                        <span class="litetext">{{resourceBundle['shortname.info']}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="cId" class="col-sm-4 control-label">{{resourceBundle['customid']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="cId" ng-model="material.cId" name="cid" maxlength="50"
+                               placeholder="{{resourceBundle['customid']}}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="dsc" class="col-sm-4 control-label">{{resourceBundle['description']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="dsc" ng-model="material.dsc" name="dsc" maxlength="200"
+                               placeholder="{{resourceBundle['description']}}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="adInfo" class="col-sm-4 control-label">{{resourceBundle['material.addinfo']}}</label>
+                    <div class="col-sm-8">
+                        <textarea class="form-control cbx" id="adInfo" rows="2" name="adInfo" ng-model="material.info"
+                                  placeholder="{{resourceBundle['material.addinfo']}}" maxlength=400></textarea>
+                        <input type="checkbox" id="adChk" name="adChk" ng-true-value="'yes'" ng-false-value="'no'" ng-model="material.dispInfo"> {{resourceBundle['material.addinfocheck']}}
+                        (400 {{resourceBundle['charactersallowed']}})
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">{{resourceBundle['tags']}}</label>
+                    <div class="col-sm-8">
+                        <tag-select  tags-model="material.tgObjs" type="'material'"></tag-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">{{resourceBundle['batch.management']}}</label>
+                    <div class="col-sm-8">
+                        <div class="cbx">
+                            <input type="checkbox" id="ebm" ng-true-value="'yes'" ng-false-value="'no'" ng-model="material.b" name="ebm"> {{resourceBundle['batch.enable']}}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="bv" class="col-sm-4 control-label">{{resourceBundle['isbinaryvalued']}}</label>
+                    <div class="col-sm-8 cbx">
+                        <input type="checkbox" id="bv" name="bv" ng-true-value="'yes'" ng-false-value="'no'" ng-model="material.dty"> <span class="litetext">{{resourceBundle['isbinaryvalued.info']}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="sv" class="col-sm-4 control-label">{{resourceBundle['material.seasonal']}}</label>
+                    <div class="col-sm-8 cbx">
+                        <input type="checkbox" id="sv" name="sv" ng-true-value="'yes'" ng-false-value="'no'" ng-model="material.snl">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bgr">
+        <div class="title-heading">
+            {{resourceBundle['material.pricinginfotitle']}}
+        </div>
+        <p class="litetext">{{resourceBundle["material.pricinginfo"]}}</p>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="msrp" class="col-sm-4 control-label">{{resourceBundle['material.msrp']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="msrp" name="msrp" ng-model="material.msrp"
+                               placeholder="{{resourceBundle['material.msrpexpanded']}}" only-digits allow-decimal maxlength="12">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="rp" class="col-sm-4 control-label">{{resourceBundle['material.retailerprice']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="rp" name="rp" ng-model="material.rp"
+                               placeholder="{{resourceBundle['material.retailerprice']}}" only-digits allow-decimal maxlength="12">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">{{resourceBundle['currency']}}</label>
+                    <div class="col-sm-8">
+                        <select ng-model="material.cur" name="currency" class="form-control" >
+                            <option value="" selected> -- {{resourceBundle['select']}} {{resourceBundle['currency']}} -- </option>
+                            <option ng-repeat="(key,val) in currencies" value="{{key}}" ng-selected="key === material.cur">{{val}} ({{key}})</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="bgr">
+        <div class="title-heading">
+            {{'Temperature'}}
+        </div>
+        <p class="litetext">{{resourceBundle["temperature.info"]}}</p>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="tm" class="col-sm-4 control-label">{{resourceBundle['temperature.sensitive']}}</label>
+                    <div class="col-sm-8">
+                        <div class="cbx">
+                            <input type="checkbox" id="tm" name="tm" ng-true-value="'yes'" ng-false-value="'no'" ng-model="material.tm"> {{resourceBundle['temperature.material']}}
+                        </div>
+                        <br/>
+                        <div ng-show="material.tm=='yes'">
+                            {{resourceBundle['temperature.rangeinfo']}}
+                            <div class="form-group col-sm-14">
+                                <div class="col-sm-2 temp">
+                                    {{resourceBundle['min']}}:
+                                </div>
+                                <div class="form-group col-sm-4">
+                                    <input type="text" class="form-control" ng-model="material.tmin" name="tmin"
+                                           placeholder="Min &deg;C" only-digits temperature allow-decimal
+                                           maxlength="6">
+                                </div>
+                                <div class="col-sm-2 temp">
+                                    {{resourceBundle['max']}}:
+                                </div>
+                                <div class="form-group col-sm-4">
+                                    <input type="text" class="form-control" ng-model="material.tmax" name="tmax"
+                                           placeholder="Max &deg;C" only-digits temperature allow-decimal
+                                           maxlength="6">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt10">
+        <div class="col-sm-6">
+            <div class="pull-right">
+                <button type="button" ng-hide="edit" ng-click="uVisited.mnm = true; !idStatus && addMatForm.$valid && createMaterial()" name="save" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                <button type="button" ng-show="edit" ng-click="uVisited.mnm = true; addMatForm.$valid && updateMaterial()" name="update" class="btn btn-primary">{{resourceBundle['update']}}</button>
+                <!--<button ng-hide="edit" ng-click="resetMaterial()" name="reset" class="btn btn-default">{{resourceBundle['reset']}}</button>-->
+                <a ng-show="edit" ng-click="$back()" name="cancel" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                <a ng-hide="edit" href="#/setup/materials/" name="cancel" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+</div>
+</div>

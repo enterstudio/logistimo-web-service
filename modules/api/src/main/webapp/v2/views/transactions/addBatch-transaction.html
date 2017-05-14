@@ -1,0 +1,129 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="AddBatchTransactionCtrl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <b>{{resourceBundle['add.batches']}} {{mnm}}</b>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-striped table-codensed ">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-3 required">{{resourceBundle['batchid']}}</th>
+                            <th class="col-sm-2">{{resourceBundle['manufactured']}}</th>
+                            <th class="col-sm-2 required">{{resourceBundle['manufacturer']}}</th>
+                            <th class="col-sm-2 required">{{resourceBundle['expiry']}}</th>
+                            <th class="col-sm-2 required">{{resourceBundle['quantity']}}</th>
+                            <th class="col-sm-1"></th>
+                        </tr>
+                        </thead>
+                        <tbody ng-repeat="item in batchDet">
+                        <tr>
+                            <td>
+                                <input type="text" ng-model="item.bid" class="form-control" maxlength="50"
+                                       ng-blur="checkBatchExists(item.bid, $index)"
+                                       ng-class="{'red-border': exists[$index] == true}" upper-case no-double-quotes/>
+                            </td>
+                            <td>
+                                <date-picker min-mode="day" date-model="item.bmfdt" max-date="today"
+                                             mode="'month'"></date-picker>
+                            </td>
+                            <td>
+                                <input type="text" ng-model="item.bmfnm" class="form-control" maxlength="50"/>
+                            </td>
+                            <td>
+                                <date-picker min-mode="day" date-model="item.bexp" min-date="today"
+                                             mode="'month'"></date-picker>
+                            </td>
+                            <td>
+                                <input only-digits type="text" ng-model="item.quantity" class="form-control"
+                                       maxlength="12"
+                                       ng-class="{'red-border':item.invalidPopup}"
+                                       uib-popover="{{item.popupMsg}}"
+                                       ng-focus="togglePopup(item,$index,'hidepopup')"
+                                       ng-blur="togglePopup(item,$index)" id="b{{mid}}{{$index}}" popover-trigger="showpopup"/>
+                                <div ng-show="item.quantity > 0" class="mt5">
+                                    <span class="litetext" ng-class="{'required' : msm}" ng-show="(!material.ts && isDef(matstatus)) || (material.ts && isDef(tempmatstatus))">{{resourceBundle['inventory.material.status']}}</span>
+                                    <select ng-hide="material.ts || isUndef(matstatus)" ng-model="item.mst" class="form-control"
+                                            ng-class="{'red-border': item.ainvalidPopup}"
+                                            uib-popover="{{item.aPopupMsg}}"
+                                            ng-blur="item.isVisitedStatus = true; togglePopup(item,$index)"
+                                            ng-focus="togglePopup(item,$index,'hidepopup', 'abtm')"
+                                            id="abtm{{mid}}{{$index}}"
+                                            tabindex="{{$index+100}}"
+                                            popover-trigger="showpopup">
+                                        <option ng-repeat="stats in matstatus track by $index" value="{{stats}}" ng-selected="item.mst == stats">{{stats || resourceBundle['select'] + " " + resourceBundle['status.lower']}}</option>
+                                    </select>
+                                    <select ng-show="material.ts && isDef(tempmatstatus)" ng-model="item.mst" class="form-control"
+                                            ng-class="{'red-border': item.ainvalidPopup}"
+                                            uib-popover="{{item.aPopupMsg}}"
+                                            ng-blur="item.isVisitedStatus = true; togglePopup(item,$index)"
+                                            ng-focus="togglePopup(item,$index,'hidepopup', 'abtmt')"
+                                            id="abtmt{{mid}}{{$index}}"
+                                            tabindex="{{$index+100}}"
+                                            popover-trigger="showpopup">
+                                        <option ng-repeat="stats in tempmatstatus track by $index" value="{{stats}}" ng-selected="item.mst == stats">{{stats || resourceBundle['select'] + " " + resourceBundle['status.lower']}}</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <a href="" ng-click="deleteRow($index)">
+                                    <span class="glyphicons glyphicons-bin temp"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr ng-show="exists[$index]">
+                            <td colspan=100%>
+                                <p class="alert alert-warning">{{resourceBundle['bid.dup']}}</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                        <tbody>
+                        <tr>
+                            <td class="col-sm-1" colspan="100%">
+                                <button type="button" ng-click="addRow()" class="btn btn-sm btn-primary"> + </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="pull-right">
+                        <button ng-disabled="invalidPopup != 0" ng-click="saveBatchTrans()" class="btn btn-sm btn-primary">{{resourceBundle['save']}}</button>
+                        <button ng-click="toggle($index)" class="btn btn-sm btn-default">{{resourceBundle['cancel']}}</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <span class="clickable dummyLink" ng-hide="batchList" ng-click="batchList = true">{{resourceBundle['view']}} {{resourceBundle['batch.lower']}}</span>
+                    <span class="clickable dummyLink" ng-show="batchList" ng-click="batchList = false">{{resourceBundle['hideuppercase']}} {{resourceBundle['batch.lower']}}</span>
+                    <div ng-show="batchList">
+                        <div ng-init="kid = transaction.ent.id" ng-include="'views/inventory/view-batch.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

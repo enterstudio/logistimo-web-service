@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<toc>
+  <item url="Documents/setupmasterdata.htm">
+    <title><![CDATA[Setup master data]]></title>
+    <tooltip><![CDATA[Setup master data]]></tooltip>
+    <item url="Documents/setupusers.htm">
+      <title><![CDATA[Setup Users]]></title>
+      <tooltip><![CDATA[Setup Users]]></tooltip>
+      <item url="Documents/viewusers.htm">
+        <title><![CDATA[View users]]></title>
+        <tooltip><![CDATA[View users]]></tooltip>
+      </item>
+      <item url="Documents/creatinganewuser.htm">
+        <title><![CDATA[Creating a new user]]></title>
+        <tooltip><![CDATA[Creating a new user]]></tooltip>
+      </item>
+      <item url="Documents/editingauserprofile.htm">
+        <title><![CDATA[Editing a user profile]]></title>
+        <tooltip><![CDATA[Editing a user profile]]></tooltip>
+      </item>
+      <item url="Documents/changingauserspassword.htm">
+        <title><![CDATA[Changing a user's password]]></title>
+        <tooltip><![CDATA[Changing a user's password]]></tooltip>
+      </item>
+      <item url="Documents/resettingauserspassword.htm">
+        <title><![CDATA[Resetting a user's password]]></title>
+        <tooltip><![CDATA[Resetting a user's password]]></tooltip>
+      </item>
+      <item url="Documents/disablingauser.htm">
+        <title><![CDATA[Disabling a user]]></title>
+        <tooltip><![CDATA[Disabling a user]]></tooltip>
+      </item>
+      <item url="Documents/removingauser.htm">
+        <title><![CDATA[Removing a user]]></title>
+        <tooltip><![CDATA[Removing a user]]></tooltip>
+      </item>
+      <item url="Documents/uploadusersinbulk.htm">
+        <title><![CDATA[Upload users in bulk]]></title>
+        <tooltip><![CDATA[Upload users in bulk]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/setupmaterials.htm">
+      <title><![CDATA[Setup materials]]></title>
+      <tooltip><![CDATA[Setup materials]]></tooltip>
+      <item url="Documents/viewmaterials.htm">
+        <title><![CDATA[View materials]]></title>
+        <tooltip><![CDATA[View materials]]></tooltip>
+      </item>
+      <item url="Documents/createamaterial.htm">
+        <title><![CDATA[Create a material]]></title>
+        <tooltip><![CDATA[Create a material]]></tooltip>
+      </item>
+      <item url="Documents/editamaterial.htm">
+        <title><![CDATA[Edit a material]]></title>
+        <tooltip><![CDATA[Edit a material]]></tooltip>
+      </item>
+      <item url="Documents/removeamaterial.htm">
+        <title><![CDATA[Remove a material]]></title>
+        <tooltip><![CDATA[Remove a material]]></tooltip>
+      </item>
+      <item url="Documents/uploadmaterialsinbulk.htm">
+        <title><![CDATA[Upload materials in bulk]]></title>
+        <tooltip><![CDATA[Upload materials in bulk]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/setupentities.htm">
+      <title><![CDATA[Setup entities]]></title>
+      <tooltip><![CDATA[Setup entities]]></tooltip>
+      <item url="Documents/viewentities.htm">
+        <title><![CDATA[View entities]]></title>
+        <tooltip><![CDATA[View entities]]></tooltip>
+      </item>
+      <item url="Documents/createanentity.htm">
+        <title><![CDATA[Create an entity]]></title>
+        <tooltip><![CDATA[Create an entity]]></tooltip>
+        <item url="Documents/managematerialsofanentity.htm">
+          <title><![CDATA[Manage materials of an entity]]></title>
+          <tooltip><![CDATA[Manage materials of an entity]]></tooltip>
+          <item url="Documents/addmaterialstoanentity.htm">
+            <title><![CDATA[Add materials to an entity]]></title>
+            <tooltip><![CDATA[Add materials to an entity]]></tooltip>
+          </item>
+          <item url="Documents/removematerialsfromanentity.htm">
+            <title><![CDATA[Remove materials from an entity]]></title>
+            <tooltip><![CDATA[Remove materials from an entity]]></tooltip>
+          </item>
+          <item url="Documents/addremovematerialsfromentitiesinbulk.htm">
+            <title><![CDATA[Add/Remove materials from entities in bulk]]></title>
+            <tooltip><![CDATA[Add/Remove materials from entities in bulk]]></tooltip>
+          </item>
+        </item>
+        <item url="Documents/managerelationshipsofanentity.htm">
+          <title><![CDATA[Manage relationships of an entity]]></title>
+          <tooltip><![CDATA[Manage relationships of an entity]]></tooltip>
+          <item url="Documents/addrelationshipstoanentity.htm">
+            <title><![CDATA[Add Relationships to an entity]]></title>
+            <tooltip><![CDATA[Add Relationships to an entity]]></tooltip>
+          </item>
+          <item url="Documents/removerelationshipsfromanentity.htm">
+            <title><![CDATA[Remove relationships from an entity.]]></title>
+            <tooltip><![CDATA[Remove relationships from an entity.]]></tooltip>
+          </item>
+        </item>
+      </item>
+      <item url="Documents/editanentity.htm">
+        <title><![CDATA[Edit an entity.]]></title>
+        <tooltip><![CDATA[Edit an entity.]]></tooltip>
+      </item>
+      <item url="Documents/removeanentity.htm">
+        <title><![CDATA[Remove an entity]]></title>
+        <tooltip><![CDATA[Remove an entity]]></tooltip>
+      </item>
+      <item url="Documents/uploadentitiesinbulk.htm">
+        <title><![CDATA[Upload entities in bulk]]></title>
+        <tooltip><![CDATA[Upload entities in bulk]]></tooltip>
+      </item>
+    </item>
+  </item>
+  <item url="Documents/inventorymanagement.htm">
+    <title><![CDATA[Inventory Management]]></title>
+    <tooltip><![CDATA[Inventory Management]]></tooltip>
+    <item url="Documents/viewstocklevels.htm">
+      <title><![CDATA[View Stock levels]]></title>
+      <tooltip><![CDATA[View Stock levels]]></tooltip>
+      <item url="Documents/filterbyentity.htm">
+        <title><![CDATA[Filter by entity]]></title>
+        <tooltip><![CDATA[Filter by entity]]></tooltip>
+      </item>
+      <item url="Documents/filterbymaterial.htm">
+        <title><![CDATA[Filter by material]]></title>
+        <tooltip><![CDATA[Filter by material]]></tooltip>
+      </item>
+      <item url="Documents/filterbybatchexpiry.htm">
+        <title><![CDATA[Filter by batch expiry]]></title>
+        <tooltip><![CDATA[Filter by batch expiry]]></tooltip>
+      </item>
+      <item url="Documents/exportinventory.htm">
+        <title><![CDATA[Export inventory]]></title>
+        <tooltip><![CDATA[Export inventory]]></tooltip>
+      </item>
+      <item url="Documents/viewandfilteronmap.htm">
+        <title><![CDATA[View and filter on map]]></title>
+        <tooltip><![CDATA[View and filter on map]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/abnormalstock.htm">
+      <title><![CDATA[Abnormal stock]]></title>
+      <tooltip><![CDATA[Abnormal stock]]></tooltip>
+      <item url="Documents/viewbytypeofabnormality.htm">
+        <title><![CDATA[View by type of abnormality]]></title>
+        <tooltip><![CDATA[View by type of abnormality]]></tooltip>
+      </item>
+      <item url="Documents/exportabnormalstock.htm">
+        <title><![CDATA[Export abnormal stock]]></title>
+        <tooltip><![CDATA[Export abnormal stock]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/transactions.htm">
+      <title><![CDATA[Transactions]]></title>
+      <tooltip><![CDATA[Transactions]]></tooltip>
+      <item url="Documents/viewtransactions.htm">
+        <title><![CDATA[View transactions]]></title>
+        <tooltip><![CDATA[View transactions]]></tooltip>
+      </item>
+      <item url="Documents/filterbyentity1.htm">
+        <title><![CDATA[Filter by entity]]></title>
+        <tooltip><![CDATA[Filter by entity]]></tooltip>
+      </item>
+      <item url="Documents/filterbyoperation.htm">
+        <title><![CDATA[Filter by operation]]></title>
+        <tooltip><![CDATA[Filter by operation]]></tooltip>
+      </item>
+      <item url="Documents/enternewtransactions.htm">
+        <title><![CDATA[Enter new transactions]]></title>
+        <tooltip><![CDATA[Enter new transactions]]></tooltip>
+      </item>
+      <item url="Documents/undotransactions.htm">
+        <title><![CDATA[Undo transactions]]></title>
+        <tooltip><![CDATA[Undo transactions]]></tooltip>
+      </item>
+      <item url="Documents/exporttransactions.htm">
+        <title><![CDATA[Export transactions]]></title>
+        <tooltip><![CDATA[Export transactions]]></tooltip>
+      </item>
+    </item>
+  </item>
+  <item url="Documents/ordermanagement.htm">
+    <title><![CDATA[Order Management]]></title>
+    <tooltip><![CDATA[Order Management]]></tooltip>
+    <item url="Documents/orders.htm">
+      <title><![CDATA[Orders]]></title>
+      <tooltip><![CDATA[Orders]]></tooltip>
+      <item url="Documents/vieworders.htm">
+        <title><![CDATA[View orders]]></title>
+        <tooltip><![CDATA[View orders]]></tooltip>
+      </item>
+      <item url="Documents/filterbyentity2.htm">
+        <title><![CDATA[Filter by Entity]]></title>
+        <tooltip><![CDATA[Filter by Entity]]></tooltip>
+      </item>
+      <item url="Documents/filterbystatus.htm">
+        <title><![CDATA[Filter by status]]></title>
+        <tooltip><![CDATA[Filter by status]]></tooltip>
+      </item>
+      <item url="Documents/filterbydaterange.htm">
+        <title><![CDATA[Filter by date range]]></title>
+        <tooltip><![CDATA[Filter by date range]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/createaneworder.htm">
+      <title><![CDATA[Create a new order]]></title>
+      <tooltip><![CDATA[Create a new order]]></tooltip>
+    </item>
+    <item url="Documents/editanorder.htm">
+      <title><![CDATA[Edit an order]]></title>
+      <tooltip><![CDATA[Edit an order]]></tooltip>
+      <item url="Documents/changevendor.htm">
+        <title><![CDATA[Change Vendor]]></title>
+        <tooltip><![CDATA[Change Vendor]]></tooltip>
+      </item>
+      <item url="Documents/addpaymenttoanorder.htm">
+        <title><![CDATA[Add payment to an order]]></title>
+        <tooltip><![CDATA[Add payment to an order]]></tooltip>
+      </item>
+      <item url="Documents/changepackagesize.htm">
+        <title><![CDATA[Change package size]]></title>
+        <tooltip><![CDATA[Change package size]]></tooltip>
+      </item>
+      <item url="Documents/changetransporter.htm">
+        <title><![CDATA[Change transporter]]></title>
+        <tooltip><![CDATA[Change transporter]]></tooltip>
+      </item>
+      <item url="Documents/edititemsinorder.htm">
+        <title><![CDATA[Edit items in order]]></title>
+        <tooltip><![CDATA[Edit items in order]]></tooltip>
+      </item>
+      <item url="Documents/addnewitemstoanorder.htm">
+        <title><![CDATA[Add new items to an order]]></title>
+        <tooltip><![CDATA[Add new items to an order]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/manageorderstatus.htm">
+      <title><![CDATA[Manage order status]]></title>
+      <tooltip><![CDATA[Manage order status]]></tooltip>
+      <item url="Documents/changingorderstatus.htm">
+        <title><![CDATA[Changing order status]]></title>
+        <tooltip><![CDATA[Changing order status]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/viewinvoice.htm">
+      <title><![CDATA[View invoice]]></title>
+      <tooltip><![CDATA[View invoice]]></tooltip>
+      <item url="Documents/exportorders.htm">
+        <title><![CDATA[Export orders]]></title>
+        <tooltip><![CDATA[Export orders]]></tooltip>
+      </item>
+    </item>
+    <item url="Documents/demand.htm">
+      <title><![CDATA[Demand]]></title>
+      <tooltip><![CDATA[Demand]]></tooltip>
+      <item url="Documents/viewdemand.htm">
+        <title><![CDATA[View Demand]]></title>
+        <tooltip><![CDATA[View Demand]]></tooltip>
+        <item url="Documents/filterbyentity3.htm">
+          <title><![CDATA[Filter by entity]]></title>
+          <tooltip><![CDATA[Filter by entity]]></tooltip>
+        </item>
+        <item url="Documents/filterbymaterial1.htm">
+          <title><![CDATA[Filter by material]]></title>
+          <tooltip><![CDATA[Filter by material]]></tooltip>
+        </item>
+      </item>
+    </item>
+  </item>
+  <item url="Documents/reports.htm">
+    <title><![CDATA[Reports]]></title>
+    <tooltip><![CDATA[Reports]]></tooltip>
+    <item url="Documents/transactioncounts.htm">
+      <title><![CDATA[Transaction counts]]></title>
+      <tooltip><![CDATA[Transaction counts]]></tooltip>
+    </item>
+    <item url="Documents/inventorytrends.htm">
+      <title><![CDATA[Inventory trends]]></title>
+      <tooltip><![CDATA[Inventory trends]]></tooltip>
+    </item>
+    <item url="Documents/useractivity.htm">
+      <title><![CDATA[User activity]]></title>
+      <tooltip><![CDATA[User activity]]></tooltip>
+    </item>
+    <item url="Documents/replenishmentresponsetimes.htm">
+      <title><![CDATA[Replenishment response times]]></title>
+      <tooltip><![CDATA[Replenishment response times]]></tooltip>
+    </item>
+    <item url="Documents/orderresponsetimes.htm">
+      <title><![CDATA[Order response times]]></title>
+      <tooltip><![CDATA[Order response times]]></tooltip>
+    </item>
+    <item url="Documents/exportreports.htm">
+      <title><![CDATA[Export Reports]]></title>
+      <tooltip><![CDATA[Export Reports]]></tooltip>
+    </item>
+  </item>
+  <item url="Documents/configuration.htm">
+    <title><![CDATA[Configuration]]></title>
+    <tooltip><![CDATA[Configuration]]></tooltip>
+    <item url="Documents/general.htm">
+      <title><![CDATA[General]]></title>
+      <tooltip><![CDATA[General]]></tooltip>
+    </item>
+    <item url="Documents/capabilities.htm">
+      <title><![CDATA[Capabilities]]></title>
+      <tooltip><![CDATA[Capabilities]]></tooltip>
+    </item>
+    <item url="Documents/inventory.htm">
+      <title><![CDATA[Inventory]]></title>
+      <tooltip><![CDATA[Inventory]]></tooltip>
+    </item>
+    <item url="Documents/orders1.htm">
+      <title><![CDATA[Orders]]></title>
+      <tooltip><![CDATA[Orders]]></tooltip>
+    </item>
+    <item url="Documents/notifications.htm">
+      <title><![CDATA[Notifications]]></title>
+      <tooltip><![CDATA[Notifications]]></tooltip>
+    </item>
+    <item url="Documents/tags.htm">
+      <title><![CDATA[Tags]]></title>
+      <tooltip><![CDATA[Tags]]></tooltip>
+    </item>
+    <item url="Documents/accounting.htm">
+      <title><![CDATA[Accounting]]></title>
+      <tooltip><![CDATA[Accounting]]></tooltip>
+    </item>
+    <item url="Documents/customreports.htm">
+      <title><![CDATA[Custom reports]]></title>
+      <tooltip><![CDATA[Custom reports]]></tooltip>
+      <item url="Documents/viewcustomreports.htm">
+        <title><![CDATA[View custom reports]]></title>
+        <tooltip><![CDATA[View custom reports]]></tooltip>
+      </item>
+      <item url="Documents/createanewcustomreport.htm">
+        <title><![CDATA[Create a new custom report]]></title>
+        <tooltip><![CDATA[Create a new custom report]]></tooltip>
+      </item>
+      <item url="Documents/editingacustomreport.htm">
+        <title><![CDATA[Editing a custom report]]></title>
+        <tooltip><![CDATA[Editing a custom report]]></tooltip>
+      </item>
+    </item>
+  </item>
+</toc>

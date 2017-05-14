@@ -1,0 +1,116 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="NotificationsConfigurationController">
+    <div class="bgr" ng-if="loading == false">
+        <div class="row">
+            <div class="col-sm-12">
+                <p class="litetext">{{resourceBundle['event.select']}}</p>
+            </div>
+        </div>
+
+        <div class="row" ng-show="!showSubview">
+
+                <div class="col-sm-3 mb10">
+                    <select ng-model="nof.inv" ng-change="fetchEvent('inventory')" class="form-control" id="nofMsg">
+                        <option value="">-- {{resourceBundle['select']}} {{'event'}} --</option>
+                        <option ng-repeat="inv in inventoryLabel" value="{{inv.name}}">{{inv.name}}</option>
+                    </select>
+                </div>
+                <div class="lnk" ng-show="prShow || showSelection || showStatusSelection">
+                <span class="col-sm-4" ng-show="prShow">
+                    {{prefixName}}<input only-digits type="text" class="form-control w60 stat-bottom" ng-model="nof.pr" id="prefix"
+                                         placeholder="{{placeHolder}}" ng-change="resetStatus('prefix')">
+                </span>
+                <span class="col-sm-3" ng-show="showSelection">
+                    <select ng-model="nof.os" class="form-control" ng-change="resetStatus('status')">
+                        <option value="">{{placeHolder}}</option>
+                        <option ng-show="prSelect == 'stockCounted'" ng-repeat="count in stockCounted"
+                                value="{{count}}">{{count}}
+                        </option>
+                        <option ng-show="prSelect == 'stockIssued'" ng-repeat="issue in stockIssued" value="{{issue}}">
+                            {{issue}}
+                        </option>
+                        <option ng-show="prSelect == 'stockTransferred'" ng-repeat="transfer in stockTransferred"
+                                value="{{transfer}}">{{transfer}}
+                        </option>
+                        <option ng-show="prSelect == 'stockReceived'" ng-repeat="receive in stockReceived"
+                                value="{{receive}}">{{receive}}
+                        </option>
+                        <option ng-show="prSelect == 'stockDiscarded'" ng-repeat="discard in stockDiscarded"
+                                value="{{discard}}">{{discard}}
+                        </option>
+                    </select>
+                </span>
+                 <span class="col-sm-3" ng-show="showStatusSelection">
+                    <select ng-model="nof.mst" class="form-control" ng-change="resetStatus('status')">
+                        <option value="">{{extraParamsPlaceHolder}}</option>
+                        <option ng-show="prExtraSelect == 'stockCounted'" ng-repeat="countStatus in stockCountedStatus"
+                                value="{{countStatus}}">{{countStatus}}
+                        </option>
+                        <option ng-show="prExtraSelect == 'stockIssued'" ng-repeat="issue in stockIssuedStatus " value="{{issue}}">
+                            {{issue}}
+                        </option>
+                        <option ng-show="prExtraSelect == 'stockTransferred'" ng-repeat="transfer in stockTransferredStatus"
+                                value="{{transfer}}">{{transfer}}
+                        </option>
+                        <option ng-show="prExtraSelect == 'stockReceived'" ng-repeat="receive in stockReceivedStatus"
+                                value="{{receive}}">{{receive}}
+                        </option>
+                        <option ng-show="prExtraSelect == 'stockDiscarded'" ng-repeat="discard in stockDiscardedStatus"
+                                value="{{discard}}">{{discard}}
+                        </option>
+                    </select>
+                </span>
+                </div>
+                <div class="col-sm-3 lPadN25 pull-right" ng-if="iSU || dp.ce">
+                    <button ng-click="validateAndOpenAddDialog()" ng-disabled="dialog == 'inventoryDialog' || dialog == 'edit'" class="btn btn-primary">{{resourceBundle['add']}}
+                        {{resourceBundle['notifications']}}
+                    </button>
+                </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div data-ng-switch on="dialog">
+                    <div data-ng-switch-when="inventoryDialog" class="pt20">
+
+                            <div
+                                    ng-init="title = title ; message = message ; index = $index ; count = count ; notify = notify; id = id; nid = nid"
+                                    ng-include="'views/configuration/add-notifications.html'"></div>
+
+                    </div>
+                    <div data-ng-switch-when="edit" class="pb20">
+
+                            <div
+                                    ng-init="title = title ; message = message ; index = $index ; count = count ; notify = notify; id = id; nid = nid;"
+                                    ng-include="'views/configuration/add-notifications.html'"></div>
+
+                    </div>
+                    <div data-ng-switch-default class="pt20">
+                        <div ng-include="'views/configuration/list-notifications.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

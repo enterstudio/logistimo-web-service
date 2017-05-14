@@ -1,0 +1,54 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="modal-header ws">
+    <h3 class="modal-title">Confirm</h3>
+</div>
+<div class="modal-body ws" style="background: #ffffff">
+    <p>You already have an open purchase order with {{order.ent.nm}} for the following materials:</p>
+    <div>
+        <table class="table table-condensed">
+            <tbody>
+            <tr>
+                <th class="text-center">Order Id</th>
+                <th class="text-center">Material</th>
+                <th class="text-center">Ordered</th>
+            </tr>
+            <tr ng-repeat="item in orderTable">
+                <td class="text-center">
+                    <a ng-href="#/orders/detail/{{item.oid}}/" target="_blank">{{item.oid}}</a>
+                </td>
+                <td class="text-center">{{item.nm}}</td>
+                <td class="text-center">{{item.q}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <p>Please edit the existing open orders, before creating a new order. Do you wish to still create a new order?</p>
+    </div>
+</div>
+<div class="modal-footer ws">
+    <button class="btn btn-primary" ng-click="proceed()">Yes</button>
+    <button class="btn btn-default" ng-click="cancel()">No</button>
+</div>

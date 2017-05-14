@@ -1,0 +1,264 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="DashboardConfigurationController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="capabilitiesConfigForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading marginlr0">
+                            <h4>{{resourceBundle['dashboard']}} {{resourceBundle['configuration']}}</h4>
+                            <span ng-show="db.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{db.lastUpdated}} {{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{db.createdBy}}" target="_new">{{db.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                General
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['conf.db.mat.fil']}}</label>
+                                <div class="col-sm-4">
+                                    <tag-select tags-model="db.dmtgo" place-holder="Select tag" type="'material'" force-no-udf="'true'"></tag-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Exclude tags</label>
+                                <div class="col-sm-4">
+                                    <tag-select tags-model="db.exetgo" place-holder="Select tag" type="'entity'" force-no-udf="'true'"></tag-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['allow.managers.dashb.label']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="db.edm" name="showdashboardmanagers"> {{resourceBundle['allow.managers.dashb']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                Temperature
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Temperature states to exclude by default</label>
+                                <div class="col-sm-4">
+                                    <lg-uib-select multiple="multiple" query="filterStatus(q)" ui-model="db.exetsta" place-holder="None"> </lg-uib-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                Overview dashboard
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Default period for activity</label>
+                                <div class="col-sm-4">
+                                    <select ng-model="db.aper" class="form-control">
+                                        <option value="1">1 day</option>
+                                        <option value="2">2 days</option>
+                                        <option value="3">3 days</option>
+                                        <option value="7">7 days</option>
+                                        <option value="30">30 days</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['home.activity']}} dashboard
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['show.upper']}} {{resourceBundle['home.activity']}} {{resourceBundle['panel']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="db.ape" name="showactivitypanel"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['show.upper']}} {{resourceBundle['home.revenue']}} {{resourceBundle['panel']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="db.rpe" name="showrevenuepanel"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['show.upper']}} {{resourceBundle['home.Orders']}} {{resourceBundle['panel']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="db.ope" name="showorderpanel"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['show.upper']}} {{resourceBundle['inventory']}} {{resourceBundle['panel']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="db.ipe" name="showinventorypanel"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['date.actual.transaction']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['conf.db.disable.atd']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="db.atdd"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10" ng-hide="db.atdd">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['conf.db.default.trn.type']}}</label>
+                                <div class="col-sm-4">
+                                    <select class="form-control input-sm" ng-model="db.dtt">
+                                        <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions']}}</option>
+                                        <option value="i">{{resourceBundle['issues']}}</option>
+                                        <option value="r">{{resourceBundle['receipts']}}</option>
+                                        <option value="p">{{resourceBundle['transactions.stockcount.upper']}}</option>
+                                        <option value="w">{{resourceBundle['transactions.wastage.upper']}}</option>
+                                        <option value="t">{{resourceBundle['transfers']}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10" ng-hide="db.atdd">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['conf.db.ent.fil']}}</label>
+                                <div class="col-sm-4">
+                                    <tag-select tags-model="db.detgo" place-holder="Select tag" type="'entity'" multiple="'false'" force-no-udf="'true'"></tag-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['home.activity']}} {{resourceBundle['views.lowercase']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['hide.usertags']}}</label>
+                                <div class="col-sm-4">
+                                    <tag-select tags-model="db.dutgo" place-holder="{{resourceBundle['hide.usertags']}}" type="'user'" multiple="'true'"></tag-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['abnormalstockviews']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['conf.db.mat.fil']}}</label>
+                                <div class="col-sm-4">
+                                    <tag-select tags-model="db.dimtgo" place-holder="Select tag" type="'material'" multiple="'false'" force-no-udf="'true'"></tag-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-if="iSU || dp.ce">
+                    <div class="col-sm-12  ml5">
+                        <button type="button" ng-click="setDashboardCfg()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

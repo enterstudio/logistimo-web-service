@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="UsersMessageStatusController">
+            <div class="row">
+                <div class="col-sm-4 col-sm-offset-8">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-striped table-condensed table-hover table-logistimo">
+                        <tbody>
+                        <tr>
+                            <th class="text-center">{{resourceBundle['serialnum']}}</th>
+                            <th>{{resourceBundle['message.senttoshort']}}</th>
+                            <th>{{resourceBundle['time']}}</th>
+                            <th>{{resourceBundle['status']}}</th>
+                            <th>{{resourceBundle['message.sentby']}}</th>
+                            <th>{{resourceBundle['message']}}</th>
+                        </tr>
+                        <tr ng-repeat="item in filtered = message1.results">
+                            <td class="text-center">{{item.sno}}</td>
+                            <td>{{item.sto}}</td>
+                            <td>{{item.tm}}</td>
+                            <td>{{item.sta}}</td>
+                            <td>{{item.sby}}</td>
+                            <td>{{item.text}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <p class=" alert alert-warning" ng-show="filtered.length == 0">{{resourceBundle['messages.nostatus']}}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-sm-offset-8">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

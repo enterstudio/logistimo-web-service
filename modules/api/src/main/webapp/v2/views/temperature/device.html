@@ -1,0 +1,262 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="DeviceProfileController">
+    <div class="row">
+        <div class="col-sm-12">
+            <h5 class="sgHeading" style="margin-left: 15px; margin-right: 0px;">
+                <a ng-hide="isTempMonOnly" href="#/setup/entities/detail/{{deviceDetails[0].kId}}">{{deviceDetails[0].kName}}</a>
+                <a ng-show="isTempMonOnly" href="#/setup/entities/detail/{{deviceDetails[0].kId}}/materials">{{deviceDetails[0].kName}}</a> >
+                <a href="#/setup/entities/detail/{{deviceDetails[0].kId}}/materials">{{resourceBundle['material']}}</a> >
+                <a href="#/setup/entities/detail/{{deviceDetails[0].kId}}/materials/{{deviceDetails[0].mId}}/devices/">{{deviceDetails[0].mnm}}</a> >
+                {{deviceDetails[0].id}}
+            </h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="jumbotron logitron">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="title-box">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <h3 class="ent-title">{{deviceDetails[0].id}} (<span ng-repeat="vendor in vendorMapping"
+                                                                                         ng-show="vendor.vid == deviceDetails[0].vid">{{vendor.vname}}</span>)
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="title-box">
+                            <div class="row mb5">
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        <div class="e-col-sm-0-1">
+                                            <span><img class="temp-icon" src="images/thermometer.png"></span>
+                                        </div>
+                                        <div class="col-sm-11">
+                                            <div class="row mg-hori-zero">
+                                                <span class="c-green temp-status" ng-show="deviceInfo.st == 0 && isDef(deviceInfo.tmp)">
+                                                    {{deviceInfo.tmp.tmp}} &#8451;
+                                                </span>
+                                                <span class="c-green temp-status" ng-show="deviceInfo.st == 0 && (isUndef(deviceInfo.tmp) || isUndef(deviceInfo.tmp.tmp))">
+                                                    0 &#8451;
+                                                </span>
+                                                <span class="c-orange temp-status" ng-show="(deviceInfo.st == 1 || deviceInfo.st == 2) && isDef(deviceInfo.tmp)">
+                                                    {{deviceInfo.tmp.tmp}} &#8451;
+                                                </span>
+                                                <span class="c-orange temp-status" ng-show="(deviceInfo.st == 1 || deviceInfo.st == 2) && (isUndef(deviceInfo.tmp) || isUndef(deviceInfo.tmp.tmp))">
+                                                    0 &#8451;
+                                                </span>
+                                                <span class="c-red temp-status" ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp >= deviceDetails[0].min && deviceInfo.tmp.tmp <= deviceDetails[0].max">
+                                                    {{deviceInfo.tmp.tmp}} &#8451;
+                                                </span>
+                                                <span class="c-red temp-status" ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp > deviceDetails[0].max">
+                                                    {{deviceInfo.tmp.tmp}} &#8451;
+                                                </span>
+                                                <span class="c-aqua temp-status" ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp < deviceDetails[0].min">
+                                                    {{deviceInfo.tmp.tmp}} &#8451;
+                                                </span>
+                                                <span class="temp-refresh" tooltip-placement="right" uib-tooltip="{{resourceBundle[currentTempReqStatus]}}">
+                                                    <h5 class="ent-title">
+                                                        <button ng-if="deviceDetails[0].tmpStatus == 1 || deviceDetails[0].tmpStatus == undefined"
+                                                            confirmed-click="getCurrentTemp()"
+                                                            ng-confirm-click="{{resourceBundle['temperature.request.message']}}" class="c_anchor">
+                                                            <span class="glyphicons glyphicons-refresh"></span>
+                                                        </button>
+                                                        <button ng-if="deviceDetails[0].tmpStatus == 0" ng-click="stopPoll()" class="c_anchor">
+                                                            <span class=" glyphicons glyphicons-refresh spin"></span>
+                                                        </button>
+                                                    </h5>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-show="deviceInfo.tmp.ftime">
+                                        <div class="col-sm-12 ml25">
+                                            <span class="caption pull-left">
+                                                <span class="sub-desc">{{deviceInfo.tmp.ftime}}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p>
+                                <span ng-show="deviceInfo.st == 0" class="glyphicons glyphicons-ok-circle c-green tglyph"></span>
+                                <span ng-show="deviceInfo.st == 1 || deviceInfo.st == 2" class="glyphicons glyphicons-exclamation-sign c-orange tglyph"></span>
+                                <span ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp >= deviceDetails[0].min && deviceInfo.tmp.tmp <= deviceDetails[0].max" class="glyphicons glyphicons-remove-circle c-red tglyph"></span>
+                                <span ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp > deviceDetails[0].max" class="glyphicons glyphicons-remove-circle c-red tglyph"></span>
+                                <span ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp < deviceDetails[0].min" class="glyphicons glyphicons-remove-circle c-aqua tglyph"></span>
+
+                                <span ng-show="deviceInfo.st == 0" class="c-green temp-status">
+                                    {{resourceBundle['temperature.normal']}}
+                                </span>
+                                <span ng-show="deviceInfo.st == 1" class="c-orange temp-status">
+                                    {{resourceBundle['temperature.state.excursion']}}
+                                </span>
+                                <span ng-show="deviceInfo.st == 2" class="c-orange temp-status">
+                                    {{resourceBundle['temperature.state.warning']}}
+                                </span>
+                                <span ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp >= deviceDetails[0].min && deviceInfo.tmp.tmp <= deviceDetails[0].max"
+                                      class="c-red temp-status">
+                                    {{resourceBundle['temperature.alert']}}
+                                </span>
+                                <span ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp > deviceDetails[0].max"
+                                      class="c-red temp-status">
+                                    {{resourceBundle['temperature.alert']}}
+                                </span>
+                                <span ng-show="deviceInfo.st == 3 && isDef(deviceInfo.tmp) && deviceInfo.tmp.tmp < deviceDetails[0].min"
+                                      class="c-aqua temp-status">
+                                    {{resourceBundle['temperature.alert']}}
+                                </span>
+                            </p>
+                            <p>
+                                <span class="glyphicons glyphicons-adjust-alt tglyph"></span>
+                                <span>{{deviceDetails[0].min}} &#8451; - {{deviceDetails[0].max}} &#8451;</span>
+                            </p>
+                            <div class="row mb5" ng-show="deviceDetails[0].bSt != 0 || deviceDetails[0].sSt == 1 || deviceDetails[0].cnSt == 1 || deviceDetails[0].aSt == 1 || deviceDetails[0].sysErrs">
+                                <div class="e-col-sm-0-1">
+                                    <span class="glyphicons glyphicons-bell tglyph"></span>
+                                </div>
+                                <div class="col-sm-11">
+                                    <div ng-show="deviceDetails[0].bSt == 1" class="label-alarm">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.battery.warning']}}&nbsp;
+                                        </div>
+                                        <p class="pull-left label-alarm-time">{{deviceDetails[0].fbStt}}</p>
+                                    </div>
+                                    <div ng-show="deviceDetails[0].bSt == 2" class="label-alarm">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.battery.low']}}&nbsp;
+                                        </div>
+                                        <p class="pull-left label-alarm-time">{{deviceDetails[0].fbStt}}</p>
+                                    </div>
+                                    <div ng-show="deviceDetails[0].bSt == 3" class="label-alarm">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.battery.charging']}}&nbsp;
+                                        </div>
+                                        <p class="pull-left label-alarm-time">{{deviceDetails[0].fbStt}}</p>
+                                    </div>
+                                    <div ng-show="deviceDetails[0].cnSt == 1" class="label-alarm">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.no.device.connection']}}&nbsp;
+                                        </div>
+                                        <p class="pull-left label-alarm-time">{{deviceDetails[0].fcnStt}}</p>
+                                    </div>
+                                    <div ng-show="deviceDetails[0].sSt == 1" class="label-alarm">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.no.sensor.connection']}}&nbsp;
+                                        </div>
+                                        <p class="pull-left label-alarm-time">{{deviceDetails[0].fsStt}}</p>
+                                    </div>
+                                    <div ng-show="deviceDetails[0].aSt == 1" class="label-alarm">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.device.inactive']}}&nbsp;
+                                        </div>
+                                        <p class="pull-left label-alarm-time">{{deviceDetails[0].faStt}}</p>
+                                    </div>
+                                    <div ng-show="deviceDetails[0].sysErrs" class="label-alarm-o">
+                                        <div>
+                                            <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.firmware.error']}}&nbsp;
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p>
+                                <span class="glyphicons glyphicons-google-maps tglyph"></span>
+                                <a ng-hide="isTempMonOnly" href="#/setup/entities/detail/{{deviceDetails[0].kId}}"
+                                   target="_blank">{{deviceDetails[0].kName}}</a><a  ng-show="isTempMonOnly" href="#/setup/entities/detail/{{deviceDetails[0].kId}}/materials"
+                                                                                    target="_blank">{{deviceDetails[0].kName}}</a>, {{deviceDetails[0].add}}
+                            </p>
+                            <div class="row">
+                                <div class="e-col-sm-0-1">
+                                    <span class="glyphicons glyphicons-user tglyph"></span>
+                                </div>
+                                <div class="col-sm-11">
+                                    <div ng-repeat="user in entityInformation.usrs" class="label label-default" style="display:inline-block;color: #FFF;margin-bottom:5px">
+                                        <a ng-href="#/setup/users/all/details?userId={{user.id}}">
+                                            {{user.fnm}} [{{user.phm}}]
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div ng-hide="marker.coords.latitude && marker.coords.longitude">
+                            <p style="margin: 150px 0 150px 100px;">{{resourceBundle['location.not.available']}}</p>
+                        </div>
+                        <div ng-if="marker.coords.latitude && marker.coords.longitude">
+                            <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="false" pan="false" options="options">
+                                <ui-gmap-marker coords="marker.coords" options="marker.options" idkey="marker.id"></ui-gmap-marker>
+                                <ui-gmap-layer ng-if="showWeather" namespace="weather" type="WeatherLayer"></ui-gmap-layer>
+                            </ui-gmap-google-map>
+                            <!--<input type="checkbox" ng-model="showWeather"> {{resourceBundle['map.show.weather']}}-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="!loadingInvItems">
+        <div class="col-sm-12" ng-controller="SimpleMenuController" ng-init="init('temperature.device')">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+                <li ng-class="{active: subview == 'summary' }" ><a
+                        href="#/temperature/device/{{vendorId}}/{{deviceId}}/summary/">{{resourceBundle.summary}}</a>
+                </li>
+                <li ng-class="{active: subview == 'info' }" ><a
+                        href="#/temperature/device/{{vendorId}}/{{deviceId}}/info/">{{resourceBundle.information}}</a>
+                </li>
+                <li ng-class="{active: subview == 'config' }" ><a
+                        href="#/temperature/device/{{vendorId}}/{{deviceId}}/config/">{{resourceBundle.configuration}}</a>
+                </li>
+                <li ng-class="{active: subview == 'stats' }" ><a
+                        href="#/temperature/device/{{vendorId}}/{{deviceId}}/stats/">{{resourceBundle.statistics}}</a>
+                </li>
+                <li ng-hide="isTempMonOnly" ng-class="{active: subview == 'inventory' }" ><a
+                        href="#/temperature/device/{{vendorId}}/{{deviceId}}/{{deviceDetails[0].kId}}/inventory"> {{resourceBundle.inventory}}	</a></li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div ng-switch="subview" >
+                    <div class="tab-pane-temp pd-zero" ng-switch-when="summary">
+                        <div ng-include="'views/temperature/summary.html'"></div>
+                    </div>
+                    <div class="tab-pane-temp pd-zero" ng-switch-when="info">
+                        <div ng-include="'views/temperature/device-info.html'"></div>
+                    </div>
+                    <div class="tab-pane-temp pd-zero" ng-switch-when="config">
+                        <div ng-include="'views/temperature/device-config.html'"></div>
+                    </div>
+                    <div class="tab-pane-temp pd-zero" ng-switch-when="stats">
+                        <div ng-include="'views/temperature/device-stats.html'"></div>
+                    </div>
+                    <div class="tab-pane-temp pd-zero" ng-switch-when="inventory" >
+                        <div ng-init="entityId=deviceDetails[0].kId;showFilters=true;" ng-include="'views/inventory/inventory-list.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

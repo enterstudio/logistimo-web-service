@@ -1,0 +1,28 @@
+<html>
+<body>
+Dear Team,<br/>
+<p>
+    <b>User: ${userId} (${userName},&nbsp;${mPhone}#if(${eMail}),&nbsp;${eMail}#end)
+</p>
+<p>
+    #if(${eName})
+        <b>Entity :</b> ${eName},&nbsp;${village}#if(${district}),&nbsp;${district}#end,&nbsp;${state}.
+    #end
+
+</p>
+<p>
+    <b>Domain: </b>${domain}
+</p>
+<p>
+    #if(${title})
+    <p>
+        <b>Topic: </b>${title}
+    </p>
+    #end
+</p>
+<p>
+    <b>Feedback:</b>
+    ${message}
+</p>
+</body>
+</html>

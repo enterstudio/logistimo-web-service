@@ -1,0 +1,212 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="report-filter-pane">
+    <div class="report-filter" ng-class="{'hide-filter':hideFilter}">
+        <div class="row" ng-click="hideFilter?openFilters():cancel()" id="fixedfilter">
+            <div class="col-sm-8 norightpad lPad5">
+                    <span uib-tooltip="Filters" tooltip-append-to-body="true"
+                          class="glyphicons glyphicons-filter codegray pt5">
+                    </span>
+                    <span class="badge filtered-data pt5" ng-show="value" ng-repeat="(key,value) in filterLabels">
+                        <b>{{key}}:</b> {{value}}
+                    </span>
+            </div>
+            <div class="form-inline noLRpad filter-fixed">
+                <div class="form-group">
+                    <span ng-show="activeMetric == 'ot'">
+                        <rpt-date-filter filter-model="filter.from" mode="dateMode" opened="fopen" close-model="topen"
+                                         max-date="today"></rpt-date-filter>
+                        -
+                    </span>
+                    <rpt-date-filter filter-model="filter.to" mode="dateMode" opened="topen" close-model="fopen"
+                                     min-date="filter.fromCopy"
+                                     max-date="maxDate"></rpt-date-filter>
+                    &nbsp;
+                    <rpt-periodicity-filter from-model="fopen" to-model="topen" filter-model="filter.periodicity"></rpt-periodicity-filter>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 card-left">
+                <div class="filter-card">
+                    <div class="filter-heading" ng-class="{'required': mandatoryFilters['material']}">Material</div>
+                    <div class="filter-sub-heading">
+                        <span ng-hide="hideMaterialTagFilter" ng-class="{'active':cards.mc == undefined}" ng-click="changeSubHeading('m')">By tag</span>
+                        <span ng-class="{'active':cards.mc == 'i'}" ng-click="changeSubHeading('m','i')">By name</span>
+                    </div>
+                    <rpt-tag-filter ng-disabled="filter.mmtag"
+                                    place-holder="Select material tag"
+                                    filter-model="filter.mtag" filter-type="material"
+                                    ng-if="cards.mc == undefined"></rpt-tag-filter>
+                    <rpt-material-filter ng-disabled="filter.mmat"
+                                         place-holder="Select material"
+                                         filter-model="filter.mat" ng-if="cards.mc == 'i'"></rpt-material-filter>
+                    <div class="filter-compare">
+                        <span ng-if="activeMetric == 'ot' && compare.type == undefined && (filter.mat != undefined || filter.mtag != undefined)"
+                              ng-click="compare.type = 'm'">Compare</span>
+                        <span ng-if="compare.type == 'm'">
+                            <span ng-click="compare.type = filter.mmat = filter.mmtag = undefined"
+                                  class="pb3 dinline">Cancel comparison</span>
+                            <rpt-tag-filter multiple="true" filter-model="filter.mmtag" filter-type="material"
+                                            place-holder="Select material tags"
+                                            pre-selected="filter.mtag"
+                                            ng-if="cards.mc == undefined"></rpt-tag-filter>
+                            <rpt-material-filter multiple="true" filter-model="filter.mmat"
+                                                 place-holder="Select material names"
+                                                 pre-selected="filter.mat"
+                                                 ng-if="cards.mc == 'i'"></rpt-material-filter>
+                            <span class="limit">{{resourceBundle['compare.limit']}}</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="filter-card">
+                    <div class="filter-heading">Location</div>
+                    <div class="filter-sub-heading">
+                        <span ng-class="{'active':cards.lc == undefined}" ng-click="changeSubHeading('l')">By state</span>
+                        <span ng-class="{'active':cards.lc == 'd'}" ng-click="changeSubHeading('l','d')">By district/county</span>
+                        <span ng-class="{'active':cards.lc == 't'}" ng-click="changeSubHeading('l','t')">By taluk/block</span>
+                        <span ng-class="{'active':cards.lc == 'c'}" ng-click="changeSubHeading('l','c')">By city/village</span>
+                    </div>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} state"
+                                         filter-model="filter.st" filter-type="state"
+                                         ng-disabled="filter.mst || filter.entity"
+                                         ng-if="cards.lc == undefined"></rpt-location-filter>
+                    <span ng-show="cards.lc == undefined && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} district/county"
+                                         filter-model="filter.dis" filter-type="district"
+                                         ng-disabled="filter.mdis || filter.entity"
+                                         ng-if="cards.lc == 'd'"></rpt-location-filter>
+                    <span ng-show="cards.lc == 'd' && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} taluk"
+                                         filter-model="filter.tlk" filter-type="taluk"
+                                         ng-disabled="filter.mtlk || filter.entity"
+                                         ng-if="cards.lc == 't'"></rpt-location-filter>
+                    <span ng-show="cards.lc == 't' && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} city/village"
+                                         filter-model="filter.cty" filter-type="city"
+                                         ng-disabled="filter.mcty || filter.entity"
+                                         ng-if="cards.lc == 'c'"></rpt-location-filter>
+                    <span ng-show="cards.lc == 'c' && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <div class="filter-compare">
+                        <span ng-if="activeMetric == 'ot' && compare.type == undefined && (filter.st != undefined || filter.dis != undefined || filter.tlk != undefined || filter.cty != undefined)"
+                              ng-click="compare.type = 'l'">Compare</span>
+                        <span ng-if="compare.type == 'l'">
+                            <span ng-click="compare.type = filter.mst = filter.mdis = filter.mtlk = filter.mcty = undefined"
+                                  class="pb3 dinline">Cancel comparison</span>
+                            <rpt-location-filter multiple="true"
+                                                 place-holder="{{resourceBundle['select']}} {{resourceBundle['state']}}"
+                                                 filter-model="filter.mst" filter-type="state"
+                                                 pre-selected="filter.st"
+                                                 ng-if="cards.lc == undefined"></rpt-location-filter>
+                            <rpt-location-filter multiple="true"
+                                                 place-holder="{{resourceBundle['select']}} {{resourceBundle['district']}}"
+                                                 filter-model="filter.mdis" filter-type="district"
+                                                 pre-selected="filter.dis"
+                                                 ng-if="cards.lc == 'd'"></rpt-location-filter>
+                            <rpt-location-filter multiple="true"
+                                                 place-holder="{{resourceBundle['select']}} {{resourceBundle['taluk']}}"
+                                                 filter-model="filter.mtlk" filter-type="taluk"
+                                                 pre-selected="filter.tlk"
+                                                 ng-if="cards.lc == 't'"></rpt-location-filter>
+                            <rpt-location-filter multiple="true"
+                                                 place-holder="{{resourceBundle['select']}} {{resourceBundle['city']}}"
+                                                 filter-model="filter.mcty" filter-type="city"
+                                                 pre-selected="filter.cty"
+                                                 ng-if="cards.lc == 'c'"></rpt-location-filter>
+                            <span class="limit">{{resourceBundle['compare.limit']}}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 card-right">
+                <div class="filter-card">
+                    <div class="filter-heading" ng-class="{'required': mandatoryFilters['entity']}">{{resourceBundle['kiosk']}}</div>
+                    <div class="filter-sub-heading">
+                        <span ng-class="{'active':cards.ec == undefined}" ng-click="changeSubHeading('e')">By tag</span>
+                        <span ng-class="{'active':cards.ec == 'i'}" ng-click="changeSubHeading('e','i')">By name</span>
+                    </div>
+                    <rpt-tag-filter ng-disabled="filter.metag"
+                                    place-holder="Select {{resourceBundle['kiosk.lowercase']}} tag"
+                                    filter-model="filter.etag" filter-type="entity"
+                                    ng-if="cards.ec == undefined"></rpt-tag-filter>
+                    <rpt-entity-filter ng-disabled="filter.mentity || filter.st || filter.dis || filter.tlk || filter.cty"
+                                       place-holder="Select {{resourceBundle['kiosk.lowercase']}}"
+                                       filter-model="filter.entity" ng-if="cards.ec == 'i'"></rpt-entity-filter>
+                    <span ng-show="filter.st || filter.dis || filter.tlk || filter.cty"
+                          class="limit">{{resourceBundle['filter.disable.entity']}}</span>
+                    <div class="filter-compare">
+                        <span ng-if="activeMetric == 'ot' && compare.type == undefined && (filter.entity != undefined || filter.etag != undefined)"
+                              ng-click="compare.type = 'e'">Compare</span>
+                        <span ng-if="compare.type == 'e'">
+                            <span ng-click="compare.type = filter.mentity = filter.metag = undefined"
+                                  class="pb3 dinline">Cancel comparison</span>
+                            <rpt-tag-filter multiple="true" filter-model="filter.metag" filter-type="entity"
+                                            pre-selected="filter.etag"
+                                            place-holder="Select {{resourceBundle['kiosk.lowercase']}} tags"
+                                            ng-if="cards.ec == undefined"></rpt-tag-filter>
+                            <rpt-entity-filter multiple="true" filter-model="filter.mentity"
+                                               place-holder="Select {{resourceBundle['kiosks.lower']}}"
+                                               pre-selected="filter.entity"
+                                               ng-if="cards.ec == 'i'"></rpt-entity-filter>
+                            <span class="limit">{{resourceBundle['compare.limit']}}</span>
+                        </span>
+                    </div>
+                    <div ng-if="showRelationFilter && filter.entity">
+                        <div class="filter-sub-heading pt10">
+                            <span class="active">By {{relationFilterTypeText}}</span>
+                        </div>
+                        <rpt-entity-relation-filter linked-id="filter.entity"
+                                                    filter-type="relationFilterType"
+                                                    place-holder="Select {{relationFilterTypeText}} name"
+                                                    filter-model="filter.lkid"></rpt-entity-relation-filter>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-1">
+                <button type="reset" ng-click="resetFilters()" class="btn btn-sm btn-default">
+                    {{resourceBundle['reset']}}
+                </button>
+            </div>
+            <div class="col-sm-11">
+                <div class="pull-right">
+                    <button type="button" ng-click="cancel()" class="btn btn-sm btn-default">
+                        Cancel
+                    </button>
+                    <button type="button" ng-click="applyFilter()" class="btn btn-sm btn-primary">
+                        {{resourceBundle['report.get']}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-click="cancel()">
+            <div class="col-sm-12">
+                <div class="filter-close">
+                    <span class="glyphicons glyphicons-chevron-up"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

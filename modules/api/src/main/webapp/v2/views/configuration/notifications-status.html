@@ -1,0 +1,96 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="NotificationMessageController">
+        <div class="filter-box form-group" ng-show="iAdm">
+            <div class="row mt10">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['from']}}</span>
+                    <date-picker date-model="from" place-holder="From" min-date="createdOn" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['to']}}</span>
+                    <date-picker date-model="to" place-holder="To" min-date="from || createdOn" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3 col-sm-offset-3 mt18">
+                    <span class="pull-right">
+                    <button type="reset" ng-click="reset()" class="btn btn-sm btn-default">
+                        {{resourceBundle['reset']}}
+                    </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div ng-hide="filtered.length == 0">
+          <div class="row action-bar">
+              <export-data ng-show="iAdm" mail-id="mailId" export-type="notificationStatus"
+                           from="from" to="to" rows="numFound"></export-data>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4 col-sm-offset-8">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-12">
+                <table class="table table-striped table-condensed table-hover table-logistimo">
+                    <tbody>
+                    <tr>
+                        <th class="text-center">{{resourceBundle['serialnum']}}</th>
+                        <th>{{resourceBundle['message.senttoshort']}}</th>
+                        <th>{{resourceBundle['type']}}</th>
+                        <th>{{resourceBundle['message']}}</th>
+                        <th>{{resourceBundle['status']}}</th>
+                        <th>{{resourceBundle['time']}}</th>
+                    </tr>
+                    <tr ng-repeat="item in filtered = message1.results">
+                        <td class="text-center">{{item.sno}}</td>
+                        <td>{{item.sto}}</td>
+                        <td>{{item.evtp}}</td>
+                        <td>{{item.text}}</td>
+                        <td>{{item.sta}}</td>
+                        <td>{{item.tm}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning" ng-show="filtered.length == 0">{{resourceBundle['messages.nostatus']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4 col-sm-offset-8">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,77 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="bizinfo bizinfo-last">
+<div ng-controller="SimpleMenuController" ng-init="init('reports')">
+<div ng-if="repTabEnabled" class="row overflowYHide">
+    <div class="col-sm-2 norightpad">
+        <ul class="nav nav-tabs-left nav-stacked mh">
+            <li ng-class="{active: subview == 'inv'}">
+                <a href="#/reports/inv/" class="clickable"> {{resourceBundle['report.consumptiontrends']}} </a>
+            </li>
+            <li ng-class="{active: subview == 'ort'}" ng-show="ordersTabEnabled">
+                <a href="#/reports/ort/" class="clickable"> {{resourceBundle['report.orderresponsetimes']}} </a>
+            </li>
+            <li ng-class="{active: subview == 'rrt'}">
+                <a href="#/reports/rrt/" class="clickable"> {{resourceBundle['report.replenishmentresponsetimes']}} </a>
+            </li>
+            <li ng-class="{active: subview == 'tc'}">
+                <a href="#/reports/tc/" class="clickable"> {{resourceBundle['report.transactioncounts']}} </a>
+            </li>
+            <li ng-hide="hbUTag" ng-class="{active: subview == 'ua'}">
+                <a href="#/reports/ua/" class="clickable"> {{resourceBundle['report.useractivity']}} </a>
+            </li>
+            <li ng-hide="hbUTag" ng-class="{active: subview == 'ht'}">
+                <a href="#/reports/ht/"> {{resourceBundle['domain.activity']}} </a>
+            </li>
+            <li ng-class="{active: subview == 'cr'}">
+                <a href="#/reports/cr/" class="clickable"> {{resourceBundle['report.customreports']}} </a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-sm-10 noleftpad mh">
+        <div ng-if="subview == 'inv'">
+            <div class="box btbox mh" ng-include="'views/reports/inventory-trends.html'"></div>
+        </div>
+        <div ng-if="subview == 'ort'">
+            <div class="box btbox mh" ng-include="'views/reports/order-response.html'"></div>
+        </div>
+        <div ng-if="subview == 'rrt'">
+            <div class="box btbox mh" ng-include="'views/reports/replenish-response.html'"></div>
+        </div>
+        <div ng-if="subview == 'tc'">
+            <div class="box btbox mh" ng-include="'views/reports/trans-count.html'"></div>
+        </div>
+        <div ng-if="subview == 'ua'">
+            <div class="box btbox mh" ng-include="'views/reports/user-activity.html'"></div>
+        </div>
+        <div ng-if="subview == 'ht'">
+            <div class="box btbox mh" ng-include="'views/reports/hierarchy-table.html'"></div>
+        </div>
+        <div ng-if="subview == 'cr'">
+            <div class="box btbox mh" ng-include="'views/reports/customreports.html'"></div>
+        </div>
+    </div>
+</div>
+</div>
+</div>

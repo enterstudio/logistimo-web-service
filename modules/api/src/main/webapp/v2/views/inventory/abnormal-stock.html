@@ -1,0 +1,134 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="AbnormalStockCtrl">
+            <div class="filter-box">
+                <div ng-include="'views/common/reset-filters.html'"></div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['events']}}</span>
+                        <select ng-model="aStock.et" class="form-control">
+                            <option value="{{INVENTORY.stock.STOCKOUT}}"
+                                    ng-selected="aStock.et == INVENTORY.stock.STOCKOUT">
+                                {{resourceBundle['inventory.zerostock']}}
+                            </option>
+                            <option value="{{INVENTORY.stock.UNDERSTOCK}}"
+                                    ng-selected="aStock.et == INVENTORY.stock.UNDERSTOCK">
+                                {{resourceBundle['inventory.lessthanmin']}}
+                            </option>
+                            <option value="{{INVENTORY.stock.OVERSTOCK}}"
+                                    ng-selected="aStock.et == INVENTORY.stock.OVERSTOCK">
+                                {{resourceBundle['inventory.morethanmax']}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 pt30 mh40">
+                        <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                    </div>
+                    <div class="col-sm-3  pt30 mh40">
+                        <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                    </div>
+                </div>
+            </div>
+            <div class="row action-bar">
+                <div class="col-sm-12 noLRpad">
+                    <span ng-if="mailId != undefined && mailId != null">
+                        <export-data mail-id="mailId" export-type="abnormalStock" e-tag="etag" abn-type="aStock.et"
+                                     m-tag="mtag" rows="numFound"></export-data>
+                    </span>
+                    <div class="pull-right" ng-show="loading" >
+                        <span><span class="glyphicons glyphicons-cogwheel spin large"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="filtered.length > 0">
+                <div class="row mt18">
+                    <div class="col-sm-8">
+                        <p class="litetext">{{resourceBundle['inventory.abnormalstocknote.new']}}</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="pull-right">
+                            <b>{{resSize}}</b>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="outer">
+                            <table class="table table-striped table-condensed table-hover table-logistimo" id="fixTable">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th  ng-click="setSort('mnm')">{{resourceBundle['material']}}  <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'mnm' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'mnm' && !sortAsc}"></span></th>
+                                    <th  ng-click="setSort('enm')">{{resourceBundle['kiosk']}} <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'enm' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'enm' && !sortAsc}"></span></th>
+                                    <th  ng-click="setSort('st')" class="text-center">{{resourceBundle['material.stockonhand']}} <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'st' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'st' && !sortAsc}"></span></th>
+                                    <th  ng-click="setSort('min')" class="text-center">{{resourceBundle['min']}} <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'min' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'min' && !sortAsc}"></span><span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                                    <th  ng-click="setSort('max')" class="text-center">{{resourceBundle['max']}} <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'max' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'max' && !sortAsc}"></span><span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                                    <th  ng-click="setSort('du')">{{resourceBundle['duration']}} <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'du' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'du' && !sortAsc}"></span></th>
+                                    <th  ng-click="setSort('stDt')" class="capbold">{{resourceBundle['since']}} <span class="filter-label" ng-class="{'glyphicons glyphicons-arrow-down':sortBy == 'stDt' && sortAsc,'glyphicons glyphicons-arrow-up':sortBy == 'stDt' && !sortAsc}"></span></th>
+                                </tr>
+                                </thead>
+                                <tbody ng-repeat="item in filtered = invAbnormal.results | orderBy:sortBy:sortAsc"
+                                       data-ng-switch on="exRow[$index]">
+                                <tr ng-click="select($index,'history')" ng-class="{'alert alert-info' : exRow[$index]}">
+                                    <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                                    <td>{{item.mnm}}</td>
+                                    <td>{{item.enm}}<span class="litetext">{{item.add}}</span></td>
+                                    <td class="text-center">{{item.st | roundNoTrailZeros:2}}</td>
+                                    <td class="text-center">{{item.min}}<span ng-show="mmdt && item.minDur > 0" class="litetext">{{item.minDur}} {{mmdt}}</span></td>
+                                    <td class="text-center">{{item.max}}<span ng-show="mmdt && item.maxDur > 0" class="litetext">{{item.maxDur}} {{mmdt}}</span></td>
+                                    <td>{{item.du | timeStr:false:true}}</td>
+                                    <td>{{item.stDtstr}}</td>
+                                </tr>
+                                <tr data-ng-switch-when="history">
+                                    <td colspan=100% class="partialview">
+                                        <div ng-init="view='views/inventory/view-history.html' ; mnm = item.mnm ; index = $index ; url='/s2/api/inventory/history?type=stev&kioskid='+item.kid+'&materialid='+item.mid+'&eventtype='+item.type+'&size=50'; color=chartColor; et=aStock.et"
+                                             ng-include="'views/partial.html'"></div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="pull-right">
+                            <b>{{resSize}}</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <p class=" alert alert-warning" ng-show="!loading && resSize == 0">
+                        {{resourceBundle['nodataavailable']}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

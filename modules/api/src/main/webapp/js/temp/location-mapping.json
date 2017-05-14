@@ -1,0 +1,2381 @@
+{
+  "data": {
+    "VN": {
+      "name": "Vietnam",
+      "states": {
+        "Hanoi": {
+          "districts": {}
+        }
+      }
+    },
+    "HT": {
+      "name": "Haiti",
+      "states": {
+        "Nord-Ouest": {
+          "districts": {}
+        },
+        "Nord": {
+          "districts": {}
+        },
+        "Nord-Est": {
+          "districts": {}
+        },
+        "Artibonite": {
+          "districts": {}
+        },
+        "Centre": {
+          "districts": {}
+        },
+        "Ouest": {
+          "districts": {}
+        },
+        "Nippes": {
+          "districts": {}
+        },
+        "Sud": {
+          "districts": {}
+        },
+        "Sud-Est": {
+          "districts": {}
+        },
+        "Grand Anse": {
+          "districts": {}
+        }
+      }
+    },
+    "TN": {
+      "name": "Tunisia",
+      "states": {
+        "Sousse": {
+          "districts": {}
+        },
+        "Gabes": {
+          "districts": {}
+        },
+        "Medenine": {
+          "districts": {}
+        },
+        "Beja": {
+          "districts": {}
+        },
+        "Kasserine": {
+          "districts": {}
+        },
+        "Monastir": {
+          "districts": {}
+        },
+        "Ariana": {
+          "districts": {}
+        },
+        "Gafsa": {
+          "districts": {}
+        },
+        "Bizerte": {
+          "districts": {}
+        },
+        "Sidi Bou Zid": {
+          "districts": {}
+        },
+        "Nabeul": {
+          "districts": {}
+        },
+        "Tozeur": {
+          "districts": {}
+        },
+        "Sfax": {
+          "districts": {}
+        },
+        "Jendouba": {
+          "districts": {}
+        },
+        "Zaghouan": {
+          "districts": {}
+        },
+        "Kef": {
+          "districts": {}
+        },
+        "Siliana": {
+          "districts": {}
+        },
+        "Kebili": {
+          "districts": {}
+        },
+        "Kairouan": {
+          "districts": {}
+        },
+        "Tunis": {
+          "districts": {}
+        },
+        "Ben Arous": {
+          "districts": {}
+        },
+        "Mahdia": {
+          "districts": {}
+        },
+        "Tataouine": {
+          "districts": {}
+        },
+        "Manouba": {
+          "districts": {}
+        }
+      }
+    },
+    "NP": {
+      "name": "Nepal",
+      "states": {
+        "Mahakali": {
+          "districts": {}
+        },
+        "Bheri": {
+          "districts": {}
+        },
+        "Mechi": {
+          "districts": {}
+        },
+        "Narayani": {
+          "districts": {}
+        },
+        "Lumbini": {
+          "districts": {}
+        },
+        "Janakpur": {
+          "districts": {}
+        },
+        "Bagmati": {
+          "districts": {}
+        },
+        "Rapti": {
+          "districts": {}
+        },
+        "Sagarmatha": {
+          "districts": {}
+        },
+        "Dhawalagiri": {
+          "districts": {}
+        },
+        "Karnali": {
+          "districts": {}
+        },
+        "Seti": {
+          "districts": {}
+        },
+        "Koshi": {
+          "districts": {}
+        },
+        "Gandaki": {
+          "districts": {}
+        }
+      }
+    },
+    "LR": {
+      "name": "Liberia",
+      "states": {
+        "Nimba": {
+          "districts": {}
+        },
+        "Margibi": {
+          "districts": {}
+        },
+        "Sinoe": {
+          "districts": {}
+        },
+        "River Cess": {
+          "districts": {}
+        },
+        "River Gee": {
+          "districts": {}
+        },
+        "Grand Cape Mount": {
+          "districts": {}
+        },
+        "Bong": {
+          "districts": {}
+        },
+        "Montserrado": {
+          "districts": {}
+        },
+        "Grand Kru": {
+          "districts": {}
+        },
+        "Lofa": {
+          "districts": {}
+        },
+        "Grand Gedeh": {
+          "districts": {}
+        },
+        "Grand Bassa": {
+          "districts": {}
+        },
+        "Maryland": {
+          "districts": {}
+        },
+        "Gbarpolu": {
+          "districts": {}
+        },
+        "Bomi": {
+          "districts": {}
+        }
+      }
+    },
+    "SS": {
+      "name": "South Sudan",
+      "states": {
+        "Central Equatoria": {
+          "districts": {
+            "Juba County": {},
+            "Lainya County": {},
+            "Morobo County": {},
+            "Terekeka County": {},
+            "Kajo Keji County": {},
+            "Yei County": {}
+          }
+        },
+        "Lakes": {
+          "districts": {
+            "Yirol West": {},
+            "Yirol East": {},
+            "Rumbek East": {},
+            "Aweriar": {},
+            "Rumbek Central": {},
+            "Cueibet": {},
+            "Wulu": {},
+            "Rumbek North": {}
+          }
+        },
+        "Western Bahr el Ghazal": {
+          "districts": {
+            "Raga County": {},
+            "Wau County": {},
+            "Jur River County": {}
+          }
+        },
+        "Western Equatoria": {
+          "districts": {
+            "Mundri County": {},
+            "Tambora County": {},
+            "Mundri West County": {},
+            "Ezo County": {},
+            "Najero County": {},
+            "Nzara County": {},
+            "Yambio County": {},
+            "Maridi East County": {},
+            "Ibba County": {},
+            "Mvolo County": {}
+          }
+        },
+        "Jonglei": {
+          "districts": {
+            "Ayod County": {},
+            "Pibor County": {},
+            "Akobo County": {},
+            "Pigi County": {},
+            "Fangak County": {},
+            "Duk County": {},
+            "Twic East County": {},
+            "Uror County": {},
+            "Nyirol County": {},
+            "Pochalla County": {},
+            "Bor County": {}
+          }
+        },
+        "Warrap": {
+          "districts": {
+            "Gogrial West County": {},
+            "Tonj South County": {},
+            "Twic": {},
+            "Tonj North County": {},
+            "Gogrial East County": {},
+            "Tonj East County": {}
+          }
+        },
+        "Eastern Equatoria": {
+          "districts": {
+            "Kapoeta East County": {},
+            "Lopa Lafon County": {},
+            "Magwi County": {},
+            "Kapoeta North County": {},
+            "Budi County": {},
+            "Ikotos County": {},
+            "Kapoeta South County": {},
+            "Torit County": {}
+          }
+        },
+        "Upper Nile": {
+          "districts": {
+            "Nasir County": {},
+            "Maban County": {},
+            "Malakal County": {},
+            "Baliet County": {},
+            "Maiwut County": {},
+            "Fashoda County": {},
+            "Panyikang County": {},
+            "Ulang County": {},
+            "Longechuk County": {},
+            "Melut County": {},
+            "Manyo County": {},
+            "Renk County": {}
+          }
+        },
+        "Northern Bahr el Ghazal": {
+          "districts": {
+            "Aweil West County": {},
+            "Aweil North County": {},
+            "Aweil South County": {},
+            "Aweil Central County": {},
+            "Aweil East County": {}
+          }
+        },
+        "Unity": {
+          "districts": {
+            "Rubkona": {},
+            "Guit": {},
+            "Payinjiar": {},
+            "Koch": {},
+            "Panrieng": {},
+            "Mayom": {},
+            "Abiemnon": {},
+            "Leer": {},
+            "Mayendit": {}
+          }
+        }
+      }
+    },
+    "ZM": {
+      "name": "Zambia",
+      "states": {
+        "Southern": {
+          "districts": {}
+        },
+        "Central": {
+          "districts": {}
+        },
+        "Western": {
+          "districts": {}
+        },
+        "Copperbelt": {
+          "districts": {}
+        },
+        "Eastern": {
+          "districts": {}
+        },
+        "Luapula": {
+          "districts": {}
+        },
+        "North-Western": {
+          "districts": {}
+        },
+        "Northern": {
+          "districts": {}
+        },
+        "Lusaka": {
+          "districts": {}
+        }
+      }
+    },
+    "KH": {
+      "name": "Cambodia",
+      "states": {
+        "Takeo": {
+          "districts": {}
+        },
+        "Tonle Sap": {
+          "districts": {}
+        },
+        "Phnom Penh": {
+          "districts": {}
+        },
+        "Kandal": {
+          "districts": {}
+        },
+        "Kep": {
+          "districts": {}
+        },
+        "Pailin": {
+          "districts": {}
+        }
+      }
+    },
+    "KG": {
+      "name": "Kyrgyzstan",
+      "states": {
+        "Naryn": {
+          "districts": {}
+        },
+        "Chuy": {
+          "districts": {}
+        },
+        "Osh": {
+          "districts": {}
+        },
+        "Talas": {
+          "districts": {}
+        },
+        "Batken": {
+          "districts": {}
+        },
+        "Bishkek": {
+          "districts": {}
+        }
+      }
+    },
+    "KE": {
+      "name": "Kenya",
+      "states": {
+        "Nairobi": {
+          "districts": {}
+        }
+      }
+    },
+    "US": {
+      "name": "USA",
+      "states": {
+        "California": {
+          "districts": {}
+        },
+        "Minnesota": {
+          "districts": {}
+        },
+        "New York": {
+          "districts": {}
+        },
+        "Massachusetts": {
+          "districts": {}
+        },
+        "Arizona": {
+          "districts": {}
+        },
+        "Connecticut": {
+          "districts": {}
+        },
+        "West Virginia": {
+          "districts": {}
+        }
+      }
+    },
+    "IN": {
+      "name": "India",
+      "states": {
+        "Meghalaya": {
+          "sn": "ME",
+          "id": "023",
+          "districts": {
+            "West Jaintia Hills": {},
+            "East Jaintia Hills": {},
+            "East Khasi Hills": {},
+            "West Khasi Hills": {},
+            "South West Khasi Hills": {},
+            "Ri-Bhoi": {},
+            "North Garo Hills": {},
+            "East Garo Hills": {},
+            "South Garo Hills": {},
+            "West Garo Hills": {},
+            "South West Garo Hills": {}
+          }
+        },
+        "Arunachal Pradesh": {
+          "districts": {
+            "Anjaw": {},
+            "Changlang": {},
+            "East Kameng": {},
+            "East Siang": {},
+            "Lohit": {},
+            "Longding": {},
+            "Lower Subansiri": {},
+            "Papum Pare": {},
+            "Tawang": {},
+            "Tirap": {},
+            "Lower Dibang Valley": {},
+            "Upper Siang": {},
+            "Upper Subansiri": {},
+            "West Kameng": {},
+            "West Siang": {},
+            "Anini": {},
+            "Koloriang": {},
+            "Kurung Kumey": {},
+            "Upper Dibang Valley": {}
+          },
+          "id": "003",
+          "sn": "AR"
+        },
+        "Manipur": {
+          "sn": "MN",
+          "id": "022",
+          "districts": {
+            "Bishnupur": {},
+            "Churachandpur": {},
+            "Chandel": {},
+            "Imphal East": {},
+            "Senapati": {},
+            "Tamenglong": {},
+            "Thoubal": {},
+            "Ukhrul": {},
+            "Imphal West": {}
+          }
+        },
+        "Capital Territory of Delhi": {
+          "sn": "DE",
+          "id": "010",
+          "districts": {}
+        },
+        "Andhra Pradesh": {
+          "sn": "AP",
+          "id": "002",
+          "districts": {
+            "Rangareddy (R.R)": {
+              "taluks": [
+                "Rangareddy (R.R)"
+              ]
+            },
+            "Hyderabad": {
+              "taluks": [
+                "Hyderabad"
+              ]
+            },
+            "Guntur": {
+              "taluks": [
+                "Guntur"
+              ]
+            },
+            "West Godavari (W.G)": {
+              "taluks": [
+                "West Godavari (W.G)"
+              ]
+            },
+            "East Godavari (E.G)": {
+              "taluks": [
+                "East Godavari (E.G)"
+              ]
+            }
+          }
+        },
+        "Rajasthan": {
+          "sn": "RA",
+          "id": "029",
+          "districts": {
+            "Ajmer": {},
+            "Alwar": {},
+            "Banswara": {},
+            "Baran": {},
+            "Barmer": {},
+            "Bharatpur": {},
+            "Bhilwara": {},
+            "Bikaner": {},
+            "Bundi": {},
+            "Chittorgarh": {},
+            "Churu": {},
+            "Dausa": {},
+            "Dholpur": {},
+            "Dungarpur": {},
+            "Hanumangarh": {},
+            "Jaipur": {},
+            "Jaisalmer": {},
+            "Jalor": {},
+            "Jhalawar": {},
+            "Jhunjhunu": {},
+            "Jodhpur": {},
+            "Karauli": {},
+            "Kota": {},
+            "Nagaur": {},
+            "Pali": {},
+            "Pratapgarh": {},
+            "Rajsamand": {},
+            "Sawai Madhopur": {},
+            "Sikar": {},
+            "Sirohi": {},
+            "Sri Ganganagar": {},
+            "Tonk": {},
+            "Udaipur": {}
+          }
+        },
+        "Bihar": {
+          "sn": "BI",
+          "id": "005",
+          "districts": {
+            "Bhojpur": {},
+            "Arwal": {},
+            "Sitamarhi": {},
+            "Samastipur": {},
+            "Muzaffarpur": {},
+            "Banka": {},
+            "Kishanganj": {},
+            "Siwan": {},
+            "East Champaran": {},
+            "Saran": {},
+            "Supaul": {},
+            "Buxar": {},
+            "Sheikhpura": {},
+            "Patna": {},
+            "Sheohar": {},
+            "Gopalganj": {},
+            "Gaya": {},
+            "Bhagalpur": {},
+            "Kaimur": {},
+            "Nalanda": {},
+            "Madhubani": {},
+            "Araria": {},
+            "Jamui": {},
+            "Purnia": {},
+            "Darbhanga": {},
+            "Nawada": {},
+            "Saharsa": {},
+            "Khagaria": {},
+            "Vaishali": {},
+            "Jehanabad": {},
+            "Lakhisarai": {},
+            "Aurangabad": {},
+            "Rohtas": {},
+            "West Champaran": {},
+            "Madhepura": {},
+            "Katihar": {},
+            "Begusarai": {},
+            "Munger": {}
+          }
+        },
+        "Uttar Pradesh": {
+          "sn": "UP",
+          "id": "033",
+          "districts": {
+            "Agra": {
+              "taluks": [
+                "Etmadpur",
+                "Agra",
+                "Kiraoli",
+                "Kheragarh",
+                "Fatehabad",
+                "Bah"
+              ]
+            },
+            "Firozabad": {},
+            "Mainpuri": {},
+            "Mathura": {},
+            "Aligarh": {},
+            "Etah": {},
+            "Hathras": {},
+            "Kasganj": {},
+            "Allahabad": {},
+            "Fatehpur": {},
+            "Kaushambi": {},
+            "Pratapgarh": {},
+            "Azamgarh": {},
+            "Ballia": {},
+            "Mau": {},
+            "Badaun": {
+              "taluks": [
+                "Budaun",
+                "Bisauli",
+                "Bilsi",
+                "Dataganj",
+                "Khair",
+                "Sahaswan"
+              ]
+            },
+            "Bareilly": {
+              "taluks": [
+                "Bareilly",
+                "Aonla",
+                "Faridpur",
+                "Mirganj",
+                "Nawabganj",
+                "Baheri"
+              ]
+            },
+            "Pilibhit": {
+              "taluks": [
+                "Pilibhit",
+                "Barkhera",
+                "Puranpur",
+                "Bisalpur"
+              ]
+            },
+            "Shahjahanpur": {
+              "taluks": [
+                "Shahjahanpur",
+                "Powayan",
+                "Tilhar",
+                "Jalalabad",
+                "Sadar"
+              ]
+            },
+            "Basti": {},
+            "Sant Kabir Nagar": {},
+            "Siddharthnagar": {},
+            "Banda": {},
+            "Chitrakoot": {},
+            "Hamirpur": {},
+            "Mahoba": {},
+            "Bahraich": {},
+            "Balarampur": {},
+            "Gonda": {},
+            "Shravasti": {},
+            "Ambedkar Nagar": {},
+            "Amethi": {},
+            "Barabanki": {},
+            "Faizabad": {},
+            "Sultanpur": {},
+            "Deoria": {},
+            "Gorakhpur": {},
+            "Kushinagar": {},
+            "Maharajganj": {},
+            "Jalaun": {},
+            "Jhansi": {},
+            "Lalitpur": {},
+            "Auraiya": {},
+            "Etawah": {},
+            "Farrukhabad": {},
+            "Kannauj": {},
+            "Kanpur Dehat": {},
+            "Kanpur Nagar": {},
+            "Hardoi": {},
+            "Lakhimpur Kheri": {},
+            "Lucknow": {},
+            "Raebareli": {},
+            "Sitapur": {},
+            "Unnao": {},
+            "Bagpat": {},
+            "Bulandshahr": {},
+            "Gautam Buddha Nagar": {},
+            "Ghaziabad": {},
+            "Hapur": {},
+            "Meerut": {},
+            "Mirzapur": {},
+            "Sant Ravidas Nagar": {},
+            "Sonbhadra": {},
+            "Amroha": {},
+            "Bijnour": {},
+            "Moradabad": {},
+            "Rampur": {},
+            "Sambhal": {},
+            "Muzaffarnagar": {},
+            "Shamli": {},
+            "Saharanpur": {},
+            "Chandauli": {},
+            "Ghazipur": {},
+            "Jaunpur": {},
+            "Varanasi": {
+              "taluks": [
+                "Varanasi",
+                "Pindra"
+              ]
+            }
+          }
+        },
+        "Jammu and Kashmir": {
+          "districts": {
+            "Kathua": {},
+            "Jammu": {},
+            "Samba": {},
+            "Udhampur": {},
+            "Reasi": {},
+            "Rajouri": {},
+            "Poonch": {},
+            "Doda": {},
+            "Ramban": {},
+            "Kishtwar": {},
+            "Anantnag": {},
+            "Kulgam": {},
+            "Pulwama": {},
+            "Shopian": {},
+            "Budgam": {},
+            "Srinagar": {},
+            "Ganderbal": {},
+            "Bandipora": {},
+            "Baramulla": {},
+            "Kupwara": {},
+            "Kargil": {},
+            "Leh": {}
+          }
+        },
+        "Tamil Nadu": {
+          "sn": "TN",
+          "id": "031",
+          "districts": {
+            "Chennai": {
+              "taluks": [
+                "Chennai"
+              ]
+            },
+            "Thanjavur": {
+              "taluks": [
+                "Thanjavur"
+              ]
+            }
+          }
+        },
+        "West Bengal": {
+          "districts": {
+            "Jalpaiguri": {},
+            "Medinipur": {}
+          }
+        },
+        "Maharashtra": {
+          "districts": {
+            "Pune": {
+              "taluks": [
+                "Indapur",
+                "Junnar"
+              ]
+            },
+            "Beed": {},
+            "Nanded": {},
+            "Aurangabad": {},
+            "Solapur": {
+              "taluks": [
+                "Barshi",
+                "Mahol"
+              ]
+            },
+            "Latur": {},
+            "Osmanabad": {}
+          }
+        },
+        "Orissa": {
+          "districts": {}
+        },
+        "Karnataka": {
+          "sn": "KA",
+          "id": "017",
+          "districts": {
+            "Chamarajanagar": {
+              "id": "IN.KA.CJ",
+              "taluks": [
+                "Chamarajanagar",
+                "Gundlupet",
+                "Kollegal",
+                "Yelandur",
+                "Hanur"
+              ]
+            },
+            "Ramanagara": {
+              "id": "IN.KA.RN",
+              "taluks": [
+                "Ramanagara",
+                "Magadi",
+                "Kanakapura"
+              ]
+            },
+            "Bellary": {
+              "id": "IN.KA.BL",
+              "taluks": [
+                "Bellary",
+                "Hospet",
+                "Hoovina Hadagalli",
+                "Hagaribommanahalli",
+                "Kudligi",
+                "Sandur",
+                "Siruguppa",
+                "Kottur",
+                "Kampli",
+                "Kurugod"
+              ]
+            },
+            "Koppal": {
+              "id": "IN.KA.KP",
+              "taluks": [
+                "Koppal",
+                "Gangavati",
+                "Kushtagi",
+                "Yelbarga"
+              ]
+            },
+            "Uttar Kannada": {
+              "id": "IN.KA.UK",
+              "taluks": [
+                "Karwar",
+                "Sirsi",
+                "Joida",
+                "Dandeli",
+                "Bhatkal",
+                "Kumta",
+                "Ankola",
+                "Haliyal",
+                "Honavar",
+                "Mundgod",
+                "Siddapur",
+                "Yellapur"
+              ]
+            },
+            "Kodagu": {
+              "id": "IN.KA.KD",
+              "taluks": [
+                "Madikeri",
+                "Somvarpet",
+                "Virajpet"
+              ]
+            },
+            "Mysore": {
+              "id": "IN.KA.MY",
+              "taluks": [
+                "Hunsur",
+                "Tirumakudalu Narasipura",
+                "Mysore",
+                "Krishnarajanagar",
+                "Nanjangud",
+                "Heggadadevanakote",
+                "Piriyapatna"
+              ]
+            },
+            "Bangalore Urban": {
+              "id": "IN.KA.BN",
+              "taluks": [
+                "Anekal",
+                "Bengaluru South",
+                "Bengaluru North",
+                "Bengaluru East",
+                "Yelahanka"
+              ]
+            },
+            "Shimoga": {
+              "id": "IN.KA.SH",
+              "taluks": [
+                "Sagar",
+                "Shimoga",
+                "Bhadravati",
+                "Hosanagara",
+                "Shikaripura",
+                "Sorab",
+                "Tirthahalli"
+              ]
+            },
+            "Dakshina Kannada": {
+              "id": "IN.KA.DK",
+              "taluks": [
+                "Mangalore",
+                "Puttur",
+                "Bantwal",
+                "Beltangadi",
+                "Sulya",
+                "Kadaba",
+                "Moodbidri"
+              ]
+            },
+            "Udupi": {
+              "id": "IN.KA.UD",
+              "taluks": [
+                "Udupi",
+                "Karkal",
+                "Kundapura"
+              ]
+            },
+            "Chikkaballapur": {
+              "id": "IN.KA.CH",
+              "taluks": [
+                "Chikkaballapur",
+                "Bagepalli",
+                "Chintamani",
+                "Gauribidanur",
+                "Gudibanda",
+                "Sidlaghatta"
+              ]
+            },
+            "Raichur": {
+              "id": "IN.KA.RA",
+              "taluks": [
+                "Raichur",
+                "Manvi",
+                "Sindhnur",
+                "Devadurga",
+                "Lingsugur",
+                "Sirwar",
+                "Maski"
+              ]
+            },
+            "Davanagere": {
+              "id": "IN.KA.DA",
+              "taluks": [
+                "Davanagere",
+                "Harihar",
+                "Channagiri",
+                "Harpanahalli",
+                "Honnali",
+                "Jagalur"
+              ]
+            },
+            "Gulbarga": {
+              "id": "IN.KA.GU",
+              "taluks": [
+                "Gulbarga",
+                "Afzalpur",
+                "Aland",
+                "Chincholi",
+                "Chitapur",
+                "Jevargi",
+                "Sedam"
+              ]
+            },
+            "Hassan": {
+              "id": "IN.KA.HS",
+              "taluks": [
+                "Hassan",
+                "Arsikere",
+                "Channarayapattana",
+                "Holenarsipur",
+                "Sakleshpur",
+                "Alur",
+                "Arkalgud",
+                "Belur"
+              ]
+            },
+            "Chikamagalur": {
+              "id": "IN.KA.CK",
+              "taluks": [
+                "Chikmagalur",
+                "Kadur",
+                "Koppa",
+                "Mudigere",
+                "Narasimharajapura",
+                "Sringeri",
+                "Tarikere"
+              ]
+            },
+            "Kolar": {
+              "id": "IN.KA.KL",
+              "taluks": [
+                "Chik Ballapur",
+                "Chintamani",
+                "Kolar",
+                "Bangarapet",
+                "Gauribidanur",
+                "Malur",
+                "Mulbagal",
+                "Sidlaghatta",
+                "Bagepalli",
+                "Gudibanda",
+                "Srinivaspur"
+              ]
+            },
+            "Gadag": {
+              "id": "IN.KA.GA",
+              "taluks": [
+                "Gadag Betigeri",
+                "Nargund",
+                "Mundargi",
+                "Ron",
+                "Shirahatti"
+              ]
+            },
+            "Haveri": {
+              "id": "IN.KA.HV",
+              "taluks": [
+                "Haveri",
+                "Ranibennur",
+                "Byadgi",
+                "Hangal",
+                "Savanur",
+                "Hirekerur",
+                "Shiggaon"
+              ]
+            },
+            "Chitradurga": {
+              "id": "IN.KA.CT",
+              "taluks": [
+                "Chitradurga",
+                "Challakere",
+                "Hiriyur",
+                "Holalkere",
+                "Hosdurga",
+                "Molakalmuru"
+              ]
+            },
+            "Bidar": {
+              "id": "IN.KA.BD",
+              "taluks": [
+                "Aurad",
+                "Basavakalyan",
+                "Bidar",
+                "Bhalki",
+                "Homnabad",
+                "Chitgoppa",
+                "Hulsoor",
+                "Kamalnagar"
+              ]
+            },
+            "Mandya": {
+              "id": "IN.KA.MA",
+              "taluks": [
+                "Mandya",
+                "Maddur",
+                "Malavalli",
+                "Shrirangapattana",
+                "Krishnarajpet",
+                "Nagamangala",
+                "Pandavapura"
+              ]
+            },
+            "Yadgir": {
+              "id": "IN.KA.YA",
+              "taluks": [
+                "Yadgir",
+                "Shahpur",
+                "Shorapur"
+              ]
+            },
+            "Bagalkot": {
+              "id": "IN.KA.BK",
+              "taluks": [
+                "Bagalkot",
+                "Jamkhandi",
+                "Mudhol",
+                "Badami",
+                "Bilagi",
+                "Hungund",
+                "Ilkal",
+                "Rabkavi Banhatti",
+                "Guledgudda"
+              ]
+            },
+            "Bangalore Rural": {
+              "id": "IN.KA.BR",
+              "taluks": [
+                "Doddaballapura",
+                "Devanhalli",
+                "Hoskote",
+                "Nelmangala"
+              ]
+            },
+            "Bijapur": {
+              "id": "IN.KA.BJ",
+              "taluks": [
+                "Bijapur",
+                "Basavan Bagevadi",
+                "Indi",
+                "Muddebihal",
+                "Sindagi",
+                "Talikota",
+                "Chadchan",
+                "Devar Hipparagi",
+                "Kolhar",
+                "Nidagundi",
+                "Babaleshwar",
+                "Tikota"
+              ]
+            },
+            "Dharwad": {
+              "id": "IN.KA.DH",
+              "taluks": [
+                "Kalghatgi",
+                "Dharwad",
+                "Hubli",
+                "Hubli City",
+                "Kundgol",
+                "Navalgund"
+              ]
+            },
+            "Belgaum": {
+              "id": "IN.KA.BG",
+              "taluks": [
+                "Belgaum",
+                "Athani",
+                "Bailahongal",
+                "Chikodi",
+                "Gokak",
+                "Hukkeri",
+                "Khanapur",
+                "Ramdurg",
+                "Raybag",
+                "Saundatti",
+                "Kittur",
+                "Nipani",
+                "Mudalgi",
+                "Kagawad"
+              ]
+            },
+            "Tumkur": {
+              "id": "IN.KA.TU",
+              "taluks": [
+                "Tumkur",
+                "Chiknayakanhalli",
+                "Kunigal",
+                "Madhugiri",
+                "Sira",
+                "Tiptur",
+                "Gubbi",
+                "Koratagere",
+                "Pavagada",
+                "Turuvekere"
+              ]
+            }
+          }
+        },
+        "Jharkhand": {
+          "districts": {}
+        },
+        "Kerala": {
+          "districts": {
+            "Palakkad": {
+              "taluks": [
+                "Alathur",
+                "Chittur"
+              ]
+            },
+            "Calicut": {},
+            "Trivandrum": {
+              "taluks": [
+                "Nedumangad",
+                "Chirayinkeezhu"
+              ]
+            }
+          }
+        },
+        "Goa": {
+          "districts": {}
+        },
+        "Andaman and Nicobar Islands": {
+          "districts": {}
+        },
+        "Assam": {
+          "districts": {}
+        },
+        "Chandigarh": {
+          "districts": {}
+        },
+        "Chhattisgarh": {
+          "districts": {}
+        },
+        "Dadra and Nagar Haveli": {
+          "districts": {}
+        },
+        "Daman and Diu": {
+          "districts": {}
+        },
+        "Gujarat": {
+          "districts": {}
+        },
+        "Haryana": {
+          "districts": {}
+        },
+        "Himachal Pradesh": {
+          "districts": {}
+        },
+        "Lakshadweep": {
+          "districts": {}
+        },
+        "Madhya Pradesh": {
+          "districts": {}
+        },
+        "Mizoram": {
+          "districts": {}
+        },
+        "Nagaland": {
+          "districts": {}
+        },
+        "Odisha": {
+          "districts": {}
+        },
+        "Puducherry": {
+          "districts": {}
+        },
+        "Sikkim": {
+          "districts": {}
+        },
+        "Tripura": {
+          "districts": {}
+        },
+        "Uttarakhand": {
+          "districts": {}
+        },
+        "Punjab": {
+          "districts": {}
+        }
+      }
+    },
+    "SL": {
+      "name": "Sierra Leone",
+      "states": {
+        "Western Area Rural": {
+          "districts": {}
+        },
+        "Moyamba": {
+          "districts": {}
+        },
+        "Bombali": {
+          "districts": {}
+        },
+        "Kenema": {
+          "districts": {}
+        },
+        "Bonthe": {
+          "districts": {}
+        },
+        "Pujehun": {
+          "districts": {}
+        },
+        "Kono": {
+          "districts": {}
+        },
+        "Port Loko": {
+          "districts": {}
+        },
+        "Bo": {
+          "districts": {}
+        },
+        "Kambia": {
+          "districts": {}
+        },
+        "Koinadugu": {
+          "districts": {}
+        },
+        "Western Area Urban": {
+          "districts": {}
+        },
+        "Tonkolili": {
+          "districts": {}
+        },
+        "Kailahun": {
+          "districts": {}
+        }
+      }
+    },
+    "MM": {
+      "name": "Myanmar",
+      "states": {
+        "Kachin State": {
+          "districts": {}
+        },
+        "Kayah State": {
+          "districts": {}
+        },
+        "Kayin State": {
+          "districts": {}
+        },
+        "Chin State": {
+          "districts": {}
+        },
+        "Sagaing Region": {
+          "districts": {}
+        },
+        "Tanintharyi Region": {
+          "districts": {}
+        },
+        "Bago Region": {
+          "districts": {}
+        },
+        "Magway Region": {
+          "districts": {}
+        },
+        "Mandalay Region": {
+          "districts": {}
+        },
+        "Mon State": {
+          "districts": {}
+        },
+        "Rakhine State": {
+          "districts": {}
+        },
+        "Yangon Region": {
+          "districts": {}
+        },
+        "Shan State": {
+          "districts": {}
+        },
+        "Ayeyarwady Region": {
+          "districts": {}
+        }
+      }
+    },
+    "UK": {
+      "name": "United Kingdom",
+      "states": {
+        "Surrey": {
+          "districts": {}
+        },
+        "Liverpool": {
+          "districts": {}
+        },
+        "Leciestershire": {
+          "districts": {}
+        }
+      }
+    },
+    "SN": {
+      "name": "Senegal",
+      "states": {
+        "Kaolack": {
+          "districts": {}
+        },
+        "Sedhiou": {
+          "districts": {}
+        },
+        "Diourbel": {
+          "districts": {}
+        },
+        "Thies": {
+          "districts": {}
+        },
+        "Kaffrine": {
+          "districts": {}
+        },
+        "Dakar": {
+          "districts": {}
+        },
+        "Tambacounda": {
+          "districts": {}
+        },
+        "Matam": {
+          "districts": {}
+        },
+        "Saint Louis": {
+          "districts": {}
+        },
+        "Kolda": {
+          "districts": {}
+        },
+        "Ziguinchor": {
+          "districts": {}
+        },
+        "Fatick": {
+          "districts": {}
+        }
+      }
+    },
+    "IT": {
+      "name": "Italy",
+      "states": {
+        "Lazio": {
+          "districts": {}
+        },
+        "Calabria": {
+          "districts": {}
+        },
+        "Apulia": {
+          "districts": {}
+        },
+        "Abruzzo": {
+          "districts": {}
+        }
+      }
+    },
+    "UG": {
+      "name": "Uganda",
+      "states": {
+        "Iganga": {
+          "districts": {}
+        },
+        "Namutumba": {
+          "districts": {}
+        },
+        "Oyam": {
+          "districts": {}
+        },
+        "Zombo": {
+          "districts": {}
+        },
+        "Koboko": {
+          "districts": {}
+        },
+        "Amuria": {
+          "districts": {}
+        },
+        "Mukono": {
+          "districts": {}
+        },
+        "Sheema": {
+          "districts": {}
+        },
+        "Buikwe": {
+          "districts": {}
+        },
+        "Kiboga": {
+          "districts": {}
+        },
+        "Kabale": {
+          "districts": {}
+        },
+        "Nebbi": {
+          "districts": {}
+        },
+        "Napak": {
+          "districts": {}
+        },
+        "Bugiri": {
+          "districts": {}
+        },
+        "Lyantonde": {
+          "districts": {}
+        },
+        "Kamwenge": {
+          "districts": {}
+        },
+        "Kisoro": {
+          "districts": {}
+        },
+        "Busia": {
+          "districts": {}
+        },
+        "Buliisa": {
+          "districts": {}
+        },
+        "Kole": {
+          "districts": {}
+        },
+        "Kanungu": {
+          "districts": {}
+        },
+        "Mityana": {
+          "districts": {}
+        },
+        "Bulambuli": {
+          "districts": {}
+        },
+        "Otuke": {
+          "districts": {}
+        },
+        "Rukungiri": {
+          "districts": {}
+        },
+        "Abim": {
+          "districts": {}
+        },
+        "Kayunga": {
+          "districts": {}
+        },
+        "Amolatar": {
+          "districts": {}
+        },
+        "Kyegegwa": {
+          "districts": {}
+        },
+        "Amuru": {
+          "districts": {}
+        },
+        "Moyo": {
+          "districts": {}
+        },
+        "Kasese": {
+          "districts": {}
+        },
+        "Kiryandongo": {
+          "districts": {}
+        },
+        "Kalungu": {
+          "districts": {}
+        },
+        "Buvuma": {
+          "districts": {}
+        },
+        "Masaka": {
+          "districts": {}
+        },
+        "Sironko": {
+          "districts": {}
+        },
+        "Buhweju": {
+          "districts": {}
+        },
+        "Agago": {
+          "districts": {}
+        },
+        "Kitgum": {
+          "districts": {}
+        },
+        "Kiruhura": {
+          "districts": {}
+        },
+        "Kibaale": {
+          "districts": {}
+        },
+        "Alebtong": {
+          "districts": {}
+        },
+        "Ntoroko": {
+          "districts": {}
+        },
+        "Mbarara": {
+          "districts": {}
+        },
+        "Bukwa": {
+          "districts": {}
+        },
+        "Butaleja": {
+          "districts": {}
+        },
+        "Isingiro": {
+          "districts": {}
+        },
+        "Mbale": {
+          "districts": {}
+        },
+        "Kapchorwa": {
+          "districts": {}
+        },
+        "Yumbe": {
+          "districts": {}
+        },
+        "Kibuku": {
+          "districts": {}
+        },
+        "Nakaseke": {
+          "districts": {}
+        },
+        "Sembabule": {
+          "districts": {}
+        },
+        "Kotido": {
+          "districts": {}
+        },
+        "Bududa": {
+          "districts": {}
+        },
+        "Maracha": {
+          "districts": {}
+        },
+        "Luuka": {
+          "districts": {}
+        },
+        "Manafwa": {
+          "districts": {}
+        },
+        "Arua": {
+          "districts": {}
+        },
+        "Ngora": {
+          "districts": {}
+        },
+        "Dokolo": {
+          "districts": {}
+        },
+        "Adjumani": {
+          "districts": {}
+        },
+        "Kamuli": {
+          "districts": {}
+        },
+        "Bukedea": {
+          "districts": {}
+        },
+        "Bundibugyo": {
+          "districts": {}
+        },
+        "Serere": {
+          "districts": {}
+        },
+        "Butambala": {
+          "districts": {}
+        },
+        "Katakwi": {
+          "districts": {}
+        },
+        "Lwengo": {
+          "districts": {}
+        },
+        "Kaliro": {
+          "districts": {}
+        },
+        "Kampala": {
+          "districts": {}
+        },
+        "Kaabong": {
+          "districts": {}
+        },
+        "Nwoya": {
+          "districts": {}
+        },
+        "Masindi": {
+          "districts": {}
+        },
+        "Kalangala": {
+          "districts": {}
+        },
+        "Gulu": {
+          "districts": {}
+        },
+        "Hoima": {
+          "districts": {}
+        },
+        "Wakiso": {
+          "districts": {}
+        },
+        "Gomba": {
+          "districts": {}
+        },
+        "Rubirizi": {
+          "districts": {}
+        },
+        "Ntungamo": {
+          "districts": {}
+        },
+        "Kabarole": {
+          "districts": {}
+        },
+        "Moroto": {
+          "districts": {}
+        },
+        "Luweero": {
+          "districts": {}
+        },
+        "Amudat": {
+          "districts": {}
+        },
+        "Pader": {
+          "districts": {}
+        },
+        "Kumi": {
+          "districts": {}
+        },
+        "Mitooma": {
+          "districts": {}
+        },
+        "Jinja": {
+          "districts": {}
+        },
+        "Mpigi": {
+          "districts": {}
+        },
+        "Namayingo": {
+          "districts": {}
+        },
+        "Mubende": {
+          "districts": {}
+        },
+        "Ibanda": {
+          "districts": {}
+        },
+        "Bushenyi": {
+          "districts": {}
+        },
+        "Kaberamaido": {
+          "districts": {}
+        },
+        "Lamwo": {
+          "districts": {}
+        },
+        "Soroti": {
+          "districts": {}
+        },
+        "Kyankwanzi": {
+          "districts": {}
+        },
+        "Pallisa": {
+          "districts": {}
+        },
+        "Apac": {
+          "districts": {}
+        },
+        "Lira": {
+          "districts": {}
+        },
+        "Tororo": {
+          "districts": {}
+        },
+        "Kween": {
+          "districts": {}
+        },
+        "Buyende": {
+          "districts": {}
+        },
+        "Kyenjojo": {
+          "districts": {}
+        },
+        "Rakai": {
+          "districts": {}
+        },
+        "Bukomansimbi": {
+          "districts": {}
+        },
+        "Nakasongola": {
+          "districts": {}
+        },
+        "Nakapiripirit": {
+          "districts": {}
+        },
+        "Mayuge": {
+          "districts": {}
+        },
+        "Budaka": {
+          "districts": {}
+        }
+      }
+    },
+    "NG": {
+      "name": "Nigeria",
+      "states": {
+        "Plateau": {
+          "districts": {}
+        },
+        "Delta": {
+          "districts": {}
+        },
+        "Borno": {
+          "districts": {}
+        },
+        "Ekiti": {
+          "districts": {}
+        },
+        "Osun": {
+          "districts": {}
+        },
+        "Nasarawa": {
+          "districts": {}
+        },
+        "Katsina": {
+          "districts": {}
+        },
+        "Kano": {
+          "districts": {}
+        },
+        "Ebonyi": {
+          "districts": {}
+        },
+        "Adamawa": {
+          "districts": {}
+        },
+        "Zamfara": {
+          "districts": {}
+        },
+        "Akwa Ibom": {
+          "districts": {}
+        },
+        "Taraba": {
+          "districts": {}
+        },
+        "Rivers": {
+          "districts": {}
+        },
+        "Enugu": {
+          "districts": {}
+        },
+        "Oyo": {
+          "districts": {}
+        },
+        "Lagos": {
+          "districts": {}
+        },
+        "Kogi": {
+          "districts": {}
+        },
+        "Bauchi": {
+          "districts": {}
+        },
+        "Kebbi": {
+          "districts": {}
+        },
+        "Edo": {
+          "districts": {}
+        },
+        "Kaduna": {
+          "districts": {}
+        },
+        "Yobe": {
+          "districts": {}
+        },
+        "Sokoto": {
+          "districts": {}
+        },
+        "Jigawa": {
+          "districts": {}
+        },
+        "Anambra": {
+          "districts": {}
+        },
+        "Kwara": {
+          "districts": {}
+        },
+        "Niger": {
+          "districts": {}
+        },
+        "Cross River": {
+          "districts": {}
+        },
+        "Abuja": {
+          "districts": {}
+        },
+        "Gombe": {
+          "districts": {}
+        },
+        "Bayelsa": {
+          "districts": {}
+        },
+        "Abia": {
+          "districts": {}
+        },
+        "Ondo": {
+          "districts": {}
+        },
+        "Ogun": {
+          "districts": {}
+        },
+        "Imo": {
+          "districts": {}
+        },
+        "Benue": {
+          "districts": {}
+        }
+      }
+    },
+    "GT": {
+      "name": "Guatemala",
+      "states": {
+        "Petén": {
+          "districts": {}
+        },
+        "Sololá": {
+          "districts": {}
+        },
+        "Chimaltenango": {
+          "districts": {}
+        },
+        "Chiquimula": {
+          "districts": {}
+        },
+        "Totonicapán": {
+          "districts": {}
+        },
+        "Santa Rosa": {
+          "districts": {}
+        },
+        "Jalapa": {
+          "districts": {}
+        },
+        "San Marcos": {
+          "districts": {}
+        },
+        "El Quiché": {
+          "districts": {}
+        },
+        "Alta Verapaz": {
+          "districts": {}
+        },
+        "Baja Verapaz": {
+          "districts": {}
+        },
+        "Jutiapa": {
+          "districts": {}
+        },
+        "Zacapa": {
+          "districts": {}
+        },
+        "Sacatepéquez": {
+          "districts": {}
+        },
+        "Retalhuleu": {
+          "districts": {}
+        },
+        "Huehuetenango": {
+          "districts": {}
+        },
+        "Quetzaltenango": {
+          "districts": {}
+        },
+        "Suchitepéquez": {
+          "districts": {}
+        },
+        "El Progreso": {
+          "districts": {}
+        },
+        "Escuintla": {
+          "districts": {}
+        },
+        "Guatemala Department": {
+          "districts": {}
+        },
+        "Izabal": {
+          "districts": {}
+        }
+      }
+    },
+    "CG": {
+      "name": "Republic of Congo",
+      "states": {
+        "Nord-Kivu": {
+          "districts": {}
+        },
+        "Orientale": {
+          "districts": {}
+        },
+        "Bas-Congo": {
+          "districts": {}
+        },
+        "Maniema": {
+          "districts": {}
+        },
+        "Equateur": {
+          "districts": {}
+        },
+        "Bandundu": {
+          "districts": {}
+        },
+        "Kinshasa": {
+          "districts": {}
+        },
+        "Sud-Kivu": {
+          "districts": {}
+        },
+        "Kasai-Oriental": {
+          "districts": {}
+        },
+        "Kasai-Occidental": {
+          "districts": {}
+        },
+        "Katanga": {
+          "districts": {}
+        }
+      }
+    },
+    "PH": {
+      "name": "Phillipines",
+      "states": {
+        "NCR": {
+          "districts": {}
+        },
+        "Region VII": {
+          "districts": {}
+        },
+        "Region V": {
+          "districts": {}
+        },
+        "Region VIII": {
+          "districts": {}
+        },
+        "Region II": {
+          "districts": {}
+        },
+        "ARMM": {
+          "districts": {}
+        },
+        "Region X": {
+          "districts": {}
+        },
+        "Region XI": {
+          "districts": {}
+        },
+        "Region XIII": {
+          "districts": {}
+        },
+        "Region VI": {
+          "districts": {}
+        },
+        "Region IVA": {
+          "districts": {}
+        },
+        "Region IVB": {
+          "districts": {}
+        },
+        "Region XII": {
+          "districts": {}
+        },
+        "Region I": {
+          "districts": {}
+        },
+        "CAR": {
+          "districts": {}
+        },
+        "Region III": {
+          "districts": {}
+        },
+        "Region IX": {
+          "districts": {}
+        }
+      }
+    },
+    "ET": {
+      "name": "Ethiopia",
+      "states": {
+        "Somali": {
+          "districts": {}
+        },
+        "Benishangul Gumuz": {
+          "districts": {}
+        },
+        "Afar": {
+          "districts": {}
+        },
+        "Tigray": {
+          "districts": {}
+        },
+        "Addis Ababa": {
+          "districts": {}
+        },
+        "Gambela": {
+          "districts": {}
+        },
+        "Harari": {
+          "districts": {}
+        },
+        "Oromia": {
+          "districts": {}
+        },
+        "Amhara": {
+          "districts": {}
+        }
+      }
+    },
+    "PK": {
+      "name": "Pakistan",
+      "states": {
+        "Islamabad Capital": {
+          "districts": {}
+        },
+        "Gilgit-Baltistan": {
+          "districts": {}
+        },
+        "FATA": {
+          "districts": {}
+        },
+        "Kashmir": {
+          "districts": {}
+        },
+        "Khyber": {
+          "districts": {}
+        },
+        "Balochistan": {
+          "districts": {}
+        },
+        "Sindh": {
+          "districts": {}
+        },
+        "Punjab": {
+          "districts": {}
+        }
+      }
+    },
+    "AF": {
+      "name": "Agghanistan",
+      "states": {
+        "Ghor": {
+          "districts": {}
+        },
+        "Ghazni": {
+          "districts": {}
+        },
+        "Khost": {
+          "districts": {}
+        },
+        "Panjshir": {
+          "districts": {}
+        },
+        "Kabul": {
+          "districts": {}
+        },
+        "Konar": {
+          "districts": {}
+        },
+        "Paktia": {
+          "districts": {}
+        },
+        "Herat": {
+          "districts": {}
+        },
+        "Daykundi": {
+          "districts": {}
+        },
+        "Kandahar": {
+          "districts": {}
+        },
+        "Balkh": {
+          "districts": {}
+        },
+        "Logar": {
+          "districts": {}
+        },
+        "Nimruz": {
+          "districts": {}
+        },
+        "Nurestan": {
+          "districts": {}
+        },
+        "Sare Pol": {
+          "districts": {}
+        },
+        "Helmand": {
+          "districts": {}
+        },
+        "Samangan": {
+          "districts": {}
+        },
+        "Badghis": {
+          "districts": {}
+        },
+        "Paktika": {
+          "districts": {}
+        },
+        "Laghman": {
+          "districts": {}
+        },
+        "Jowzjan": {
+          "districts": {}
+        },
+        "Bamyan": {
+          "districts": {}
+        },
+        "Takhar": {
+          "districts": {}
+        },
+        "Kunduz": {
+          "districts": {}
+        },
+        "Kapisa": {
+          "districts": {}
+        },
+        "Nangarhar": {
+          "districts": {}
+        },
+        "Faryab": {
+          "districts": {}
+        },
+        "Zabol": {
+          "districts": {}
+        },
+        "Baghlan": {
+          "districts": {}
+        },
+        "Wardak": {
+          "districts": {}
+        },
+        "Badakhshan": {
+          "districts": {}
+        },
+        "Parvan": {
+          "districts": {}
+        },
+        "Oruzgan": {
+          "districts": {}
+        },
+        "Farah": {
+          "districts": {}
+        }
+      }
+    },
+    "CO": {
+      "name": "Columbia",
+      "states": {
+        "Vichata": {
+          "districts": {}
+        },
+        "Boyaca": {
+          "districts": {}
+        }
+      }
+    },
+    "TZ": {
+      "name": "Tanzania",
+      "states": {
+        "Iringa": {
+          "districts": {}
+        },
+        "Kagera": {
+          "districts": {}
+        },
+        "Shinyanga": {
+          "districts": {}
+        },
+        "Ruvuma": {
+          "districts": {}
+        },
+        "Katavi": {
+          "districts": {}
+        },
+        "Pwani": {
+          "districts": {}
+        },
+        "Lindi": {
+          "districts": {}
+        },
+        "Singida": {
+          "districts": {}
+        },
+        "Manyara": {
+          "districts": {}
+        },
+        "Pemba South": {
+          "districts": {}
+        },
+        "Kilimanjaro": {
+          "districts": {}
+        },
+        "Mbeya": {
+          "districts": {}
+        },
+        "Tabora": {
+          "districts": {}
+        },
+        "Dodoma": {
+          "districts": {}
+        },
+        "Mara": {
+          "districts": {}
+        },
+        "Kigoma": {
+          "districts": {}
+        },
+        "Dar es Salaam": {
+          "districts": {}
+        },
+        "Tanga": {
+          "districts": {}
+        },
+        "Morogoro": {
+          "districts": {}
+        },
+        "Njombe": {
+          "districts": {}
+        },
+        "Geita": {
+          "districts": {}
+        },
+        "Rukwa": {
+          "districts": {}
+        },
+        "Zanzibar Central/South": {
+          "districts": {}
+        },
+        "Pemba North": {
+          "districts": {}
+        },
+        "Simiyu": {
+          "districts": {}
+        },
+        "Zanzibar Urban/West": {
+          "districts": {}
+        },
+        "Mwanza": {
+          "districts": {}
+        },
+        "Mtwara": {
+          "districts": {}
+        },
+        "Zanzibar North": {
+          "districts": {}
+        },
+        "Arusha": {
+          "districts": {}
+        }
+      }
+    },
+    "GH": {
+      "name": "Ghana",
+      "states": {
+        "Central": {
+          "districts": {}
+        },
+        "Ashanti": {
+          "districts": {}
+        },
+        "Western": {
+          "districts": {}
+        },
+        "Brong Ahafo": {
+          "districts": {}
+        },
+        "Greater Accra": {
+          "districts": {}
+        },
+        "Upper West": {
+          "districts": {}
+        },
+        "Eastern": {
+          "districts": {}
+        },
+        "Upper East": {
+          "districts": {}
+        },
+        "Volta": {
+          "districts": {}
+        },
+        "Northern": {
+          "districts": {}
+        }
+      }
+    }
+  },
+  "statusCode": 200,
+  "message": "OK"
+}

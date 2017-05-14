@@ -1,0 +1,216 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="DeviceStatsController">
+    <div class="row mg-hori-zero">
+        <div class="row action-bar-temp">
+            <div class="row">
+                <div class="col-sm-6" style="padding-top: 3px;">
+                    <h2>{{dDate}}</h2>
+                </div>
+                <div class="col-sm-6">
+                    <div class="pull-right">
+                        <div class="dateleft">
+                            <date-picker date-model="day" place-holder="From" max-date="today"></date-picker>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row stats-temp" ng-show="statsLoading == 1">
+            <div class="col-sm-12 text-center">
+                <span ng-show="statsLoading == 1">
+                    <div class="alert alert-warning">
+                        {{resourceBundle['no.data.available']}}
+                    </div>
+                </span>
+            </div>
+        </div>
+        <div class="row stats-temp" ng-show="statsLoading == 2">
+            <div class="col-sm-12">
+                <div class="row mg-hori-zero">
+                    <h5 class="info-label">{{resourceBundle['temperature']}}</h5>
+                </div>
+                <div class="row mg-hori-zero">
+                    <table class="table table-bordered text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['temperature.device.stats.excursions']}}</td>
+                            <td>{{resourceBundle['temperature.device.stats.mean']}} (&#8451;)</td>
+                            <td>{{resourceBundle['temperature.device.stats.min']}} (&#8451;)</td>
+                            <td>{{resourceBundle['temperature.device.stats.max']}} (&#8451;)</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.nExc || 0}}</td>
+                            <td>{{deviceStats.mean || 'None'}}</td>
+                            <td>{{deviceStats.min || 'None'}}</td>
+                            <td>{{deviceStats.max || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10">
+                    <h5 class="info-label">{{resourceBundle['temperature.device.stats.comm']}}</h5>
+                </div>
+                <div class="row mg-hori-zero">
+                    <table class="table table-bordered mg-bottom-zero text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['temperature.device.stats.comm.sms']}}</td>
+                            <td># {{resourceBundle['temperature.device.stats.comm.internet']}}</td>
+                            <td># {{resourceBundle['temperature.device.stats.comm.internet']}} {{resourceBundle['failed'] | lowercase}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.comm.nSMS || 0}}</td>
+                            <td>{{deviceStats.comm.nPsh || 0}}</td>
+                            <td>{{deviceStats.comm.nErr || 0}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10">
+                    <h5 class="info-label">{{resourceBundle['device.high.alarm']}}</h5>
+                </div>
+                <div class="row mg-hori-zero">
+                    <table class="table table-bordered mg-bottom-zero text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['alarms']}}</td>
+                            <td>{{resourceBundle['duration']}}</td>
+                            <td>{{resourceBundle['first.occurence']}}</td>
+                            <td>{{resourceBundle['ambient.temperature']}} (&#8451;)</td>
+                            <td>{{resourceBundle['confirmed']}}</td>
+                            <td>{{resourceBundle['confirm.message']}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.high.nAlrm || deviceStats.high.stat}}</td>
+                            <td>{{deviceStats.high.dur || 'None'}}</td>
+                            <td>{{deviceStats.high.fTime || 'None'}}</td>
+                            <td>{{deviceStats.high.aTmp || 'None'}}</td>
+                            <td>{{deviceStats.high.cnf || false}}</td>
+                            <td>{{deviceStats.high.cnfms || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10">
+                    <h5 class="info-label">{{resourceBundle['device.low.alarm']}}</h5>
+                </div>
+                <div class="row mg-hori-zero">
+                    <table class="table table-bordered mg-bottom-zero text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['alarms']}}</td>
+                            <td>{{resourceBundle['duration']}}</td>
+                            <td>{{resourceBundle['first.occurence']}}</td>
+                            <td>{{resourceBundle['ambient.temperature']}} (&#8451;)</td>
+                            <td>{{resourceBundle['confirmed']}}</td>
+                            <td>{{resourceBundle['confirm.message']}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.low.nAlrm || deviceStats.low.stat}}</td>
+                            <td>{{deviceStats.low.dur || 'None'}}</td>
+                            <td>{{deviceStats.low.fTime || 'None'}}</td>
+                            <td>{{deviceStats.low.aTmp || 'None'}}</td>
+                            <td>{{deviceStats.low.cnf || false}}</td>
+                            <td>{{deviceStats.low.cnfms || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10" ng-show="deviceStats.dCon != undefined">
+                    <h5 class="info-label">{{resourceBundle['device.connection']}}</h5>
+                </div>
+                <div class="row mg-hori-zero" ng-show="deviceStats.dCon != undefined">
+                    <table class="table table-bordered mg-bottom-zero text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['alarms']}}</td>
+                            <td>{{resourceBundle['duration']}}</td>
+                            <td>{{resourceBundle['first.occurence']}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.dCon.nAlrm || deviceStats.dCon.stat}}</td>
+                            <td>{{deviceStats.dCon.dur || 'None'}}</td>
+                            <td>{{deviceStats.dCon.fTime || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10" ng-show="deviceStats.xSns != undefined">
+                    <h5 class="info-label">{{resourceBundle['sensor.connection']}}</h5>
+                </div>
+                <div class="row mg-hori-zero" ng-show="deviceStats.xSns != undefined">
+                    <table class="table table-bordered mg-bottom-zero text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['alarms']}}</td>
+                            <td>{{resourceBundle['duration']}}</td>
+                            <td>{{resourceBundle['first.occurence']}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.xSns.nAlrm || deviceStats.xSns.stat}}</td>
+                            <td>{{deviceStats.xSns.dur || 'None'}}</td>
+                            <td>{{deviceStats.xSns.fTime || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10">
+                    <h5 class="info-label">{{resourceBundle['battery']}}</h5>
+                </div>
+                <div class="row mg-hori-zero">
+                    <table class="table table-bordered text-center table-striped">
+                        <tr>
+                            <td># {{resourceBundle['alarms']}}</td>
+                            <td>{{resourceBundle['battery.actual.voltage']}}</td>
+                            <td>{{resourceBundle['battery.low.voltage']}}</td>
+                            <td>{{resourceBundle['battery.high.voltage']}}</td>
+                            <td>{{resourceBundle['first.occurence']}}</td>
+                            <td>{{resourceBundle['battery.charging.time']}}</td>
+                            <td>{{resourceBundle['battery.power.time']}}</td>
+                            <td>{{resourceBundle['battery.warning.duration']}}</td>
+                            <td>{{resourceBundle['battery.alarm.duration']}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{deviceStats.batt.nAlrm || deviceStats.batt.stat}}</td>
+                            <td>{{deviceStats.batt.actv || 'None'}}</td>
+                            <td>{{deviceStats.batt.lowv || 'None'}}</td>
+                            <td>{{deviceStats.batt.highv || 'None'}}</td>
+                            <td>{{deviceStats.batt.fTime || 'None'}}</td>
+                            <td>{{deviceStats.batt.chgt || 'None'}}</td>
+                            <td>{{deviceStats.batt.pwrt || 'None'}}</td>
+                            <td>{{deviceStats.batt.wdur || 'None'}}</td>
+                            <td>{{deviceStats.batt.adur || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row mg-hori-zero mt10" ng-show="deviceStats.errs.length > 0">
+                    <h5 class="info-label">{{resourceBundle['firmware.error']}}</h5>
+                </div>
+                <div class="row mg-hori-zero" ng-show="deviceStats.errs.length > 0">
+                    <table class="table table-bordered table-striped mg-bottom-zero text-center">
+                        <tr>
+                            <td>{{resourceBundle['code']}}</td>
+                            <td># {{resourceBundle['occurence']}}</td>
+                            <td>{{resourceBundle['first.occurence']}}</td>
+                        </tr>
+                        <tr ng-repeat="err in deviceStats.errs">
+                            <td>{{err.code}}</td>
+                            <td>{{err.cnt}}</td>
+                            <td>{{err.fTime || 'None'}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

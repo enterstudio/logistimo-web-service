@@ -1,0 +1,36 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-hide="loading || numFound == 0">
+	<ul class="pager">
+		<li><a ng-show="offset > size" ng-click="fetchFirst();"><span class="glyphicons glyphicons-fast-backward"></span></a></li>
+		<li><a ng-show="offset > 0" ng-click="fetchPrev();"><span class="glyphicons glyphicons-rewind"></span></a></li>
+		<li><b>
+                <span ng-show="filtered.length > 1">{{ (offset * 1) + 1 | number}}-{{ (offset * 1) + (filtered.length * 1) | number}}</span>
+                <span ng-show="filtered.length > 0 && filtered.length < 2">{{ (offset * 1) + (filtered.length * 1) | number}}</span>
+                <span ng-show="filtered.length > 0 && numFound !== undefined && numFound !== -1"> <span style="font-weight: normal">{{resourceBundle['of'] || parameter.rb['of']}}</span> {{numFound | number}}</span>
+            </b>
+        </li>
+		<li><a ng-click="fetchNext()" ng-show="filtered.length > 0 && numFound > ((offset * 1) + (size*1)) || (numFound == -1 && resSize == size)"><span class="glyphicons glyphicons-forward"></span></a></li>
+	</ul>
+</div>

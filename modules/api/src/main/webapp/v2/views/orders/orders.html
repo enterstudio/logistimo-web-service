@@ -1,0 +1,68 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('orders')">
+	<div class="subnavbar navbar navbar-default" role="navigation">
+			<ul class="nav navbar-nav subnav">
+				<li ng-if="!vo && !isDmdOnly" ng-class="{ enable: (subview == 'all' || subview == 'detail')}"><a
+					href="#/orders/">{{resourceBundle.orders}}</a></li>
+				<li ng-if="!vt" ng-class="{ enable: subview == 'transfers'}">
+					<a href="#/orders/transfers/">
+						<span ng-hide="transRelease">{{resourceBundle['transfers']}}</span>
+						<span ng-show="transRelease">{{resourceBundle['releases']}}</span>
+					</a>
+				</li>
+				<li ng-class="{ enable: (subview == 'shipment' || subview== 'shipmentdetail') }">
+					<a href="#/orders/shipment">{{resourceBundle['shipments']}}</a>
+				</li>
+				<li ng-class="{enable: subview == 'discrepancies' }">
+					<a href="#/orders/discrepancies/">{{resourceBundle.discrepancies}}</a>
+				</li>
+				<li ng-class="{ enable: subview == 'demand'}">
+					<a href="#/orders/demand/">{{resourceBundle.demand}}</a>
+				</li>
+			</ul>
+	</div>
+	<div ng-switch="subview">
+		<div ng-switch-when="all">
+			<div ng-hide="isDmdOnly">
+			    <div ng-include="'views/orders/orders-base.html'"></div>
+			</div>
+		</div>
+		<div ng-switch-when="demand">
+			<div ng-include="'views/orders/demand.html'"></div>
+		</div>
+		<div ng-switch-when="detail">
+			<div ng-include="'views/orders/order-detail.html'"></div>
+		</div>
+		<div ng-switch-when="transfers">
+			<div ng-include="'views/orders/transfers-base.html'"></div>
+		</div>
+		<div ng-switch-when="shipment">
+			<div ng-include="'views/shipment/shipments-base.html'"></div>
+		</div>
+		<div ng-switch-when="discrepancies">
+			<div ng-init="showEntityFilter = true" ng-include="'views/orders/discrepancies.html'"></div>
+		</div>
+	</div>
+</div>

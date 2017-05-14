@@ -1,0 +1,78 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('setup')">
+	<div class="subnavbar navbar navbar-default" role="navigation">
+        <ul class="nav navbar-nav subnav">
+            <li ng-if="iSU || dp.uv" ng-class="{ enable: subview == 'users' }"><a
+                href="#/setup/users/">{{resourceBundle.users}}</a></li>
+            <li ng-if="iSU ||(iAdm && dp.mv)" ng-class="{ enable: subview == 'materials' }"><a
+                href="#/setup/materials/">{{resourceBundle.materials}}</a></li>
+			<li ng-if="iSU || (iAdm && dp.mv)" ng-class="{enable: subview == 'handlingunits' }">
+				<a href="#/setup/handlingunits/">Handling units</a>
+			</li>
+			<li ng-if="iSU || (iAU && tempEnabled && dp.ev) || (!iAU && dp.ev)" ng-class="{ enable: subview == 'entities' }"><a
+                href="#/setup/entities/">{{resourceBundle.kiosks}}</a></li>
+            <li ng-if="iSU || dp.egv" ng-class="{ enable: subview == 'ent-grps' }"><a
+                href="#/setup/ent-grps/">{{resourceBundle['linked.domains.allow.entity.groups.management']}}</a></li>
+            <li ng-show="!iMan && ( iSU || dp.ia || dp.ie || dp.ir )" ng-class="{ enable: subview == 'inventory' }"><a
+                href="#/setup/inventory/">{{resourceBundle.inventory}}</a></li>
+            <li ng-hide="(iAU && !tempEnabled) || iMan" ng-class="{ enable: subview == 'domains' }"><a
+                    href="#/setup/domains/">{{resourceBundle.domains}}</a></li>
+            <li ng-class="{enable: subview == 'assets' }" ng-show="(isTempMonOnly || isTempMonWLg) && (iSU || (iAdm && dp.av))">
+                <a href="#/setup/assets/">{{resourceBundle.assets}}</a>
+            </li>
+            <!--<li ng-if="iSU" ng-class="{ enable: subview == 'dashboard' }"><a
+                    href="#/setup/dashboard/">Dashboard</a></li>-->
+        </ul>
+	</div>
+	<div ng-switch="subview">
+		<div ng-switch-when="users">
+			<div ng-include="'views/users/users.html'"></div>
+		</div>
+		<div ng-switch-when="materials">
+			<div ng-include="'views/materials/materials.html'"></div>
+		</div>
+		<div ng-switch-when="entities">
+			<div ng-include="'views/entities/entities.html'"></div>
+		</div>
+		<div ng-switch-when="ent-grps">
+			<div ng-include="'views/ent-grps/ent-grps.html'"></div>
+		</div>
+        <div ng-switch-when="inventory">
+			<div ng-include="'views/inventory/inventory-setup.html'"></div>
+		</div>
+		<div ng-switch-when="domains">
+			<div ng-include="'views/domains/domains.html'"></div>
+		</div>
+		<div ng-switch-when="assets">
+			<div ng-include="'views/assets/setup-assets.html'"></div>
+		</div>
+        <div ng-switch-when="dashboard">
+            <div ng-include="'views/dashboard/setup.html'"></div>
+        </div>
+		<div ng-switch-when="handlingunits">
+			<div ng-include="'views/handlingunits/handling-units.html'"></div>
+		</div>
+	</div>
+</div>

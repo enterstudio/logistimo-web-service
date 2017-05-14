@@ -1,0 +1,413 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="OrdersConfigurationController">
+            <form ng-hide="loading" class="form-horizontal" role="form" name="inventoryConfigForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading marginlr0">
+                            <h4>{{resourceBundle['orders']}} {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                            <span ng-show="orders.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{orders.lastUpdated}} {{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{orders.createdBy}}" target="_new">{{orders.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['general']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.ordersinfo']}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.purchaseordersgen']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="radio" ng-model="orders.og" value="0"/> {{resourceBundle['config.purchaseordersgentransrecd']}}<br/>
+                                    <input type="radio" ng-model="orders.og" value="1"/> {{resourceBundle['config.purchaseorderscapturedemand']}}<br/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label ">{{resourceBundle['config.autopost']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.agi"> {{resourceBundle['config.autopostissuesandreceipts']}}<br/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label ">{{resourceBundle['transporter']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.tm"> {{resourceBundle['config.transportermandatory']}}<br/>
+                                    <input type="checkbox" ng-model="orders.tiss"> {{resourceBundle['config.transporterinsms']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label ">{{resourceBundle['config.allowemptyorders']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.ao"> {{resourceBundle['config.allowemptyordersmsg']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.markorderconfirmed']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.aoc"> {{resourceBundle['config.markorderconfirmedmsg']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.allocatestocksonconfirmation']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.asc"> {{resourceBundle['config.allocatestocksonconfirmationmsg']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 col-sm-3 control-label">{{resourceBundle['config.paymentoptions']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control"
+                                           autocomplete="off" maxlength="100" ng-model="orders.po">
+                                    <p class="litetext">
+                                        ({{resourceBundle['config.paymentoptionsmsg']}})
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.packagesizes']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control"
+                                           autocomplete="off" maxlength="100" ng-model="orders.ps">
+                                    <p class="litetext">
+                                        ({{resourceBundle['config.packagesizesmsg']}})
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['vendor']}} ({{resourceBundle['default']}})</label>
+                                <div class="col-sm-3">
+                                    <entity-select ent-model="orders.defVendor" add-model-watch='true' classes="form-control" place-holder="{{resourceBundle.typetogetsuggestions}}"></entity-select>
+                                    <p class="litetext">
+                                        ({{resourceBundle['config.vendormsg']}})
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['order.config.order.price']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.dop"> {{resourceBundle['order.config.disable.order.price']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['order.config.transfer']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.tr"> {{resourceBundle['order.config.transfer.release']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--<div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['allow.creating.partial.shipments']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="orders.acs"> {{resourceBundle['allow.creating.shipments']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>-->
+                </div>
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.orders.dataexport']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.orders.dataexport.overview']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.orders.dataexportschedule']}}</label>
+                                <div class="cbx col-sm-8">
+                                    <input class="cbx" type="checkbox" ng-model="orders.eex"> {{resourceBundle['config.orders.dataexport.enable']}}<br/>
+                                    <div class="bgr" ng-show="orders.eex">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">{{resourceBundle['everydayat']}} {{resourceBundle['hours']}} (hh:mm)</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control w25 wh"
+                                                       maxlength="144" ng-model="orders.et"
+                                                       placeholder="hh:mm">
+                                                <p class="litetext">
+                                                    {{resourceBundle['config.transactions.dataexport.csv']}} {{resourceBundle['in']}} {{dmntz}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">{{resourceBundle['to']}}</label>
+
+                                            <div class="col-sm-8 pull-down">
+                                                <p class="litetext mat">
+                                                    {{resourceBundle['config.specify.user.tags']}}
+                                                </p>
+                                                <tag-select  tags-model="orders.uTgs" type="'user'" force-no-udf="'true'" place-holder="{{resourceBundle['config.enter.user.tags']}}"></tag-select>
+                                            </div>
+                                            <label class="control-label col-sm-4"></label>
+                                            <div class="col-sm-8 pull-down">
+                                                <p class="litetext mat">
+                                                    {{resourceBundle['config.specify.users']}}
+                                                </p>
+                                                <user-select users-model="orders.aname" place-holder="{{resourceBundle['config.enter.users']}}"></user-select>
+                                            </div>
+                                            <div class="col-sm-8">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="title-heading">
+                               {{resourceBundle['order.reasons']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['ordconfig.ordrsn']}}
+                            </p>
+                        </div>
+                        </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                  <label class="col-sm-3 control-label">{{resourceBundle['config.order.recommendationreasons']}}</label>
+                                <div class="col-sm-8">
+                                  <multi-select ng-model="orders.orr" name="orsn"></multi-select>
+                                    <span class="col-sm-8 litetext noleftpad">
+                                    <input type="checkbox" ng-disabled="orders.disable.orrm" ng-model="orders.orrm" ng-change="disableMandatory('orr','orrm')" >&nbsp;{{resourceBundle['markmandatory']}}
+                                </span>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.order.editingreasons']}}</label>
+                                <div class="col-sm-8">
+                                    <multi-select ng-model="orders.eqr" name="orsn"></multi-select>
+                                </div>
+                                 <span class="col-sm-offset-3 col-sm-8 litetext">
+                                    <input type="checkbox" ng-disabled="orders.disable.eqrm" ng-model="orders.eqrm" ng-change="disableMandatory('eqr','eqrm')">&nbsp;{{resourceBundle['markmandatory']}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.order.partialshipmentreasons']}}</label>
+                                <div class="col-sm-8">
+                                    <multi-select ng-model="orders.psr" name="orsn"></multi-select>
+                                </div>
+                                 <span class="col-sm-offset-3 col-sm-8 litetext">
+                                    <input type="checkbox" ng-disabled="orders.disable.psrm" ng-model="orders.psrm" ng-change="disableMandatory('psr','psrm')" >&nbsp;{{resourceBundle['markmandatory']}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.order.partialfulfillmentreasons']}}</label>
+                                <div class="col-sm-8">
+                                    <multi-select ng-model="orders.pfr" name="orsn"></multi-select>
+                                </div>
+                                 <span class="col-sm-offset-3 col-sm-8 litetext">
+                                    <input type="checkbox" ng-disabled="orders.disable.pfrm" ng-model="orders.pfrm" ng-change="disableMandatory('pfr','pfrm')" >&nbsp;{{resourceBundle['markmandatory']}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.cancellingorderreasons']}}</label>
+                                <div class="col-sm-8">
+                                    <multi-select ng-model="orders.cor" name="orsn"></multi-select>
+                                </div>
+                                 <span class="col-sm-offset-3 col-sm-8 litetext">
+                                    <input type="checkbox" ng-disabled="orders.disable.corm" ng-model="orders.corm" ng-change="disableMandatory('cor','corm')" >&nbsp;{{resourceBundle['markmandatory']}}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.demandboardinfotitle']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.demandboardinfo']}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.demandboardvisibility']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="radio" name="demandboardvisibility" ng-model="orders.ip" value="r" ng-change="demandBoardSelected()"> {{resourceBundle['config.demandboardprivate']}}<br/>
+                                    <input type="radio" name="demandboardvisibility" ng-model="orders.ip" value="p" ng-change="demandBoardSelected()"> {{resourceBundle['config.demandboardpublic']}}<br/>
+                                    <div ng-if="change">
+                                        <div class="col-sm-8">
+                                            <input type="checkbox" ng-model="orders.spb"> {{resourceBundle['stock.show']}}
+                                        </div>
+                                        <div class="col-sm-8">
+                                            URL: <a id="dbv" ng-href="{{orders.url}}" target="_blank">{{orders.url}}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.banner']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" ng-model="orders.bn"
+                                           autocomplete="off" maxlength="100">
+                                    <p class="litetext">
+                                        ({{resourceBundle['config.bannermessage']}})
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.header']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" ng-model="orders.hd"
+                                           autocomplete="off" maxlength="100">
+                                    <p class="litetext">
+                                        ({{resourceBundle['config.bannermessage']}})
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.footer']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" ng-model="orders.cp"
+                                           autocomplete="off" maxlength="100">
+                                    <p class="litetext">
+                                        ({{resourceBundle['config.footermessage']}})
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-if="iSU || dp.ce">
+                    <div class="col-sm-12  ml5">
+                        <button type="button" ng-click="setOrders()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

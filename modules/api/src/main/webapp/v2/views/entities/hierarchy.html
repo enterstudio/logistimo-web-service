@@ -1,0 +1,59 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div>
+    <div ng-controller="EntityHierarchyController" id="cid">
+        <div class="mt5">
+            <div class="box topbox mb5">
+                <div class="row action-bar">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <h4>{{resourceBundle['hierarchy.view']}}</h4>
+                        </div>
+                        <div class="col-sm-6" ng-show="showNetwork">
+                            <span class="glyphicons glyphicons-download-alt pull-right pt5 lPad5" svg-download uib-tooltip="{{resourceBundle['download.png']}}" type="png"></span>
+                            <select ng-model="hr.sl" class="col-sm-2 pull-right" ng-change="renderHierarchy()">
+                                <option ng-repeat="n in [] | range:maxLevel:1" ng-selected="hr.sl == n" value="{{n}}">{{n}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row pt10" ng-show="showNetwork">
+                    <div class="col-sm-12" ng-show="isDef(hr.network.updatedOn)">
+                        <span class="caption pull-right mb5">{{resourceBundle['lastupdated']}}&nbsp;{{resourceBundle['on']}} {{hr.network.updatedOn}}</span>
+                    </div>
+                    <div class="col-sm-12">
+                        <div id="toolt" class="pa"></div>
+                        <div id="tree-container" class="ntwb"></div>
+                    </div>
+                </div>
+                <div class="row" ng-show="!loading && !showNetwork">
+                    <div class="col-sm-12">
+                        <p class="alert alert-warning">
+                            {{resourceBundle['hierarchy.view.unavailable']}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

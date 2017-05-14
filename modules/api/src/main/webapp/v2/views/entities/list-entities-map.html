@@ -1,0 +1,73 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="bizinfo bizinfo-last" ng-controller="EntityMapListController">
+    <div class="row" ng-show="resSize > 0">
+        <div class="col-sm-12 mb5">
+            <div class="pull-right">
+                <div ng-include="'views/load-more-paginator.html'"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bigmap">
+        <div ng-if="filtered.length > 0">
+            <ui-gmap-google-map center="lmap.center" zoom="lmap.zoom" bounds="lmap.bounds"
+                                dragging="'false'" draggable="true" options="lmap.options" >
+                <ui-gmap-markers
+                        idKey="'id'"
+                        models="filtered"
+                        coords="'self'" doCluster="!lmap.noCluster" modelsbyref="true" clusterOptions="{maxZoom:15}" options="'options'" doRebuildAll="false">
+                    <ui-gmap-windows
+                            show="'show'"
+                            templateUrl="'tu'"
+                            templateParameter="'tp'"
+                            ></ui-gmap-windows>
+                </ui-gmap-markers>
+            </ui-gmap-google-map>
+
+        </div>
+        <div class="row" ng-show="resSize > 0">
+            <div class="col-sm-12">
+                <input type="checkbox" ng-model="lmap.noCluster"/> {{resourceBundle['map.donotclusterpoints']}}
+            </div>
+        </div>
+        <!--<div><button class="btn btn-sm btn-primary" ng-click="addRandom50()">Add random map points</button></div>-->
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <p class=" alert alert-warning"
+               ng-show="loading != true && filtered.length == 0">
+                {{resourceBundle['entities.notavailable']}}</p>
+        </div>
+    </div>
+
+    <div class="row" ng-show="resSize > 0">
+        <div class="col-sm-12">
+            <div class="pull-right">
+                <div ng-include="'views/load-more-paginator.html'"></div>
+            </div>
+        </div>
+    </div>
+</div>

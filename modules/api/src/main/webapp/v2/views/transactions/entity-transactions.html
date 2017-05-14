@@ -1,0 +1,44 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('setup.entities.detail.transactions')">
+
+    <div class="box topbox">
+        <ul class="nav nav-tabs subnav-tabs">
+            <li ng-class="{active: subview == 'view' }"><a
+                    href="#/setup/entities/detail/{{entityId}}/transactions/">{{resourceBundle.transactions}}</a></li>
+            <li ng-hide="dp.vp || {{perm < 2}}" ng-class="{active: subview == 'add' }"><a
+                    href="#/setup/entities/detail/{{entityId}}/transactions/add/">{{resourceBundle['trans.create']}}</a></li>
+        </ul>
+        <div ng-switch="subview">
+            <div  class="tab-pane" ng-switch-when="view">
+                <div ng-include="'views/transactions/transactions-list.html'"></div>
+            </div>
+            <div  ng-hide="dp.vp || {{perm < 2}}" class="tab-pane" ng-switch-when="add">
+                <div ng-init="isEnt = true;" ng-include="'views/transactions/new-transaction.html'"></div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

@@ -1,0 +1,172 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="ShipmentListingController">
+        <div class="filter-box form-group">
+            <div ng-include="'views/common/reset-filters.html'"/>
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label" ng-class="{'required':mxE || iMan}">{{resourceBundle['customer']}}</span>
+                    <entity-select ent-model="custId" classes="form-control"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['customer.lower']}}"></entity-select>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label" ng-class="{'required':mxE || iMan}">{{resourceBundle['vendor']}}</span>
+                    <entity-select ent-model="vendId" classes="form-control"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['vendor.lower']}}"></entity-select>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.status}}</span>
+                    <select class="form-control" ng-model="status">
+                        <option value="">{{resourceBundle.all}}</option>
+                        <option value="op">{{resourceBundle['order.pending']}}</option>
+                        <option value="sp">{{resourceBundle['order.shipped']}}</option>
+                        <option value="fl">{{resourceBundle['order.fulfilled']}}</option>
+                        <option value="cn">{{resourceBundle['order.cancelled']}}</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">Tracking id</span>
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="sTrackId" autocomplete="off" typeahead-wait-ms = "300" placeholder="Tracking id">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click="searchTID()" type="button"
+                                    ng-disabled="(search.key == null && search.key == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}" tooltip-append-to-body="true">
+                                <span class="glyphicons glyphicons-search pt2"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.from}}</span>
+                    <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.to}}</span>
+                    <date-picker date-model="to" place-holder="To" min-date="from" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">From expected fulfilment</span>
+                    <date-picker date-model="eftFrom" place-holder="Fulfilment date"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">To expected fulfilment</span>
+                    <date-picker date-model="eftTo" place-holder="Fulfilment date"></date-picker>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore">
+                <div class="col-sm-3">
+                    <span class="filter-label">Transporter</span>
+                    <div class="has-feedback">
+                        <input type="text" class="form-control" ng-model="sTrans" autocomplete="off" typeahead-wait-ms="300"
+                               placeholder="Transporter"  uib-typeahead="val for val in getSuggestions($viewValue,'trans')"
+                               typeahead-loading="loadingTransporter" typeahead-on-select="fetchData()">
+                        <span ng-show="loadingTransporter" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div ng-hide="showMore">
+                <div class="col-sm-12">
+                    <span class="glyphicons glyphicons-chevron-down medium filter-expand" ng-click="showMore = true"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div ng-show="showMore && isUndef(orderId)">
+                <div class="col-sm-12">
+                    <span class="glyphicons glyphicons-chevron-up medium filter-expand" ng-click="showMore = false"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right" ng-show="filtered">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-condensed table-hover table-logistimo"
+                       ng-hide="filtered.length<=0" id="fixTable">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th class="text-center">Sl.No.</th>
+                        <th>Shipment Id</th>
+                        <th>Order Id</th>
+                        <th class="text-center">No. of items</th>
+                        <th>{{resourceBundle['customer']}}</th>
+                        <th>{{resourceBundle['vendor']}}</th>
+                        <th>{{resourceBundle['status']}}</th>
+                        <th>{{resourceBundle['created']}}</th>
+                    </tr>
+                    </thead>
+                    <tbody ng-repeat="item in filtered" ng-controller="NoController">
+                    <tr class="clickable" ng-click="openShipment(item.sId)">
+                        <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}" tooltip-append-to-body="true"></span></td>
+                        <td class="text-center">{{$index + offset + 1}}</td>
+                        <td>{{item.sId}}</td>
+                        <td><a ng-href="#/orders/detail/{{item.orderId}}/" ng-click="$event.stopPropagation();" target="_blank">{{item.orderId}}</a></td>
+                        <td class="text-center">{{item.noi}}</td>
+                        <td>
+                            <a href="#/setup/entities/detail/{{item.customerId}}" ng-click="$event.stopPropagation();" target="_blank">{{item.customerName}}</a>
+                            <span class="litetext">{{item.customerAdd}}</span>
+                        </td>
+                        <td>
+                            <a href="#/setup/entities/detail/{{item.vendorId}}" ng-click="$event.stopPropagation();" target="_blank">{{item.vendorName}}</a>
+                            <span class="litetext">{{item.vendorAdd}}</span>
+                        </td>
+                        <td>{{item.status}}</td>
+                        <td>
+                            <a ng-href="#/setup/users/all/details?userId={{item.userID}}" ng-click="$event.stopPropagation();" target="_blank">{{item.createdBy}}</a>
+                            <span class="litetext">{{item.cOn}}</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt5">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning" ng-show="(!loading && filtered.length == 0) && !(iMan && (custId == null && vendId == null))">
+                    No shipments available</p>
+                <p class=" alert alert-warning" ng-show="iMan && (custId == null && vendId == null)">
+                    {{resourceBundle['either.custvend']}}.</p>
+            </div>
+        </div>
+        <div class="row" ng-show="filtered.length > 10">
+            <div class="col-sm-3 col-sm-offset-9">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="AccessLogController">
+            <div ng-if="loading == false" class="bgr">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="col-sm-8">
+                            <div class="pull-left">
+                                <h5>{{resourceBundle['bulletinboard.accesslog']}}</h5>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="padding-right: 0;padding-top: 10px;padding-bottom: 10px;">
+                            <div class="pull-right">
+                                <div ng-include="'views/paginator.html'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <table class="table table-condensed table-hover table-logistimo">
+                        <tbody>
+                        <tr>
+                            <th>{{resourceBundle['serialnum']}}</th>
+                            <th>{{resourceBundle['date']}}</th>
+                            <th>{{resourceBundle['user.ipaddress']}}</th>
+                            <th>{{resourceBundle['useragent']}}</th>
+                        </tr>
+                        <tr ng-repeat="item in filtered = accesslog">
+                            <td>{{offset*1+$index + 1}}</td>
+                            <td>{{item.t}}</td>
+                            <td>{{item.ip}}</td>
+                            <td>{{item.ua}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="minbox" ng-show="filtered.length == 0">
+                    <p class="alert alert-warning">{{resourceBundle['accesslogs.none']}}</p>
+                </div>
+
+                <div class="col-sm-4 col-sm-offset-8" style="padding-right: 0;padding-top: 10px;padding-bottom: 10px;">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,239 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="AssetSummaryController">
+    <div class="pane">
+        <div class="row action-bar">
+            <span class="col-sm-4">
+                <export-data export-type="powerdata"
+                             mail-id="mailId"
+                             asset-vendor="vendorId"
+                             device-id="deviceId"
+                             asset-type="assetDetails.typ"
+                             to="tday"
+                             sensor-name="currentAsset.at == 2 ? (getMonitoringPointName(currentMpId) + (isDef(assetRelations) && isDef(assetRelations[currentMpId]) && isDef(assetRelations[currentMpId].sId)?': '+assetRelations[currentMpId].sId :'')): currentSensor"
+                             sensor="currentAsset.at == 1?currentSensor:currentMpId" >
+                </export-data>
+            </span>
+        </div>
+        <div class="row" ng-show="isDef(currentAsset) && currentAsset.at == 2 && getObjectLength(currentAsset.mps) > 1">
+            <div class="col-sm-12">
+                <div class="btn-group pull-right">
+                    <a class="btn btn-sm btn-default"
+                       ng-repeat="ar in assetDetails.tmp"
+                       ng-class="{active: currentMpId == ar.mpId}"
+                       ng-click="updateMonitoringPositionFilter(ar.mpId)">
+                        {{getMonitoringPointName(ar.mpId)}}<span ng-show="isDef(assetRelations) && isDef(assetRelations[ar.mpId]) && isDef(assetRelations[ar.mpId].sId)">:&nbsp;
+                        <span ng-style="{'color': getSensorColorCode(assetRelations[ar.mpId].vId, assetRelations[ar.mpId].meta.dev.mdl, assetRelations[ar.mpId].sId)}">{{assetRelations[ar.mpId].sId}}</span>
+                        </span>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-show="isDef(currentAsset) && currentAsset.at == 1 && getObjectLength(currentManu.model[assetDetails.meta.dev.mdl].sns) > 1">
+            <div class="col-sm-12">
+                <div class="btn-group pull-right">
+                    <a class="btn btn-sm btn-default"
+                       ng-repeat="sensor in currentManu.model[assetDetails.meta.dev.mdl].sns"
+                       ng-class="{active: currentSensor == sensor.name}"
+                       ng-click="updateCurrentSensor(sensor.name)">
+                        <span ng-style="{'color': sensor.cd}">{{sensor.name}}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="bgr summary-temp">
+                    <div class="title-heading" style="padding: 7px 10px;">
+                        <div class="row">
+                            <div class="col-sm-6" style="padding-top: 3px;">
+                                {{resourceBundle['temperature']}}
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-sm-7">
+
+                                    </div>
+                                    <div class="col-sm-3 dateleft plr0">
+                                        <date-picker date-model="tday" place-holder="Day" max-date="today"></date-picker>
+                                    </div>
+                                    <div class="col-sm-2 plr0 text-center">
+                                        <!-- Simply resetting variable tday, this is watched -->
+                                        <button type="button" ng-click="tday = undefined" class="btn btn-sm btn-default">
+                                            {{resourceBundle['reset']}}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mlr0">
+                        <div id="chart-container" ng-if="!deviceTempLoading">
+
+                        </div>
+                        <div ng-hide="deviceTempLoading || isUndef(deviceTemp.data) || deviceTemp.data.length == 0" class="mini-desc">
+                            {{resourceBundle['temperature.zoom.chart.note']}}
+                        </div>
+                        <div ng-show="deviceTempLoading">
+                            <div class="text-center">
+                                <span class="glyphicons glyphicons-cogwheel spin"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="row mlr0" ng-if="!deviceTempLoading && ((currentAsset.at == 1 && currentManu.model[assetDetails.meta.dev.mdl].fts.ps) || (currentAsset.at == 2 && assetConfig.assets[1].mcs[assetRelations[currentMpId].vId].model[assetRelations[currentMpId].meta.dev.mdl].fts.ps))">
+                        <div class="col-sm-25 p25">
+                            <fusion-chart type="pg.type" height="pg.height" width="pg.width"
+                                          chart-data="pg.values" chart-options="pg.options" chart-id="pc" simple="true" trend="pg.trendlines.line"></fusion-chart>
+                        </div>
+                        <!--<div class="row">
+                            <div class="col-sm-12 text-center">
+                                <span class="legend" ng-repeat="legend in pg.legends">
+                                    <span class="glyphicons glyphicons-charts" ng-style="{'color': legend.color}"></span> {{legend.name}}
+                                </span>
+                            </div>
+                        </div>-->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="bgr summary-temp">
+                    <div class="title-heading">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                {{resourceBundle['recent.activity']}}
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="pull-right">
+                                    <div ng-show="recentAlerts.length">
+                                        <ul class="pager">
+                                            <li>
+                                                <a href="" ng-show="offset >= 2 * size" ng-click="fetchFirst();">
+                                                    <span class="glyphicons glyphicons-fast-backward"></span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="" ng-show="offset >= 1 * size" ng-click="fetchPrev();">
+                                                    <span class="glyphicons glyphicons-rewind"></span>
+                                                </a>
+                                            </li>
+                                            <li><b>{{offset/size + 1}}</b> of <b>{{numFound/size}}</b></li>
+                                            <li>
+                                                <a href="" ng-show="(offset + size) < numFound" ng-click="fetchNext();">
+                                                    <span class="glyphicons glyphicons-forward"></span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="" ng-show="(offset + size) < (numFound - size)" ng-click="fetchLast();">
+                                                    <span class="glyphicons glyphicons-fast-forward"></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <table class="table table-hover table-bordered table-striped">
+                                <tr>
+                                    <th ng-show="isDef(currentAsset) && currentAsset.at == 2">Monitoring point</th>
+                                    <th ng-show="isDef(currentAsset) && currentAsset.at == 1">Channel</th>
+                                    <th>{{resourceBundle['alarm']}}</th>
+                                    <th><span class="glyphicons glyphicons-clock"></span>&nbsp;{{resourceBundle['time']}}</th>
+                                </tr>
+                                <tr ng-repeat="recentAlert in recentAlerts | limitTo: size" ng-show="recentAlerts.length > 0 && (recentAlert.typ == 0 || recentAlert.typ == 1)">
+                                    <td ng-show="isDef(currentAsset) && currentAsset.at == 2">
+                                        {{getMonitoringPointName(recentAlert.tmpalm.mpId)}}<span ng-show="isDef(assetRelations) && isDef(assetRelations[recentAlert.tmpalm.mpId])">:&nbsp;
+                                        <span ng-style="{'color': getSensorColorCode(assetRelations[recentAlert.tmpalm.mpId].vId, assetRelations[recentAlert.tmpalm.mpId].meta.dev.mdl, assetRelations[recentAlert.tmpalm.mpId].sId)}">{{assetRelations[recentAlert.tmpalm.mpId].sId}}</span>
+                                    </span>
+                                    </td>
+                                    <td ng-show="isDef(currentAsset) && currentAsset.at == 1">
+                                        <span ng-show="recentAlert.devalm.sId" ng-style="{'color': getSensorColorCode(assetDetails.vId, assetDetails.meta.dev.mdl, recentAlert.devalm.sId)}">{{recentAlert.devalm.sId}}</span>
+                                        <span ng-hide="recentAlert.devalm.sId">Device</span>
+                                    </td>
+                                    <td ng-class="{'c-green': ((recentAlert.typ == 0 && recentAlert.tmpalm.st <= 1) || (recentAlert.typ == 1 && recentAlert.devalm.stat == 0)),'c-orange': (recentAlert.typ == 0 && recentAlert.tmpalm.st >= 2 && recentAlert.tmpalm.st <= 3),'c-red': (recentAlert.typ == 0 && recentAlert.tmpalm.st == 4 && recentAlert.tmpalm.aSt == 2), 'c-aqua': (recentAlert.typ == 0 && recentAlert.tmpalm.st == 4 && recentAlert.tmpalm.aSt == 1), 'c-yellow': (recentAlert.typ == 1 && recentAlert.devalm.stat > 0)}">
+                                        <i class="glyphicons" ng-class="{'glyphicons-ok-circle': ((recentAlert.typ == 0 && recentAlert.tmpalm.st <= 1) || (recentAlert.typ == 1 && recentAlert.devalm.stat == 0)), 'glyphicons-remove-circle': (recentAlert.typ == 0 && recentAlert.tmpalm.st >= 2), 'glyphicons-warning-sign': (recentAlert.typ == 1 && recentAlert.devalm.stat > 0)}"></i>
+                                        <span ng-show="recentAlert.typ == 0 && recentAlert.tmpalm.aSt == 2">
+                                            <span ng-show="recentAlert.tmpalm.st == 2">{{resourceBundle['temperature.high.excursion']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                            <span ng-show="recentAlert.tmpalm.st == 3">{{resourceBundle['temperature.high.warning']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                            <span ng-show="recentAlert.tmpalm.st == 4">{{resourceBundle['temperature.high.alarm']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                        </span>
+                                        <span ng-show="recentAlert.typ == 0 && recentAlert.tmpalm.aSt == 1">
+                                            <span ng-show="recentAlert.tmpalm.st == 2">{{resourceBundle['temperature.low.excursion']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                            <span ng-show="recentAlert.tmpalm.st == 3">{{resourceBundle['temperature.low.warning']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                            <span ng-show="recentAlert.tmpalm.st == 4">{{resourceBundle['temperature.low.alarm']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                            </span>
+                                        <span ng-show="recentAlert.typ == 0 && recentAlert.tmpalm.aSt == 0">
+                                            <span ng-show="recentAlert.tmpalm.st <= 1">{{resourceBundle['temperature.incursion']}} {{resourceBundle['of']}} {{recentAlert.tmpalm.tmp | number: 1}} &#8451;</span>
+                                        </span>
+                                        <span ng-show="recentAlert.typ == 1">
+                                            <span ng-show="recentAlert.devalm.typ == 0 && recentAlert.devalm.stat == 1">{{resourceBundle['temperature.device.connection.alarm']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 0 && recentAlert.devalm.stat == 0">{{resourceBundle['temperature.device.connection.ok']}}</span><span ng-show="recentAlert.devalm.typ == 1 && recentAlert.devalm.stat == 1">{{resourceBundle['temperature.sensor.connection.alarm']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 1 && recentAlert.devalm.stat == 0">{{resourceBundle['temperature.sensor.connection.ok']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 3">{{resourceBundle['temperature.firmware.error']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 1">{{resourceBundle['temperature.battery.warning']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 2">{{resourceBundle['temperature.battery.low']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 3">{{resourceBundle['temperature.battery.charging']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 0">{{resourceBundle['temperature.battery.ok']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 4 && recentAlert.devalm.stat == 1">{{resourceBundle['temperature.device.inactive.alarm']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 4 && recentAlert.devalm.stat == 0">{{resourceBundle['temperature.device.inactive.ok']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 5 && recentAlert.devalm.stat == 1">{{resourceBundle['power.outage']}}</span>
+                                            <span ng-show="recentAlert.devalm.typ == 5 && recentAlert.devalm.stat == 0">{{resourceBundle['power.available']}}</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{recentAlert.ft}}
+                                    </td>
+                                </tr>
+                                <tr ng-show="recentAlertsLoading">
+                                    <td colspan="3" class="text-center">
+                                        <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                    </td>
+                                </tr>
+                                <tr ng-show="!recentAlerts.length && !recentAlertsLoading">
+                                    <td colspan="3"  ng-show="isDef(currentAsset) && currentAsset.at == 2">
+                                        <div class="alert alert-warning">
+                                            {{resourceBundle['no.data.available']}}
+                                        </div>
+                                    </td>
+                                    <td colspan="3"  ng-show="isDef(currentAsset) && currentAsset.at == 1">
+                                        <div class="alert alert-warning">
+                                            {{resourceBundle['no.data.available']}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

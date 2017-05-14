@@ -1,0 +1,67 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="ShortcutController">
+<div ng-if="iAdm " class="bgr bg-white" style="margin-top: 5px;">
+    <div class="title-heading panel-background">
+        <p>{{resourceBundle['shortcuts']}}</p>
+    </div>
+    <div class="panel-body lh25 bg-white">
+        <span ng-if="enableBB">
+            <a href="/pub/board?domainid={{bb.did}}" target="_blank" class="clickable pad3" style="display: inline;">{{resourceBundle['bulletinboard']}}
+            </a>
+            <p ng-if="enablePost" class="dummyLink automargin" ng-click="toggle()" style="display: inline-block;">({{resourceBundle['home.post']}})</p>
+            <div ng-if="showPostBoard">
+                <div ng-include="'views/configuration/message-to-board.html'"></div>
+            </div>
+        </span>
+        <span>
+            <div ng-if="ordersTabEnabled">
+                <a href="#/orders/demand/?vw=m" target="_blank" class="clickable pad3 db">{{resourceBundle['home.demandmap']}}</a>
+            </div>
+        </span>
+        <span>
+            <a href="#/inventory/?vw=m" target="_blank" class="clickable pad3 db">{{resourceBundle['home.inventorymap']}}</a>
+        </span>
+        <span>
+            <a href="#/inventory/transactions/" target="_blank" class="clickable pad3 db">{{resourceBundle['home.inventorytransactions']}}</a>
+        </span>
+    </div>
+</div>
+<div class="bgr bg-white">
+    <div class="title-heading panel-background">
+        <p>{{resourceBundle['home.mobileapps']}}</p>
+    </div>
+    <div class="panel-body lh25">
+        <span ng-show="isDef(generalconfig.appurls.j2me_en)">
+            <a href="http://{{generalconfig.appurls.j2me_en}}" target="_blank" class="clickable pad3 db">{{resourceBundle['home.featuredphone']}}</a>
+        </span>
+        <span ng-show="isDef(generalconfig.appurls.android)">
+            <a href="http://{{generalconfig.appurls.android}}" target="_blank" class="clickable pad3 db">{{resourceBundle['home.smartphone']}}</a>
+        </span>
+        <span>
+            <a href="/m/index.html" target="_blank" class="clickable pad3 db">{{resourceBundle['home.html5browser']}}</a>
+        </span>
+    </div>
+</div>
+</div>

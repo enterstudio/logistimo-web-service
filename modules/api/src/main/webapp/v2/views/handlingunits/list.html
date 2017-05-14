@@ -1,0 +1,123 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-if="iAdm">
+    <div ng-controller="HUListController">
+        <div class="filter-box form-group">
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label">Handling units</span>
+
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="search.key" name="search.key" maxlength="50"
+                               placeholder="{{resourceBundle['filterby']}} handling units" ng-enter="searchHU()">
+							<span class="input-group-btn">
+							<button class="btn btn-default" ng-click="searchHU()" type="button"
+                                    ng-disabled="(search.key == null && search.key == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}">
+                                <span class="glyphicons glyphicons-search"></span>
+                            </button>
+							</span>
+                    </div>
+                </div>
+                <div class="mt18">
+                    <span class="pull-right">
+                    <button type="reset" ng-click="reset()" class="btn btn-sm btn-default">
+                        {{resourceBundle['reset']}}
+                    </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!--<div class="row action-bar">
+            <button ng-show="iSU || dp.mr" type="button" class="btn btn-sm btn-default" ng-click="deleteHU()">
+                {{resourceBundle['remove']}}
+            </button>
+        </div>-->
+        <div ng-hide="noData">
+            <div class="row pt10">
+                <div class="col-sm-12">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-condensed table-hover table-striped table-logistimo" id="fixTable">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <!--<th><input type="checkbox"  ng-change="selectAll(selAll)" ng-model='selAll'></th>-->
+                            <th class="text-center">{{resourceBundle.serialnum}}</th>
+                            <th>Handling unit</th>
+                            <th>{{resourceBundle.description}}</th>
+                            <th>Contents</th>
+                            <th>{{resourceBundle['lastupdated']}}</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in filtered = huList.results">
+                            <td>
+                                <span class="glyphicons glyphicons-bring-to-front tglyph"
+                                      ng-if="currentDomain != item.sdId && (iSU || (iAdm && dp.me))"
+                                      ng-click="switchDomain(item.sdId,item.sdname)"
+                                      uib-tooltip="{{item.sdname}}">
+                                </span>
+                            </td>
+                            <!--<td><input type="checkbox" ng-model="item.selected"></td>-->
+                            <td class="text-center">{{offset * 1 + $index * 1 + 1}}</td>
+                            <td class="word-break"><a href="#/setup/handlingunits/all/detail/{{item.id}}">{{item.name}}</a></td>
+                            <td class="word-break">{{item.description | limitTo:40}}<span ng-if="item.description.length > 40"> ...</span></td>
+                            <td><a href="#/setup/materials/all/detail/{{item.contents[0].cntId}}">{{item.contents[0].cntName}}</a>: {{item.contents[0].quantity}}
+                            </td>
+                            <td><a href="#/setup/users/all/details?userId={{item.ub}}">{{item.ubName}}</a>
+                                <span class="litetext">{{item.lastUpdated}}</span></td>
+                            <td><a ng-show="currentDomain == item.sdId && (iSU || dp.me)" ng-href="#/setup/handlingunits/all/edit/{{item.id}}" ng-click="editHandlingUnit()" uib-tooltip="{{resourceBundle['edit']}}"><span class="glyphicons glyphicons-edit tglyph"></span></a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-sm-offset-8">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <!--<div class="row action-bar" ng-show="filtered.length > 10">
+                <button ng-show="iSU || dp.mr" type="button" class="btn btn-sm btn-default" ng-click="deleteHU()">
+                    {{resourceBundle['remove']}}
+                </button>
+            </div>-->
+        </div>
+        <div class="row mt18" ng-show="noData">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning" >{{resourceBundle['hu.none']}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

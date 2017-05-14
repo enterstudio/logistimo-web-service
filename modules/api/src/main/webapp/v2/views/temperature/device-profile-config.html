@@ -1,0 +1,466 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<form name="configForm" novalidate>
+    <table class="table table-hover borderless">
+        <tr ng-show="(deviceConfig.highAlarm.temp || deviceConfig.highAlarm.dur || configEditable)">
+            <td ng-class="{'required' : configEditable}" class="info-label">
+                {{resourceBundle['temperature.device.config.highalarm']}}
+            </td>
+            <td>
+                <div class="row">
+                    <span class="col-sm-6">
+                        <span ng-hide="configEditable">{{deviceConfig.highAlarm.temp}} &#8451;</span>
+                    </span>
+                    <span class="col-sm-6">
+                        <span ng-hide="configEditable"><i class="fa fa-clock-o"></i> {{deviceConfig.highAlarm.dur}} minutes.</span>
+                    </span>
+                </div>
+                <div class="row mg-hori-zero"
+                     ng-class="{ 'has-error' : configForm.highAlarmTemp.$invalid && configForm.highAlarmTemp.$dirty && configEditable }">
+                    <input type="number" class="form-control" name="highAlarmTemp"
+                           ng-show="configEditable"
+                           type="text" ng-model="deviceConfig.highAlarm.temp" required
+                           placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                           ng-blur="configForm.highAlarmTemp.$dirty = true"/>
+
+                    <p ng-show="configForm.highAlarmTemp.$error.required && configForm.highAlarmTemp.$dirty && !configForm.highAlarmTemp.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['temperature']}} {{resourceBundle['isrequired']}}
+                    </p>
+
+                    <p ng-show="configForm.highAlarmTemp.$error.number && configForm.highAlarmTemp.$dirty && !configForm.highAlarmTemp.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['temperature']}} {{resourceBundle['isinvalid']}}
+                    </p>
+                </div>
+                <div class="row mg-hori-zero mg-top-10"
+                     ng-class="{ 'has-error' : configForm.highAlarmDur.$invalid && configForm.highAlarmDur.$dirty && configEditable }">
+                    <input type="number" min="0" class="form-control" name="highAlarmDur"
+                           ng-show="configEditable"
+                           type="text" ng-model="deviceConfig.highAlarm.dur" required
+                           placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                           ng-blur="configForm.highAlarmDur.$dirty = true"/>
+
+                    <p ng-show="configForm.highAlarmDur.$error.required && configForm.highAlarmDur.$dirty && !configForm.highAlarmDur.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['duration']}} {{resourceBundle['isrequired']}}
+                    </p>
+
+                    <p ng-show="(configForm.highAlarmDur.$error.number || configForm.highAlarmDur.$error.min) && configForm.highAlarmDur.$dirty && !configForm.highAlarmDur.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['duration']}} {{resourceBundle['isinvalid']}}
+                    </p>
+                </div>
+            </td>
+        </tr>
+        <tr ng-show="(deviceConfig.lowAlarm.temp || deviceConfig.lowAlarm.dur || configEditable)">
+            <td class="info-label" ng-class="{'required' : configEditable}">
+                {{resourceBundle['alarm.low']}}
+            </td>
+            <td>
+                <div class="row">
+                    <span class="col-sm-6">
+                        <span ng-hide="configEditable">{{deviceConfig.lowAlarm.temp}} &#8451;</span>
+                    </span>
+                    <span class="col-sm-6">
+                        <span ng-hide="configEditable"><i class="fa fa-clock-o"></i> {{deviceConfig.lowAlarm.dur}} {{resourceBundle['minutes']}}.</span>
+                    </span>
+                </div>
+                <div class="row mg-hori-zero" ng-class="{ 'has-error' : configForm.lowAlarmTemp.$invalid && configForm.lowAlarmTemp.$dirty && configEditable }">
+                    <input name="lowAlarmTemp" type="number" class="form-control"
+                           ng-show="configEditable"
+                           type="text" ng-model="deviceConfig.lowAlarm.temp"
+                           placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                           ng-blur="configForm.lowAlarmTemp.$dirty = true" required/>
+
+                    <p ng-show="configForm.lowAlarmTemp.$error.required && configForm.lowAlarmTemp.$dirty && !configForm.lowAlarmTemp.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['temperature']}} {{resourceBundle['isrequired']}}
+                    </p>
+
+                    <p ng-show="configForm.lowAlarmTemp.$error.number && configForm.lowAlarmTemp.$dirty && !configForm.lowAlarmTemp.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['temperature']}} {{resourceBundle['isinvalid']}}
+                    </p>
+                </div>
+                <div class="row mg-hori-zero mg-top-10" ng-class="{ 'has-error' : configForm.lowAlarmDur.$invalid && configForm.lowAlarmDur.$dirty && configEditable }">
+                    <input name="lowAlarmDur" type="number" min="0" class="form-control"
+                           ng-show="configEditable"
+                           type="text" ng-model="deviceConfig.lowAlarm.dur"
+                           placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                           ng-blur="configForm.lowAlarmDur.$dirty = true" required/>
+
+                    <p ng-show="configForm.lowAlarmDur.$error.required && configForm.lowAlarmDur.$dirty && !configForm.lowAlarmDur.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['duration']}} {{resourceBundle['isrequired']}}
+                    </p>
+
+                    <p ng-show="(configForm.lowAlarmDur.$error.number || configForm.lowAlarmDur.$error.min) && configForm.lowAlarmDur.$dirty && !configForm.lowAlarmDur.$focused && configEditable"
+                       class="help-block">
+                        {{resourceBundle['duration']}} {{resourceBundle['isinvalid']}}
+                    </p>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label" ng-class="{'required' : configEditable}">
+                {{resourceBundle['temperature.device.config.comm.chnl']}}
+            </td>
+            <td ng-class="{ 'has-error' : configForm.commChnl.$invalid && configForm.commChnl.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{configCommChannelArray[deviceConfig.comm.chnl]}}</span>
+                <select name="commChnl" ng-model="deviceConfig.comm.chnl"
+                        class="form-control"
+                        ng-blur="addDeviceForm.commChnl.$dirty = true"
+                        ng-options="chnl.id as chnl.value for chnl in configCommunicationChannel"
+                        required
+                        ng-show="configEditable"
+                        ng-selected="deviceConfig.comm.chnl">
+                    <option value="">{{resourceBundle['select']}} {{resourceBundle['temperature.device.config.comm.chnl']}}</option>
+                </select>
+                <p ng-show="configForm.commChnl.$error.required && configForm.commChnl.$dirty && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.chnl']}}
+                    {{resourceBundle['isrequired']}}
+                </p>
+
+                <p ng-show="configForm.commChnl.$error.invalid && configForm.commChnl.$dirty && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.chnl']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td ng-class="{'required' : configEditable}" class="info-label">
+                {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+            </td>
+            <td ng-class="{ 'has-error' : configForm.tmpUrl.$invalid && configForm.tmpUrl.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.tmpUrl}}</span>
+                <input type="url" name="tmpUrl" class="form-control"
+                       ng-show="configEditable" ng-model="deviceConfig.comm.tmpUrl" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.tmpUrl']}}"
+                       ng-blur="configForm.tmpUrl.$dirty = true"/>
+                <p ng-show="configForm.tmpUrl.$error.required && configForm.tmpUrl.$dirty && !configForm.tmpUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+                    {{resourceBundle['isrequired']}}
+                </p>
+
+                <p ng-show="configForm.tmpUrl.$error.url && configForm.tmpUrl.$dirty && !configForm.tmpUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['temperature.device.config.comm.cfgUrl']}}
+            </td>
+            <td ng-class="{ 'has-error' : configForm.cfgUrl.$invalid && configForm.cfgUrl.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.cfgUrl || "None"}}</span>
+                <input type="url" name="cfgUrl" class="form-control"
+                       ng-show="configEditable" type="text" ng-model="deviceConfig.comm.cfgUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.cfgUrl']}}"
+                       ng-blur="configForm.cfgUrl.$dirty = true"/>
+                <p ng-show="configForm.cfgUrl.$invalid && configForm.cfgUrl.$dirty && !configForm.cfgUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.cfgUrl']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['temperature.device.config.comm.almUrl']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.alrmUrl.$invalid && configForm.alrmUrl.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.alrmUrl || "None"}}</span>
+                <input type="url" name="alrmUrl" class="form-control"
+                       ng-show="configEditable" type="text" ng-model="deviceConfig.comm.alrmUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.almUrl']}}"
+                       ng-blur="configForm.alrmUrl.$dirty = true"/>
+                <p ng-show="configForm.alrmUrl.$error.required && configForm.alrmUrl.$dirty && !configForm.alrmUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.almUrl']}}
+                    {{resourceBundle['isrequired']}}
+                </p>
+
+                <p ng-show="configForm.alrmUrl.$error.url && configForm.alrmUrl.$dirty && !configForm.alrmUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.almUrl']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.statsUrl.$invalid && configForm.statsUrl.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.statsUrl || "None"}}</span>
+                <input type="url" name="statsUrl" class="form-control"
+                       ng-show="configEditable" type="text" ng-model="deviceConfig.comm.statsUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.statsUrl']}}"
+                       ng-blur="configForm.statsUrl.$dirty = true"/>
+                <p ng-show="configForm.statsUrl.$invalid && configForm.statsUrl.$dirty && !configForm.statsUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['temperature.device.config.comm.devRyUrl']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.devRyUrl.$invalid && configForm.devRyUrl.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.devRyUrl || "None"}}</span>
+                <input type="url" name="devRyUrl" class="form-control"
+                       ng-show="configEditable" type="text" ng-model="deviceConfig.comm.devRyUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.devRyUrl']}}"
+                       ng-blur="configForm.devRyUrl.$dirty = true"/>
+                <p ng-show="configForm.devRyUrl.$invalid && configForm.devRyUrl.$dirty && !configForm.devRyUrl.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.devRyUrl']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td ng-class="{'required' : configEditable}" class="info-label">
+                {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.smsGyPh.$invalid && configForm.smsGyPh.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.smsGyPh}}</span>
+                <input name="smsGyPh" class="form-control" ng-show="configEditable"
+                       type="text" ng-model="deviceConfig.comm.smsGyPh" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.smsGyPh']}}"
+                       ng-blur="configForm.smsGyPh.$dirty = true"
+                       ng-pattern="/^\++\d{4,20}$/"/>
+                <p ng-show="configEditable" class="desc">(+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}
+                    &gt;&lt;&gt;; {{resourceBundle['eg']}} +919844360948
+                    [{{resourceBundle['india']}}], +15404569089 [{{resourceBundle['usa']}}])</p>
+
+                <p ng-show="configForm.smsGyPh.$error.required && configForm.smsGyPh.$dirty && !configForm.smsGyPh.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                    {{resourceBundle['isrequired']}}
+                </p>
+
+                <p ng-show="configForm.smsGyPh.$error.pattern && configForm.smsGyPh.$dirty && !configForm.smsGyPh.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['temperature.device.config.comm.smsGyKey']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.smsGyKey.$invalid && configForm.smsGyKey.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.smsGyKey || "None"}}</span>
+                <input name="smsGyKey" class="form-control" ng-show="configEditable"
+                       type="text" ng-model="deviceConfig.comm.smsGyKey"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.smsGyKey']}}"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['temperature.device.config.comm.sender']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.senderId.$invalid && configForm.senderId.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.senderId || "None"}}</span>
+                <input name="senderId" class="form-control" ng-show="configEditable"
+                       type="text" ng-model="deviceConfig.comm.senderId"
+                       placeholder="SMS sender number/ID"/>
+            </td>
+        </tr>
+        <tr>
+            <td ng-class="{'required' : configEditable}" class="info-label">
+                {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.sInt.$invalid && configForm.sInt.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.samplingInt}}</span>
+                <input type="number" name="sInt" class="form-control" min="1"
+                       ng-show="configEditable" type="text" ng-model="deviceConfig.comm.samplingInt" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.samplingInt']}}"
+                       ng-blur="configForm.sInt.$dirty = true"/>
+                <p ng-show="configForm.sInt.$error.required && configForm.sInt.$dirty && !configForm.sInt.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+                    {{resourceBundle['isrequired']}}
+                </p>
+
+                <p ng-show="(configForm.sInt.$error.number || configForm.sInt.$error.min) && configForm.sInt.$dirty && !configForm.sInt.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td ng-class="{'required' : configEditable}" class="info-label">
+                {{resourceBundle['temperature.device.config.comm.pushInt']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.pInt.$invalid && configForm.pInt.$dirty && configEditable }">
+                <span ng-hide="configEditable">{{deviceConfig.comm.pushInt}}</span>
+                <input type="number" name="pInt" class="form-control" min="1"
+                       ng-show="configEditable" type="text" ng-model="deviceConfig.comm.pushInt" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.pushInt']}}"
+                       ng-blur="configForm.pInt.$dirty = true"/>
+                <p ng-show="configForm.pInt.$error.required && configForm.pInt.$dirty && !configForm.pInt.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.pushInt']}}
+                    {{resourceBundle['isrequired']}}
+                </p>
+
+                <p ng-show="(configForm.pInt.$error.number || configForm.pInt.$error.min) && configForm.pInt.$dirty && !configForm.pInt.$focused && configEditable"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.pushInt']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label" nowrap>
+                {{resourceBundle['temperature.device.config.comm.usrPhones']}}
+            </td>
+            <td  ng-class="{ 'has-error' : configForm.usrPhones.$invalid && configForm.usrPhones.$dirty && configEditable && !configForm.usrPhones.$focused }">
+                <span ng-hide="configEditable">{{isDef(deviceConfig.comm.usrPhones) ? deviceConfig.comm.usrPhones : 'None'}}</span>
+                <input name="usrPhones" class="form-control" ng-show="configEditable"
+                       type="text" ng-model="deviceConfig.comm.usrPhones"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.usrPhones']}}"
+                       ng-blur="configForm.usrPhones.$dirty = true"
+                       ng-pattern="/^(\++\d{4,20}\,*)*$/"
+                       ng-focus-logi
+                        />
+                <p ng-show="configEditable" class="desc">({{resourceBundle['temperature.device.config.comm.usrPhones.desc']}})</p>
+
+                <p ng-show="configEditable" class="desc">({{resourceBundle['temperature.device.config.comm.phone.numbers']}} ({{resourceBundle['temperature.device.config.comm.comma.seperated']}})
+                    (+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}&gt;&lt;&gt;;
+                    {{resourceBundle['eg"']}} +919844360948 [{{resourceBundle['india']}}],
+                    +15404569089 [{{resourceBundle['usa']}}]))</p>
+
+                <p ng-show="configForm.usrPhones.$invalid && configForm.usrPhones.$dirty && configEditable && !configForm.usrPhones.$focused"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.usrPhones']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['notifications']}}
+            </td>
+            <td>
+                <span ng-hide="configEditable">
+                    <span class="label label-tags label-default" ng-show="deviceConfig.comm.tmpNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['raw.temperature']}}</span>
+                    <span class="label label-tags label-default" ng-show="deviceConfig.comm.incExcNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['incursion.excursion']}} </span>
+                    <span class="label label-tags label-default" ng-show="deviceConfig.comm.statsNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['daily.statistics']}}</span>
+                    <span class="label label-tags label-default" ng-show="deviceConfig.comm.devAlrmsNotify"><span class="glyphicons glyphicons-check"></span> {{resourceBundle['device.alarm']}}</span>
+                </span>
+                <div  ng-show="configEditable">
+                    <div class="checkbox">
+                        <label>
+                            <input name="tmpNotify" type="checkbox" ng-model="deviceConfig.comm.tmpNotify" >  {{resourceBundle['temperature.device.config.comm.tmpNotify']}}
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input name="incExcNotify" type="checkbox" ng-model="deviceConfig.comm.incExcNotify" required>  {{resourceBundle['temperature.device.config.comm.incExcNotify']}}
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input name="devAlrmsNotify" type="checkbox" ng-model="deviceConfig.comm.devAlrmsNotify" >  {{resourceBundle['temperature.device.config.comm.devAlrmsNotify']}}
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input name="statsNotify" type="checkbox" ng-model="deviceConfig.comm.statsNotify" >  {{resourceBundle['temperature.device.config.comm.statsNotify']}}
+                        </label>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['timezone']}}
+            </td>
+            <td>
+                <span ng-hide="configEditable">{{deviceConfig.locale.tznm ? allTimezones[deviceConfig.locale.tznm] : 'None'}}</span>
+                <select ng-show="configEditable" ng-model="deviceConfig.locale.tznm" class="form-control" id="cnfTz"
+                        name="tz">
+                    <option value="">-- {{resourceBundle['select']}} {{resourceBundle['timezone']}} --</option>
+                    <option ng-repeat="(key,value) in allTimezones" value="{{key}}">
+                        {{value}}
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['country']}}
+            </td>
+            <td>
+                <span ng-hide="configEditable">{{deviceConfig.locale.cn ? countries[deviceConfig.locale.cn].name : 'None'}}</span>
+                <select ng-show="configEditable" ng-model="deviceConfig.locale.cn" class="form-control" id="cnfCnt"
+                        ng-change="setCountry(cnf.cnt)">
+                    <option value="">-- {{resourceBundle['select']}} {{resourceBundle['country']}} --</option>
+                    <option ng-repeat="(code,val) in countries" value="{{code}}">{{val.name}}</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">
+                {{resourceBundle['language']}}
+            </td>
+            <td>
+                <span ng-hide="configEditable">{{deviceConfig.locale.ln ? allLanguages[deviceConfig.locale.ln] : 'None'}}</span>
+                <select ng-show="configEditable" ng-model="deviceConfig.locale.ln" class="form-control" id="cnfLng"
+                        name="lng">
+                    <option value="">-- {{resourceBundle['select']}} {{resourceBundle['language']}} --</option>
+                    <option ng-repeat="(value,key) in allLanguages" value="{{value}}">
+                        {{key}}
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr ng-show="configEditable">
+            <td></td>
+            <td>
+                <button type="submit" class="btn btn-primary"
+                        ng-click="submitConfig(0)"
+                        ng-disabled="configForm.$invalid">{{resourceBundle['save']}}
+                </button>
+                <button type="submit" class="btn btn-primary" ng-click="submitConfig(1)"
+                        ng-disabled="configForm.$invalid">{{resourceBundle['save.push']}}
+                </button>
+                <button class="btn" ng-click="cancelConfigEdit()">{{resourceBundle['cancel']}}</button>
+            </td>
+        </tr>
+    </table>
+</form>

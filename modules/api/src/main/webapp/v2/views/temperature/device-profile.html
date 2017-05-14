@@ -1,0 +1,696 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<!--
+<div class="box topbox" ng-controller="DeviceProfileController">
+    <h5 class="sgHeading" style="margin-left: 0px; margin-right: 0px;">
+        <a href="#/setup/entities/detail/{{deviceDetails[0].kId}}">{{deviceDetails[0].kName}}</a>
+        >
+        <a href="#/setup/entities/detail/{{deviceDetails[0].kId}}/materials">{{resourceBundle['material']}}</a> >
+        <a href="#/setup/entities/detail/{{deviceDetails[0].kId}}/materials/{{deviceDetails[0].mId}}/devices/">{{deviceDetails[0].mnm}}</a>
+        >
+        {{deviceDetails[0].id}}
+    </h5>
+
+    <div class="row mg-hori-zero">
+        <div class="col-md-4 pd-hori-zero">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>{{deviceDetails[0].id}} (<span ng-repeat="vendor in vendorMapping"
+                                                      ng-show="vendor.vid == deviceDetails[0].vid">{{vendor.vname}}</span>)
+                        <i ng-show="deviceDetails[0].st == 0" class="glyphicons circle_ok c-green"></i>
+                        <i ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp >= deviceDetails[0].max"
+                           class="glyphicons circle_remove c-red"></i>
+                        <i ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp <= deviceDetails[0].min"
+                           class="glyphicons circle_remove c-aqua"></i>
+                    </b>
+                </div>
+                <div class="panel-body pd-zero" style="height: 620px;">
+                    <table class="table table-hover borderless">
+                        <tr>
+                            <td class="info-label">
+                                Device
+                            </td>
+                            <td class="temp-status">
+                                {{deviceDetails[0].id}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">
+                                Vendor
+                            </td>
+                            <td>
+                                <div ng-repeat="vendor in vendorMapping" ng-show="vendor.vid == deviceDetails[0].vid">
+                                    {{vendor.vname}}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">
+                                Status
+                            </td>
+                            <td ng-show="deviceDetails[0].st == 0 || (deviceDetails[0].st == 1 && deviceDetails[0].tmp > deviceDetails[0].min && deviceDetails[0].tmp < deviceDetails[0].max)" class="c-green temp-status">
+                                Normal
+                            </td>
+                            <td ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp >= deviceDetails[0].max"
+                                class="c-red temp-status">
+                                Alert
+                            </td>
+                            <td ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp <= deviceDetails[0].min"
+                                class="c-aqua temp-status">
+                                Alert
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">
+                                Temperature
+                            </td>
+                            <td class="temp-status" style="margin: auto;">
+                                <div class="row mg-hori-zero">
+                                    <div class="col-sm-8 pd-hori-zero">
+                                            <span class="c-green" ng-show="deviceDetails[0].st == 0">
+                                                {{deviceDetails[0].tmp}} &#8451;
+                                            </span>
+                                            <span class="c-green" ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp > deviceDetails[0].min && deviceDetails[0].tmp < deviceDetails[0].max">
+                                                {{deviceDetails[0].tmp}} &#8451;
+                                            </span>
+                                            <span class="c-red"
+                                                  ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp >= deviceDetails[0].max">
+                                                {{deviceDetails[0].tmp}} &#8451;
+                                            </span>
+                                            <span class="c-aqua"
+                                                  ng-show="deviceDetails[0].st == 1 && deviceDetails[0].tmp <= deviceDetails[0].min">
+                                                {{deviceDetails[0].tmp}} &#8451;
+                                            </span>
+                                    </div>
+                                    <div class="col-sm-4" tooltip-placement="left" tooltip="{{currentTempReqStatus}}">
+                                        <a class="pull-right"
+                                           ng-if="deviceDetails[0].tmpStatus == 1 || deviceDetails[0].tmpStatus == undefined">
+                                                <span class="glyphicons refresh"
+                                                      confirmed-click="getCurrentTemp()"
+                                                      ng-confirm-click="Request will be sent to device, this might take few minutes.">
+                                                </span>
+                                        </a>
+                                        <a class="pull-right" ng-if="deviceDetails[0].tmpStatus == 0">
+                                                <span class="glyphicons refresh spin" ng-click="stopPoll()">
+                                                </span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="row mg-hori-zero">
+                                    <span class="sub-desc">{{deviceDetails[0].tut | date: 'DD/MM/YYYY HH:MM:SS Z'}}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">
+                                Range
+                            </td>
+                            <td>
+                                {{deviceDetails[0].min}} &#8451; - {{deviceDetails[0].max}} &#8451;
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">
+                                Entity
+                            </td>
+                            <td>
+                                <a href="#/setup/entities/detail/{{deviceDetails[0].kId}}"
+                                   target="_blank">{{deviceDetails[0].kName}}</a>, {{deviceDetails[0].kCity}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">
+                                Users
+                            </td>
+                            <td>
+                                <span ng-repeat="user in entityInformation.usrs | limitTo:1">
+                                    <span><a href="#/setup/users/all/details?userId={{user.id}}" target="_blank">{{user.fnm}}</a> ({{user.phm}})</span>
+                                </span>
+                                <a id="userPopover" ng-show="entityInformation.usrs.length > 1"
+                                   class="pull-right" ng-click="showUser = !showUser;showUsers($event);">
+                                    <span class="glyphicons expand medium" ng-show="showUser"></span>
+                                    <span class="glyphicons collapse_top medium" ng-hide="showUser"></span>
+                                </a>
+                                <span id="userPopoverContent" style="display: none;">
+                                    <div ng-repeat="user in entityInformation.usrs">
+                                        <span><a href="#/setup/users/all/details?userId={{user.id}}" target="_blank">{{user.fnm}}</a> ({{user.phm}})</span>
+                                    </div>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="col-sm-12 pd-zero" ng-if="marker.coords.latitude && marker.coords.longitude">
+                                    <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="false"
+                                                        options="options">
+                                        <ui-gmap-marker coords="marker.coords" options="marker.options"
+                                                        idkey="marker.id">
+                                        </ui-gmap-marker>
+                                        <ui-gmap-layer namespace="weather" type="WeatherLayer"></ui-gmap-layer>
+                                    </ui-gmap-google-map>
+                                </div>
+                                <div ng-hide="marker.coords.latitude && marker.coords.longitude">
+                                    <p style="margin: 150px 0 150px 100px;">Location not available.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 pd-right-zero">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row mg-hori-zero">
+                        <div class="col-sm-4 pd-hori-zero">
+                            Temperature
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body" style="min-height: 310px;">
+                    <div id="chart-container">
+                        <tr ng-show="{{deviceInfoLoading}}">
+                            <td colspan="2">
+                                Loading..
+                            </td>
+                        </tr>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            Recent Alerts
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="pull-right">
+                                <div ng-show="recentAlerts.length">
+                                    <ul class="pager">
+                                        <li>
+                                            <a href="" ng-show="offset >= 2 * size" ng-click="fetchFirst();">
+                                                <span class="glyphicons step_backward"></span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="" ng-show="offset >= 1 * size" ng-click="fetchPrev();">
+                                                <span class="glyphicons chevron-left"></span>
+                                            </a>
+                                        </li>
+                                        <li><b>{{offset/size + 1}}</b> of <b>{{numFound/size}}</b></li>
+                                        <li>
+                                            <a href="" ng-show="(offset + size) < numFound" ng-click="fetchNext();">
+                                                <span class="glyphicons chevron-right"></span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="" ng-show="(offset + size) < (numFound - size)" ng-click="fetchLast();">
+                                                <span class="glyphicons step_forward"></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body pd-zero" style="min-height: 242px;">
+                    <table class="table table-hover table-bordered table-striped">
+                        <tr>
+                            <th>Alarm</th>
+                            <th><span class="glyphicons clock"></span> Time</th>
+                        </tr>
+                        <tr ng-repeat="recentAlert in recentAlerts | limitTo: 5" ng-show="recentAlerts.length > 0 && (recentAlert.typ == 0 || (recentAlert.typ == 1 && (recentAlert.devalm.typ == 3 || (recentAlert.devalm.typ >= 0 && recentAlert.devalm.typ <= 2 && recentAlert.devalm.stat > 0))))">
+                            <td ng-class="{'c-red': (recentAlert.typ == 0 && recentAlert.tmpalm.tmp >= deviceDetails[0].max) || (recentAlert.typ == 0 && recentAlert.tmpalm.tmp < deviceDetails[0].max && recentAlert.tmpalm.tmp > deviceDetails[0].min && recentAlert.tmpalm.typ == 2), 'c-aqua': recentAlert.typ == 0 &&  recentAlert.tmpalm.tmp <= deviceDetails[0].min, 'c-yellow': recentAlert.typ == 1}">
+                                <i class="glyphicons"
+                                   ng-class="{'circle_remove': recentAlert.typ == 0, 'warning_sign': recentAlert.typ == 1}"></i>
+                                    <span ng-show="recentAlert.typ == 0 && recentAlert.tmpalm.tmp >= deviceDetails[0].max">
+                                        High temperature excursion
+                                    </span>
+                                    <span ng-show="recentAlert.typ == 0 && recentAlert.tmpalm.tmp <= deviceDetails[0].min">
+                                        Low temperature excursion
+                                    </span>
+                                    <span ng-show="recentAlert.typ == 0 && recentAlert.tmpalm.tmp < deviceDetails[0].max && recentAlert.tmpalm.tmp > deviceDetails[0].min && recentAlert.tmpalm.typ == 2">
+                                        Temperature excursion
+                                    </span>
+                                    <span ng-show="recentAlert.typ == 1">
+                                        <span ng-show="recentAlert.devalm.typ == 0 && recentAlert.devalm.stat == 1">Device connection alarm</span>
+                                        <span ng-show="recentAlert.devalm.typ == 1 && recentAlert.devalm.stat == 1">External sensor alarm</span>
+                                        <span ng-show="recentAlert.devalm.typ == 3">Firmware alarm</span>
+                                        <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 1">Battery warning</span>
+                                        <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 2">Battery alarm</span>
+                                        <span ng-show="recentAlert.devalm.typ == 2 && recentAlert.devalm.stat == 3">Battery charging</span>
+                                    </span>
+                            </td>
+                            <td>
+                                {{recentAlert.time * 1000 | timeago:true:true}}
+                            </td>
+                        </tr>
+                        <tr ng-show="recentAlertsLoading">
+                            <td colspan="2" class="text-center">
+                                <span class="glyphicons cogwheel spin"></span>
+                            </td>
+                        </tr>
+                        <tr ng-show="!recentAlerts.length && !recentAlertsLoading">
+                            <td colspan="2">
+                                No data available.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mg-hori-zero">
+
+    </div>
+    <div class="row mg-hori-zero">
+        <div class="col-md-6 pd-hori-zero">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-sm-9 pd-right-zero">
+                            Device Configuration
+                            <span class="config-warning" ng-show="deviceInfo.cfg == undefined">
+                                <span class="glyphicons warning_sign medium"
+                                              tooltip="Device is not configured"></span>
+                            </span><br/>
+                        </div>
+                        <div class="col-sm-3 pd-left-zero">
+                            <div class="row mg-hori-zero">
+                                <div class="col-sm-4 pd-right-zero" tooltip="Push configuration to device">
+                                    <a ng-hide="pushingConfig" class="pull-right medium" confirmed-click="pushConfiguration()"
+                                       ng-confirm-click="Do you want to push configuration to device?">
+                                        <span class="glyphicons download"></span>
+                                    </a>
+                                    <a class="pull-right medium" ng-show="pushingConfig">
+                                        <span class="glyphicons cogwheel spin"></span>
+                                    </a>
+                                </div>
+                                <div class="col-sm-4 pd-right-zero" tooltip="Ask device to pull configuration">
+                                    <a ng-hide="sendingConfigPullRequest" class="pull-right medium" confirmed-click="sendConfigPullRequest()"
+                                       ng-confirm-click="Do you want to send pull request to device?">
+                                        <span class="glyphicons upload"></span>
+                                    </a>
+                                    <a ng-show="sendingConfigPullRequest" class="pull-right medium">
+                                        <span class="glyphicons cogwheel medium spin"></span>
+                                    </a>
+                                </div>
+                                <div class="col-sm-4 pd-right-zero" tooltip="Edit">
+                                    <a class="pull-right medium" ng-show="!alarmConfigEditable"
+                                       ng-click="editConfig()">
+                                        <span class="glyphicons edit"></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="deviceConfig && !deviceConfigLoading" class="panel-body pd-zero">
+                    <div class="row">
+                        <div class="col-sm-12 mini-desc">
+                            <span ng-hide="deviceInfo.cfg == undefined && deviceInfo.drdy != undefined">
+                                Last updated at {{deviceInfo.cfg.time * 1000 | date:'medium'}}<span ng-show="deviceInfo.drdy != undefined">,
+                                 device confirmed at {{deviceInfo.drdy.time * 1000 | date:'medium'}}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <div ng-include="'views/temperature/device-profile-config.html'"></div>
+                </div>
+                <div ng-show="deviceConfigLoading" class="panel-body pd-zero">
+                    <div class="text-center">
+                        <span class="glyphicons cogwheel spin"></span>
+                    </div>
+                </div>
+                <div ng-show="!deviceConfig && !deviceConfigLoading" class="panel-body pd-zero">
+                    No config available.
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 pd-right-zero">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Device Information
+                    <a ng-click="editInfo()" class="pull-right medium" tooltip="Edit">
+                        <span class="glyphicons edit"></span>
+                    </a>
+                </div>
+                <div class="panel-body pd-zero" ng-show="deviceInfoLoading">
+                    <div class="text-center">
+                        <span class="glyphicons cogwheel spin"></span>
+                    </div>
+                </div>
+                <div class="panel-body pd-zero" ng-show="!deviceInfoLoading && !deviceInfo.dev && !deviceInfo.sim">
+                    No data available.
+                </div>
+                <div class="panel-body pd-zero" ng-show="!deviceInfoLoading && deviceInfo.dev && deviceInfo.sim">
+                    <form name="deviceInfoForm" novalidate>
+                        <table class="table table-hover borderless">
+                            <tr ng-show="isDef(deviceInfo.trId) || infoEditable">
+                                <td class="info-label">
+                                    Transmitter ID
+                                </td>
+                                <td>
+                                    <p ng-hide="infoEditable">{{deviceInfo.trId}}</p>
+                                    <input class="form-control" ng-show="infoEditable" type="text"
+                                           ng-model="deviceInfo.trId"/>
+                                </td>
+                            </tr>
+                            <tr ng-show="isDef(deviceInfo.dev.mdl) || infoEditable">
+                                <td class="info-label">
+                                    Device model
+                                </td>
+                                <td>
+                                    <p ng-hide="infoEditable">{{deviceInfo.dev.mdl}}</p>
+                                    <input class="form-control" ng-show="infoEditable" type="text"
+                                           ng-model="deviceInfo.dev.mdl"/>
+                                </td>
+                            </tr>
+                            <tr ng-show="isDef(deviceInfo.dev.dVr) || infoEditable">
+                                <td class="info-label">
+                                    Firmware version
+                                </td>
+                                <td>
+                                    <p ng-hide="infoEditable">{{deviceInfo.dev.dVr}}</p>
+                                    <input class="form-control" ng-show="infoEditable" type="text"
+                                           ng-model="deviceInfo.dev.dVr"/>
+                                </td>
+                            </tr>
+                            <tr ng-show="isDef(deviceInfo.dev.mVr) || infoEditable">
+                                <td class="info-label">
+                                    GSM module version
+                                </td>
+                                <td>
+                                    <p ng-hide="infoEditable">{{deviceInfo.dev.mVr}}</p>
+                                    <input class="form-control" ng-show="infoEditable" type="text"
+                                           ng-model="deviceInfo.dev.mVr"/>
+                                </td>
+                            </tr>
+                            <tr ng-show="isDef(deviceInfo.dev.imei) || infoEditable">
+                                <td class="info-label">
+                                    IMEI
+                                </td>
+                                <td>
+                                    <p ng-hide="infoEditable">{{deviceInfo.dev.imei}}</p>
+                                    <input class="form-control" ng-show="infoEditable" type="text"
+                                           ng-model="deviceInfo.dev.imei"/>
+                                </td>
+                            </tr>
+                            <tr ng-show="isDef(deviceInfo.sim.sid) || infoEditable">
+                                <td class="info-label">
+                                    SIM ID
+                                </td>
+                                <td>
+                                    <p ng-hide="infoEditable">{{deviceInfo.sim.sid}}</p>
+                                    <input class="form-control" ng-show="infoEditable" type="text"
+                                           ng-model="deviceInfo.sim.sid"/>
+                                </td>
+                            </tr>
+                            <tr ng-show="isDef(deviceInfo.sim.phn) || infoEditable">
+                                <td class="info-label">
+                                    Mobile number
+                                </td>
+                                <td ng-class="{ 'has-error' : infoEditable && deviceInfoForm.devicePhoneNumber.$error.pattern && deviceInfoForm.devicePhoneNumber.$dirty && !deviceInfoForm.devicePhoneNumber.$focused}">
+                                    <p ng-hide="infoEditable">{{deviceInfo.sim.phn}}</p>
+                                    <input name="devicePhoneNumber" class="form-control" ng-show="infoEditable"
+                                           type="text" ng-model="deviceInfo.sim.phn"
+                                           ng-pattern="/^\++\d{4,20}$/"
+                                           ng-blur="temperatureForm.smsGyPh.$dirty = true"
+                                           ng-focus-logi
+                                           maxlength="20"/>
+                                    <p ng-show="infoEditable" class="desc">(+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}
+                                        &gt;&lt;&gt;; {{resourceBundle['eg']}} +919844360948
+                                        [{{resourceBundle['india']}}], +15404569089 [{{resourceBundle['usa']}}])</p>
+                                    <p ng-show="infoEditable && deviceInfoForm.devicePhoneNumber.$error.pattern && deviceInfoForm.devicePhoneNumber.$dirty && !deviceInfoForm.devicePhoneNumber.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr ng-show="infoEditable">
+                                <td></td>
+                                <td>
+                                    <button type="submit" class="btn btn-primary" ng-click="submitDeviceInfo()"
+                                            ng-disabled="deviceInfoForm.$invalid">Submit
+                                    </button>
+                                    <button class="btn" ng-click="cancelDeviceInfoEdit()">Cancel</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" style="padding: 7px 15px;">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            Daily statistics
+                        </div>
+                        <div class="col-sm-6 pd-right-zero">
+                            <div class="row pull-right">
+                                <div class="col-sm-6 pd-hori-zero">
+                                    <date-picker date-model="statsSelectedDate" place-holder="From"></date-picker>
+                                </div>
+                                <div class="col-sm-6 pd-right-5">
+                                    <button type="button" ng-disabled="statsLoading == 0" class="btn btn-sm btn-default" ng-disabled="!statsSelectedDate" ng-click="getStats()">Get
+                                        stats
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body text-center" style="padding: 5px 5px;"
+                     ng-show="statsLoading == 1 || statsLoading == 0">
+                    <span ng-show="statsLoading == 1">No data available.</span>
+                        <span ng-show="statsLoading == 0">
+                            <span class="glyphicons cogwheel spin"></span>
+                        </span>
+                </div>
+                <div class="panel-body" style="padding: 5px 5px;" ng-show="statsLoading == 2">
+                    <div class="row mg-hori-zero">
+                        <h5 class="info-label">Temperature</h5>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td># Excursions</td>
+                                <td>Mean Temperature (&#8451;)</td>
+                                <td>Minimum Temperature (&#8451;)</td>
+                                <td>Maximum Temperature (&#8451;)</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.nExc || 0}}</td>
+                                <td>{{deviceStats.mean || 'None'}}</td>
+                                <td>{{deviceStats.min || 'None'}}</td>
+                                <td>{{deviceStats.max || 'None'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <h5 class="info-label">Communication</h5>
+                    </div>
+                    <div class="row mg-hori-zero">
+
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td># SMS Sent</td>
+                                <td># Internet push</td>
+                                <td># Internet push failed</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.comm.nSMS || 0}}</td>
+                                <td>{{deviceStats.comm.nPsh || 0}}</td>
+                                <td>{{deviceStats.comm.nErr || 0}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <h5 class="info-label">High alarm</h5>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td># Alarms</td>
+                                <td>Duration</td>
+                                <td>First occurrence</td>
+                                <td>Ambient temperature (&#8451;)</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.high.nAlrm || deviceStats.high.stat}}</td>
+                                <td>{{deviceStats.high.dur || 'None'}}</td>
+                                <td ng-show="deviceStats.high.time != undefined">{{deviceStats.high.time * 1000 |
+                                    date:'short'}}
+                                </td>
+                                <td ng-show="deviceStats.high.time == undefined">None</td>
+                                <td>{{deviceStats.high.aTmp || 'None'}}</td>
+                            </tr>
+                        </table>
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td>Confirmed</td>
+                                <td>Confirm message</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.high.cnf || false}}</td>
+                                <td>{{deviceStats.high.cnfms || 'None'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <h5 class="info-label">Low alarm</h5>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td># Alarms</td>
+                                <td>Duration</td>
+                                <td>First occurrence</td>
+                                <td>Ambient temperature (&#8451;)</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.low.nAlrm || deviceStats.low.stat}}</td>
+                                <td>{{deviceStats.low.dur || 'None'}}</td>
+                                <td ng-show="deviceStats.low.time != undefined">{{deviceStats.low.time * 1000 |
+                                    date:'short'}}
+                                </td>
+                                <td ng-show="deviceStats.low.time == undefined">None</td>
+                                <td>{{deviceStats.low.aTmp || 'None'}}</td>
+                            </tr>
+                        </table>
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td>Confirmed</td>
+                                <td>Confirm message</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.low.cnf || false}}</td>
+                                <td>{{deviceStats.low.cnfms || 'None'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero" ng-show="deviceStats.dCon != undefined">
+                        <h5 class="info-label">Device connection</h5>
+                    </div>
+                    <div class="row mg-hori-zero" ng-show="deviceStats.dCon != undefined">
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td># Alarms</td>
+                                <td>Duration</td>
+                                <td>First occurrence</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.dCon.nAlrm || deviceStats.dCon.stat}}</td>
+                                <td>{{deviceStats.dCon.dur || 'None'}}</td>
+                                <td ng-show="deviceStats.dCon.time != undefined">{{deviceStats.dCon.time * 1000 |
+                                    date:'short'}}
+                                </td>
+                                <td ng-show="deviceStats.dCon.time == undefined">None</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero" ng-show="deviceStats.xSns != undefined">
+                        <h5 class="info-label">Sensor connection</h5>
+                    </div>
+                    <div class="row mg-hori-zero" ng-show="deviceStats.xSns != undefined">
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td># Alarms</td>
+                                <td>Duration</td>
+                                <td>First occurrence</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.xSns.nAlrm || deviceStats.xSns.stat}}</td>
+                                <td>{{deviceStats.xSns.dur || 'None'}}</td>
+                                <td ng-show="deviceStats.xSns.time != undefined">{{deviceStats.xSns.time * 1000 | date:
+                                    'short'}}
+                                </td>
+                                <td ng-show="deviceStats.xSns.time == undefined">None</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <h5 class="info-label">Battery</h5>
+                    </div>
+                    <div class="row mg-hori-zero">
+                        <table class="table table-border-less text-center table-striped">
+                            <tr>
+                                <td># Alarms</td>
+                                <td>Actual voltage (volts)</td>
+                                <td>Low voltage (volts)</td>
+                                <td>High voltage (volts)</td>
+                                <td>First occurrence</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.batt.nAlrm || deviceStats.batt.stat}}</td>
+                                <td>{{deviceStats.batt.actv || 'None'}}</td>
+                                <td>{{deviceStats.batt.lowv || 'None'}}</td>
+                                <td>{{deviceStats.batt.highv || 'None'}}</td>
+                                <td ng-show="deviceStats.batt.time != undefined">{{deviceStats.batt.time * 1000 |
+                                    date:'short'}}
+                                </td>
+                                <td ng-show="deviceStats.batt.time == undefined">None</td>
+                            </tr>
+                        </table>
+                        <table class="table table-border-less mg-bottom-zero text-center table-striped">
+                            <tr>
+                                <td>Charging time (minutes)</td>
+                                <td>Power available time (minutes)</td>
+                                <td>Warning duraion (minutes)</td>
+                                <td>Alarm duration (minutes)</td>
+                            </tr>
+                            <tr>
+                                <td>{{deviceStats.batt.chgt || 'None'}}</td>
+                                <td>{{deviceStats.batt.pwrt || 'None'}}</td>
+                                <td>{{deviceStats.batt.wdur || 'None'}}</td>
+                                <td>{{deviceStats.batt.adur || 'None'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="row mg-hori-zero" ng-show="deviceStats.errs.length > 0">
+                        <h5 class="info-label">Firmware error</h5>
+                    </div>
+                    <div class="row mg-hori-zero" ng-show="deviceStats.errs.length > 0">
+                        <table class="table table-striped mg-bottom-zero text-center">
+                            <tr>
+                                <td>Code</td>
+                                <td># Occurrence</td>
+                                <td>First occurrence</td>
+                            </tr>
+                            <tr ng-repeat="err in deviceStats.errs">
+                                <td>{{err.code}}</td>
+                                <td>{{err.cnt}}</td>
+                                <td>{{err.time * 1000 | date:'short'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>-->

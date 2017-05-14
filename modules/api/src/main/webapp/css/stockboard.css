@@ -1,0 +1,130 @@
+/*
+ * Copyright © 2017 Logistimo.
+ *
+ * This file is part of Logistimo.
+ *
+ * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+ * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * You can be released from the requirements of the license by purchasing a commercial license. To know more about
+ * the commercial license, please contact us at opensource@logistimo.com
+ */
+
+/*
+	Totem Ticker Stylesheet
+	Zach Dunn / Build Internet (buildinternet.com)
+	Winter 2011
+*/
+
+
+*{margin:0; padding:0;}
+
+body{
+	font-family:Lucida Grande, Helvetica, Arial, sans-serif;
+	/*background: url('../images/demo-bg.jpg') center 105px no-repeat #1a110a;*/
+	-webkit-font-smoothing:antialiased;
+	background-color: #c69633;
+}
+/*
+h1.logo{
+	overflow:hidden; 
+	text-indent:-9999em; 
+	width:230px; 
+	height:70px;
+	margin:0 auto 15px auto;
+	background: url('../images/totem-logo.png') top left no-repeat;
+}
+*/
+/* Top Banner */
+/*.banner { width:100%; background-color:#ffffff; }*/
+.banner {
+	height: 10%;
+	width: 100%;
+	background-image: url(/images/lightwood.jpg); background-repeat:repeat; background-attachment: fixed;
+}
+
+.banner .nav { 
+	float:right;
+	/*margin-top:-40px;*/
+	margin-right:5px;
+	font-size:12pt;
+	color:#FFFF66;
+	-moz-border-radius: 10px;
+    border-radius: 10px;
+    background-color:#cc853e;
+    padding: 0 4px 4px 4px;
+}
+
+#wrapper{
+	padding:30px;
+	width: 90%;/*width:800px;*/
+	margin:0 auto;
+}
+
+	p{color:#fff; padding:10px 0; text-align:center;}
+		.nav{}
+	
+	#wrapper a, #footer a{color:#e8914c; text-decoration:none; border-bottom:1px dotted #e8914c;}
+		#wrapper a:hover, #footer a:hover{color:#eab209; border-bottom:1px dotted #eab209;}
+
+
+#footer{margin-top:20px; text-transform:uppercase; font-size:11px; letter-spacing:1px;}
+	#footer p{color:rgba(255,255,255,.5);}
+/*
+
+	This is the only semi-important stuff for plugin installation
+	It's just an example, so customize away!
+*/
+
+#vertical-ticker{
+	/*height:400px;*/
+	height:80%;
+	overflow:hidden;
+	margin:0; padding:0;
+	-webkit-box-shadow:0 1px 3px rgba(0,0,0, .4);
+}
+
+#vertical-ticker li {
+	padding:35px 20px;
+	display:block;
+	background:#fdfef0; /* #efefef; */
+	color:#333;
+	border-bottom:2px solid #ddd;
+	/*text-align:center;*/
+	font-size:20pt;
+	font-weight:bold;
+	font-family: Helvetica Neue, times, serif;
+	height:30px;
+}
+
+#vertical-ticker li .liname{
+	float:left;
+	color:blue;
+}
+
+#vertical-ticker li .liname span.liinfo {display:block;font-size:20px;}
+
+#vertical-ticker li .livalue{
+	float:right;
+}
+
+/* Style for the horizontal message board.*/
+.newsCss{
+	height:50px;
+	width:88%;
+	border:1px solid #c3501d;
+	padding:15px;
+	background:#efefef;
+	margin-left:5%;
+}

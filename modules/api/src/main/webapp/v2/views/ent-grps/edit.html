@@ -1,0 +1,111 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="EntGrpEditCtrl">
+    <div ng-if="!cancel">
+        <form class="form-horizontal" role="form" name="addEntityGroupsForm">
+            <div class="bgr">
+                <div class="title-heading">
+                    {{resourceBundle['poolgroup.infotitle']}}
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <p class="litetext">{{resourceBundle['poolgroup.info']}}</p>
+                        <div class="form-group">
+                            <label for="entGrpNm" class="col-sm-4 control-label required">{{resourceBundle['poolgroup.name']}}</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="entGrpNm"
+                                       ng-model="entGrps.nm" name="entGrpNm"
+                                       placeholder="{{resourceBundle['poolgroup.name']}}"
+                                       ng-class="{'c-visited' : uVisited.entGrpNm}"
+                                       ng-blur="uVisited.entGrpNm = true" maxlength="50" autocomplete="off" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="has-error"
+                             ng-show="uVisited.entGrpNm && addEntityGroupsForm.entGrpNm.$error.required">
+									<span class="help-block">
+										{{resourceBundle['kiosk']}} {{resourceBundle['poolgroup.name']}} {{resourceBundle['isrequired']}} </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="entGrpDsc" class="col-sm-4 control-label">{{resourceBundle['config.customreports.description']}}</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="entGrpDsc"
+                                       ng-model="entGrps.dsc" name="entGrpNm"
+                                       placeholder="{{resourceBundle['config.customreports.description']}}"
+                                       maxlength="100" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="entGrpOwner" class="col-sm-4 control-label required">{{resourceBundle['poolgroup.owner']}}</label>
+                            <div class="col-sm-8" ng-class="{'has-error' : vErrors.grpOwn}"  id="entGrpOwner">
+                                <user-select users-model="entGrps.user"></user-select>
+                                <div class="has-error"
+                                     ng-show="uVisited.entGrpOwner && addEntityGroupsForm.entGrpOwner.$error.required">
+                                    <span class="help-block">{{resourceBundle['kiosk']}} {{resourceBundle['poolgroup.owner']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bgr">
+                <div class="title-heading">
+                    {{resourceBundle['kiosks']}}
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <p class="litetext">{{resourceBundle['poolgroup.selectkiosksinfo']}}</p>
+                        <div class="form-group">
+                            <label for="entGrpNm" class="col-sm-4 control-label">{{resourceBundle['kiosks']}}</label>
+                            <div class="col-sm-8">
+                                <ent-select ent-model="entGrps.ent" place-holder="{{resourceBundle['choose.kiosk']}}"></ent-select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6 mt10">
+                    <div class="pull-right">
+                        <button ng-click="updatePoolGroup()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                        <button ng-click="cancelEditing()" class="btn btn-default">{{resourceBundle['cancel']}}</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div ng-if="cancel">
+        <div ng-include="'views/ent-grps/ent-grps-list.html'"></div>
+    </div>
+</div>
+

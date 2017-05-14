@@ -1,0 +1,740 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="row mg-hori-zero mg-top-10 lg-row">
+        <form name="addDeviceForm" novalidate>
+            <h5>{{resourceBundle['device.info']}}</h5>
+            <hr/>
+            <div class="row mg-hori-zero">
+                <p class="form-desc">{{resourceBundle['device.basicinfo']}}</p>
+                <div class="col-sm-8">
+                    <table class="table table-bordered-less">
+                        <tr>
+                            <td class="form-label required">
+                                {{resourceBundle['deviceid']}}
+                            </td>
+                            <td style="width: 50%;" class="form-group" ng-class="{ 'has-error' : addDeviceForm.deviceId.$invalid && addDeviceForm.deviceId.$dirty && uVisited.did }">
+                                <input name="deviceId" type="text" ng-blur="addDeviceForm.deviceId.$dirty = true; uVisited.did = true" ng-model="device.id" class="form-control" placeholder="Unique Device Id" required/>
+                                <p ng-show="addDeviceForm.deviceId.$invalid && addDeviceForm.deviceId.$dirty && uVisited.did" class="help-block">{{resourceBundle['deviceid']}} {{resourceBundle['isrequired']}}.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label required">
+                                {{resourceBundle['vendor.uppercase']}}
+                            </td>
+                            <td class="form-group" ng-class="{ 'has-error' : addDeviceForm.vendorId.$invalid && addDeviceForm.vendorId.$dirty && uVisited.vid }">
+                                <select name="vendorId" ng-model="device.vid" class="form-control"  ng-blur="addDeviceForm.vendorId.$dirty = true; uVisited.vid = true"
+                                        ng-options="vendor.vid as vendor.vname for vendor in vendorMapping" required>
+                                    <option value="">-- {{resourceBundle['select']}} {{resourceBundle['vendor.lowercase']}} --</option>
+                                </select>
+                                <p ng-show="addDeviceForm.vendorId.$invalid && addDeviceForm.vendorId.$dirty && uVisited.vid" class="help-block">{{resourceBundle['vendor.name.required']}}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label required">
+                                {{resourceBundle['min.temp']}} (&deg;C)
+                            </td>
+                            <td class="form-group" ng-class="{ 'has-error' : addDeviceForm.tmin.$invalid && addDeviceForm.tmin.$dirty }">
+                                <input name="tmin" type="number" ng-model="device.min" ng-blur="addDeviceForm.tmin.$dirty = true" class="form-control" placeholder="Min. temperature in Celsius" required/>
+                                <p ng-show="addDeviceForm.tmin.$invalid && addDeviceForm.tmin.$dirty" class="help-block">{{resourceBundle['min.temperature']}} {{resourceBundle['isrequired']}}.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label required">
+                                {{resourceBundle['max.temp']}} (&deg;C)
+                            </td>
+                            <td class="form-group" ng-class="{ 'has-error' : addDeviceForm.tmax.$invalid && addDeviceForm.tmax.$dirty }">
+                                <input name="tmax" type="number" ng-model="device.max" ng-blur="addDeviceForm.tmax.$dirty = true" class="form-control" placeholder="Max. temperature in Celsius" required/>
+                                <p ng-show="addDeviceForm.tmax.$invalid && addDeviceForm.tmax.$dirty" class="help-block">{{resourceBundle['max.temperature']}} {{resourceBundle['isrequired']}}.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <hr/>
+            <div class="row mg-hori-zero">
+                <p class="form-desc">{{resourceBundle['device.additionalinfo']}}</p>
+                <div class="col-sm-8">
+                    <table class="table table-bordered-less mg-bottom-zero">
+                        <tr>
+                            <td class="form-label">
+                                {{resourceBundle['mobile.number']}}
+                            </td>
+                            <td ng-class="{ 'has-error' : addDeviceForm.mobileNumber.$invalid && addDeviceForm.mobileNumber.$dirty && !addDeviceForm.mobileNumber.$focused}">
+                                <input name="mobileNumber" class="form-control"
+                                       ng-model="device.sim.phn" type="text"
+                                       placeholder="+919999999999"
+                                       ng-pattern="/^\++\d{4,20}$/"
+                                       ng-blur="addDeviceForm.mobileNumber.$dirty = true"
+                                       ng-focus-logi
+                                       maxlength="20"/>
+
+                                <p ng-show="addDeviceForm.mobileNumber.$error.pattern && addDeviceForm.mobileNumber.$dirty && !addDeviceForm.mobileNumber.$focused"
+                                   class="help-block">{{resourceBundle['mobile.number']}} {{resourceBundle['error.isinvalid']}}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label">
+                                IMEI
+                            </td>
+                            <td>
+                                <input name="imeiNumber" class="form-control" ng-model="device.dev.imei"
+                                       type="text" placeholder="Device IMEI number"/>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label">
+                                {{resourceBundle['transmitter.id']}}
+                            </td>
+                            <td style="width: 50%;" >
+                                <input class="form-control"  ng-model="device.trId" type="text" placeholder="Transmitter Id"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label">
+                                {{resourceBundle['device.model']}}
+                            </td>
+                            <td>
+                                <input class="form-control" ng-model="device.dev.mdl" type="text" placeholder="Device model"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label">
+                                {{resourceBundle['firmware.version']}}
+                            </td>
+                            <td>
+                                <input class="form-control" ng-model="device.dev.dVr" type="text" placeholder="Firmware version"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label">
+                                {{resourceBundle['gsm.module.version']}}
+                            </td>
+                            <td>
+                                <input class="form-control" ng-model="device.dev.mVr" type="text" placeholder="GSM Module version"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="form-label">
+                                {{resourceBundle['sim.id']}}
+                            </td>
+                            <td>
+                                <input class="form-control" ng-model="device.sim.sid" type="text" placeholder="SIM Id"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <h5>{{resourceBundle['temperature.device.default.config']}}</h5>
+            <hr/>
+            <div class="row mg-hori-zero">
+                <p class="form-desc">{{resourceBundle['device.specify.config']}}</p>
+                <div class="col-sm-8">
+                    <label class="radio-inline">
+                        <input type="radio" name="configRadioOptions" id="configRadio1" value="1" ng-model="device.pushDeviceConfig" ng-change="configChange()"> {{resourceBundle['device.config.nopush']}}
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="configRadioOptions" id="configRadio2" value="2" ng-model="device.pushDeviceConfig"> {{resourceBundle['device.config.push']}}
+                    </label>
+                </div>
+            </div>
+            <div class="row mg-hori-zero mg-top-10" id="configSection" ng-show="device.pushDeviceConfig == 2">
+                <hr/>
+                <div ng-hide="deviceConfig.comm" class="row mg-hori-zero">
+                    <p>{{resourceBundle['device.config.notavailable']}}</p>
+                </div>
+                <div ng-show="deviceConfig.comm" class="row mg-hori-zero">
+                    <div class="col-sm-12">
+                        <button type="button" class="btn btn-sm btn-default pull-left"
+                                ng-click="device.editConfig = true" ng-hide="device.editConfig">{{resourceBundle['device.edit.config']}}
+                        </button>
+                        <button type="button" class="btn btn-sm btn-default pull-left"
+                                ng-click="configChange()" ng-show="device.editConfig">{{resourceBundle['device.reset.config']}}
+                        </button>
+                    </div>
+                    <div class="col-sm-8">
+                        <table class="table table-bordered-less mg-bottom-zero">
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.comm.chnl']}}
+                                </td>
+                                <td style="width: 50%;"
+                                    ng-class="{ 'has-error' : addDeviceForm.commChnl.$invalid && addDeviceForm.commChnl.$dirty }">
+                                    <select name="commChnl" ng-model="deviceConfig.comm.chnl"
+                                            class="form-control"
+                                            ng-blur="addDeviceForm.commChnl.$dirty = true"
+                                            ng-options="chnl.id as chnl.value for chnl in configCommunicationChannel"
+                                            required
+                                            ng-disabled="!device.editConfig"
+                                            ng-selected="deviceConfig.comm.chnl">
+                                        <option value="">{{resourceBundle['select']}} {{resourceBundle['temperature.device.config.comm.chnl']}}</option>
+                                    </select>
+
+                                    <p ng-show="addDeviceForm.commChnl.$error.required && addDeviceForm.commChnl.$dirty"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.chnl']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+
+                                    <p ng-show="addDeviceForm.commChnl.$error.invalid && addDeviceForm.commChnl.$dirty"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.chnl']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.tmpUrl.$invalid && addDeviceForm.tmpUrl.$dirty }">
+                                    <input type="url" name="tmpUrl" class="form-control" type="text"
+                                           ng-model="deviceConfig.comm.tmpUrl" required
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.tmpUrl']}}"
+                                           ng-blur="addDeviceForm.tmpUrl.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p ng-show="addDeviceForm.tmpUrl.$error.required && addDeviceForm.tmpUrl.$dirty && !addDeviceForm.tmpUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+
+                                    <p ng-show="addDeviceForm.tmpUrl.$error.url && addDeviceForm.tmpUrl.$dirty && !addDeviceForm.tmpUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['temperature.device.config.comm.cfgUrl']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.cfgUrl.$invalid && addDeviceForm.cfgUrl.$dirty }">
+                                    <input type="url" name="cfgUrl" class="form-control"
+                                           type="text" ng-model="deviceConfig.comm.cfgUrl"
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.cfgUrl']}}"
+                                           ng-blur="addDeviceForm.cfgUrl.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p ng-show="addDeviceForm.cfgUrl.$invalid && addDeviceForm.cfgUrl.$dirty && !addDeviceForm.cfgUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.cfgUrl']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.comm.almUrl']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.alrmUrl.$invalid && addDeviceForm.alrmUrl.$dirty }">
+                                    <input type="url" name="alrmUrl" class="form-control"
+                                           type="text"
+                                           ng-model="deviceConfig.comm.alrmUrl"
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.almUrl']}}"
+                                           ng-blur="addDeviceForm.alrmUrl.$dirty = true"
+                                           ng-disabled="!device.editConfig"
+                                           required/>
+
+                                    <p ng-show="addDeviceForm.alrmUrl.$error.required && addDeviceForm.alrmUrl.$dirty && !addDeviceForm.alrmUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.almUrl']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+
+                                    <p ng-show="addDeviceForm.alrmUrl.$error.url && addDeviceForm.alrmUrl.$dirty && !addDeviceForm.alrmUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.almUrl']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : (addDeviceForm.statsUrl.$invalid && addDeviceForm.statsUrl.$dirty) || uVisited.statsUrl }">
+                                    <input type="url" name="statsUrl" class="form-control"
+                                           type="text"
+                                           ng-model="deviceConfig.comm.statsUrl"
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.statsUrl']}}"
+                                           ng-blur="addDeviceForm.statsUrl.$dirty = true; uVisited.statsUrl=false;"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p ng-show="addDeviceForm.statsUrl.$invalid && addDeviceForm.statsUrl.$dirty && !addDeviceForm.statsUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                    <p ng-show="uVisited.statsUrl && !addDeviceForm.statsUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['temperature.device.config.comm.devRyUrl']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.devRyUrl.$invalid && addDeviceForm.devRyUrl.$dirty}">
+                                    <input type="url" name="devRyUrl" class="form-control"
+                                           type="text"
+                                           ng-model="deviceConfig.comm.devRyUrl"
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.devRyUrl']}}"
+                                           ng-blur="addDeviceForm.devRyUrl.$dirty = true; uVisited.alarmUrl=false"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p ng-show="addDeviceForm.devRyUrl.$invalid && addDeviceForm.devRyUrl.$dirty && !addDeviceForm.devRyUrl.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.devRyUrl']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.smsGyPh.$invalid && addDeviceForm.smsGyPh.$dirty }">
+                                    <input name="smsGyPh" class="form-control" type="text"
+                                           ng-model="deviceConfig.comm.smsGyPh" required
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.smsGyPh']}}"
+                                           ng-pattern="/^\++\d{4,20}$/"
+                                           ng-blur="addDeviceForm.smsGyPh.$dirty = true"
+                                           ng-disabled="!device.editConfig"
+                                           maxlength="20"/>
+
+                                    <p class="desc">(+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}
+                                        &gt;&lt;{{resourceBundle['user.mobile']}}&gt;; {{resourceBundle['eg']}} +919844360948
+                                        [{{resourceBundle['india']}}], +15404569089 [{{resourceBundle['usa']}}])</p>
+
+                                    <p ng-show="addDeviceForm.smsGyPh.$error.required && addDeviceForm.smsGyPh.$dirty && !addDeviceForm.smsGyPh.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+
+                                    <p ng-show="addDeviceForm.smsGyPh.$error.pattern && addDeviceForm.smsGyPh.$dirty && !addDeviceForm.smsGyPh.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['temperature.device.config.comm.smsGyKey']}}
+                                </td>
+                                <td>
+                                    <input name="smsGyKey" class="form-control" type="text"
+                                           ng-model="deviceConfig.comm.smsGyKey"
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.smsGyKey']}}"
+                                           ng-blur="addDeviceForm.smsGyKey.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['temperature.device.config.comm.sender']}}
+                                </td>
+                                <td>
+                                    <input name="senderId" class="form-control" type="text"
+                                           ng-model="deviceConfig.comm.senderId" placeholder="SMS sender number/Id"
+                                           ng-blur="addDeviceForm.senderId.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.sInt.$invalid && addDeviceForm.sInt.$dirty }">
+                                    <input type="number" name="sInt" class="form-control"
+                                           min="1" type="text" ng-model="deviceConfig.comm.samplingInt"
+                                           required
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.samplingInt']}}"
+                                           ng-blur="addDeviceForm.sInt.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p ng-show="addDeviceForm.sInt.$error.required && addDeviceForm.sInt.$dirty && !addDeviceForm.sInt.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+
+                                    <p ng-show="(addDeviceForm.sInt.$error.number || addDeviceForm.sInt.$error.min) && addDeviceForm.sInt.$dirty && !addDeviceForm.sInt.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.comm.pushInt']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.pInt.$invalid && addDeviceForm.pInt.$dirty }">
+                                    <input type="number" name="pInt" class="form-control" min="1"
+                                           type="text"
+                                           ng-model="deviceConfig.comm.pushInt" required
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.pushInt']}}"
+                                           ng-blur="addDeviceForm.pInt.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p ng-show="addDeviceForm.pInt.$error.required && addDeviceForm.pInt.$dirty && !addDeviceForm.pInt.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.pushInt']}}
+                                        {{resourceBundle['isrequired']}}
+                                    </p>
+
+                                    <p ng-show="(addDeviceForm.pInt.$error.number || addDeviceForm.pInt.$error.min) && addDeviceForm.pInt.$dirty && !addDeviceForm.pInt.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.pushInt']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label" nowrap>
+                                    {{resourceBundle['temperature.device.config.comm.usrPhones']}}
+                                </td>
+                                <td ng-class="{ 'has-error' : addDeviceForm.usrPhones.$invalid && addDeviceForm.usrPhones.$dirty }">
+                                    <input name="usrPhones" class="form-control" type="text"
+                                           ng-model="deviceConfig.comm.usrPhones"
+                                           placeholder="{{resourceBundle['temperature.device.config.comm.usrPhones']}}"
+                                           ng-blur="addDeviceForm.usrPhones.$dirty = true"
+                                           ng-disabled="!device.editConfig"/>
+
+                                    <p class="desc">({{resourceBundle['temperature.device.config.comm.usrPhones.desc']}})</p>
+
+                                    <p class="desc">({{resourceBundle['temperature.device.config.comm.phone.numbers']}} ({{resourceBundle['temperature.device.config.comm.comma.seperated']}})
+                                        (+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}&gt;&lt;{{resourceBundle['user.mobile']}}&gt;;
+                                        {{resourceBundle['eg"']}} +919844360948 [{{resourceBundle['india']}}],
+                                        +15404569089 [{{resourceBundle['usa']}}]))</p>
+
+                                    <p ng-show="addDeviceForm.usrPhones.$invalid && addDeviceForm.usrPhones.$dirty && !addDeviceForm.usrPhones.$focused"
+                                       class="help-block">
+                                        {{resourceBundle['temperature.device.config.comm.usrPhones']}}
+                                        {{resourceBundle['isinvalid']}}
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['notifications']}}
+                                </td>
+                                <td>
+                                    <div class="checkbox mg-top-zero">
+                                        <label>
+                                            <input name="tmpNotify" type="checkbox"
+                                                   ng-model="deviceConfig.comm.tmpNotify"
+                                                   ng-disabled="!device.editConfig"> {{resourceBundle['temperature.device.config.comm.tmpNotify']}}
+                                        </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="incExcNotify" type="checkbox"
+                                                   ng-model="deviceConfig.comm.incExcNotify"
+                                                   ng-disabled="!device.editConfig"> {{resourceBundle['temperature.device.config.comm.incExcNotify']}}
+                                            {{resourceBundle['notification']}}
+                                        </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="devAlrmsNotify" type="checkbox"
+                                                   ng-model="deviceConfig.comm.devAlrmsNotify"
+                                                   ng-disabled="!device.editConfig"> {{resourceBundle['temperature.device.config.comm.devAlrmsNotify']}}
+                                        </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="statsNotify" type="checkbox"
+                                                   ng-model="deviceConfig.comm.statsNotify"
+                                                   ng-disabled="!device.editConfig"> {{resourceBundle['temperature.device.config.comm.statsNotify']}}
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.highalarm']}}
+                                </td>
+                                <td>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.highAlarmTemp.$invalid && addDeviceForm.highAlarmTemp.$dirty }">
+                                        <input type="number" class="form-control" name="highAlarmTemp"
+                                               ng-model="deviceConfig.highAlarm.temp"
+                                               required
+                                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                                               ng-blur="addDeviceForm.highAlarmTemp.$dirty = true"
+                                               ng-disabled="!device.editConfig"/>
+
+                                        <p ng-show="addDeviceForm.highAlarmTemp.$error.required && addDeviceForm.highAlarmTemp.$dirty && !addDeviceForm.highAlarmTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="addDeviceForm.highAlarmTemp.$error.number && addDeviceForm.highAlarmTemp.$dirty && !addDeviceForm.highAlarmTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.highAlarmDur.$invalid && addDeviceForm.highAlarmDur.$dirty }">
+                                        <input type="number" min="0" class="form-control"
+                                               name="highAlarmDur" ng-model="deviceConfig.highAlarm.dur"
+                                               required
+                                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                                               ng-blur="addDeviceForm.highAlarmDur.$dirty = true"
+                                               ng-disabled="!device.editConfig"/>
+
+                                        <p ng-show="addDeviceForm.highAlarmDur.$error.required && addDeviceForm.highAlarmDur.$dirty && !addDeviceForm.highAlarmDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="(addDeviceForm.highAlarmDur.$error.number || addDeviceForm.highAlarmDur.$error.min) && addDeviceForm.highAlarmDur.$dirty && !addDeviceForm.highAlarmDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.lowalarm']}}
+                                </td>
+                                <td>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.lowAlarmTemp.$invalid && addDeviceForm.lowAlarmTemp.$dirty }">
+                                        <input type="number"
+                                               name="lowAlarmTemp"
+                                               class="form-control"
+                                               ng-model="deviceConfig.lowAlarm.temp"
+                                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                                               ng-blur="addDeviceForm.lowAlarmTemp.$dirty = true"
+                                               ng-disabled="!device.editConfig"
+                                               required/>
+
+                                        <p ng-show="addDeviceForm.lowAlarmTemp.$error.required && addDeviceForm.lowAlarmTemp.$dirty && !addDeviceForm.lowAlarmTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="addDeviceForm.lowAlarmTemp.$error.number && addDeviceForm.lowAlarmTemp.$dirty && !addDeviceForm.lowAlarmTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.lowAlarmDur.$invalid && addDeviceForm.lowAlarmDur.$dirty }">
+                                        <input type="number" name="lowAlarmDur" min="0"
+                                               class="form-control" ng-model="deviceConfig.lowAlarm.dur"
+                                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                                               ng-blur="addDeviceForm.lowAlarmDur.$dirty = true"
+                                               ng-disabled="!device.editConfig"
+                                               required/>
+
+                                        <p ng-show="addDeviceForm.lowAlarmDur.$error.required && addDeviceForm.lowAlarmDur.$dirty && !addDeviceForm.lowAlarmDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="(addDeviceForm.lowAlarmDur.$error.number || addDeviceForm.lowAlarmDur.$error.min) && addDeviceForm.lowAlarmDur.$dirty && !addDeviceForm.lowAlarmDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.highwarn']}}
+                                </td>
+                                <td>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.highWarnTemp.$invalid && addDeviceForm.highWarnTemp.$dirty }">
+                                        <input type="number" class="form-control" name="highWarnTemp"
+                                               ng-model="deviceConfig.highWarn.temp"
+                                               required
+                                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                                               ng-blur="addDeviceForm.highWarnTemp.$dirty = true"
+                                               ng-disabled="!device.editConfig"/>
+
+                                        <p ng-show="addDeviceForm.highWarnTemp.$error.required && addDeviceForm.highWarnTemp.$dirty && !addDeviceForm.highWarnTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="addDeviceForm.highWarnTemp.$error.number && addDeviceForm.highWarnTemp.$dirty && !addDeviceForm.highWarnTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.highWarnDur.$invalid && addDeviceForm.highWarnDur.$dirty }">
+                                        <input type="number" min="0" class="form-control"
+                                               name="highWarnDur" ng-model="deviceConfig.highWarn.dur"
+                                               required
+                                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                                               ng-blur="addDeviceForm.highWarnDur.$dirty = true"
+                                               ng-disabled="!device.editConfig"/>
+
+                                        <p ng-show="addDeviceForm.highWarnDur.$error.required && addDeviceForm.highWarnDur.$dirty && !addDeviceForm.highWarnDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="(addDeviceForm.highWarnDur.$error.number || addDeviceForm.highWarnDur.$error.min) && addDeviceForm.highWarnDur.$dirty && !addDeviceForm.highWarnDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label required">
+                                    {{resourceBundle['temperature.device.config.lowwarn']}}
+                                </td>
+                                <td>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.lowWarnTemp.$invalid && addDeviceForm.lowWarnTemp.$dirty }">
+                                        <input type="number"
+                                               name="lowWarnTemp"
+                                               class="form-control"
+                                               ng-model="deviceConfig.lowWarn.temp"
+                                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                                               ng-blur="addDeviceForm.lowWarnTemp.$dirty = true"
+                                               ng-disabled="!device.editConfig"
+                                               required/>
+
+                                        <p ng-show="addDeviceForm.lowWarnTemp.$error.required && addDeviceForm.lowWarnTemp.$dirty && !addDeviceForm.lowWarnTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="addDeviceForm.lowWarnTemp.$error.number && addDeviceForm.lowWarnTemp.$dirty && !addDeviceForm.lowWarnTemp.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['temperature']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                    <div class="inputbox"
+                                         ng-class="{ 'has-error' : addDeviceForm.lowWarnDur.$invalid && addDeviceForm.lowWarnDur.$dirty }">
+                                        <input type="number" name="lowWarnDur" min="0"
+                                               class="form-control" ng-model="deviceConfig.lowWarn.dur"
+                                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                                               ng-blur="addDeviceForm.lowWarnDur.$dirty = true"
+                                               ng-disabled="!device.editConfig"
+                                               required/>
+
+                                        <p ng-show="addDeviceForm.lowWarnDur.$error.required && addDeviceForm.lowWarnDur.$dirty && !addDeviceForm.lowWarnDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isrequired']}}
+                                        </p>
+
+                                        <p ng-show="(addDeviceForm.lowWarnDur.$error.number || addDeviceForm.lowWarnDur.$error.min) && addDeviceForm.lowWarnDur.$dirty && !addDeviceForm.lowWarnDur.$focused"
+                                           class="help-block">
+                                            {{resourceBundle['duration']}} {{resourceBundle['isinvalid']}}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <h5>{{resourceBundle['temperature.device.config.locale']}}</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['timezone']}}
+                                </td>
+                                <td>
+                                    <select ng-disabled="!device.editConfig" ng-model="deviceConfig.locale.tznm" class="form-control" id="cnfTz"
+                                            name="tz">
+                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['timezone']}} --</option>
+                                        <option ng-repeat="(key,value) in allTimezones" value="{{key}}">
+                                            {{value}}
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['country']}}
+                                </td>
+                                <td>
+                                    <select ng-disabled="!device.editConfig" ng-model="deviceConfig.locale.cn" class="form-control" id="cnfCnt">
+                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['country']}} --</option>
+                                        <option ng-repeat="(code,val) in countries" value="{{code}}">{{val.name}}</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-label">
+                                    {{resourceBundle['language']}}
+                                </td>
+                                <td>
+                                    <select ng-disabled="!device.editConfig" ng-model="deviceConfig.locale.ln" class="form-control" id="cnfLng"
+                                            name="lng">
+                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['language']}} --</option>
+                                        <option ng-repeat="(value,key) in allLanguages" value="{{value}}">
+                                            {{key}}
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row mg-top-10 mg-hori-zero">
+                <hr />
+                <div class="col-sm-12">
+                    <table class="table table-bordered-less mg-bottom-zero">
+                        <tr>
+                            <td></td>
+                            <td class="pull-right">
+                                <button type="submit" ng-click="createDevice()" class="btn btn-primary"
+                                        ng-disabled="pushDeviceConfig == 2
+                                                        ? (addDeviceForm.$invalid)
+                                                        : (addDeviceForm.mobileNumber.$invalid ||
+                                                        addDeviceForm.deviceId.$invalid ||
+                                                        addDeviceForm.vendorId.$invalid ||
+                                                        addDeviceForm.imeiNumber.$invalid ||
+                                                        addDeviceForm.tmax.$invalid ||
+                                                        addDeviceForm.tmin.$invalid ) ">{{resourceBundle['submit']}}
+                                </button>
+                                <button class="btn" ng-click="cancelCreateDevice()">{{resourceBundle['cancel']}}</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

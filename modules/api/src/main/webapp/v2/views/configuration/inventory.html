@@ -1,0 +1,1085 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="InventoryConfigurationController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="inventoryConfigForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading">
+                            <h4>{{resourceBundle['inventory']}} {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                            <span ng-show="inv.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{inv.lastUpdated}} {{resourceBundle['by']}}
+                                <a href="#setup/users/all/details?userId={{inv.createdBy}}" target="_new">{{inv.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="title-heading">
+                                {{resourceBundle['config.reasons']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.reasonsmsg']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bizinfo bizinfo-last">
+                        <div class="row overflowYHide">
+                            <div class="col-sm-2 " style="min-height:280px;">
+                                <ul class="nav nav-tabs-left extend">
+                                    <li ng-class="{active : transType.i}"><a href="" ng-click="tabContent('i')">{{resourceBundle['transactions.issue.upper']}}</a></li>
+                                    <li ng-class="{active : transType.r}"><a href="" ng-click="tabContent('r')">{{resourceBundle['transactions.receipt.upper']}}</a></li>
+                                    <li ng-class="{active : transType.s}"><a href="" ng-click="tabContent('s')">{{resourceBundle['transactions.stockcount.lower']}}</a></li>
+                                    <li ng-class="{active : transType.d}"><a href="" ng-click="tabContent('d')">{{resourceBundle['transactions.wastage.upper']}}</a></li>
+                                    <li ng-class="{active : transType.t}"><a href="" ng-click="tabContent('t')">{{resourceBundle['transactions.transfer.upper']}}</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-10">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="bgr" style="margin: 0px;min-height:280px;">
+                                            <div class="title-heading">
+                                                Reasons
+                                            </div>
+                                            <p class="litetext">
+                                                {{resourceBundle['config.reason.length']}}
+                                            </p>
+                                            <div ng-show="transType.i" style="border:none;">
+                                                <div class="row"> <!--Reasons for issue-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.reasons.issue']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="cnfIss" ng-model="inv.ri"
+                                                                       autocomplete="off" maxlength="500">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row " ng-show="MatTags.length>0">
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['inventory.config.by.material.tags']}}</label>
+                                                            <div class="col-sm-8 cbx">
+                                                                <input type="checkbox" ng-change="selectRsn()" ng-model="inv.cimt"> {{resourceBundle['inventory.config.specify.tags.reasons']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div ng-show="inv.cimt" class="row">
+                                                    <div class="col-sm-10 ml32">
+                                                        <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                                            <tbody>
+                                                            <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                                                <th class="col-sm-3 text-center">{{resourceBundle['config.tagsinfotitle']}}</th>
+                                                                <th class="col-sm-4 text-center">{{resourceBundle['reason']}}</th>
+                                                                <th class="col-sm-0-2 text-center"></th>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="itag in inv.imt" data-ng-switch on="exRow[$index]">
+                                                            <tr ng-class="{'alert alert-info' : exRow[$index]}">
+                                                                <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                                                <td>
+                                                                    <input ng-hide="inv.imt.length>$index+1" ng-model="itag.mtg" type="text"
+                                                                           autocomplete="off"
+                                                                           typeahead-on-select="setMtg($item)"
+                                                                           class="form-control" id="mtg"
+                                                                           placeholder="Enter the material tag"
+                                                                           typeahead-editable="false"
+                                                                           uib-typeahead="item for item in iMatTags| filter:$viewValue |limitTo:8"
+                                                                           class="form-control"  typeahead-min-length=1 maxlength="50"
+                                                                           typeahead-append-to-body="true" />
+                                                                    <p ng-show="inv.imt.length>$index+1" class="temp">{{itag.mtg}}</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" id="mtrsn" ng-model="itag.rsn"
+                                                                           autocomplete="off" maxlength="500">
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a ng-show="(itag.length -1 !== $index)" href="" ng-click="deleteRow($index,'iss')">
+                                                                        <span class="glyphicons glyphicons-bin temp"></span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="transType.r" style="border:none;">
+                                                <div class="row"> <!--Reasons for receipt-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label for="cnfRec" class="col-sm-3 control-label">{{resourceBundle['config.reasons.receipt']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="cnfRec" ng-model="inv.rr"
+                                                                       autocomplete="off" maxlength="500">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row " ng-show="MatTags.length>0">
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['inventory.config.by.material.tags']}}</label>
+                                                            <div class="col-sm-8 cbx">
+                                                                <input type="checkbox" ng-model="inv.crmt"> {{resourceBundle['inventory.config.specify.tags.reasons']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div ng-show="inv.crmt" class="row">
+                                                    <div class="col-sm-10 ml32">
+                                                        <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                                            <tbody>
+                                                            <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                                                <th class="col-sm-3 text-center">{{resourceBundle['config.tagsinfotitle']}}</th>
+                                                                <th class="col-sm-4 text-center">{{resourceBundle['reason']}}</th>
+                                                                <th class="col-sm-0-2 text-center"></th>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="rtag in inv.rmt" data-ng-switch on="rxRow[$index]">
+                                                            <tr ng-class="{'alert alert-info' : rxRow[$index]}">
+                                                                <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                                                <td>
+                                                                    <input ng-hide="inv.rmt.length>$index+1" ng-model="rtag.mtg" type="text"
+                                                                           autocomplete="off"
+                                                                           typeahead-on-select="setRMtg($item)"
+                                                                           class="form-control" id="rmtg"
+                                                                           placeholder="Enter the material tag"
+                                                                           typeahead-editable="false"
+                                                                           uib-typeahead="item for item in rMatTags| filter:$viewValue |limitTo:8"
+                                                                           class="form-control"  typeahead-min-length=1 maxlength="50"
+                                                                           typeahead-append-to-body="true" />
+                                                                    <p ng-show="inv.rmt.length>$index+1" class="temp">{{rtag.mtg}}</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" id="rmtrsn" ng-model="rtag.rsn"
+                                                                           autocomplete="off" maxlength="500">
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a ng-show="(rtag.length -1 !== $index)" href="" ng-click="deleteRow($index,'rec')">
+                                                                        <span class="glyphicons glyphicons-bin temp"></span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="transType.s" style="border:none;">
+                                                <div class="row"> <!--Reasons for stock count-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label for="cnfStc" class="col-sm-3 control-label">{{resourceBundle['config.reasons.stockcount']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="cnfStc" ng-model="inv.rs"
+                                                                       autocomplete="off" maxlength="500">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row " ng-show="MatTags.length>0">
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['inventory.config.by.material.tags']}}</label>
+                                                            <div class="col-sm-8 cbx">
+                                                                <input type="checkbox" ng-model="inv.csmt"> {{resourceBundle['inventory.config.specify.tags.reasons']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div ng-show="inv.csmt" class="row">
+                                                    <div class="col-sm-10 ml32">
+                                                        <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                                            <tbody>
+                                                            <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                                                <th class="col-sm-3 text-center">{{resourceBundle['config.tagsinfotitle']}}</th>
+                                                                <th class="col-sm-4 text-center">{{resourceBundle['reason']}}</th>
+                                                                <th class="col-sm-0-2 text-center"></th>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="stag in inv.smt" data-ng-switch on="sxRow[$index]">
+                                                            <tr ng-class="{'alert alert-info' : sxRow[$index]}">
+                                                                <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                                                <td>
+                                                                    <input ng-hide="inv.smt.length>$index+1" ng-model="stag.mtg" type="text"
+                                                                           autocomplete="off"
+                                                                           typeahead-on-select="setSMtg($item)"
+                                                                           class="form-control" id="smtg"
+                                                                           placeholder="Enter the material tag"
+                                                                           typeahead-editable="false"
+                                                                           uib-typeahead="item for item in sMatTags| filter:$viewValue |limitTo:8"
+                                                                           class="form-control"  typeahead-min-length=1 maxlength="50"
+                                                                           typeahead-append-to-body="true" />
+                                                                    <p ng-show="inv.smt.length>$index+1" class="temp">{{stag.mtg}}</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" id="smtrsn" ng-model="stag.rsn"
+                                                                           autocomplete="off" maxlength="500">
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a ng-show="(stag.length -1 !== $index)" href="" ng-click="deleteRow($index,'st')">
+                                                                        <span class="glyphicons glyphicons-bin temp"></span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="transType.d"style="border:none;">
+                                                <div class="row"> <!--Reasons for discards-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label for="cnfDis" class="col-sm-3 control-label">{{resourceBundle['config.reasons.wastage']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="cnfdis" ng-model="inv.rd"
+                                                                       autocomplete="off" maxlength="500">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row " ng-show="MatTags.length>0">
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['inventory.config.by.material.tags']}}</label>
+                                                            <div class="col-sm-8 cbx">
+                                                                <input type="checkbox" ng-model="inv.cdmt"> {{resourceBundle['inventory.config.specify.tags.reasons']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div ng-show="inv.cdmt" class="row">
+                                                    <div class="col-sm-10 ml32">
+                                                        <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                                            <tbody>
+                                                            <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                                                <th class="col-sm-3 text-center">{{resourceBundle['config.tagsinfotitle']}}</th>
+                                                                <th class="col-sm-4 text-center">{{resourceBundle['reason']}}</th>
+                                                                <th class="col-sm-0-2 text-center"></th>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="dtag in inv.dmt" data-ng-switch on="dxRow[$index]">
+                                                            <tr ng-class="{'alert alert-info' : dxRow[$index]}">
+                                                                <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                                                <td>
+                                                                    <input ng-hide="inv.dmt.length>$index+1" ng-model="dtag.mtg" type="text"
+                                                                           autocomplete="off"
+                                                                           typeahead-on-select="setDMtg($item)"
+                                                                           class="form-control" id="dmtg"
+                                                                           placeholder="Enter the material tag"
+                                                                           typeahead-editable="false"
+                                                                           uib-typeahead="item for item in dMatTags| filter:$viewValue |limitTo:8"
+                                                                           class="form-control"  typeahead-min-length=1 maxlength="50"
+                                                                           typeahead-append-to-body="true" />
+                                                                    <p ng-show="inv.dmt.length>$index+1" class="temp">{{dtag.mtg}}</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" id="dmtrsn" ng-model="dtag.rsn"
+                                                                           autocomplete="off" maxlength="500">
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a ng-show="(dtag.length -1 !== $index)" href="" ng-click="deleteRow($index,'dc')">
+                                                                        <span class="glyphicons glyphicons-bin temp"></span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="transType.t" style="border:none">
+                                                <div class="row"> <!--Reasons for Transfer-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label for="cnfTns" class="col-sm-3 control-label">{{resourceBundle['config.reasons.transfer']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="cnfTns" ng-model="inv.rt"
+                                                                       autocomplete="off" maxlength="500">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row " ng-show="MatTags.length>0">
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['inventory.config.by.material.tags']}}</label>
+                                                            <div class="col-sm-8 cbx">
+                                                                <input type="checkbox" ng-model="inv.ctmt"> {{resourceBundle['inventory.config.specify.tags.reasons']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div ng-show="inv.ctmt" class="row">
+                                                    <div class="col-sm-10 ml32">
+                                                        <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                                            <tbody>
+                                                            <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                                                <th class="col-sm-3 text-center">{{resourceBundle['config.tagsinfotitle']}}</th>
+                                                                <th class="col-sm-4 text-center">{{resourceBundle['reason']}}</th>
+                                                                <th class="col-sm-0-2 text-center"></th>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="ttag in inv.tmt" data-ng-switch on="rxRow[$index]">
+                                                            <tr ng-class="{'alert alert-info' : txRow[$index]}">
+                                                                <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                                                <td>
+                                                                    <input ng-hide="inv.tmt.length>$index+1" ng-model="ttag.mtg" type="text"
+                                                                           autocomplete="off"
+                                                                           typeahead-on-select="setTMtg($item)"
+                                                                           class="form-control" id="tmtg"
+                                                                           placeholder="Enter the material tag"
+                                                                           typeahead-editable="false"
+                                                                           uib-typeahead="item for item in tMatTags| filter:$viewValue |limitTo:8"
+                                                                           class="form-control"  typeahead-min-length=1 maxlength="50"
+                                                                           typeahead-append-to-body="true" />
+                                                                    <p ng-show="inv.tmt.length>$index+1" class="temp">{{ttag.mtg}}</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" id="tmtrsn" ng-model="ttag.rsn"
+                                                                           autocomplete="off" maxlength="500">
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <a ng-show="(ttag.length -1 !== $index)" href="" ng-click="deleteRow($index,'tr')">
+                                                                        <span class="glyphicons glyphicons-bin temp"></span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="title-heading">
+                                {{resourceBundle['config.material.status.heading']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.statusmsg']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bizinfo bizinfo-last">
+                        <div class="row overflowYHide">
+                            <div class="col-sm-2" style="min-height:220px;">
+                                <ul class="nav nav-tabs-left extend">
+                                    <li ng-class="{active : matStatus.i}"><a href="" ng-click="StatusContent('i')">{{resourceBundle['transactions.issue.upper']}}</a></li>
+                                    <li ng-class="{active : matStatus.r}"><a href="" ng-click="StatusContent('r')">{{resourceBundle['transactions.receipt.upper']}}</a></li>
+                                    <li ng-class="{active : matStatus.s}"><a href="" ng-click="StatusContent('s')">{{resourceBundle['transactions.stockcount.lower']}}</a></li>
+                                    <li ng-class="{active : matStatus.d}"><a href="" ng-click="StatusContent('d')">{{resourceBundle['transactions.wastage.upper']}}</a></li>
+                                    <li ng-class="{active : matStatus.t}"><a href="" ng-click="StatusContent('t')">{{resourceBundle['transactions.transfer.upper']}}</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-10">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="bgr" style="margin: 0px;min-height:220px;">
+                                            <div class="title-heading">
+                                                {{resourceBundle['config.status.title']}}
+                                            </div>
+                                            <p class="litetext">
+                                                {{resourceBundle['config.status.length']}}
+                                            </p>
+                                            <div ng-show="matStatus.i" style="border:none;">
+                                                <div class="row"> <!--Status for issue-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.issue.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="rnfIss" ng-model="inv.idf"
+                                                                       autocomplete="off" maxlength="500">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for issue for temperature sensitive material-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.issue.etst.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="tsmIss" ng-model="inv.iestm"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.idf,inv.iestm,'i')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for issue is mandatory or not-->
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <div class="col-sm-3"></div>
+                                                            <div class="col-sm-8">
+                                                                <input type="checkbox" ng-disabled="isUndef(inv.idf) && isUndef(inv.iestm)" ng-model="inv.ism"> {{resourceBundle['markmandatory']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="matStatus.r" style="border:none;">
+                                                <div class="row"> <!--Status for receipt-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.receipt.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="rnfrec" ng-model="inv.rdf"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.rdf,inv.restm,'r')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for receipt for temperature sensitive material-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.issue.etst.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="tsmrec" ng-model="inv.restm"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.rdf,inv.restm,'r')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for receipt is mandatory or not-->
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <div class="col-sm-3"></div>
+                                                            <div class="col-sm-8">
+                                                                <input type="checkbox" ng-disabled="isUndef(inv.rdf) && isUndef(inv.restm)" ng-model="inv.rsm"> {{resourceBundle['markmandatory']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="matStatus.s" style="border:none;">
+                                                <div class="row"> <!--Status for stock count-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.stockcounts.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="rnfstc" ng-model="inv.pdf"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.pdf,inv.pestm,'p')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for stock count for temperature sensitive material-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.issue.etst.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="tsmstc" ng-model="inv.pestm"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.pdf,inv.pestm,'p')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for stock count is mandatory or not-->
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <div class="col-sm-3"></div>
+                                                            <div class="col-sm-8">
+                                                                <input type="checkbox" ng-disabled="isUndef(inv.pdf) && isUndef(inv.pestm)" ng-model="inv.psm"> {{resourceBundle['markmandatory']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="matStatus.d" style="border:none;">
+                                                <div class="row"> <!--Status for discards-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.discards.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="rnfdis" ng-model="inv.wdf"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.wdf,inv.westm,'w')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for discards for temperature sensitive material-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.issue.etst.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="tsmdis" ng-model="inv.westm"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.wdf,inv.westm,'w')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for discards is mandatory or not-->
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <div class="col-sm-3"></div>
+                                                            <div class="col-sm-8">
+                                                                <input type="checkbox" ng-disabled="isUndef(inv.wdf) && isUndef(inv.westm)" ng-model="inv.wsm"> {{resourceBundle['markmandatory']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="matStatus.t" style="border:none;">
+                                                <div class="row"> <!--Status for transfer-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.transfer.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="rnftr" ng-model="inv.tdf"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.tdf,inv.testm,'t')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for transfer for temperature sensitive material-->
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label  class="col-sm-3 control-label">{{resourceBundle['config.issue.etst.status']}}</label>
+                                                            <div class="col-sm-8">
+                                                                <input type="text" class="form-control" id="tsmtr" ng-model="inv.testm"
+                                                                       autocomplete="off" maxlength="500" ng-change="validateStatus(inv.tdf,inv.testm,'t')">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row"> <!--Status for transfer is mandatory or not-->
+                                                    <div class="col-sm-11">
+                                                        <div class="form-group">
+                                                            <div class="col-sm-3"></div>
+                                                            <div class="col-sm-8">
+                                                                <input type="checkbox" ng-disabled="isUndef(inv.tdf) && isUndef(inv.testm)" ng-model="inv.tsm"> {{resourceBundle['markmandatory']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.transactions.permissions']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.transactions.permissions.overview']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row"> <!--Inventory visibility-->
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.transactions.inventoryvisibility']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="inv.ivc"> {{resourceBundle['config.transactions.permissions.invvisibilitycustomer']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.transactions.dataexport']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.transactions.dataexport.overview']}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row"> <!--Transaction data export schedule-->
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.transactions.dataexportschedule']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="inv.etdx"> {{resourceBundle['config.transactions.dataexport.enable']}}
+                                    <div class="bgr" ng-show="inv.etdx">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">{{resourceBundle['everydayat']}} {{resourceBundle['hours']}} (hh:mm)</label>
+
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control w25 wh"
+                                                       maxlength="144" ng-model="inv.et"
+                                                       placeholder="hh:mm">
+                                                <p class="litetext">
+                                                    {{resourceBundle['config.transactions.dataexport.csv']}} {{resourceBundle['in']}} {{dmntz}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">{{resourceBundle['to']}}</label>
+
+                                            <div class="col-sm-8 pull-down">
+                                                <p class="litetext mat">
+                                                    {{resourceBundle['config.specify.user.tags']}}
+                                                </p>
+                                                <tag-select  tags-model="inv.uTgs" type="'user'" force-no-udf="'true'" place-holder="{{resourceBundle['config.enter.user.tags']}}"></tag-select>
+                                            </div>
+                                            <label class="control-label col-sm-4"></label>
+                                            <div class="col-sm-8 pull-down">
+                                                <p class="litetext mat">
+                                                    {{resourceBundle['config.specify.users']}}
+                                                </p>
+                                                <user-select users-model="inv.aname" place-holder="{{resourceBundle['config.enter.users']}}"></user-select>
+                                            </div>
+                                            <div class="col-sm-8">
+
+                                            </div>
+                                        </div>
+                                        <!--<p class="litetext">
+                                            ({{resourceBundle['by']}} {{curUser}})
+                                        </p>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.consumptionrates']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.consumptionrates.overview']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row"> <!--Consumption rate(s) - Manual-->
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.computation']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <note-data>
+                                    <input type="radio" ng-disabled="inv.co != -1" name="computeoption" ng-model="inv.crc" value="-1" ng-change="open('crc')" > {{resourceBundle['none']}}<br/>
+                                    <input type="radio" name="computeoption" ng-model="inv.crc" value="0" ng-change="open('crc')"> {{resourceBundle['manual']}}<br/>
+                                    </note-data>
+                                    <div class="row" ng-show="inv.crc == 0 && inv.co == -1">
+                                        <div class="col-sm-12 bgr ml32">
+                                            <p ng-show="inv.crc == 0" class="litetext">{{resourceBundle['enter.manualcr']}}</p>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['select']}} {{resourceBundle['config.period']}}</label>
+                                                <div class="col-sm-8">
+                                                    <select ng-model="inv.mcrfreq" class="form-control wd30" name="manualConsumptionRate">
+                                                        <option ng-repeat="period in fr" value="{{period}}" ng-selected="period == inv.mcrfreq">{{period}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="radio" name="computeoption" ng-model="inv.crc" value="1"> {{resourceBundle['automatic']}}<br/>
+                                    <div class="row" ng-show="inv.crc==1">
+                                        <div class="col-sm-12 bgr ml32">
+                                           <p class="litetext">{{resourceBundle['config.compute.automatic']}} {{resourceBundle['config.specifydefaults']}}</p>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.compute.freq']}}</label>
+                                                <div class="col-sm-8">
+                                                    <note-data>
+                                                        <select ng-model="inv.crfreq" ng-change="open(setMMUpdateFreq())" class="form-control wd30" name="consumptionRateCF">
+                                                            <option ng-repeat="period in fr" value="{{period}}" ng-selected="period == inv.crfreq">{{period}}</option>
+                                                        </select>
+                                                    </note-data>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.mintransactionperiod']}}</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" maxlength="5" class="form-control w20 dh30" placeholder="10" autocomplete="off" ng-model="inv.minhpccr">
+                                                    <span ng-if="inv.crfreq == 'daily'">{{resourceBundle['days']}}</span>
+                                                    <span ng-if="inv.crfreq == 'weekly'">{{resourceBundle['weeks']}}</span>
+                                                    <span ng-if="inv.crfreq == 'monthly'">{{resourceBundle['months']}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.maxtransactionperiod']}}</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" maxlength="5" class="form-control w20 dh30" placeholder="365" autocomplete="off" ng-model="inv.maxhpccr">
+                                                    <span ng-if="inv.crfreq == 'daily'">{{resourceBundle['days']}}</span>
+                                                    <span ng-if="inv.crfreq == 'weekly'">{{resourceBundle['weeks']}}</span>
+                                                    <span ng-if="inv.crfreq == 'monthly'">{{resourceBundle['months']}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.exclude']}}</label>
+                                                <div class="col-sm-8 cbx">
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <input type="checkbox" ng-model="inv.edis"> {{resourceBundle['config.exclude.discard']}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <input type="checkbox" ng-model="inv.irc"> {{resourceBundle['config.exclude.reasons']}}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" ng-show="inv.irc">
+                                                        <div class="col-sm-12">
+                                                            <div class="row col-sm-12 noMargin">
+                                                                <lg-uib-select multiple="multiple" ng-disabled="disabled" query="query(q)" ui-model="inv.ersnsObj" place-holder="Enter the reason codes"> </lg-uib-select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.display']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-disabled="inv.crc == -1" ng-model="inv.dispcr"> {{resourceBundle['config.showStock']}}
+                                    <div class="row" ng-show="inv.dispcr">
+                                        <div class="col-sm-8">
+                                           &nbsp;&nbsp;&nbsp; {{resourceBundle['select']}} {{resourceBundle['config.period']}} &nbsp;&nbsp;
+                                            <select ng-model="inv.dcrfreq" class="form-control wd30" name="consumptionRate">
+                                                <option ng-repeat="period in fr" value="{{period}}" ng-selected="period == inv.dcrfreq">{{period}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row" class="col-sm-8">
+                                        &nbsp;&nbsp;&nbsp;  <input type="checkbox" ng-disabled="inv.crc == -1" ng-model="inv.showpr"> {{resourceBundle['show.predictions']}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['forecastingoptimization']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.forecastingoptimization.overview']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row"> <!--Computation options-->
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.computationoptions']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <note-data>
+                                    <select ng-model="inv.co" class="form-control wd30" ng-change="open(inv.co)">
+                                        <option ng-repeat="period in forecast" name="forecasting" value="{{period.value}}" ng-selected="period.value == inv.co">{{period.key}}</option>
+                                    </select>
+                                    </note-data>
+                                    <div class="row" ng-show="inv.co == forecast[1].value">
+                                        <div class="col-sm-12 bgr effect8 ml32" ng-show="inv.crc==1">
+                                            <p class="litetext">{{resourceBundle['config.computes']}} '{{resourceBundle['demandforecast']}}'. {{resourceBundle['config.specifydefaults']}}</p>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.mintransactionperiod']}}</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" maxlength="5" class="form-control w20 dh30" autocomplete="off" placeholder="10" ng-model="inv.minhpccr" disabled>
+                                                    <span ng-if="inv.crfreq == 'daily'">{{resourceBundle['days']}}</span>
+                                                    <span ng-if="inv.crfreq == 'weekly'">{{resourceBundle['weeks']}}</span>
+                                                    <span ng-if="inv.crfreq == 'monthly'">{{resourceBundle['months']}}</span>
+                                                    <span class="litetext">{{resourceBundle['set.automatic']}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.maxtransactionperiod']}}</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" maxlength="5" class="form-control w20 dh30" autocomplete="off" placeholder="365" ng-model="inv.maxhpccr" disabled>
+                                                    <span ng-if="inv.crfreq == 'daily'">{{resourceBundle['days']}}</span>
+                                                    <span ng-if="inv.crfreq == 'weekly'">{{resourceBundle['weeks']}}</span>
+                                                    <span ng-if="inv.crfreq == 'monthly'">{{resourceBundle['months']}}</span>
+                                                    <span class="litetext">{{resourceBundle['set.automatic']}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-4">{{resourceBundle['order.periodicity']}} ({{resourceBundle['average']}})</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control w20 dh30" autocomplete="off" ng-model="inv.aopfd"> {{resourceBundle['days']}}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-4">{{resourceBundle['config.numberoforderperiods']}}</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control w20 dh30" autocomplete="off" ng-model="inv.nopfd"> {{resourceBundle['periods']}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-show="inv.co == forecast[2].value">
+                                        <div class="col-sm-12 bgr effect8 ml32" ng-show="inv.crc==1">
+                                            <p class="litetext">{{resourceBundle['config.computes']}} '{{resourceBundle['order.optimalorderquantity']}}'. {{resourceBundle['config.specifydefaults']}}</p>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['inventory.model']}}</label>
+                                                <div class="col-sm-4">
+                                                    <select ng-model="inv.im" class="form-control" id="inv">
+                                                        <option value="nq">{{resourceBundle['inventorypolicy.none']}}</option>
+                                                        <option value="sq">{{resourceBundle['inventorypolicy.sq']}}</option>
+                                                    </select>
+                                                    <p class="litetext">
+                                                        ({{resourceBundle['config.overridepermaterialentity']}})
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-4">
+                                                    <label class="control-label fr">{{resourceBundle['config.mintransactionperiod']}}</label>
+                                                    <p class="litetext fr">
+                                                        ({{resourceBundle['config.durationofdata']}})
+                                                    </p>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <input type="text" maxlength="5" class="form-control w20 dh30" autocomplete="off" placeholder="10" ng-model="inv.minhpccr" disabled>
+                                                    <span ng-if="inv.crfreq == 'daily'">{{resourceBundle['days']}}</span>
+                                                    <span ng-if="inv.crfreq == 'weekly'">{{resourceBundle['weeks']}}</span>
+                                                    <span ng-if="inv.crfreq == 'monthly'">{{resourceBundle['months']}}</span>
+                                                    <span class="litetext">{{resourceBundle['set.automatic']}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-4">
+                                                    <label class="control-label fr">{{resourceBundle['config.maxtransactionperiod']}}</label>
+                                                    <p class="litetext fr">
+                                                        ({{resourceBundle['config.durationofdata']}})
+                                                    </p>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <input type="text" maxlength="5" class="form-control w20 dh30" autocomplete="off" placeholder="365" ng-model="inv.maxhpccr" disabled>
+                                                    <span ng-if="inv.crfreq == 'daily'">{{resourceBundle['days']}}</span>
+                                                    <span ng-if="inv.crfreq == 'weekly'">{{resourceBundle['weeks']}}</span>
+                                                    <span ng-if="inv.crfreq == 'monthly'">{{resourceBundle['months']}}</span>
+                                                    <span class="litetext">{{resourceBundle['set.automatic']}}</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['order.periodicity']}} ({{resourceBundle['average']}})</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control w20 dh30" autocomplete="off" placeholder="10" ng-model="inv.aopeoq"> {{resourceBundle['days']}}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['config.numberoforderperiods']}}</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control w20 dh30" autocomplete="off" placeholder="3" ng-model="inv.nopeoq"> {{resourceBundle['periods']}}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">{{resourceBundle['order.leadtime']}} ({{resourceBundle['average']}})</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control w20 dh30" maxlength="3" autocomplete="off" placeholder="3" ng-model="inv.lt"> {{resourceBundle['days']}} (default)
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label"></label>
+                                                <div class="col-sm-8">
+                                                    <div class="bgr effect8" ng-show="inv.crc==1" style="margin:0px;">
+                                                        <p class="litetext">{{resourceBundle['leadtime.computation.parameters']}}</p>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-5 control-label">{{resourceBundle['minimum.orders']}}</label>
+                                                            <div class="col-sm-7">
+                                                                <input type="text" class="form-control w20 dh30" maxlength="3" autocomplete="off" placeholder="3" ng-model="inv.ltacm.mino">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-5 control-label">{{resourceBundle['maximum.orders']}}</label>
+                                                            <div class="col-sm-7">
+                                                                <input type="text" class="form-control w20 dh30" maxlength="3" autocomplete="off" placeholder="30" ng-model="inv.ltacm.maxo">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="col-sm-5 control-label">{{resourceBundle['maximum.order.periods']}}</label>
+                                                            <div class="col-sm-7">
+                                                                <input type="text" class="form-control w20 dh30" maxlength="3" autocomplete="off" placeholder="6" ng-model="inv.ltacm.maxop">
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-sm-12 cbx">
+                                                                <input type="checkbox" ng-model="inv.ltacm.exopt"> {{resourceBundle['leadtime.computation.exclude.processingtime']}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group" ng-show="inv.co != -1">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.display']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <div class="row">
+                                        <input type="checkbox" ng-model="inv.ddf"> {{resourceBundle['config.showdf']}}
+                                    </div>
+                                    <div class="row" ng-show="inv.co == 200">
+                                       <input type="checkbox" ng-model="inv.dooq"> {{resourceBundle['config.showooq']}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="bgr"> <!--Min/Max configuration-->
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.mm']}}
+                            </div>
+                            <p class="litetext">
+
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.mm.type']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <span><input type="radio" name="mmType" ng-model="inv.mmType" value="0"> {{resourceBundle['config.mm.type.aq']}}</span><br/>
+                                    <span ng-show="inv.crc != -1"><input type="radio" name="mmType" ng-model="inv.mmType" value="1"> {{resourceBundle['config.mm.type.dos']}}</span><br/>
+                                    <div class="col-sm-8" ng-show="inv.mmType == 1 && inv.crc != -1">
+                                        <select ng-model="inv.mmDur" class="form-control wd30">
+                                            <option value="daily">{{resourceBundle['daysofstock']}}</option>
+                                            <option value="weekly">{{resourceBundle['weeksofstock']}}</option>
+                                            <option value="monthly">{{resourceBundle['monthsofstock']}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="inv.crc == 1 && inv.mmType == 1">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Min/max update frequency</label>
+                                <div class="col-sm-8 cbx">
+                                    <select ng-model="inv.mmFreq" class="form-control wd30">
+                                        <option ng-show="inv.crfreq == 'daily'" value="daily">Daily</option>
+                                        <option ng-show="inv.crfreq == 'daily' || inv.crfreq == 'weekly'" value="weekly">Weekly</option>
+                                        <option ng-show="inv.crfreq == 'daily' || inv.crfreq == 'weekly' || inv.crfreq == 'monthly'" value="monthly">Monthly</option>
+                                        <option ng-show="inv.crfreq == 'daily' || inv.crfreq == 'weekly' || inv.crfreq == 'monthly'" value="quarterly">Quarterly</option>
+                                        <option ng-show="inv.crfreq == 'daily' || inv.crfreq == 'weekly' || inv.crfreq == 'monthly'" value="halfyearly">Half-yearly</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.inventorydashboard']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.inventorydashboard.overview']}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row"> <!--Inventory Dashboard-->
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.inventorydashboard.visibility']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="inv.eidb" ng-change="updateEtags()"> {{resourceBundle['config.inventorydashboard.enabletext']}}<br/>
+                                    <div class="bgr" ng-show="inv.eidb">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3 mt5">Default entity tag</label>
+                                            <div class="col-sm-6 mt5">
+                                                <tag-select  tags-model="inv.eTgs" type="'entity'" force-no-udf="'true'"></tag-select>
+                                                <div class="col-sm-12 noleftpad">
+                                                    <p class="litetext">
+                                                        ( Filter this view using the above entity tags )
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div ng-if="iSU" class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.manualtransupload']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['config.manualtransupload.overview']}}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row"> <!--Manual transaction upload options-->
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.manualtransuploadoptions']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" ng-model="inv.emuidt"> {{resourceBundle['config.enablemanualuploadofinvdataandtransactions']}}<br/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div ng-include="'views/configuration/actual-trans-date.html'"></div>
+
+                <div class="row mt10" ng-if="iSU || dp.ce">
+                    <div class="col-sm-12  ml5">
+                        <button type="button" ng-click="setInventoryConfiguration()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

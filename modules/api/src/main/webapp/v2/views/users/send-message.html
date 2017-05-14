@@ -1,0 +1,144 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="UserMessageController">
+            <form class="form-horizontal" role="form" name="messageUserForm" novalidate>
+                <div class="title-heading-rounded">
+                    {{resourceBundle['message.sendmessagetousers']}}
+                </div>
+                <div class="col-sm-12">
+                    <div class="col-sm-7">
+                        <div class="row">
+                            <label class="col-sm-3 control-label">{{resourceBundle['message']}} {{resourceBundle['type']}}</label>
+                            <div class="col-sm-9 cbx">
+                                <select ng-model="msg.type" class="form-control" id="msgType" style="width: auto"
+                                        name="type">
+                                    <option value="sms" selected>{{resourceBundle['message.sms']}}</option>
+                                </select>
+                                <input type="radio" ng-model="msg.template" name="msgTemplate" value="txt" ng-change="setDefaultMessage();" checked/> {{resourceBundle['message.textmessage']}}<br/>
+                                <div ng-hide="isTempMonOnly">
+                                    <input type="radio" ng-model="msg.template" name="msgTemplate" value="wappush" ng-change="setDefaultMessage();" /> {{resourceBundle['contentapppush']}}
+                                    <div class="bgr" ng-show="msg.template=='wappush'">
+                                        <div class="title-heading ng-binding">{{resourceBundle['mobileapplicationoptions']}}</div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">{{resourceBundle['applicationtype']}}</label>
+                                            <div class="col-sm-8">
+                                                <span ng-show="isDef(appurls.android)">
+                                                <select ng-model="appType" class="form-control" style="width: auto"
+                                                        ng-change="toggleLngDivAndUpAppURL()">
+                                                    <option value="{{APPTYPE.ANDROID_SMART_PHONE_APP}}"
+                                                            ng-selected="appType == APPTYPE.ANDROID_SMART_PHONE_APP">
+                                                        {{resourceBundle['androidsmartphoneapplication']}}
+                                                    </option>
+                                                    <option value="{{APPTYPE.JAVA_FEATURE_PHONE_APP}}"
+                                                            ng-selected="appType == APPTYPE.JAVA_FEATURE_PHONE_APP">
+                                                        {{resourceBundle['javafeaturephoneapplication']}}
+                                                    </option>
+                                                </select>
+                                                </span>
+                                                <span ng-show="isUndef(appurls.android)">
+                                                    <select ng-model="appType" class="form-control" style="width: auto"
+                                                            ng-change="toggleLngDivAndUpAppURL()">
+                                                        <option value="{{APPTYPE.JAVA_FEATURE_PHONE_APP}}"
+                                                                ng-selected="appType == APPTYPE.JAVA_FEATURE_PHONE_APP">
+                                                            {{resourceBundle['javafeaturephoneapplication']}}
+                                                        </option>
+                                                    </select>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" ng-show="showLng">
+                                            <label class="control-label col-sm-4">{{resourceBundle['language']}}</label>
+                                            <div class="col-sm-8 cbx">
+                                                <select ng-model="lng" class="form-control" id="usrMlng" style="width: auto"
+                                                        ng-change="updateAppURL()"
+                                                        name="mlng">
+                                                    <option
+                                                            ng-repeat="(value,key) in allMobileLanguages" value="{{value}}">
+                                                        {{key}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">{{resourceBundle['push']}} URL</label>
+                                            <div class="col-sm-8" cbx>
+                                                <label class="control-label">{{msg.pushURL}}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 control-label">{{resourceBundle['message']}}</label>
+                            <div class="col-sm-9 cbx">
+                                <textarea class="form-control" name="msgTxt" ng-blur="mVisitedText=true" rows="4" ng-model="msg.text" ng-keyup="setMsgRemLength()" required></textarea>
+                                <br/> {{remLength}} {{resourceBundle['charactersleft']}}
+                                <div class="has-error" ng-show="mVisitedText && messageUserForm.msgTxt.$error.required">
+                                    <span class="help-block">{{resourceBundle['messagetosend']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt10">
+                            <div class="col-sm-12">
+                                <div class="pull-right">
+                                    <button ng-click="messageUserForm.$valid && sendUserMessage();" class="btn btn-sm btn-primary">{{resourceBundle['submit']}}</button>
+                                    <a href="#/setup/users/" style="color: #000000;" class="btn btn-sm btn-default">{{resourceBundle['cancel']}}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="row">
+                            <label class="col-sm-12 tal control-label">{{resourceBundle['users']}}</label>
+                            <div class="col-sm-12 cbx">
+                                <div ng-hide="allUsers">
+                                    <table class="table table-striped table-bordered table-condensed table-hover table-logistimo">
+                                        <tbody>
+                                        <tr>
+                                            <th>{{resourceBundle['user']}}</th>
+                                            <th>{{resourceBundle['user.mobile']}}</th>
+                                        </tr>
+                                        <tr ng-repeat="item in users">
+                                            <td>{{item.fnm}}</td>
+                                            <td>{{item.phm}}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div ng-show="allUsers">
+                                    {{resourceBundle['users.all']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group"></div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,169 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-if="isDef(dcntry) && !hbUTag" ng-controller="SessionDashboardCtrl">
+    <div class="box topbox">
+        <div class="filter-box from-group">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-sm-2 norightpad">
+                        <label class="control-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}</label>
+                        <tag-select tags-model="etag" place-holder="All"
+                                    type="'entity'"
+                                    multiple="'false'" force-no-udf="'true'"></tag-select>
+                    </div>
+                    <div class="col-sm-2 norightpad">
+                        <label class="control-label">{{resourceBundle['material']}} {{resourceBundle['multiple.tags']}}</label>
+                        <tag-select tags-model="mtag" place-holder="All"
+                                    type="'material'"
+                                    force-no-udf="'true'"></tag-select>
+                    </div>
+                    <div class="col-sm-2 norightpad">
+                        <label class="control-label">Material name</label>
+                        <material-drop-down ng-model="material" mtag="mtag.text"></material-drop-down>
+                    </div>
+                    <div class="col-sm-3 norightpad">
+                        <label class="control-label">Transaction type</label>
+                        <select class="form-control input-sm" ng-model="type">
+                            <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions']}}</option>
+                            <option value="i">{{resourceBundle['issues']}}</option>
+                            <option value="r">{{resourceBundle['receipts']}}</option>
+                            <option value="p">{{resourceBundle['transactions.stockcount.upper']}}</option>
+                            <option value="w">{{resourceBundle['transactions.wastage.upper']}}</option>
+                            <option value="t">{{resourceBundle['transfers']}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="control-label">Date of actual transaction</label>
+                        <date-picker extra-class="input-sm" date-model="date" noclear="noclear" max-date="today"></date-picker>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt5">
+        <div class="box topbox tabminheight">
+            <div class="row">
+                <div class="col-sm-12" ng-show="isDef(links)">
+                    <ul class="breadcrumb domain-bread-crumb col-sm-12" style="margin-bottom: 0px">
+                        <li ng-repeat="item in links">
+                            <span ng-if="$index != links.length-1" class="title domain-child"
+                                  ng-click="getSessionData(item.filter, item.level, $index)"
+                                  uib-tooltip="Go to {{item.text}}" style="padding-left: 0px;">{{item.text}}</span>
+                            <span ng-if="$index == links.length-1" style="padding-left: 0px;"
+                                  class="title domain-child"><b>{{item.text}}</b></span>
+                        </li>
+                        <div class="pull-right">
+                            <button type="button" ng-click="hardRefreshDashboard()" class="btn btn-sm btn-default pull-right" tooltip-placement="top" uib-tooltip="{{resourceBundle['upgrade']}}">
+                                <span class="glyphicons pt2 glyphicons-refresh"></span>
+                            </button>
+                            <span class="litetext pull-right cbx rPad10">{{resourceBundle['asof']}} {{dashboardView.ut}}</span>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table ng-show="isObjDef(dashboardView.domain)" class="table table-condensed table-logistimo table-col-striped">
+                        <tbody>
+                            <tr>
+                                <td class="col-sm-3" style="border-top:none"></td>
+                                <td class="text-center" colspan="7" style="background-color: #ededed">
+                                    <b>Date of actual transaction</b>
+                                    <span uib-tooltip="% of {{resourceBundle['kiosks.lower']}} entering data by next day(1d), on 2nd day(2d) and beyond 2nd day(>2d) of date of actual transaction" style="display: inline" class="litetext glyphicons glyphicons-info-sign"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-sm-3 text-capitalize text-center text-bold">{{dataLevel}}</td>
+                                <td class="text-center" ng-repeat="(key,value) in dashboardView.sDomain">
+                                    <b>{{value.date}}</b><br/>
+                                    <span class="col-sm-4 noLRpad small">1d</span>
+                                    <span class="col-sm-4 noLRpad small">2d</span>
+                                    <span class="col-sm-4 noLRpad small">>2d</span>
+                                </td>
+                            </tr>
+                            <tr ng-repeat="(key,value) in dashboardView.sData">
+                                <td>
+                                    <a ng-if="iCnt || iState" ng-click="getSessionSubData(key || 'No District')">{{key || 'No District'}}</a>
+                                    <span ng-if="iDist">{{key}}</span>
+
+                                </td>
+                                <td class="text-center" ng-repeat="(key,value) in value">
+                                    <span class="col-sm-4 noLRpad">
+                                        <span ng-if="!iDist && value[0].value > 0" uib-tooltip="{{value[0].num}}&nbsp;of&nbsp;{{value[0].den}}&nbsp;{{resourceBundle['kiosks.lower']}}">{{value[0].per | number:0}}</span>
+                                        <span ng-if="iDist && value[0].value > 0" class="glyphicons glyphicons-ok" uib-tooltip="{{value[0].value}}&nbsp;transaction(s)"></span>
+                                    </span>
+                                    <span class="col-sm-4 noLRpad">
+                                        <span ng-if="!iDist && value[1].value > 0" uib-tooltip="{{value[1].num}}&nbsp;of&nbsp;{{value[1].den}}&nbsp;{{resourceBundle['kiosks.lower']}}">{{value[1].per | number:0}}</span>
+                                        <span ng-if="iDist && value[1].value > 0" class="glyphicons glyphicons-ok" uib-tooltip="{{value[1].value}}&nbsp;transaction(s)"></span>
+                                    </span>
+                                    <span class="col-sm-4 noLRpad">
+                                        <span ng-if="!iDist && value[2].value > 0" uib-tooltip="{{value[2].num}}&nbsp;of&nbsp;{{value[2].den}}&nbsp;{{resourceBundle['kiosks.lower']}}">{{value[2].per | number:0}}</span>
+                                        <span ng-if="iDist && value[2].value > 0" class="glyphicons glyphicons-ok" uib-tooltip="{{value[2].value}}&nbsp;transaction(s)"></span>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="text-bold">
+                                <td class="lh25">Total (%)</td>
+                                <td class="text-center lh25" ng-repeat="(key,value) in dashboardView.sDomain">
+                                    <span class="col-sm-4 noLRpad">
+                                        <span ng-if="value[0].value > 0" uib-tooltip="{{value[0].num}}&nbsp;of&nbsp;{{value[0].den}}&nbsp;{{resourceBundle['kiosks.lower']}}">{{value[0].per | number:0}}</span>
+                                    </span>
+                                    <span class="col-sm-4 noLRpad">
+                                        <span ng-if="value[1].value > 0" uib-tooltip="{{value[1].num}}&nbsp;of&nbsp;{{value[1].den}}&nbsp;{{resourceBundle['kiosks.lower']}}">{{value[1].per | number:0}}</span>
+                                    </span>
+                                    <span class="col-sm-4 noLRpad">
+                                        <span ng-if="value[2].value > 0" uib-tooltip="{{value[2].num}}&nbsp;of&nbsp;{{value[2].den}}&nbsp;{{resourceBundle['kiosks.lower']}}">{{value[2].per | number:0}}</span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div ng-hide="isObjDef(dashboardView.domain) || loading" class="pt10">
+                        <p class="alert alert-warning">
+                            {{resourceBundle.nodataavailable}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="isObjDef(dashboardView.domain)">
+                <div class="col-sm-12 mt10" align="center">
+                    <a ng-click="exportAsCSV()">Download as CSV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-if="isUndef(dcntry)">
+    <div class="mt5">
+        <div class="box topbox tabminheight">
+            <div class="row">
+                <div class="col-sm-12 mt10">
+                    <div class="alert alert-warning">Please choose default country for the domain to enable dashboards.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

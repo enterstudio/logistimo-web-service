@@ -1,0 +1,212 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="DomainFormCtrl">
+    <div class="bizinfo bizinfo-last">
+        <div class="row noMargin">
+            <div class="col-sm-12 nopad">
+                <div class="ml10 text-justify" ng-show="openDomains">
+                    {{resourceBundle['linkeddomains.overview']}}
+                </div>
+                <div ng-controller="DomainListController">
+                    <form class="form-horizontal" role="form" name="linkedDomainListForm">
+                        <div ng-class="{'col-sm-12':!openDomains, 'col-sm-6':openDomains}" class="mt10">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <ul class="breadcrumb domain-bread-crumb">
+                                        <li ng-repeat="item in parents | reverse">
+                                            <span ng-if="currentDomain != item.dId" class="title domain-child" ng-click="switchDomain(item.dId, item.name)" uib-tooltip="Switch to {{item.name}}" style="padding-left: 0px;">{{item.name}}</span>
+                                            <span ng-if="currentDomain == item.dId" style="color: #F56C64;padding-left: 0px;" class="title domain-child">{{item.name}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="row mt18" ng-show="!hasChild">
+                                <div class="col-sm-12">
+                                    <p class=" alert alert-warning">
+                                        {{resourceBundle['domain.child.none']}}</p>
+                                </div>
+                            </div>
+                            <div class="row overflowXYAuto" style="max-height:400px;">
+                                <div class="col-sm-12">
+                                    <div ng-include="'views/domains/child-list.html'" ng-init="_index=0;editDomains=openDomains"></div>
+                                </div>
+                            </div>
+                            <div class="row pt10" ng-show="!open && iSU && openDomains">
+                                <div class="col-sm-12">
+                                    <button type="button" ng-click="openForm()" class="btn btn-sm btn-primary"
+                                            value="{{resourceBundle.add}}">{{resourceBundle.add}}
+                                    </button>
+                                    <!--<button type="button" ng-click="fetchLinkedDomains()" class="btn btn-sm btn-default"
+                                            value="Refresh">{{resourceBundle['upgrade']}}</button>-->
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div ng-controller="AddChildDomainsController" ng-if="openDomains">
+                    <form class="form-horizontal" role="form" name="linkedDomainAddForm">
+                        <div class="col-sm-6 mt10" ng-show="open">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="domain-title-heading marginlr0">
+                                        <h4 ng-show="edit == false">{{resourceBundle['linked.child']}} {{resourceBundle.domains}}</h4>
+                                        <h4 ng-show="edit == true">{{nchld.name}}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt18">
+                                <div class="col-sm-12">
+                                    <div class="form-group" ng-show="edit == false">
+                                        <label class="col-sm-3 control-label">{{resourceBundle['linkeddomains.inputtext']}}</label>
+
+                                        <div class="col-sm-6">
+                                            <child-domain-select child-domain-model="nchld.ldl"
+                                                                 place-holder="Choose Domains"></child-domain-select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" ng-show="edit == false">
+                                        <label class="col-sm-3 control-label">{{resourceBundle['linked.domains.copy.options']}}</label>
+
+                                        <div class="col-sm-8 cbx">
+                                            <input type="checkbox" ng-model="nchld.cm">&nbsp;{{resourceBundle['linkeddomains.inheritmaterialsfrom']}}
+                                            {{resourceBundle['linked.parent.lowercase']}}<br/>
+                                            <input type="checkbox" ng-model="nchld.cc">&nbsp;{{resourceBundle['linkeddomains.inheritconfigfrom']}}
+                                            {{resourceBundle['linked.parent.lowercase']}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">{{resourceBundle['permissions']}}</label>
+
+                                        <div class="col-sm-8">
+                                            <!--<label class="pull-left mt5">{{resourceBundle['prm.master.data']}}</label>-->
+                                            <table
+                                                    class="table table-bordered table-condensed table-hover table-striped table-logistimo w95">
+                                                <tbody>
+                                                <tr>
+                                                    <th colspan="5">{{resourceBundle['prm.master.data']}}</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td class="h5">{{resourceBundle['prm.view']}}</td>
+                                                    <td class="h5">{{resourceBundle['prm.add']}}</td>
+                                                    <td class="h5">{{resourceBundle['prm.edit']}}</td>
+                                                    <td class="h5">{{resourceBundle['prm.remove']}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.users.management']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.uv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ua" ng-disabled="!nchld.uv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ue" ng-disabled="!nchld.uv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ur" ng-disabled="!nchld.uv"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.entities.management']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.ev" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ea" ng-disabled="!nchld.ev"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ee" ng-disabled="!nchld.ev"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.er" ng-disabled="!nchld.ev"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.entity.groups.management']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.egv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ega" ng-disabled="!nchld.egv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ege" ng-disabled="!nchld.egv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.egr" ng-disabled="!nchld.egv"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['linked.domains.allow.entity.relationships.management']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.erv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.era" ng-disabled="!nchld.erv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ere" ng-disabled="!nchld.erv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.err" ng-disabled="!nchld.erv"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['prm.inventory']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.iv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ia" ng-disabled="!nchld.iv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ie" ng-disabled="!nchld.iv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ir" ng-disabled="!nchld.iv"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['prm.materials']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.mv" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ma" ng-disabled="!nchld.mv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.me" ng-disabled="!nchld.mv"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.mr" ng-disabled="!nchld.mv"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{resourceBundle['assets']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.av" ng-change="checkPermission()"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.aa" ng-disabled="!nchld.av"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ae" ng-disabled="!nchld.av"></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ar" ng-disabled="!nchld.av"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="5">{{resourceBundle['domain.configuration']}}</th>
+                                                <tr>
+                                                    <td>{{resourceBundle['domain.configuration']}}</td>
+                                                    <td><input type="checkbox" ng-model="nchld.cv" ng-change="checkPermission()"></td>
+                                                    <td></td>
+                                                    <td><input type="checkbox" ng-model="nchld.ce" ng-disabled="!nchld.cv"></td>
+                                                    <td></td>
+                                                </tr>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <!--<label class="pull-left mt5">{{resourceBundle['domain.configuration']}}</label>
+                                            <br/>
+                                            <div class="pt10">
+                                                <input type="checkbox" ng-model="nchld.cv">&nbsp;{{resourceBundle['prm.view']}}&nbsp;
+
+                                                <input type="checkbox" ng-model="nchld.ce">&nbsp;{{resourceBundle['prm.edit']}}
+                                            </div>-->
+                                        </div>
+
+                                    </div>
+                                    <div class="row mt10" ng-show="iSU && openDomains">
+                                        <div class="col-sm-6">
+                                            <div class="pull-right" style="position: relative;left:17px;">
+                                                <button ng-show="!edit" ng-click="addChildren()" name="save"
+                                                        class="btn btn-sm btn-primary">{{resourceBundle['save']}}
+                                                </button>
+                                                <button ng-show="edit" ng-click="updateChild()" name="update"
+                                                        class="btn btn-sm btn-primary">{{resourceBundle['update']}}
+                                                </button>
+                                                <button ng-click="openForm()" name="cancel"
+                                                        class="btn btn-sm btn-default">{{resourceBundle['cancel']}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

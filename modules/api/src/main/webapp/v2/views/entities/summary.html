@@ -1,0 +1,286 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="row">
+        <div class="col-sm-9">
+            <form class="form-horizontal">
+                <div class="bgr" ng-hide="monthlyStats.length == 0 || iAU">
+                    <div class="title-heading">
+                        {{resourceBundle['statistics']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+
+                            <table class="table table-striped table-condensed table-hover table-logistimo">
+                                <tbody>
+                                <tr class="active">
+                                    <th>{{resourceBundle['month.upper']}}</th>
+                                    <th ng-if="ordersTabEnabled">{{resourceBundle['orders']}}</th>
+                                    <th>{{resourceBundle['transactions']}}</th>
+                                    <th ng-if="ordersTabEnabled && accountTabEnabled">{{resourceBundle['revenue']}} ({{entity.cur}})</th>
+                                    <th>{{resourceBundle['stockout']}}</th>
+                                </tr>
+                                <tr ng-repeat="item in monthlyStats">
+                                    <td>{{item.month}}</td>
+                                    <td ng-if="ordersTabEnabled">{{item.oc}}
+                                        <span ng-show="item.ocs == 'u'" class="codegreen glyphicons glyphicons-arrow-up"></span>
+                                        <span ng-show="item.ocs == 'd'" class="codered glyphicons glyphicons-arrow-down"></span>
+
+                                    </td>
+                                    <td>{{item.tc}}
+                                        <span ng-show="item.tcs == 'u'" class="codegreen glyphicons glyphicons-arrow-up"></span>
+                                        <span ng-show="item.tcs == 'd'" class="codered glyphicons glyphicons-arrow-down"></span>
+
+
+                                    </td>
+                                    <td ng-if="ordersTabEnabled && accountTabEnabled">{{item.br}}
+                                        <span ng-show="item.brs == 'u'" class="codegreen glyphicons glyphicons-arrow-up"></span>
+                                        <span ng-show="item.brs == 'd'" class="codered glyphicons glyphicons-arrow-down"></span>
+                                    </td>
+                                    <td>{{item.soc}}
+                                        <span ng-show="item.socs == 'u'" class="codegreen glyphicons glyphicons-arrow-up"></span>
+                                        <span ng-show="item.socs == 'd'" class="codered glyphicons glyphicons-arrow-down"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-if="isDef(entity.ctr) || isDef(entity.st) || isDef(entity.ds) || isDef(entity.tlk) || isDef(entity.ct) || isDef(entity.str) || isDef(entity.zip)">
+                    <div class="title-heading">
+                        {{resourceBundle['location']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row" ng-if="isDef(entity.ctr)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['country']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{getCountryNameByCode(entity.ctr)}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.st)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['state']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.st}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.ds)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['district']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.ds}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.tlk)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['taluk']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.tlk}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.ct)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['village']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.ct}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.str)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['streetaddress']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.str}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.zip)">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['zipcode']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.zip}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-if="!tempOnlyAU && (isDef(entity.cur) || isDef(entity.tx) || isDef(entity.txid))">
+                    <div class="title-heading">
+                        {{resourceBundle['financialdetails']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div ng-if="isDef(entity.cur)" class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['currency']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.cur}}
+                                </div>
+                            </div>
+                            <div ng-if="isDef(entity.tx)" class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['tax']}} (%):</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.tx}}
+                                </div>
+                            </div>
+                            <div ng-if="isDef(entity.txid)" class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['tax.id']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.txid}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-if="(iSU || dp.iv) && isDef(entity.invDsp)">
+                    <div class="title-heading">
+                        {{resourceBundle['inventory.policy']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['inventory.policy']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.invDsp}}
+                                </div>
+                            </div>
+                            <div class="row" ng-if="isDef(entity.inv) && isDef(entity.sl) && entity.sl != 0">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['inventory.servicelevel']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.sl}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['batch.management']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    <p ng-show="entity.be">{{resourceBundle['enabled.upper']}}</p>
+                                    <p ng-hide="entity.be">{{resourceBundle['disabled.upper']}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-show="(iSU || dp.egv) && isDef(entity.pgs)">
+                    <div class="title-heading">
+                        {{resourceBundle['poolgroups']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <label class="control-label">{{resourceBundle['poolgroups']}}:</label>
+                                </div>
+                                <div class="col-sm-10 cbx">
+                                    <span ng-repeat="item in entity.pgs" class="label label-default"><a ng-href="#/setup/ent-grps/?egid={{item.gid}}">{{item.nm}}</a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-show="!tempOnlyAU && isDef(entity.cid)">
+                    <div class="title-heading">
+                        {{resourceBundle['customid']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <label class="control-label">{{resourceBundle['customid']}}:</label>
+                                </div>
+                                <div class="col-sm-9 cbx">
+                                    {{entity.cid}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div ng-controller="EntityDetailMenuController">
+            <div class="col-sm-3 noleftpad" ng-show="loadimage">
+                <span class="glyphicons glyphicons-cogwheel spin"></span>
+            </div>
+            <div class="col-sm-3 noleftpad" ng-show="isDef(entityImages) && entityImages.length > 0 && !loadimage "  >
+                <div class="bgr image-upload" >
+                    <div ng-hide="loadimage" uib-carousel active="active" interval="5000" no-wrap="noWrapSlides" class="logiCarousel">
+                        <div uib-slide ng-repeat="slide in entityImages track by $index" index="$index" ng-mouseover="hoverEdit=true" ng-mouseleave="hoverEdit=false">
+                            <!--<img class="uploadImage" ng-src="{{slide.servingUrl}}" style="margin:auto;" ng-style="hoverEdit && {'opacity':'0.2'}">-->
+                            <span class="btn btn-primary image-add-button img-tr" ng-show="currentDomain == entity.sdid && hoverEdit && (iSU || (dp.ee && perm > 1))"  ng-click="addImage()" uib-tooltip="{{resourceBundle['addimage']}}">
+                               <span class="glyphicons glyphicons-plus" ></span>
+                           </span>
+                          <span class="btn btn-primary image-close-button" ng-show="currentDomain == entity.sdid && hoverEdit && (iSU || dp.ee)" ng-click="removeImage(slide.id)"
+                                uib-tooltip="{{resourceBundle['deleteimage']}}">
+                              <span class="glyphicons glyphicons-bin" ></span>
+                          </span>
+                            <a href="{{slide.servingUrl}}" target="_blank">
+                                <img class="uploadImage" ng-src="{{slide.servingUrl}}" ng-style="hoverEdit && {'opacity':'0.2'}">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3 noleftpad" >
+                <div ng-show="(isUndef(entityImages) || entityImages.length == 0) && !loadimage">
+                    <div class="bgr" style="min-height: 250px;background-color: #f5f5f5">
+                        <span ng-show="currentDomain == entity.sdid && (iSU || (dp.ee && perm > 1))" class="btn btn-primary image-add-button no-img-tr" ng-click="addImage()" uib-tooltip="{{resourceBundle['addimage']}}">
+                            <span class="glyphicons glyphicons-plus " ></span>
+                        </span>
+                        <p ng-show="iSU || dp.ee" class="text-center" style="margin-top:10px;color:#9d9d9d">{{resourceBundle['image.unavailable']}}</p>
+                        <p ng-hide="iSU || dp.ee" class="text-center" style="margin-top:100px;color:#9d9d9d">{{resourceBundle['image.unavailable']}}</p>
+                    </div>
+                </div>
+                <div ng-show="doAddImage" style="padding:5px">
+                    <div class="form-group mgh0">
+                        <input type="file" id="entityFileupload" ng-model="imageData" class="form-control" accept=".png,.jpg,.jpeg" base-sixty-four-input/>
+                    </div>
+                    <span class="litetext">{{resourceBundle['uploadmessage']}}</span>
+                    <div class="mt10">
+                        <input type="button" ng-click="validateImage() && uploadImage()" class="btn btn-primary" value="{{resourceBundle['upload']}}">
+                        <input type="button" ng-click="cancel()" class="btn btn-default" value="{{resourceBundle['cancel']}}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

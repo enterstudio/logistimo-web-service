@@ -1,0 +1,95 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="bgr mt18 white-gray-bg" ng-init="lty = ty; lht = ht; lmv = mv">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="col-sm-3 mh25">
+                <label class="control-label pull-right cbx">Heading</label>
+            </div>
+            <div class="col-sm-8 lPad5">
+                <span editable-box ng-class="{codegray:!item.hd}" style="border: 1px solid #ddd; border-radius: 4px;" ng-show="!item.hdedit" ng-click="setHeading(item)" class="fullSpan whitebg">
+                    {{item.hd || 'Click to add Heading'}}
+                </span>
+                <div ng-show="item.hdedit">
+                    <editable-text edit-model="item.ehd"
+                                   on-ok="updateHeading(item)"
+                                   on-cancel="cancelHeading(item)"
+                                   set-focus="{{item.hdedit}}">
+                    </editable-text>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+        <div class="float-right">
+            <form class="form-inline" role="form" name="uploadForm" novalidate>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        View as tab
+                        <input type="checkbox" ng-true-value="y" ng-false-value="n" ng-model="lmv" ng-change="setMergeView(ind,lmv)">
+                        <span class="lPad"></span>
+                        <select ng-model="lty" ng-change="changeLayout(ind,lty); lty = ty;" class="form-control form-control-min" name="lty">
+                            <option value="1">Layout 1</option>
+                            <option value="2">Layout 2</option>
+                            <option value="3">Layout 3</option>
+                            <option value="12">Layout 1:2</option>
+                            <option value="21">Layout 2:1</option>
+                        </select>
+                        <span class="lPad"></span>
+                        <select ng-model="lht" ng-change="changeHeight(ind,lht); lht = ht;" class="form-control form-control-min" name="lht">
+                            <option value="s">Small</option>
+                            <option value="m">Medium</option>
+                            <option value="l">Large</option>
+                        </select>
+                        <span class="lPad"></span>
+                        <a ng-click="deleteLayout(ind)" uib-tooltip="{{resourceBundle['delete']}}">
+                            <span class="glyphicons glyphicons-bin"></span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div data-ng-switch on="ty">
+                <div data-ng-switch-when="1">
+                    <div ng-include="'views/dashboard/widget-holder-1.html'"></div>
+                </div>
+                <div data-ng-switch-when="2">
+                    <div ng-include="'views/dashboard/widget-holder-2.html'"></div>
+                </div>
+                <div data-ng-switch-when="3">
+                    <div ng-include="'views/dashboard/widget-holder-3.html'"></div>
+                </div>
+                <div data-ng-switch-when="12">
+                    <div ng-include="'views/dashboard/widget-holder-12.html'"></div>
+                </div>
+                <div data-ng-switch-when="21">
+                    <div ng-include="'views/dashboard/widget-holder-21.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

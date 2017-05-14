@@ -1,0 +1,220 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-controller="FulfilShipmentController">
+    <h3>Fulfill the shipment <a ng-href="#/orders/shipment/detail/{{shipment.sId}}/">{{shipment.sId}}</a>
+        (order <a ng-href="#/orders/detail/{{shipment.orderId}}/">{{shipment.orderId}}</a>)
+    </h3>
+    <hr/>
+    <span class="litetext">
+        Please review and confirm the received quantities before fulfilling the order. If the received quantities are different from the shipped quantities indicated in the order, edit the corresponding received quantities before fulfilling the order.
+    </span>
+    <div class="row mt10">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{resourceBundle['customer']}}
+                </div>
+                <div class="panel-body">
+                    <div class="row lPad5 mb5">
+                        <div class="col-sm-12">
+                            <p>
+                                <a class="capitalize" ng-href="#/setup/entities/detail/{{shipment.customerId}}" target="_blank">{{shipment.customerName}}</a></p>
+                            <p class="capitalize">{{shipment.customerAdd}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{resourceBundle['vendor']}}
+                </div>
+                <div class="panel-body">
+                    <div class="row lPad5 mb5">
+                        <div class="col-sm-12">
+                            <p>
+                                <a class="capitalize" ng-href="#/setup/entities/detail/{{shipment.vendorId}}" target="_blank">{{shipment.vendorName}}</a></p>
+                            <p class="capitalize">{{shipment.vendorAdd}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{resourceBundle['items']}}
+                </div>
+                <div class="panel-body">
+                        <table class="table table-condensed table-hover table-logistimo">
+                            <tr>
+                                <th class="col-sm-0-1 text-center">SI.No.</th>
+                                <th class="col-sm-2 text-left">{{resourceBundle['material']}}</th>
+                                <th class="col-sm-2 text-center">Shipped</th>
+                                <th class="col-sm-3 text-center" ng-show="allocate">Received</th>
+                            </tr>
+                            <tbody ng-repeat="item in shipment.items" ng-controller="DemandItemController" data-ng-switch on="exRow[$index]">
+                            <tr>
+                                <td class="text-center">{{$index + 1}}</td>
+                                <td class="text-left">{{item.mnm}}</td>
+                                <td class="text-center">{{item.q}}</td>
+                                <td ng-show="allocate">
+                                    <div ng-switch on="item.isBa">
+                                        <div ng-switch-when="true" class="dummyLink">
+                                            <table class="table table-striped table-nobot-mar table-condensed">
+                                                <tbody>
+                                                <tr>
+                                                    <td>{{resourceBundle['batch']}}</td>
+                                                    <td>{{resourceBundle['expiry']}}</td>
+                                                    <td>Shipped</td>
+                                                    <td>Received</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr ng-repeat="bi in item.bts">
+                                                    <td>{{bi.id}}</td>
+                                                    <td>{{bi.e}}</td>
+                                                    <td>{{bi.sq}}
+                                                        <span class="litetext" ng-show="isDef(bi.smst) && bi.sq > 0">{{bi.smst}}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{bi.fq}}
+                                                        <span ng-if="isDef(bi.frsn) || isDef(bi.mrsn)"
+                                                              uib-tooltip="{{bi.mrsn || bi.frsn}}"
+                                                               class="litetext glyphicons glyphicons-info-sign lnk"
+                                                               tooltip-append-to-body="true"></span>
+                                                        <span class="litetext" ng-show="isDef(bi.fmst) && bi.fq > 0">{{bi.fmst}}
+                                                        </span>
+
+                                                    </td>
+                                                    <td>
+                                                        <span ng-click="select($parent.$index,'show')" class="glyphicons glyphicons-edit alignBaseLine"></span>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                                </table>
+                                        </div>
+                                        <div ng-switch-when="false">
+                                            <input ng-if="!item.isBa" class="form-control" type="text" only-digits ng-model="item.fq"
+                                                   ng-change="checkShowReason();"
+                                                   id="f{{item.mId}}{{$index}}"
+                                                   ng-class="{'red-border':item.invalidPopup}"
+                                                   uib-popover="{{item.popupMsg}}" popover-trigger="showpopup"
+                                                   ng-focus="hidePop(item,$index)"
+                                                   ng-blur="validate(item,$index)" maxlength="12">
+                                        </div>
+                                    </div>
+                                    <div class="mt5" ng-show="!item.isBa">
+                                        <span class="litetext" ng-class="{'required' : transConfig.rsm}" ng-show="(!item.tm && isDef(matstatus)) || (item.tm && isDef(tempmatstatus))">{{resourceBundle['inventory.material.status']}}</span>
+                                        <select ng-show="isDef(matstatus) && !item.tm" ng-model="item.fmst" class="form-control"
+                                                ng-class="{'red-border': item.sinvalidPopup}"
+                                                uib-popover="{{item.sPopupMsg}}"
+                                                ng-blur="item.isVisitedStatus = true; validate(item,$index,'cm')"
+                                                ng-focus="hidePop(item,$index,'cm')"
+                                                id="cm{{item.mId}}{{$index}}"
+                                                popover-trigger="showpopup">
+                                            <option ng-repeat="status in matstatus" value="{{status}}"
+                                                    ng-selected="item.fmst == status">{{status|| resourceBundle['pleaseselect']}}
+                                            </option>
+                                        </select>
+                                        <select ng-show="isDef(tempmatstatus) && item.tm" ng-model="item.fmst" class="form-control"
+                                                ng-class="{'red-border': item.sinvalidPopup}"
+                                                uib-popover="{{item.sPopupMsg}}"
+                                                ng-blur="item.isVisitedStatus = true; validate(item,$index,'cmt')"
+                                                ng-focus="hidePop(item,$index,'cmt')"
+                                                id="cmt{{item.mId}}{{$index}}"
+                                                popover-trigger="showpopup">
+                                            <option ng-repeat="status in tempmatstatus" value="{{status}}"
+                                                    ng-selected="item.fmst == status">{{status|| resourceBundle['pleaseselect']}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div ng-show="!item.isBa && item.fq != item.q">
+                                        <span class="litetext pull-left" ng-class="{'required': oCfg.pfrm}">{{resourceBundle['reason']}}</span>
+                                        <select class="form-control"
+                                                id="frr{{item.mId}}{{$index}}"
+                                                ng-class="{'red-border':item.ainvalidPopup}"
+                                                uib-popover="{{item.aPopupMsg}}" popover-trigger="showpopup"
+                                                ng-focus="hidePop(item,$index,'r')"
+                                                ng-blur="validate(item,$index,'r')"
+                                                ng-change="item.mrsn = ''"
+                                                ng-model="item.frsn" ng-show="isDef(fulfilReasons)">
+                                            <option ng-repeat="reason in fulfilReasons" value="{{reason}}" ng-selected="item.frsn == reason">{{reason|| resourceBundle['pleaseselect']}}</option>
+                                        </select>
+                                        <textarea type="text" class="form-control mt2" ng-show="isUndef(fulfilReasons) || item.frsn == 'Others'"
+                                                  id="fr{{item.mId}}{{$index}}"
+                                                  ng-class="{'red-border':item.ainvalidPopup}"
+                                                  uib-popover="{{item.aPopupMsg}}" popover-trigger="showpopup"
+                                                  ng-focus="hidePop(item,$index,'r')"
+                                                  ng-blur="validate(item,$index,'r')"
+                                                  ng-model="item.mrsn" placeholder="{{resourceBundle['enterreason']}}" maxlength="160"></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-ng-switch-when="show">
+                                <td colspan=100% class="partialview">
+                                    <div ng-init="view='views/transactions/batch-transaction-reason.html';huName = item.huName; huQty = item.huQty; mnm = item.mnm; mid = item.mId ; kid = shipment.vendorId ; bdata = item.bts; exBatches = item.bq; allocq = item.aq; index = $index; tm = item.tm;msm = transConfig.rsm"
+                                         ng-include="'views/partial.html'"></div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <label class="col-sm-2 control-label required cbx">Date of actual receipt</label>
+
+                        <div class="col-sm-3">
+                            <date-picker date-model="shipData.afd" max-date="today" min-date="shipDate"></date-picker>
+                        </div>
+                    </div>
+                    <div class="row mt10">
+                        <label class="col-sm-2 control-label">Comment </label>
+                        <div class="col-sm-5">
+                            <textarea class="form-control" rows="4" ng-model="shipData.msg"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <button type="button" class="btn btn-sm btn-primary" ng-disabled="saveDisable" ng-click="fulfil(shipment.items)">Fulfill</button>
+                    <button type="button" class="btn btn-sm btn-default" ng-click="toggleFulfil(false,masterIts)">{{resourceBundle['cancel']}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

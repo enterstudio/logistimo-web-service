@@ -1,0 +1,99 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="AccountingConfigurationController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="accountingConfigForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading marginlr0">
+                            <h4>{{resourceBundle['accounting']}} {{resourceBundle['configuration']}}</h4>
+                             <span ng-show="ac.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{ac.lastUpdated}} {{resourceBundle['by']}}
+                            <a href="#/setup/users/all/details?userId={{ac.createdBy}}" target="_new">{{ac.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['accounting']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['enable']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" value="true" ng-model="ac.ea"> {{resourceBundle['config.enableaccounting']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['creditlimit']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <p class="litetext">
+                                {{resourceBundle['config.creditlimit.info']}}
+                            </p>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['creditlimit']}} ({{resourceBundle['default']}})</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="text" style="width: 25%; display: inline-block;" class="form-control" autocomplete="off" maxlength="10" ng-model="ac.cl" placeholder="0.0"> {{cnf.cur}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['config.creditlimit.enforce']}}</label>
+                                <div class="col-sm-8 cbx">{{resourceBundle['config.creditlimit.enforcemsg']}}:<br/>
+                                    <input type="radio" ng-model="ac.en"> {{resourceBundle['none']}}
+                                    <input type="radio" ng-model="ac.en" value="cf"> {{resourceBundle['order.confirmed']}}
+                                    <input type="radio" ng-model="ac.en" value="cm"> {{resourceBundle['order.shipped']}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-if="iSU || dp.ce">
+                    <div class="col-sm-12 ml5">
+                        <button type="button" ng-click="setAccountConfiguration()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,260 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="row mt10" ng-show="assetInfoCounter == 0">
+        <div class="col-sm-12">
+            <div class="alert alert-warning">
+                {{resourceBundle['no.data.available']}}
+            </div>
+        </div>
+    </div>
+    <div class="pane">
+        <div class="row">
+            <div class="bgr" ng-show="isDef(assetDetails.info)">
+                <div class="title-heading">
+                    {{resourceBundle['asset']}} {{resourceBundle['profile']}}
+                </div>
+                <div class="row" ng-show="isDef(currentAsset.an) && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['asset.type']}}</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{currentAsset.an}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="isDef(assetDetails.dId) && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['asset.serial.number']}}</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.dId}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="isDef(currentManu.name) && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['manufacturer']}}</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{currentManu.name}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="isDef(assetDetails.meta.dev.mdl) && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['asset.model']}}</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.dev.mdl}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="isDef(assetDetails.meta.dev.yom) && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['asset.manufacture.year']}}</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.dev.yom}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="bgr" ng-show="currentAsset.at == 2 && assetInfoCounter > 0 && isDef(assetDetails.meta.cc.qty)">
+                <div class="title-heading">
+                    {{resourceBundle['asset']}} {{resourceBundle['capacity'] | lowercase}}
+                </div>
+                <div class="row"  ng-show="isDef(assetDetails.meta.cc.qty) && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['capacity']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.cc.qty}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="isDef(assetDetails.meta.cc.met) && assetDetails.meta.cc.met != 0 && increaseCounter()">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['capacity']}} {{resourceBundle['metric'] | lowercase}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.cc.met}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bgr" ng-show="isDef(assetDetails.gsmInfo) && assetInfoCounter > 0">
+                <div class="title-heading">
+                    {{resourceBundle['asset.meta.gsm.info']}}
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.dev.dVr) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['firmware.version']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.dev.dVr}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.dev.mVr) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['gsm.module.version']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.dev.mVr}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.dev.imei) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['imei']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.dev.imei}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.gsm.sim.phn) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['mobile.number']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.gsm.sim.phn}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.gsm.sim.sid) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['sim.id']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.gsm.sim.sid}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.gsm.sim.np) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['sim.network.provider']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.gsm.sim.np}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.gsm.altSim.phn) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['alternate']}} {{resourceBundle['mobile.number'] | lowercase}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.gsm.altSim.phn}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.gsm.altSim.sid) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['alternate']}} {{resourceBundle['sim.id']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.gsm.altSim.sid}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.gsm.altSim.np) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">{{resourceBundle['alternate']}} {{resourceBundle['sim.network.provider']}}:</label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.gsm.altSim.np}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row" ng-show="isDef(assetDetails.meta.dev.mdlD) && increaseCounter()">
+                            <div class="col-sm-2 cbx">
+                                <label class="control-label">
+                                    {{resourceBundle['device.model']}}:
+                                    <p class="litetext">({{resourceBundle['as.sent.device']}})</p>
+                                </label>
+                            </div>
+                            <div class="col-sm-10 cbx">
+                                {{assetDetails.meta.dev.mdlD}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

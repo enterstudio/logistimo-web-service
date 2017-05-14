@@ -1,0 +1,176 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="StockBoardController">
+            <form class="form-horizontal" role="form" name="addBulletinForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <div class="pull-left">
+                                <h5>{{resourceBundle['stockboard']}}</h5>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 norightpad">
+                            <div class="pull-right">
+                                <a href="/s/inventory/stockboard.jsp?kioskid={{entityId}}" target="_blank" class="btn btn-sm btn-default"><b>{{resourceBundle['goto']}} {{resourceBundle['stockboard']}}</b></a>&nbsp;&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['enable']}} {{resourceBundle['stockboard']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <span class="litetext">{{resourceBundle['config.stockboard.info']}}</span>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{resourceBundle['enable']}}</label>
+                                <div class="col-sm-10 cbx" style="padding-left: 21px;">
+                                    <div class="col-sm-10">
+                                        <input type="radio" name="enable" ng-model="sb.esb" value="0"> {{resourceBundle['disabled.upper']}}<br/>
+                                        <input type="radio" name="enable" ng-model="sb.esb" value="1"> {{resourceBundle['config.board.visibilityprivate']}}<br/>
+                                        <input type="radio" name="enable" ng-model="sb.esb" value="2" checked> {{resourceBundle['config.board.visibilitypublic']}}<br/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.board.dataoptions']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div class="col-sm-10" style="padding-top: 10px;padding-bottom: 10px;">
+                                    <div class="col-sm-10">
+                                        <div class="col-sm-3" style="padding-top:4px;">
+                                            {{resourceBundle['config.stockboard.numberofitemsinview']}}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input only-digits type="text" class="form-control" ng-model="sb.itv" autocomplete="off"
+                                                   placeholder="10" maxlength="50" style="width:25%;display: inline-block;">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-10" style="padding-top: 10px;">
+
+                                        <div class="col-sm-3" style="padding-top: 9px;">
+                                            {{resourceBundle['config.board.refreshduration']}}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input only-digits type="text" class="form-control" ng-model="sb.rd" autocomplete="off"
+                                                   placeholder="3600" maxlength="50" style="width:25%;display: inline-block;"> {{resourceBundle['seconds']}}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.board.displayoptions']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div class="col-sm-10" style="padding-top:10px;">
+                                    <div class="col-sm-10">
+                                        <div class="col-sm-3">
+                                            {{resourceBundle['config.board.scrollinterval']}}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input only-digits type="text" class="form-control" ng-model="sb.sci" autocomplete="off"
+                                                   placeholder="5000" maxlength="50" style="width:25%;display: inline-block;"> {{resourceBundle['milliseconds']}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['config.stockboard.horizontalscrolloptions']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <div class="col-sm-10" style="padding-top:10px;">
+                                    <div class="col-sm-10">
+                                        <div class="col-sm-3">
+                                            {{resourceBundle['config.stockboard.horizontalscrolloptionsmsg']}}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <textarea rows="4" cols="50" name="comment" ng-model="sb.msg" maxlength="160" style="width: 100%;"/>
+                                            <span class="litetext">({{resourceBundle['config.stockboard.horizontalscrolloptionsdesc']}})</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-10" style="padding-top: 10px;">
+
+                                        <div class="col-sm-3" style="padding-top: 9px;">
+                                            {{resourceBundle['config.board.scrollinterval']}}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input only-digits type="text" class="form-control" ng-model="sb.hsi" autocomplete="off"
+                                                   placeholder="10000" maxlength="50" style="width:25%;display: inline-block;"> {{resourceBundle['milliseconds']}}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-show="iSU || dp.ea || dp.ee">
+                    <div class="col-sm-12">
+                        <div class="pull-right">
+                            <button ng-click="saveStockBoard()" class="btn btn-sm btn-primary">{{resourceBundle['save']}}</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,934 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.comm.chnl']}}</label>
+            <div class="col-sm-8">
+                <select name="commChnl" ng-model="config.comm.chnl"
+                        class="form-control"
+                        ng-blur="uVis.commChnl = true"
+                        ng-options="chnl.id as chnl.value for chnl in configCommunicationChannel"
+                        required
+                        ng-selected="config.comm.chnl">
+                    <option value="">{{resourceBundle['select']}} {{resourceBundle['temperature.device.config.comm.chnl']}}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-class="{ 'has-error' : addAssetForm.commChnl.$invalid && addAssetForm.commChnl}">
+        <p ng-show="addAssetForm.commChnl.$error.required && uVis.commChnl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.chnl']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+
+        <p ng-show="addAssetForm.commChnl.$error.invalid && uVis.commChnl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.chnl']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.comm.tmpUrl']}}</label>
+            <div class="col-sm-8">
+                <input type="url" name="tmpUrl" class="form-control" type="text"
+                       ng-model="config.comm.tmpUrl" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.tmpUrl']}}"
+                       ng-blur="uVis.tmpUrl = true"
+                       ng-focus-logi
+                       ng-class="{'c-visited' : addAssetForm.tmpUrl.$invalid && !addAssetForm.tmpUrl.$focused && uVis.tmpUrl}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-class="{ 'has-error' : addAssetForm.tmpUrl.$invalid && !addAssetForm.tmpUrl.$focused && uVis.tmpUrl }">
+        <p ng-show="addAssetForm.tmpUrl.$error.required && !addAssetForm.tmpUrl.$focused && uVis.tmpUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+
+        <p ng-show="addAssetForm.tmpUrl.$error.url && !addAssetForm.tmpUrl.$focused && uVis.tmpUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.tmpUrl']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.cfgUrl']}}</label>
+            <div class="col-sm-8">
+                <input type="url" name="cfgUrl" class="form-control" type="text"
+                       ng-model="config.comm.cfgUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.cfgUrl']}}"
+                       ng-blur="uVis.cfgUrl = true"
+                       ng-focus-logi
+                       ng-class="{'c-visited' : addAssetForm.cfgUrl.$invalid && !addAssetForm.cfgUrl.$focused && uVis.cfgUrl}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-class="{ 'has-error' : addAssetForm.cfgUrl.$invalid && !addAssetForm.cfgUrl.$focused && uVis.cfgUrl }">
+        <p ng-show="addAssetForm.cfgUrl.$error.url && !addAssetForm.cfgUrl.$focused && uVis.cfgUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.cfgUrl']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.comm.almUrl']}}</label>
+            <div class="col-sm-8">
+                <input type="url" name="alrmUrl" class="form-control" type="text"
+                       ng-model="config.comm.alrmUrl" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.almUrl']}}"
+                       ng-blur="uVis.alrmUrl = true"
+                       ng-focus-logi
+                       ng-class="{'c-visited' : addAssetForm.alrmUrl.$invalid && !addAssetForm.alrmUrl.$focused && uVis.alrmUrl}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-class="{ 'has-error' : addAssetForm.alrmUrl.$invalid && !addAssetForm.alrmUrl.$focused && uVis.alrmUrl }">
+        <p ng-show="addAssetForm.alrmUrl.$error.required && !addAssetForm.alrmUrl.$focused && uVis.alrmUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.almUrl']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+
+        <p ng-show="addAssetForm.alrmUrl.$error.url && !addAssetForm.alrmUrl.$focused && uVis.alrmUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.almUrl']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.statsUrl']}}</label>
+            <div class="col-sm-8">
+                <input type="url" name="statsUrl" class="form-control" type="text"
+                       ng-model="config.comm.statsUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.statsUrl']}}"
+                       ng-blur="uVis.statsUrl = true; checkFormValidity();"
+                       ng-focus-logi
+                       ng-required="required"
+                       ng-class="{'c-visited' : invalidStatusUrl && !assetConfigForm.statsUrl.$focused && uVis.statsUrl}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-class="{ 'has-error' : addAssetForm.statsUrl.$invalid && !addAssetForm.statsUrl.$focused && uVis.statsUrl || invalidStatusUrl}">
+        <p ng-show="addAssetForm.statsUrl.$error.url && !addAssetForm.statsUrl.$focused && uVis.statsUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+        <p ng-show="invalidStatusUrl && config.comm.statsNotify" class="help-block">
+            {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+        <p ng-show="invalidStatusUrl && sensorConfigEnabled && !config.comm.statsNotify" class="help-block">
+            {{resourceBundle['temperature.device.config.comm.statsUrl']}}
+            {{resourceBundle['isrequired']}} as " {{sensorMsg}} "
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.devRyUrl']}}</label>
+            <div class="col-sm-8">
+                <input type="url" name="devRyUrl" class="form-control" type="text"
+                       ng-model="config.comm.devRyUrl"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.devRyUrl']}}"
+                       ng-blur="uVis.devRyUrl = true"
+                       ng-focus-logi
+                       ng-class="{'c-visited' : addAssetForm.devRyUrl.$invalid && !addAssetForm.devRyUrl.$focused && uVis.devRyUrl}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-class="{ 'has-error' : addAssetForm.devRyUrl.$invalid && !addAssetForm.devRyUrl.$focused && uVis.devRyUrl }">
+        <p ng-show="addAssetForm.devRyUrl.$error.url && !addAssetForm.devRyUrl.$focused && uVis.devRyUrl"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.devRyUrl']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.comm.smsGyPh']}}</label>
+            <div class="col-sm-8">
+                <input name="smsGyPh" class="form-control" type="text"
+                       ng-model="config.comm.smsGyPh" required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.smsGyPh']}}"
+                       ng-pattern="/^\++\d{4,20}$/"
+                       ng-blur="uVis.smsGyPh = true"
+                       ng-focus-logi
+                       maxlength="20"
+                       ng-class="{'c-visited' : addAssetForm.smsGyPh.$invalid && !addAssetForm.smsGyPh.$focused && uVis.smsGyPh}"/>
+
+                <p class="desc">(+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}
+                    &gt;&lt;{{resourceBundle['user.mobile']}}&gt;; {{resourceBundle['eg']}} +919844360948
+                    [{{resourceBundle['india']}}], +15404569089 [{{resourceBundle['usa']}}])</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.smsGyPh.$invalid && !addAssetForm.smsGyPh.$focused && uVis.smsGyPh"
+         ng-class="{ 'has-error' : addAssetForm.smsGyPh.$invalid && !addAssetForm.smsGyPh.$focused && uVis.smsGyPh }">
+        <p ng-show="addAssetForm.smsGyPh.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+
+        <p ng-show="addAssetForm.smsGyPh.$error.pattern"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.smsGyKey']}}</label>
+            <div class="col-sm-8">
+                <input name="smsGyKey" class="form-control" type="text"
+                       ng-model="config.comm.smsGyKey"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.smsGyKey']}}" />
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.sender']}}</label>
+            <div class="col-sm-8">
+                <input name="senderId" class="form-control" type="text"
+                       ng-model="config.comm.senderId" placeholder="SMS sender number/Id"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.comm.samplingInt']}}</label>
+            <div class="col-sm-8">
+                <input type="text" name="sInt" class="form-control"
+                       min="1" ng-model="config.comm.samplingInt"
+                       required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.samplingInt']}}"
+                       ng-blur="uVis.sInt = true;"
+                       ng-focus-logi
+                       only-digits min-value="1"
+                       ng-class="{'c-visited' : addAssetForm.sInt.$invalid && !addAssetForm.sInt.$focused && uVis.sInt}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.sInt.$invalid && !addAssetForm.sInt.$focused && uVis.sInt"
+         ng-class="{ 'has-error' : addAssetForm.sInt.$invalid && !addAssetForm.sInt.$focused && uVis.sInt }">
+        <p ng-show="addAssetForm.sInt.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.samplingInt']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.comm.pushInt']}}</label>
+            <div class="col-sm-8">
+                <input type="text" name="pInt" class="form-control"
+                       min="1" ng-model="config.comm.pushInt"
+                       required
+                       placeholder="{{resourceBundle['temperature.device.config.comm.pushInt']}}"
+                       ng-blur="uVis.pInt = true;"
+                       ng-focus-logi
+                       only-digits min-value="1"
+                       ng-class="{'c-visited' : addAssetForm.pInt.$invalid && !addAssetForm.pInt.$focused && uVis.pInt}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.pInt.$invalid && !addAssetForm.pInt.$focused && uVis.pInt"
+         ng-class="{ 'has-error' : addAssetForm.pInt.$invalid && !addAssetForm.pInt.$focused && uVis.pInt }">
+        <p ng-show="addAssetForm.pInt.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.pushInt']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.usrPhones']}}</label>
+            <div class="col-sm-8">
+                <input name="usrPhones" class="form-control" type="text"
+                       ng-model="config.comm.usrPhones"
+                       placeholder="{{resourceBundle['temperature.device.config.comm.usrPhones']}}"
+                       ng-blur="uVis.usrPhones = true"
+                       ng-pattern="/^(\++\d{4,20}\,*)*$/"
+                       ng-focus-logi
+                       ng-class="{ 'c-visited' : addAssetForm.usrPhones.$invalid && !addAssetForm.usrPhones.$focused && uVis.usrPhones }"
+                        />
+
+                <p class="desc">({{resourceBundle['temperature.device.config.comm.usrPhones.desc']}})</p>
+
+                <p class="desc">(User phone numbers (comma-separated)
+                    (+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}&gt;&lt;{{resourceBundle['user.mobile']}}&gt;;
+                    {{resourceBundle['eg"']}} +919844360948 [{{resourceBundle['india']}}],
+                    +15404569089 [{{resourceBundle['usa']}}]))</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.usrPhones.$invalid && !addAssetForm.usrPhones.$focused && uVis.usrPhones"
+         ng-class="{ 'has-error' : addAssetForm.usrPhones.$invalid && !addAssetForm.usrPhones.$focused && uVis.usrPhones }">
+        <p ng-show="addAssetForm.usrPhones.$error.pattern"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.comm.usrPhones']}}
+            {{resourceBundle['isinvalid']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['notifications']}}</label>
+            <div class="col-sm-8">
+                <div class="checkbox mg-top-zero">
+                    <label>
+                        <input name="tmpNotify" type="checkbox"
+                               ng-model="config.comm.tmpNotify">
+                        {{resourceBundle['temperature.device.config.comm.tmpNotify']}}
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input name="incExcNotify" type="checkbox"
+                               ng-model="config.comm.incExcNotify">
+                        {{resourceBundle['temperature.device.config.comm.incExcNotify']}}
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input name="devAlrmsNotify" type="checkbox"
+                               ng-model="config.comm.devAlrmsNotify">
+                        {{resourceBundle['temperature.device.config.comm.devAlrmsNotify']}}
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input name="statsNotify" type="checkbox"
+                               ng-model="config.comm.statsNotify" ng-change="checkFormValidity()">
+                        {{resourceBundle['temperature.device.config.comm.statsNotify']}}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.poa.duration']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="0" class="form-control"
+                       name="poaDur" ng-model="config.poa.dur"
+                       placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                       ng-focus-logi
+                       only-digits min-value="0" empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.lba.limits']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="0" class="form-control"
+                       name="lbaLimits" ng-model="config.lba.lmt"
+                       placeholder="{{resourceBundle['temperature.device.config.lba.limits']}}"
+                       ng-focus-logi
+                       only-digits min-value="0" empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt10">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.highalarm']}}</p>
+        <p class="litetext">{{resourceBundle['temperature.device.config.halarm.desc']}}</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.temp']}}</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="highAlarmTemp"
+                       ng-model="config.highAlarm.temp"
+                       required
+                       placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                       ng-blur="uVis.highAlarmTemp = true"
+                       ng-focus-logi
+                       only-digits allow-decimal allow-negative
+                       ng-class="{'c-visited' : addAssetForm.highAlarmTemp.$invalid && !addAssetForm.highAlarmTemp.$focused && uVis.highAlarmTemp}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.highAlarmTemp.$invalid && !addAssetForm.highAlarmTemp.$focused && uVis.highAlarmTemp"
+         ng-class="{ 'has-error' : addAssetForm.highAlarmTemp.$invalid && !addAssetForm.highAlarmTemp.$focused && uVis.highAlarmTemp }">
+        <p ng-show="addAssetForm.highAlarmTemp.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.temp']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.duration']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="1" class="form-control"
+                       name="highAlarmDur" ng-model="config.highAlarm.dur"
+                       required
+                       placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                       ng-blur="uVis.highAlarmDur = true"
+                       ng-focus-logi
+                       only-digits min-value="1"
+                       ng-class="{'c-visited' : addAssetForm.highAlarmDur.$invalid && !addAssetForm.highAlarmDur.$focused && uVis.highAlarmDur}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.highAlarmDur.$invalid && !addAssetForm.highAlarmDur.$focused && uVis.highAlarmDur"
+         ng-class="{ 'has-error' : addAssetForm.highAlarmDur.$invalid && !addAssetForm.highAlarmDur.$focused && uVis.highAlarmDur }">
+        <p ng-show="addAssetForm.highAlarmTemp.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.duration']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+    </div>
+</div>
+<div class="row mt10">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.lowalarm']}}</p>
+        <p class="litetext">{{resourceBundle['temperature.device.config.lalarm.desc']}}</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.temp']}}</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="lowAlarmTemp"
+                       ng-model="config.lowAlarm.temp"
+                       required
+                       placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                       ng-blur="uVis.lowAlarmTemp = true"
+                       ng-focus-logi
+                       only-digits allow-decimal allow-negative
+                       ng-class="{'c-visited' : addAssetForm.lowAlarmTemp.$invalid && !addAssetForm.lowAlarmTemp.$focused && uVis.lowAlarmTemp}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.lowAlarmTemp.$invalid && !addAssetForm.lowAlarmTemp.$focused && uVis.lowAlarmTemp"
+         ng-class="{ 'has-error' : addAssetForm.lowAlarmTemp.$invalid && !addAssetForm.lowAlarmTemp.$focused && uVis.lowAlarmTemp }">
+        <p ng-show="addAssetForm.lowAlarmTemp.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.temp']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label required">{{resourceBundle['temperature.device.config.duration']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="1" class="form-control"
+                       name="lowAlarmDur" ng-model="config.lowAlarm.dur"
+                       required
+                       placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                       ng-blur="uVis.lowAlarmDur = true"
+                       ng-focus-logi
+                       only-digits min-value="1"
+                       ng-class="{'c-visited' : addAssetForm.lowAlarmDur.$invalid && !addAssetForm.lowAlarmDur.$focused && uVis.lowAlarmDur}"/>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6" ng-show="addAssetForm.lowAlarmDur.$invalid && !addAssetForm.lowAlarmDur.$focused && uVis.lowAlarmDur"
+         ng-class="{ 'has-error' : addAssetForm.lowAlarmDur.$invalid && !addAssetForm.lowAlarmDur.$focused && uVis.lowAlarmDur }">
+        <p ng-show="addAssetForm.lowAlarmDur.$error.required"
+           class="help-block">
+            {{resourceBundle['temperature.device.config.duration']}}
+            {{resourceBundle['isrequired']}}
+        </p>
+    </div>
+</div>
+<div class="row mt10">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.highwarn']}}</p>
+        <p class="litetext">{{resourceBundle['temperature.device.config.hwarn.desc']}}</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.temp']}}</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="highWarnTemp"
+                       ng-model="config.highWarn.temp"
+                       placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                       ng-blur="uVis.highWarnTemp = true"
+                       ng-focus-logi
+                       only-digits allow-decimal allow-negative empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.duration']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="1" class="form-control"
+                       name="highWarnDur" ng-model="config.highWarn.dur"
+                       placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                       ng-blur="uVis.highWarnDur = true"
+                       ng-focus-logi
+                       only-digits min-value="1" empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt10">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.lowwarn']}}</p>
+        <p class="litetext">{{resourceBundle['temperature.device.config.lwarn.desc']}}</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.temp']}}</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="lowWarnTemp"
+                       ng-model="config.lowWarn.temp"
+                       placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                       ng-blur="uVis.lowWarnTemp = true"
+                       ng-focus-logi
+                       only-digits allow-decimal allow-negative empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.duration']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="1" class="form-control"
+                       name="lowWarnDur" ng-model="config.lowWarn.dur"
+                       placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                       ng-blur="uVis.lowWarnDur = true"
+                       ng-focus-logi
+                       only-digits min-value="1" empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt10">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.alm.notf']}}</p>
+        <p class="litetext">{{resourceBundle['temperature.device.config.alm.notf.desc']}}</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.alm.notf.dur']}}</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="notfDur"
+                       ng-model="config.notf.dur"
+                       placeholder="{{resourceBundle['temperature.device.config.alm.notf.dur']}}"
+                       ng-focus-logi
+                       only-digits min-value="0"
+                       empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.alm.notf.num']}}</label>
+            <div class="col-sm-8">
+                <input type="text" min="1" class="form-control"
+                       name="notfNum" ng-model="config.notf.num"
+                       placeholder="{{resourceBundle['temperature.device.config.alm.notf.num']}}"
+                       ng-focus-logi only-digits min-value="1"
+                       empty-to-null/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt10">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.locale']}}</p>
+    </div>
+</div>
+<div class="row"> <!--Timezone-->
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label for="cnfTz" class="col-sm-4 control-label">{{resourceBundle['timezone']}}</label>
+            <div class="col-sm-8">
+                <select ng-model="config.locale.tznm" class="form-control" id="cnfTz"
+                        name="tz">
+                    <option value="">-- {{resourceBundle['select']}} {{resourceBundle['timezone']}} --</option>
+                    <option ng-repeat="(key,value) in allTimezones" value="{{key}}" ng-selected="key === config.locale.tznm">
+                        {{value}}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label for="cnfCnt" class="col-sm-4 control-label">{{resourceBundle['country']}}</label>
+            <div class="col-sm-8">
+                <select ng-model="config.locale.cn" class="form-control" id="cnfCnt"
+                        ng-change="setCountry(cnf.cnt)">
+                    <option value="">-- {{resourceBundle['select']}} {{resourceBundle['country']}} --</option>
+                    <option ng-repeat="(name,val) in sCountries" value="{{val.code}}" ng-selected="val.code === config.locale.cn">{{val.name}}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row"> <!--Language-->
+    <div class="col-sm-6">
+        <div class="form-group">
+            <label for="cnfLng" class="col-sm-4 control-label">{{resourceBundle['language']}}</label>
+            <div class="col-sm-8">
+                <select ng-model="config.locale.ln" class="form-control" id="cnfLng"
+                        name="lng">
+                    <option ng-repeat="(value,key) in allLanguages" value="{{value}}"  ng-selected="value === config.locale.ln">
+                        {{key}}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt10" ng-show="isDef(asset.sns) && asset.sns.length > 0">
+    <div class="col-sm-6">
+        <p class="form-desc">{{resourceBundle['temperature.device.config.sensors']}}</p>
+        <p class="litetext">{{resourceBundle['temperature.device.config.sensors.desc']}}</p>
+    </div>
+</div>
+<div class="row" ng-show="isDef(asset.sns) && asset.sns.length > 0">
+    <div class="col-sm-12">
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="nav nav-tabs">
+                    <li role="presentation" ng-repeat="sensor in asset.sns | orderBy: 'sId'"
+                        ng-class="{'active': currentSns == sensor.sId}"
+                        ng-click="setCurrentSensorConfig(sensor.sId)"><a>{{sensor.sId}}</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['asset.default.config']}}</label>
+                    <div class="col-sm-8">
+                        <div class="checkbox mt0">
+                            <label>
+                                <input name="currentSnsConfig-useDefault" type="checkbox" ng-change="resetCurrentSensorConfig()"
+                                       ng-model="currentSnsConfig.useDefault">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.samplingInt']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="currentSnsConfig-sInt" class="form-control"
+                               min="1" ng-model="currentSnsConfig.comm.samplingInt"
+                               placeholder="{{resourceBundle['temperature.device.config.comm.samplingInt']}}"
+                               ng-focus-logi
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.comm.pushInt']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" name="currentSnsConfig-pInt" class="form-control"
+                               min="1" ng-model="currentSnsConfig.comm.pushInt"
+                               placeholder="{{resourceBundle['temperature.device.config.comm.pushInt']}}"
+                               ng-focus-logi
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['notifications']}}</label>
+                    <div class="col-sm-8">
+                        <div class="checkbox mg-top-zero">
+                            <label>
+                                <input name="currentSnsConfig-tmpNotify" type="checkbox"
+                                       ng-model="currentSnsConfig.comm.tmpNotify"
+                                       ng-disabled="currentSnsConfig.useDefault">
+                                {{resourceBundle['temperature.device.config.comm.tmpNotify']}}
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input name="currentSnsConfig-incExcNotify" type="checkbox"
+                                       ng-model="currentSnsConfig.comm.incExcNotify"
+                                       ng-disabled="currentSnsConfig.useDefault">
+                                {{resourceBundle['temperature.device.config.comm.incExcNotify']}}
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input name="currentSnsConfig-devAlrmsNotify" type="checkbox"
+                                       ng-model="currentSnsConfig.comm.devAlrmsNotify"
+                                       ng-disabled="currentSnsConfig.useDefault">
+                                {{resourceBundle['temperature.device.config.comm.devAlrmsNotify']}}
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input name="currentSnsConfig-statsNotify" type="checkbox"
+                                       ng-model="currentSnsConfig.comm.statsNotify"
+                                       ng-disabled="currentSnsConfig.useDefault"
+                                       ng-change="checkFormValidity()">
+                                {{resourceBundle['temperature.device.config.comm.statsNotify']}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-6">
+                <p class="form-desc">{{resourceBundle['temperature.device.config.highalarm']}}</p>
+                <p class="litetext">{{resourceBundle['temperature.device.config.halarm.desc']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.temp']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="currentSnsConfig-highAlarmTemp"
+                               ng-model="currentSnsConfig.highAlarm.temp"
+                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                               only-digits allow-decimal allow-negative empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.duration']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" min="1" class="form-control"
+                               name="currentSnsConfig-highAlarmDur" ng-model="currentSnsConfig.highAlarm.dur"
+                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-6">
+                <p class="form-desc">{{resourceBundle['temperature.device.config.lowalarm']}}</p>
+                <p class="litetext">{{resourceBundle['temperature.device.config.lalarm.desc']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.temp']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="currentSnsConfig-lowAlarmTemp"
+                               ng-model="currentSnsConfig.lowAlarm.temp"
+                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                               only-digits allow-decimal allow-negative empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.duration']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" min="1" class="form-control"
+                               name="currentSnsConfig-lowAlarmDur" ng-model="currentSnsConfig.lowAlarm.dur"
+                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-6">
+                <p class="form-desc">{{resourceBundle['temperature.device.config.highwarn']}}</p>
+                <p class="litetext">{{resourceBundle['temperature.device.config.hwarn.desc']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.temp']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="currentSnsConfig-highWarnTemp"
+                               ng-model="currentSnsConfig.highWarn.temp"
+                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                               only-digits allow-decimal allow-negative empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.duration']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" min="1" class="form-control"
+                               name="currentSnsConfig-highWarnDur" ng-model="currentSnsConfig.highWarn.dur"
+                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-6">
+                <p class="form-desc">{{resourceBundle['temperature.device.config.lowwarn']}}</p>
+                <p class="litetext">{{resourceBundle['temperature.device.config.lwarn.desc']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.temp']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="currentSnsConfig-lowWarnTemp"
+                               ng-model="currentSnsConfig.lowWarn.temp"
+                               placeholder="{{resourceBundle['temperature.device.config.temp']}}"
+                               only-digits allow-decimal allow-negative empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.duration']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" min="1" class="form-control"
+                               name="currentSnsConfig-lowWarnDur" ng-model="currentSnsConfig.lowWarn.dur"
+                               placeholder="{{resourceBundle['temperature.device.config.duration']}}"
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt10">
+            <div class="col-sm-6">
+                <p class="form-desc">{{resourceBundle['temperature.device.config.alm.notf']}}</p>
+                <p class="litetext">{{resourceBundle['temperature.device.config.alm.notf.desc']}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.alm.notf.dur']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="currentSnsConfig-notfDur"
+                               ng-model="currentSnsConfig.notf.dur"
+                               placeholder="{{resourceBundle['temperature.device.config.alm.notf.dur']}}"
+                               only-digits allow-decimal allow-negative empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label  class="col-sm-4 control-label">{{resourceBundle['temperature.device.config.alm.notf.num']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" min="1" class="form-control"
+                               name="currentSnsConfig-notfNum" ng-model="currentSnsConfig.notf.num"
+                               placeholder="{{resourceBundle['temperature.device.config.alm.notf.num']}}"
+                               only-digits min-value="1" empty-to-null
+                               ng-disabled="currentSnsConfig.useDefault"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

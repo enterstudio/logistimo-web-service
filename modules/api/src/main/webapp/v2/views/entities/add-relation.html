@@ -1,0 +1,131 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+<div class="bizinfo bizinfo-last">
+<div ng-controller="RelationAddController">
+<form class="form-horizontal" role="form" name="addRelationForm" novalidate>
+    <div class="bgr">
+        <h5>{{resourceBundle['add']}} {{resourceBundle['relationships']}} {{resourceBundle['to']}} {{entityName}}</h5>
+        <hr/>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">{{resourceBundle['relation']}} {{resourceBundle['type']}}</label>
+                    <div class="col-sm-8">
+                        <select ng-change="fetchLinks()" ng-model="rel.linkType" class="form-control" required>
+                            <option ng-if="!(iMan && !cnff.enableCs)" value="c" selected>{{resourceBundle['customer']}}</option>
+                            <option ng-if="!(iMan && !cnff.enableVs)" value="v">{{resourceBundle['vendor']}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="pull-right">
+                        <button ng-show="iSU || dp.era" type="button" ng-disabled="!addRelationForm.$valid" ng-click="addRelationForm.$valid && update()" class="btn btn-primary">{{resourceBundle['submit']}}</button>
+                        <a href="#/setup/entities/detail/{{entityId}}/relationships/" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class=" form-group">
+                    <label class="col-sm-4 control-label">{{resourceBundle['description']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control"
+                               autocomplete="off"
+                               ng-model="rel.desc"
+                               maxlength="160">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-show="rel.linkType === 'c'">
+            <div class="col-sm-6">
+                <div class=" form-group">
+                    <label class="col-sm-4 control-label">{{resourceBundle['creditlimit']}}</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control"
+                               only-digits
+                               autocomplete="off"
+                               ng-model="rel.cl">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5>{{resourceBundle['relationship.relatedkiosk']}}</h5>
+        <hr/>
+        <div ng-hide="loading">
+            <div class="row">
+                <div class="col-sm-3 col-sm-offset-9">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped table-condensed table-hover table-logistimo">
+                <tbody>
+                <tr>
+                    <th class="col-sm-0-1"></th>
+                    <th class="text-center"><input type="checkbox" ng-change="selectAll(selAll)" ng-model='selAll' /></th>
+                    <th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                    <th>{{resourceBundle['kiosk']}}</th>
+                    <th class="col-sm-7">{{resourceBundle['location']}}</th>
+                </tr>
+                <tr ng-class="{'alert-warning': entity.linked}" ng-repeat="entity in filtered">
+                    <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != entity.sdid" ng-click="switchDomain(entity.sdid,entity.sdname)" uib-tooltip="{{entity.sdname}}"></span></td>
+                    <td class="text-center"><input type="checkbox" ng-model="entity.selected" ng-hide="entity.linked"/></td>
+                    <td class=" text-center">{{offset*1 + 1 + $index}}</td>
+                    <td>{{entity.nm}}</td>
+                    <td>{{entity.loc}}</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="row enclose">
+                <div class="col-sm-3 col-sm-offset-9">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <button ng-show="iSU || dp.era" type="button" ng-disabled="!addRelationForm.$valid"
+                            ng-click="addRelationForm.$valid && update()" class="btn btn-primary">
+                        {{resourceBundle['submit']}}
+                    </button>
+                    <a href="#/setup/entities/detail/{{entityId}}/relationships/" style="color: #000000;"
+                       class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+</div>
+</div>
+</div>

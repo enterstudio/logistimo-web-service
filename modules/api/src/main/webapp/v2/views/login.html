@@ -1,0 +1,97 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="LoginController">
+    <script>
+        (function () {
+            var ieOld = ( navigator.userAgent.match(/MSIE/i) ? true : false );
+            if(ieOld){
+               alert("It appears that you are using an Internet Explorer version lower than 11. The application works best only on Internet Explorer 11 or above. Please upgrade your application for best performance.");
+            }
+            if(window.screen.availWidth < 1024){
+                alert("It appears that your display monitor has a lower resolution than required for this application (which is 1024x600). As a result, the web pages may not render properly, but will continue to function correctly.");
+            };
+        } ());
+    </script>
+<form class="form-horizontal" novalidate ng-hide="fp">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="text-center">
+                <img class="imagewrapper" src="images/acquia_marina_logo.png">
+            </div>
+        </div>
+    </div>
+    <div class="bgr bgr-login">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="pull-right">
+                <select name="switchLanguage" ng-model="i18n.language" id="switchLanguage"
+                    ng-change="showMsg=false" ng-options="l as l.txt for l in languages"></select>
+            </div>
+        </div>
+    </div>
+    <div class="row mt10">
+        <div class="col-sm-10 col-sm-offset-1">
+            <p class="fc-color-red" ng-show="invalid && showMsg"><span class="glyphicons glyphicons-remove-circle" style="top:2px;"></span>&nbsp;{{errorMsg}}
+                <span ng-show="denied"><a href="/m/index.html">{{resourceBundle['operator.console']}}</a></span></p>
+        </div>
+    </div>
+    <div class="row noMargin"> <!--User ID-->
+        <div class="col-sm-10 col-sm-offset-1">
+            <div class="form-group">
+                <span class="control-label">{{resourceBundle['user.id']}}</span>
+                <input type="text" class="form-control" ng-model="userId" name="username" autofocus="autofocus"/>
+            </div>
+        </div>
+    </div>
+    <div class="row noMargin"> <!--Password-->
+        <div class="col-sm-10 col-sm-offset-1">
+            <div class="form-group">
+                <span class="control-label">{{resourceBundle['login.password']}}</span>
+                <input type="password" class="form-control" ng-model="password" name="password"/>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <button ng-disabled="lLoading || isUndef(userId) || isUndef(password)" ng-click="login()" name="login" class="btn btn-primary w100">
+                        <span ng-show="lLoading" style="padding: 3px" class="glyphicons glyphicons-cogwheel spin"></span>&nbsp;{{resourceBundle['login']}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row noMargin">
+        <div class="col-sm-10 col-sm-offset-1">
+            <div class="form-group">
+                <a ng-click="forgotPassword()">{{resourceBundle['pwd.forgot']}}?</a>
+            </div>
+        </div>
+    </div>
+    </div>
+</form>
+<div ng-show="fp" ng-init="title = 'Forgot password'; userId = userId ; loadDetail = true;"
+     ng-include="'views/forgot-password.html'"></div>
+</div>

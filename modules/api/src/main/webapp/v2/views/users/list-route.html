@@ -1,0 +1,122 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="UserRouteListController">
+    <div class="row">
+        <div class="col-sm-7">
+            <div class=" bizinfo-last">
+                <button type="button" ng-show="isDef(allRTags) && (iSU || dp.ue)" ng-click="editRoute('true')"
+                        class="btn btn-sm btn-default">{{resourceBundle['edit.route']}}
+                </button>
+            </div>
+        </div>
+        <div class="col-sm-2 col-sm-offset-3">
+            <div class="pull-right">
+                <div ng-map-tab-switch vw="vw"></div>
+            </div>
+        </div>
+    </div>
+    <div class="noLRpad tab-pane no-min-height nb">
+        <div class="row">
+            <div ng-show="isDef(allRTags)" class="col-sm-2">
+                <ul class="tabb nav nav-tabs-left nav-stacked">
+                    <li ng-class="{active: tag == '--notag--'}">
+                        <a ng-click="setTag('--notag--')" class="clickable"><span class="badge">{{countTags['--notag--'] || 0}}</span> {{resourceBundle['untagged']}}</a>
+                    </li>
+                    <li ng-class="{active: tag == rTag}" ng-repeat="rTag in allRTags">
+                        <a ng-click="setTag(rTag)" class="clickable"><span class="badge">{{countTags[rTag] || 0}}</span> {{rTag}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div ng-if="vw == 't'" ng-controller="ManagedListTableController">
+                <div ng-class="{'col-sm-12':isUndef(allRTags),'col-sm-10 noleftpad':isDef(allRTags)}">
+                    <div class="pull-right">
+                        <div class="mt5 mb5">
+                            <div ng-include="'views/load-more-paginator.html'"></div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table-condensed table-hover table-logistimo">
+                        <tbody>
+                        <tr>
+                            <th class="col-sm-0-1"></th>
+                            <th class="col-sm-0-1 text-center">{{resourceBundle['serialnum']}}</th>
+                            <th class="col-sm-4">{{resourceBundle['kiosk.name']}}</th>
+                            <th class="col-sm-4">{{resourceBundle['location']}}</th>
+                            <th ng-show="isUndef(allRTags) || tag != '--notag--'" class="col-sm-0-2 text-center">{{resourceBundle['move']}}</th>
+                            <th ng-show="isUndef(allRTags) || tag != '--notag--'" class="col-sm-0-5 text-center">{{resourceBundle['reorder']}}</th>
+                        </tr>
+                        <tr ng-class="{'reorderbg' : item.rhc}"
+                            ng-repeat="item in filtered = (rData | filter:{rt:tag} | orderBy:'osno')">
+                            <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                            <td class="text-center">{{item.sno}}</td>
+                            <td><a href="#/setup/entities/detail/{{item.id}}">{{item.nm}}</a></td>
+                            <td>{{item.loc}}</td>
+                            <td ng-show="isUndef(allRTags) || tag != '--notag--'" class="text-center">
+                            <span class="clickable glyphicons glyphicons-arrow-up"
+                                  ng-click="moveUp($index)"></span>
+                            <span class="clickable glyphicons glyphicons-arrow-down"
+                                  ng-click="moveDown($index)"></span>
+                            </td>
+                            <td ng-show="isUndef(allRTags)|| tag != '--notag--'">
+                                <span editable-box ng-show="!item.edit" ng-click="setPosition($index)" class="fullSpan">
+                                    {{item.osno}}
+                                </span>
+                                <div ng-show="item.edit">
+                                    <editable-text edit-model="item.esno"
+                                                   on-ok="updatePosition($index)"
+                                                   on-cancel="cancelPosition($index)"
+                                                   set-focus="{{item.edit}}">
+                                    </editable-text>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr ng-show="isUndef(filtered) || filtered.length == 0" class="mt5">
+                            <td colspan="100%" width="100%">
+                                <p class="alert alert-warning">{{resourceBundle['entities.notavailable']}}</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="pull-right">
+                        <div class="mb5">
+                            <div ng-include="'views/load-more-paginator.html'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pull-right">
+                    <div ng-class="{'col-sm-12':isUndef(allRTags),'col-sm-10':isDef(allRTags)}">
+                        <button ng-disabled="!routeUpdated || dp.vp || (currentDomain != user.sdid)" type="button"
+                                ng-click="updateManagedRouteOrder()" class="btn btn-primary">
+                            {{resourceBundle['routing.save']}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="vw == 'm' && isDef(orData)">
+                <div ng-class="{'col-sm-12':isUndef(allRTags),'col-sm-10 noleftpad':isDef(allRTags)}">
+                    <div ng-include="'views/users/view-man-map-route.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

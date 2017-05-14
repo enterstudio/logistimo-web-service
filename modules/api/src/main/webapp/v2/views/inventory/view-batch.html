@@ -1,0 +1,132 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="BatchDetailCtrl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <b>{{resourceBundle['batches.of']}} {{mnm}}</b>
+        </div>
+        <div class="panel-body" ng-show="loading">
+            <span class="glyphicons glyphicons-cogwheel spin"></span>
+        </div>
+        <div class="panel-body" ng-show="!loading">
+            <div class="row" ng-show="batchDet.length > 0">
+                <div class="col-sm-12">
+                    <table class="table table-striped table-condensed table-bordered">
+                        <tbody>
+                            <tr>
+                                <th>{{resourceBundle['serialnum']}}</th>
+                                <th>{{resourceBundle['batchid']}}</th>
+                                <th>{{resourceBundle['manufactured']}} (dd/mm/yyyy)</th>
+                                <th>{{resourceBundle['manufacturer']}}</th>
+                                <th>{{resourceBundle['expiry']}} (dd/mm/yyyy)</th>
+                                <th class="text-center">{{resourceBundle['material.stockonhand']}}</th>
+                                <th class="text-center" ng-show="ordersTabEnabled && allocate"> {{resourceBundle['allocated']}}</th>
+                                <th class="text-center" ng-show="ordersTabEnabled && allocate">{{resourceBundle['available']}}</th>
+                            </tr>
+                            <tr ng-repeat="item in batchDet">
+                                <td>{{$index+1}}</td>
+                                <td>{{item.bid}}</td>
+                                <td>{{item.bmfdt| asDate | date:'dd/MM/yyyy'}}</td>
+                                <td>{{item.bmfnm}}</td>
+                                <td>{{item.bexp | asDate | date:'dd/MM/yyyy'}}</td>
+                                <td class="text-center">{{item.q | number}}</td>
+                                <td class="text-center" ng-show="ordersTabEnabled && allocate">{{item.astk | number}}</td>
+                                <td class="text-center" ng-show="ordersTabEnabled && allocate">{{item.atpstk | number}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p ng-show="noDataFound" class="alert alert-warning">{{resourceBundle['nobatchesavailable']}}</p>
+            <div class="row" ng-show="expBatchDet.length > 0">
+                <div class="panel-heading">
+                    <b>{{resourceBundle['expired.batches']}} {{mnm}}</b>
+                </div>
+                <div class="col-sm-12">
+                    <table class="table table-striped table-condensed table-bordered">
+                        <tbody>
+                        <tr>
+                            <th>{{resourceBundle['serialnum']}}</th>
+                            <th>{{resourceBundle['batchid']}}</th>
+                            <th>{{resourceBundle['manufactured']}} (dd/mm/yyyy)</th>
+                            <th>{{resourceBundle['manufacturer']}}</th>
+                            <th>{{resourceBundle['expiry']}} (dd/mm/yyyy)</th>
+                            <th class="text-center">{{resourceBundle['material.stockonhand']}}</th>
+                            <th class="text-center" ng-show="ordersTabEnabled && allocate"> {{resourceBundle['allocated']}}</th>
+                            <th ng-show="batchPerm > 1 && !dp.vp">{{resourceBundle['action']}}</th>
+                        </tr>
+                        <tr ng-repeat="item in expBatchDet" class="alert alert-warning">
+                            <td>{{$index+1}}</td>
+                            <td>{{item.bid}}</td>
+                            <td>{{item.bmfdt| asDate | date:'dd/MM/yyyy'}}</td>
+                            <td>{{item.bmfnm}}</td>
+                            <td>{{item.bexp | asDate | date:'dd/MM/yyyy'}}</td>
+                            <td class="text-center">{{item.q}}</td>
+                            <td class="text-center" ng-show="ordersTabEnabled && allocate">{{item.astk | number}}</td>
+                            <td ng-show="batchPerm > 1 && !dp.vp"><span ng-show="!item.showReason" class="glyphicons glyphicons-disk-remove" uib-tooltip="Discard" ng-click="openReason('w', $index, item.mtgs)"></span>
+                                <span ng-show="!item.showReason" class="glyphicons glyphicons-underground lPad10" uib-tooltip="Batch reset" ng-click="openReason('p', $index, item.mtgs)"></span>
+                                <div class="bgr" ng-show="item.showReason" style="background-color: #fff;">
+                                    <div class="domain-title-heading" style="color:#333;">
+                                        <h5>{{title}}</h5>
+                                        <i ng-show="transType == 'p'">({{resourceBundle['batch.reset']}})</i>
+                                    </div>
+                                    <div class="row" ng-show="isDef(reasons) ">
+                                        <div class="col-sm-12">
+                                            <label class="ml10 control-label">Reason: </label>
+                                        </div>
+                                        <div class="col-sm-8 ml10">
+                                            <select ng-model="item.reason" class="form-control">
+                                                <option ng-repeat="reason in reasons track by $index" ng-selected="item.reason == reason" value="{{reason}}">{{reason  || '--' + resourceBundle['select'] + ' ' + resourceBundle['reason'] + '--'}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-show="atd > 0">
+                                        <div class="col-sm-12">
+                                            <label class="ml10 mt5 control-label" ng-class="{'required' : atd == '2'}">{{resourceBundle['date.actual.transaction']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 ml10">
+                                                <date-picker date-model="item.atd" min-date="minDate" max-date="today"></date-picker>
+                                        </div>
+                                    </div>
+                                    <div class="row mt10">
+                                        <div class="col-sm-12">
+                                            <button type="button" class="btn btn-sm btn-primary lPad5 ml10" ng-show="item.showReason" ng-click="updateTransaction($index, transType, item.reason, item.atd, item.mtgs)">{{resourceBundle['submit']}}</button>
+                                            <span ng-show="item.showReason" class="btn btn-sm btn-default lPad5" ng-click="openReason(transType, $index, item.mtgs)">{{resourceBundle['cancel']}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr ng-show="noDataFound">
+                            <td colspan="100%">
+                                <p class="alert alert-warning">{{resourceBundle['nobatchesavailable']}}</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

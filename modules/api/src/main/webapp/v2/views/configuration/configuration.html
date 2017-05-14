@@ -1,0 +1,91 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('configuration')">
+    <div class="subnavbar navbar navbar-default" role="navigation">
+        <ul ng-if="configTabEnabled && (iSU || dp.cv)" class="nav navbar-nav subnav">
+            <li ng-class="{ enable: subview == 'general'}">
+                <a href="#/configuration/general/">{{resourceBundle['general']}}</a></li>
+            <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'capabilities' }">
+                <a href="#/configuration/capabilities/">{{resourceBundle['capabilities']}}</a></li>
+            <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'inventory' }">
+                <a href="#/configuration/inventory/">{{resourceBundle['inventory']}}</a></li>
+            <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'orders' }">
+                <a href="#/configuration/orders/">{{resourceBundle['orders']}}</a></li>
+            <li ng-class="{ enable: subview == 'notifications' }">
+                <a ng-if="!isTempMonOnly" href="#/configuration/notifications/">{{resourceBundle['notifications']}}</a>
+                <a ng-if="isTempMonOnly" href="#/configuration/notifications/event/assets">{{resourceBundle['notifications']}}</a>
+            </li>
+            <li ng-class="{ enable: subview == 'tags' }">
+                <a href="#/configuration/tags/">{{resourceBundle['tags']}}</a></li>
+            <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'accounting' }">
+                <a href="#/configuration/accounting/">{{resourceBundle['accounting']}}</a></li>
+            <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'custom' }">
+                <a href="#/configuration/custom/">{{resourceBundle['report.customreports']}}</a></li>
+            <li ng-if="iSU || (iAdm && dp.av)" ng-class="{ enable: subview == 'asset' }">
+                <a href="#/configuration/asset/">{{resourceBundle['assets']}}</a></li>
+            <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'dashboard' }">
+                <a href="#/configuration/dashboard/">{{resourceBundle['dashboard']}}</a></li>
+            <li ng-if="hasChild && (iSU || dp.ce)" ng-class="{ enable: subview == 'options'}">
+                <a href="#/configuration/options/">{{resourceBundle['configuration.options']}}</a>
+            </li>
+        </ul>
+        <!--<span class="pull-right" ng-class="{ enable: subview == 'push'}">
+            <a href="#/configuration/push" class="btn btn-sm btn-primary pull-right">{{resourceBundle['push']}} {{resourceBundle['configuration']}}</a></span>-->
+    </div>
+    <div ng-if="configTabEnabled && (iSU || dp.cv)" ng-switch="subview">
+        <div ng-switch-when="general">
+            <div  ng-include="'views/configuration/general.html'"></div>
+        </div>
+        <div ng-switch-when="capabilities">
+            <div ng-include="'views/configuration/capabilities.html'"></div>
+        </div>
+        <div ng-switch-when="orders">
+            <div ng-include="'views/configuration/orders.html'"></div>
+        </div>
+        <div ng-switch-when="inventory">
+            <div ng-include="'views/configuration/inventory.html'"></div>
+        </div>
+        <div ng-switch-when="notifications">
+            <div ng-include="'views/configuration/notifications.html'"></div>
+        </div>
+        <div ng-switch-when="tags">
+            <div ng-include="'views/configuration/tags.html'"></div>
+        </div>
+        <div ng-switch-when="accounting">
+            <div ng-include="'views/configuration/accounting.html'"></div>
+        </div>
+        <div ng-switch-when="custom">
+            <div ng-include="'views/configuration/custom-reports.html'"></div>
+        </div>
+        <div ng-switch-when="asset">
+            <div ng-include="'views/configuration/asset.html'"></div>
+        </div>
+        <div ng-switch-when="dashboard">
+            <div ng-include="'views/configuration/dashboard.html'"></div>
+        </div>
+        <div ng-switch-when="options">
+            <div ng-if="iSU || dp.ce" ng-include="'views/configuration/config.html'"></div>
+        </div>
+    </div>
+</div>

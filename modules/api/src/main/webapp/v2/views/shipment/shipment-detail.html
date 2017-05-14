@@ -1,0 +1,554 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="ShipmentDetailCtrl" class="overflowYonly paddinglr10">
+    <div class="animate-switch-container" ng-switch on="selection">
+        <div ng-switch-when="shipDetail">
+            <div class="row mt18 lPad5">
+                <div class="col-sm-8 mb10">
+                    <span class="h3">
+                        Shipment: {{shipment.sId}}
+                    </span>
+                    <span class="badge currentstatus" ng-class="{'cancelled': shipment.statusCode == ORDER.CANCELLED}">{{ORDER.statusTxt[shipment.statusCode]}}</span>
+                    <span class="suborder h5" ng-show="shipment.oty == 1">({{resourceBundle['order']}}: <a ng-href="#/orders/detail/{{shipment.orderId}}/" target="_blank">{{shipment.orderId}}</a>)</span>
+                    <span class="suborder h5" ng-show="shipment.oty == 0">({{resourceBundle['transactions.transfer.upper']}}: <a ng-href="#/orders/transfers/detail/{{shipment.orderId}}/">{{shipment.orderId}}</a>)</span>
+                    <span class="litetext"  >
+                        {{resourceBundle['createdon']}} {{shipment.cOn}} {{resourceBundle['by']}}
+                        <a ng-href="#/setup/users/all/details?userId={{shipment.userID}}" target="_blank"> {{shipment.createdBy}}</a>
+                        <span ng-show="isDef(shipment.upOn)">
+                            , {{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{shipment.upOn}} {{resourceBundle['by']}}
+                            <a ng-href="#/setup/users/all/details?userId={{shipment.upId}}" target="_blank"> {{shipment.upBy}}</a>
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <hr/>
+            <div class="row mt10">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Status
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-sm-9">
+                                <div ng-include="'views/orders/status-indicator.html'"></div>
+                            </div>
+                            <div class="col-sm-3 btn-group">
+                                <div class="pull-right">
+                                    <ul class="nav navbar-nav" ng-hide="dp.vp || statusList.length == 0 || edit.ship">
+                                        <li>
+                                            <button type="button" class="btn btn-sm btn-primary dropdown-toggle"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-show="statusList.length > 0">
+                                                <span class="glyphicons glyphicons-show-lines medium pt2" uib-tooltip="Change status" tooltip-append-to-body="true"></span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                <li ng-repeat="status in statusList">
+                                                    <a ng-click="changeStatus(status)"> {{ORDERSTATUSTEXT.statusTxt[status]}}</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <span class="lPad5">
+                                        <button type="button" class="btn btn-sm btn-primary" ng-click="toggleStatusHistory()">
+                                            <span class="glyphicons glyphicons-history" style="font-size: 15px;" uib-tooltip="Show status history" ng-if="!dispStatusHistory" tooltip-append-to-body="true"></span>
+                                            <span class="glyphicons glyphicons-history" style="font-size: 15px;" uib-tooltip="Hide status history" ng-if="dispStatusHistory" tooltip-append-to-body="true"></span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div ng-if="dispStatusHistory">
+                                <div class="col-sm-12 pt15">
+                                    <div ng-include="'views/orders/status-history.html'" ng-init="isShip = true"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            {{resourceBundle['customer']}}
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <p><a class="capitalize"
+                                       ng-href="#/setup/entities/detail/{{shipment.customerId}}" target="_blank">{{shipment.customerName}}</a></p>
+
+                                    <p class="capitalize">{{shipment.customerAdd}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            {{resourceBundle['vendor']}}
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                        <p><a class="capitalize" href="#/setup/entities/detail/{{shipment.vendorId}}"
+                                           target="_blank">{{shipment.vendorName}}</a></p>
+
+                                        <p class="capitalize">{{shipment.vendorAdd}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt10">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Details
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="row mb10">
+                                        <label class="col-sm-4 control-label" ng-class="{'required':isTMand}">
+                                            {{resourceBundle['transporter']}} </label>
+
+                                        <div class="col-sm-7">
+                                            <p ng-hide="edit.transp">
+                                                {{shipment.transporter ? shipment.transporter : resourceBundle['none'] }}
+                                                <a class="ml15"
+                                                   ng-show="!edit.transp && !dp.vp && shipment.atv"
+                                                   ng-click="toggleEdit('transp')" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                                                    <span class="glyphicons glyphicons-edit alignBaseLine"></span>
+                                                </a>
+                                            </p>
+                                            <div ng-show="edit.transp">
+                                                <editable-text edit-model="shipment.tempTransporter"
+                                                               on-ok="updateShipmentField('transp', shipment.tempTransporter)"
+                                                               on-cancel="toggleEdit('transp')"
+                                                               set-focus="">
+                                                </editable-text>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb10">
+                                        <label class="col-sm-4 control-label"> {{resourceBundle['trackingid']}}</label>
+
+                                        <div class="col-sm-7">
+                                            <p ng-hide="edit.trackid">
+                                                {{shipment.trackingId ? shipment.trackingId : resourceBundle['none'] }}
+                                                <a class="ml15"
+                                                   ng-show="!edit.trackid && !dp.vp && shipment.atv"
+                                                   ng-click="toggleEdit('trackid')" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                                                    <span class="glyphicons glyphicons-edit alignBaseLine"></span>
+                                                </a>
+                                            </p>
+                                            <div ng-show="edit.trackid">
+                                                <editable-text edit-model="shipment.tempTrackingId"
+                                                               on-ok="updateShipmentField('trackid',shipment.tempTrackingId)"
+                                                               on-cancel="toggleEdit('trackid')"
+                                                               set-focus="">
+                                                </editable-text>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb10">
+                                        <label class="col-sm-4 control-label"> {{resourceBundle['eda']}} </label>
+
+                                        <div class="col-sm-7">
+                                            <p class="capitalize" ng-hide="edit.sefd">
+                                                {{shipment.eadLabel? shipment.eadLabel:resourceBundle['none']}}
+                                                <a class="ml15 alignBaseLine"
+                                                   ng-show="!edit.sefd && !dp.vp && shipment.atv && shipment.statusCode != ORDER.FULFILLED"
+                                                   ng-click="toggleEdit('sefd')" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                                                    <span class="glyphicons glyphicons-edit alignBaseLine"></span>
+                                                </a>
+                                            </p>
+                                            <date-picker ng-show="edit.sefd" date-model="shipment.tead"
+                                                         min-date="today" place-holder="{{resourceBundle['eda']}}"></date-picker>
+                                            <div ng-show="edit.sefd" class="mt10">
+                                                <button class="btn btn-sm btn-primary"
+                                                        ng-click="updateShipmentField('sefd',shipment.tead)">
+                                                    {{resourceBundle['save']}}
+                                                </button>
+                                                <button class="btn btn-sm btn-default" ng-click="toggleEdit('sefd', true)">
+                                                    {{resourceBundle['cancel']}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb10" ng-if="shipment.statusCode == 'fl'">
+                                        <label class="col-sm-4 control-label"> Actual fulfilment date </label>
+
+                                        <div class="col-sm-7">
+                                            <label class="capitalize" ng-hide="edit.sefd">{{shipment.afd? shipment.afd:resourceBundle['none']}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                               <div class="col-sm-6" ng-if="isDef(rsn)">
+                                    <div class="row">
+                                        <label class="col-sm-4 control-label">
+                                            {{resourceBundle['reason.shipment']}} </label>
+
+                                        <div class="col-sm-7">
+                                            <label class="capitalize">{{rsn}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb10">
+                                    <div class="row">
+                                        <label class="col-sm-4 control-label cbx">{{resourceBundle['packagesize']}}</label>
+
+                                        <div class="col-sm-7">
+                                            <p ng-show="!edit.ps" class="cbx">
+                                                {{shipment.ps? shipment.ps : resourceBundle['none']}}
+                                                <a class="ml15"
+                                                   ng-show="!edit.ps && !dp.vp && shipment.atv"
+                                                   ng-click="toggleEdit('ps')" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                                                    <span class="glyphicons glyphicons-edit alignBaseLine"></span>
+                                                </a>
+                                            </p>
+                                            <select class="form-control" ng-model="shipment.tempPS" ng-show="isDef(packageSize) && edit.ps">
+                                                <option ng-repeat="psize in packageSize" value="{{psize}}"
+                                                        ng-selected="shipment.tempPS == psize">
+                                                    {{psize || resourceBundle['select'] + ' ' + resourceBundle['packagesize']}}
+                                                </option>
+                                            </select>
+                                            <input type="text" class="form-control" ng-show="isUndef(packageSize) && edit.ps" ng-model="shipment.tempPS">
+                                            <div ng-show="edit.ps" class="mt10">
+                                                <button class="btn btn-sm btn-primary"
+                                                        ng-click="updateShipmentField('ps',shipment.tempPS)">
+                                                    {{resourceBundle['save']}}
+                                                </button>
+                                                <button class="btn btn-sm btn-default" ng-click="toggleEdit('ps')">
+                                                    {{resourceBundle['cancel']}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="nav nav-tabs subnav-tabs">
+                        <li ng-class="{ active: view == 'consignment'}"><a
+                                ng-click="view='consignment'">{{resourceBundle['items']}} <span class="badge">{{shipment.items ? shipment.items.length : 0}}</span></a>
+                        </li>
+                        <li ng-class="{ active: view == 'message'}">
+                            <a ng-click="view='message'">{{resourceBundle['comments']}} <span class="badge">{{messageCnt ? messageCnt : 0}}</span></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="tab-content">
+                        <div ng-switch="view">
+                            <div ng-switch-when="consignment" class="tab-pane">
+                                <div class="row">
+                                    <div class="col-sm-12 mt10">
+                                        <div class="row">
+                                            <div class="col-sm-12"
+                                                 ng-show="allocate && !edit.ship && shipment.statusCode == 'op' && !dp.vp && shipment.atv">
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                        ng-click="startEditShipment()">{{resourceBundle['edit']}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-12 mt10">
+                                                <table class="table table-condensed table-hover table-logistimo">
+                                                    <tr>
+                                                        <th class="col-sm-2 text-left">{{resourceBundle['material']}}
+                                                        </th>
+                                                        <th class="col-sm-2 text-center">{{resourceBundle['ordered']}}</th>
+                                                        <th class="text-center" ng-show="allocate || shipment.statusCode != 'op'"
+                                                            ng-if="shipment.statusCode != 'cn'"
+                                                            ng-class="{'col-sm-2':shipment.statusCode == 'op','col-sm-3':shipment.statusCode != 'op'}">
+                                                            <span ng-if="shipment.statusCode == 'op'">{{resourceBundle['allocated']}}</span>
+                                                            <span ng-if="shipment.statusCode != 'op'">{{resourceBundle['shipped']}}</span>
+                                                        </th>
+                                                        <!--<th class="col-sm-0-1" ng-show="allocate || shipment.statusCode != 'op'"
+                                                            ng-if="shipment.statusCode != 'cn'"></th>-->
+                                                        <th class="text-center" ng-show="shipment.statusCode == 'fl'"
+                                                            ng-class="{'col-sm-2':shipment.statusCode == 'op','col-sm-3':shipment.statusCode != 'op'}">
+                                                            {{resourceBundle['fulfilled']}}
+                                                        </th>
+                                                        <th class="col-sm-0-1" ng-show="shipment.statusCode == 'fl'"></th>
+                                                        <!--<th class="text-center" ng-hide="shipment.statusCode != 'op'">
+                                                            {{resourceBundle['material.stockonhand']}}
+                                                            <span class="litetext">{{shipment.customerName | limitTo:17}}
+                                                                <span ng-show="shipment.customerName.length > 17">...</span>
+                                                            </span>
+                                                        </th>-->
+                                                        <th class="text-center" ng-hide="shipment.statusCode != 'op'">
+                                                            {{resourceBundle['available.stock']}}
+                                                            <span class="litetext">{{shipment.vendorName | limitTo:17}}
+                                                                <span ng-show="shipment.vendorName.length > 17">...</span>
+                                                            </span>
+                                                        </th>
+                                                    </tr>
+                                                    <tbody ng-repeat="item in shipment.items"
+                                                           ng-controller="DemandItemController"
+                                                           data-ng-switch on="exRow[$index]">
+                                                    <tr>
+                                                        <td class="col-sm-2 text-left"><a
+                                                                href="#/setup/materials/all/detail/{{item.mId}}"
+                                                                target="_blank" class="alignBaseLine">{{item.mnm}}</a>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span>{{item.q}}</span>
+                                                            <span class="litetext" ng-if="item.oq">{{resourceBundle['original']}}: {{item.oq}}</span>
+                                                            <span class="litetext" ng-if="item.rq > 0">{{resourceBundle['order.recommended']}}: {{item.rq}}</span>
+                                                        </td>
+                                                        <td class="text-center" ng-show="allocate || shipment.statusCode != 'op'"
+                                                            ng-if="shipment.statusCode != 'cn'">
+                                                            <div ng-hide="edit.ship" style="clear: both" class="col-sm-9 pr30 text-right">
+                                                                <span>{{shipment.statusCode == 'op' ? item.aq : item.q}}
+                                                                </span>
+                                                            </div>
+                                                            <span ng-show="(allocate && item.isBa &&
+                                                                ((shipment.statusCode == 'op' && isDef(item.aq)) ||
+                                                                (shipment.statusCode != 'op' && isDef(item.q)))) && !edit.ship"
+                                                                  class="glyphicons glyphicons-list-alt pull-left col-sm-2 pl0 text-left"
+                                                                  style="vertical-align:middle;"
+                                                                  ng-click="toggleBatch('sBDetail',$index)">
+                                                            </span>
+                                                            <div ng-show="item.sBDetail || edit.ship">
+                                                                <div ng-switch on="item.isBa">
+                                                                    <div ng-switch-when="true">
+                                                                        <table class="table table-bordered table-order-batch"
+                                                                               ng-show="item.bts.length > 0"
+                                                                               style="margin-left: auto; margin-right: auto;">
+                                                                            <thead>
+                                                                            <tr style="font-size: x-small;"
+                                                                                id="at{{item.mId}}{{$index}}"
+                                                                                uib-popover="{{item.popupMsg}}"
+                                                                                popover-trigger="showpopup">
+                                                                                <th class=" text-center">
+                                                                                    {{resourceBundle['batch']}}
+                                                                                </th>
+                                                                                <th class=" text-center">
+                                                                                    {{resourceBundle['expiry']}}
+                                                                                </th>
+                                                                                <th class=" text-center">
+                                                                                    {{resourceBundle['quantity']}}
+                                                                                </th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <tr style="font-size: xx-small;"
+                                                                                ng-repeat="bi in item.bts"
+                                                                                ng-hide="isUndef(bi.q) || bi.q == 0">
+                                                                                <td class=" text-center">{{bi.id}}</td>
+                                                                                <td class=" text-center">{{bi.e}}</td>
+                                                                                <td class=" text-center">{{bi.q}}
+                                                                                    <span class="litetext small-font"
+                                                                                          ng-if="isDef(bi.smst)">{{bi.smst}}
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div ng-show="edit.ship">
+                                                                <a ng-disabled="item.atpstk == 0 && item.aq == 0" ng-show="item.isBa && !exRow[$index]" ng-click="hidePop(item,$index,'s'); select($index,'show')"
+                                                                   class="btn btn-sm btn-primary">{{resourceBundle['allocate.batch']}}</a>
+                                                                <input ng-if="!item.isBa" class="form-control"
+                                                                       ng-disabled="item.atpstk == 0 && item.aq == 0"
+                                                                       type="text" only-digits
+                                                                       ng-model="item.naq"
+                                                                       id="{{item.mId}}{{$index}}"
+                                                                       ng-class="{'red-border':item.invalidPopup}"
+                                                                       uib-popover="{{item.popupMsg}}"
+                                                                       popover-trigger="showpopup"
+                                                                       ng-focus="hidePop(item,$index)"
+                                                                       ng-blur="validate(item,$index)"
+                                                                       maxlength="12">
+                                                                <span class="litetext" ng-if="item.oastk">Allocation in order: {{item.oastk}}</span>
+                                                                <div ng-show="item.naq > 0 && !item.isBa" class="mt5">
+                                                                    <span class="litetext float-left" ng-class="{'required' : transConfig.ism}" ng-show="(!item.tm && isDef(matstatus)) || (item.tm && isDef(tempmatstatus))">{{resourceBundle['inventory.material.status']}}</span>
+                                                                    <select ng-show="isDef(matstatus) && !item.tm" ng-model="item.smst" class="form-control"
+                                                                            ng-class="{'red-border': item.sinvalidPopup}"
+                                                                            uib-popover="{{item.sPopupMsg}}"
+                                                                            ng-blur="item.isVisitedStatus = true; validateStatus(item,$index,'cm')"
+                                                                            ng-focus="hidePop(item,$index,'cm', true)"
+                                                                            id="cm{{item.mId}}{{$index}}"
+                                                                            popover-trigger="showpopup">
+                                                                        <option ng-repeat="status in matstatus" value="{{status}}"
+                                                                                ng-selected="item.smst == status">
+                                                                            {{status|| resourceBundle['select'] + ' ' + resourceBundle['mat.status.lowercase'] }}
+                                                                        </option>
+                                                                    </select>
+                                                                    <select ng-show="isDef(tempmatstatus) && item.tm" ng-model="item.smst" class="form-control"
+                                                                            ng-class="{'red-border': item.sinvalidPopup}"
+                                                                            uib-popover="{{item.sPopupMsg}}"
+                                                                            ng-blur="item.isVisitedStatus = true; validateStatus(item,$index,'cmt')"
+                                                                            ng-focus="hidePop(item,$index,'cmt', true)"
+                                                                            id="cmt{{item.mId}}{{$index}}"
+                                                                            popover-trigger="showpopup">
+                                                                        <option ng-repeat="status in tempmatstatus"
+                                                                                value="{{status}}"
+                                                                                ng-selected="item.smst == status">
+                                                                            {{status|| resourceBundle['select'] + ' ' +
+                                                                            resourceBundle['mat.status.lowercase'] }}
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <span class="litetext col-sm-9 pr30 text-right" ng-show="isDef(item.smst) && !item.isBa && !edit.ship">{{item.smst}}</span>
+                                                        </td>
+                                                        <!--<td ng-show="allocate || shipment.statusCode != 'op'"
+                                                            ng-if="shipment.statusCode != 'cn'">
+                                                            <span ng-show="allocate && item.isBa &&
+                                                                ((shipment.statusCode == 'op' && isDef(item.aq)) ||
+                                                                (shipment.statusCode != 'op' && isDef(item.q)))"
+                                                                  class="glyphicons glyphicons-list-alt pull-left"
+                                                                  style="vertical-align:middle;"
+                                                                  ng-click="toggleBatch('sBDetail',$index)">
+                                                                </span>
+                                                        </td>-->
+                                                        <td class="text-center" ng-show="shipment.statusCode == 'fl'">
+                                                            <span class="col-sm-8 pr30 text-right">{{item.fq}}</span>
+                                                            <span ng-if="isDef(item.frsn) && !item.isBa"
+                                                                  uib-tooltip-html="item.fdrsn"
+                                                                  class="litetext glyphicons glyphicons-info-sign lnk col-sm-1 text-left pl0"
+                                                                  tooltip-append-to-body="true">
+                                                            </span>
+                                                            <span ng-show="allocate && item.isBa && isDef(item.fq) && !edit.ship"
+                                                                  class="glyphicons glyphicons-list-alt text-left pl0 col-sm-2"
+                                                                  style="vertical-align:middle;"
+                                                                  ng-click="toggleBatch('sBDetailF',$index)">
+                                                            </span>
+                                                            <div ng-show="item.sBDetailF || edit.ship">
+                                                            <div ng-switch on="item.isBa">
+                                                                <div ng-switch-when="true">
+                                                                    <table class="table table-bordered table-order-batch"
+                                                                           ng-show="item.bts"
+                                                                           style="margin-left: auto; margin-right: auto;">
+                                                                        <thead>
+                                                                        <tr style="font-size: x-small;">
+                                                                            <th class=" text-center">
+                                                                                {{resourceBundle['batch']}}
+                                                                            </th>
+                                                                            <th class=" text-center">
+                                                                                {{resourceBundle['expiry']}}
+                                                                            </th>
+                                                                            <th class=" text-center">
+                                                                                {{resourceBundle['quantity']}}
+                                                                            </th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                        <tr style="font-size: xx-small;"
+                                                                            ng-repeat="bi in item.bts"
+                                                                            ng-hide="isUndef(bi.fq) || bi.fq == 0">
+                                                                            <td class=" text-center">{{bi.id}}</td>
+                                                                            <td class=" text-center">{{bi.e}}</td>
+                                                                            <td class=" text-center">{{bi.fq}}
+                                                                                <span ng-if="isDef(bi.frsn)"
+                                                                                      uib-tooltip-html="bi.fdrsn"
+                                                                                      class="litetext glyphicons glyphicons-info-sign lnk"
+                                                                                      tooltip-append-to-body="true">
+                                                                                </span>
+                                                                                <span ng-show="isDef(bi.fmst)" class="litetext small-font">{{bi.fmst}}</span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <span class="litetext col-sm-8 pr30 text-right" ng-if="isDef(item.fmst)">{{item.fmst}}</span>
+                                                        </td>
+                                                        <!--<td ng-show="shipment.statusCode == 'fl'">
+                                                            <span ng-show="allocate && item.isBa && isDef(item.fq)"
+                                                                  class="ml10 glyphicons glyphicons-list-alt pull-left"
+                                                                  style="vertical-align:middle;"
+                                                                  ng-click="toggleBatch('sBDetailF',$index)">
+                                                            </span>
+                                                        </td>-->
+                                                        <!--<td class="text-center" ng-hide="shipment.statusCode != 'op'">
+                                                            {{item.stk}}
+                                                            <span class="litetext" ng-show="item.csavibper > 0 && isDef(mmdt)">{{item.csavibper | roundNoTrailZeros:2}} {{mmdt}}</span>
+                                                            <span class="litetext">({{item.min}},{{item.max}})</span>
+                                                        </td>-->
+                                                        <td class="text-center" ng-hide="shipment.statusCode != 'op'">
+                                                            {{item.atpstk}}
+                                                            <span class="litetext">{{resourceBundle['material.stockonhand']}}: {{item.vs}}</span>
+                                                            <span class="litetext" ng-show="isDef(item.itstk)">In-transit: {{item.itstk}}</span>
+                                                            <span class="litetext"><span uib-tooltip="(min,max)">({{item.vmin}},{{item.vmax}})</span></span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr data-ng-switch-when="show">
+                                                        <td colspan=100% class="partialview">
+                                                            <div ng-init="view='views/transactions/batch-transaction.html';index = $index;
+                                                            huName = item.huName; huQty = item.huQty; mnm = item.mnm; mid = item.mId ;
+                                                            kid = shipment.vendorId ; bdata = item.bdata; obts = item.obts;
+                                                            exBatches = isDef(item.bts)?item.bts:item.bq;
+                                                            allocq = isDef(item.bdata)?0:(isDef(item.aq)?item.aq:item.q);
+                                                            shipOrderId = shipment.orderId; material = item;
+                                                            msm = transConfig.ism;"
+                                                                 ng-include="'views/partial.html'"></div>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                                <div ng-show="edit.ship" class="col-sm-12">
+                                                    <div class="pull-right">
+                                                        <button class="btn btn-sm btn-primary" ng-disabled="saveDisable"
+                                                                ng-click="saveShipment()">
+                                                            {{resourceBundle['save']}}
+                                                        </button>
+                                                        <button class="btn btn-sm btn-default"
+                                                                ng-click="cancelShipment()">
+                                                            {{resourceBundle['cancel']}}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-switch-when="message" class="tab-pane">
+                                <div ng-include="'views/conversation/messages.html'"
+                                     ng-init="objId = sid;objType = 'SHIPMENT'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-switch-when="fulfilShipment">
+            <div ng-include="'views/shipment/fulfil-shipment.html'"></div>
+        </div>
+    </div>
+</div>

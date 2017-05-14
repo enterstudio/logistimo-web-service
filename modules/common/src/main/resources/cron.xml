@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<cronentries>
+     <!-- Scheduled backups -->
+    <cron>
+        <url>/task/mrstarter?name=ScheduleTransactionDataExport&amp;kind=Domain</url>
+        <description>Schedule transaction data export tasks for a domain</description>
+        <schedule>every day 00:05</schedule> <!-- 05:35 am IST -->
+    </cron>
+    <cron>
+        <url>/task/mrstarter?name=EntityHierarchy&amp;kind=Domain</url>
+        <description>Pre compute entity hierarchy</description>
+        <schedule>every day 21:30</schedule>
+    </cron>
+    <cron>
+        <url>/task/mrstarter?name=ScheduleCustomReportsExport&amp;kind=Domain</url>
+        <description>Schedule Custom reports export tasks for a domain</description>
+        <schedule>every day 01:15</schedule> <!-- 06:45 am IST -->
+        <target>backend1</target>
+    </cron>
+    <cron>
+        <url>/task/mrstarter?name=BatchEventNotifier&amp;kind=Domain</url>
+        <description>Notify events in batch (for daily/weekly notifications)</description>
+        <schedule>every day 02:30</schedule> <!-- 08:00 am IST -->
+    </cron>
+    <cron>
+        <url>/task/mrstarter?name=DailyEventsCreator&amp;kind=Domain</url>
+        <description>Check and create events on a daily basis (such as no activity, order fulfilment due, user not logged-in)</description>
+        <schedule>every day 01:30</schedule> <!-- 07:00 am IST (this should be after the notification for previous day; else, this may get included in notifications for previous day) -->
+    </cron>
+</cronentries>

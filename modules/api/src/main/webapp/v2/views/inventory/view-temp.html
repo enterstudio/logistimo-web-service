@@ -1,0 +1,71 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="TempDetailCtrl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <b>{{resourceBundle['temperature.of']}} {{mnm}} {{resourceBundle['of']}} {{enm}}</b>
+        </div>
+        <div class="panel-body" ng-show="loading">
+            <span class="glyphicons glyphicons-cogwheel spin"></span>
+        </div>
+        <div class="panel-body">
+            <div ng-class="{'tempMainDiv':forceMinHeight}">
+                <div class="tempMainDiv" ng-show="isDef(chartData)">
+                    <div class="row tempdiv bgr mb10" ng-repeat="data in chartData">
+                        <div class="col-sm-3">
+                            <h4>{{data.sId}} <img ng-src="../../images/icon/{{data.aIco}}"/></h4>
+                            {{data.vnm}}
+                            <h4>
+                                <span ng-style="{color:data.tClr}"
+                                      ng-show="data.isn">{{resourceBundle['normal']}}</span>
+                                <span ng-style="{color:data.tClr}" ng-hide="data.isn">{{resourceBundle['alert']}}</span>
+                            </h4>
+                            {{data.min}}&deg;C - {{data.max}}&deg;C<br/><br/>
+
+                            <div ng-show="data.cTemp != undefined">
+                                <h1 ng-style="{color:data.cTempClr}">{{data.cTemp}}&deg;C</h1>
+                                {{data.time}}
+                            </div>
+                        </div>
+                        <div class="col-sm-9">
+                            <div ng-show="data.cTemp != undefined">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth"
+                                              chart-label="data.cLabel"
+                                              chart-data="data.cData" chart-options="data.cOptions"
+                                              chart-id="c{{$index}}"
+                                              trend="data.cTrend"></fusion-chart>
+                            </div>
+                            <div ng-show="data.cTemp == undefined">
+                                {{resourceBundle['nodataavailable']}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="isUndef(chartData) && !loading">
+                    {{resourceBundle['nodataavailable']}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

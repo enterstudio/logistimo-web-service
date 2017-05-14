@@ -1,0 +1,246 @@
+/*
+ * Copyright © 2017 Logistimo.
+ *
+ * This file is part of Logistimo.
+ *
+ * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+ * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * You can be released from the requirements of the license by purchasing a commercial license. To know more about
+ * the commercial license, please contact us at opensource@logistimo.com
+ */
+
+.uib-datepicker .btn-default{
+    background-color: white;
+    border-radius: 0;
+    border: 1px solid #eeeeee;
+}
+
+.uib-datepicker .text-muted {
+    color: #cccccc;
+}
+
+.uib-datepicker .btn-info {
+    background-color: #5bc0de;
+}
+
+.uib-datepicker-popup .uib-clear {
+    display: none;
+}
+
+.uib-datepicker-popup .btn-group>.btn:first-child:not(:last-child):not(.dropdown-toggle) {
+    border-radius: 3px;
+}
+
+.report-filter {
+    position: absolute;
+    width: 100%;
+    z-index:3;
+    border:1px #ddd solid;
+    overflow: auto;
+    box-shadow: 0 0 10px #ddd;
+    padding: 10px 15px 0;
+    /*background: #FFFFFF linear-gradient(to bottom, #ffffff 0%, #f5f5f5 100%);*/
+    background: #f3f3f3;
+}
+
+.report-filter.hide-filter {
+    background: #f2f2f2;
+}
+
+.report-data-pane {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.report-data-pane .form-label {
+    color: #888;
+    padding-left: 5px;
+}
+.report-filter>.row {
+    overflow-y: hidden;
+    max-height: 500px;
+    -webkit-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+.report-filter .row:first-child {
+    margin-bottom: 20px;
+}
+.report-filter.hide-filter .row {
+    margin-bottom: 0;
+}
+.report-filter .row:last-child{
+    margin-bottom: 5px;
+}
+.report-filter.hide-filter .row:not(:first-child) {
+    max-height: 0;
+}
+
+.report-metric li {
+    width: 150px;
+}
+.report-metric li>a {
+    text-align: center;
+}
+
+.report-filter-pane {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 30px;
+    left: 30px;
+    margin-top: 55px;
+}
+
+.badge.filtered-data {
+    background-color: transparent;
+    color: #555;
+    border: 1px solid #888;
+    border-radius: 10px;
+    vertical-align: super;
+    margin-right: 5px;
+}
+
+.badge:hover span:after {
+    content: " X ";
+    font-size: 80%;
+    position: relative;
+}
+
+.filter-fixed {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 30%;
+}
+
+.filter-fixed .form-group {
+    float: right;
+}
+
+.filter-close {
+    text-align: center;
+    color: #aaa;
+    cursor: pointer;
+}
+.filter-close span {
+    padding-top: 5px;
+}
+
+.filter-card {
+    background: #fdfdfd;
+    padding: 10px;
+    box-shadow: 0 0 10px #dedede;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.filter-card .filter-heading {
+    padding-bottom: 10px;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.filter-card .filter-sub-heading {
+    color: #aaa;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+.filter-card .filter-sub-heading span {
+    padding-right: 15px;
+    cursor: pointer;
+}
+
+.filter-card .filter-sub-heading span.active {
+    color: #F56C64;
+}
+
+.filter-card .filter-compare {
+    text-align: right;
+    color: #888;
+    cursor: pointer;
+    padding-top: 2px;
+}
+
+.filter-compare:before {
+    content: " ";
+    white-space: pre;
+}
+.filter-card .limit {
+    font-size: 10px;
+    color: #777;
+    display: block;
+    text-align: left;
+}
+.card-left {
+    padding-right: 7px;
+}
+
+.card-right {
+    padding-left: 8px;
+}
+
+.select2-highlighted .litetext {
+    color: inherit;
+}
+
+.report-table {
+    margin: 0 auto;
+}
+
+.report-table th {
+    text-align: left;
+    background-color: #f0f0f0;
+}
+.report-table td,
+.report-table th {
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+.report-table-container {
+    padding-top: 10px;
+    padding-bottom: 15px;
+}
+
+.report-table>tbody>tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.report-data-pane fusion-chart text:nth-child(2) tspan {
+    white-space:pre;
+}
+
+/*
+th.rotate {
+    /!* Something you can count on *!/
+    height: 140px;
+    white-space: nowrap;
+}
+
+th.rotate > div {
+    transform:
+        /!* Magic Numbers *!/
+    translate(25px, 51px)
+        /!* 45 is really 360 - 45 *!/
+    rotate(270deg);
+    width: 30px;
+}
+
+th.rotate > div > span {
+    border-bottom: 1px solid #ccc;
+    padding: 5px 10px;
+}*/

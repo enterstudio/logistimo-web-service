@@ -1,0 +1,147 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="report-filter-pane">
+    <div class="report-filter" ng-class="{'hide-filter':hideFilter}">
+        <div class="row" ng-click="hideFilter?openFilters():cancel()" id="fixedfilter">
+            <div class="col-sm-8 norightpad lPad5">
+                    <span uib-tooltip="Filters" tooltip-append-to-body="true"
+                          class="glyphicons glyphicons-filter codegray pt5">
+                    </span>
+                    <span class="badge filtered-data pt5" ng-show="value" ng-repeat="(key,value) in filterLabels">
+                        <b>{{key}}:</b> {{value}}
+                    </span>
+            </div>
+            <div class="form-inline noLRpad filter-fixed">
+                <div class="form-group">
+                    <span ng-show="activeMetric == 'ot'">
+                        <rpt-date-filter filter-model="filter.from" mode="dateMode" opened="fopen" close-model="topen"
+                                         max-date="today"></rpt-date-filter>
+                        -
+                    </span>
+                    <rpt-date-filter filter-model="filter.to" mode="dateMode" opened="topen" close-model="fopen"
+                                     min-date="filter.from"
+                                     max-date="maxDate"></rpt-date-filter>
+                    &nbsp;
+                    <rpt-periodicity-filter from-model="fopen" to-model="topen" filter-model="filter.periodicity"></rpt-periodicity-filter>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 card-left">
+                <div class="filter-card">
+                    <div class="filter-heading" ng-class="{'required': mandatoryFilters['monitor']}">Type</div>
+                    <div class="filter-sub-heading">
+                        <span ng-class="{'active':cards.mc == undefined}" ng-click="changeSubHeading('m')">By monitoring type</span>
+                        <span ng-class="{'active':cards.mc == 't'}" ng-click="changeSubHeading('m','t')">By asset type</span>
+                    </div>
+                    <rpt-monitor-type-filter filter-model="filter.mt" ng-disabled="disableMonitor" ng-if="cards.mc == undefined"></rpt-monitor-type-filter>
+                    <rpt-asset-filter filter-model="filter.at" filter-type="'all'" ng-if="cards.mc == 't'"></rpt-asset-filter>
+                </div>
+                <div class="filter-card">
+                    <div class="filter-heading">Manufacturer</div>
+                    <div class="filter-sub-heading">
+                        <span ng-class="{'active':cards.mfc == undefined}" ng-click="changeSubHeading('mf')">By manufacturer</span>
+                        <span ng-class="{'active':cards.mfc == 'm'}" ng-click="changeSubHeading('mf','m')">By model</span>
+                    </div>
+                    <rpt-manufacturer-filter filter-model="filter.mf" filter-type="filter.mt" ng-if="cards.mfc == undefined"></rpt-manufacturer-filter>
+                    <rpt-model-filter filter-model="filter.mm" ng-if="cards.mfc == 'm'"></rpt-model-filter>
+                    <div class="filter-sub-heading pt10">
+                        <span class="active">By manufacturing year</span>
+                    </div>
+                    <rpt-age-filter offset="0" filter-model="filter.myear"/>
+                </div>
+            </div>
+            <div class="col-sm-6 card-right">
+                <div class="filter-card">
+                    <div class="filter-heading">{{resourceBundle['kiosk']}}</div>
+                    <div class="filter-sub-heading">
+                        <span ng-class="{'active':cards.ec == undefined}" ng-click="changeSubHeading('e')">By tag</span>
+                        <span ng-class="{'active':cards.ec == 'i'}" ng-click="changeSubHeading('e','i')">By name</span>
+                    </div>
+                    <rpt-tag-filter place-holder="Select {{resourceBundle['kiosk.lowercase']}} tag"
+                                    filter-model="filter.etag" filter-type="entity"
+                                    ng-if="cards.ec == undefined"></rpt-tag-filter>
+                    <rpt-entity-filter ng-disabled="filter.st || filter.dis || filter.tlk || filter.cty"
+                                       place-holder="Select {{resourceBundle['kiosk.lowercase']}}" filter-model="filter.entity"
+                                       ng-if="cards.ec == 'i'"></rpt-entity-filter>
+                    <span ng-show="filter.st || filter.dis || filter.tlk || filter.cty"
+                          class="limit">{{resourceBundle['filter.disable.entity']}}</span>
+                </div>
+                <div class="filter-card">
+                    <div class="filter-heading">Location</div>
+                    <div class="filter-sub-heading">
+                        <span ng-class="{'active':cards.lc == undefined}" ng-click="changeSubHeading('l')">By state</span>
+                        <span ng-class="{'active':cards.lc == 'd'}" ng-click="changeSubHeading('l','d')">By district/county</span>
+                        <span ng-class="{'active':cards.lc == 't'}" ng-click="changeSubHeading('l','t')">By taluk/block</span>
+                        <span ng-class="{'active':cards.lc == 'c'}" ng-click="changeSubHeading('l','c')">By city/village</span>
+                    </div>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} state"
+                                         filter-model="filter.st" filter-type="state"
+                                         ng-disabled="filter.mst || filter.entity"
+                                         ng-if="cards.lc == undefined"></rpt-location-filter>
+                    <span ng-show="cards.lc == undefined && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} district/county"
+                                         filter-model="filter.dis" filter-type="district"
+                                         ng-disabled="filter.mdis || filter.entity"
+                                         ng-if="cards.lc == 'd'"></rpt-location-filter>
+                    <span ng-show="cards.lc == 'd' && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} taluk"
+                                         filter-model="filter.tlk" filter-type="taluk"
+                                         ng-disabled="filter.mtlk || filter.entity"
+                                         ng-if="cards.lc == 't'"></rpt-location-filter>
+                    <span ng-show="cards.lc == 't' && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                    <rpt-location-filter place-holder="{{resourceBundle['select']}} city/village"
+                                         filter-model="filter.cty" filter-type="city"
+                                         ng-disabled="filter.mcty || filter.entity"
+                                         ng-if="cards.lc == 'c'"></rpt-location-filter>
+                    <span ng-show="cards.lc == 'c' && filter.entity" class="limit">{{resourceBundle['filter.disable.location']}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-1">
+                <button type="reset" ng-click="resetFilters()" class="btn btn-sm btn-default">
+                    {{resourceBundle['reset']}}
+                </button>
+            </div>
+            <div class="col-sm-11">
+                <div class="pull-right">
+                    <button type="button" ng-click="cancel()" class="btn btn-sm btn-default">
+                        Cancel
+                    </button>
+                    <button type="button" ng-click="applyFilter()" class="btn btn-sm btn-primary">
+                        {{resourceBundle['report.get']}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-click="cancel()">
+            <div class="col-sm-12">
+                <div class="filter-close">
+                    <span class="glyphicons glyphicons-chevron-up"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

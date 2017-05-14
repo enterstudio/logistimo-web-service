@@ -1,0 +1,121 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="InvMsgCtrl">
+    <div class="panel panel-default">
+        <div class="panel-body" ng-show="loading || mapLoad">
+            <span class="glyphicons glyphicons-cogwheel spin"></span>
+        </div>
+        <div class="panel-body" ng-show="!loading && !mapLoad">
+            <div class="row">
+                <div class="col-sm-12" ng-if="iPredEnabled && !mapLoad">
+                    <fusion-chart type="'msline'" height="'250'" width="'100%'"
+                                  chart-data="predChartData" chart-label="cLabel" chart-options="predChartOpt" trend = "trendLines"
+                                  chart-id="pred{{mid}}">
+                    </fusion-chart>
+                </div>
+                <div class="col-sm-12">
+                    <span ng-show="checkNotNullEmpty(invMsg.omsg)">
+                        {{resourceBundle['message']}}: {{invMsg.omsg}}
+                    </span>
+                    <table class="table table-striped table-condensed">
+                        <tbody>
+                        <tr>
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['config.consumptionrate']}}</td>
+                            <td>
+                                <span ng-show="invCnf.cu == 'days'">{{invMsg.crd | roundNoTrailZeros:2}} / {{resourceBundle['day']}}</span>
+                                <span ng-show="invCnf.cu == 'weeks'">{{invMsg.crw | roundNoTrailZeros:2}} / {{resourceBundle['week']}} </span>
+                                <span ng-show="invCnf.cu == 'months'">{{invMsg.crm | roundNoTrailZeros:2}} / {{resourceBundle['month']}} </span>
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.pst != ''">({{invMsg.pst}})</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="invCnf.idf || invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['order.periodicity']}}</td>
+                            <td>
+                                {{invMsg.ordp | roundNoTrailZeros:2}} ({{resourceBundle['days']}})
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.pst != ''">({{invMsg.pst}})</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="invCnf.idf || invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['demandforecast']}}</td>
+                            <td>
+                                {{invMsg.rvpdmd | roundNoTrailZeros:2}}  ({{resourceBundle['days']}})
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.dqt != ''">({{invMsg.dqt}})</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['inventory.safetystock']}}</td>
+                            <td>
+                                {{invMsg.sfstk | roundNoTrailZeros:2}}
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.pst != ''">({{invMsg.pst}})</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['order.optimalorderquantity']}}</td>
+                            <td>
+                                {{invMsg.eoq | roundNoTrailZeros:2}}
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.dqt != ''">({{invMsg.dqt}})</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['order.deliveryleadtime']}}</td>
+                            <td>
+                                {{invMsg.ldt | roundNoTrailZeros:2}} ({{resourceBundle['days']}})
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr ng-show="invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['order.leadtimedemand']}}</td>
+                            <td>
+                                {{invMsg.ldtdmd | roundNoTrailZeros:2}}
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.pst != ''">({{invMsg.pst}})</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="invCnf.ieoq">
+                            <td class="control-label col-sm-3 tal">{{resourceBundle['order.stddevleadtime']}}</td>
+                            <td>
+                                {{invMsg.stdv | roundNoTrailZeros:2}}
+                            </td>
+                            <td>
+                                <span ng-show="invMsg.pst != ''">({{invMsg.pst}})</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

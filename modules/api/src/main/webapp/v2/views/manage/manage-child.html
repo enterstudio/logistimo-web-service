@@ -1,0 +1,55 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="ManageChildDomainCtrl">
+    <table class="table" style="margin:0px">
+        <tbody ng-repeat="item in chld" data-ng-switch on="item.expand">
+        <tr ng-mouseover="item.showIcons=true" ng-mouseleave="item.showIcons=false" >
+            <td class="child-domain-td" ng-style="{left:''+_index*30+'px'}">
+                <span ng-if="globalHC && !item.hc"></span>
+                <span class="glyphicons glyphicons-plus-sign click-element" ng-if="item.hc && !item.expand"
+                      ng-click="item.expand = true;" title="Expand" style="top:3px;"></span>
+                <span class="glyphicons glyphicons-minus-sign" ng-if="item.expand"
+                      ng-click="item.expand = false;" title="Collapse" style="color:#285379 !important;top:3px;"></span>
+                <div ng-show="!item.hc" class="glyphicons glyphicons-record child-record" style="cursor: default;">
+                </div>
+                <span class="title domain-parent" ng-show="item.hc">&nbsp;&nbsp;{{item.text}}</span>
+                <span class="title domain-child" ng-show="!item.hc">&nbsp;{{item.text}}</span>
+
+                <span class="" ng-show="item.showIcons">
+                    <span class="glyphicons glyphicons-transfer click-element" ng-show="item.showIcons" ng-click="switchDomain(item.id,item.text)" title="Switch domain"></span>
+                    <span class="glyphicons glyphicons-edit lPad5 click-element" ng-show="item.showIcons && iSU && !isUserPage && editDomains" ng-click="editDomainPermission(item.id,item.text)" title="Edit"></span>
+                    <span class="glyphicons glyphicons-eye-open lPad5 click-element" ng-show="item.showIcons && !iSU && !isUserPage && !iAU && editDomains" ng-click="editDomainPermission(item.id,item.text)" title="View permission"></span>
+                    <span class="glyphicons glyphicons-bin lPad5 click-element" ng-show="!item.hc && item.showIcons && iSU && !isUserPage && editDomains" ng-click="deleteDomainLink(item.id)" title="Delete"></span>
+                    <span class="glyphicons glyphicons-bin lPad5 click-element" ng-show="isUserPage && isUserPageDel && item.id != currentDomain && editDomains" ng-click="removeDomain(item.id)" title="Delete"></span>
+                </span>
+            </td>
+        </tr>
+        <tr data-ng-switch-when="true">
+            <td style="padding: 0px;border:none">
+                <div ng-include="'views/domains/child-list.html'" ng-init="isUserPageDel=false;did=item.id;recursion=true;_index=_index+1"></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,139 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="bgr">
+    <div class="row">
+        <div class="col-sm-11">
+            <div class="title-heading">
+                {{resourceBundle['date.actual.transaction']}}
+            </div>
+            <p class="litetext">
+                {{resourceBundle['invntry.config.trans.date.message']}}
+            </p>
+        </div>
+    </div>
+    <div class="bizinfo bizinfo-last">
+        <div class="row overflowYHide">
+            <div class="col-sm-2" style="min-height:220px;">
+                <ul class="nav nav-tabs-left extend">
+                    <li ng-class="{active : actualTransDate.i}"><a href="" ng-click="ActualTransContent('i')">{{resourceBundle['transactions.issue.upper']}}</a></li>
+                    <li ng-class="{active : actualTransDate.r}"><a href="" ng-click="ActualTransContent('r')">{{resourceBundle['transactions.receipt.upper']}}</a></li>
+                    <li ng-class="{active : actualTransDate.s}"><a href="" ng-click="ActualTransContent('s')">{{resourceBundle['transactions.stockcount.upper']}}</a></li>
+                    <li ng-class="{active : actualTransDate.d}"><a href="" ng-click="ActualTransContent('d')">{{resourceBundle['transactions.wastage.upper']}}</a></li>
+                    <li ng-class="{active : actualTransDate.t}"><a href="" ng-click="ActualTransContent('t')">{{resourceBundle['transactions.transfer.upper']}}</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-10">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="bgr" style="margin: 0px;min-height:220px;">
+                            <div class="title-heading">
+                                {{resourceBundle['invntry.config.trans.date.enable.message']}}
+                            </div>
+                            <div ng-show="actualTransDate.i" style="border:none;">
+                                <div class="row"> <!--capture the actual date of transaction-->
+                                    <div class="col-sm-11">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{resourceBundle['date.actual.transaction']}}</label>
+                                            <div class="col-sm-8 cbx">
+                                                <div class="col-sm-8" >
+                                                    <input type="radio" name="actualtransi" ng-model="inv.catdi" value="0"> {{resourceBundle['none']}}<br/>
+                                                    <input type="radio" name="actualtransi" ng-model="inv.catdi" value="1"> {{resourceBundle['invntry.config.trans.date.options.optional']}}<br/>
+                                                    <input type="radio" name="actualtransi" ng-model="inv.catdi" value="2"> {{resourceBundle['invntry.config.trans.date.options.mandatory']}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="actualTransDate.r" style="border:none;">
+                                <div class="row"> <!--capture the actual date of transaction-->
+                                    <div class="col-sm-11">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{resourceBundle['date.actual.transaction']}}</label>
+                                            <div class="col-sm-8 cbx">
+                                                <div class="col-sm-8" >
+                                                    <input type="radio" name="actualtransr" ng-model="inv.catdr" value="0"> {{resourceBundle['none']}}<br/>
+                                                    <input type="radio" name="actualtransr" ng-model="inv.catdr" value="1"> {{resourceBundle['invntry.config.trans.date.options.optional']}}<br/>
+                                                    <input type="radio" name="actualtransr" ng-model="inv.catdr" value="2"> {{resourceBundle['invntry.config.trans.date.options.mandatory']}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="actualTransDate.s" style="border:none;">
+                                <div class="row"> <!--capture the actual date of transaction-->
+                                    <div class="col-sm-11">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{resourceBundle['date.actual.transaction']}}</label>
+                                            <div class="col-sm-8 cbx">
+                                                <div class="col-sm-8" >
+                                                    <input type="radio" name="actualtranss" ng-model="inv.catdp" value="0"  > {{resourceBundle['none']}}<br/>
+                                                    <input type="radio" name="actualtranss" ng-model="inv.catdp" value="1"> {{resourceBundle['invntry.config.trans.date.options.optional']}}<br/>
+                                                    <input type="radio" name="actualtranss" ng-model="inv.catdp" value="2"> {{resourceBundle['invntry.config.trans.date.options.mandatory']}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="actualTransDate.d" style="border:none;">
+                                <div class="row"> <!--capture the actual date of transaction-->
+                                    <div class="col-sm-11">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{resourceBundle['date.actual.transaction']}}</label>
+                                            <div class="col-sm-8 cbx">
+                                                <div class="col-sm-8" >
+                                                    <input type="radio" name="actualtransd" ng-model="inv.catdw" value="0"  > {{resourceBundle['none']}}<br/>
+                                                    <input type="radio" name="actualtransd" ng-model="inv.catdw" value="1"> {{resourceBundle['invntry.config.trans.date.options.optional']}}<br/>
+                                                    <input type="radio" name="actualtransd" ng-model="inv.catdw" value="2"> {{resourceBundle['invntry.config.trans.date.options.mandatory']}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="actualTransDate.t" style="border:none;">
+                                <div class="row"> <!--capture the actual date of transaction-->
+                                    <div class="col-sm-11">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{resourceBundle['date.actual.transaction']}}</label>
+                                            <div class="col-sm-8 cbx">
+                                                <div class="col-sm-8" >
+                                                    <input type="radio" name="actualtransdt" ng-model="inv.catdt" value="0" > {{resourceBundle['none']}}<br/>
+                                                    <input type="radio" name="actualtransdt" ng-model="inv.catdt" value="1"> {{resourceBundle['invntry.config.trans.date.options.optional']}}<br/>
+                                                    <input type="radio" name="actualtransdt" ng-model="inv.catdt" value="2"> {{resourceBundle['invntry.config.trans.date.options.mandatory']}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

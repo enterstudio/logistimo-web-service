@@ -1,0 +1,50 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<script type="text/ng-template" id="locationFilterTemplate">
+    <a>
+        <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+        <span class="litetext">
+            {{match.model.subLabel}}
+        </span>
+    </a>
+</script>
+
+<div class="has-feedback">
+    <input type="text"
+           ng-model="lf.filterModel"
+           autocomplete="off"
+           placeholder="{{lf.placeHolder}}"
+           typeahead-wait-ms="300"
+           typeahead-template-url="locationFilterTemplate"
+           uib-typeahead="data as data.label for data in lf.getData($viewValue)"
+           class="form-control"
+           typeahead-append-to-body="true"
+           ng-disabled="lf.ngDisabled"
+           typeahead-loading="loadingLocation"
+           typeahead-editable="false">
+    <span ng-show="loadingLocation" class="form-control-feedback typehead-loading" aria-hidden="true">
+            <span class="glyphicons glyphicons-cogwheel spin"></span>
+    </span>
+
+</div>

@@ -1,0 +1,136 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="AssetListingController">
+        <div class="filter-box form-group" ng-show="iAdm">
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['assets']}}</span>
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="search.key" name="search.key" maxlength="50"
+                               placeholder="{{resourceBundle['filterby']}} {{resourceBundle['asset.serial.number'] | lowercase}}" ng-enter="searchAsset()">
+                        <span class="input-group-btn">
+							<button class="btn btn-default" ng-click="searchAsset()" type="button"
+                                    ng-disabled="(search.key == null && search.key == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}">
+                                <span class="glyphicons glyphicons-search"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <!--<div class="col-sm-3 mt18 pt10" ng-show="(search.nm == undefined || search.nm == '')">
+                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tags']}}:</span>
+                    <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                </div>-->
+                <div class="col-sm-3 mt18 pt10" ng-show="(search.nm == undefined || search.nm == '')">
+                    <span class="lPad5 filter-label">{{resourceBundle['type']}}:</span>
+                    <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="istypeopen">
+                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                            {{assetFilters[assetTypeFilter].dV}} <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" ng-show="istypeopen">
+                            <li ng-repeat="assetFilter in assetFilters | orderBy: 'dV'">
+                                <a ng-click="updateTypeFilter(assetFilter.value)">{{assetFilter.dV}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt18" ng-class="{'col-sm-6':(search.nm == undefined || search.nm == ''),'col-sm-9':(search.nm != undefined && search.nm != '')}">
+                    <span class="pull-right" >
+                    <button type="reset" ng-click="reset()" class="btn btn-sm btn-default">
+                        {{resourceBundle['reset']}}
+                    </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row action-bar" ng-show="!loading && filtered.length > 0">
+            <export-data ng-hide="iAU" mail-id="mailId" export-type="assets">
+            </export-data>
+            <button ng-show="iSU || dp.ar" type="button" class="btn btn-sm btn-default" ng-click="deleteAssets()">
+                {{resourceBundle['remove']}} {{resourceBundle['assets'] | lowercase}}
+            </button>
+        </div>
+        <div class="row" ng-class="{'mt18': !loading && filtered.length == 0}">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-show="!loading && filtered.length > 0">
+            <div class="col-sm-12">
+                <table class="table table-condensed table-hover table-logistimo" id="fixTable">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" ng-change="selectAll(selAll)" ng-model='selAll'/></th>
+                        <th>{{resourceBundle['serialnum']}}</th>
+                        <th>{{resourceBundle['asset']}}</th>
+                        <th ng-if="assetTypeFilter == 0">{{resourceBundle['asset.type']}}</th>
+                        <th>{{resourceBundle['kiosk']}} </th>
+                        <th>{{resourceBundle['lastupdated']}}</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in filtered">
+                        <td ng-if="currentDomain != item.sdid" ><span class="glyphicons glyphicons-bring-to-front tglyph" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                        <td ng-if="currentDomain == item.sdid" ><input type="checkbox" ng-model="item.selected"/></td>
+                        <td>{{item.sno}}</td>
+                        <td class="col-sm-3"><a ng-href="#/assets/detail/{{item.vId}}/{{encodeURIParam(item.dId)}}">{{item.dId}}</a> - {{item.mdl}} ({{assetVendorMapping[item.vId]}})</td>
+                        <td ng-if="assetTypeFilter == 0">{{assetFilters[item.typ].dV}}</td>
+                        <td><a ng-href="#/setup/entities/detail/{{item.entity.id}}" target="_blank">{{item.entity.nm}}</a><p class="litetext">{{getAddress(item.entity)}}</p></td>
+                        <td>
+                            <a href="#setup/users/all/details?userId={{item.lub}}" target="_blank">{{item.lubn}}</a>
+                            <span class="litetext">{{item.lts}}</span>
+                        </td>
+                        <td><a href="#/setup/assets/all/edit/?aid={{item.id}}" ng-if="(iSU || dp.ae) && currentDomain == item.sdid"><span class="glyphicons glyphicons-edit tglyph"></span></a></td>
+                        <!--<td><span class="pull-right" ng-show="item.entity.ln !=0 && item.entity.lt != 0"><span class="glyphicons glyphicons-globe" tooltip="{{item.entity.lt}},{{item.entity.ln}}"></span></span></td>-->
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="pull-right">
+                            <div ng-include="'views/paginator.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row action-bar"  ng-show="!loading && filtered.length > 10">
+            <export-data ng-hide="iAU" mail-id="mailId" export-type="assets">
+            </export-data>
+            <button ng-show="iSU || dp.ar" type="button" class="btn btn-sm btn-default" ng-click="deleteAssets()">
+                {{resourceBundle['remove']}} {{resourceBundle['assets'] | lowercase}}
+            </button>
+        </div>
+        <div class="row mt18"  ng-show="!loading && filtered.length == 0">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning" ng-show="!loading && filtered.length == 0">
+                    {{resourceBundle['assets.notavailable']}}</p>
+            </div>
+        </div>
+    </div>
+</div>

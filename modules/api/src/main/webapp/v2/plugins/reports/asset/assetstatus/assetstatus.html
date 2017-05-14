@@ -1,0 +1,107 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="report-canvas" ng-controller="rptAssetStatusController" id="cid">
+
+    <span ng-include="'plugins/reports/asset/asset-filters.html'"></span>
+
+    <div class="report-data-pane">
+        <div class="row">
+            <div class="col-sm-12">
+                <div>
+                    <ul class="nav nav-tabs subnav-tabs report-metric">
+                        <li ng-class="{active: activeMetric == heading.code}" ng-repeat="heading in metricHeadings">
+                            <a ng-hide="hideMetricHeadings[heading.code]" ng-click="setMetric(heading.code)" class="clickable">{{heading.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+                <div ng-show="!loading && !noData">
+                    <div class="row pt30">
+                        <div class="col-sm-2">
+                            <span class="form-label">{{resourceBundle['asset']}} {{resourceBundle['status.lower']}}</span>
+                            <select class="form-control" ng-model="metrics.primary">
+                                <option ng-repeat="metric in primaryMetric" value="{{metric.value}}">{{metric.name}}</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <span class="form-label">{{resourceBundle['metric']}}</span>
+                            <select class="form-control" ng-model="metrics.secondary">
+                                <option ng-repeat="metric in secondaryMetric" value="{{metric.value}}">{{metric.name}}</option>
+                            </select>
+                        </div>
+                        <div ng-show="activeMetric == 'ot'" class="col-sm-offset-5 col-sm-2">
+                            <div class="pull-right" ng-chart-tab-switch vw="vw"></div>
+                        </div>
+                    </div>
+                    <div ng-if="!loading && activeMetric == 'ot'">
+                        <div class="row pt30">
+                            <div class="col-sm-12">
+                                <div ng-if="cLabel != undefined && !loading" align="center">
+                                    <div ng-if="vw == 'c'">
+                                        <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                                      chart-data="cData" chart-options="cOptions"
+                                                      chart-id="c1"></fusion-chart>
+                                        <p class="litetext">({{resourceBundle['month.barselect']}})</p>
+                                    </div>
+                                    <div ng-if="vw == 't'">
+                                        <span ng-include="'plugins/reports/tables/chart-data-table.html'"></span>
+                                    </div>
+                                    <a ng-click="downloadAsCSV()">{{resourceBundle['download.csv']}}</a>
+
+                                    <div ng-if="dcData && !dLoading" class="fcminheight pt15">
+                                        <div ng-if="vw == 'c'">
+                                            <fusion-chart type="cType" height="cHeight" width="cWidth"
+                                                          chart-label="dcLabel"
+                                                          chart-data="dcData" chart-options="dcOptions"
+                                                          chart-id="c2"></fusion-chart>
+                                        </div>
+                                        <div ng-if="vw == 't'">
+                                            <span ng-include="'plugins/reports/tables/daily-chart-data-table.html'"></span>
+                                        </div>
+                                        <a ng-click="downloadAsCSV(true)">{{resourceBundle['download.csv']}}</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="activeMetric != 'ot'" class="row">
+                        <div class="col-sm-12">
+                            <span ng-include="'plugins/reports/tables/data-table.html'"></span>
+                            <p class="text-center">
+                                <a ng-click="downloadTableAsCSV()">{{resourceBundle['download.csv']}}</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 pt15">
+                <p class=" alert alert-warning" ng-show="!(loading || dLoading) && noData">
+                    <span ng-show="activeMetric != 'rt'">{{resourceBundle['data.notavailable']}}</span>
+                    <span ng-show="activeMetric == 'rt'">{{noDataText}}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

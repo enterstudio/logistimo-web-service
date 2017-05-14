@@ -1,0 +1,125 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="bizinfo bizinfo-last">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="pull-right">
+                <div ng-include="'views/paginator.html'"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="demandWithDisc.results.length > 0">
+        <div class="col-sm-12">
+            <table class="table table-condensed table-hover table-logistimo" id="fixTable">
+                <thead>
+                <tr>
+                    <th class="text-center"></th>
+                    <th>{{resourceBundle['serialnum']}}</th>
+                    <th>{{resourceBundle['order.id']}}</th>
+                    <th>{{resourceBundle['material']}}</th>
+                    <th class="text-center">{{resourceBundle['order.recommended']}}</th>
+                    <th class="text-center">{{resourceBundle['ordered']}}</th>
+                    <th class="text-center">{{resourceBundle['shipped']}}</th>
+                    <th class="text-center">{{resourceBundle['fulfilled']}}</th>
+                    <th>{{resourceBundle['status']}}</th>
+                    <th ng-show="showCustomer">{{resourceBundle['customer']}}</th>
+                    <th ng-show="showVendor">{{resourceBundle['vendor']}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="item in filtered" ng-controller="DiscrepanciesDetailCtrl">
+                    <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdnm)" uib-tooltip="{{item.sdnm}}" tooltip-append-to-body="true"></span></td>
+                    <td>{{item.sno}}</td>
+                    <td><a ng-href="#/orders/detail/{{item.oid}}/" target="_blank">{{item.oid}}</a>
+                        <span class="litetext">{{item.oct}}</span>
+                        <span class="litetext">{{item.otyStr}}</span>
+                    </td>
+                    <td><a ng-href="#/setup/materials/all/detail/{{item.mid}}/" target="_blank">{{item.mnm}}</a></td>
+                    <td class="text-center">
+                        <div ng-show="item.roq != -1">{{item.roq}}</div>
+                        <div ng-show="item.roq == -1">
+                            NA
+                            <span uib-tooltip="There was no recommendation for this item because minimum and maximum stock levels were not specified." style="display: inline" class="litetext glyphicons glyphicons-info-sign" tooltip-append-to-body="true"></span>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <span ng-class="{'fc-color-red':item.hasOd}" >
+                            {{item.oq}}
+                        </span>
+                        <span ng-if="item.hasOd">
+                            <span ng-show="item.odRsn != undefined" id="popover-odrsn{{$index}}" tooltip-trigger='hclick'
+                                  uib-tooltip-html="item.odRsn"
+                                  ng-mouseover="!isDisplaying && showReasonPopup()"
+                                  ng-mouseleave="isDisplaying && hideReasonPopup()" style="display: inline"
+                                  class="litetext glyphicons glyphicons-info-sign"></span>
+                            <span class="litetext smallFont">{{item.od > 0 ? '+' : ''}}{{item.od}}</span>
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span ng-class="{'fc-color-red':item.hasSd}" >
+                            {{item.sq}}
+                        </span>
+                        <span ng-if="item.hasSd">
+                            <span ng-show="item.sdRsn != undefined" id="popover-sdrsn{{$index}}" tooltip-trigger='hclick'
+                                  uib-tooltip-html="item.sdRsn"
+                                  ng-mouseover="!isDisplaying && showReasonPopup()"
+                                  ng-mouseleave="isDisplaying && hideReasonPopup()" style="display: inline"
+                                  class="litetext glyphicons glyphicons-info-sign"></span>
+                            <span class="litetext smallFont">{{item.sd > 0 ? '+' : ''}}{{item.sd}}</span>
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span ng-class="{'fc-color-red':item.hasFd}" >
+                            {{item.fq}}
+                        </span>
+                        <span ng-if="item.hasFd">
+                            <span ng-show="item.fdRsnsStr != undefined" id="popover-fdrsn{{$index}}" tooltip-trigger='hclick'
+                                  uib-tooltip-html="item.fdRsnsStr"
+                                  ng-mouseover="!isDisplaying && showReasonPopup()"
+                                  ng-mouseleave="isDisplaying && hideReasonPopup()" style="display: inline"
+                                  class="litetext glyphicons glyphicons-info-sign"></span>
+                            <span class="litetext smallFont">{{item.fd > 0 ? '+' : ''}}{{item.fd}}</span>
+                        </span>
+                    </td>
+                    <td>{{item.status}}<span class="litetext">{{item.stt}}</span></td>
+                    <td ng-show="showCustomer"><a ng-href="#/setup/entities/detail/{{item.cid}}/" target="_blank">{{item.cnm}}</a><span class="litetext">{{item.cadd}}</span></td>
+                    <td ng-show="showVendor"><a ng-href="#/setup/entities/detail/{{item.vid}}/" target="_blank">{{item.vnm}}</a><span class="litetext">{{item.vadd}}</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div ng-if="(demandWithDisc.results.length == 0 || resSize == 0) && !loading">
+                <p class=" alert alert-warning mt18">{{resourceBundle['discrepancies.none']}}</p>
+            </div>
+            <div ng-hide="loading == true || demandWithDisc.results.length == 0">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

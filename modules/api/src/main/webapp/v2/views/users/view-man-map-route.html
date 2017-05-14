@@ -1,0 +1,115 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="ManagedEntityRouteMapCtrl">
+    <div class="row" ng-if="mFiltered.length != 0">
+        <div class="col-sm-12">
+            <p class="litetext">{{resourceBundle['routing.showactualroutemessage']}}</p>
+            <div class="form-inline ml15">
+                <div class="form-group">
+                    <label class="filter-label cbx">{{resourceBundle['from']}}</label>
+                    <date-picker disabled="showActual" date-picker-read-only="!showActual" date-model="from" noclear="noclear" place-holder="From" max-date="today"></date-picker>
+                    <label class="filter-label cbx">{{resourceBundle['to']}}</label>
+                    <date-picker disabled="showActual" date-picker-read-only="!showActual" date-model="to" noclear="noclear" place-holder="To" max-date="today"></date-picker>
+                    <button ng-hide="showActual" type="button" class="btn btn-sm btn-default" ng-click="showActualRoute()">{{resourceBundle['routing.showactualroute']}}</button>
+                    <span ng-hide="showActual || isUndef(arType)">({{resourceBundle['using']}} {{arType}})</span>
+                    <button ng-show="showActual"type="button" class="btn btn-sm btn-default" ng-click="hideActualRoute()">{{resourceBundle['routing.hideactualroute']}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div ng-if="mFiltered.length != 0" class="mp">
+                <div class="row" ng-hide="showActual || numFound == 0">
+                    <div class="pull-right">
+                        <div class="col-sm-12 mb5 mt5">
+                            <div ng-include="'views/load-more-paginator.html'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="!showActual && numFound == 0">
+                    <div class="col-sm-6 mb5 mt5">
+                        <b>{{mFiltered.length}}</b> {{resourceBundle['routing.manualroutegeoinfomsg']}}
+                    </div>
+                </div>
+                <div class="row" ng-show="showActual">
+                    <div class="col-sm-6 mb5 mt5">
+                        <b>{{actualRouteStartIndex}}</b> {{resourceBundle['routing.manualroutegeoinfomsg']}}
+                    </div>
+                    <div class="col-sm-6 mb5 mt5">
+                        <span class="codered pull-right"><b>{{mFiltered.length - actualRouteStartIndex}}</b> {{resourceBundle['routing.actualroutegeoinfomsg']}}. <span ng-show="isDef(distance)"><b>{{distance}}</b> {{resourceBundle['travelled']}}</span></span>
+                    </div>
+                </div>
+                <div ng-if="showMap">
+                    <ui-gmap-google-map
+                            options="lmap.options"
+                            center="lmap.center"
+                            control="lmap.control"
+                            zoom="lmap.zoom"
+                            draggable="false"
+                            refresh="true">
+                        <ui-gmap-markers idKey="'sno'" coords="'self'" models="mFiltered" options="'options'"
+                                         icon="'icon'" click="addLineCoord"></ui-gmap-markers>
+                    </ui-gmap-google-map>
+                </div>
+                <div ng-hide="showMap" class="tabminheight">
+                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                </div>
+                <div class="row" ng-hide="showActual">
+                    <div class="pull-right">
+                        <div class="col-sm-12 mt5">
+                            <div ng-include="'views/load-more-paginator.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="mFiltered.length == 0" class="mt5">
+                <p class="alert alert-warning"> {{resourceBundle['data.notavailable']}} </p>
+            </div>
+            <div class="row mt10" ng-if="showActual && showRoute && showMap">
+                <div class="col-sm-12 mp">
+                    <h5>{{resourceBundle['route.road']}}</h5>
+                    {{resourceBundle['distance']}}: <b>{{distance}}</b>, {{resourceBundle['placesvisited']}}: <b>{{placeVisited}}</b>
+                    <ui-gmap-google-map
+                            options="almap.options"
+                            center="almap.center"
+                            control="almap.control"
+                            zoom="almap.zoom"
+                            draggable="false"
+                            refresh="true">
+                    </ui-gmap-google-map>
+                </div>
+            </div>
+            <div class="row">
+                <div class="pull-right temp">
+                    <div class="col-sm-12">
+                        <button ng-disabled="!routeUpdated || dp.vp" type="button" ng-click="updateManagedRouteOrderViaMap()"
+                                class="btn btn-primary">{{resourceBundle['routing.save']}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

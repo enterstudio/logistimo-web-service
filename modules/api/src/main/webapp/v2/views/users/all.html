@@ -1,0 +1,65 @@
+
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController"
+	ng-init="init('setup.users.all')">
+	<ul class="nav nav-tabs subnav-tabs">
+		<li ng-class="{active: (subview == 'list' || subview == 'details' || subview == 'edit'
+		                || subview == 'updatepassword' || subview == 'sendmessage')}"><a
+			href="#/setup/users/" ng-show="iSU || dp.uv">{{resourceBundle.users}}</a></li>
+		<li ng-class="{active: (subview == 'add')}" ng-show="iSU || dp.ua"><a
+			href="#/setup/users/all/add/">{{resourceBundle['create']}} {{resourceBundle['userlowercase']}}</a></li>
+		<li ng-class="{active: subview == 'upload' }" ng-show="!iMan && ( iSU || dp.ua || dp.ue || dp.ur )"><a
+			href="#/setup/users/all/upload/">{{resourceBundle['bulkupload.uploadinbulk']}}</a></li>
+		<li ng-class="{active: subview == 'msgstatus' }"><a
+				href="#/setup/users/all/msgstatus/">{{resourceBundle['messages.sentstatus']}}</a></li>
+	</ul>
+	<div ng-switch="subview">
+		<div class="tab-pane" ng-switch-when="list">
+			<div ng-if="iSU || dp.uv" ng-include="'views/users/users-list.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="add">
+			<div ng-if="iSU || dp.ua" ng-include="'views/users/add.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="details">
+			<div ng-include="'views/users/user-details.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="updatepassword">
+			<div ng-include="'views/users/change-password.html'"></div>
+		</div>
+		<div class="tab-pane no-min-height" ng-switch-when="sendmessage">
+			<div ng-include="'views/users/send-message.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="msgstatus">
+			<div ng-include="'views/users/message-status.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="edit">
+			<div ng-if="iSU || dp.ue" ng-include="'views/users/add.html'"></div>
+		</div>
+		<div class="tab-pane" ng-switch-when="upload">
+			<div ng-if="!iMan && ( iSU || dp.ua || dp.ue || dp.ur )" ng-init="uploadType='users'" ng-include="'views/bulkupload.html'"></div>
+		</div>
+	</div>
+</div>
+

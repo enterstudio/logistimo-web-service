@@ -1,0 +1,266 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="AddMaterialsController">
+        <div class="row mt18"  ng-show="(isBulk || isAdd) && (iSU || dp.ia)">
+            <div class="col-sm-12">
+                <div class="title-heading mlr0">
+                    <span ng-show="isBulk">
+                            {{resourceBundle['materials.addremovefrom']}}
+                                <span ng-hide="entity">{{entityLabel}} {{resourceBundle['kiosks.lower']}}</span>
+                                <a ng-show="entity" ng-href="#/setup/entities/detail/{{entity.id}}">{{entity.nm}}</a>
+                            </span>
+
+                    <span ng-show="isAdd">{{resourceBundle['materials.add']}} {{entity.nm}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="filter-box filter-box-fit" ng-hide="isEdit">
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="tag" tag-type="material"></tag-filter>
+                </div>
+            </div>
+        </div>
+        <div class="row action-bar ">
+                <span ng-hide="isEdit">
+                            <button ng-show="(isBulk || isAdd) && (iSU || dp.ia)" type="button" ng-click="addMaterialsToEntity()"
+                                    class="btn btn-sm btn-primary">
+                                {{resourceBundle['add']}}
+                            </button>
+                             <button ng-hide="(isBulk || isAdd) || (!iSU && !dp.ia)" type="button" ng-click="addNewMaterials()"
+                                     class="btn btn-sm btn-primary">
+                                 {{resourceBundle['add']}}
+                             </button>
+                             <button ng-hide="isBulk || isAdd || (!iSU && !dp.ie)" type="button" ng-click="editMaterials()"
+                                     class="btn btn-sm btn-primary">{{resourceBundle['edit']}}
+                             </button>
+                            <button ng-hide="(isAdd || (!iSU && !dp.ir))" type="button" class="btn btn-sm btn-default"
+                                    ng-click="removeMaterials()">
+                                {{resourceBundle['remove']}}
+                            </button>
+                            <button ng-hide="isBulk || isAdd || (!iSU && !dp.ia && !dp.ir)" type="button" ng-click="refresh()"
+                                    class="btn btn-sm btn-default capbold">{{resourceBundle['refresh']}}
+                            </button>
+                            <button ng-show="isBulk || isAdd" class="btn btn-sm btn-default" ng-click="back()">
+                                {{resourceBundle['cancel']}}
+                            </button>
+                         </span>
+                        <span class=" pull-right" ng-show="isEdit && (iSU || dp.ie)">
+                            <button type="button" ng-click="saveEditMaterials()" class="btn btn-sm btn-primary">
+                                {{resourceBundle['save']}}
+                            </button>
+                                <button class="btn btn-sm btn-default" ng-click="cancelEditMaterials()">
+                                    {{resourceBundle['cancel']}}
+                                </button>
+
+                        </span>
+        </div>
+        <div ng-show="resSize > 0">
+            <div class="row">
+                <div class="col-sm-12" ng-hide="isEdit">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                    <div ng-show = "isBulk && (entityLabel > 1 || entityLabel=='all')">
+                        <input type="checkbox" ng-model="check" value="true"> {{resourceBundle['materials.overwrite']}}</input>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table
+                            class="table table-condensed table-logistimo">
+                        <tbody>
+                        <tr>
+                            <th class="col-sm-0-1 text-center"><input tabindex="1" type="checkbox"
+                                                                      ng-change="selectAll(selAll)"
+                                                                      ng-model='selAll'></tt>
+                            </th>
+                            <th class="col-sm-0-5 text-center">{{resourceBundle['serialnum']}}</th>
+                            <th class="col-sm-2">{{resourceBundle['material']}}</th>
+                            <th class="col-sm-1">{{resourceBundle['inventory.reorderlevel']}}<span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                            <th class="col-sm-1">{{resourceBundle['max']}}<span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                            <th class="col-sm-1" ng-show="invCfg.crc == 0"><p class="capbold" style="display: inline;">{{invCfg.mcrfreq}}</p> {{resourceBundle['materials.consumptionrate.lower']}}</th>
+                            <th class="col-sm-1">{{resourceBundle['material.retailerprice']}}</th>
+                            <th class="col-sm-1">{{resourceBundle['tax']}}</th>
+                            <th ng-show="entity.oo">{{resourceBundle['inventory.model']}}</th>
+                            <th ng-show="entity.oo">{{resourceBundle['inventory.servicelevel']}}</th>
+                            <th ng-hide="isBulk" class="text-center">{{resourceBundle['temperature']}}
+                                {{resourceBundle['min']}}
+                            </th>
+                            <th ng-hide="isBulk" class="text-center">{{resourceBundle['temperature']}}
+                                {{resourceBundle['max']}}
+                            </th>
+                            <th ng-hide="isBulk || isAdd || isEdit" class="col-sm-1">{{resourceBundle['updatedby']}}</th>
+                        </tr>
+                        </tbody>
+                        <tbody ng-hide="isEdit && item.isAdded"
+                               ng-repeat="item in filtered = (materials.results)"
+                               data-ng-switch on="exRow[$index]">
+                        <tr>
+                            <td class="text-center"><input tabindex="1" ng-hide="!isBulk && isAdd && item.isAdded"
+                                                           type="checkbox"
+                                                           name="check{{item.mId}}"
+                                                           ng-model="item.selected"></td>
+                            <td class="text-center"><p>{{item.sno}}</p></td>
+                            <td><a href="#/setup/materials/all/detail/{{item.mId}}">{{item.mnm}}</a></td>
+                            <td><input only-digits tabindex="1" ng-hide="item.isAdded || mmd" class="form-control" ng-model="item.reord"
+                                       name="reord{{item.mId}}"
+                                       ng-blur="isMinMaxInvalid(item.reord, item.max, $index)"
+                                       value="{{item.reord}}" maxlength="12"/>
+                                <input only-digits tabindex="1" ng-hide="item.isAdded || !mmd" class="form-control" ng-model="item.minDur"
+                                       name="minDur{{item.mId}}"
+                                       ng-blur="isMinMaxInvalid(item.minDur, item.maxDur, $index)"
+                                       value="{{item.minDur}}" maxlength="12"/>
+                                <span ng-show="item.isAdded" style="display: inline-block;">
+                                    {{item.reord}} <span ng-show="mmdt && item.minDur > 0" class="litetext">{{item.minDur}} {{mmdt}}</span>
+                                </span>
+                                <span ng-show="item.isAdded" ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index)"></span>
+                            </td>
+                            <td><input only-digits tabindex="1" ng-hide="item.isAdded || mmd" class="form-control"
+                                       ng-blur="isMinMaxInvalid(item.reord, item.max, $index)"
+                                       ng-class="{'ng-invalid c-visited' : maxInValid[$index]}"
+                                       name="max{{item.mId}}"
+                                       ng-model="item.max" value="{{item.max}}" maxlength="12"/>
+                                <input only-digits tabindex="1" ng-hide="item.isAdded || !mmd" class="form-control"
+                                       ng-blur="isMinMaxInvalid(item.minDur, item.maxDur, $index)"
+                                       ng-class="{'ng-invalid c-visited' : maxInValid[$index]}"
+                                       name="maxDur{{item.mId}}"
+                                       ng-model="item.maxDur" value="{{item.maxDur}}" maxlength="12"/>
+                                <span ng-show="item.isAdded" style="display: inline-block;">
+                                    {{item.max}} <span ng-show="mmdt && item.maxDur > 0" class="litetext">{{item.maxDur}} {{mmdt}}</span>
+                                </span>
+                                <span ng-show="item.isAdded" ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index)"></span>
+
+                            </td>
+                            <td ng-show="invCfg.crc == 0"><input only-digits allow-decimal  tabindex="1" ng-hide="item.isAdded" class="form-control"
+                                                             name="conrate{{item.mId}}"
+                                                             ng-model="item.crMnl" value="item.crMnl" maxlength="12"/>
+                                <span ng-show="(item.isAdded && isDef(item.crMnlT))" class="glyphicons glyphicons-clock "
+                                      style="font-size:xx-small" uib-tooltip="{{ resourceBundle['lastupdated']+' '+ resourceBundle['on']+' '+item.crMnlT}} "></span>
+                                <span ng-show="item.isAdded">{{item.crMnl | roundNoTrailZeros:2}}</span>
+
+                            </td>
+                            <td><input only-digits allow-decimal tabindex="1" ng-hide="item.isAdded" class="form-control" ng-model="item.rp"
+                                       name="price{{item.mId}}"
+                                       value="{{item.rp}}" maxlength="12"/>
+                                <span ng-show="(item.isAdded && isDef(item.rpT))" class="glyphicons glyphicons-clock "
+                                      style="font-size:xx-small" uib-tooltip="{{resourceBundle['lastupdated']+' '+ resourceBundle['on']+' '+item.rpT}}"></span>
+                                <span ng-show="item.isAdded">{{item.rp | roundNoTrailZeros:2}}</span>
+
+                            </td>
+                            <td><input only-digits allow-decimal tabindex="1" ng-hide="item.isAdded" class="form-control" ng-model="item.tx"
+                                       name="tax{{item.mId}}"
+                                       value="{{item.tx}}" maxlength="12">
+                                <span ng-show="item.isAdded">{{item.tx | roundNoTrailZeros:2}}</span>
+                            </td>
+                            <td ng-show="entity.oo"><select tabindex="1" ng-hide="item.isAdded" ng-model="item.im"
+                                                            class="form-control"
+                                                            id="inv">
+                                <option value="">{{resourceBundle['inventorypolicy.none']}}</option>
+                                <option value="sq" ng-if="isEOQ">{{resourceBundle['inventorypolicy.sq']}}</option>
+                            </select>
+                                <span ng-show="item.isAdded">{{getInvModel(item.im)}}</span>
+                            </td>
+                            <td ng-show="entity.oo"><select tabindex="1" ng-hide="item.isAdded || item.im != 'sq'"
+                                                            ng-model="item.sl"
+                                                            class="form-control">
+                                <option ng-repeat="(code,val) in serviceLevels" value="{{val}}" ng-selected="val === item.sl">{{val}}</option>
+                            </select>
+                                <span ng-show="item.isAdded && item.im == 'sq'">{{item.sl}}</span>
+                            </td>
+                            <td ng-hide="isBulk" class="text-center">{{item.tmin}}</td>
+                            <td ng-hide="isBulk" class="text-center">{{item.tmax}}</td>
+                            <td ng-hide="isBulk || isAdd || isEdit" class="col-sm-1">
+                                <a href="#/setup/users/all/details?userId={{item.updtBy}}" target="_new"> {{item.fn}} </a>
+                            </td>
+                        </tr>
+                        <tr data-ng-switch-when="history">
+                            <td colspan=100% class="partialview">
+                                <div ng-init="view='views/inventory/min-max-history.html' ; invid = item.invId; mid = item.mId ; mnm = item.mnm ; index = $index ; min = item.reord; max = item.max;"
+                                     ng-include="'views/partial.html'"></div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-sm-12" ng-hide="isEdit">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                             <span ng-hide="isEdit">
+                            <button tabindex="1" ng-show="(isBulk || isAdd) && (iSU || dp.ia)" type="button"
+                                    ng-click="addMaterialsToEntity()"
+                                    class="btn btn-sm btn-primary">
+                                {{resourceBundle['add']}}
+                            </button>
+                             <button ng-hide="(isBulk || isAdd) || (!iSU && !dp.ia)" type="button" ng-click="addNewMaterials()"
+                                     class="btn btn-sm btn-primary">
+                                 {{resourceBundle['add']}}
+                             </button>
+                             <button ng-hide="(isBulk || isAdd || (!iSU && !dp.ie))" type="button" ng-click="editMaterials()"
+                                     class="btn btn-sm btn-primary">{{resourceBundle['edit']}}
+                             </button>
+                            <button ng-hide="(isAdd || (!iSU && !dp.ir))" type="button" class="btn btn-sm btn-default"
+                                    ng-click="removeMaterials()">
+                                {{resourceBundle['remove']}}
+                            </button>
+                                 <button ng-hide="isBulk || isAdd || (!iSU && !dp.ia && !dp.ir)" type="button" ng-click="refresh()"
+                                         class="btn btn-sm btn-default capbold">{{resourceBundle['refresh']}}
+                                 </button>
+                            <button tabindex="1" ng-show="isBulk || isAdd" class="btn btn-sm btn-default"
+                                    ng-click="back()">
+                                {{resourceBundle['cancel']}}
+                            </button>
+                         </span>
+                        <span class=" pull-right" ng-show="isEdit && (iSU || dp.ie)">
+                            <button type="button" ng-click="saveEditMaterials()" class="btn btn-sm btn-primary">
+                                {{resourceBundle['save']}}
+                            </button>
+                                <button class="btn btn-sm btn-default" ng-click="cancelEditMaterials()">
+                                    {{resourceBundle['cancel']}}
+                                </button>
+                        </span>
+                </div>
+            </div>
+        </div>
+        <div class="row mt18" ng-show="resSize == 0">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning">{{resourceBundle['materials.none']}}</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+<html>
+<head>
+<title>Logistimo REST API Test</title>
+</head>
+<body>
+	<h1>Logistimo REST API Test</h1>
+	<p>This form tests Logistimo's inventory update API. Fill in the required parameters and click 'Update Now'.</p>
+	<h2>Inventory Update</h2>
+	<form name="iForm" action="../i" method="post">
+		<input type="hidden" name="a" value="ui"/>
+		Type: <input type="text" name="ty" value="p" size="1" maxlength="1"/><p>
+		Password: <input type="password" name="p"/><p>
+		Material quantities (JSON):<br>
+		<textarea name="j" rows="4" cols="80">{ "v" : "01", "uid" : "acuis", "kid" : "2270001", "mt" : [ { "mid" : "2270003", "q" : "25" },  { "mid" : "2277001", "q" : "12" }, { "mid" : "2260003", "q" : "30" } ] }</textarea>
+		<p>
+		<input name="submit" value="Update Now" type="submit" />
+	</form>
+</body>
+</html>

@@ -1,0 +1,524 @@
+﻿/*
+ * Copyright © 2017 Logistimo.
+ *
+ * This file is part of Logistimo.
+ *
+ * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+ * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * You can be released from the requirements of the license by purchasing a commercial license. To know more about
+ * the commercial license, please contact us at opensource@logistimo.com
+ */
+
+SPAN.C1HDropdownText {}
+
+P.TOCTitle {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 7pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 24pt;  FONT-WEIGHT: bold; }
+
+P.TableText {LINE-HEIGHT: normal;  MARGIN: 2pt 3.6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 9pt; }
+
+P.ListTable {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 18pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 18.0pt 36.0pt; }
+
+
+
+
+
+
+
+
+
+P.MsoTitle {TEXT-ALIGN: right;  LINE-HEIGHT: normal;  MARGIN: 12.1pt 0pt 36.1pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 36pt;  FONT-WEIGHT: bold; }
+
+P.MsoListBullet5 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 90pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 74.6pt; }
+
+P.MsoListBullet4 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 72pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 60.45pt; }
+
+P.MsoListBullet3 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 54pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 46.3pt; }
+
+P.MsoListBullet2 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 36.0pt; }
+
+P.MsoListBullet {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 18pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 18.0pt; }
+
+
+H6 {LINE-HEIGHT: normal;  MARGIN: 12pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 11pt;  FONT-WEIGHT: bold; }
+
+P.MsoNormal {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+span.MsoNormal {color:windowtext; text-decoration:none; }
+
+SPAN.C1HExpandText {FONT-STYLE: italic; }
+
+P.MidTopic {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 7pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 16pt;  FONT-WEIGHT: bold; }
+
+P.Figures {LINE-HEIGHT: 14pt;  MARGIN: 3pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 18.0pt 36.0pt; }
+
+P.BodyTextTable {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+
+
+P.MsoListNumber5 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 90pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 74.6pt; }
+
+P.MsoListNumber4 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 72pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 60.45pt; }
+
+P.MsoListNumber3 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 54pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 46.3pt; }
+
+P.MsoListNumber2 {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 36.0pt; }
+
+P.MsoListNumber {LINE-HEIGHT: normal;  TEXT-INDENT: -18pt;  MARGIN: 0pt 0pt 0pt 18pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 18.0pt; }
+
+P.MsoEndnoteText {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoIndex4 {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 40pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+H1 {LINE-HEIGHT: normal;  MARGIN: 10pt 0pt 8pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 20pt;  FONT-WEIGHT: bold; }
+
+P.JumpfromContents {LINE-HEIGHT: 14pt;  MARGIN: 1pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 11pt;  FONT-WEIGHT: bold; }
+
+SPAN.C1HInlineDropdown {}
+
+SPAN.C1HOnline {}
+
+SPAN.C1HGroupInvisible {DISPLAY: none; }
+
+
+
+
+
+
+
+
+
+
+
+P.MsoCommentSubject {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+P.MsoBodyTextIndent3 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 6pt 14.15pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 8pt; }
+
+P.MsoBodyTextIndent2 {LINE-HEIGHT: 200%;  MARGIN: 0pt 0pt 6pt 14.15pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoListContinue5 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 6pt 70.75pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoListContinue4 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 6pt 56.6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoListContinue3 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 6pt 42.45pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoListContinue2 {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoListContinue {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt 18pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoTof {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoIndex5 {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 50pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+div[align] table {text-align: left; }
+
+P.C1SectionCollapsed, h4.C1SectionCollapsed {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 2pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 12pt;  FONT-WEIGHT: bold; }
+
+P.Note {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: 14pt;  MARGIN: 9pt 0pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  BORDER-TOP: medium none;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt; }
+
+
+P.MsoQuote {LINE-HEIGHT: normal;  FONT-STYLE: italic;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  COLOR: black;  FONT-SIZE: 10pt; }
+
+
+
+
+
+
+
+P.MsoDocumentMap {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Tahoma","sans-serif";  FONT-SIZE: 8pt; }
+
+P.MsoSalutation {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoIndex6 {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 60pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+H3 {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 7pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 16pt;  FONT-WEIGHT: bold; }
+
+P.JumpBase {LINE-HEIGHT: 14pt;  MARGIN: 0pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+SPAN.C1HTopicProperties {DISPLAY: none; }
+
+SPAN.C1HManual {}
+
+P.headerodd {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  tab-stops: right 486.0pt; }
+
+P.HeadingBase {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+
+
+
+
+
+P.MsoBodyTextFirstIndent2 {LINE-HEIGHT: normal;  TEXT-INDENT: 10.5pt;  MARGIN: 0pt 0pt 6pt 14.15pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+P.MsoIndex7 {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 70pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+H2 {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 7pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 16pt;  FONT-WEIGHT: bold; }
+
+P.Source {LINE-HEIGHT: 14pt;  MARGIN: 0pt 0pt 0pt 36pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt;  tab-stops: 54.0pt 72.0pt 90.0pt 108.0pt 126.0pt 144.0pt 162.0pt 180.0pt 198.0pt 216.0pt 234.0pt 252.0pt 270.0pt 288.0pt 306.0pt; }
+
+SPAN.D2HNoGloss {}
+
+
+
+
+
+
+
+
+
+P.MsoNoSpacing {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+
+
+P.MsoAutoSig {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+SPAN.MsoHyperlinkFollowed {COLOR: #954f72;  TEXT-DECORATION: underline;  text-underline: single; }
+
+P.MsoHeading8 {LINE-HEIGHT: normal;  FONT-STYLE: italic;  MARGIN: 12pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 12pt; }
+
+SPAN.C1HInlinePopup {}
+
+P.C1HNumber2 {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 54pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 54.0pt; }
+
+P.C1HNumber {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 36.0pt; }
+
+P.TableHeading {LINE-HEIGHT: normal;  MARGIN: 3pt 3.6pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+P.headereven {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  tab-stops: right 486.0pt; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PRE {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt;  tab-stops: 36.0pt; }
+
+
+P.MsoFootnoteText {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+P.MsoIndex1 {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoHeading9 {LINE-HEIGHT: normal;  MARGIN: 12pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 11pt; }
+
+P.C1SectionEnd {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+SPAN.C1HPopupText {FONT-FAMILY: "Tahoma","sans-serif"; }
+
+SPAN.C1HGroupLink {}
+
+SPAN.C1HIndex {}
+
+SPAN.C1HJump {}
+
+P.C1HBullet2 {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 54pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 54.0pt; }
+
+P.C1HBullet {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 36.0pt; }
+
+P.HeaderBase {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt; }
+
+P.CodeExplained {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 2pt 36pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+P.MsoList5 {LINE-HEIGHT: normal;  TEXT-INDENT: -14.15pt;  MARGIN: 0pt 0pt 0pt 70.75pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoList4 {LINE-HEIGHT: normal;  TEXT-INDENT: -14.15pt;  MARGIN: 0pt 0pt 0pt 56.6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoList3 {LINE-HEIGHT: normal;  TEXT-INDENT: -14.15pt;  MARGIN: 0pt 0pt 0pt 42.45pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoList2 {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 36.0pt; }
+
+P.MsoToaHeading {LINE-HEIGHT: normal;  MARGIN: 6pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 12pt;  FONT-WEIGHT: bold; }
+
+SPAN.MsoFootnoteReference {POSITION: relative;  TOP: -3pt; }
+
+P.MsoIndexHeading {LINE-HEIGHT: normal;  MARGIN: 15.1pt 0pt 6.1pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 11pt;  FONT-WEIGHT: bold; }
+
+P.MsoHeader {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  tab-stops: right 486.0pt; }
+
+P.MsoToc1 {LINE-HEIGHT: normal;  MARGIN: 12pt 0pt 6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 14pt;  FONT-WEIGHT: bold; }
+
+P.MsoIndex2 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 18pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+SPAN.C1HContentsTitle {}
+
+SPAN.C1HLinkTag {}
+
+SPAN.C1HKeywordLink {}
+
+P.C1HContinue2 {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt 54pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.C1HContinue {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.SourceTop {LINE-HEIGHT: 14pt;  MARGIN: 5.75pt 0pt 0pt 36pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt;  tab-stops: 54.0pt 72.0pt 90.0pt 108.0pt 126.0pt 144.0pt 162.0pt 180.0pt 198.0pt 216.0pt 234.0pt 252.0pt 270.0pt 288.0pt 306.0pt; }
+
+P.MarginNote {LINE-HEIGHT: 14pt;  FONT-STYLE: italic;  MARGIN: 3pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.RelatedHead {LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 1pt;  FONT-FAMILY: "Verdana","sans-serif";  COLOR: blue;  FONT-SIZE: 11pt;  FONT-WEIGHT: bold; }
+
+P.Jump {LINE-HEIGHT: 14pt;  MARGIN: 0pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.Definition {LINE-HEIGHT: 14pt;  MARGIN: 5.75pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+P.MsoListParagraph {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+
+P.MsoToc2 {LINE-HEIGHT: normal;  MARGIN: 3pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 11pt;  TEXT-DECORATION: underline;  text-underline: double; }
+
+P.MsoIndex3 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoHeading7 {LINE-HEIGHT: normal;  MARGIN: 12pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 12pt; }
+
+SPAN.HTML {COLOR: green; }
+
+P.JumpfromList {LINE-HEIGHT: 14pt;  MARGIN: 0pt 0pt 3pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.CaptionTable {LINE-HEIGHT: 14pt;  FONT-STYLE: italic;  MARGIN: 0pt 0pt 8pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 18.0pt 36.0pt; }
+
+P.C1SectionExpanded, h4.C1SectionExpanded {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 2pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 12pt;  FONT-WEIGHT: bold; }
+
+P.WhatsThis {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 7pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 16pt;  FONT-WEIGHT: bold; }
+
+P.SuperTitle {BORDER-BOTTOM: medium none;  TEXT-ALIGN: right;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  MARGIN: 48pt 0pt 0pt 72pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 14pt;  BORDER-TOP: medium none;  FONT-WEIGHT: bold;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt; }
+
+P.footerodd {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  MARGIN: 0pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  BORDER-TOP: medium none;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt;  tab-stops: right 486.0pt; }
+
+P.MsoBibliography {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SPAN.MsoHyperlink {COLOR: #0563c1;  TEXT-DECORATION: underline;  text-underline: single; }
+
+P.MsoBodyText3 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 8pt; }
+
+P.MsoBodyText2 {LINE-HEIGHT: 200%;  MARGIN: 0pt 0pt 6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoBodyText {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoToc3 {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+SPAN.C1HInlineExpand {}
+
+P.C1HPopupTopicText {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt;  FONT-FAMILY: "Tahoma","sans-serif";  FONT-SIZE: 8pt; }
+
+SPAN.C1HConditional {}
+
+SPAN.C1HLinkTagInvisible {DISPLAY: none; }
+
+SPAN.C1HPopup {}
+
+SPAN.C1HGroup {}
+
+
+
+
+
+
+
+P.MsoClosing {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 212.6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoFooter {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  MARGIN: 0pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  BORDER-TOP: medium none;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt;  tab-stops: right 486.0pt; }
+
+P.MsoCommentText {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoToc4 {LINE-HEIGHT: normal;  MARGIN: 0pt 36pt 0pt 108pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.TableBorder {LINE-HEIGHT: 1pt;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.footereven {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  MARGIN: 0pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Arial","sans-serif";  FONT-SIZE: 10pt;  BORDER-TOP: medium none;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt;  tab-stops: right 486.0pt; }
+
+P.FiguresTable {LINE-HEIGHT: 14pt;  MARGIN: 3pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 18.0pt 36.0pt; }
+
+P.CodeBase {LINE-HEIGHT: 14pt;  MARGIN: 5pt 0pt 0pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+P.MsoDate {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoToc5 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 40pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.GlossaryHeadingnoautolinks {LINE-HEIGHT: normal;  MARGIN: 6pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+P.GlossaryHeading {LINE-HEIGHT: normal;  MARGIN: 6pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+P.List2Table {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 36.0pt; }
+
+P.BodyTable {LINE-HEIGHT: normal;  MARGIN: 5.75pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+P.MsoIntenseQuote {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  FONT-STYLE: italic;  MARGIN: 10pt 46.8pt 14pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  COLOR: #4f81bd;  FONT-SIZE: 10pt;  BORDER-TOP: medium none;  FONT-WEIGHT: bold;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt; }
+
+
+
+
+P.MsoToc6 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 50pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.IndexBase {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ADDRESS {LINE-HEIGHT: normal;  FONT-STYLE: italic;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoBlockText {LINE-HEIGHT: normal;  MARGIN: 0pt 72pt 6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoNoteHeading {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoBodyTextFirstIndent {LINE-HEIGHT: normal;  TEXT-INDENT: 10.5pt;  MARGIN: 0pt 0pt 6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoEnvelopeAddress {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 144pt;  FONT-FAMILY: "Cambria","serif";  FONT-SIZE: 12pt; }
+
+P.MsoToc7 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 60pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoIndex8 {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 80pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+button {text-indent: 0pt; }
+
+P.ByLine {TEXT-ALIGN: right;  LINE-HEIGHT: normal;  MARGIN: 12.1pt 0pt 36.1pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 14pt;  FONT-WEIGHT: bold; }
+
+
+
+
+
+
+
+
+P.MsoBodyTextIndent {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 6pt 14.15pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoNormalIndent {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 36pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoIndex9 {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 90pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+H5 {LINE-HEIGHT: normal;  MARGIN: 6pt 0pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  FONT-WEIGHT: bold; }
+
+P.GlossaryTerm {LINE-HEIGHT: 14pt;  MARGIN: 2pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 11pt; }
+
+SPAN.C1HContextID {DISPLAY: none; }
+
+SPAN.C1HIndexInvisible {DISPLAY: none; }
+
+P.TOCBase {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+
+
+
+P.MsoSubtitle {TEXT-ALIGN: center;  LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 3pt;  FONT-FAMILY: "Cambria","serif";  FONT-SIZE: 12pt; }
+
+P.MsoSignature {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 212.6pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoToc8 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 70pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+H4 {PAGE-BREAK-AFTER: avoid;  LINE-HEIGHT: normal;  MARGIN: 2pt 0pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 12pt;  FONT-WEIGHT: bold; }
+
+P.KeywordLink {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  MARGIN: 9pt 0pt 1pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Verdana","sans-serif";  COLOR: blue;  FONT-SIZE: 11pt;  BORDER-TOP: medium none;  FONT-WEIGHT: bold;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt; }
+
+P.C1HBullet2A {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 54pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: list 54.0pt; }
+
+
+
+
+
+
+
+
+
+
+
+
+P.MsoPlainText {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt; }
+
+P.MsoMessageHeader {BORDER-BOTTOM: medium none;  BORDER-LEFT: medium none;  PADDING-BOTTOM: 0pt;  LINE-HEIGHT: normal;  TEXT-INDENT: -56.7pt;  MARGIN: 0pt 0pt 0pt 56.7pt;  PADDING-LEFT: 0pt;  PADDING-RIGHT: 0pt;  FONT-FAMILY: "Cambria","serif";  BACKGROUND: #cccccc;  FONT-SIZE: 12pt;  BORDER-TOP: medium none;  BORDER-RIGHT: medium none;  PADDING-TOP: 0pt; }
+
+P.MsoList {LINE-HEIGHT: 14pt;  TEXT-INDENT: -18pt;  MARGIN: 5pt 0pt 0pt 18pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 18.0pt; }
+
+P.MsoMacroText {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Courier New";  FONT-SIZE: 10pt;  tab-stops: 24.0pt 48.0pt 72.0pt 96.0pt 120.0pt 144.0pt 168.0pt 192.0pt 216.0pt; }
+
+P.MsoToa {LINE-HEIGHT: normal;  TEXT-INDENT: -10pt;  MARGIN: 0pt 0pt 0pt 10pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+
+P.MsoEnvelopeReturn {LINE-HEIGHT: normal;  MARGIN: 0pt;  FONT-FAMILY: "Cambria","serif";  FONT-SIZE: 10pt; }
+
+P.MsoCaption {LINE-HEIGHT: 14pt;  FONT-STYLE: italic;  MARGIN: 0pt 0pt 8pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt;  tab-stops: 18.0pt 36.0pt; }
+
+P.MsoToc9 {LINE-HEIGHT: normal;  MARGIN: 0pt 0pt 0pt 80pt;  FONT-FAMILY: "Verdana","sans-serif";  FONT-SIZE: 10pt; }
+

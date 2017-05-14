@@ -1,0 +1,163 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane mt18" >
+    <div class="row box topbox">
+        <div ng-if="hasDashbaccess && !iAU" class="col-sm-12" ng-controller="DashboardOrderController">
+            <div class="navbar navbar-default pb2">
+                <div class="col-sm-6">
+                    <h2>{{dDate}}</h2>
+                </div>
+                <div class="col-sm-6 noLRpad form-inline">
+                    <div class="form-group float-right">
+                        <div class="label mgr0 norightpad" ng-day-month-switch vw="vw"></div>
+                        <date-picker ng-show="vw == 'm'" date-model="day" mode="'month'" noclear="noclear" min-date="createdOn" max-date="today"></date-picker>
+                        <date-picker ng-show="vw == 'd'" date-model="day" noclear="noclear" min-date="createdOn" max-date="today"></date-picker>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                    <span ng-show="tm" class="caption pull-right">
+                       {{resourceBundle['asof']}} {{tm}}
+                    </span>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="ordersTabEnabled && ds.rpe" class="bgr col-sm-12 extcontainer">
+                <div class="title-heading panel-background">
+                    <b>{{resourceBundle['home.revenue']}}</b>
+                </div>
+                <div ng-if="!loading">
+                    <div class="row pulldown-2x">
+                        <div class="col-sm-12">
+                            <div class="col-sm-4 home-stat home-stat-green pull-left home-stat-green-btm">
+                                <div class="dash-report-container-g">
+                                    <span class="reportLabel">{{hpr.rvn || 0 | number}}</span>
+                                    <span>
+                                        <span ng-if="hpr.rcp > 0"><span class="glyphicons glyphicons-arrow-up fc-color-green userinfo">{{hpr.arcp}}%</span></span>
+                                        <span ng-if="hpr.rcp < 0"><span class="glyphicons glyphicons-arrow-down fc-color-red userinfo">{{hpr.arcp}}%</span></span>
+                                        <span ng-if="hpr.rcp == 0"><span class="lPad5 fc-color-grey">{{hpr.arcp}}%</span></span>
+                                    </span>
+                                    <p class="home-stat-green-l">{{resourceBundle['home.revenue']}} ({{cnf.cur || 'INR'}})</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pulldown-2x mh3">
+                        <div class="col-sm-12">
+                            <div class="text-center">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_r" chart-options="cOptions_r" chart-id="c4"></fusion-chart>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="ordersTabEnabled && ds.ope" class="bgr col-sm-12 extcontainer">
+                <div class="title-heading panel-background">
+                    <b>{{resourceBundle['orders']}}</b>
+                </div>
+                <div ng-if="!loading">
+                    <div class="row pulldown-2x">
+                        <div class="col-sm-12">
+                            <div ng-click="showOrders('o')" class="col-sm-3 home-stat home-stat-teal" ng-class="{'home-stat-teal-btm' : og == 'o'}">
+                                <div class="dash-report-container-t">
+                                    <span class="reportLabel">{{hpr.ord || 0 | number}}</span>
+                                    <span>
+                                        <span ng-if="hpr.ocp > 0"><span class="glyphicons glyphicons-arrow-up fc-color-green userinfo">{{hpr.aocp}}%</span></span>
+                                        <span ng-if="hpr.ocp < 0"><span class="glyphicons glyphicons-arrow-down fc-color-red userinfo">{{hpr.aocp}}%</span></span>
+                                        <span ng-if="hpr.ocp == 0"><span class="lPad5 fc-color-grey">{{hpr.aocp}}%</span></span>
+                                    </span>
+                                    <p class="home-stat-teal-l">{{resourceBundle['orders']}}</p>
+                                </div>
+                            </div>
+                            <div ng-click="showOrders('f')" class="col-sm-3 home-stat home-stat-green" ng-class="{'home-stat-green-btm' : og == 'f'}">
+                                <div class="dash-report-container-g">
+                                    <span class="reportLabel">{{hpr.ford || 0 | number}}</span>
+                                    <span>
+                                        <span ng-if="hpr.focp > 0"><span class="glyphicons glyphicons-arrow-up fc-color-green userinfo">{{hpr.afocp}}%</span></span>
+                                        <span ng-if="hpr.focp < 0"><span class="glyphicons glyphicons-arrow-down fc-color-red userinfo">{{hpr.afocp}}%</span></span>
+                                        <span ng-if="hpr.focp == 0"><span class="lPad5 fc-color-grey">{{hpr.afocp}}%</span></span>
+                                    </span>
+                                    <p class="home-stat-green-l">{{resourceBundle['home.fulfilledorders']}}</p>
+                                </div>
+                            </div>
+                            <div ng-click="showOrders('p')" class="col-sm-3 home-stat home-stat-red" ng-class="{'home-stat-red-btm' : og == 'p'}">
+                                <div class="dash-report-container-r">
+                                    <span class="reportLabel">{{hpr.pord || 0 | number}}</span>
+                                    <span>
+                                        <span ng-if="hpr.pocp > 0"><span class="glyphicons glyphicons-arrow-up fc-color-green userinfo">{{hpr.apocp}}%</span></span>
+                                        <span ng-if="hpr.pocp < 0"><span class="glyphicons glyphicons-arrow-down fc-color-red userinfo">{{hpr.apocp}}%</span></span>
+                                        <span ng-if="hpr.pocp == 0"><span class="lPad5 fc-color-grey">{{hpr.apocp}}%</span></span>
+                                    </span>
+                                    <p class="home-stat-red-l">{{resourceBundle['home.pendingorders']}}</p>
+                                </div>
+                            </div>
+                            <div ng-click="showOrders('r')" class="col-sm-3 home-stat home-stat-orange" ng-class="{'home-stat-orange-btm' : og == 'r'}">
+                                <div class="dash-report-container-o">
+                                    <span class="reportLabel">{{hpr.ort || 0 | number}}</span>
+                                    <span>
+                                        <span ng-if="hpr.ortcp > 0"><span class="glyphicons glyphicons-arrow-up fc-color-green userinfo">{{hpr.aortcp}}%</span></span>
+                                        <span ng-if="hpr.ortcp < 0"><span class="glyphicons glyphicons-arrow-down fc-color-red userinfo">{{hpr.aortcp}}%</span></span>
+                                        <span ng-if="hpr.ortcp == 0"><span class="lPad5 fc-color-grey">{{hpr.aortcp}}%</span></span>
+                                    </span>
+                                    <p class="home-stat-orange-l">{{resourceBundle['home.orderresponsetime']}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pulldown-2x mh3">
+                        <div class="col-sm-12">
+                            <div class="text-center" ng-if="og == 'o'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_o" chart-options="cOptions_o" chart-id="c5"></fusion-chart>
+                            </div>
+                            <div class="text-center" ng-if="og == 'f'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_fo" chart-options="cOptions_fo" chart-id="c6"></fusion-chart>
+                            </div>
+                            <div class="text-center" ng-if="og == 'p'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_po" chart-options="cOptions_po" chart-id="c7"></fusion-chart>
+                            </div>
+                            <div class="text-center" ng-if="og == 'r'">
+                                <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                              chart-data="cData_ort" chart-options="cOptions_ort" chart-id="c8"></fusion-chart>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12" ng-if="!iAdm"  style="margin-top: 45px;">
+            <div class="bgr" ng-if="iMan && !dashboardConfig.edm" >
+                <div class="title-heading panel-background">
+                    <b>{{resourceBundle['dashboard.welcome']}}</b>
+                </div>
+                <div class="panel-body">
+                    <img src="../../images/front-pic.jpg" width="100%"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

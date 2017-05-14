@@ -1,0 +1,184 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane pt45">
+    <div ng-controller="OrdResController" id="cid">
+        <div class="filter-box">
+            <div ng-include="'views/common/reset-filters.html'"></div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['state']}} {{resourceBundle['name']}}</span>
+                    <report-filter filter-model="rep.st" filter-type="state"></report-filter>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['district']}}</span>
+                    <report-filter filter-model="rep.dis" filter-type="district"></report-filter>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['entity.group.lowercase']}}</span>
+                    <select-ent-group ent-grp-model="rep.eg"></select-ent-group>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['kiosk']}}</span>
+                    <entity-select ent-model="rep.entity" classes="form-control"></entity-select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3  pt30 mh40">
+                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="rep.etag" tag-type="entity"></tag-filter>
+                </div>
+                <div class="col-sm-12">
+                    <span ng-show="tm" class="caption pull-right" >
+                        {{resourceBundle['asof']}} {{tm}}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row action-bar">
+            <div class="col-sm-7 noLRpad">
+                <form class="form-inline" role="form">
+                    <div class="form-group">
+                        <label class="filter-label cbx">{{resourceBundle['from']}}</label>
+                        <date-picker date-model="from" place-holder="From" mode="'month'"
+                                     noclear="noclear" max-date="today"></date-picker>
+                        <span class="lPad"></span>
+                        <label class="filter-label cbx">{{resourceBundle['to']}}</label>
+                        <date-picker date-model="to" place-holder="To" mode="'month'" noclear="noclear" min-date="from" max-date="today"></date-picker>
+                    </div>
+                </form>
+            </div>
+            <div class="pull-right">
+                <button type="button" ng-click="getFChartData()" class="btn btn-sm btn-primary">
+                    {{resourceBundle['report.get']}}
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <span class="pull-right mb5" ng-hide="cLabel == undefined">
+                    <a ng-hide="showExport" ng-click="openExportOptions()">{{resourceBundle['show.export.options']}}</a>
+                    <a ng-show="showExport" ng-click="closeExportOptions()">{{resourceBundle['hide.export.options']}}</a>
+                </span>
+            </div>
+        </div>
+        <div ng-show="showExport" class="tron form-group">
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label required">{{resourceBundle['aggregateuppercase']}}</span>
+                    <div clas="form-control">
+                        <div class="btn-group"><label class="btn btn-sm btn-default" ng-model="dm" uib-btn-radio="'m'">{{resourceBundle['month.upper']}}</label></div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label" >{{resourceBundle['from']}}</span>
+
+                    <date-picker ng-show="dm == 'm'" date-model="startDate" place-holder="From"
+                                 mode="'month'" noclear="noclear"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['to']}}</span>
+                    <date-picker ng-show="dm == 'm'" date-model="endDate" place-holder="To"
+                                 mode="'month'" noclear="noclear"></date-picker>
+                </div>
+                <!--<div ng-include="'views/reports/export-filters.html'"/>-->
+                <div ng-if="mailId != undefined && mailId != null" class="col-sm-3" style="top:23px;">
+                    <export-data mail-id="mailId" frequency="dm" report-type="orderresponsetimes"
+                                       export-type="reports"
+                                       export-callback="exportOrderResponseReports('orderresponsetimes')"></export-data>
+                    <button type="button" class="btn btn-sm btn-default" ng-click="closeExportOptions()">
+                        {{resourceBundle['cancel']}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning" ng-show="showChart && cLabel == undefined">
+                    {{resourceBundle['data.notavailable']}}</p>
+            </div>
+        </div>
+        <div class="row" ng-show="showChart">
+            <div class="col-sm-12" ng-hide="cLabel == undefined">
+                <div>
+                    <ul class="tabb nav nav-tabs subnav-tabs">
+                        <li ng-class="{active: cView == 'p'}"><a ng-click="setCView('p')" class="clickable">{{resourceBundle['order.processingtimes']}}</a>
+                        </li>
+                        <li ng-class="{active: cView == 'd'}"><a ng-click="setCView('d')" class="clickable">{{resourceBundle['report.deliveryleadtime']}}</a>
+                        </li>
+                    </ul>
+                </div>
+                <div ng-if="!loading">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="pull-right padding5">
+                                <div ng-chart-tab-switch vw="vw"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="cView=='p'" class="row">
+                        <div class="col-sm-12">
+                            <div ng-if="cLabel != undefined" align="center">
+                                <div ng-if="vw == 'c'">
+                                    <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                                  chart-data="cData_p" chart-options="cOptions"
+                                                  chart-id="c1"></fusion-chart>
+                                    <p class="padding5" ng-if="cSummary_p > 0">
+                                        <b>{{resourceBundle['average.period']}}: </b>{{cSummary_p}} {{resourceBundle['days']}}</p>
+                                </div>
+                                <div ng-if="vw == 't'">
+                                    <chart-table caption="cOptions.caption" heading="tHead_p"
+                                                 row="tData_p"></chart-table>
+                                    <p class="padding5" ng-if="cSummary_p > 0">
+                                        <b>{{resourceBundle['average.period']}}: </b>{{cSummary_p}} {{resourceBundle['days']}}</p>
+                                </div>
+                                <a ng-click="exportAsCSV()">{{resourceBundle['download.csv']}}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="cView=='d'" class="row">
+                        <div class="col-sm-12">
+
+                            <div ng-if="cLabel != undefined" align="center">
+                                <div ng-if="vw == 'c'">
+                                    <fusion-chart type="cType" height="cHeight" width="cWidth" chart-label="cLabel"
+                                                  chart-data="cData_d" chart-options="cOptions"
+                                                  chart-id="c2"></fusion-chart>
+                                    <p class="padding5" ng-if="cSummary_d > 0">
+                                        <b>{{resourceBundle['average.period']}}: </b>{{cSummary_d}} {{resourceBundle['days']}}</p>
+                                </div>
+                                <div ng-if="vw == 't'">
+                                    <chart-table caption="cOptions.caption" heading="tHead_d"
+                                                 row="tData_d"></chart-table>
+                                    <p class="padding5" ng-if="cSummary_d > 0">
+                                        <b>{{resourceBundle['average.period']}}: </b>{{cSummary_d}} {{resourceBundle['days']}}</p>
+                                </div>
+                                <a ng-click="exportAsCSV()">{{resourceBundle['download.csv']}}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

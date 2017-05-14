@@ -1,0 +1,155 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" xmlns="http://www.w3.org/1999/html">
+<div class="bizinfo bizinfo-last">
+<div ng-controller="BulkUploadController">
+<div class="row" ng-hide="loading">
+    <div class="col-sm-8">
+        <div ng-show="us.iu">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-sm-7 noLRpad">
+                                <span class="glyphicons glyphicons-upload uploadIcon col-sm-1"></span>
+                                <span class="form-control-static col-sm-11"><b>{{resourceBundle['bulkupload.mylastupload']}}:</b> <a href="/s2/api/export/download?key={{us.id}}" target="_new">{{us.fnm}}</a>
+                                    <span class="caption">{{resourceBundle['on']}} {{us.utm}}<span ng-show="isDef(us.unm)"> {{resourceBundle['by']}} <a href="/v2/index.html#/setup/users/all/details?userId={{us.uid}}" target="_new">{{us.unm}}</a></span></span>
+                                </span>
+                            </div>
+                            <div class="col-sm-5 form-control-static noLRpad">
+                                <b>{{resourceBundle['status']}}:</b> {{us.jsnm}}
+                                <span class="lPad"></span>
+                                <b>{{resourceBundle['errors']}}:</b>
+                                <span ng-show="us.ierr">
+                                    <span ng-click="viewErrors()" class="codered"> {{us.errcnt}} {{resourceBundle['errors.small']}} </span>
+                                </span>
+                                <span ng-hide="us.ierr">
+                                None
+                                </span>
+                                <span class="lPad"></span>
+                                <a><span class="glyphicons glyphicons-refresh clickable" ng-click="uploadStatus()"></span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-show="serr">
+                <div class="col-sm-12">
+                    <div class="errors">
+                    <table class="table table-condensed table-hover table-logistimo">
+                        <tr>
+                            <th>#</th>
+                            <th>{{resourceBundle['characteroffset']}}</th>
+                            <th>{{resourceBundle['operation']}}</th>
+                            <th>{{resourceBundle['errors']}}</th>
+                        </tr>
+                        <tr ng-repeat="error in us.errs">
+                            <td>{{$index + 1}}</td>
+                            <td>{{error.off}}</td>
+                            <td>{{error.onm}}</td>
+                            <td>
+                                <table class="table table-condensed">
+                                    <tr ng-repeat="msg in error.msgs">
+                                        <td class="codered bl1 br1">{{$index + 1}}</td>
+                                        <td class="codered br1"> {{msg}}</td>
+                                    </tr>
+                                </table>
+                                <table class="table">
+                                    <tr>
+                                        <td class="btb0">{{resourceBundle['in']}}</td>
+                                        <td class="btb0" style="color:#808080"> {{error.ln}}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-show="us.ipc" class="mt10">
+            <form class="form-inline" role="form" name="uploadForm" novalidate>
+                <div class="form-group">
+                    <label class="col-sm-12">{{resourceBundle['bulkupload.selectcsvfile']}} {{us.tnm}}</label>
+                    <div class="col-sm-12">
+                        <div class="input-group form-control">
+                            <input type="file" file-model="fileData" accept=".csv,text/csv" >
+                        </div>
+                        <input type="button" ng-click="validate() && uploadPostUrl()" class="btn btn-primary" value="Upload">
+                        <a href="{{us.mp}}/" class="btn btn-default" >{{resourceBundle['cancel']}}</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div ng-hide="us.ipc">
+            <p class=" alert alert-warning">{{resourceBundle['bulkupload.previousuploadnotcomplete']}}</p>
+        </div>
+    </div>
+    <div class="col-sm-4 noleftpad">
+        <h4>{{resourceBundle['instructions']}}</h4><hr/>
+        <div class="row">
+            <div class="col-sm-12 enclose text-justify">
+                {{resourceBundle['bulkupload.overview1']}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 enclose text-justify">
+                {{resourceBundle['bulkupload.overview3']}}
+            </div>
+        </div>
+        <div class="row enclose">
+            <div class="col-sm-12">
+                <span class="glyphicons glyphicons-download uploadIcon"></span>
+                <span class="uploadBotSpace">
+                    <a href="/s2/api/export/uploadformat?type={{us.ty}}" target="_new">{{resourceBundle['bulkupload.downloaddatafile']}} {{us.tnm}}</a>
+                </span>
+                <span class="uploadBotSpace" ng-show="helpFile != null">
+                    <a href="/s/help/index.html#!Documents/{{helpFile}}" target="_blank"><span class="glyphicons glyphicons-info-sign"></span></a>
+                </span>
+            </div>
+        </div>
+        <div class="row enclose">
+            <div class="col-sm-12" ng-show="us.iut">
+                <span class="glyphicons glyphicons-download uploadIcon"></span>
+                <span class="uploadBotSpace">
+                    <a href="/s2/api/export/uploadformat?type=timezones" target="_new">{{resourceBundle['bulkupload.downloadtimezones']}}</a>
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <h4>{{resourceBundle['bulkupload.tiptitle']}}</h4>
+                <hr/>
+                <ul class="text-justify" style="padding-left: 15px;">
+                    <li> {{resourceBundle['bulkupload.tip1']}}</li>
+                    <li> {{resourceBundle['bulkupload.tip2']}}</li>
+                    <li> {{resourceBundle['bulkupload.tip3']}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>

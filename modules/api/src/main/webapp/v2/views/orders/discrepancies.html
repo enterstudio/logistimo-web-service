@@ -1,0 +1,110 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="pane">
+    <div ng-controller="DiscrepanciesListingCtrl">
+        <div class="filter-box form-group">
+            <div ng-include="'views/common/reset-filters.html'"/>
+            <div class="row">
+                <div class="col-sm-3" ng-show="showEntityFilter">
+                    <span class="filter-label">{{resourceBundle.kiosk}}</span>
+                    <entity-select ent-model="entity" classes="form-control"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
+                                   disable="!showEntityFilter || isDef(material.mId)"></entity-select>
+
+                </div>
+                <div class="col-sm-3" ng-show="iAdm && !isEnt">
+                    <span class="filter-label">{{resourceBundle.material}}</span>
+                    <material-select mat-model="material" classes="form-control" place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}"
+                                     disable="isDef(entity.id)"></material-select>
+                </div>
+                <div class="col-sm-3" >
+                        <span class="filter-label">{{resourceBundle['discrepancy']}}</span>
+                        <select class="form-control" ng-model="discType">
+                            <option value="">{{resourceBundle.all}}</option>
+                            <option value="ordering">{{resourceBundle['discrepancy.ordering']}}</option>
+                            <option value="shipping">{{resourceBundle['discrepancy.shipping']}}</option>
+                            <option value="fulfillment">{{resourceBundle['discrepancy.fulfillment']}}</option>
+                        </select>
+                </div>
+                <div class="col-sm-3 pt30 mh40">
+                    <input class="pt7" type="checkbox" ng-model="etrn">
+                    <span ng-hide="transRelease">{{resourceBundle['exclude.transferorders']}}</span>
+                    <span ng-show="transRelease">{{resourceBundle['exclude.releaseorders']}}</span>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['order']}}</span>
+                    <div class="has-feedback">
+                        <input type="text" class="form-control" ng-model="ordId" autocomplete="off" typeahead-wait-ms="300"
+                               placeholder="{{resourceBundle['ord.num']}}"  uib-typeahead="val for val in getSuggestions($viewValue,'oid')"
+                               typeahead-loading="loadingOrderId" typeahead-on-select="orderId = ordId">
+                        <span ng-show="loadingOrderId" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.from}}</span>
+                    <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.to}}</span>
+                    <date-picker date-model="to" place-holder="To" min-date="from" max-date="today"></date-picker>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore">
+                <div ng-show="iAdm && (entity.id == undefined || entity.id == '')" class="col-sm-3 pt30 mh40">
+                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="eTag" tag-type="entity" ></tag-filter>
+                </div>
+                <div ng-show="isUndef(material.mId) && !((vw == 'm'|| iMan) && isUndef(entity.id))" class="col-sm-3  pt30 mh40">
+                    <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="mTag" tag-type="material"></tag-filter>
+                </div>
+            </div>
+
+        </div>
+        <div class="row" ng-hide="showMore">
+            <div class="col-sm-12 ">
+                <span class="glyphicons  glyphicons-chevron-down medium filter-expand"  ng-click="showMore = true" ></span>
+            </div>
+        </div>
+        <div class="row" ng-show="showMore">
+            <div class="col-sm-12">
+                <span class="glyphicons  glyphicons-chevron-up medium filter-expand"  ng-click="showMore = !showMore"></span>
+            </div>
+        </div>
+        <div class="row action-bar">
+            <div class="col-sm-9 noLRpad">
+                <export-data ng-show="resSize > 0" mail-id="mailId" export-type="discrepancies" export-callback="exportDiscrepancies(type,extraParams)"
+                             disc-type="discType" entity-id="entity.id" entity-name="entity.nm" e-tag="eTag" mat-id="material.mId" mat-name="material.nm" m-tag="mTag" order-id="orderId" export-order-type="oType" etrn="etrn" from="from" to="to" rows="numFound"></export-data>
+            </div>
+            <div class="btn-group pull-right" ng-show="(entity!= null && entity.id != null && entity.id != '') && isUndef(orderId)" ng-click="showColumns()">
+                <label class="btn btn-sm btn-default" ng-model="oType" uib-btn-radio="'sle'">{{resourceBundle.salesorders}}</label>
+                <label class="btn btn-sm btn-default" ng-model="oType" uib-btn-radio="'prc'">{{resourceBundle.purchaseorders}}</label>
+            </div>
+        </div>
+        <div ng-include="'views/orders/discrepancies-list.html'"></div>
+    </div>
+    </div>
+</div>

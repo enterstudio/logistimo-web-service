@@ -1,0 +1,25 @@
+<!-- this is a spring XML file where we have Camel embedded -->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <!-- Here we define Camel, notice the namespace it uses -->
+    <camelContext xmlns="http://camel.apache.org/schema/spring">
+
+        <template id="camel-events-gen"></template>
+
+        <route id="eventsRoute">
+            <from uri="direct:events"/>
+            <log message="Routing message from task queue to task ${body}"/>
+            <bean ref="taskExecutor"/>
+        </route>
+
+    </camelContext>
+
+
+    <bean id="taskExecutor" class="com.logistimo.events.processor.EventProcessor">
+    </bean>
+
+</beans>

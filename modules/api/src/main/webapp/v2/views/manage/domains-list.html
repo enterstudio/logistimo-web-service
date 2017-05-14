@@ -1,0 +1,106 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox" ng-if="iSU">
+    <div ng-controller="DomainFormCtrl">
+        <div ng-controller="AllDomainsListController">
+
+            <div class="filter-box form-group">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['domains']}}</span>
+                        <div class="input-group">
+                            <input type="text" class="form-control" ng-model="search.key" name="search.key" maxlength="50"
+                                   placeholder="{{resourceBundle['filterby']}} {{resourceBundle['domain.lowercase']}}s" ng-enter="searchDomain()">
+							<span class="input-group-btn">
+							<button class="btn btn-default" ng-click="searchDomain()" type="button"
+                                    ng-disabled="(search.key == null && search.key == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}">
+                                <span class="glyphicons glyphicons-search"></span>
+                            </button>
+							</span>
+                        </div>
+                    </div>
+                    <div class="mt18 col-sm-9 " >
+                        <span class="pull-right" >
+                            <button type="reset" ng-click="reset(true)" class="btn btn-sm btn-default">
+                                {{resourceBundle['reset']}}
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt10">
+                <div class="col-sm-12">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row " ng-show="domain.length > 0">
+                <div class="col-sm-12">
+                    <table class="table table-condensed table-hover table-logistimo table-fixed">
+                        <tr>
+                            <th class="text-center col-sm-1">{{resourceBundle['serialnum']}}</th>
+                            <th class="col-sm-4" >{{resourceBundle['domain']}} {{resourceBundle['name']}}</th>
+                            <th class="col-sm-4" >{{resourceBundle['description']}}</th>
+                            <th class="text-center col-sm-2">{{resourceBundle['domain.switch.button']}}</th>
+                            <th class="text-center col-sm-1"></th>
+                        </tr>
+                        <tr ng-repeat="item in filtered=domain">
+                            <td class="text-center col-sm-1">{{offset + $index + 1}}</td>
+                            <td class="col-sm-4"><a href="#/manage/domains/{{item.dId}}/" >{{item.name}}
+                                <span class="color-black text-bold" ng-show="'{{item.dId}}' == '{{currentDomain}}'"> [{{resourceBundle['domain.current']}}]</span>
+                            </a></td>
+                            <td class="col-sm-4">{{item.description}}</td>
+                            <td class="text-center col-sm-2"><span
+                                    class="glyphicons glyphicons-transfer tglyph text-center" ng-click="switchDomain(item.dId,item.name)"></span></td>
+                            <td class="text-center col-sm-1">
+                                <a href="" ng-show="curUser == 'arun' || curUser == 'charan'" confirmed-click="deleteDomain(item.dId)"
+                                   ng-confirm-click="Are you sure you want to delete domain '{{item.name}}'?">
+                                    <span class="glyphicons glyphicons-bin"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row mt10">
+                <div class="col-sm-4 col-sm-offset-8">
+                    <div class="pull-right">
+                        <div ng-include="'views/paginator.html'"></div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="domain.length == 0">
+                <div class="row mt18">
+                    <div class="col-sm-12">
+                        <p class=" alert alert-warning" ng-show="domain.length == 0">
+                            {{resourceBundle['domain.notavailable']}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

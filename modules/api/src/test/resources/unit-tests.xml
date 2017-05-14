@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="UnitTests" verbose="1" >
+    <test name="TestAll"   >
+        <classes>
+            <class name="com.logistimo.service.impl.InvManagementUnitTest" />
+        </classes>
+    </test>
+</suite>

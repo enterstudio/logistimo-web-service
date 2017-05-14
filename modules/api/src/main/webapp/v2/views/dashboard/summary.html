@@ -1,0 +1,141 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox tabminheight">
+<div ng-controller="DashboardSummaryController">
+<div class="row">
+    <div class="col-sm-6 norightpad">
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['dashboard']}}s
+            </div>
+            <div class="row" ng-show="isDef(dashboards) && dashboards.length > 0">
+                <div class="col-sm-12">
+                    <table class="table table-striped table-condensed table-hover table-logistimo">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                            <th class="col-sm-5">Dashboard Name</th>
+                            <th class="col-sm-3"></th>
+                            <th class="col-sm-1"></th>
+                            <th class="col-sm-1"></th>
+                            <th class="col-sm-1"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in dashboards">
+                            <td class="text-center">{{$index + 1}}</td>
+                            <td>
+                                <a href="#/setup/dashboard/editdashboard/?dbid={{item.dbId}}">{{item.nm}}</a>
+                                <span ng-show="item.isConfd" class="glyphicons glyphicons-ok"></span>
+                            </td>
+                            <td>
+                                <a ng-if="!item.def" ng-click="setAsDefault(item.dbId)"
+                                        name="default_{{$index}}">Set as default
+                                </a>
+                                <span ng-show="item.def">Default</span>
+                            </td>
+                            <td>
+                                <a href="#/dashboard/view/{{item.dbId}}" uib-tooltip="{{resourceBundle['view']}}">
+                                    <span class="glyphicons glyphicons-pie-chart"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#/setup/dashboard/configdashboard/?dbid={{item.dbId}}" uib-tooltip="{{resourceBundle['configure']}}">
+                                    <span class="glyphicons glyphicons-cogwheels"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a ng-if="!item.def" ng-click="deleteDashboard(item.dbId)" uib-tooltip="{{resourceBundle['delete']}}">
+                                    <span class="glyphicons glyphicons-bin"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row mt18" ng-show="!loading && (isUndef(dashboards) || dashboards.length == 0)">
+                <div class="col-sm-12">
+                    <p class=" alert alert-warning">No Dashboards available.</p>
+                </div>
+            </div>
+            <div class="row mt10">
+                <div class="col-sm-12">
+                    <a href="#/setup/dashboard/createdashboard" class="btn btn-primary">{{resourceBundle['add']}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 noleftpad">
+        <div class="bgr">
+            <div class="title-heading">
+                {{resourceBundle['widget']}}s
+            </div>
+            <div class="row" ng-show="isDef(widgets) && widgets.length > 0">
+                <div class="col-sm-12">
+                    <table class="table table-striped table-condensed table-hover table-logistimo">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-2 text-center">{{resourceBundle['serialnum']}}</th>
+                            <th class="col-sm-7">Widget Name</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in widgets">
+                            <td class="text-center">{{$index + 1}}</td>
+                            <td>
+                                <a href="#/setup/dashboard/editwidget/?wid={{item.wId}}">{{item.nm}}</a>
+                            </td>
+                            <td>
+                                <a href="#/setup/dashboard/configwidget/?wid={{item.wId}}" uib-tooltip="{{resourceBundle['configure']}}">
+                                    <span class="glyphicons glyphicons-cogwheels"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a ng-click="deleteWidget(item.wId)" uib-tooltip="{{resourceBundle['delete']}}">
+                                    <span class="glyphicons glyphicons-bin"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row mt18" ng-show="!wLoading && (isUndef(widgets) || widgets.length == 0)">
+                <div class="col-sm-12">
+                    <p class="alert alert-warning">No Widgets available.</p>
+                </div>
+            </div>
+            <div class="row mt10">
+                <div class="col-sm-12">
+                    <a href="#/setup/dashboard/createwidget" class="btn btn-primary">{{resourceBundle['add']}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>

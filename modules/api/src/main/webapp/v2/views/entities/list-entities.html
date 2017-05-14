@@ -1,0 +1,196 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="EntityListController">
+        <div class="filter-box form-group" ng-show="iAdm">
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['kiosks']}}</span>
+
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="search.key" name="search.key" maxlength="50"
+                               ng-disabled="vw == 'm'" placeholder="{{resourceBundle['filterby']}} {{resourceBundle['kiosks.kiosks.lower']}}" ng-enter="searchEntity()">
+							<span class="input-group-btn">
+							<button class="btn btn-default" ng-click="searchEntity()" type="button"
+                                    ng-disabled="(search.key == null && search.key == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}">
+                                <span class="glyphicons glyphicons-search"></span>
+                            </button>
+							</span>
+                    </div>
+                </div>
+                <div class="col-sm-3 mt18 pt10" ng-show="(search.nm == undefined || search.nm == '')">
+                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                </div>
+                <div class="mt18" ng-class="{'col-sm-6':(search.nm == undefined || search.nm == ''),'col-sm-9':(search.nm != undefined && search.nm != '')}">
+                    <span class="pull-right" >
+                    <button type="reset" ng-click="reset()" class="btn btn-sm btn-default">
+                        {{resourceBundle['reset']}}
+                    </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div ng-show="filtered.length > 0">
+            <div class="row action-bar">
+                    <a ng-show="vw=='t' && (iSU || dp.ia || dp.ir)" ng-click="addOrRemoveMaterials()" class="btn btn-sm btn-primary">
+                        <span ng-show="iSU || dp.ia">{{resourceBundle['add']}}</span>
+                        <span ng-show="iSU || (dp.ia && dp.ir)">/</span>
+                        <span ng-show="iSU || dp.ir"> {{resourceBundle['materials.remove']}}</span>
+                        <span ng-show="!iSU && dp.ia && !dp.ir"> {{resourceBundle['materials']}}</span>
+                    </a>
+                    <export-data ng-show="vw=='t' && !iAU" mail-id="mailId" export-type="entities"
+                                       entity-id="entityId" mat-id="mid" entity-name="entity.nm" mat-name="material.mnm"
+                                       ebf="ebf" rows="numFound"></export-data>
+                <button ng-show="vw=='t' && (iSU || dp.er)" type="button" class="btn btn-sm btn-default" ng-click="deleteEntities()">
+                    {{resourceBundle['kiosks.remove']}}
+                </button>
+                <span class="pull-right">
+                    <div ng-map-tab-switch vw="vw" show-network="true"></div>
+                </span>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div ng-switch="vw">
+                        <div ng-switch-when="t">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="pull-right">
+                                        <div ng-include="'views/paginator.html'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <table
+                                    class="table table-condensed table-hover table-logistimo" id="fixTable">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th><input type="checkbox" ng-change="selectAll(selAll)" ng-model='$parent.selAll'/>
+                                    </th>
+                                    <th class="text-center">Sl.No.</th>
+                                    <th>{{resourceBundle['kiosk']}} Name</th>
+                                    <th>Location</th>
+                                    <th>Tags</th>
+                                    <th>{{resourceBundle['lastupdated']}}</th>
+                                    <th><span ng-hide="tempOnlyAU">Shortcuts</span></th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr
+                                        ng-repeat="item in getFiltered()">
+                                    <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                                    <td><input ng-if="currentDomain == item.sdid" type="checkbox" ng-model="item.selected"/></td>
+                                    <td class="text-center">{{item.sno}}</td>
+                                    <td>
+                                        <a ng-hide="tempOnlyAU" href="#/setup/entities/detail/{{item.id}}">{{item.nm}}</a>
+                                        <a ng-show="tempOnlyAU"
+                                           href="#/setup/entities/detail/{{item.id}}/assets/">{{item.nm}}</a>
+                                    </td>
+                                    <td>{{getAddress(item)}}<span class="pull-right" ng-show="item.ln !=0 && item.lt != 0"><span class="glyphicons glyphicons-globe" uib-tooltip="{{item.lt}},{{item.ln}}"></span></span></td>
+                                    <td>
+                                        <div ng-logi-tags tgs="item.tgs"></div>
+                                    </td>
+                                    <td><a href="#setup/users/all/details?userId={{item.lub}}" target="_blank">{{item.lubn}}</a>
+                                        <span class="litetext">{{item.lts}}</span>
+                                    </td>
+                                    <td>
+                                        <a ng-hide="tempOnlyAU" href="#/setup/entities/detail/{{item.id}}/inventory/"
+                                           uib-tooltip="{{resourceBundle.inventory}}"><span
+                                                class="glyphicons glyphicons-factory tglyph"></span></a>
+                                        <a ng-hide="tempOnlyAU || !ordersTabEnabled" href="#/setup/entities/detail/{{item.id}}/orders/"
+                                           uib-tooltip="{{resourceBundle.orders}}"><span
+                                                class="glyphicons glyphicons-money tglyph"></span></a>
+                                        <a ng-hide="tempOnlyAU"
+                                           href="#/setup/entities/detail/{{item.id}}/transactions/"
+                                           uib-tooltip="{{resourceBundle.transactions}}"><span
+                                                class="glyphicons glyphicons-transfer tglyph"></span></a>
+                                        <a ng-hide="tempOnlyAU || (!iSU && !dp.iv)"
+                                           href="#/setup/entities/detail/{{item.id}}/materials/"
+                                           uib-tooltip="{{resourceBundle.materials}}" ><span
+                                                class="glyphicons glyphicons-package tglyph"></span></a>
+                                        <a ng-hide="tempOnlyAU || (!iSU && !dp.erv)"
+                                           href="#/setup/entities/detail/{{item.id}}/relationships/"
+                                           uib-tooltip="{{resourceBundle.relationships}}"><span
+                                                class="glyphicons glyphicons-link tglyph"></span></a>
+                                    </td>
+                                    <td ng-show="(iSU || dp.ee) && currentDomain == item.sdid">
+                                        <a href="#/setup/entities/all/edit?eid={{item.id}}"
+                                           uib-tooltip="{{resourceBundle.edit}}"><span
+                                                class="glyphicons glyphicons-edit tglyph"></span></a>
+                                    </td>
+                                    <td ng-show="!dp.ee"></td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="pull-right">
+                                        <div ng-include="'views/paginator.html'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-switch-when="m">
+                            <div ng-init="templateUrl='views/entities/map-entity-info.html';" ng-include="'views/entities/list-entities-map.html'"></div>
+                        </div>
+                        <div ng-switch-when="h">
+                            <div ng-include="'views/entities/hierarchy.html'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-show="filtered.length > 10">
+                <div class="col-sm-12">
+                    <a ng-show="vw=='t' && (iSU || dp.ia || dp.ir)" ng-click="addOrRemoveMaterials()" class="btn btn-sm btn-primary">
+                        <span ng-show="iSU || dp.ia">{{resourceBundle['add']}}</span>
+                        <span ng-show="iSU || (dp.ia && dp.ir)">/</span>
+                        <span ng-show="iSU || dp.ir"> {{resourceBundle['materials.remove']}}</span>
+                        <span ng-show="!iSU && dp.ia && !dp.ir"> {{resourceBundle['materials']}}</span>
+                    </a>
+                    <export-data ng-show="vw=='t' && !iAU" mail-id="mailId" export-type="entities"
+                                       entity-id="entityId" mat-id="mid" entity-name="entity.nm" mat-name="material.mnm"
+                                       ebf="ebf" rows="numFound"></export-data>
+                    <button ng-show="vw=='t' && (iSU || dp.er)" type="button" class="btn btn-sm btn-default" ng-click="deleteEntities()">
+                        {{resourceBundle['kiosks.remove']}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div ng-show="!loading && filtered.length == 0">
+            <div class="row mt18">
+                <div class="col-sm-12">
+                    <p class=" alert alert-warning" ng-show="!loading && filtered.length == 0">
+                        {{resourceBundle['entities.notavailable']}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

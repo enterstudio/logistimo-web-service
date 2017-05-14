@@ -1,0 +1,69 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="AddWidgetController">
+            <form class="form-horizontal" role="form" novalidate>
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['add']}} {{resourceBundle['new']}} {{resourceBundle['widget']}}
+                    </div>
+                    <div class="row mt18">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['widget']}} {{resourceBundle['name']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" maxlength="50" autocomplete="off"
+                                           ng-model="wid.nm" name="w_name" placeholder="{{resourceBundle['widget']}} {{resourceBundle['name']}}"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['description']}}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" maxlength="50" autocomplete="off"
+                                           ng-model="wid.desc" name="w_desc" placeholder="{{resourceBundle['description']}}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h5>Configuration</h5><hr/>
+                    <div ng-include="'views/dashboard/widget-filters.html'"></div>
+                    <div class="row mt10">
+                        <div class="col-sm-6">
+                            <div class="pull-right">
+                                <button  ng-click="create()" name="save" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                                <a  href="#/setup/dashboard" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

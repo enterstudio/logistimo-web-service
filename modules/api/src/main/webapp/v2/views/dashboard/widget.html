@@ -1,0 +1,44 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<widget-panel>
+    <div class="panel panel-default dummy" style="height: {{item.cy}}px;">
+        <div class="panel-heading" style="display: flex">
+            <span class="panel-title" style="flex: 1 1 0">{{allWidgetsByIds[item.wid].nm}}</span>
+            <div class="btn-group">
+                <a href="#/setup/dashboard/configwidget?wid={{item.wid}}" uib-tooltip="Configure">
+                    <span class="glyphicons glyphicons-cogwheels"></span>
+                </a>
+                <span class="lPad10"></span>
+                <a ng-click="removeWidget(item)" uib-tooltip="Remove">
+                    <span class="glyphicons glyphicons-bin"></span>
+                </a>
+            </div>
+        </div>
+        <div class="row" style="margin: 0">
+            <div class="col-sm-12 text-center noLRpad">
+                <span class="dummy widget-watermark" style="line-height: {{item.cy - 45}}px">Widget</span>
+            </div>
+        </div>
+    </div>
+</widget-panel>

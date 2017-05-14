@@ -1,0 +1,502 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="AddAssetController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="addAssetForm" novalidate>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['device.info']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['device.basicinfo']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label required">{{resourceBundle['asset.type']}}</label>
+                                <div class="col-sm-8">
+                                    <select name="at" ng-model="asset.typ" id="asset-type" class="form-control"
+                                            ng-change="updateAssetSel(asset.typ)"
+                                            ng-blur="uVisited.at = true;"
+                                            ng-class="{'c-visited' : uVisited.at}"
+                                            required ng-disabled="edit && !editAll">
+                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['asset.type'] | lowercase}} --</option>
+                                        <option ng-repeat="cfgAsset in assetConfig.assets" value="{{cfgAsset.id}}"
+                                                ng-hide="edit && cfgAsset.at != currentAsset.at">{{cfgAsset.an}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div ng-if="edit && !editAll" class="cbx">
+                                <span uib-tooltip= "{{resourceBundle['asset.noneditable']}}" class="litetext glyphicons glyphicons-info-sign lnk">
+                                    </span>
+                                </div>
+                                <div class="has-error" ng-show="uVisited.at && addAssetForm.at.$error.required">
+                                    <span class="help-block">{{resourceBundle['asset.type']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="asset-manu" class="col-sm-4 control-label required">{{resourceBundle['manufacturer']}}</label>
+                                <div class="col-sm-8">
+                                    <select name="vId" ng-model="asset.vId" id="asset-manu" class="form-control" ng-disabled="isUndef(currentAsset) || (edit && !editAll)"
+                                            ng-change="updateManufacturer(asset.vId)"
+                                            ng-selected="asset.vId"
+                                            ng-blur="uVisited.vId = true;"
+                                            ng-class="{'c-visited' : uVisited.vId}"
+                                            required>
+                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['manufacturer'] | lowercase}} --</option>
+                                        <option ng-repeat="manufacturer in currentAsset.mcs" value="{{manufacturer.id}}"
+                                                ng-show="manufacturer.iC"
+                                                ng-selected="manufacturer.id == asset.vId">{{manufacturer.name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.vId && addAssetForm.vId.$error.required">
+                                    <span class="help-block">{{resourceBundle['manufacturer']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="asset-model" class="col-sm-4 control-label required">{{resourceBundle['asset.model']}}</label>
+                                <div class="col-sm-8">
+                                    <select name="devMdl" ng-model="asset.meta.dev.mdl" id="asset-model" class="form-control"
+                                            ng-disabled="isUndef(currentAsset) && isUndef(asset.vId) || edit" ng-show="asset.typ == 1"
+                                            ng-blur="uVisited.devMdl = true; updateSensors();"
+                                            ng-class="{'c-visited' : uVisited.devMdl}"
+                                            required>
+                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['asset.model'] | lowercase}} --</option>
+                                        <option ng-repeat="(key,value) in currentManu.model" value="{{key}}" ng-selected="asset.meta.dev.mdl == key">{{key}}</option>
+                                    </select>
+                                    <input ng-hide="asset.typ == 1" name="devMdl" type="text"
+                                           ng-model="asset.meta.dev.mdl"
+                                           ng-blur="uVisited.devMdl = true; validateAssetMetaData();"
+                                           ng-class="{'c-visited' : uVisited.devMdl && asset.merror,'u-na': asset.merror}"
+                                           class="form-control"
+                                           ng-focus="uVisited.devMdl = false;"
+                                           placeholder="{{resourceBundle['asset.model']}}"
+                                           required
+                                           ng-disabled="isUndef(currentAsset) && isUndef(asset.vId)" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group col-sm-12 pr0 pl0">
+                                <div class="has-error" ng-show="uVisited.devMdl && addAssetForm.devMdl.$error.required">
+                                    <span class="help-block">{{resourceBundle['asset.model']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                                <div class="has-error" ng-show="asset.meta.dev.mdl != null && isDef(asset.merror) && uVisited.devMdl">
+                                    <span class="help-block">{{asset.merror}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['asset.serial.number']}}</label>
+                                <div class="col-sm-8">
+                                    <input name="dId" type="text"
+                                           ng-blur="uVisited.dId = true; validateAssetMetaData(true, edit);"
+                                           ng-model="asset.dId"
+                                           ng-focus="uVisited.dId = false;"
+                                           ng-class="{'c-visited' : uVisited.dId && asset.serror,'u-na': asset.serror}"
+                                           class="form-control"
+                                           placeholder="{{resourceBundle['asset.unique.id']}}"
+                                           required
+                                           ng-disabled="edit" maxlength="50"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group col-sm-12 pr0 pl0">
+                                <div class="has-error" ng-show="uVisited.dId && addAssetForm.dId.$error.required">
+                                    <span class="help-block">{{resourceBundle['asset.serial.number']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                                <div class="has-error" ng-show="asset.dId != null && isDef(asset.serror) && uVisited.dId">
+                                    <span class="help-block">{{asset.serror}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="asset-model" class="col-sm-4 control-label">{{resourceBundle['asset.manufacture.year']}}</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" ng-model="asset.meta.dev.yom">
+                                        <option value="">-- {{resourceBundle['select.year.of.manufacture']}} --</option>
+                                        <option ng-repeat="year in range(1980,currentYear) track by $index" value="{{year}}" ng-selected="year === asset.meta.dev.yom">{{year}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{resourceBundle['asset.kiosk']}}</label>
+                                <div class="col-sm-8">
+                                    <input name="kId" type="text" ng-model="asset.kiosk"
+                                           typeahead-template-url="entityTemplate"
+                                           autocomplete="off"
+                                           placeholder="{{resourceBundle['asset.kiosk']}}"
+                                           ng-blur="uVisited.kId = true"
+                                           typeahead-wait-ms="300"
+                                           uib-typeahead="ent as ent.nm for ent in getFilteredEntity($viewValue)"
+                                           class="form-control" typeahead-editable="false"
+                                           />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="asset-owners" class="col-sm-4 control-label">{{resourceBundle['asset.owners']}}</label>
+                                <div class="col-sm-8" id="asset-owners">
+                                    <user-select only-active="true" users-model="asset.owners" blur-callback="setOwnersVisited()"></user-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="asset-mns" class="col-sm-4 control-label">{{resourceBundle['asset.maintainers']}}</label>
+                                <div class="col-sm-8" id="asset-mns">
+                                    <user-select only-active="true" users-model="asset.maintainers" blur-callback="setMaintainersVisited()"></user-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-show="currentAsset.at == 2">
+                    <div class="title-heading">
+                        {{resourceBundle['asset']}} {{resourceBundle['capacity'] | lowercase}}
+                    </div>
+                    <div class="row mgh0">
+                        <p class="litetext">{{resourceBundle['asset.meta.capacity.desc']}}</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['capacity']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.cc.qty" type="text" only-digits min-value="1" placeholder="{{resourceBundle['capacity']}}"
+                                           name="assetCapacity"
+                                           ng-blur="uVisited.aCapacity = true"
+                                           ng-required="isDef(asset.meta.cc.met)"
+                                           ng-class="{'c-visited' : uVisited.aCapacity}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.aCapacity && addAssetForm.assetCapacity.$error.required">
+                                    <span class="help-block">{{resourceBundle['capacity']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['capacity']}} {{resourceBundle['metric'] | lowercase}}</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="asset.meta.cc.met"
+                                            class="form-control"
+                                            ng-options="metric.id as metric.value for metric in assetCapacityMetrics"
+                                            ng-selected="asset.meta.cc.met == metric"
+                                            name="assetCapacityMetric"
+                                            ng-blur="uVisited.aCapacityMetric = true"
+                                            ng-required="isDef(asset.meta.cc.qty)"
+                                            ng-class="{'c-visited' : uVisited.aCapacityMetric}">
+                                        <option value="">{{resourceBundle['select']}} {{resourceBundle['metric'] | lowercase}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.aCapacityMetric && addAssetForm.assetCapacityMetric.$error.required">
+                                    <span class="help-block">{{resourceBundle['capacity']}} {{resourceBundle['metric'] | lowercase}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr" ng-show="currentAsset.iGe">
+                    <div class="title-heading">
+                        {{resourceBundle['asset.meta.gsm.info']}}
+                    </div>
+                    <div class="row mgh0">
+                        <p class="litetext">{{resourceBundle['asset.meta.gsm.info.desc']}}</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['mobile.number']}}</label>
+                                <div class="col-sm-8">
+                                    <input name="mobileNumber" class="form-control"
+                                           ng-model="asset.meta.gsm.sim.phn" type="text"
+                                           placeholder="+919999999999"
+                                           ng-pattern="/^\++\d{4,20}$/"
+                                           ng-blur="uVisited.simPhn = true"
+                                           ng-focus-logi
+                                           ng-class="{'c-visited' : uVisited.simPhn}"
+                                           maxlength="20"
+                                           ng-required="asset.pushDeviceConfig == 2 && !edit"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.simPhn && addAssetForm.mobileNumber.$error.pattern">
+                                    <span class="help-block">{{resourceBundle['mobile.number']}} {{resourceBundle['isinvalid']}}</span>
+                                </div>
+                                <div class="has-error" ng-show="uVisited.simPhn && addAssetForm.mobileNumber.$error.required">
+                                    <span class="help-block">{{resourceBundle['mobile.number']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['sim.id']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.gsm.sim.sid" type="text" placeholder="{{resourceBundle['sim.id']}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['sim.network.provider']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.gsm.sim.np" type="text" placeholder="{{resourceBundle['sim.network.provider']}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['alternate']}} {{resourceBundle['mobile.number']}}</label>
+                                <div class="col-sm-8">
+                                    <input name="alternateMobileNumber" class="form-control"
+                                           ng-model="asset.meta.gsm.altSim.phn" type="text"
+                                           placeholder="+919999999999"
+                                           ng-pattern="/^\++\d{4,20}$/"
+                                           ng-blur="uVisited.altSimPhn = true"
+                                           ng-class="{'c-visited' : uVisited.altSimPhn}"
+                                           ng-focus-logi
+                                           maxlength="20"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.altSimPhn && addAssetForm.alternateMobileNumber.$error.pattern">
+                                    <span class="help-block">{{resourceBundle['mobile.number']}} {{resourceBundle['isinvalid']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['alternate']}} {{resourceBundle['sim.id']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.gsm.altSim.sid" type="text" placeholder="{{resourceBundle['sim.id']}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['alternate']}} {{resourceBundle['sim.network.provider']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.gsm.altSim.np" type="text" placeholder="{{resourceBundle['sim.network.provider']}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">IMEI</label>
+                                <div class="col-sm-8">
+                                    <input name="imeiNumber" class="form-control" ng-model="asset.meta.dev.imei"
+                                           type="text" placeholder="Asset IMEI number"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['firmware.version']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.dev.dVr"
+                                           type="text" placeholder="{{resourceBundle['firmware.version']}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label  class="col-sm-4 control-label">{{resourceBundle['gsm.module.version']}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" ng-model="asset.meta.dev.mVr"
+                                           type="text" placeholder="{{resourceBundle['gsm.module.version']}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="bgr" ng-if="currentAsset.iTs">
+                    <div class="title-heading">
+                        {{resourceBundle['asset.meta.temp.info']}}
+                    </div>
+                    <div class="row mgh0">
+                        <p class="litetext">{{resourceBundle['asset.meta.temp.info.desc']}}</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['min.temp']}} (&deg;C)</label>
+                                <div class="col-sm-8">
+                                    <input name="tmin" type="text" ng-model="asset.meta.tmp.min"
+                                           ng-blur="uVisited.tmpMin = true"
+                                           ng-class="{'c-visited' : uVisited.tmpMin}"
+                                           class="form-control"
+                                           placeholder="Min. temperature in Celsius" required/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.tmpMin && addAssetForm.tmin.$error.required">
+                                    <span class="help-block">{{resourceBundle['min.temp']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label required">{{resourceBundle['max.temp']}} (&deg;C)</label>
+                                <div class="col-sm-8">
+                                    <input name="tmax" type="text" ng-model="asset.meta.tmp.max"
+                                           ng-blur="uVisited.tmpMax = true"
+                                           class="form-control"
+                                           ng-class="{'c-visited' : uVisited.tmpMax}"
+                                           placeholder="Max. temperature in Celsius" required/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="has-error" ng-show="uVisited.tmpMax && addAssetForm.tmax.$error.required">
+                                    <span class="help-block">{{resourceBundle['max.temp']}} {{resourceBundle['isrequired']}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="bgr" ng-if="currentAsset.iGe && isDef(asset.vId) && !edit">
+                    <div class="title-heading">
+                        {{resourceBundle['asset.temperature.device']}} {{resourceBundle['configuration'] | lowercase}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label class="pull-left control-label">{{resourceBundle['device.specify.config']}}</label>
+                        </div>
+                    </div>
+                    <div class="row ml10">
+                        <div class="col-sm-6">
+                            <label class="radio-inline">
+                                <input type="radio" name="configRadioOptions" id="configRadio1" value="1" ng-model="asset.pushDeviceConfig" ng-select="resetConfig()"> {{resourceBundle['device.config.nopush']}}
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="configRadioOptions" id="configRadio2" value="2" ng-model="asset.pushDeviceConfig" ng-click="uVisited.simPhn = true"> {{resourceBundle['device.config.push']}}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row mt10" ng-if="asset.pushDeviceConfig == 2">
+                        <div class="col-sm-12">
+                            <hr/>
+                            <div class="row mt10">
+                                <div class="col-sm-12">
+                                    <button type="button" class="btn btn-sm btn-default pull-left"
+                                            ng-click="editConfig = true" ng-hide="editConfig">{{resourceBundle['device.edit.config']}}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-default pull-left"
+                                            ng-click="resetConfig(); editConfig = false" ng-show="editConfig">{{resourceBundle['device.reset.config']}}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt10">
+                                <fieldset ng-disabled="!editConfig">
+                                    <div ng-include="'views/assets/temperature-device-config.html'"></div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10">
+                    <div class="col-sm-6">
+                        <div class="pull-right">
+                            <button ng-click="setAllVisited();((!addAssetForm.$valid  || invalidStatusUrl) && showValidationWarning()) || (addAssetForm.$valid && createAsset())" ng-hide="edit" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                            <button type="button" ng-show="edit" ng-click="setAllVisited(); (!addAssetForm.$valid && showValidationWarning()) || (addAssetForm.$valid && updateAsset())" name="update" class="btn btn-primary">{{resourceBundle['update']}}</button>
+                            <a ng-show="edit" ng-click="$back()" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                            <a ng-hide="edit" href="#/setup/assets/" name="cancel" class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

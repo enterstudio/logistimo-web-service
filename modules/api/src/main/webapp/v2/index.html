@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<html lang="en" ng-app="logistimoApp" ng-controller="AppController">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Logistimo</title>
+    <script type="text/javascript">
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays*24*60*60*1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = cname + "=" + cvalue + "; " + expires+ "; path=/";
+        }
+        <!-- @if NODE_ENV == 'LOCAL' -->
+        setCookie('web.app.ver','',30);
+        <!-- @endif -->
+        <!-- @if NODE_ENV == 'PRODUCTION' || NODE_ENV == 'DEVELOPMENT' -->
+        <!-- @echo appVerScriptInc -->
+        <!-- @endif -->
+    </script>
+
+    <link rel="stylesheet" href="css/3rdparty/bootstrap.min.css">
+    <link href="css/3rdparty/select.min.css" rel="stylesheet"/>
+    <link href="css/3rdparty/select2.css" rel="stylesheet"/>
+    <link href="css/3rdparty/select2-bootstrap.css" rel="stylesheet"/>
+    <link href="css/3rdparty/d3/nv.d3.min.css" rel="stylesheet"/>
+    <link rel="shortcut icon" href="../titleiconnew.ico">
+
+    <!-- @if NODE_ENV == 'LOCAL' -->
+	<link rel="stylesheet" href="css/navbar.css">
+	<link rel="stylesheet" href="css/logistimo.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/toastr.css">
+    <!-- @endif -->
+
+    <!-- @if NODE_ENV == 'PRODUCTION' || NODE_ENV == 'DEVELOPMENT'  -->
+    <!-- @echo cssInc -->
+    <!-- @endif -->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="js/3rdparty/html5shiv.js"></script>
+    <script src="js/3rdparty/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="mainbody">
+    <div ng-show="showLoadIcon" class="loader">
+    </div>
+    <div ng-show="showLoadIcon" class="loader-content">
+        <spinner></spinner>
+    </div>
+	<div class="splash" ng-cloak="">
+        <div  class="loader-content">
+            <spinner></spinner>
+        </div>
+	</div>
+
+    <!-- General 3rdparty inclusion(common for dev n prod) -->
+    <script src="js/3rdparty/jquery.min.js"></script>
+    <script src="js/3rdparty/bootstrap.min.js"></script>
+
+    <!-- @if NODE_ENV == 'LOCAL' -->
+    <script src="js/angular-1.5.11/angular.js"></script>
+    <script src="js/angular-1.5.11/angular-animate.js"></script>
+    <script src="js/angular-1.5.11/angular-route.js"></script>
+    <script src="js/angular-1.5.11/angular-sanitize.js"></script>
+    <script src="js/3rdparty/ng-i18n-0.2.1.1.js"></script>
+    <script src="js/3rdparty/angular-ui/ui-bootstrap-tpls-2.5.0.js"></script>
+    <!-- @endif -->
+
+    <!-- @if NODE_ENV == 'PRODUCTION' || NODE_ENV == 'DEVELOPMENT' -->
+    <!-- comments:uncomment-block html -->
+    <!--
+    <script src="js/angular-1.5.11/angular.min.js"></script>
+    <script src="js/angular-1.5.11/angular-animate.min.js"></script>
+    <script src="js/angular-1.5.11/angular-route.min.js"></script>
+    <script src="js/angular-1.5.11/angular-sanitize.min.js"></script>
+    <script src="js/3rdparty/ng-i18n-0.2.1.1.min.js"></script>
+    <script src="js/3rdparty/angular-ui/ui-bootstrap-tpls-2.5.0.min.js"></script>
+    -->
+    <!-- endcomments -->
+    <!-- @endif -->
+
+
+
+
+    <script src="js/3rdparty/toastr.js"></script>
+
+    <!--<script src="js/fusioncharts-3.11.2.6/fusioncharts.js"></script>-->
+    <!--<script src="js/fusioncharts-3.11.2.6/theme/fusioncharts.theme.fint.js"></script>-->
+    <!--<script src="js/fusioncharts-3.11.2.6/fusioncharts.charts.js"></script>-->
+    <!--<script src="js/fusioncharts-3.11.2.6/fusioncharts.maps.js"></script>-->
+    <script src="js/3rdparty/lodash.underscore.min.js"></script>
+    <script src="js/3rdparty/angular-google-maps-2.0.20.2.min.js"></script>
+    <script src="js/utils/http-auth-interceptor.js"></script>
+    <script src="js/3rdparty/angular-ui/select.min.js"></script>
+    <script src="js/3rdparty/once.min.js"></script>
+    <script src="js/3rdparty/jquery.flot.min.js"></script>
+    <script src="js/3rdparty/jquery.flot.time.min.js"></script>
+    <script src="js/3rdparty/d3/d3.min.js"></script>
+    <script src="js/3rdparty/d3/nv.d3.js"></script>
+    <script src="js/3rdparty/angular-downloadsvg-directive.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?client=&v=3.exp&libraries=weather,visualization"></script>
+    <script src="js/3rdparty/oms.min.js"></script>
+    <script src="js/3rdparty/angular-base64-upload.min.js"></script>
+
+
+    <!-- @if NODE_ENV == 'PRODUCTION' || NODE_ENV == 'DEVELOPMENT' -->
+    <!-- @echo scriptInc -->
+    <!-- @echo templateInc -->
+    <!-- @endif -->
+
+    <!-- @if NODE_ENV == 'LOCAL' -->
+    <script src="js/app.js"></script>
+    <script src="js/app-controller.js"></script>
+    <script src="js/app-constants.js"></script>
+    <script src="js/app-directives.js"></script>
+    <script src="js/request-context.js"></script>
+    <script src="js/render-context.js"></script>
+    <script src="js/utils/common-utils.js"></script>
+    <script src="js/utils/d3-tree.js"></script>
+    <script src="js/utils/fusion-chart-util.js"></script>
+    <script src="js/utils/google-map-api.js"></script>
+    <script src="js/utils/common-controllers.js"></script>
+    <script src="js/utils/lodash-addons.js"></script>
+    <script src="js/components/reports/report-controller.js"></script>
+    <script src="js/components/reports/report-service.js"></script>
+    <script src="js/components/entities/entity-service.js"></script>
+    <script src="js/components/entities/entity-controllers.js"></script>
+    <script src="js/components/handlingunits/handlingunit-controller.js"></script>
+    <script src="js/components/handlingunits/handlingunit-service.js"></script>
+    <script src="js/components/materials/material-service.js"></script>
+    <script src="js/components/materials/material-controllers.js"></script>
+    <script src="js/components/temperature/temperature-controllers.js"></script>
+    <script src="js/components/temperature/temperature-services.js"></script>
+  	<script src="js/components/config/domaincfg-service.js"></script>
+  	<script src="js/components/config/domaincfg-controller.js"></script>
+  	<script src="js/components/config/config-service.js"></script>
+  	<script src="js/components/dashboard/dashboard-services.js"></script>
+  	<script src="js/components/dashboard/dashboard-controllers.js"></script>
+  	<script src="js/components/dashboard/widget-services.js"></script>
+  	<script src="js/components/dashboard/widget-controller.js"></script>
+    <script src="js/components/orders/order-services.js"></script>
+    <script src="js/components/orders/order-controllers.js"></script>
+    <script src="js/components/bulkupload/bulkupload-controller.js"></script>
+    <script src="js/components/bulkupload/bulkupload-service.js"></script>
+    <script src="js/components/home/home-controller.js"></script>
+    <script src="js/components/home/home-service.js"></script>
+    <script src="js/components/export/export-service.js"></script>
+    <script src="js/components/users/user-services.js"></script>
+    <script src="js/components/users/user-controllers.js"></script>
+    <script src="js/components/demand/demand-services.js"></script>
+    <script src="js/components/demand/demand-controllers.js"></script>
+    <script src="js/components/inventory/invService.js"></script>
+    <script src="js/components/inventory/invControllers.js"></script>
+    <script src="js/components/transactions/trnService.js"></script>
+    <script src="js/components/transactions/trnControllers.js"></script>
+    <script src="js/components/accounts/accountsService.js"></script>
+    <script src="js/components/accounts/accountsController.js"></script>
+    <script src="js/components/ent-grps/ent-grps-service.js"></script>
+    <script src="js/components/ent-grps/ent-grps-controllers.js"></script>
+    <script src="js/components/auth/auth-controllers.js"></script>
+    <script src="js/components/auth/auth-services.js"></script>
+    <script src="js/components/domains/linkedDomain-controller.js"></script>
+    <script src="js/components/domains/linkedDomain-service.js"></script>
+    <script src="js/components/domains/domain-controller.js"></script>
+    <script src="js/components/domains/domain-service.js"></script>
+    <script src="js/components/media/media-services.js"></script>
+    <script src="js/components/export/export-controllers.js"></script>
+    <script src="js/components/assets/asset-controllers.js"></script>
+    <script src="js/components/assets/asset-services.js"></script>
+    <script src="js/components/activity/activity-services.js"></script>
+    <script src="js/components/conversation/conversation-services.js"></script>
+    <script src="js/components/conversation/conversation-controllers.js"></script>
+
+    <script src="plugins/reports/reports-core.js"></script>
+
+    <script src="plugins/reports/inventory/inventoryreports.js"></script>
+    <script src="plugins/reports/inventory/abnormalstock/abnormalstock.js"></script>
+    <script src="plugins/reports/inventory/replenishment/replenishment.js"></script>
+    <script src="plugins/reports/inventory/transactioncounts/transactioncounts.js"></script>
+
+    <script src="plugins/reports/asset/assetreports.js"></script>
+    <script src="plugins/reports/asset/assetstatus/assetstatus.js"></script>
+    <!-- @endif -->
+
+    <script type="text/ng-template" id="entityTemplate">
+        <a>
+            <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+            <span class="litetext">
+                {{match.model.ct}}<span ng-show="match.model.ds">, {{match.model.ds}}</span>, {{match.model.st}}
+            </span>
+        </a>
+    </script>
+
+    <script type="text/ng-template" id="assetTemplate">
+        <a>
+            <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+        </a>
+    </script>
+
+	<div ng-cloak>
+	<div class="container">
+		<div ng-include=" 'views/menu.html' "></div>
+			<div ng-switch="subview">
+				<div ng-switch-when="setup">
+					<div ng-include=" 'views/setup.html' "></div>
+				</div>
+				<div ng-switch-when="orders">
+					<div ng-include=" 'views/orders/orders.html' "></div>
+				</div>
+				<div ng-switch-when="inventory">
+					<div ng-include=" 'views/inventory/inventory.html' "></div>
+				</div>
+                <div ng-switch-when="configuration">
+					<div ng-include=" 'views/configuration/configuration.html' "></div>
+				</div>
+                <div ng-switch-when="reports">
+					<div ng-include=" 'views/reports/reports.html' "></div>
+				</div>
+                <div ng-switch-when="newreports">
+                    <div ng-include=" 'plugins/reports/reports-menu.html' "></div>
+                </div>
+                <div ng-switch-when="accounts">
+					<div ng-include=" 'views/accounts/accounts.html' "></div>
+				</div>
+                <div ng-switch-when="assets">
+                    <div ng-include=" 'views/assets/assets.html' "></div>
+                </div>
+                <div ng-switch-when="home">
+                    <div ng-include=" 'views/home/home.html' "></div>
+                </div>
+                <div ng-switch-when="dashboard">
+                    <div ng-include="'views/dashboard/dashboard.html'"></div>
+                </div>
+                <div ng-switch-when="manage">
+                    <div ng-include=" 'views/manage/manage.html' "></div>
+                </div>
+                <div ng-switch-when="exportstatus">
+                    <div ng-include=" 'views/exportstatus/exportstatus.html' "></div>
+                </div>
+			</div>
+        <div class="row mt18">
+            <div class="col-sm-6 norightpad">
+                <span class="pull-right">
+                &copy; <script type="text/javascript">document.write(new Date().getFullYear() );</script> Logistimo |
+                    <a href="http://www.logistimo.com/privacy-policy.html" target="_new">Privacy Policy</a>
+                </span>
+            </div>
+            <div class="col-sm-6">
+                <span class="pull-right">
+                    {{resourceBundle['questions']}}? {{resourceBundle['user.email']}} <a href="mailto:{{supportConfig.em}}">{{supportConfig.em}}</a> <span class="lPad5">{{ resourceBundle['phone'] }} <a href="tel:{{supportConfig.phnm}}">{{supportConfig.phnm}}</a></span>
+                </span>
+            </div>
+        </div>
+		</div>
+	</div>
+</body>
+</html>

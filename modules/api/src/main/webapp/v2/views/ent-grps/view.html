@@ -1,0 +1,112 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="EntGrpEditCtrl">
+    <form class="form-horizontal">
+        <div class="filter-box">
+            <div class="filter-title">
+                {{entGrps.nm}}
+            </div>
+        </div>
+        <div class="row action-bar">
+            <a ng-click="$parent.$parent.$parent.editPoolGroup(entGrps.id)"
+               class="btn btn-sm btn-primary" ng-show="iSU || dp.ege">{{resourceBundle['edit']}}</a>
+            <a ng-click="back()" class="btn btn-sm btn-default">{{resourceBundle['back']}}</a>
+            <span class="caption pull-right cbx">
+                <span ng-show="isDef(entGrps.creOn)">
+                    {{resourceBundle['createdon']}} {{entGrps.creOn}}<span ng-show="isUndef(entGrps.creBy) && isDef(entGrps.updOn)">,</span>
+                </span>
+                <span ng-show="isDef(entGrps.creBy)">{{resourceBundle['by']}}
+                    <a href="#/setup/users/all/details?userId={{entGrps.creBy}}" target="_new" >{{entGrps.creByn ? entGrps.creByn : entGrps.creBy}}</a><span ng-show="isDef(entGrps.updOn)">,</span>
+                </span>
+                <span ng-show="isDef(entGrps.updOn)">{{resourceBundle['material.lastupdated']}}&nbsp;{{resourceBundle['on']}}
+                    {{entGrps.updOn}}
+                    <span ng-show="isDef(entGrps.updBy)">
+                        {{resourceBundle['by']}}
+                        <a href="#/setup/users/all/details?userId={{material.ludBy}}" target="_new">
+                            {{entGrps.updByn ? entGrps.updByn :entGrps.updBy}}</a>
+                    </span>
+                </span>
+            </span>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['poolgroup.infotitle']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="control-label">{{resourceBundle['poolgroup.name']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{entGrps.nm}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+
+                            <label class="control-label">{{resourceBundle['config.customreports.description']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            {{entGrps.dsc}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label for="entGrpOwner" class="control-label">{{resourceBundle['poolgroup.owner']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx" id="entGrpOwner">
+                            <a ng-href="#/setup/users/all/details?userId={{entGrps.user.id}}">{{entGrps.unm}} [{{entGrps.user.id}}]</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['kiosks']}}
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="control-label">{{resourceBundle['kiosks']}}:</label>
+                        </div>
+                        <div class="col-sm-10 cbx">
+                            <table class="table table-striped table-logistimo">
+                                <tr ng-repeat="entity in entGrps.entities">
+                                    <td class=""><a
+                                            href="#/setup/entities/detail/{{entity.id}}">{{entity.nm}}</a>
+                                    <span class="litetext">{{entity.add}}</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+

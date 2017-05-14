@@ -1,0 +1,117 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="bizinfo bizinfo-last">
+    <div ng-show="isUndef(entity) && iMan" class="row">
+        <div class="col-sm-12">
+            <div>
+                <p class=" alert alert-warning mt18">{{resourceBundle['selectkioskmsg']}}</p>
+            </div>
+        </div>
+    </div>
+    <div ng-show="isDef(entity) || iAdm" class="row">
+        <div class="col-sm-12">
+            <div class="pull-right">
+                <div ng-include="'views/paginator.html'"></div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="isDef(entity) || iAdm" class="row" ng-if="demand.results.length > 0">
+        <div class="col-sm-12">
+            <table class="table table-condensed table-hover table-logistimo" id="fixTable">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>{{resourceBundle['serialnum']}}</th>
+                    <th ng-show="otype=='sle' && isUndef(entity)">{{resourceBundle['vendor']}}</th>
+                    <th ng-show="otype == 'prc' && isUndef(entity)">{{resourceBundle['customer']}}</th>
+                    <th>{{resourceBundle['material']}}</th>
+                    <th class="text-center">{{resourceBundle['ordered']}}</th>
+                    <th ng-show="allocate && otype=='sle'" class="text-center">{{resourceBundle['allocated']}}</th>
+                    <th class="text-center">{{resourceBundle['shipped']}}</th>
+                    <th class="text-center">{{resourceBundle['yet.to.ship']}}</th>
+                    <th class="text-center">{{resourceBundle['material.stockonhand']}}</th>
+                    <th class="text-center">{{resourceBundle['available.stock']}}</th>
+                    <th class="text-center">{{resourceBundle['intransit']}} {{resourceBundle['stock.lowercase']}}</th>
+                    <th ng-show="allocate && otype == 'sle' && !dp.vp" class="text-center">{{resourceBundle['actions']}}</th>
+                </tr>
+                </thead>
+                <tbody ng-repeat="item in filtered" data-ng-switch on="showDemand[$index]" ng-controller="DemandTableController">
+                <tr class="clickable" >
+                    <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.e.sdid" target="_blank"
+                              ng-click="switchDomain(item.e.sdid,item.e.sdname)" uib-tooltip="{{item.e.sdname}}" tooltip-placement="right"
+                              tooltip-append-to-body="true"></span></td>
+                    <td ng-click="toggle($index)">{{$index + offset + 1}} </td>
+                    <td ng-click="toggle($index)" ng-show="isUndef(entity)"><a ng-href="#/setup/entities/detail/{{item.e.id}}/" target="_blank">{{item.e.nm}} </a>
+                    <span class=" litetext">{{item.e.add}}</span></td>
+                    <td ng-click="toggle($index)"><a ng-href="#/setup/materials/all/detail/{{item.id}}/" target="_blank">{{item.nm}} </a></td>
+                    <td ng-click="toggle($index)" class="text-center">{{item.q}} </td>
+                    <td ng-click="toggle($index)" ng-show="allocate && otype == 'sle'" class="text-center">{{item.astk}} </td>
+                    <td ng-click="toggle($index)" class="text-center">{{item.sq}} </td>
+                    <td ng-click="toggle($index)" class="text-center">{{item.yts}} </td>
+                    <td ng-click="toggle($index)" class="text-center">{{item.stk}}</td>
+                    <td ng-click="toggle($index)" class="text-center">{{item.atpstk}}</td>
+                    <td ng-click="toggle($index)" class="text-center">{{item.itstk}}</td>
+                    <td ng-show="allocate && otype == 'sle' && !dp.vp" class="text-center">
+                        <div style="margin-left: auto;margin-right: auto;display: inline-block;">
+                            <note-data>
+                                <ul class="nav navbar-nav">
+                                    <li>
+                                        <a class="dropdown-toggle clickable no-background act_icons" data-toggle="dropdown" ng-hide="item.astk == 0" aria-haspopup="true" aria-expanded="false">
+                                            <button class=" center-block subnav-form-control glyphicons glyphicons-show-lines medium" style="color: #000101"></button>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-right">
+                                            <li><a href="" class="no-background" ng-click="open('falloc')">{{resourceBundle['clear.allocations']}}</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </note-data>
+                        </div>
+                    </td>
+                </tr>
+                <tr data-ng-switch-when="true">
+                    <td colspan="100%" class="partialview">
+                        <div ng-init="view='views/orders/demand-table-view.html' ; title = 'Demand '; index = $index ;
+                                      kId = item.e.id; mId = item.id; exTrn = etrn; oty = otype; bo = showBackOrder; astk = item.astk; demandDataList = item;"
+                             ng-include="'views/partial.html'">
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div ng-show="isDef(entity) || iAdm" class="row">
+        <div class="col-sm-12">
+            <div>
+                <p class=" alert alert-warning mt18"
+                   ng-show="(demand.results.length == 0 ) && !loading">{{resourceBundle['demand.none']}}</p>
+            </div>
+            <div ng-hide="loading == true || demand.results.length == 0">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

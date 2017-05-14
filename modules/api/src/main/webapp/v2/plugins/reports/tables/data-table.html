@@ -1,0 +1,83 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="text-center pt15">
+    <div class="row">
+        <div class="col-sm-12">
+            <div ng-hide="loading" class="pull-right">
+                <ul class="pager">
+                    <li>
+                        <a ng-show="offset > size" ng-click="fetchFirst();">
+                            <span class="glyphicons glyphicons-fast-backward"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a ng-show="offset > 0" ng-click="fetchPrev();">
+                            <span class="glyphicons glyphicons-rewind"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <b>
+                            <span ng-show="tableDataLength > 1">{{ (offset * 1) + 1 | number}}-{{ (offset * 1) + (tableDataLength * 1) | number}}</span>
+                            <span ng-show="tableDataLength > 0 && tableDataLength < 2">{{ (offset * 1) + (tableDataLength * 1) | number}}</span>
+                        </b>
+                    </li>
+                    <li><a ng-click="fetchNext()" ng-show="!tableHideNext && tableDataLength == size"><span class="glyphicons glyphicons-forward"></span></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <b>{{tableMetric}}</b>
+
+            <div style="white-space:pre;">{{tableCaption}}</div>
+            <div class="report-table-container">
+                <table class="report-table">
+                    <thead>
+                    <tr>
+                        <th>SI.No.</th>
+                        <th ng-repeat="heading in tableHeading">{{heading}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="(key,value) in tableData">
+                        <td class="text-center">
+                            {{$index + 1 + offset }}
+                        </td>
+                        <td class="text-left" ng-if="activeMetric == 'kt'"><a href="#/setup/entities/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}} </a>
+                            <span class="litetext">{{key.split('|')[2]}}</span>
+                        </td>
+                        <td class="text-left" ng-if="activeMetric == 'at'">{{key.split('_').splice(1,key.split('_').length).join()}} </a>
+                        </td>
+                        <td class="text-left" ng-if="activeMetric == 'mt'"><a href="#/setup/materials/all/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}}</a>
+                        </td>
+                        <td ng-if="activeMetric != 'mt' && activeMetric != 'kt' && activeMetric != 'at'" class="text-left">{{key}}</td>
+                        <td class="text-center" ng-class="{'codegray':isUndef(val[tableSeriesNo].value * 1)}" tooltip-enable="val[tableSeriesNo].num" uib-tooltip="{{val[tableSeriesNo].num}} / {{val[tableSeriesNo].den}}" tooltip-append-to-body="true" ng-repeat="val in value track by $index">{{(val[tableSeriesNo].value)}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,247 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="domain-title-heading mb10">
+    <h5 ng-show="dialog == 'edit'">{{resourceBundle['notification.edit']}}</h5>
+    <h5 ng-hide="dialog == 'edit'">{{resourceBundle['notification.add']}}</h5>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b ng-show="title != '' ">{{title}}</b>&nbsp;<b ng-show="count != '' ">({{message}} = {{count}})</b>&nbsp;<b ng-show="extraParamsSelect != '' ">({{extraParamsMessage}} = {{extraParamsSelect}})</b>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12 w95" ng-hide="!showMaterialTags && !showEntityTags && !showOrderTags">
+                            <p>Specify the tags to exclude while notifying the event.</p>
+                        </div>
+                    </div>
+                    <div class="row mb10" ng-show="showMaterialTags">
+                        <div class="col-sm-12 w95">
+                            <label class="col-sm-2 control-label">Material tags</label>
+                            <div class="col-sm-10">
+                                <tag-select  tags-model="notif.emts" type="'material'" force-no-udf="'true'"></tag-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb10" ng-show="showEntityTags">
+                        <div class="col-sm-12 w95">
+                            <label class="col-sm-2 control-label">{{resourceBundle.kiosk}} tags</label>
+                            <div class="col-sm-10">
+                                <tag-select  tags-model="notif.eets" type="'entity'" force-no-udf="'true'"></tag-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb10" ng-show="showOrderTags">
+                        <div class="col-sm-12 w95">
+                            <label class="col-sm-2 control-label">Order tags</label>
+                            <div class="col-sm-10">
+                                <tag-select  tags-model="notif.eots" type="'order'" force-no-udf="'true'"></tag-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 w95">
+                            <p>{{resourceBundle['notification.info']}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb10">
+                        <div class="col-sm-12">
+                            <h7>{{resourceBundle['notification.whom']}},
+                                {{resourceBundle['notification.what']}} {{resourceBundle['frequency']}}?
+                            </h7>
+                            <table
+                                    class="table table-bordered table-condensed table-hover table-striped table-logistimo w95">
+                                <tbody>
+                                <tr>
+                                    <th></th>
+                                    <th class="col-sm-3">{{resourceBundle['notification.whom']}}</th>
+                                    <th>{{resourceBundle['frequency']}}</th>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" ng-model="notif.co"></td>
+                                    <td>{{resourceBundle['customers']}} / {{resourceBundle['owners']}}</td>
+                                    <td>
+                                        <div>
+                                            <input type="radio" ng-model="notif.cot" value="0" ng-disabled="!notif.co">
+                                            {{resourceBundle['immediately']}} ({{resourceBundle['message.sms']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.cot" value="1" ng-disabled="!notif.co">
+                                            {{resourceBundle['daily']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.cot" value="2" ng-disabled="!notif.co">
+                                            {{resourceBundle['weekly']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.cot" value="3" ng-disabled="!notif.co">
+                                            {{resourceBundle['monthly']}} ({{resourceBundle['user.email']}})
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="checkbox" ng-model="notif.vn" value="true"></td>
+                                    <td>{{resourceBundle['vendors']}}</td>
+                                    <td>
+                                        <div>
+                                            <input type="radio" ng-model="notif.vnt" value="0" ng-disabled="!notif.vn">
+                                            {{resourceBundle['immediately']}} ({{resourceBundle['message.sms']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.vnt" value="1" ng-disabled="!notif.vn">
+                                            {{resourceBundle['daily']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.vnt" value="2" ng-disabled="!notif.vn">
+                                            {{resourceBundle['weekly']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.vnt" value="3" ng-disabled="!notif.vn">
+                                            {{resourceBundle['monthly']}} ({{resourceBundle['user.email']}})
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="checkbox" ng-model="notif.ad" value="true"></td>
+                                    <td>{{resourceBundle['administrators']}}</td>
+                                    <td>
+                                        <div>
+                                            <input type="radio" ng-model="notif.adt" value="0" ng-disabled="!notif.ad">
+                                            {{resourceBundle['immediately']}} ({{resourceBundle['message.sms']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.adt" value="1" ng-disabled="!notif.ad">
+                                            {{resourceBundle['daily']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.adt" value="2" ng-disabled="!notif.ad">
+                                            {{resourceBundle['weekly']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.adt" value="3" ng-disabled="!notif.ad">
+                                            {{resourceBundle['monthly']}} ({{resourceBundle['user.email']}})
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" ng-model="notif.au"></td>
+                                    <td>{{resourceBundle['asset']}} {{resourceBundle['owners'] | lowercase}} / {{resourceBundle['asset.maintainers'] | lowercase}}</td>
+                                    <td>
+                                        <div>
+                                            <input type="radio" ng-model="notif.aut" value="0" ng-disabled="!notif.au">
+                                            {{resourceBundle['immediately']}} ({{resourceBundle['message.sms']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.aut" value="1" ng-disabled="!notif.au">
+                                            {{resourceBundle['daily']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.aut" value="2" ng-disabled="!notif.au">
+                                            {{resourceBundle['weekly']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.aut" value="3" ng-disabled="!notif.au">
+                                            {{resourceBundle['monthly']}} ({{resourceBundle['user.email']}})
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr ng-if="subview == 'orders'">
+                                    <td><input type="checkbox" ng-model="notif.cr"></td>
+                                    <td>{{resourceBundle['creator']}}</td>
+                                    <td>
+                                        <div>
+                                            <input type="radio" ng-model="notif.crt" value="0" ng-disabled="!notif.cr">
+                                            {{resourceBundle['immediately']}} ({{resourceBundle['message.sms']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.crt" value="1" ng-disabled="!notif.cr">
+                                            {{resourceBundle['daily']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.crt" value="2" ng-disabled="!notif.cr">
+                                            {{resourceBundle['weekly']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.crt" value="3" ng-disabled="!notif.cr">
+                                            {{resourceBundle['monthly']}} ({{resourceBundle['user.email']}})
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" ng-model="notif.usr" value="true"></td>
+                                    <td>{{resourceBundle['users']}}
+                                        <div ng-show="notif.usr">
+                                            <div class="col-sm-12 pull-down">
+                                                <p class="litetext mat">
+                                                    {{resourceBundle['config.specify.user.tags']}}
+                                                </p>
+                                                <tag-select  tags-model="notif.uTgs" type="'user'" force-no-udf="'true'" place-holder="{{resourceBundle['config.enter.user.tags']}}"></tag-select>
+                                            </div>
+                                            <div class="col-sm-12 pull-down">
+                                                <p class="litetext mat">
+                                                    {{resourceBundle['config.specify.users']}}
+                                                </p>
+                                                <user-select include-superusers="iSU" users-model="notif.uids" place-holder="{{resourceBundle['config.enter.users']}}"></user-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <input type="radio" ng-model="notif.ust" value="0" ng-disabled="!notif.usr">
+                                            {{resourceBundle['immediately']}} ({{resourceBundle['message.sms']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.ust" value="1" ng-disabled="!notif.usr">
+                                            {{resourceBundle['daily']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.ust" value="2" ng-disabled="!notif.usr">
+                                            {{resourceBundle['weekly']}} ({{resourceBundle['user.email']}})&nbsp;&nbsp;
+                                            <input type="radio" ng-model="notif.ust" value="3" ng-disabled="!notif.usr">
+                                            {{resourceBundle['monthly']}} ({{resourceBundle['user.email']}})
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mb10">
+                        <div class="col-sm-12">
+                            <input type="checkbox" ng-model="notif.bb" value="true">&nbsp;&nbsp;{{resourceBundle['home.post']}}
+                            {{resourceBundle['on']}} {{resourceBundle['bulletinboard']}}
+                        </div>
+                    </div>
+                    <div ng-show="dialog=='inventoryDialog'" class="row mb10">
+                        <div class="col-sm-12">
+                            <input type="text" autocomplete="off" ng-model="notif.tags" width="80" name="mtags" placeholder="Allow only these tags (comma-separated)" style="width:40%;"/>
+                        </div>
+                    </div>
+                    <div class="row mb10">
+                        <div class="col-sm-12">
+                            <p>{{resourceBundle['message.template']}}
+                                ({{resourceBundle['message.sentorposted']}})</p>
+                        <textarea rows="2" cols="25" name="comment" ng-model="notif.mt" class="w95 pr"
+                                  maxlength="300"/>
+                        </div>
+                    </div>
+                    <div class="row mb10">
+                        <div class="col-sm-12 w95">
+                            <div class="pull-right">
+                                <button ng-show="dialog != 'edit' && (iSU || dp.ce)" ng-click="saveNotifications('add')" class="btn btn-sm btn-primary"> {{resourceBundle['save']}} </button>
+                                <button ng-show="dialog == 'edit' && (iSU || dp.ce)" ng-click="saveNotifications('edit')" class="btn btn-sm btn-primary"> {{resourceBundle['save']}} </button>
+                                <button ng-click="toggle()" class="btn btn-sm btn-default">{{resourceBundle['cancel']}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h5>{{resourceBundle['event.variables']}}:</h5>
+                            <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                <tr ng-repeat="(key,value) in tableData">
+                                    <td>{{resourceBundle[value['key']]}}</td>
+                                    <td>{{key}}</td>
+                                    <td ng-show="value['size'] == 0">(variable)</td>
+                                    <td ng-show="value['size'] != 0">{{value['size']}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

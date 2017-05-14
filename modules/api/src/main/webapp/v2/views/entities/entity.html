@@ -1,0 +1,280 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="EntityDetailMenuController" ng-hide="isUndef(entity)">
+    <div class="row" >
+        <div class="col-sm-12">
+            <div class="jumbotron logitron">
+                <div class="row">
+                    <div class="col-sm-7">
+                        <div class="title-box pb3">
+                            <div class="row">
+                                <div class="col-sm-10"><h3 class="ent-title">{{entity.nm}}</h3></div>
+                                <div class="col-sm-2 noleftpad" >
+                                    <h3 class="ent-title pull-right">
+                                        <a ng-show="(iSU || (dp.ee && entity.perm > 1) ) && currentDomain == entity.sdid" ng-href="#/setup/entities/all/edit?eid={{entity.id}}" uib-tooltip="{{resourceBundle['edit']}}"><span class="glyphicons glyphicons-edit tglyph"></span></a>
+                                        <span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != entity.sdid" ng-click="switchDomain(entity.sdid,entity.sdname)" uib-tooltip="{{entity.sdname}}"></span>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="row mt2">
+                                <span class="col-sm-12">{{address}}</span>
+                            </div>
+                        </div>
+                        <div class="title-box pb3" style="border-bottom: none">
+                            <p>
+                                <span class="glyphicons glyphicons-tags tglyph"></span>
+                                <span ng-show="entity.tgs.length"><span ng-repeat="tag in entity.tgs" class="label label-default mt5 dinline">{{tag}}</span></span>
+                                <span ng-show="!entity.tgs.length">{{resourceBundle['none']}}</span>
+                            </p>
+                            <div class="row">
+                                <div class="e-col-sm-0-1">
+                                    <span class="glyphicons glyphicons-user tglyph"></span>
+                                </div>
+                                <div class="col-sm-11">
+
+                                <div ng-repeat="user in entity.usrs" class="label label-default" style="display:inline-block;margin-bottom:5px">
+                                <a ng-href="#/setup/users/all/details?userId={{user.id}}">
+                                    {{user.fnm}} [{{user.id}}]
+                                </a>
+                                </div>
+                                </div>
+                            </div>
+                        <div ng-show="!tempOnlyAU && materialStats.invSz>0">
+                            <div class="title-top">
+                                <span ng-show="ost" class="glyphicons glyphicons-exclamation-sign tglyph fc-color-red"></span>
+                                <span ng-show="!ost"
+                                      class="glyphicons glyphicons-exclamation-sign tglyph codegreen"></span>
+                            </div>
+                            <div class="title-top">
+                                <div ng-show="ost">
+                                    <a href="#/setup/entities/detail/{{entityId}}/inventory/">
+                                        <span style="display: inline-block;" class="fc-color-red"><b>{{entity.oos}}</b>
+                                        {{resourceBundle['materials.outofstock']}}</span>
+                                    </a>
+                                </div>
+                                <div class="codegreen" ng-show="!ost">
+                                    <b style="display: inline-block;">{{resourceBundle['materials.instock']}}</b>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div ng-if="isDef(entity.lt) || isDef(entity.ln)">
+                        <ui-gmap-google-map center="lmap.center" zoom="lmap.zoom" pan="false">
+                            <ui-gmap-marker idKey="'gmid'" coords='entity.location' options='{title: entity.nm}'></ui-gmap-marker>
+                        </ui-gmap-google-map>
+                        <span ng-hide="isUndef(entity.lt) && isUndef(entity.ln)" class="pull-right">{{entity.lt}},&nbsp;{{entity.ln}}</span>
+                        </div>
+                        <div ng-hide="isDef(entity.lt) || isDef(entity.ln)">
+                            <div class="bgr" style="min-height: 250px;background-color: #f5f5f5">
+                                <p class="text-center" style="margin-top:110px;color:#9d9d9d">{{resourceBundle['geocodes.notdefined']}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-7">
+                        <div class="lPad5 updateinfo">
+                            <div class="title-top">
+                                 <span class="caption"> {{resourceBundle['createdon']}} {{entity.ts}}
+                                       <span ng-show="isUndef(entity.rus) && isDef(entity.lts)">,</span>
+                                       <span ng-show="isDef(entity.rus)"> {{resourceBundle['by']}}
+                                         <a href="#/setup/users/all/details?userId={{entity.rus}}" target="_new">{{isDef(entity.rusn)?entity.rusn : entity.rus}}</a><span ng-show="isDef(entity.lts)">,</span></span>
+                                       <span ng-show="isDef(entity.lts)"> {{resourceBundle['lastupdated']}}&nbsp;{{resourceBundle['on']}} {{entity.lts}}
+                                       <span ng-show="isDef(entity.lub)"> {{resourceBundle['by']}}
+                                           <a href="#/setup/users/all/details?userId={{entity.lub}}" target="_new">{{isDef(entity.lubn)? entity.lubn : entity.lub}}</a>
+                                       </span>
+                                       </span>
+                                 </span>
+                                 <span class="caption">
+                                     <span ng-show="isDef(entity.iat)">{{resourceBundle['entity.inventoryactivity.startedon']}} {{entity.iat}}</span><span ng-show="ordersTabEnabled && isDef(entity.oat)">{{isDef(entity.iat) ? ',' : ''}} {{resourceBundle['entity.orderactivity.startedon']}} {{entity.oat}}</span>
+                                 </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col-sm-12">
+        <div class=" col-sm-12 noLRpad bg-white">
+            <div ng-show="dLoading" class="row pt5 fc-color-grey text-center">{{resourceBundle['loading']}}...
+                <span class="pt2 glyphicons glyphicons-cogwheel spin"></span>
+            </div>
+            <div ng-hide="dLoading">
+                <div ng-hide="tempOnlyAU" ng-class="{'col-sm-6 norightpad': tempEnabled, 'col-sm-offset-3 col-sm-6': !tempEnabled}"
+                     class="col-sm-6 norightpad">
+                    <h4 class="text-center mb0">{{p1caption}}</h4>
+                    <div class="pb2">
+                        <div class="litetext text-center" ng-show="isDef(subcaption)" ng-bind-html="subcaption"></div>
+                    </div>
+                    <div class="row invPanel" ng-hide="showMore">
+                        <span ng-hide="hideInvData" class="flex-display">
+                            <div class="col-sm-2 invData" uib-tooltip="{{invNrmlTT}}" ng-if="isDef(entDashboardData[0])">
+                                <span class="normal">{{entDashboardData[0] | number}}%</span>
+                                <span class="litetext">{{resourceBundle['available']}}</span>
+                            </div>
+                            <div class="col-sm-2 invData" uib-tooltip="{{invZeroTT}}" ng-if="isDef(entDashboardData[1])">
+                                <span class="high">{{entDashboardData[1] | number}}%</span>
+                                <span class="litetext capitalize">{{resourceBundle['inventory.zerostock']}}</span>
+                            </div>
+                        </span>
+                        <span ng-show="hideInvData">
+                            <div>
+                                <span class="litetext unknown" style="font-size: large;">{{resourceBundle['nodatatodisplay']}}</span>
+                            </div>
+                        </span>
+                    </div>
+                    <div ng-if="!dLoading && showMore" class="row pt5 ml0 mh300">
+                        <fusion-chart type="'doughnut2d'" height="'300'" width="'100%'"
+                                      chart-data="pieData[0]" chart-options="pieOpt[0]"
+                                      chart-id="pie1" simple="'true'">
+                        </fusion-chart>
+                    </div>
+                </div>
+                <div ng-show="tempEnabled" ng-class="{'col-sm-6 noleftpad' : !(isTempMonOnly || iAU),'col-sm-offset-3 col-sm-6': isTempMonOnly || iAU}"
+                     class="col-sm-6 noleftpad">
+                    <h4 class="text-center mb0">{{p2caption}}</h4>
+                    <div class="litetext text-center pb2" ng-show="isDef(tsubcaption)" ng-bind-html="tsubcaption"></div>
+                    <div class="row invPanel" ng-hide="showMore">
+                        <div ng-hide="hideTempData" class="flex-display">
+                            <div class="invData col-sm-2" uib-tooltip="{{tempTooltip['tn']}}" ng-if="isDef(entDashboardData[2])">
+                                <span class="normal">{{entDashboardData[2] | number}}%</span>
+                                <span class="litetext">{{resourceBundle['normal']}}</span>
+                            </div>
+                            <div class="invData col-sm-2" uib-tooltip="{{tempTooltip['tl']}}" ng-if="isDef(entDashboardData[3])">
+                                <span class="low">{{entDashboardData[3] | number}}%</span>
+                                <span class="litetext capitalize">{{resourceBundle['low']}}</span>
+                            </div>
+                            <div class="invData col-sm-2" uib-tooltip="{{tempTooltip['th']}}" ng-if="isDef(entDashboardData[4])">
+                                <span class="high">{{entDashboardData[4] | number}}%</span>
+                                <span class="litetext capitalize">{{resourceBundle['high']}}</span>
+                            </div>
+                            <div class="invData col-sm-2" uib-tooltip="{{tempTooltip['tu']}}" ng-if="isDef(entDashboardData[5])">
+                                <span class="unknown">{{entDashboardData[5] | number}}%</span>
+                                <span class="litetext">{{resourceBundle['status.unknown']}}</span>
+                            </div>
+                        </div>
+                        <div ng-show="hideTempData">
+                            <div>
+                                <span class="litetext unknown" style="font-size: large;">{{resourceBundle['nodatatodisplay']}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="!dLoading && showMore" class="row pt5 mh200 mgr0">
+                        <fusion-chart type="'doughnut2d'" height="'300'" width="'100%'"
+                                  chart-data="pieData[1]" chart-options="pieOpt[1]"
+                                  chart-id="pie2" simple="'true'">
+                        </fusion-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="pb10">
+        <div class="row" ng-hide="showMore">
+            <div class="col-sm-12 ">
+                <span class="glyphicons glyphicons-chevron-down medium filter-expand" ng-click="showMore = true"></span>
+            </div>
+        </div>
+        <div class="row" ng-show="showMore">
+            <div class="col-sm-12">
+                <span class="glyphicons glyphicons-chevron-up medium filter-expand" ng-click="showMore = false"></span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <ul class="nav nav-tabs">
+                <li ng-hide="tempOnlyAU" ng-class="{active: subview == 'inventory' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/inventory/"> {{resourceBundle.inventory}}	</a></li>
+                <li ng-hide="tempOnlyAU || !ordersTabEnabled || entity.perm < 2" ng-class="{active: subview == 'orders' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/orders/"> {{resourceBundle.orders}}</a></li>
+                <li ng-hide="tempOnlyAU ||  entity.perm < 2" ng-class="{active: subview == 'transactions' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/transactions/"> {{resourceBundle.transactions}}</a></li>
+                <li ng-show="iSU || (dp.iv && !tempMonOnlyAU && entity.perm > 1)" ng-class="{active: subview == 'materials' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/materials/"> {{resourceBundle.materials}}</a></li>
+                <li ng-hide="tempOnlyAU|| (!iSU && !dp.erv) || entity.perm < 2" ng-class="{active: subview == 'relationships' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/relationships/"> {{resourceBundle.relationships}}</a></li>
+                <li ng-hide="tempOnlyAU || entity.perm < 2" ng-class="{active: subview == 'stockboard' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/stockboard/"> {{resourceBundle.stockboard}}</a></li>
+                <li ng-show="iSU" ng-class="{active: subview == 'domains' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/domains/"> {{resourceBundle.domains}}</a></li>
+                <li ng-show="tempEnabled && (iSU || dp.av) && entity.perm > 1" ng-class="{active: subview == 'assets' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/assets/"> {{resourceBundle.assets}}</a></li>
+                <li ng-class="{active: subview == 'summary' }" ><a
+                        href="#/setup/entities/detail/{{entityId}}/summary/">{{resourceBundle.profile}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="row mainbox">
+
+        <div class="col-sm-12">
+            <!-- Nav tabs -->
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+
+                <div ng-switch="subview" >
+                    <div  class="tab-pane" ng-switch-when="summary"  >
+                        <div ng-init="perm=entity.perm" ng-include="'views/entities/summary.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="inventory"  >
+                        <div ng-init="showFilters=true;perm=entity.perm" ng-include="'views/inventory/inventory-list.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="transactions" >
+                        <div ng-init="showEntityFilter=false;perm=entity.perm" ng-include="'views/transactions/entity-transactions.html'"></div>
+                    </div>
+                    <div class="tab-pane"  ng-switch-when="activity">
+                        <div ng-include="'views/activity.html'"></div>
+                    </div>
+                    <div class="tab-pane"  ng-switch-when="orders" >
+                        <div ng-init="showEntityFilter=false;perm=entity.perm" ng-include="'views/orders/entity-orders.html'"></div>
+                    </div>
+                    <div class="tab-pane"  ng-switch-when="relationships" >
+                        <div ng-if="iSU || dp.erv" ng-init="perm=entity.perm" ng-include="'views/entities/relations.html'"></div>
+                    </div>
+                    <div class="tab-pane"  ng-switch-when="materials">
+                        <div ng-if="iSU || dp.iv;perm=entity.perm" ng-include="'views/entities/materials.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="stockboard">
+                        <div ng-include="'views/entities/stockboard.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="domains">
+                        <div ng-init="perm=entity.perm" ng-include="'views/entities/ent-domains.html'"></div>
+                    </div>
+                    <div class="tab-pane pt12" ng-switch-when="assets">
+                        <div ng-init="filterMin = true; entityId=entityId" ng-include="'views/assets/all.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

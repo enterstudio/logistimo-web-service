@@ -1,0 +1,46 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="SimpleMenuController" ng-init="init('inventory')">
+	<div class="subnavbar navbar navbar-default" role="navigation">
+			<ul class="nav navbar-nav subnav">
+				<li ng-class="{ enable: subview == 'stock'}"><a
+					href="#/inventory/">{{resourceBundle.stock}} {{resourceBundle['views.lowercase']}}</a></li>
+				<li ng-class="{ enable: subview == 'abnormalstock'}"><a
+					href="#/inventory/abnormalstock/">{{resourceBundle.abnormal}} {{resourceBundle['stock.lowercase']}}</a></li>
+				<li ng-class="{ enable: subview == 'transactions' }"><a
+					href="#/inventory/transactions/">{{resourceBundle.transactions}}</a></li>
+			</ul>
+	</div>
+	<div ng-switch="subview">
+		<div ng-switch-when="transactions">
+			<div  ng-include="'views/transactions/transactions.html'"></div>
+		</div>
+		<div ng-switch-when="stock">
+			<div ng-include="'views/inventory/stock-views.html'"></div>
+		</div>
+        <div ng-switch-when="abnormalstock">
+			<div ng-include="'views/inventory/abnormal-stock.html'"></div>
+		</div>
+	</div>
+</div>

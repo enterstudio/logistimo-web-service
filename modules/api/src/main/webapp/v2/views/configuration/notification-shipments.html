@@ -1,0 +1,83 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="NotificationsConfigurationController">
+    <div class="bgr" ng-if="loading == false">
+        <div class="row">
+            <div class="col-sm-12">
+                <p class="litetext">{{resourceBundle['event.select']}}</p>
+            </div>
+        </div>
+
+        <div class="row" ng-show="!showSubview">
+
+            <div class="col-sm-4 mb10">
+                <select ng-model="nof.ship" ng-change="fetchEvent('shipments')" class="form-control" id="nofMsg">
+                    <option value="">-- {{resourceBundle['select']}} {{'event'}} --</option>
+                    <option ng-repeat="shipment in shipmentsLabel" value="{{shipment.name}}">{{shipment.name}}</option>
+                </select>
+            </div>
+            <div class="lnk" ng-show="prShow || prSelect">
+                <span class="col-sm-4" ng-show="prShow">
+                    {{prefixName}}<input only-digits type="text" class="form-control w70 stat-bottom" ng-model="nof.pr" id="prefix"
+                                         placeholder="{{placeHolder}}" ng-change="resetStatus('prefix')">
+                </span>
+                <span class="col-sm-4" ng-show="prSelect == 'status' ">
+                    <select ng-model="nof.os" class="form-control" ng-change="resetStatus('status')">
+                        <option value="">{{placeHolder}}</option>
+                        <option ng-repeat="(key, value) in shipmentStatusLabel" value="{{key}}">{{value}}</option>
+                    </select>
+                </span>
+            </div>
+            <div class="col-sm-3 lPadN25 pull-right" ng-if="iSU || dp.ce">
+                <button ng-click="validateAndOpenAddDialog()" class="btn btn-primary pr" ng-disabled="dialog == 'shipmentsDialog' || dialog == 'edit'">{{resourceBundle['add']}}
+                    {{resourceBundle['notifications']}}
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div data-ng-switch on="dialog">
+                    <div data-ng-switch-when="shipmentsDialog" class="pt20">
+
+                        <div
+                                ng-init="title = title ; message = message ; index = $index ; count = count ; notify = notify; id = id; nid = nid"
+                                ng-include="'views/configuration/add-notifications.html'"></div>
+
+                    </div>
+                    <div data-ng-switch-when="edit" class="pb20">
+
+                        <div
+                                ng-init="title = title ; message = message ; index = $index ; count = count ; notify = notify; id = id; nid = nid;"
+                                ng-include="'views/configuration/add-notifications.html'"></div>
+
+                    </div>
+                    <div data-ng-switch-default class="pt20">
+                        <div ng-include="'views/configuration/list-notifications.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

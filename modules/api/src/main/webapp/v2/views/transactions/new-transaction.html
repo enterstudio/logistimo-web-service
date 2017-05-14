@@ -1,0 +1,407 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+<div class="bizinfo bizinfo-first bizinfo-last">
+<div ng-controller="TransactionsFormCtrl">
+<form novalidate class="form-horizontal" role="form" name="addTransaction">
+    <div class="row">
+        <div class="col-sm-6 norightpad">
+            <div class="bgr h280">
+                <div class="title-heading">
+                    {{resourceBundle['transaction']}} {{resourceBundle['details']}}
+                </div>
+                <div>
+                    <div class="form-group has-feedback">
+                        <label class="col-sm-4 control-label required noLRpad">{{resourceBundle['kiosk']}}</label>
+                        <div class="col-sm-7">
+                            <input type="text" ng-model="transaction.ent"
+                                   typeahead-template-url="entityTemplate"
+                                   autocomplete="off"
+                                   typeahead-on-select = "changeEntity()"
+                                   ng-disabled = "isEnt || transaction.eent"
+                                   placeholder="{{resourceBundle['kiosk']}} {{resourceBundle['name.lower']}}"
+                                   typeahead-wait-ms = "300"
+                                   ng-class="{'c-visited' : submitted}"
+                                   uib-typeahead="ent as ent.nm for ent in getFilteredEntity($viewValue)"
+                                   class="form-control" typeahead-editable="false" required/>
+                            <span ng-show="loadingEntity" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                        </div>
+                        <div ng-show="!isEnt && transaction.eent" class="clickable temp" ng-click="reset('en')"><span class="glyphicons glyphicons-edit"></span></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label required noLRpad">{{resourceBundle['transtype']}}</label>
+                        <div class="col-sm-7">
+                            <select class="form-control" ng-class="{'c-visited' : submitted}"
+                                    ng-disabled="validType || !transaction.eent"
+                                    ng-change = "dInventory=null;dInv=false;transaction.dent=null;"
+                                    ng-model="transaction.type" required>
+                                <option ng-selected="trn.value == transaction.type"
+                                        ng-repeat="trn in transactions_arr" value="{{trn.value}}">{{trn.displayName}}
+                                </option>
+
+                            </select>
+                        </div>
+                        <div ng-show="validType" class="clickable temp" ng-click="reset('ty')"><span class="glyphicons glyphicons-edit"></span></div>
+                    </div>
+                    <div ng-show="(atd == '1') || (atd =='2')" class="form-group ml16">
+                        <label class="col-sm-4 control-label noLRpad"  ng-class="{'required' : atd == '2'}">{{resourceBundle['date.actual.transaction']}}</label>
+                        <div class="col-sm-7">
+                            <date-picker date-model="transaction.date" place-holder="Transaction date" min-date="minDate" max-date="today"></date-picker>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="entityType != '' ">
+                        <label class="col-sm-4 control-label noLRpad"
+                               ng-class="{'required' : transaction.type == 't'}">{{entityType}}</label>
+                        <script type="text/ng-template" id="destTemplate">
+                            <a>
+                                <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+                                <span class="litetext">
+                                     {{match.model.ct}}<span ng-show="match.model.ds">, {{match.model.ds}}</span>, {{match.model.st}}
+                                </span>
+                            </a>
+                        </script>
+
+                        <div ng-show="transaction.type == 'i'" class="col-sm-7">
+                            <div class="form-group has-feedback mgh0 mgb0">
+                                <input type="text" ng-model="transaction.dent"
+                                       typeahead-template-url="destTemplate"
+                                       typeahead-on-select="checkPermission(transaction.dent)"
+                                       autocomplete="off"
+                                       class="form-control"
+                                       placeholder="{{entityType}}"
+                                       ng-change = "dInventory=null;dInv=false;"
+                                       typeahead-wait-ms = "300"
+                                       uib-typeahead="ent as ent.enm for ent in tranDomainConfig.customers | filter : {enm:$viewValue} | limitTo:8"
+                                       typeahead-editable="false"
+                                       typeahead-loading="loadingDent"/>
+                                <span ng-show="loadingDent" class="form-control-feedback typehead-loading" aria-hidden="true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div ng-show="transaction.type == 'r'" class="col-sm-7">
+                            <div class="form-group has-feedback mgh0 mgb0">
+                                <input type="text" ng-model="transaction.dent" typeahead-template-url="destTemplate"
+                                       autocomplete="off"
+                                       class="form-control"
+                                       placeholder="{{entityType}}"
+                                       typeahead-wait-ms = "300"
+                                       uib-typeahead="ent as ent.enm for ent in tranDomainConfig.vendors | filter : {enm:$viewValue} | limitTo:8"
+                                       typeahead-editable="false"
+                                       typeahead-loading="loadingDent"/>
+                                <span ng-show="loadingDent" class="form-control-feedback typehead-loading" aria-hidden="true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div ng-show="transaction.type == 't'" class="col-sm-7">
+                            <select ng-show="tranDomainConfig.isMan" class="form-control mb5" ng-change="setTrans()" ng-model="transaction.entityType">
+                                <option value=""> {{resourceBundle['others']}}</option>
+                                <option value="c"> {{resourceBundle['customer']}}</option>
+                                <option value="v"> {{resourceBundle['vendor']}}</option>
+                            </select>
+                            <div class="form-group has-feedback mgh0 mgb0">
+                                <input type="text" ng-model="transaction.dent" typeahead-template-url="destTemplate"
+                                       autocomplete="off"
+                                       placeholder="{{entityType}}"
+                                       ng-change = "dInventory=null;dInv=false;showDestInv=false;"
+                                       typeahead-on-select="checkPermission(transaction.dent)"
+                                       typeahead-wait-ms = "300"
+                                       ng-class="{'c-visited' : submitted}"
+                                       uib-typeahead="ent as ent.enm for ent in trans | filter : {enm:$viewValue} | limitTo:8"
+                                       class="form-control" typeahead-editable="false" ng-required="transaction.type === 't'"
+                                       typeahead-loading="loadingDent"/>
+                                <span ng-show="loadingDent" class="form-control-feedback typehead-loading">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                </span>
+                            </div>
+                            <div ng-show="transaction.ent.nm === transaction.dent.enm" class="has-error">
+                                <span class="help-block">{{resourceBundle['materials.transfer']}}</span>
+                            </div>
+                            <div ng-show="tranDomainConfig.showCInv && (transaction.type == 't' || transaction.type == 'i') && transaction.dent.enm.length > 0 && transaction.ent.nm !== transaction.dent.enm && showDestInvPermission > 0" class="temp">
+                                <span class="litetext"> <input type="checkbox" ng-model="showDestInv" ng-disabled="showDestInv"> {{resourceBundle['show.currentstock.at']}} {{transaction.dent.enm}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div  class="col-sm-6 noleftpad">
+            <div class="bgr h280">
+                <div class="title-heading">
+                    {{resourceBundle['materials']}} {{resourceBundle['at']}} {{transaction.ent.nm || resourceBundle['kiosk.lower']}}
+                    <span class="filter-label"><span ng-show="loadMaterials" class="glyphicons glyphicons-cogwheel spin"></span></span>
+                        <span ng-show="isDef(transaction.ent.id)" class="navbar-right pr30">
+                            <span class="glyphicons glyphicons-tags"></span>&nbsp;
+                            <select class="form-control form-control-min" ng-model="mtag" ng-hide="loadMaterials">
+                                <option value="">{{resourceBundle['all']}}</option>
+                                <option ng-repeat="tag in tags" value="{{tag}}">{{tag}}</option>
+                            </select>
+                        </span>
+
+                </div>
+                <div ng-show="isDef(transaction.ent.id)">
+                    <table class="table table-mat table-logistimo table-nobot-mar">
+                        <thead>
+                        <tr>
+                            <th ng-class="{'col-sm-5' : dInv, 'col-sm-9' : !dInv}">
+                                {{resourceBundle['material.name']}}
+                                <span ng-if="ordersTabEnabled || dInv" class="litetext">&nbsp;</span>
+                            </th>
+                            <th class="col-sm-3 text-center" ng-if="ordersTabEnabled">
+                                {{resourceBundle['available.stock']}}
+                                <span class="litetext">{{transaction.ent.nm | limitTo:17}}
+                                    <span ng-show="transaction.ent.nm.length > 17">...</span>
+                                </span>
+                            </th>
+                            <th class="col-sm-3 text-center" ng-if="!ordersTabEnabled">
+                                {{resourceBundle['inventory.currentstock']}}
+                                <span ng-if="dInv" class="litetext">&nbsp;</span>
+                            </th>
+                            <th ng-show="dInv" class="col-sm-4 text-center">
+                                <span>{{resourceBundle['material.stockonhand']}}
+                                    <span class="litetext">{{transaction.dent.enm | limitTo:17}}
+                                        <span ng-show="transaction.dent.enm.length > 17">...</span>
+                                    </span>
+                                </span>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-class="{'disabled-bg' : hasStock(availableInventory[$index], transaction.type) == false}"
+                            ng-click="hasStock(availableInventory[$index], transaction.type) && addMaterialToList($index)"
+                            ng-hide="inv.hide || inv.tHide"
+                            ng-repeat="inv in availableInventory">
+                            <td ng-class="{'col-sm-5' : dInv, 'col-sm-9' : !dInv}">{{inv.mnm}}</td>
+                            <td class="col-sm-3 text-center" ng-if="ordersTabEnabled">{{inv.atpstk}}</td>
+                            <td class="col-sm-3 text-center" ng-if="!ordersTabEnabled">{{inv.stk}}</td>
+                            <td ng-show="dInv" class="col-sm-4 text-center">{{inv.dInv.stk}}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div ng-show="showMaterials && validType">
+                        <p class="litetext navbar-right pr30">({{resourceBundle['row.click']}})</p>
+                    </div>
+                </div>
+                <div ng-hide="isDef(transaction.ent.id)">
+                    {{resourceBundle['entity.selectmaterial']}}...
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bgr">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="title-heading">
+                    {{resourceBundle['choose']}} {{resourceBundle['material.lowercase']}}
+                </div>
+                <script type="text/ng-template" id="materialTemplate">
+                    <a>
+                        <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+                        <br/>
+                        <span class="litetext" ng-if="$parent.$parent.$parent.ordersTabEnabled">
+                            {{$parent.$parent.$parent.$parent.resourceBundle['available.stock']}}: {{match.model.atpstk}}
+                        </span>
+                        <span class="litetext" ng-if="!$parent.$parent.$parent.ordersTabEnabled">
+                            {{$parent.$parent.$parent.$parent.resourceBundle['material.stockonhand']}}: {{match.model.stk}}
+                        </span>
+                    </a>
+                </script>
+                <table class="table table-condensed table-hover table-logistimo">
+                    <tbody>
+                    <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                        <th class="col-sm-2">{{resourceBundle['material']}}</th>
+                        <th class="col-sm-1 text-center" >{{resourceBundle['material.stockonhand']}}
+                            <span class="litetext">{{transaction.ent.nm | limitTo:17}}
+                                <span ng-show="transaction.ent.nm.length > 17">...</span>
+                            </span>
+                        </th>
+                            <!--<span class="litetext-head"><input type="checkbox" ng-model="showMinMax"> {{resourceBundle['minmax.show']}} </span></th>-->
+                        <th class="col-sm-1 text-center" ng-show="ordersTabEnabled">{{resourceBundle['available.stock']}}
+                            <span class="litetext">{{transaction.ent.nm | limitTo:17}}
+                                <span ng-show="transaction.ent.nm.length > 17">...</span>
+                            </span>
+                        </th>
+                        <th class="col-sm-1 text-center">{{resourceBundle['quantity']}}</th>
+                        <th  class="col-sm-1 text-center">{{resourceBundle['reason']}}</th>
+                        <th class="col-sm-0-5 text-center"></th>
+                        <th ng-show="dInv" class="col-sm-2 text-center">{{resourceBundle['material.stockonhand']}}
+                            <span class="litetext">{{transaction.dent.enm | limitTo:17}}
+                                <span ng-show="transaction.dent.enm.length > 17">...</span>
+                            </span>
+                            <!--<span class="litetext-head"><input type="checkbox" ng-model="showMinMax"> {{resourceBundle['minmax.show']}} </span>-->
+                        </th>
+                    </tr>
+                    </tbody>
+                    <tbody ng-repeat="material in transaction.materials" ng-controller="transactions.MaterialController"
+                           data-ng-switch on="exRow[$index]">
+                    <tr ng-class="{'alert alert-info alert-info-dark' : exRow[$index]}">
+                        <td><p class="text-center temp">{{$index + 1}}</p></td>
+                        <td>
+                            <div ng-hide="!showMaterials || !validType || transaction.materials.length>$index+1" class="form-group has-feedback  mgh0 mgb0">
+                                <input type="text"
+                                       typeahead-template-url="materialTemplate"
+                                       ng-model="material.name"
+                                       class="form-control"
+                                       placeholder="Type material name to choose"
+                                       uib-typeahead="item as item.mnm for item in getFilteredInvntry($viewValue)"
+                                       typeahead-editable="false"
+                                       maxlength="50" tabindex="{{$index+100}}"
+                                       typeahead-loading="loadingMaterials"/>
+                                <span ng-show="loadingMaterials" class="form-control-feedback typehead-loading" aria-hidden="true">
+                                    <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                </span>
+                            </div>
+                            <p class="temp" ng-show="transaction.materials.length>$index+1">{{material.name.mnm}}</p>
+                            <p class="cader temp" ng-show="!showMaterials || !validType">{{resourceBundle['select']}} {{resourceBundle['kiosk']}} & {{resourceBundle['transtype']}} {{resourceBundle['to']}} {{resourceBundle['choose']}} {{resourceBundle['materials']}}...</p>
+                        </td>
+                        <td ng-class=" {'alert-danger' : material.event == 200,
+                         'alert-info alert-info-dark' : material.event == 202,
+                         'alert-warning alert-warning-dark' : material.event == 201}" class="text-center">
+                            <span ng-show="showMaterials && transaction.materials.length - 1 !== $index" class="temp">{{material.stock}}
+                                <span class="litetext" ng-show="showMinMax"><span uib-tooltip="(min,max)">{{material.mm}}</span></span>
+                            </span>
+                        </td>
+                        <td class="text-center" ng-if="ordersTabEnabled">
+                            <span ng-if="showMaterials && transaction.materials.length - 1 !== $index" class="temp">
+                                {{material.atpstock}}
+                                <span ng-if="material.tstk > 0" class="litetext">In transit: {{material.tstk}}</span>
+                            </span>
+                        </td>
+                        <td>
+                            <input only-digits ng-show="!material.isBatch && !material.isBinary && showMaterials && transaction.materials.length - 1 !== $index"
+                                   type="text" ng-model="material.quantity" class="form-control" maxlength="12"
+                                   tabindex="{{$index+100}}"
+                                   ng-class="{'red-border':material.invalidPopup}"
+                                   uib-popover="{{material.popupMsg}}"
+                                   ng-focus="hidePopup(material,$index)"
+                                   ng-blur="validate(material,$index,'b')" id="{{material.name.mId}}{{$index}}" popover-trigger="showpopup"/>
+                            <div ng-show="showMaterials && transaction.materials.length - 1 !== $index && !transaction.material.isBatch && material.quantity > 0">
+                                <span class="litetext float-left" ng-class="{'required' : msm}" ng-show="(!material.ts && isDef(matstatus)) || (material.ts && isDef(tempmatstatus))">{{resourceBundle['inventory.material.status']}}</span>
+                                <select ng-hide="material.ts || isUndef(matstatus)"
+                                        class="form-control mt5"
+                                        id="m{{material.name.mId}}{{$index}}"
+                                        ng-class="{'red-border':material.ainvalidPopup}"
+                                        uib-popover="{{material.aPopupMsg}}" popover-trigger="showpopup"
+                                        ng-focus="hidePopup(material,$index,'m')"
+                                        ng-blur="material.isVisitedStatus = true; validate(material,$index)"
+                                        ng-model="material.mst" tabindex="{{$index+100}}">
+                                    <option ng-repeat="stats in matstatus track by $index" value="{{stats}}" ng-selected="material.mst == stats">{{stats || resourceBundle['select'] + " " + resourceBundle['status.lower']}}</option>
+                                </select>
+                                <select ng-show="material.ts && isDef(tempmatstatus)"
+                                        class="form-control mt5"
+                                        id="mt{{material.name.mId}}{{$index}}"
+                                        ng-class="{'red-border':material.ainvalidPopup}"
+                                        uib-popover="{{material.aPopupMsg}}" popover-trigger="showpopup"
+                                        ng-focus="hidePopup(material,$index,'mt')"
+                                        ng-blur="material.isVisitedStatus = true; validate(material,$index)"
+                                        ng-model="material.mst" tabindex="{{$index+100}}">
+                                    <option ng-repeat="stats in tempmatstatus track by $index" value="{{stats}}" ng-selected="material.mst == stats">{{stats || resourceBundle['select'] + " " + resourceBundle['status.lower']}}</option>
+                                </select>
+                            </div>
+                            <div class="text-center clickable dummyLink" ng-show="material.isBatch && showMaterials" ng-click="selectOnType($index)">
+                                <table class="table table-striped table-nobot-mar table-condensed" ng-show="material.bquantity.length">
+                                    <tbody>
+                                    <tr ng-show="fBatMat.length > 0">
+                                        <td>{{resourceBundle['batch']}}</td>
+                                        <td>{{resourceBundle['expiry']}}</td>
+                                        <td>{{resourceBundle['quantity']}}</td>
+                                    </tr>
+                                    <tr ng-repeat="bitem in fBatMat = filterBatchMat(material.bquantity)">
+                                        <td>{{bitem.bid}}</td>
+                                        <td>{{bitem.bexp}}</td>
+                                        <td>{{bitem.quantity}}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <button type="button" ng-hide="exRow[$index] === 'add' || exRow[$index] === 'show'" class="btn btn-sm btn-primary">{{resourceBundle['batch.enter']}}</button>
+                                <p ng-show="exRow[$index] === 'add' || exRow[$index] === 'show'" class="btn btn-sm btn-default">{{resourceBundle['hideuppercase']}} {{resourceBundle['batch.lower']}}</p>
+                            </div>
+                            <p class="text-center temp" ng-show="material.isBinary && showMaterials">1</p>
+                        </td>
+                        <td>
+                            <div ng-show="showMaterials && material.rsns && material.rsns.length > 0 && showReason && transaction.materials.length - 1 !== $index" >
+                                <select class="form-control" ng-model="material.reason" tabindex="{{$index+100}}">
+                                    <option ng-repeat="reason in material.rsns track by $index" value="{{reason}}" ng-selected="material.reason == reason">{{reason || '--' + resourceBundle['select'] + ' ' + resourceBundle['reason'] + '--'}}</option>
+                                </select>
+                            </div>
+                            <div ng-show="showMaterials && !material.rsns && reasons && reasons.length > 0 && showReason && transaction.materials.length - 1 !== $index" >
+                                <select class="form-control " ng-model="material.reason" tabindex="{{$index+100}}">
+                                    <option ng-repeat="reason in reasons track by $index" value="{{reason}}" ng-selected="material.reason == reason">{{reason || '--' + resourceBundle['select'] + ' ' + resourceBundle['reason'] + '--'}}</option>
+                                </select>
+                            </div>
+                            <p ng-show="showMaterials && (!showReason || (!(material.rsns && material.rsns.length > 0) && !(!material.rsns && reasons && reasons.length > 0))) && transaction.materials.length - 1 !== $index" class="text-center cbx">NA</p>
+                        </td>
+                        <td class="text-center">
+                            <a ng-show="showMaterials && transaction.materials.length - 1 !== $index" href="" ng-click="deleteRow($index)">
+                                <span class="glyphicons glyphicons-bin temp"></span>
+                            </a>
+                        </td>
+                        <td ng-show="dInv" ng-class=" {'alert-danger' : material.devent == 200,
+                         'alert-info alert-info-dark' : material.devent == 202,
+                         'alert-warning alert-warning-dark' : material.devent == 201}">
+                            <p class="text-center temp" ng-style="{color:material.dStockColor}">{{material.dStock}}
+                                <span class="litetext" ng-show="showMinMax"><span uib-tooltip="(min,max)">{{material.dmm}}</span></span>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr data-ng-switch-when="show">
+                        <td colspan=100% class="partialview">
+                            <div ng-init="view='views/transactions/batch-transaction.html'; huName = material.name.huName; huQty = material.name.huQty; mnm = material.name.mnm ; mid = material.name.mId ; kid = material.name.kId ; bdata = material.bquantity; type = transaction.type;index = $index"
+                                 ng-include="'views/partial.html'"></div>
+                        </td>
+                    </tr>
+                    <tr data-ng-switch-when="add">
+                        <td colspan=100% class="partialview">
+                            <div ng-init="view='views/transactions/addBatch-transaction.html'; huName = material.name.huName; huQty = material.name.huQty; mnm = material.name.mnm; mid = material.name.mId ; bdata = material.bquantity;index = $index"
+                                 ng-include="'views/partial.html'"></div>
+                        </td>
+                    </tr>
+                    <tr data-ng-switch-when="stock">
+                        <td colspan=100% class="partialview">
+                            <div ng-init="view='views/transactions/stockBatch-transactions.html'; huName = material.name.huName; huQty = material.name.huQty; mnm = material.name.mnm ; mid = material.name.mId ; kid = material.name.kId ; bdata = material.oquantity; bndata = material.bnquantity; type = transaction.type; index = $index"
+                                 ng-include="'views/partial.html'"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="pull-right">
+                            <button type="button" ng-disabled="invalidPopup != 0 || transaction.materials.length<=1 || !addTransaction.$valid " ng-click="submitted=true; addTransaction.$valid && update()" class="btn btn-sm btn-primary">{{resourceBundle['submit']}}</button>
+                            <button type="button" class="btn btn-sm btn-default" ng-click="reset()">{{resourceBundle['reset']}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+</div>
+</div>

@@ -1,0 +1,561 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="CustomReportConfigurationController">
+            <div>
+                <form class="form-horizontal" role="form" name="customReportForm">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="domain-title-heading marginlr0">
+                                <h4>{{resourceBundle['report.customreports']}} {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                                <span ng-show="lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{lastUpdated}} {{resourceBundle['by']}}
+                                    <a href="#/setup/users/all/details?userId={{createdBy}}" target="_new">{{fn}}</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-show="crt && !open">
+
+                        <div>
+                            <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                <tbody>
+                                <tr>
+                                    <th>{{resourceBundle['serialnum']}}</th>
+                                    <th>{{resourceBundle['config.customreports.templatename']}}</th>
+                                    <th>{{resourceBundle['config.customreports.templatelink']}}</th>
+                                    <th>{{resourceBundle['lastupdated']}}</th>
+                                    <th ng-show="iSU || dp.ce">{{resourceBundle['action']}}</th>
+                                </tr>
+                                <tr ng-repeat="item in crp">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.tn}}</td>
+                                    <td><a href="/s/export?action=dl&key={{item.tk}}" target="_new">{{item.fn}}</a></td>
+                                    <td>{{item.lut}}</td>
+                                    <td ng-show="iSU || dp.ce"><span class="glyphicons glyphicons-bin" ng-click="deleteCustomReport(item.tn)" title="{{resourceBundle['delete']}}"></span>
+                                        <span class="glyphicons glyphicons-edit" ng-click="editCustomReport(item.tn, item.tk)" title="{{resourceBundle['edit']}}" style="padding-left:10px;"></span>
+                                        <span ng-if="iSU" class="glyphicons glyphicons-new-window" ng-click="exportReport(item.tn)" title="{{resourceBundle['export']}}" style="padding-left:10px;"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" style="padding-top: 10px;" ng-show="!crt && !open">
+                        <h6 style="padding-left:10px;">{{resourceBundle['config.customreports.notemplatesmsg']}}</h6>
+                    </div>
+                    <div class="row" style="padding-top: 10px;" ng-show="!open && (iSU || dp.ce)">
+                        <div class="col-sm-12">
+                            <input type="button" ng-click="addTemplate()" class="btn btn-primary ml10" value="{{resourceBundle['config.customreports.addtemplate']}}" />
+                        </div>
+                    </div>
+                    <div ng-show="open">
+                        <div class="bgr">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="title-heading">
+                                        {{resourceBundle['config.customreports.templatedetails']}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group" ng-hide="edituf">
+                                        <label class="col-sm-4 control-label required">{{resourceBundle['config.customreports.filename']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                                <input type="file" file-model="fileData" />
+                                                <span class="litetext">{{resourceBundle['upload']}} <b>.xls .xlsx or .xlsm</b> {{resourceBundle['files.only']}}</span>
+                                            <span ng-show = "showEdit" class="glyphicons glyphicons-remove lpad10" ng-click="stopEdit()" title="Cancel"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" ng-show="edituf">
+                                        <label class="col-sm-4 control-label">{{'Uploaded File'}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <input ng-disabled="edit && !showEdit" type="text" class="form-control" ng-model="cr.fn"/>
+                                            <span class="glyphicons glyphicons-edit editFile " ng-click="editUploadedFile(cr.fn)" title="Edit"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="tName" class="col-sm-4 control-label required">{{resourceBundle['config.customreports.templatename']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="tName"
+                                                   autocomplete="off"
+                                                   ng-model="cr.tn"
+                                                   name="templateName"
+                                                   placeholder="{{'Template name'}}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="desp" class="col-sm-4 control-label">{{resourceBundle['description']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="desp"
+                                                   autocomplete="off"
+                                                   ng-model="cr.dsc"
+                                                   name="description"
+                                                   maxlength="1000"
+                                                   placeholder="{{'Description'}}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bgr">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="title-heading">
+                                        {{resourceBundle['config.customreports.sheetdata']}}
+                                    </div>
+                                    <p class="litetext">{{resourceBundle['config.customreports.entersheetdatamsg']}}</p>
+                                    <p class="litetext" style="color: #bd362f">{{resourceBundle['config.customreports.maxrowmsg']}}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['inventory']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="invsn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="invsn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.invsn"
+                                                   name="inventorySheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.inventorysheetname']}}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="padding-top:5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['batch']}}</label>
+                                        <div class="col-sm-8" style="padding-top:5px;">
+                                            <input type="checkbox" ng-model="cr.ib" name="batchdetails"> {{resourceBundle['inventory.includebatchdetails']}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['users']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="usn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="usn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.usn"
+                                                   name="usersSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.userssheetname']}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['kiosks']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="ksn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="ksn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.ksn"
+                                                   name="kioskSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.entitiessheetname']}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['materials']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="msn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="msn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.msn"
+                                                   name="materialsSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.materialssheetname']}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['orders']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="osn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="osn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.osn"
+                                                   name="ordersSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.orderssheetname']}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top: 5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.dataduration']}}</label>
+                                        <div class="col-sm-8" style="padding-top:5px;">
+                                            <input type="checkbox" ng-model="cr.ogf" ng-change="resetReportGenerationTime()"/> {{resourceBundle['config.customreports.datadurationsameasreportgeneration']}}
+                                        </div>
+                                        <div class="col-sm-8" style="padding-top: 5px;">
+                                            <input only-digits type="text" class="form-control"
+                                                   autocomplete="off"
+                                                   ng-model="cr.od"
+                                                   ng-disabled="cr.ogf"
+                                                   name="ordersDataDuration"
+                                                   placeholder="0 {{resourceBundle['days']}}" style="width:25%;display: inline;">&nbsp;
+                                            <p class="litetext" style="padding-top: 5px;display: inline;">({{resourceBundle['config.customreports.datadurationmsg']}})</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['transactions']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="tsn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="tsn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.tsn"
+                                                   name="transactionsSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.transactionssheetname']}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top: 5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.dataduration']}}</label>
+                                        <div class="col-sm-8" style="padding-top:5px;">
+                                            <input type="checkbox" ng-model="cr.tgf" ng-change="resetReportGenerationTime()"/> {{resourceBundle['config.customreports.datadurationsameasreportgeneration']}}
+                                        </div>
+                                        <div class="col-sm-8" style="padding-top: 5px;">
+                                            <input type="text" class="form-control"
+                                                   autocomplete="off"
+                                                   ng-model="cr.td"
+                                                   ng-disabled="cr.tgf"
+                                                   name="transactionDataDuration"
+                                                   placeholder="0 {{resourceBundle['days']}}" style="width:25%;display: inline;">&nbsp;
+                                            <p class="litetext" style="padding-top: 5px;display: inline;">({{resourceBundle['config.customreports.datadurationmsg']}})</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-show="emt" class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['mnltransactions']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="tsn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="mtsn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.mtsn"
+                                                   name="manualTransactionsSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.mnltransactionssheetname']}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top: 5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.dataduration']}}</label>
+                                        <div class="col-sm-8" style="padding-top:5px;">
+                                            <input type="checkbox" ng-model="cr.mtgf" ng-change="resetReportGenerationTime()"/> {{resourceBundle['config.customreports.datadurationsameasreportgeneration']}}
+                                        </div>
+                                        <div class="col-sm-8" style="padding-top: 5px;">
+                                            <input type="text" class="form-control"
+                                                   autocomplete="off"
+                                                   ng-model="cr.mtd"
+                                                   ng-disabled="cr.mtgf"
+                                                   name="manualTransactionDataDuration"
+                                                   placeholder="0 {{resourceBundle['days']}}" style="width:25%;display: inline;">&nbsp;
+                                            <p class="litetext" style="padding-top: 5px;display: inline;">({{resourceBundle['config.customreports.datadurationmsg']}})</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['report.transactioncounts']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="tcsn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <input type="text" class="form-control" id="tcsn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.tcsn"
+                                                   name="transactionCountSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.transactioncountssheetname']}}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top:5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['aggregateuppercase']}} {{resourceBundle['by']}}</label>
+                                        <div class="col-sm-4" style="padding-top: 5px;">
+                                            <select ng-model="cr.tct" class="form-control" name="transactionCountTime">
+                                                <option value="">-- {{resourceBundle['select']}} {{resourceBundle['period']}} --</option>
+                                                <option ng-repeat="period in fr" value="{{period}}" ng-selected="period == cr.tct">{{period}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4" style="padding-top: 5px;">
+                                            <select ng-model="cr.tce" class="form-control" name="transactionCountEvent">
+                                                <option value="">-- {{resourceBundle['select']}} {{resourceBundle['event']}} --</option>
+                                                <option value="ksk">{{resourceBundle['kiosk']}}</option>
+                                                <option value="mtag">{{resourceBundle['tagmaterial']}}</option>
+                                                <option value="stt">{{resourceBundle['state']}}</option>
+                                                <option value="dstr">{{resourceBundle['district']}}</option>
+                                                <option value="plgr">{{resourceBundle['poolgroup']}}</option>
+                                                <option value="ktag">{{resourceBundle['tagentity']}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top: 5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.dataduration']}}</label>
+                                        <div class="col-sm-8" style="padding-top:5px;">
+                                            <input type="checkbox" ng-model="cr.tcrgf" ng-change="resetReportGenerationTime()" name="enableTransactionCount"/> {{resourceBundle['config.customreports.datadurationsameasreportgeneration']}}
+                                        </div>
+                                        <div class="col-sm-8" style="padding-top: 5px;">
+                                            <input only-digits type="text" class="form-control"
+                                                   autocomplete="off"
+                                                   ng-model="cr.tcd"
+                                                   ng-disabled="cr.tcrgf"
+                                                   name="transactionCountDataDuration"
+                                                   placeholder="0 {{resourceBundle['days']}}" style="width:25%;display: inline;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['report.consumptiontrends']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="ctsn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <input type="text" class="form-control" id="ctsn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.itsn"
+                                                   name="inventoryTransactionsSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.inventorytrendsheetname']}}"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top:5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['aggregateuppercase']}} {{resourceBundle['by']}}</label>
+                                        <div class="col-sm-4" style="padding-top: 5px;">
+                                            <select ng-model="cr.itt" class="form-control" name="inventoryTransactionTime">
+                                                <option value="">-- {{resourceBundle['select']}} {{'period'}} --</option>
+                                                <option ng-repeat="period in fr" value="{{period}}" ng-selected="period == cr.itt">{{period}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4" style="padding-top: 5px;">
+                                            <select ng-model="cr.ite" class="form-control" name="inventoryTransactionEvent">
+                                                <option value="">-- {{resourceBundle['select']}} {{resourceBundle['event']}} --</option>
+                                                <option value="ksk">{{resourceBundle['kiosk']}}</option>
+                                                <option value="mtag">{{resourceBundle['tagmaterial']}}</option>
+                                                <option value="stt">{{resourceBundle['state']}}</option>
+                                                <option value="dstr">{{resourceBundle['district']}}</option>
+                                                <option value="plgr">{{resourceBundle['poolgroup']}}</option>
+                                                <option value="ktag">{{resourceBundle['tagentity']}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="padding-top: 5px;">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.dataduration']}}</label>
+                                        <div class="col-sm-8" style="padding-top:5px;">
+                                            <input type="checkbox" ng-model="cr.itrgf" ng-change="resetReportGenerationTime()" name="enableInventoryTransactionDataDuration"/> {{resourceBundle['config.customreports.datadurationsameasreportgeneration']}}
+                                        </div>
+                                        <div class="col-sm-8" style="padding-top: 5px;">
+                                            <input only-digits only-digits type="text" class="form-control"
+                                                   autocomplete="off"
+                                                   ng-model="cr.itd"
+                                                   ng-disabled="cr.itrgf"
+                                                   name="inventoryTransactionDataDuration"
+                                                   placeholder="0 {{resourceBundle['days']}}" style="width:25%;display: inline;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p  class="title-heading">{{resourceBundle['report.historicalinvsnapshot']}}</p>
+                                    <div class="form-group pt5">
+                                        <label for="hsn" class="col-sm-4 control-label">{{resourceBundle['config.customreports.sheetname']}}</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="hsn"
+                                                   autocomplete="off"
+                                                   ng-model="cr.hsn"
+                                                   name="historicalSheetName"
+                                                   placeholder="{{resourceBundle['config.customreports.historicaleventsheetname']}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group pt5">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.snapshottime']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <input only-digits type="text" class="form-control w25 lnk"
+                                                   autocomplete="off"
+                                                   ng-model="cr.hd"
+                                                   name="historicalDataDuration"
+                                                   placeholder="0">&nbsp;
+                                            <p class="litetext pt5 lnk">({{resourceBundle['config.customreports.snapshotmessage']}})</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bgr">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="title-heading">
+                                        {{resourceBundle['config.customreports.reportgeneration']}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="litetext">{{resourceBundle['config.customreports.reportgenerationmsg']}}</p>
+                                    <p class="title-heading">{{resourceBundle['config.customreports.reportgenerationschedule']}}</p>
+                                    <div class="form-group pt5">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['config.customreports.reportgenerationintervals']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <input type="radio" value="0" ng-model="cr.rgt"  ng-change="resetSchedule()" name="reportGenerationIntervals"/> {{resourceBundle['daily']}}&nbsp;&nbsp;&nbsp;
+                                            <input type="radio" value="1" ng-model="cr.rgt"  ng-change="resetSchedule()" name="reportGenerationIntervals"/> {{resourceBundle['weekly']}}&nbsp;&nbsp;&nbsp;
+                                            <input type="radio" value="2" ng-model="cr.rgt"  ng-change="resetSchedule()" name="reportGenerationIntervals"/> {{resourceBundle['monthly']}}
+                                            <div class="col-lg-12 bgr nopad mt5" ng-if="cr.rgt == '0'">
+                                                <table width="100%" style="margin:5px;">
+                                                    <tr>
+                                                        <td class="w20 lpad5">
+                                                            <label class="control-label pt0" style="position:relative;bottom:15px;">{{resourceBundle['config.customreports.runat']}}</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control w30 stat-bottom h30 mt10 mb10" autocomplete="off" ng-model="cr.rgth" name="reportGenerationTimeDaily" placeholder="(hh:mm)">
+                                                            <p class="litetext">({{resourceBundle['config.customreports.dailytimemsg']}} {{resourceBundle['in']}} {{dmntz}})</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-lg-12 bgr nopad mt5" ng-if="cr.rgt == '1'">
+                                                <table width="100%" style="margin: 5px;">
+                                                    <tr>
+                                                        <td class="w20 lPad5">
+                                                            <label class="control-label pt0">{{resourceBundle['day.upper']}}</label>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control w50" ng-model="cr.rgtw" name="reportGenerationTimeWeekly">
+                                                                <option value="">-- {{resourceBundle['select']}} {{resourceBundle['day.upper']}} --</option>
+                                                                <option value="2" selected>{{'Monday'}}</option>
+                                                                <option value="3">{{'Tuesday'}}</option>
+                                                                <option value="4">{{'Wednesday'}}</option>
+                                                                <option value="5">{{'Thursday'}}</option>
+                                                                <option value="6">{{'Friday'}}</option>
+                                                                <option value="7">{{'Saturday'}}</option>
+                                                                <option value="1">{{'Sunday'}}</option>
+                                                            </select>
+
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="w20 lPad5">
+                                                            <label class="control-label pt0" style="position:relative;bottom:15px;">{{resourceBundle['config.customreports.runat']}}</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control w30 stat-bottom h30 mt10 mb10" autocomplete="off" ng-model="cr.rgth" placeholder="(hh:mm)">
+                                                            <p class="litetext">({{resourceBundle['config.customreports.dailytimemsg']}} {{resourceBundle['in']}} {{dmntz}})</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-lg-12 bgr nopad mt5" ng-if="cr.rgt == '2'">
+                                                <table width="100%" style="margin: 5px;">
+                                                    <tr>
+                                                        <td class="w20 lpad5">
+                                                            <label class="control-label pt0">{{'Interval'}}</label>
+                                                        </td>
+                                                        <td>
+                                                            <input only-digits type="text" class="form-control w30 stat-bottom h30 mt10 mb10" autocomplete="off" ng-model="cr.rgtm" name="reportGenerationTimeMonthly"> ({{resourceBundle['config.customreports.dayofmonth']}})<br/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="w20 lPad5">
+                                                            <label class="control-label pt0" style="position:relative;bottom:15px;">{{resourceBundle['config.customreports.runat']}}</label>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control w30 stat-bottom h30 mt10 mb10" autocomplete="off" ng-model="cr.rgth" placeholder="(hh:mm)">
+                                                            <p class="litetext">({{resourceBundle['config.customreports.dailytimemsg']}} {{resourceBundle['in']}} {{dmntz}})</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="title-heading">{{resourceBundle['user.emailto']}}</p>
+                                    <div class="form-group pt5">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['managers']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <user-select users-model="cr.mn" role="mgr"></user-select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['administrators']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <user-select users-model="cr.an" role="admin"></user-select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['emails']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <multi-select id="exusr" ng-model="cr.exusrsvo" name="eu" type="'email'" place-holder="'Type email id and press enter'"></multi-select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">User Tags</label>
+                                        <div class="col-sm-8 pt5">
+                                            <tag-select  tags-model="cr.uTgs" type="'user'" force-no-udf="'true'" place-holder="{{resourceBundle['config.enter.user.tags']}}"></tag-select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" ng-if="iSU">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['superusers']}}</label>
+                                        <div class="col-sm-8 pt5">
+                                            <user-select users-model="cr.sn" role="su" ></user-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt10" ng-show="iSU || dp.ce">
+                            <div class="col-sm-6">
+                                <div class="pull-right">
+                                    <input ng-show="!edit" type="button" ng-click="saveCustomReports()" class="btn btn-primary" value="{{resourceBundle['save']}}" />
+                                    <input ng-show="edit" type="button" ng-click="updateCustomReport()" class="btn btn-primary" value="{{resourceBundle['save']}}" />
+                                    <input type="button" ng-click="reloadTemplate()" class="btn btn-default" value="{{resourceBundle['cancel']}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

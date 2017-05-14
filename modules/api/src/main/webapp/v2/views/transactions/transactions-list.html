@@ -1,0 +1,284 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="TransactionsCtrl">
+        <div class="filter-box form-group">
+           <!-- <div ng-include="'views/common/reset-filters.html'"/>-->
+            <div class="row">
+                <div class="col-sm-3" ng-hide="!showEntityFilter">
+                    <span ng-class="{'required':mxE}" class="filter-label" >{{resourceBundle.kiosk}}</span>
+                    <entity-select ent-model="entity" classes="form-control"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
+                    </entity-select>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.material}}</span>
+                    <material-select mat-model="material" classes="form-control"
+                                     place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}">
+                    </material-select>
+                </div>
+                <div class="col-sm-2">
+                    <span class="filter-label">{{resourceBundle.type}}</span>
+                    <select class="form-control" ng-model="type">
+                        <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions.lowercase']}}</option>
+                        <option value="i">{{resourceBundle['issues']}}</option>
+                        <option value="r">{{resourceBundle['receipts']}}</option>
+                        <option value="p">{{resourceBundle['transactions.stockcount.upper']}}</option>
+                        <option value="w">{{resourceBundle['transactions.wastage.upper']}}</option>
+                        <option value="t">{{resourceBundle['transfers']}}</option>
+                    </select>
+                </div>
+                <div  class="col-sm-3">
+                    <div ng-show="material.b == 'yes'">
+                        <span class="filter-label">{{resourceBundle['batch']}}</span>
+                        <div class="input-group">
+                            <input type="text" ng-model="batchId"  name="batchId" placeholder=" " class="form-control" ng-enter="searchBatch()" upper-case />
+                        <span class="input-group-btn">
+							<button class="btn btn-default" ng-click="searchBatch()" type="button"
+                                    uib-tooltip="{{resourceBundle['search']}}" ng-disabled="batchId == null || batchId == '' || batchId.length == 0">
+                                {{resourceBundle['go']}}
+                            </button>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-1 mt18 pull-right">
+                    <span class="pull-right">
+                         <button type="reset" ng-click="resetFilters()" class="btn btn-sm btn-default">
+                              {{resourceBundle['reset']}}
+                         </button>
+                    </span>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore ">
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['from']}}</span>
+                    <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
+                    <span ng-show="hasAtd" class="filter-check-box" ><input class="pt7" type="checkbox" ng-model="atd"> {{resourceBundle.filterby}}
+                    {{resourceBundle['date.actual.transaction.small']}}</span>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['to']}}</span>
+                    <date-picker date-model="to" place-holder="To" min-date="from" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3" ng-show="isDef(entity) && customerCount > 0 && isUndef(vend)">
+                    <span class="filter-label">{{resourceBundle.customer}}</span>
+                    <entity-select ent-model="cust" classes="form-control" ent-type="customers" ent-id="entity.id"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle.customer}}" is-filter="true">
+                    </entity-select>
+                </div>
+                <div class="col-sm-3" ng-show="isDef(entity) && vendorCount > 0 && isUndef(cust)">
+                    <span class="filter-label">{{resourceBundle.vendor}}</span>
+                    <entity-select ent-model="vend" classes="form-control" ent-type="vendors" ent-id="entity.id"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle.vendor}}" is-filter="true">
+                    </entity-select>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore ">
+                <div ng-show="(entity.id == null || entity.id == '') && !iMan" class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                </div>
+                <div class="col-sm-3" ng-show="(material.mId == '' || material.mId == undefined)">
+                    <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                    <tag-filter ng-model="tag" tag-type="material"></tag-filter>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['transaction']}} {{resourceBundle['reason.lowercase']}}:</span>
+                    <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isRsnOpen">
+                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                            {{reason || resourceBundle['all']}} <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" ng-show="isRsnOpen">
+                            <li><a ng-click="updateReason('')">{{resourceBundle['all']}}</a></li>
+                            <li ng-repeat="rsn in reasons">
+                                <a ng-click="updateReason(rsn)">{{rsn}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-hide="showMore ">
+            <div class="col-sm-12 ">
+                <span class="glyphicons  glyphicons-chevron-down medium filter-expand"  ng-click="showMore = true" ></span>
+            </div>
+        </div>
+        <div class="row" ng-show="showMore ">
+            <div class="col-sm-12">
+                <span class="glyphicons  glyphicons-chevron-up medium filter-expand"  ng-click="showMore = !showMore"></span>
+            </div>
+        </div>
+        <div ng-show="resSize > 0">
+            <div class="row action-bar">
+                <span ng-if="mailId != undefined && mailId != null">
+                    <export-data mail-id="mailId" export-type="transactions" transaction-type="type" linked-id="cust.id || vend.id"
+                                     entity-id="entity.id"
+                                     mat-id="material.mId" from="from" to="to"
+                                     entity-name="entity.nm" material-name="material.mnm" trns-batch="batchId"
+                                 ebf="ebf" atd="atd" from="from" to="to" reason="reason" e-tag="etag" m-tag="tag" rows="numFound"></export-data>
+                </span>
+                <button ng-show="iSU" type="button" class="btn btn-sm btn-default" ng-click="undoTransactions()">
+                    {{resourceBundle['undo']}}
+                </button>
+            </div>
+
+
+            <div class="row">
+                <div class="col-sm-8">
+                    <span class="litetext" ng-show="iSU">({{resourceBundle['undotransactionsnote']}})</span>
+                </div>
+                <div class="col-sm-4">
+                <span class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </span>
+                </div>
+            </div>
+            <div class="overflow-x">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="table table-condensed table-hover table-logistimo" id="fixTable">
+                            <thead>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th><input ng-show="iSU" type="checkbox" ng-change="selectAll(selAll)" ng-model="selAll"/></th>
+                                <th>{{resourceBundle['serialnum']}}</th>
+                                <th ng-hide="!showEntityFilter">{{resourceBundle['kiosk']}}</th>
+                                <th>{{resourceBundle['material']}}</th>
+                                <th class="text-center">{{resourceBundle['openingstock']}}</th>
+                                <th>{{resourceBundle['operation']}}</th>
+                                <th class="text-center">{{resourceBundle['quantity']}}</th>
+                                <th>&nbsp;</th>
+                                <th class="text-center">{{resourceBundle['closingstock']}}</th>
+                                <th>{{resourceBundle['updatedon']}}</th>
+                                <th>{{resourceBundle['updatedby']}}</th>
+                                <th>&nbsp;</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody data-ng-switch on="exRow[$index]"
+                                   ng-repeat="item in filtered = transactions.results">
+                            <tr ng-class="{'noborbot':exRow[$index]}">
+                                <td><span class="glyphicons glyphicons-bring-to-front tglyph"
+                                          ng-if="currentDomain != item.sdid"
+                                          ng-click="switchDomain(item.sdid,item.sdname)"
+                                          uib-tooltip="{{item.sdname}}" tooltip-placement="right"></span></td>
+                                <td><input ng-if="currentDomain == item.sdid" type="checkbox"
+                                           ng-show="iSU && (item.ty=='i' || item.ty=='r' || item.ty=='w' || item.ty=='rt')"
+                                           ng-model="item.selected"/></td>
+                                <td class="text-center">{{item.sno}}</td>
+                                <td ng-show="showEntityFilter"><a
+                                        ng-href="#/setup/entities/detail/{{item.eid}}" target="_blank">{{item.enm}}</a>
+                                    <span class = "litetext">{{item.eadd}}</span>
+                                </td>
+                                <td><a ng-href="#/setup/materials/all/detail/{{item.mid}}"
+                                                                  target="_blank" title="{{item.mnm}}">{{item.mnm}}</a>
+                                    <span ng-show="isDef(item.mst)" class="litetext">{{item.mst}}</span>
+                                </td>
+                                <td class="text-center">{{item.os | number}}</td>
+                                <td><span style="display: block;">{{item.type}}</span>
+                                    <span ng-show="isDef(item.lkId)" class="litetext">{{item.ty=="r"?resourceBundle.from:resourceBundle.to}}&nbsp;<a ng-href="#/setup/entities/detail/{{item.lkId}}" target="_blank">{{item.lknm}}</a></span>
+                                    <span ng-show="isDef(item.resn)" class="litetext">({{item.resn}})</span>
+                                    <a ng-show="isDef(item.trkid) && (isUndef(item.trkObTy) || item.trkObTy == 'o' )"  class = "clickable litetext" ng-href="#/orders/detail/{{item.trkid}}/" target="_blank">({{resourceBundle['order']}}: {{item.trkid}})</a>
+                                    <a ng-show="isDef(item.trkid) && isDef(item.trkObTy) && item.trkObTy == 's'" class="clickable litetext" ng-href="#/orders/shipment/detail/{{item.trkid}}" target="_blank">({{resourceBundle['shipment']}}: {{item.trkid}})</a>
+                                    <span ng-show="isDef(item.trkid) && isDef(item.trkObTy) && item.trkObTy == 't'" class = "litetext">({{resourceBundle['transactions.viatransfer']}} {{item.trkid}})</span>
+                                    <span ng-show=" item.ty=='t'" class = "litetext">({{resourceBundle['transactions.id']}}: {{item.trnId}})</span>
+                                </td>
+                                <td class="text-center">{{item.q | number}}</td>
+                                <td>
+                                <span ng-show="item.bid" class="clickable pull-right" ng-click="select($index,'transbatch')">
+                                    <span class="glyphicons glyphicons-list-alt" uib-tooltip="{{resourceBundle['batch']}}"></span>
+                                </span>
+                                </td>
+                                <td class="text-center">{{item.cs | number}}</td>
+                                <td>{{item.ts}}
+                                    <span ng-show="isDef(item.atd)" class="litetext" uib-tooltip="{{resourceBundle['date.actual.transaction']}}" tooltip-placement="left">{{item.atd}}</span>
+                                </td>
+                                <td><a ng-href="#/setup/users/all/details?userId={{item.uid}}" target="_blank">{{item.unm}}</a>
+                                </td>
+                                <td>
+                                    <span ng-if="item.trnSrc === 1" class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
+                                </td>
+                                <td>
+                            <span ng-show="item.lt !== 0 || item.ln !== 0" ng-click="select($index,'map')"
+                                  class="clickable glyphicons glyphicons-globe"></span>
+                                </td>
+                            </tr>
+                            <tr data-ng-switch-when="transbatch">
+                                <td colspan="100%" class="partialview">
+                                    <div ng-init="view='views/transactions/view-batch.html' ; index = $index; bid = item.bid; bexp = item.bexp; bmfnm = item.bmfnm; bmfdt = item.bmfdt; osb = item.osb; csb = item.csb; mnm = item.mnm"
+                                         ng-include = "'views/partial.html'">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-ng-switch-when="map">
+                                <td colspan=100% class="partialview">
+                                    <div ng-init="view='views/transactions/view-map.html' ; index = $index ; type = item.ty; dName = item.lknm; lt = item.lt; ln = item.ln; lklt = item.lklt; lkln = item.lkln; accuracy = item.ac; enMap = item.enMap;"
+                                         ng-include="'views/partial.html'">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-ng-switch-when="order">
+                                <td colspan=100% class="partialview">
+                                    <div
+                                            ng-init="view='views/orders/view-order.html' ; title = 'Order Details :'+ item.trkid ; orderId = item.trkid ; index = $index ; sno = item.sno"
+                                            ng-include="'views/partial.html'">
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row action-bar">
+            <span ng-if="mailId != undefined && mailId != null">
+                <export-data mail-id="mailId" export-type="transactions" transaction-type="type" linked-id="cust.id || vend.id"
+                             entity-id="entity.id" mat-id="material.mId"
+                             entity-name="entity.nm" m-name="material.mnm" trns-batch="batchId" ebf="ebf" atd="atd" from="from" to="to" reason="reason" ></export-data>
+            </span>
+            <button ng-show="iSU" type="button" class="btn btn-sm btn-default" ng-click="undoTransactions()">
+                {{resourceBundle['undo']}}
+            </button>
+            <div class="pull-right">
+                <div ng-include="'views/paginator.html'"></div>
+            </div>
+        </div>
+
+        <div class="row mt18" ng-show="resSize == 0">
+            <div class="col-sm-12">
+                <p ng-hide="mxE && isUndef(entity)" class=" alert alert-warning">
+                    {{resourceBundle['transactions.none']}}</p>
+                <p ng-show="mxE && isUndef(entity)" class="alert alert-info">
+                    {{resourceBundle['selectkioskmsg']}}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Integration Tests" verbose="1" >
+    <test name="Integration">
+        <classes>
+            <class name="com.logistimo.service.impl.InventoryManagementServiceTest" />
+            <class name="com.logistimo.service.impl.InventoryOptimizerServiceVanillaImplTest" />
+            <class name="com.logistimo.service.InvMgmtServiceTest" />
+            <class name="com.logistimo.service.OrderMgmtServiceTest" />
+            <class name="com.logistimo.utils.TransactionUtilOrdersTest" />
+            <class name="com.logistimo.utils.TransactionUtilTest" />
+        </classes>
+    </test>
+
+</suite>

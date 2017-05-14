@@ -1,0 +1,901 @@
+<!DOCTYPE html> 
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<html>
+	<head>
+		<!-- @if !isCustomDeployment -->
+		<title>Logistimo</title>
+		<!-- @endif -->
+		<!-- @if isCustomDeployment -->
+		<!-- comments:uncomment-block html -->
+		<!--
+        <title>Custom title</title>
+        -->
+		<!-- endcomments -->
+		<!-- @endif -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- Uncomment for Cordova app
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *">
+	-->
+    <link rel="stylesheet" href="styles/ls.css">
+	<script src="jquerymobile/jquery-1.7.1.min.js"></script>
+	<script src="js/webtoolkit.md5.js"></script>
+	<script type="text/javascript">
+	// Bind to the mobile phone configuration initialization
+	$( document ).bind( 'mobileinit', function() {
+		// Set jQuery Mobile parameters to enable cross-domain access (for PhoneGap)
+		$.support.cors = true;
+		$.mobile.allowCrossDomainPages = true;
+		// Disable transitions for better performance (esp. with data-position="fixed" for headers/footers); also seems to eliminate flicering and white screens
+		///$.mobile.touchOverflowEnabled = false;
+		$.mobile.defaultPageTransition = 'none'; /// 'slide'; /// 
+		$.mobile.defaultDialogTransition = 'none';
+		$.mobile.buttonMarkup.hoverDelay = 0;
+		///$.mobile.phonegapNavigationEnabled = true;
+		$.mobile.pushStateEnabled = false;
+		// To ensure clicks cannot happen during loading
+		$.mobile.loader.prototype.defaultHtml = '<div class="ui-loader"><span class="ui-icon ui-icon-loading"></span><h1></h1><div class="ui-loader-curtain"></div></div>';
+	});
+	</script>
+	<!-- Jquery Mobile & Phonegap -->
+	<!-- NOTE: uncomment the next line when using Cordova/Phonegap -->
+	<!-- <script type="text/javascript" charset="utf-8" src="cordova.js"></script> -->
+	<script src="jquerymobile/jquery.mobile-1.2.0.min.js"></script>
+	<script src="jquerymobile/jqm.autoComplete-1.5.1-min.js"></script>
+    <script type="text/javascript" src="photoswipe/klass.min.js"></script>
+    <script type="text/javascript" src="photoswipe/code.photoswipe.jquery-3.0.5.1.min.js"></script>
+    <script type="text/javascript" src="simpledialog2/jquery.mobile.simpledialog2.js"></script>
+	<script type="text/javascript" src="jquerymobile/xdate.js"></script>
+	<script type="text/javascript" src="jquerymobile/xdate.i18n.js"></script>
+	<script type="text/javascript" src="jquerymobile/mobipick.js"></script>
+        
+	<!-- App. scripts -->
+    <script src="js/media.js"></script>  
+	<script src="js/sg.m.js"></script>	
+	<script src="js/notifications.js"></script>
+	<script src="js/sync.js"></script>
+	<!-- Event bindings -->
+	<script type="text/javascript" src="js/events.js"></script>
+	<!--  Styles -->
+
+	<link rel="stylesheet" href="jquerymobile/jquery.mobile-1.2.0.min.css" />
+    <link href="photoswipe/gallery.css" type="text/css" rel="stylesheet" />
+    <link href="photoswipe/photoswipe.css" type="text/css" rel="stylesheet" />
+    <link href="simpledialog2/jquery.mobile.simpledialog.min.css" type="text/css" rel="stylesheet" />
+
+	<link rel="stylesheet" type="text/css" href="jquerymobile/mobipick.css" />
+	<!-- Custom style -->
+	<style type="text/css">
+	/* tables showing name-value pairs */
+	.infotable { border-spacing:0px; }
+	.infotable tbody th,
+	.infotable tbody td { border-bottom:1px solid rgba(0, 0, 0, .1); padding:4px 4px 4px 0; text-align:left;font-weight:normal; vertical-align:top; }
+	.infotable tbody th { width:25%; vertical-align:top; }
+	/* title bar of each page */
+	.title { text-align:center;font-size:small;background-color:#2F4F4F; }
+	/* To ensure no clicks are possible during loading indicator/message */
+	.ui-loader-curtain { position: absolute;top:-1200px;left:-1200px;width:2400px;height:2400px;background:white;opacity:0.0;filter:Alpha(Opacity=0); }
+	/* Form validation status message */
+	.fieldstatus { font-size:small;color:red;display:none; }
+	.printtable { border-spacing:0px; }
+	.printtable th,
+	.printtable td { border: 1px solid black; padding:5px 5px 5px 5px; }
+	.printtable thead { background:lightgray; }
+	/* Small font button */
+	.ui-mini.ui-mini-smaller .ui-btn-inner {
+    	font-size: 10px;
+    	padding: .25em 2px .2em;
+	}
+
+	 #radiogroupordertypeselector .ui-btn-active{
+		 background: #000000;
+	 }
+	.table-stroke thead th {
+		border-bottom: 1px solid rgba(0, 0, 0, .2);
+		text-align: left;
+	}
+	.table-stroke tbody th,
+	.table-stroke tbody td {
+		border-bottom: 1px solid rgba(0, 0, 0, .1);
+		border: 1px solid rgba(0, 0, 0, .1);
+		/*padding:5px 5px 5px 5px;*/
+	}
+	.error-highlight {
+		border: solid 2px #FF0000;
+	}
+	.input-disabled {
+		background-color:#EBEBE4;border:1px solid #ABADB3;padding:2px 1px;
+	}
+	.material-info-header{
+		font-weight: normal;
+		color: slategray;
+		font-size:medium;
+	}
+	.order-info-header{
+		font-weight: normal;
+		color: slategray;
+		font-size:10pt;
+	}
+	.order-info{
+		font-weight: normal;
+		color: black;
+		font-size:10pt;
+	}
+	</style>
+	<!-- Global variables -->
+	<script type="text/javascript">
+		// Our global variables
+		var $version = '1.6.5.5'; // 5 appended to indicate html5
+		var $reconnect = false; // whether to reconnect to server or not
+		var $host = ''; ///  'https://logistimo-web.appspot.com'; ///
+		var $uid, $pwd, $role, $currentOperation; // current user, password, role, and operation
+		var $config = null; // configuration information
+		var $hasMultipleEntities = false; // configurations to help screen skipping/navigation
+		var $entity = null; // current entity
+        var $mediaItems = null; //images related to either an entity or material.
+		var $materialData = null; // material ID list, tag list, tag map { materialmap: { mid1 : {<material-data>} },...], tags: [tag1,tag2,...], tagmap: { tag1: [mid1,mid2], ..} [, currency : <currency> ] }
+		var $mtag = null; // currently selected material tag (NOTE: made global so that back buttons can be leveraged to come back to an open tag area with scrolling preserved on back)
+		var $searchIndex = {}; // index used for filtering/searching within listviews (json)
+		var $osearch = {}; // order search params. { oty: '<otype>', st: '<status>' } - the currently selected order-type and status
+		var $currentRelationType; // current relationship type in view (e.g. csts / vnds) - required for enabling search (esp. when viewing entity profile/connections)
+		var $entitiesData = {}; // a mapping of an entity type ents/csts/vnds, to a mapping of a tag to a list of corresponding entity IDs; NOTE: for managed-entity (ents), list of kids are stored, whereas for csts/vnds, list of entity objects (JSONs) are stored 
+		var $rtag = null; // current selected entity (route);
+		var $rtag_re = null; // related entity route tag
+		var $disableOrderPrice;
+		var $orderTagFilter;
+		var $orderSearchFilter;
+	//	var $parentEntityId = null;
+	//	var $parentRelationType = null;
+		var $parentEntity = [];
+		// Operations
+		//var $operations = { 'vs' : 'View', 'ei' : 'Issues', 'er' : 'Receipts', 'es' : 'Physical stock', 'ew' : 'Discards', 'vo' : 'Orders', 'no' : 'New orders', 'ts' : 'Transfer stock','ne':'Entities','vt':'Transactions'};
+		// Valid order states
+		var $orderStates = [ 'pn','cf','cm','fl','bo','cn' ];
+		// Valid order state transitions
+		var $orderStateTransitions = { 'pn' : ['cf','cm','cn'], 'cf' : ['pn','cm','cn'], 'cm' : ['fl','cn'], 'op': ['cm','cn'],'bo':['cn']};
+		// Order types
+		//var $orderTypes = { 'prc' : 'Purchases', 'sle' : 'Sales' };
+		var $newOrderType = 'prc';
+		var $transferOrder = null;
+		var $discrepancyColor = '#f56954';
+		// Error messages
+		var $networkErrMsg = 'Unable to connect to server. Please check network connection and try again.';
+		// Max. orders loaded
+		var $MAX_ORDERS = 50;
+		// Number of items in a page
+		var $PAGE_SIZE = 10;
+		// Default page fetch size for backend objects (e.g. kiosks, materials)
+		var $FETCH_SIZE = 50;
+		var $ORDERS_FETCH_SIZE = 25;
+		// Geo code expiry
+		var $GEO_CODE_EXPIRY = 1800000; // milliseconds (30 mins.)
+		// Others route tag
+		var $ROUTETAG_UNTAGGED = 'Others';
+		// Default route index
+		var $ROUTEINDEX_DEFAULT = "2147483647";
+		// Others material/general-purpose tag
+		var $TAG_UNTAGGED = '- others -';
+		// Auth. token header name
+		var AUTHORIZATION = 'Authorization';
+		var X_ACCESS_TOKEN = 'x-access-token';
+		var X_ACCESS_INITIATOR = 'x-access-initiator';
+		var EXPIRES = 'expires';
+		// Request timeout
+		var REQUEST_TIMEOUT_DEFAULT = 120000; // millis
+		//Maximum length for number entries
+		var $maxNumberLength = 12;
+		// Variable to track what types of data were loaded/refreshed from the server, per entity, per session (e.g. trans. history, orders, stock, and so on); this object is only in scope when app. is running and goes out of scope on exit (not persisted)
+		var $refreshed = { "server" : {} }; // keyed by kid (kiosk/entity ID) and sub-keyed by: inventory, orders, transactions (e.g. { "server" : { "kid1" : { "inventory": true, "orders": true, "transactions": true } }
+
+		// Event messages
+	  //  var $nMsg = { 'ei' : 'unsent issues', 'er' : 'unsent receipts', 'es' : 'unsent physical stock', 'ew' : 'unsent discards',  'no' : 'unsent orders', 'ts' : 'unsent transfer stock','ne': 'unsent entities'};
+		var $etIcon = { 'ei' : 'issues.png', 'er' : 'receipts.png', 'es' : 'stockcounts.png', 'ew' : 'wastage.png',  'no' : 'neworder.png', 'ts' : 'transfer.png','ne': 'profile.png'};
+	  
+	    var $batchSend = false; // batch send transaction;
+        var $ntfyMdl = {};
+        
+        //Transactions
+	     var $transLimit = 50;
+		 var $transExportLimit = 5000;
+		 var $userDateFormat = 'd/m/yy';
+		 var $datePickerFormat = 'dd/MM/yyyy';
+		 var $batchDateFormat = 'd/m/yy';
+
+		// Last page's params and options (used selectively, by media service after taking photos)
+		var $lastPageParams;
+
+        var $pictureSource = null; // picture source
+        var $destinationType = null; // sets the format of returned value 
+        var $selectedPhotoUri = null;
+        var $currentPhotoObject = {}; // includes domainkey and name (of object) of currently selected photo
+        var $pictureClicked =false; // picture clicked is stored as a work around for back button issue with android
+		var $MEDIA_UPLOAD_URL = '/_ah/api/mediaendpoint/v2/media';
+		var $MEDIA_METADATA_URL = '/_ah/api/mediaendpoint/v1/mediaforDomain';
+		var $MEDIA_DELETE_URL = '/_ah/api/mediaendpoint/v1/media';
+
+		// Global access to log and sync. files
+		var $logFile;
+		// Log cache which accumulates the last few logs, which are flushed from time to time
+		var $logCache; // a JSON object (used by logR) that keep track of the number of log entries and the cumulative log string
+		var $LOG_CACHE_MAX_SIZE = 5; // 10 entries in cache after which it is written to the file, and cache is cleared (this helps manage asynchronous writes in Cordova)
+		// Synchronization data structures
+		var $syncFile; // sync. file
+		var $syncCache; // sync. data object (i.e. sync. file content in JSON format)
+		var $syncLocked = false; // Whether the sync. is locked, which means its going on now
+		// Network listening flag
+		var $networkListenerOn = false;
+		// Whether partial error dialog is already shown or not
+		var $partialErrorsShown = false;
+		// Default configurtion for syncing.
+		var $syncConfigDefault = {
+			mdrf: "24",				// master data loading interval (days)
+			applgs: "24"			// app. logs upload interval (days)
+		};
+		// General keys
+		var KEY_ALARM_REGISTERED = "alarmRegistered";
+
+		// Support details
+        // <!--   @if isCustomDeployment -->
+        // <!-- comments:uncomment // -->
+        // var $SUPPORT_PHONE_DEFAULT = '+9199999999';
+        // var $SUPPORT_EMAIL_DEFAULT = 'customemailid@customdomain.com';
+        // <!-- endcomments -->
+        // <!--  @endif -->
+
+        // <!--   @if !isCustomDeployment -->
+        // Dont remove this block
+        var $SUPPORT_PHONE_DEFAULT = '180030101947';
+        var $SUPPORT_EMAIL_DEFAULT = 'support@logistimo.com';
+        // <!--  @endif -->
+        // Dont remove this block
+
+		//Customers and vendors permissions
+		var $NO_PERMISSIONS = 0;
+		var $VIEW_INVENTORY = 1;
+		var $MANAGE_ENTITY = 2;
+		var $VIEW_ONLY = 1;
+		var $ASSETS_ONLY = 2;
+
+
+        (function(window, $, PhotoSwipe){
+            $(document).ready(function(){
+                $('div.gallery-page')
+                    .live('pageshow', function(e){
+                        var 
+                            currentPage = $(e.target),
+                            options = {},
+                            galleryDiv = $("ul.gallery a", e.target);
+							if ( galleryDiv.length > 0  ) {
+								//	galleryDiv.photoSwipe(options,  currentPage.attr('id'));
+								  var instance = PhotoSwipe.attach(window.document.querySelectorAll('.gallery a'), options);
+								// onHide
+								   instance.addEventHandler(PhotoSwipe.EventTypes.onHide, function(e){
+									mobile.changePage(getCurrentUrl());
+								});
+							}
+                            
+                        return true;                        
+                    })
+                    
+                    .live('pagehide', function(e){
+                        
+                        var 
+                            currentPage = $(e.target),
+                            photoSwipeInstance = PhotoSwipe.getInstance(currentPage.attr('id'));
+                        if (typeof photoSwipeInstance != "undefined" && photoSwipeInstance != null) {
+                            PhotoSwipe.detatch(photoSwipeInstance);
+                        }
+                        return true;
+                        
+                    });
+            });
+        }(window, window.jQuery, window.Code.PhotoSwipe));
+		var $existingQuantity = 0.0;
+	</script>
+</head> 
+<body>
+<!-- Login page -->
+<div id="login" data-role="page">
+	<div data-role="header">
+		<h3 id="welcometext">Welcome!</h3>
+<!--  	<a data-role="button" data-icon="delete" onclick="exit()">Exit</a>-->	
+	</div>
+	<!-- content -->
+	<div data-role="content">
+	<p id="loginmessagetext">Please enter your user name and password to login.</p>
+	    <form action="">
+	        <div data-role="fieldcontain">
+	            <fieldset data-role="controlgroup">
+	                <input name="userid" id="userid" placeholder="Enter user name" value="" type="text" />
+	            </fieldset>
+	        </div>
+	        <div data-role="fieldcontain">
+	            <fieldset data-role="controlgroup">
+	                <input name="pwd" id="pwd" placeholder="Enter password" value="" type="password" />
+	            </fieldset>
+	        </div>
+	        <a id="loginbutton" data-role="button" data-transition="none" onclick="login(false);">Login</a>
+	        <p id="refreshtext">To connect over the network and get fresh data from server, enter your name and password and click below:</p> 
+	        <a id="refreshbutton" data-role="button" data-transition="none" onclick="login(true);">Refresh</a>
+			<br/>
+			<a id="forgotpasswordtext" href="#forgotpassword" style="font-size:10pt;display:inline;">Forgot Password</a>
+ 	    </form>
+	</div>
+	<div data-role="footer" class="ui-bar" data-theme="c">
+		<span id="needhelptext">Need help?</span>
+	     <span style="font-size:8pt;display:inline;float:right"><script>document.write($version.substring(0,5))</script></span>
+		<p><a id ="calltext" alt="call" onclick="callSupportPhone()" style="display:inline;margin-right:20px;"><img src="jquerymobile/icons/phone.png"/></a>
+		<a  id ="emailtext" alt="email" style="display:inline;" onclick="sendSupportEmail()"><img src="jquerymobile/icons/mail.png"/></a><br/>
+		<span id="contactname" style="font-weight:normal;font-size:small"></span></p>
+	</div>
+</div>
+
+<!-- Entities page -->
+<div id="entities" data-role="page">
+  <!-- Header -->
+  <div data-role="header">
+	<h3 id ='entitiesheader'>Entities</h3>
+	<a id="entitieslogout" href="#logout" data-direction="reverse" data-icon="delete">Logout</a>
+	<a id="entitiessetup" href="#setupentity?ty=ents" data-icon="add" style="display:none">Add Entity</a>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+</div>
+
+<!-- Main menu Page -->
+<div id="menu" data-role="page">
+	<!-- Header -->
+	<div data-role="header">
+		<h3 id="operationsheader">Operations</h3>
+		<a id="menuback" href="#entities" data-direction="reverse" data-icon="back" style="display:none;">Back</a>
+		<a id="menulogout" href="#logout" data-direction="reverse" data-icon="delete">Logout</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+	<div data-role="footer" class="ui-bar" data-theme="c"></div>
+</div>
+
+<!-- Related Entities page -->
+<div id="relatedentities" data-role="page" data-theme="a">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="relatedentitiesback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	<a id="relatedentitieslogout" href="#logout" data-direction="reverse" data-icon="delete" style="display:none;">Logout</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+	<div data-role="footer" class="ui-bar" data-position="fixed">
+	</div>
+</div>
+
+<div id="printstock" data-role="page" data-theme="d">
+	<div data-role="content">
+	</div>
+</div>
+<div id="printtransactions" data-role="page" data-theme="d">
+	<div data-role="content">
+	</div>
+</div>
+
+<div id="export" data-role="page">
+    <div data-role="header" data-position="fixed">
+	   	<h3></h3>
+	  	<a id="exportback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	  	<div data-role="navbar">
+	  		<ul><li class="title ui-bar"></li></ul>
+	  	</div>  
+   </div>
+   <div data-role="content">
+   </div>
+</div>
+<div id="transfer" data-role="page">
+    <div data-role="header" data-position="fixed">
+	   	<h3></h3>
+	  	<a id="transferback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	  	<div data-role="navbar">
+	  		<ul><li class="title ui-bar"></li></ul>
+	  	</div>  
+   </div>
+   <div data-role="content">
+   </div>
+</div>
+<div id="ordertypeselection" data-role="page">
+    <div data-role="header" data-position="fixed">
+	   	<h3></h3>
+	  	<a id="ordertypeselectionback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	  	<div data-role="navbar">
+	  		<ul><li class="title ui-bar"></li></ul>
+	  	</div>  
+   </div>
+   <div data-role="content">
+   </div>
+</div>
+<!-- Materials page -->
+<div id="materials" data-role="page">
+	<div data-role="popup" id="materialsOptionsMenu">
+	    <ul data-role="listview" data-inset="true" data-theme="a">
+	    	<li><a id ="materialshome" href="#menu" data-direction="reverse">Home</a></li>
+	        <li id="materialsprint"><a id= "materialsprintstock" href="#printstock" >Print</a></li>
+	    </ul>
+	</div>
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="materialsback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	<a id="materialsoptions" href="#materialsOptionsMenu" data-rel="popup" data-role="button" data-inline="true" data-icon="gear">Options</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+  <div data-role="footer" class="ui-bar" data-position="fixed">
+  </div>
+</div>
+
+<!-- Material info. page -->
+<div id="materialinfo" data-role="page" class="gallery-page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="materialinfoback" href="#materials" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+</div>
+
+<!-- Add Batch info page -->
+<div id="batchinfo" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="batchinfoback" href="#materialinfo" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+</div>
+
+<!-- Order allocate  page -->
+<div id="orderallocate" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="orderallocateback" href="#orderinfo" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+</div>
+
+
+<!-- Order Status change  page -->
+<div id="orderstatuschange" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="orderstatuschangeback" href="#orderinfo" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+</div>
+
+<!-- Review page -->
+<div id="review" data-role="page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="reviewback" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+  <div data-role="footer" data-position="fixed" class="ui-bar">
+  	<div data-role="controlgroup" data-type="horizontal">
+		<a id="sendnowbutton" href="#" data-mini="false" data-icon="arrow-u" onclick="sendNow()">Send now</a>
+		<a id="reviewcancelbutton" data-mini="false" href="#materials" data-direction="reverse" data-icon="delete">Cancel</a>
+	</div>
+  </div>
+</div>
+
+<!-- Transactions page -->
+<div id="transactions" data-role="page">
+	<div data-role="popup" id="transactionsOptionsMenu">
+	    <ul data-role="listview" data-inset="true" data-theme="a">
+	    	<li><a href="#menu" id ="transactionsHome" data-direction="reverse">Home</a></li>
+	        <li id ="listItemPrintTransactions"><a href="#printtransactions"  id ="transactionsPrint">Print</a></li>
+			<li id ="listItemExportTransactions"><a href="#export?ty=transactions"  id ="transactionsExport">Export</a></li>
+	    </ul>
+	</div>
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="transactionsback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	<a id="transactionsoptions"  href="#transactionsOptionsMenu" data-rel="popup" data-role="button" data-inline="true" data-icon="gear">Options</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+  <div data-role="footer" class="ui-bar" data-position="fixed">
+  </div>
+</div>
+
+<!-- Orders page -->
+<div id="orders" data-role="page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="ordersback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	<a id="ordershome" href="#menu" data-direction="reverse" data-icon="home">Home</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+  <div data-role="footer" data-position="fixed" class="ui-bar">
+  </div>
+  <!-- Order type popup -->
+  <div data-role="popup" id="ordertypeselector" data-theme="a" class="ui-corner-all">
+  	<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+  	<ul data-role="listview" data-inset="true" data-theme="a">
+  		<li><a href="#orders?op=vo&oty=prc">Purchases</a></li>
+  		<li><a href="#orders?op=vo&oty=sle">Sales</a></li>
+  	</ul>
+  </div>
+</div>
+
+<!-- Order info. page -->
+<div id="orderinfo" data-role="page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="orderinfoback" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+  <div data-role="footer" data-position="fixed" class="ui-bar">
+  </div>
+</div>
+
+<!-- Shipments. page -->
+<div id="shipmentinfo" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="shipmentinfoback" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+	<div data-role="footer" data-position="fixed" class="ui-bar">
+	</div>
+</div>
+
+<!-- Order Partial fulfillment info. page -->
+<div id="orderfulfilment" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="orderfulfilmentback" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+	<div data-role="footer" data-position="fixed" class="ui-bar">
+	</div>
+</div>
+
+<!-- Order comments page -->
+<div id="ordercomments" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="ordercommentsback" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+	<div data-role="footer" data-position="fixed" class="ui-bar">
+	</div>
+</div>
+
+<!-- Order comments page -->
+<div id="orderiteminfo" data-role="page">
+	<!-- Header -->
+	<div data-role="header" data-position="fixed">
+		<h3></h3>
+		<a id="orderiteminfoback" data-direction="reverse" data-icon="back">Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+	</div>
+	<div data-role="footer" data-position="fixed" class="ui-bar">
+	</div>
+</div>
+<!-- Add Materials to Order page -->
+<div id="addmaterialstoorder" data-role="page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="addmaterialstoorderback" href="#orderinfo" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+  <div data-role="footer" data-position="fixed" class="ui-bar">
+  </div>
+</div>
+
+<!-- Add entity page -->
+<div id="setupentity" data-role="page">
+  <!-- Header -->
+  <div data-role="header">
+	<h3></h3>
+	<a id="setupentityback" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+</div>
+
+<!-- Entity (profile) page -->
+<div id="entityinfo" data-role="page" class="gallery-page">
+  <!-- Header -->
+  <div data-role="header">
+	<h3></h3>
+	<a id="entityinfoback" href="#menu" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+</div>
+
+<!-- Relationships listing for a given entity (from entityinfo) -->
+<div id="myentityrelationships" data-role="page" data-theme="a">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="myentityrelationshipsback" href="#menu?profile=true" data-direction="reverse" data-icon="back">Back</a>
+	<a id="myentityrelationshipssetup" href="#setupentity" data-icon="add">Add</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+</div>
+
+<!-- Review page -->
+<div id="unsententities" data-role="page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="unsententitiesback" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+    <div data-role="footer" data-position="fixed" class="ui-bar">
+  	<div data-role="controlgroup" data-type="horizontal">
+		<a id="unsententitiescancelbutton" data-mini="false" href="#menu" data-direction="reverse" data-icon="delete">Cancel</a>
+	</div>
+  </div>
+</div>
+<!-- Review page -->
+<div id="unsentrelatedentities" data-role="page">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="unsentrelatedentitiesback" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  </div>
+    <div data-role="footer" data-position="fixed" class="ui-bar">
+  	<div data-role="controlgroup" data-type="horizontal">
+		<a id="unsentrelatedentitescancel" data-mini="false" href="#menu" data-direction="reverse" data-icon="delete">Cancel</a>
+	</div>
+  </div>
+</div>
+
+<!-- Photo review page -->
+<div id="photoreview" data-role="page" data-theme="c">
+  <!-- Header -->
+  <div data-role="header" data-position="fixed">
+	<h3></h3>
+	<a id="photoreviewback" data-direction="reverse" data-icon="back">Back</a>
+	<div data-role="navbar">
+		<ul><li class="title ui-bar"></li></ul>
+	</div>
+  </div>
+  <!-- Content -->
+  <div data-role="content">
+  	<h4></h4> <!-- title -->
+  	<img style="width:100%;" id="largeImage" />
+  	<br/>
+  	<a id="photoreviewupload" data-role="button" data-theme="b" data-inline="true">Upload</a>
+  	<a id="photoreviewcancel" data-role="button" data-direction="reverse" data-inline="true">Cancel</a>
+  </div>
+</div>
+
+<!-- Message pop-up -->
+<div id="messagedialog" data-role="dialog" data-overlay-theme="a" data-theme="c" class="ui-corner-all">
+	<div data-role="header" data-theme="d" class="ui-corner-top">
+		<h1 id="title_d">Oops!</h1>
+	</div>
+	<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+		<p id="message_d" class="ui-title">Invalid name or password!</p>
+		<a id="okbutton_d" data-role="button" data-inline="true" data-rel="back" data-theme="b">OK</a>
+	</div>
+</div>
+
+<!-- Confirmation page -->
+<div id="messageconfirm" data-role="dialog" data-overlay-theme="a" data-theme="c" class="ui-corner-all">
+	<div data-role="header" data-theme="d" class="ui-corner-top">
+		<h1 id="title">Confirm</h1>
+	</div>
+	<!-- content -->
+	<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+		<p id="message" class="ui-title"></p>
+		<a id="okbutton" href="#" data-role="button" data-inline="true" data-theme="b">Yes</a>
+		<a id="cancelbutton" href="#" data-role="button" data-inline="true">No</a>
+	</div>
+</div>
+
+<!-- Forgot Password page -->
+
+<div id="forgotpassword" data-role="page">
+	<!-- Header -->
+	<div data-role="header">
+		<h3 id="forgotpasswordheader">Forgot Password</h3>
+	    <a id="forgotpasswordback" href="#login" data-direction="reverse" data-icon="back" >Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	  </div>
+	<!-- Content -->
+	<div data-role="content">
+		<p id="forgotpasswordmessagetext" style="font-weight:normal;font-size:10pt">Please enter your user name and click send, a new password will be sent to your phone through SMS.</p>
+		<form action="">
+			<div class="ui-grid-a">
+				<div class="ui-block-a">
+			      <input name="puserid" id="puserid" placeholder="Enter user name" style="display:inline-block" value="" type="text" />
+				</div>
+				<div class="ui-block-b">
+		     	<a id="fpsendotpbutton" href="#"  data-mini="true" data-role="button" data-icon="arrow-u" data-inline="true" data-theme="b" style="margin-top: 0.6em;" onclick="processForgotPassword(null)">Send</a>
+				</div>
+			</div>
+			<p  id="generateOTPmessage" style="font-weight:normal;font-size:10pt">It can take a few minutes to receive the one-time password (OTP) over SMS. If you do not receive the OTP even after 15 minutes, click on the link above</p>
+		    <hr>
+			</br>
+			<p id="enterOTPmessage" style="font-weight:normal;font-size:10pt">Once the OTP is received, please enter the OTP in the OTP field and click Send. A new password will be sent to your mobile phone.</p>
+			<div data-role="fieldcontain">
+				<input name="otpfield" id="otpfield" placeholder="Enter OTP" value="" type="text" />
+			</div>
+			<a id="fpresetpassword" href="#" data-role="button" data-icon="arrow-u" data-inline="true" data-theme="b" onclick="processForgotPassword(true)">Send</a>
+			<a id="fpcancelbutton1" href="#login" data-role="button" data-icon="delete" data-inline="true">Cancel</a>
+			 </form>
+		</div>
+ </div>
+
+<!-- Forgot Password page -->
+
+<div id="feedbackpage" data-role="page">
+	<!-- Header -->
+	<div data-role="header">
+		<h3 id="feedbackheader">Feedback</h3>
+		<a id="fbbackbutton" href="#login" data-direction="reverse" data-icon="back" >Back</a>
+		<div data-role="navbar">
+			<ul><li class="title ui-bar"></li></ul>
+		</div>
+	</div>
+	<!-- Content -->
+	<div data-role="content">
+		<p id="feedbacktext1">Please enter your feedback in the field below below:</p>
+		<form action="">
+			<div data-role="fieldcontain">
+				<fieldset data-role="controlgroup">
+					<!--<input name="feedbacktopic" id="feedbacktopic" maxlength="200" placeholder="Enter title" value="" type="text" />
+					<p> </p>-->
+					<textarea id="feedbackmessage" placeholder ="feedback text" maxlength="5000"  rows="10" style="height:auto"; ></textarea>
+				</fieldset>
+				</div>
+			<a id="fbsendbutton" href="#" data-role="button" data-icon="arrow-u" data-inline="true" data-theme="b" onclick="processSendFeedback('#login')">Send</a>
+
+			<a id="fbcancelbutton" href="#login" data-role="button" data-icon="delete" data-inline="true">Cancel</a>
+		</form>
+		<p id="feedbacktext2"><font style="font-size:9pt">NOTE: Use this form only to provide feedback on improving the application.</font></p>
+
+	</div>
+</div>
+
+
+</body>
+</html>

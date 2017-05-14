@@ -1,0 +1,102 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div ng-controller="HUDetailController">
+        <div class="row" ng-show="loading == false">
+            <div class="col-sm-12">
+                <form class="form-horizontal">
+                    <div class="filter-box">
+                        <div class="filter-title">
+                            {{huDetail.name}}
+                        </div>
+                    </div>
+                    <div class="row action-bar">
+                        <a ng-if="currentDomain == huDetail.sdId && (iSU || (iAdm && dp.me))" href="#/setup/handlingunits/all/edit/{{huDetail.id}}" class="btn btn-sm btn-primary">{{resourceBundle['edit']}}</a>
+                        <!--<a ng-click="$back()" class="btn btn-sm btn-default">{{resourceBundle['back']}}</a>-->
+                        <span class="caption pull-right cbx">
+                            <span ng-show="isDef(huDetail.cb)">
+                                 {{resourceBundle['createdon']}} {{huDetail.timeStamp}}<span ng-show="isUndef(huDetail.cb)">,</span>
+                            </span>
+                            <span ng-show="isDef(huDetail.cb)">{{resourceBundle['by']}}
+                                <a href="#/setup/users/all/details?userId={{huDetail.cb}}" target="_new" >{{huDetail.cbName}}</a><span ng-show="isDef(huDetail.timeStamp)">,</span>
+                            </span>
+                            <span ng-show="isDef(huDetail.timeStamp)">
+                                {{resourceBundle['material.lastupdated']}}&nbsp;{{resourceBundle['on']}}
+                                {{huDetail.lastUpdated}}
+                                <span ng-show="isDef(huDetail.ub)">
+                                     {{resourceBundle['by']}}
+                                    <a href="#/setup/users/all/details?userId={{huDetail.ub}}" target="_new">{{huDetail.ubName}}</a>
+                                </span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="bgr">
+                                    <div class="title-heading">
+                                        Handling unit information
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">Handling unit name:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{huDetail.name}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">{{resourceBundle['description']}}:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx">
+                                            {{huDetail.description}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">Content:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx word-wrap">
+                                            <a href="#/setup/materials/all/detail/{{huDetail.contents[0].cntId}}">{{huDetail.contents[0].cntName}}</a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label class="control-label">Quantity:</label>
+                                        </div>
+                                        <div class="col-sm-8 cbx word-wrap">
+                                            {{huDetail.contents[0].quantity}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

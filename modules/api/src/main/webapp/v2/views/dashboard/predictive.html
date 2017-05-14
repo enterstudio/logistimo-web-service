@@ -1,0 +1,166 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-if="isDef(dcntry) && iPredEnabled">
+    <div  ng-controller="PredictiveController" id="cid">
+        <div class="box topbox mb5">
+            <div class="row" ng-hide="iAU && !tempEnabled">
+                <div class="col-sm-12 rPad5 lPad5" ng-show="isDef(links)">
+                    <ul class="breadcrumb domain-bread-crumb col-sm-12" style="margin-bottom: 0px">
+                        <li ng-repeat="item in links">
+                        <span ng-if="$index != links.length-1" class="title domain-child"
+                              ng-click="addFilter(item.filter, item.level, $index, 'true')"
+                              uib-tooltip="Go to {{item.text}}" style="padding-left: 0px;">{{item.text}}</span>
+                        <span ng-if="$index == links.length-1" style="padding-left: 0px;"
+                              class="title domain-child"><b>{{item.text}}</b></span>
+                        </li>
+                        <div class="pull-right">
+                            <button type="button" ng-click="hardRefreshDashboard()" class="btn btn-sm btn-default pull-right" tooltip-placement="top" uib-tooltip="{{resourceBundle['upgrade']}}">
+                                <span class="glyphicons pt2 glyphicons-refresh"></span>
+                            </button>
+                            <span class="litetext pull-right cbx rPad10">{{resourceBundle['asof']}} {{dashboardView.ut}}</span>
+                        </div>
+
+                    </ul>
+                </div>
+            </div>
+            <div ng-show="!loading" class="row pt5 border-bottom" style="min-height: 350px">
+                <div ng-hide="tempOnlyAU" class="col-sm-8" style="margin-left: 16%;">
+                    <h4 class="text-center mb0" style="padding-left: 20px;">Likely to stock out <span uib-tooltip="% of inventory items that are likely to stock out across all {{resourceBundle['kiosks.lowercase']}} in this jurisdiction. An inventory item is a material at a {{resourceBundle['kiosk.lowercase']}}." style="display: inline" class="litetext glyphicons glyphicons-info-sign"></span>
+                        <div uib-tooltip="Filters" ng-click="toggleFilter('i')" class="pull-right rPad10 glyphicons glyphicons-filter codegray" style="cursor: pointer"></div>
+                    </h4>
+                    <div class="litetext text-center" ng-bind-html="subCaption"></div>
+                    <div class="pop_filter_box col-sm-11 ws" id="filter_i" style="margin-left: 3px;">
+                        <div class="row pb10 pt10">
+                            <div class="col-sm-12">
+                                <label class="col-sm-3 noLRpad control-label cbx">{{resourceBundle['material']}} {{resourceBundle['multiple.tags']}}</label>
+                                <span class="col-sm-9 noLRpad lPad5">
+                                    <tag-select tags-model="mtag" place-holder="All"
+                                                type="'material'"
+                                                force-no-udf="'true'">
+                                    </tag-select>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row pb10">
+                            <div class="col-sm-12">
+                                <label class="col-sm-3 noLRpad control-label cbx">Material name</label>
+                                <span class="col-sm-9 noLRpad lPad5">
+                                    <material-drop-down ng-model="material" mtag="mtag.text"></material-drop-down>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row pb10">
+                            <div class="col-sm-12">
+                                <label class="col-sm-3 noLRpad control-label cbx">{{resourceBundle['kiosk']}} {{resourceBundle['multiple.tags']}}</label>
+                                <span class="col-sm-9 noLRpad lPad5">
+                                    <span class="litetext">{{resourceBundle['include']}} {{resourceBundle['multiple.tags']}}</span>
+                                    <tag-select tags-model="eTag" place-holder="All"
+                                                type="'entity'"
+                                                multiple="'true'"
+                                                force-no-udf="'true'">
+                                    </tag-select>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row pb10">
+                            <div class="col-sm-12">
+                                <span class="col-sm-offset-3 col-sm-9 noLRpad lPad5">
+                                    <span class="litetext">{{resourceBundle['exclude']}} {{resourceBundle['multiple.tags']}}</span>
+                                    <tag-select tags-model="excludeTag" place-holder="All"
+                                                type="'entity'"
+                                                multiple="'true'"
+                                                force-no-udf="'true'">
+                                    </tag-select>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row pb10">
+                            <div class="col-sm-12">
+                                <span class="pull-right">
+                                    <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilters()" value="Filter">
+                                    <input type="button" class="btn btn-sm btn-default" ng-click="toggleFilter('i')" value="Cancel">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="!loading">
+                        <fusion-chart type="'doughnut2d'" height="'300'" width="'100%'"
+                                      chart-data="soPieData" chart-options="predictiveOpt"
+                                      chart-id="pie1" simple="'true'">
+                        </fusion-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-hide="iAU && !tempEnabled" class="box topbox">
+                <div ng-if="!mloading" class="row" style="min-height: 700px">
+                    <h4 class="text-center mb0">Likely to stock out</h4>
+                    <div class="litetext text-center" ng-if="subCaption != '&amp;nbsp;'" ng-bind-html="subCaption"></div>
+                    <div class="pt20">
+                        <div ng-class="{'col-sm-offset-2':!matBarData}" class="col-sm-6">
+                            <div class="text-center text-bold">By location
+                                <div class="btn-group rPad10 float-right" ng-show="false">
+                                    <label class="btn btn-sm btn-default" ng-click="setShowMap(true)" ng-model="showMap" uib-btn-radio="true" uib-tooltip="{{resourceBundle['map.view']}}"><span style="padding-top: 3px" class="glyphicons glyphicons-globe"></span></label>
+                                    <label class="btn btn-sm btn-default" ng-click="setShowMap(false)" ng-model="showMap" uib-btn-radio="false" uib-tooltip="Bar&nbsp;view"><span style="padding-top: 3px" class="glyphicons glyphicons-paragraph"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" ng-if="matBarData">
+                            <div class="text-center text-bold">By material</div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-left: 15px;margin-right: 15px;">
+                        <div ng-if="!showMap" class="col-sm-6">
+                            <fusion-chart type="'bar2d'" height="barHeight" width="'100%'"
+                                          chart-data="barData" chart-options="barOpt"
+                                          chart-id="bar1" simple="'true'">
+                            </fusion-chart>
+                        </div>
+                        <div class="col-sm-6" ng-if="matBarData">
+                            <fusion-chart type="'bar2d'" height="matBarHeight" width="'100%'"
+                                          chart-data="matBarData" chart-options="barOpt"
+                                          chart-id="bar2" simple="'true'">
+                            </fusion-chart>
+                        </div>
+                    </div>
+                </div>
+                <div ng-if="mloading" class="row mt18" style="min-height: 700px;color: #aaaaaa">
+                    <div class="text-center">
+                        Loading... <span class="glyphicons glyphicons-cogwheel spin"></span>
+                    </div>
+                </div>
+            </div>
+   </div>
+</div>
+<div ng-if="isUndef(dcntry)">
+    <div class="mt5">
+        <div class="box topbox tabminheight">
+            <div class="row">
+                <div class="col-sm-12 mt10">
+                    <div class="alert alert-warning">Please choose default country for the domain to enable dashboards.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

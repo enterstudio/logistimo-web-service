@@ -1,0 +1,111 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<form name="deviceInfoForm" novalidate>
+    <table class="table borderless">
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['transmitter.id']}}
+            </td>
+            <td class="borderless">
+                <input class="form-control" type="text"
+                       ng-model="deviceInfo.trId"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['device.model']}}
+            </td>
+            <td class="borderless">
+                <input class="form-control" ng-show="infoEditable" type="text"
+                       ng-model="deviceInfo.dev.mdl"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['firmware.version']}}
+            </td>
+            <td class="borderless">
+                <input class="form-control" ng-show="infoEditable" type="text"
+                       ng-model="deviceInfo.dev.dVr"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['gsm.module.version']}}
+            </td>
+            <td class="borderless">
+                <input class="form-control" ng-show="infoEditable" type="text"
+                       ng-model="deviceInfo.dev.mVr"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['imei']}}
+            </td>
+            <td class="borderless">
+                <input class="form-control" ng-show="infoEditable" type="text"
+                       ng-model="deviceInfo.dev.imei"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['sim.id']}}
+            </td>
+            <td class="borderless">
+                <input class="form-control" ng-show="infoEditable" type="text"
+                       ng-model="deviceInfo.sim.sid"/>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label borderless">
+                {{resourceBundle['mobile.number']}}
+            </td>
+            <td  class="borderless" ng-class="{ 'has-error' : infoEditable && deviceInfoForm.devicePhoneNumber.$error.pattern && deviceInfoForm.devicePhoneNumber.$dirty && !deviceInfoForm.devicePhoneNumber.$focused}">
+                <input name="devicePhoneNumber" class="form-control" ng-show="infoEditable"
+                       type="text" ng-model="deviceInfo.sim.phn"
+                       ng-pattern="/^\++\d{4,20}$/"
+                       ng-blur="temperatureForm.smsGyPh.$dirty = true"
+                       ng-focus-logi
+                       maxlength="20"/>
+                <p ng-show="infoEditable" class="desc">(+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}
+                    &gt;&lt;&gt;; {{resourceBundle['eg']}} +919844360948
+                    [{{resourceBundle['india']}}], +15404569089 [{{resourceBundle['usa']}}])</p>
+                <p ng-show="infoEditable && deviceInfoForm.devicePhoneNumber.$error.pattern && deviceInfoForm.devicePhoneNumber.$dirty && !deviceInfoForm.devicePhoneNumber.$focused"
+                   class="help-block">
+                    {{resourceBundle['temperature.device.config.comm.smsGyPh']}}
+                    {{resourceBundle['isinvalid']}}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td class="borderless">
+                <button type="submit" class="btn btn-primary" ng-click="submitDeviceInfo()"
+                        ng-disabled="deviceInfoForm.$invalid">{{resourceBundle['submit']}}
+                </button>
+                <button class="btn" ng-click="cancelDeviceInfoEdit()">{{resourceBundle['cancel']}}</button>
+            </td>
+            <td class="borderless"></td>
+        </tr>
+    </table>
+</form>

@@ -1,0 +1,131 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="row">
+    <div class="col-sm-6">
+        <div class="panel panel-default" style="min-height: 177px;">
+            <div class="panel-heading">{{resourceBundle['customer']}}</div>
+            <div class="panel-body">
+                <div class="row mt10">
+                    <div class="col-sm-3">
+                        <label class="control-label">{{resourceBundle['customer']}}:</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="epanel">
+                            <a class="capitalize" ng-href="#/setup/entities/detail/{{order.eid}}"
+                               target="_blank">{{order.enm}}</a>
+
+                            <div>{{order.eadd}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-hide="(order.st == ORDER.CANCELLED || order.st == ORDER.FULFILLED || dp.vp || (!order.atc && isUndef(order.eddLabel)) ) && !eddt">
+                    <div class="col-sm-3">
+                        <label class="control-label">Required by date:</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <span ng-hide="edit.etdate">{{order.eddLabel ? order.eddLabel : "Select date" }}</span>
+
+                        <div ng-show="edit.etdate">
+                            <date-picker ng-show="edit.etdate" class="col-sm-12 noLRpad pb3" date-model="dates.edd"
+                                         min-date="today" place-holder="Required by date"></date-picker>
+                            <button class="btn btn-sm btn-primary" ng-click="updateDueDate()">
+                                {{resourceBundle['save']}}
+                            </button>
+                            <button class="btn btn-sm btn-default" ng-click="toggleEdit('etdate',true)">
+                                {{resourceBundle['cancel']}}
+                            </button>
+                        </div>
+                        <a ng-hide="dp.vp || order.st == ORDER.FULFILLED || order.st == ORDER.CANCELLED || edit.etdate || !order.atc" ng-click="toggleEdit('etdate',true)"
+                           uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                            <span class="glyphicons glyphicons-edit"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="panel panel-default" style="min-height: 177px;">
+            <div class="panel-heading">{{resourceBundle['vendor']}}</div>
+            <div class="panel-body">
+                <div class="row mt10">
+                    <div class="col-sm-3">
+                        <label class="control-label">{{resourceBundle['vendor']}}:</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="epanel">
+                            <a ng-hide="edit.vend" class="capitalize" ng-href="#/setup/entities/detail/{{order.vid}}"
+                               target="_blank">{{order.vnm}}</a>
+                            <span ng-show="isUndef(order.vnm) && !edit.vend">Specify {{resourceBundle['vendor']}}</span>
+                            <a class="ml15"
+                               ng-show="!dp.vp && !shipAvailable && order.st == ORDER.PENDING && !edit.mat && (order.oty!=0 || (order.oty==0 && order.alc)) && !edit.vend"
+                               ng-click="toggleEdit('vend')" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                                <span class="glyphicons glyphicons-edit" ng-if="order.st != ORDER.FULFILLED"></span>
+                            </a>
+                            <div ng-hide="edit.vend">{{order.vadd}}</div>
+                            <span ng-if="edit.vend">
+                                <span class="control-label nopad">Specify {{resourceBundle['vendor']}}:</span>
+                                <span class="row">
+                                <entity-select ent-model="vendor"
+                                               place-holder="Choose {{resourceBundle['vendor.lowercase']}}"
+                                               ent-type="{{(order.oty==0 && order.alc)?'all':'vendors'}}" ent-id="order.eid" classes="form-control"
+                                               style="display:inline-block;padding-bottom: 3px;"></entity-select>
+                                </span>
+                                <button class="btn btn-sm btn-primary" ng-click="saveVendor(vendor)">
+                                    {{resourceBundle['save']}}
+                                </button>
+                                <button class="btn btn-sm btn-default" ng-click="toggleEdit('vend')">
+                                    {{resourceBundle['cancel']}}
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-hide="(order.st == ORDER.CANCELLED || order.st == ORDER.FULFILLED || dp.vp || (!order.atv && isUndef(order.efdLabel)) ) && !efdt">
+                    <div class="col-sm-3">
+                        <label class="control-label">{{resourceBundle['eda']}}:</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <span ng-hide="edit.efdate">{{order.efdLabel ? order.efdLabel : "Select date" }}</span>
+
+                        <div ng-show="edit.efdate">
+                            <date-picker ng-show="edit.efdate" class="col-sm-12 noLRpad pb3" date-model="dates.efd"
+                                         min-date="today" place-holder="{{resourceBundle['eda']}}"></date-picker>
+                            <button class="btn btn-sm btn-primary" ng-click="updateExpectedFulfillmentDate()">
+                                {{resourceBundle['save']}}
+                            </button>
+                            <button class="btn btn-sm btn-default" ng-click="toggleEdit('efdate', true)">
+                                {{resourceBundle['cancel']}}
+                            </button>
+                        </div>
+                        <a ng-hide="dp.vp || order.st == ORDER.FULFILLED || edit.efdate || !order.atv" ng-click="toggleEdit('efdate',true)"
+                           uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
+                            <span class="glyphicons glyphicons-edit" ng-if="order.st != ORDER.CANCELLED"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

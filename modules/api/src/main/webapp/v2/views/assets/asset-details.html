@@ -1,0 +1,230 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="AssetDetailsController" ng-show="isDef(assetDetails)">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="jumbotron logitron">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="title-box">
+                            <div class="row">
+                                <div class="col-sm-7"><h3 class="ent-title">{{assetDetails.dId}} - {{assetDetails.meta.dev.mdl}} ({{assetVendorMapping[assetDetails.vId]}})</h3></div>
+                                <div class="col-sm-5 noleftpad" >
+                                    <h3 class="ent-title pull-right">
+                                        <a ng-show="(iSU || dp.ae) && currentDomain == assetDetails.sdid && !iMan" ng-href="#/setup/assets/all/edit?aid={{assetDetails.id}}" uib-tooltip="{{resourceBundle['edit']}}"><span class="glyphicons glyphicons-edit tglyph"></span></a>
+                                        <span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != assetDetails.sdid" ng-click="switchDomain(assetDetails.sdid,assetDetails.sdname)" uib-tooltip="{{assetDetails.sdname}}"></span>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="row mt5" ng-show="isDef(assetDetails.entity)">
+                                <div class="col-sm-12">
+                                    <a href="#/setup/entities/detail/{{assetDetails.entity.id}}" target="_blank">{{assetDetails.entity.nm}}</a>, {{getAddress(assetDetails.entity)}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="title-box">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="row mb8" ng-if="isDef(currentAsset) && currentAsset.at == 2">
+                                        <div class="e-col-sm-0-1">
+                                            <span><img class="temp-icon" src="images/thermometer.png"></span>
+                                        </div>
+                                        <div class="col-sm-11" ng-show="assetDetails.tmp.length > 0">
+                                            <span ng-init="relation = assetDetails.rel" ng-repeat="t in assetDetails.tmp">
+                                                <span ng-include="'views/assets/asset-temp-block.html'"></span>
+                                            </span>
+                                        </div>
+                                        <div class="col-sm-11" ng-show="assetDetails.tmp.length == 0">
+                                            <span class="glyphicons glyphicons-circle-question-mark c-grey"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb8" ng-if="isDef(currentAsset) && currentAsset.at == 1 && assetDetails.iDa">
+                                        <div class="e-col-sm-0-1">
+                                            <span class="glyphicons glyphicons-bell tglyph"></span>
+                                        </div>
+                                        <div class="col-sm-11">
+                                            <span ng-repeat="a in assetDetails.alrm" ng-if="a.stat > 0">
+                                                <span ng-init="asset=assetDetails" ng-include="'views/assets/asset-device-alarm-block.html'"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb8" ng-if="isDef(currentAsset)">
+                                        <div class="e-col-sm-0-1">
+                                            <span class="glyphicons glyphicons-text-underline"></span>
+                                        </div>
+                                        <div class="col-sm-11">
+                                            {{currentAsset.an}}
+                                        </div>
+                                    </div>
+                                    <div class="row mb8">
+                                        <div class="e-col-sm-0-1">
+                                            <span class="glyphicons glyphicons-remote-control tglyph"></span>
+                                        </div>
+                                        <div class="col-sm-5" ng-hide="editWS">
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    {{assetWSFilters[assetDetails.ws.st + 1].dV}}&nbsp;
+                                                    <a ng-click="editWS = true" ng-show="(iSU || dp.ae) && currentDomain == assetDetails.sdid"><span class="glyphicons glyphicons-edit pb2 tglyph"></span></a>
+                                                    <p ng-show="!editWS && (!assetDetails.iCon || assetDetails.ws.stut != assetDetails.iCon/1000)" class="litetext">{{assetDetails.ws.fstut}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-5" ng-show="editWS">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <select ng-model="workingStatus" id="asset-ws" class="form-control">
+                                                        <option value="">-- {{resourceBundle['select']}} {{resourceBundle['asset']}} {{resourceBundle['status.lowercase']}} --</option>
+                                                        <option ng-repeat="ws in assetWSFilters" value="{{ws.status-1}}" ng-selected="ws.status == (assetDetails.ws.st + 1)"
+                                                                ng-show="ws.status > 0">{{ws.dV}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-1 pd-left-zero t8">
+                                                    <a ng-click="updateWS()">
+                                                        <span class="glyphicons glyphicons-ok-circle pb2 tglyph"></span>
+                                                    </a>
+                                                </div>
+                                                <div class="col-sm-1 pd-left-zero t8">
+                                                    <a ng-click="editWS=false">
+                                                        <span class="glyphicons glyphicons-remove-circle pb2 tglyph"></span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--<div class="row mb8">
+                                        <div class="e-col-sm-0-1">
+                                            <span class="glyphicons glyphicons-google-maps tglyph"></span>
+                                        </div>
+                                        <div class="col-sm-11">
+                                            <a href="#/setup/entities/detail/{{assetDetails.entity.id}}" target="_blank">{{assetDetails.entity.nm}}</a>, {{getAddress(assetDetails.entity)}}
+                                        </div>
+                                    </div>-->
+                                    <div class="row mb8" ng-if="isDef(assetDetails.ons) && assetDetails.ons.length > 0">
+                                        <div class="e-col-sm-0-1">
+                                            <span class="glyphicons glyphicons-user tglyph"></span>
+                                        </div>
+                                        <div class="col-sm-11">
+                                            <div ng-repeat="user in assetDetails.ons" class="label label-default" style="display:inline-block;color: #FFF;margin-bottom:5px">
+                                                <a ng-href="#/setup/users/all/details?userId={{user.id}}">
+                                                    {{user.fnm}} [{{user.phm}}]
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb8" ng-if="isDef(assetDetails.mts) && assetDetails.mts.length > 0">
+                                        <div class="e-col-sm-0-1">
+                                            <span class="glyphicons glyphicons-cogwheels tglyph"></span>
+                                        </div>
+                                        <div class="col-sm-11">
+                                            <div ng-repeat="user in assetDetails.mts" class="label label-default" style="display:inline-block;color: #FFF;margin-bottom:5px">
+                                                <a ng-href="#/setup/users/all/details?userId={{user.id}}">
+                                                    {{user.fnm}} [{{user.phm}}]
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                    <span class="caption pull-left">
+                                        {{resourceBundle['createdon']}} {{assetDetails.ts}}<span ng-show="isUndef(assetDetails.rus) && isDef(assetDetails.lts)">,</span>
+                                        <span ng-show="isDef(assetDetails.rus)">
+                                            {{resourceBundle['by']}}
+                                            <a href="#/setup/users/all/details?userId={{assetDetails.rus}}" target="_new">{{isDef(assetDetails.rusn) ? assetDetails.rusn : assetDetails.rus}}</a><span ng-show="isDef(assetDetails.lts)">,</span>
+                                        </span>
+                                        <span ng-show="isDef(assetDetails.lts)">
+                                            {{resourceBundle['lastupdated']}}&nbsp;{{resourceBundle['on']}}
+                                            {{assetDetails.lts}}
+                                            <span ng-show="isDef(assetDetails.lub)">
+                                                {{resourceBundle['by']}}
+                                                <a href="#/setup/users/all/details?userId={{assetDetails.lub}}" target="_new">{{isDef(assetDetails.lubn) ? assetDetails.lubn : assetDetails.lub}}</a>
+                                            </span>
+                                        </span>
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div ng-hide="marker.coords.latitude && marker.coords.longitude">
+                            <div class="bgr" style="min-height: 250px;background-color: #f5f5f5">
+                                <p class="text-center" style="margin-top:110px;color:#9d9d9d">{{resourceBundle['geocodes.notdefined']}}</p>
+                            </div>
+                        </div>
+                        <div ng-if="marker.coords.latitude && marker.coords.longitude">
+                            <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="false" pan="false" options="options">
+                                <ui-gmap-marker coords="marker.coords" options="marker.options" idkey="marker.id"></ui-gmap-marker>
+                                <ui-gmap-layer ng-if="showWeather" namespace="weather" type="WeatherLayer"></ui-gmap-layer>
+                            </ui-gmap-google-map>
+                            <!--<input type="checkbox" ng-model="showWeather"> {{resourceBundle['map.show.weather']}}-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12" ng-controller="SimpleMenuController" ng-init="init('assets.detail')">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+                <li ng-class="{active: subview == 'summary' }" ><a
+                        ng-href="#/assets/detail/{{vendorId}}/{{encodeURIParam(assetDetails.dId)}}/summary/">{{resourceBundle.summary}}</a>
+                </li>
+                <li ng-class="{active: subview == 'info' }" ><a
+                        ng-href="#/assets/detail/{{vendorId}}/{{encodeURIParam(assetDetails.dId)}}/info/">{{resourceBundle.information}}</a>
+                </li>
+                <li ng-if="isDef(currentAsset) && currentAsset.at == 1" ng-class="{active: subview == 'config' }" ><a
+                        ng-href="#/assets/detail/{{vendorId}}/{{encodeURIParam(assetDetails.dId)}}/config/">{{resourceBundle.configuration}}</a>
+                </li>
+                <li ng-class="{active: subview == 'relations' }"><a
+                        ng-href="#/assets/detail/{{vendorId}}/{{encodeURIParam(assetDetails.dId)}}/relations/">{{resourceBundle.relationships}}</a>
+                </li>
+                <li ng-class="{active: subview == 'stats' }" ng-show="isDef(currentAsset) && currentAsset.at == 1 && currentManu.model[assetDetails.meta.dev.mdl].fts.ds"><a
+                        ng-href="#/assets/detail/{{vendorId}}/{{encodeURIParam(assetDetails.dId)}}/stats/">{{resourceBundle.statistics}}</a>
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div ng-switch="subview" >
+                    <div class="tab-pane" ng-switch-when="summary">
+                        <div ng-include="'views/assets/summary.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="info">
+                        <div ng-include="'views/assets/asset-info.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="config">
+                        <div ng-include="'views/assets/asset-config.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="relations">
+                        <div ng-include="'views/assets/asset-relations.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="stats">
+                        <div ng-include="'views/assets/asset-stats.html'"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

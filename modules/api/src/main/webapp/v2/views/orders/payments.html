@@ -1,0 +1,100 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="panel panel-default">
+    <div class="panel-heading">Payments</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="col-sm-6 lPad5" ng-hide="edit.pmt">
+                    <span ng-show="order.pd != 0">{{order.cur}} {{order.pd | number : 2}} [{{order.po}}] </span>
+                    <span ng-show="order.pd >= order.tp" class="greentxt">Amount {{resourceBundle['paid']}}</span>
+                    <span ng-show="order.pd < order.tp">
+                        <br/>
+                        {{resourceBundle['balance']}}: <span class="fc-color-red">{{order.cur}} {{(order.tp - order.pd) | number : 2}}</span>
+                        <br/>
+                        {{resourceBundle['availablecredit']}}: <span class="fc-color-red">{{order.cur}} {{order.avc| number : 2}}</span>
+                    </span>
+                </div>
+
+                <div ng-hide="edit.pmt" class="col-sm-6 pull-right nopad">
+                    <button ng-hide="dp.vp" ng-click="editPayment()"
+                            class="btn btn-sm btn-primary mb5 pull-right">Add
+                        payment
+                    </button>
+                </div>
+                <div ng-hide="!edit.pmt" class="col-sm-6">
+                    <form class="form-horizontal">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5>Add payment</h5>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Payment Option</label>
+
+                                        <div class="col-sm-7">
+                                            <input ng-hide="payOpts.length > 0" class="form-control" type="text"
+                                                   ng-model="pmt.po"
+                                                   placeholder="Payment Option"/>
+
+                                            <select ng-hide="payOpts.length == 0" class="form-control"
+                                                    ng-model="pmt.po">
+                                                <option ng-repeat="po in payOpts">{{po}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Enter Amount</label>
+
+                                        <div class="col-sm-7">
+                                            <input type="text" ng-model="pmt.pay" class="form-control"
+                                                   placeholder="Enter Amount"/>
+                                <span class="litetext mt5">{{resourceBundle['payment.paidsofar']}}: {{order.cur}}
+                                    {{order.pd}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col-sm-offset-4 col-sm-8">
+                                        <button class="btn btn-sm btn-primary" ng-click="savePayment('pmt')">
+                                            {{resourceBundle['save']}}
+                                        </button>
+                                        <button class="btn btn-sm btn-default ml5" ng-click="toggleEdit('pmt')">
+                                            {{resourceBundle['cancel']}}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

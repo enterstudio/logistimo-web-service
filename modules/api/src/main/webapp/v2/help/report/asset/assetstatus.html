@@ -1,0 +1,88 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Cache-Control" content="max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Logistimo</title>
+    <link rel="stylesheet" href="../../../css/3rdparty/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../css/logistimo.css">
+    <link rel="stylesheet" href="../../../css/help.css">
+    <link rel="shortcut icon" href="../../../../titleiconnew.ico">
+</head>
+<body class="mainbody">
+<div class="container" style="border-bottom: 2px solid #F56C64;padding:10px 0">
+    <div>
+        <div class="row">
+            <div class="col-sm-12">
+                <img style="max-height: 60px;max-width: 360px;" src="../../../images/acquia_marina_logo.png">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:15px;min-height: 90%">
+    <div class="mh300">
+        <div class="page-header" style="margin-top: 20px">
+            <div class="heading">Asset status</div>
+        </div>
+        <p>
+            Asset status reports provides an overview of the number of times and duration that assets change states,
+            such as working, under repair, beyond repair, and so on. Using this report, one can understand, for
+            instance, the number of times assets went 'under repair' (or broke down) or started working in a given
+            period. It also indicates the average duration in which an asset stayed in a particular state, say, the
+            average working duration of assets in a given domain or entity or other filter criteria.
+        </p>
+
+        <p>
+            The metrics in this report as described below:
+        </p>
+        <ul>
+            <li>
+                <b>Number of times assets changed to this state:</b> This metric is
+                computed by counting number of asset state changes to the selected status in the given period, across
+                all assets within the filter criteria.
+            </li>
+            <li>
+                <b>Average number of times assets changed to this state:</b> This metric
+                is computed by dividing the number of asset state changes (to this state) by the total number of assets.
+            </li>
+            <li>
+                <b>Average duration in this state per asset (in hours):</b> This metric is computed by dividing the
+                total duration (in hours) of a given status (e.g. working, under
+                repair) across all assets by the total number of assets.
+            </li>
+            <li>
+                <b>% of assets in this state:</b> This metric represents the
+                proportion of assets in a given state at the end of the period. It is computed by dividing the sum of
+                all assets in a given state at the end of the period by the total number of assets.
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

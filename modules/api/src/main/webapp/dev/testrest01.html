@@ -1,0 +1,181 @@
+<html>
+<head>
+<title>Test SG REST API (01)</title>
+</head>
+<body>
+<h1>Samaanguru REST API Test (01)</h1>
+<h2>Login</h2>
+<form name="loginForm" action="/api/l" method="get">
+UserId: <input type="text" name="uid" value="arjun" id="USERID"/>
+<br>
+Password: <input type="password" name="p" id="PASSWORD"/>
+<br>
+<input type="hidden" name="a" value="li"/>
+<!-- <input type="hidden" name="start" value="15/08/2013 00:00:00"/> -->
+<input name="submit" value="Login" type="submit" />
+</form>
+<p>
+<h2>Get Inventory</h2>
+<form name="getInventory" action="/api/i" method="get">
+Kiosk ID: <input type="text" name="kid" value="191002" size="5"/>
+<br>
+User ID: <input type="text" name="uid" value="arjun" size="5"/>
+<br>
+Password: <input type="password" name="p" value=""/>
+<br>
+<input type="hidden" name="a" value="gi"/>
+<input type="submit" name="submit" value="Submit"/>
+</form>
+<p>
+<h2>Update Inventory</h2>
+<form name="updInventory" action="/api/i" method="post">
+UserId: <input type="text" name="uid" value="arjun" id="USERID"/>
+<br>
+Password: <input type="password" name="p" id="PASSWORD"/>
+<br>
+Type: <br/>
+<select name="ty">
+	<option value="i">Issue</option>
+	<option value="r">Receipt</option>
+	<option value="p">Stock count</option>
+</select>
+<br/>
+JSON String: <br>
+<textarea name="j" rows="4" cols="80">
+{ "v" : "01", "uid" : "vanitest", "kid" : "3433501", "mt": [ { "mid" : "1733542", "q" : "100" }, { "mid" : "1735530", "q" : "150" } ], "lat": "13.1075", "lng": "77.600278"  }
+</textarea>
+<input type="hidden" name="a" value="ui"/>
+<br>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<h2>Create/update Order</h2>
+<form name="updInventory" action="/api/o" method="post">
+<br>
+Password: <input type="password" name="p" id="PASSWORD"/>
+<br>
+Type: <br/>
+<select name="ty">
+	<option value="o">Order</option>
+	<option value="oo">Re-order</option>
+</select>
+<br/>
+JSON String: <br>
+<textarea name="j" rows="4" cols="80">
+{ "v" : "01", "uid" : "arjun", "kid" : "191002", "mt": [ { "mid" : "203002", "q" : "650" }, { "mid" : "204002", "q" : "750" } ]  }
+</textarea>
+<input type="hidden" name="a" value="uo"/>
+<br>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<h2>Get Orders</h2>
+<form name="getOrders" action="/api/o" method="get">
+Kiosk ID: <input type="text" name="kid" value="191002" size="5"/>
+<br>
+User ID: <input type="text" name="uid" value="arjun" size="5"/>
+<br>
+Password: <input type="text" name="p" value="" size="5"/>
+<br/>
+From: <input type="text" name="sd" value="" size="20"/>
+<br/>
+To: <input type="text" name="ed" value="" size="20"/>
+<br/>
+State: <br/>
+<select name="st">
+	<option value="" selected>None</option>
+	<option value="cn">Cancelled</option>
+	<option value="ch">Changed</option>
+	<option value="cm">Completed</option>
+	<option value="nv">Invalid</option>
+	<option value="pn">Pending</option>
+</select>
+<br/>
+Load all order items: <br/>
+<select name="ld">
+	<option value="0" selected>True</option>
+	<option value="1">False</option>
+</select>
+<input type="hidden" name="a" value="gos"/>
+<br>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<h2>Get Order</h2>
+<form name="getOrder" action="/api/o" method="get">
+User ID: <input type="text" name="uid" value="arjun" size="5"/>
+<br>
+Order ID: <input type="text" name="oid" value="" size="5"/>
+<br>
+<input type="hidden" name="a" value="go"/>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<h2>Cancel Order</h2>
+<form name="getOrder" action="/api/o" method="get">
+User ID: <input type="text" name="uid" value="arjun" size="5"/>
+<br>
+Order ID: <input type="text" name="oid" value="" size="5"/>
+<br>
+<input type="hidden" name="a" value="co"/>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<h2>Create/Update User Kiosk</h2>
+<form name="createUpdateUserKiosk" action="/api/s" method="post">
+User ID: <input type="text" name="uid" value="vani" size="5"/>
+<br/>
+Password: <input type="text" name="p" value="vani" size="5"/>
+<br/>
+Type: <br/>
+<select name="ty">
+	<option value="u">User</option>
+	<option value="k">Kiosk</option>
+	<option value="uk">User And Kiosk</option>
+</select>
+<br/>
+JSON String: <br>
+<textarea name="j" rows="4" cols="80">
+{ "v" : "01", "u" : { "uid" : "raji", "p":  "raji",  "rle" : "ROLE_sm", "fn" : "Raji", "ln" : "Anandampillai", "mob" : "+91 9880592310", "eml" : "raji@yahoo.com", "cn": "IN", "lg": "en", "tz" : "Asia/Kolkata", "ste": "Karnataka", "dst": "Bangalore", "cty" : "Bangalore", "sa" : "#1, 12th Cross, Malleswaram", "pc" : "560003" }, "k" : { "n": "raji", "em": [], "eo" : ["raji"], "cn": "IN", "ste" : "Karnataka", "cty" : "Bangalore", "dst" : "Bangalore", "sa" : "#1, 12th Cross, Malleswaram", "pc" : "560003" , "aam" : "yes", "mt":[], "csts" : ["suresh"], "vnds" : [] } }
+</textarea>
+<input type="hidden" name="a" value="cuk"/>
+<br>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<p>
+<h2>Update Password</h2>
+<form name="updatePassword" action="/api/s" method="post">
+User ID: <input type="text" name="uid" value = "vani" size="5"/>
+<br/>
+Password: <input type="text" name="p" value="vani" size="5"/>
+<br/>
+Updated User ID: <input type="text" name="uuid" size="25"/>
+<br/>
+Old Password: <input type="password" name="opwd" size="15"/>
+<br/>
+New Password: <input type="password" name="upwd" size="15"/>
+<br/>
+<input type="hidden" name="a" value="up"/>
+<br>
+<input type="submit" name="Submit"/>
+</form>
+<p>
+<h2>Get Relationships</h2>
+<form name="getrelatedentities" action="/api/s" method="post">
+User ID: <input type="text" name="uid" value="" size="5"/>
+<br/>
+Password: <input type="text" name="p" value="" size="5"/>
+<br/>
+Kiosk ID: <input type="text" name="kid" value="" size="5"/>
+<br/>
+Relationship Type:<br/>
+<select name="r">
+	<option value="c">Customer</option>
+	<option value="v">Vendor</option>
+</select>
+<input type="hidden" name="a" value="gre"/>
+<input type="submit" name="Submit"/>
+</form>
+</body>
+</html>

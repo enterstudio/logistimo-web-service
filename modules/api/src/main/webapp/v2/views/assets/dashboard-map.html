@@ -1,0 +1,172 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="row">
+    <div class="col-sm-8 pr0">
+        <div class="bgr">
+            <div id="chart-container" ng-show="isMapSupported && !mapLoading && isDef(childTagSummary)">
+
+            </div>
+            <div class="text-center temp-map-container" ng-show="isMapSupported && mapLoading">
+                <span class="glyphicons glyphicons-cogwheel spin"></span>
+            </div>
+            <div class="text-center temp-map-container" ng-hide="isMapSupported">
+                {{resourceBundle['config.location.nosupport']}}.
+            </div>
+            <div class="text-center temp-map-container" ng-show="isMapSupported && !mapLoading && isUndef(childTagSummary)">
+                {{resourceBundle['no.data.available']}}
+            </div>
+        </div>
+    </div>
+    <div id="chart-metadata" class="col-sm-4">
+        <div class="bgr">
+            <div class="title-heading" id="chart-meta-dis-name">
+                {{selectedLocStats.location}}
+            </div>
+            <table class="table table-bordered-less">
+                <tr>
+                    <td class="mlr0">
+                        <div class="row mlr0">
+                            <div class="col-md-3 plr0" ng-show="currentFilter == 1">
+                                <div class="temp-dash-items c-red clickable" ng-click="handleAlertClick(1, firstInit ? '' : selectedLocStats.location, isDef(stateCode) ? 'dis' : 'st')">
+                                    <div ng-show="currentFilter == 1">
+                                        <span class="glyphicons glyphicons-remove-circle"></span>
+                                        {{selectedLocStats.nAbnormalDevices-0}}
+                                    </div>
+                                    <p class="pull-left" style="font-size: small;position: relative;">
+                                        {{resourceBundle['in.alarm']}}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 plr0" ng-show="currentFilter == 2">
+                                <div class="temp-dash-items c-white label-warning clickable" ng-click="handleAlertClick(2, firstInit ? '' : selectedLocStats.location, isDef(stateCode) ? 'dis' : 'st')">
+                                    <div ng-show="currentFilter == 2">
+                                        <span class="glyphicons glyphicons-warning-sign"></span>
+                                        {{selectedLocStats.nAbnormalDevice - 0}}
+                                    </div>
+                                    <p class="pull-left" style="font-size: small;position: relative;">
+                                        {{resourceBundle['in.alarm']}}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 plr0">
+                                <div class="temp-dash-items c-green clickable" ng-click="handleAlertClick(4, firstInit ? '' : selectedLocStats.location, isDef(stateCode) ? 'dis' : 'st')">
+                                    <div>
+                                        <span class="glyphicons glyphicons-ok-circle"></span>
+                                        {{selectedLocStats.nDevices - (selectedLocStats.nAbnormalDevices + selectedLocStats.nIActDevices)}}
+                                    </div>
+                                    <p class="pull-left" style="font-size: small;position: relative;">
+                                        {{resourceBundle['in.normal']}}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 plr0">
+                                <div class="temp-dash-items bg-grey c-white clickable" ng-click="handleAlertClick(3, firstInit ? '' : selectedLocStats.location, isDef(stateCode)  ? 'dis' : 'st')">
+                                    <div id="chart-meta-nodata">
+                                        <span class="glyphicons glyphicons-circle-question-mark"></span>
+                                        {{selectedLocStats.nIActDevices-0}}
+                                    </div>
+                                    <p class="pull-left" style="font-size: small;position: relative;">
+                                        {{resourceBundle['status.unknown']}}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 plr0">
+                                <div class="temp-dash-items c-blue clickable" ng-click="handleAlertClick(0, firstInit ? '' : selectedLocStats.location, isDef(stateCode) ? 'dis' : 'st')">
+                                    <div id="chart-meta-num">
+                                        <span class="glyphicons glyphicons-info-sign"></span>
+                                        {{selectedLocStats.nDevices-0}}
+                                    </div>
+                                    <p class="pull-left" style="font-size: small;position: relative;">
+                                        # {{resourceBundle['items']}}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <!--<div class="bgr mgr0">
+            <div class="title-heading">
+                {{resourceBundle['devices.alertstate']}}
+            </div>
+            <table class="table table-bordered-less table-hover">
+                <tr>
+                    <td colspan="2" class="text-center" ng-show="loadingTagAbnormalDevices">
+                        <span class="glyphicons glyphicons-cogwheel spin"></span>
+                    </td>
+                </tr>
+                <tr ng-show="((selectedLocStats.nAbnormalTemps == 0 && currentFilter == 1) || (selectedLocStats.nAbnormalDevices == 0 && currentFilter == 2)) && !loadingTagAbnormalDevices">
+                    <td colspan="2" class="text-center">{{resourceBundle['no.devices.alarm']}}</td>
+                </tr>
+                <tr ng-repeat="aDevice in getFiltered(tagAbnormalDevices) | limitTo:5" ng-show="((selectedLocStats.nAbnormalTemps > 0 && currentFilter == 1) || (selectedLocStats.nAbnormalDevices > 0 && currentFilter == 2)) && !loadingTagAbnormalDevices">
+                    <td>
+                        <a href="#/temperature/device/{{aDevice.vId}}/{{aDevice.dId}}">
+                            <span class="temp-table-prod">
+                                {{aDevice.dId}}&nbsp;({{aDevice.vId | uppercase}})
+                            </span>
+                        </a>
+                    </td>
+                    <td style="padding-top: 12px">
+                        <div ng-show="aDevice.tmp.tmp > 8 && currentFilter == 1"
+                             class="temp-table-status label c-red">
+                            <span class="glyphicons glyphicons-circle-remove"></span>
+                            &nbsp;{{aDevice.tmp.tmp}} &#8451;
+                        </div>
+                        <div ng-show="aDevice.tmp.tmp <= 8 && currentFilter == 1"
+                             class="temp-table-status label c-aqua">
+                            <span class="glyphicons glyphicons-circle-remove"></span>
+                            &nbsp;{{aDevice.tmp.tmp}} &#8451;
+                        </div>
+                        <div ng-show="currentFilter == 2"
+                             class="temp-table-status label label-warning"
+                             ng-repeat="alarm in aDevice.alrm | limitTo: 1">
+                            <span ng-show="alarm.typ == 2" class="temp-table-status label label-warning">
+                                <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['battery.low']}}
+                            </span>
+                            <span ng-show="alarm.typ == 0" class="temp-table-status label label-warning">
+                                <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['device.noconnection']}}.
+                            </span>
+                            <span ng-show="alarm.typ == 1" class="temp-table-status label label-warning">
+                                <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['sensor.noconnection']}}.
+                            </span>
+                            <span ng-show="alarm.typ == 4" class="temp-table-status label label-warning">
+                                <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['temperature.device.inactive']}}.
+                            </span>
+                            <span ng-show="alarm.typ == 3" class="temp-table-status label label-warning">
+                                <span class="glyphicons glyphicons-warning-sign"></span>&nbsp;{{resourceBundle['firmware.error']}}
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <span class="pull-right" ng-show="selectedLocStats.nAbnormalTemps > 5 && currentFilter == 1" ><a href="#/assets/all?alrm=1&dur=0">{{resourceBundle['view.more']}}</a> </span>
+                        <span class="pull-right" ng-show="selectedLocStats.nAbnormalDevices > 5 && currentFilter == 2"><a href="#/assets/all?alrm=2&dur=0">{{resourceBundle['view.more']}}</a> </span>
+                    </td>
+                </tr>
+            </table>
+        </div>-->
+    </div>
+</div>

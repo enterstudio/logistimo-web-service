@@ -1,0 +1,63 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="topbox">
+    <div class="bizinfo bizinfo-last">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="domain-title-heading marginlr0">
+                    <h4>{{resourceBundle['notifications']}} {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                </div>
+            </div>
+        </div>
+        <div ng-controller="SimpleMenuController"
+             ng-init="init('configuration.notifications')">
+            <ul class="nav nav-tabs subnav-tabs">
+                <li ng-show="isTempMonOnly && (iSU || dp.cv)" ng-class="{active: subview == 'event'}"><a
+                        href="#/configuration/notifications/event/assets">{{resourceBundle['event.notifications']}}</a></li>
+                <li ng-hide="isTempMonOnly || !(iSU || dp.cv)" ng-class="{active: subview == 'event'}"><a
+                        href="#/configuration/notifications/event/">{{resourceBundle['event.notifications']}}</a></li>
+                <li ng-show="iSU || dp.cv" ng-class="{active: subview == 'bulletin'}"><a
+                        href="#/configuration/notifications/bulletin/"></span> {{resourceBundle['bulletinboard']}}</a></li></li>
+                <li ng-show="iSU || dp.cv" ng-class="{active: subview == 'accesslogs'}"><a
+                        href="#/configuration/notifications/accesslogs/"></span>  {{resourceBundle['access.logs']}}</a></li></li>
+                <li ng-show="iSU || dp.cv" ng-class="{active: subview == 'notifstatus'}"><a
+                        href="#/configuration/notifications/notifstatus/"></span> {{resourceBundle['notifications.status']}}</a></li></li>
+            </ul>
+            <div ng-switch="subview">
+                <div class="tab-pane" ng-switch-when="event">
+                    <div ng-if="iSU || dp.cv" ng-include="'views/configuration/event.html'"></div>
+                </div>
+                <div class="tab-pane" ng-switch-when="bulletin">
+                    <div ng-if="iSU || dp.cv" ng-include="'views/configuration/bulletin.html'"></div>
+                </div>
+                <div class="tab-pane" ng-switch-when="accesslogs">
+                    <div ng-if="iSU || dp.cv" ng-include="'views/configuration/access-logs.html'"></div>
+                </div>
+                <div class="tab-pane" ng-switch-when="notifstatus">
+                    <div ng-if="iSU || dp.cv" ng-include="'views/configuration/notifications-status.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

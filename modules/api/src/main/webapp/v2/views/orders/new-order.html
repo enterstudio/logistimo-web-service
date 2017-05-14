@@ -1,0 +1,361 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="box topbox">
+    <div class="bizinfo bizinfo-first bizinfo-last">
+        <div ng-controller="OrdersFormCtrl">
+            <form novalidate class="form-horizontal" role="form" name="addOrder">
+                <div class="row">
+                    <div class="col-sm-6 norightpad">
+                        <div class="bgr h400">
+                            <div class="title-heading">
+                                {{resourceBundle['order']}} {{resourceBundle['details']}}
+                            </div>
+                            <div>
+                                <div class="form-group" ng-show="type < 2">
+                                    <label class="col-sm-4 control-label required">{{resourceBundle['type']}}</label>
+                                    <div class="col-sm-7">
+                                        <select class="form-control" ng-model="type">
+                                            <option value="1">{{resourceBundle['purchaseorders']}}</option>
+                                            <option value="0">{{resourceBundle['salesorders']}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label required">
+                                        <span ng-show="type == 0 || type == 2">{{resourceBundle['vendor']}}</span>
+                                        <span ng-show="type == 1">{{resourceBundle['customer']}}</span>
+                                    </label>
+                                    <div class="col-sm-7">
+                                        <div class="form-group has-feedback mgh0 mgb0">
+                                        <input type="text" ng-model="order.ent"
+                                               typeahead-template-url="entityTemplate"
+                                               autocomplete="off"
+                                               typeahead-on-select="changeEntity()"
+                                               ng-disabled="isEnt || order.eent"
+                                               placeholder="{{resourceBundle['kiosk']}} {{resourceBundle['name.lower']}}"
+                                               typeahead-wait-ms="300"
+                                               ng-class="{'c-visited' : submitted}"
+                                               uib-typeahead="ent as ent.nm for ent in getFilteredEntity($viewValue)"
+                                               class="form-control" typeahead-editable="false"
+                                               required/>
+                                        <span ng-show="loadingEntityMaterials" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                                        </div>
+                                    </div>
+                                    <div ng-show="order.eent" class="clickable temp" ng-click="reset('en')"><span
+                                            class="glyphicons glyphicons-edit"></span></div>
+                                </div>
+                                <div class="form-group">
+                                    <div ng-if="type == 0 || type == 2">
+                                        <label class="col-sm-4 control-label required">{{resourceBundle['customer']}} </label>
+                                        <div class="col-sm-7">
+                                            <entity-select ent-model="order.cent"
+                                                           place-holder="{{resourceBundle['choose']}} {{resourceBundle['customer.lower']}}"
+                                                           ent-type={{entType}}
+                                                           ent-id="order.ent.id" classes="form-control"
+                                                           disable="order.ent == undefined || dcu "></entity-select>
+                                        </div>
+                                    </div>
+                                    <div ng-if="type == 1">
+                                        <label class="col-sm-4 control-label">{{resourceBundle['vendor']}}</label>
+                                        <div class="col-sm-7">
+                                            <entity-select ent-model="order.vent" on-select="setVendor()"
+                                                           place-holder="{{resourceBundle['choose']}} {{resourceBundle['vendor.lower']}}"
+                                                           ent-type="vendors"
+                                                           ent-id="order.ent.id" classes="form-control"
+                                                           disable="order.ent == undefined"></entity-select>
+                                        </div>
+                                    </div>
+                                    <div ng-show="isDef(order.cent)" class="clickable temp" ng-click="reset('cu')"><span
+                                            class="glyphicons glyphicons-edit"></span></div>
+                                        <div  class="col-sm-offset-4 col-sm-7 has-error" ng-show="isDef(order.ent) && isDef(order.cent) && order.ent.id === order.cent.id">
+                                            <span class="help-block">{{resourceBundle['materials.transfer']}}</span>
+                                        </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{resourceBundle['referenceid']}}</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" ng-model="order.rid" placeholder="{{resourceBundle['referenceid']}}" class="form-control" maxlength="50">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{resourceBundle['order.tags']}}</label>
+                                    <div class="col-sm-7">
+                                        <tag-select tags-model="order.oTags" place-holder="Select order tag" type="'order'" multiple="'true'"></tag-select>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-if="type==1">
+                                    <label class="col-sm-4 control-label">{{resourceBundle['required.bydate']}}</label>
+                                    <div class="col-sm-7">
+                                        <date-picker min-date="today" date-model="order.edd" place-holder="{{resourceBundle['required.bydate']}}"></date-picker>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-if="type==0 || type==2">
+                                    <label class="col-sm-4 control-label">{{resourceBundle['expected.date.arrival']}}</label>
+                                    <div class="col-sm-7">
+                                        <date-picker min-date="today" date-model="order.efd" place-holder="{{resourceBundle['expected.date.arrival']}}"></date-picker>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{resourceBundle['comments']}}</label>
+
+                                    <div class="col-sm-7">
+                                        <textarea type="text" ng-model="order.msg"
+                                               autocomplete="off" rows="2"
+                                               class="form-control"
+                                               class="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 noleftpad">
+                        <div class="bgr h400">
+                            <div class="title-heading">
+                                {{resourceBundle['materials']}} {{resourceBundle['at']}} {{order.ent.nm||resourceBundle['kiosk.lower']}}
+                                <span class="filter-label"><span ng-show="loadMaterials" class="glyphicons glyphicons-cogwheel spin"></span></span>
+									<span class="navbar-right pr30">
+										<span class="glyphicons glyphicons-tags"></span>&nbsp;
+										<select class="form-control form-control-min" ng-model="mtag">
+                                            <option value="">{{resourceBundle['all']}}</option>
+                                            <option ng-repeat="tag in tags" value="{{tag}}">{{tag}}</option>
+                                        </select>
+									</span>
+
+                            </div>
+                            <div ng-show="isDef(order.ent.id)">
+                                        <table class="table table-mat table-logistimo table-nobot-mar">
+                                            <thead>
+                                            <tr>
+                                                <th ng-class="{'col-sm-5' : showCustInv, 'col-sm-9' : !showCustInv }">
+                                                    {{resourceBundle['material.name']}}
+                                                    <span class="litetext">&nbsp;</span>
+                                                </th>
+                                                <th class="col-sm-3 text-center">
+                                                    <span ng-show="type == 0 || type == 2">{{resourceBundle['available.stock']}}</span>
+                                                    <span ng-show="type == 1">{{resourceBundle['material.stockonhand']}}</span>
+                                                    <span class="litetext">{{order.ent.nm | limitTo:17}}
+                                                        <span ng-show="order.ent.nm.length > 17">...</span>
+                                                    </span>
+                                                </th>
+                                                <th ng-show="showCustInv" class="col-sm-4 text-center">
+                                                    {{resourceBundle['material.stockonhand']}}
+                                                    <span class="litetext">{{order.cent.nm | limitTo:17}}
+                                                        <span ng-show="order.cent.nm.length > 17">...</span>
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody style="height: 280px;">
+                                            <tr   ng-class="{'disabled-bg' : type == -1 || ((type == 0 || type == 2) && (isUndef(order.cent) || isUndef(inv.enable)))}"
+                                                  ng-click="(type == 1 || ((type == 0 || type == 2) && isDef(order.cent) && isDef(inv.enable))) && addMaterialToList($index)"
+                                                  ng-hide="inv.hide || inv.tHide"
+                                                  ng-repeat="inv in availableInventory">
+                                                <td ng-class="{'col-sm-5' : showCustInv, 'col-sm-9' : !showCustInv}">{{inv.mnm}}
+                                                </td>
+                                                <td class="col-sm-3 text-center">
+                                                    <span ng-show="type == 0 || type == 2">{{inv.atpstk}}</span>
+                                                    <span ng-show="type == 1">{{inv.stk}}</span>
+                                                    </td>
+                                                <td ng-show="showCustInv" class="col-sm-4 text-center">{{inv.cstk != null && inv.cstk != undefined ? inv.cstk : "NA"}}
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+
+                                <div ng-show="showMaterials">
+                                    <p class="litetext navbar-right pr30">({{resourceBundle['row.click']}})</p>
+                                </div>
+                            </div>
+                            <div ng-hide="isDef(order.ent.id)">
+                                {{resourceBundle['entity.selectmaterial']}}...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="title-heading">
+                        {{resourceBundle['choose']}} {{resourceBundle['materials.lowercase']}}
+                    <div ng-show="iCfg && isDef(order.cent)" class="pull-right">
+                        <span class="rPad5" style="font-size: 13px">
+                            <input type="checkbox" class="cbx" ng-model="showCustInv" > {{resourceBundle['show.current.stock']}}
+                            </input>
+                        </span>
+                    </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <script type="text/ng-template" id="materialTemplate">
+                                <a>
+                                    <span ng-bind-html="match.label | uibTypeaheadHighlight:query"/>
+                                    <span ng-show="$parent.$parent.$parent.type == 1">({{match.model.stk}})</span>
+                                    <span class="litetext" ng-show="$parent.$parent.$parent.type == 0 || $parent.$parent.$parent.type == 2">
+                                        {{$parent.$parent.$parent.resourceBundle['available.stock']}}: {{match.model.atpstk}}
+                                    </span>
+                                </a>
+                            </script>
+                            <table class="table table-condensed table-hover table-logistimo">
+                                <tbody>
+                                <tr>
+                                    <th class="text-center col-sm-0-5">{{resourceBundle['serialnum']}}</th>
+                                    <th>{{resourceBundle['material']}}</th>
+                                    <th ng-hide="oCfg.dop" class="text-center">{{resourceBundle['price']}} <span ng-if="isDef(invCnf.cur)">({{invCnf.cur}})</span></th>
+                                    <th class="text-center">
+                                        <span ng-show="type == 0 || type == 2">{{resourceBundle['available.stock']}}</span>
+                                        <span ng-show="type == 1">{{resourceBundle['material.stockonhand']}}</span>
+                                        <span class="litetext">{{order.ent.nm | limitTo:17}}
+                                            <span ng-show="order.ent.nm.length > 17">...</span>
+                                        </span>
+                                        <!--<input type="checkbox" ng-model="showMinMax" class="cbx"> <span class="litetext-head">{{resourceBundle['minmax.show']}} </span></th>-->
+                                    <th class="text-center" ng-show="invCnf.cr"><p class="capbold" style="display: inline;">{{invCnf.cu}}</p> {{resourceBundle['of']}} {{resourceBundle['stock.lowercase']}}</th>
+                                    <th class="text-center col-sm-2">{{resourceBundle['quantity']}}</th>
+                                    <th class="text-center col-sm-0-5"></th>
+                                    <th ng-show="showCustInv" class="text-center">
+                                        {{resourceBundle['material.stockonhand']}}
+                                        <span class="litetext">{{order.cent.nm | limitTo:17}}
+                                            <span ng-show="order.cent.nm.length > 17">...</span>
+                                        </span>
+                                        <!--<input type="checkbox" ng-model="showMinMax" class="cbx"> <span class="litetext-head">{{resourceBundle['minmax.show']}}</span>-->
+                                    </th>
+                                </tr>
+                                </tbody>
+                                <tbody ng-repeat="material in order.materials" ng-controller="order.MaterialController"
+                                       data-ng-switch on="exRow[$index]">
+                                <tr ng-class="{'alert alert-info' : exRow[$index]}">
+                                    <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                    <td>
+                                        <div class="form-group has-feedback" ng-hide="!showMaterials || order.materials.length>$index+1" >
+                                            <input type="text"
+                                               ng-disabled="(type == 0 || type == 2) && isUndef(order.cent)"
+                                               typeahead-template-url="materialTemplate"
+                                               ng-model="material.name"
+                                               class="form-control"
+                                               placeholder="Type material name to choose"
+                                               uib-typeahead="item as item.mnm for item in getFilteredInvntry($viewValue)"
+                                               typeahead-editable="false"
+                                               class="form-control" maxlength="50" tabindex="{{$index+100}}"
+                                               typeahead-loading="loadingMaterials"/>
+                                            <span ng-show="loadingMaterials" class="form-control-feedback typehead-loading" aria-hidden="true">
+                                                <span class="glyphicons glyphicons-cogwheel spin"></span>
+                                            </span>
+                                        </div>
+
+                                        <p class="temp" ng-show="order.materials.length>$index+1">
+                                            {{material.name.mnm}}</p>
+
+                                        <p class="cader temp" ng-show="!showMaterials">
+                                            {{resourceBundle['entity.selectmaterial']}}...</p>
+                                    </td>
+                                    <td ng-hide="oCfg.dop" class="text-center">
+                                        <p class="temp" ng-show="order.materials.length>$index+1">{{material.rp | number:2}}</p>
+                                    </td>
+                                    <td ng-class=" {'alert-danger' : material.event == 200,
+                                     'alert-info' : material.event == 202,
+                                     'alert-warning' : material.event == 201}">
+                                        <p ng-show="showMaterials && order.materials.length - 1 !== $index" class="text-center temp">
+                                            <span ng-show="type == 0 || type == 2">{{material.atpstk}}
+                                                <span class="litetext">{{resourceBundle['material.stockonhand']}}: {{material.stock}}</span>
+                                            </span>
+                                            <span ng-show="type == 1">{{material.stock}}</span>
+                                            <span class="litetext" ng-show="material.tstk > 0">In transit: {{material.tstk}}</span>
+                                            <span class="litetext" ng-show="showMinMax"><span uib-tooltip="(min,max)">{{material.mm}}</span></span>
+                                        </p>
+                                    </td>
+                                    <td ng-show="invCnf.cr">
+                                        <div ng-show="order.materials.length - 1 !== $index" class="inline text-center temp">
+                                            {{material.name.sap > 0 ? (material.name.sap | number:2) : "NA"}}
+                                            <div class="clickable" ng-click="select($index,'show')" ng-show="material.name.sap>0">
+                                                <span ng-show="exRow[$index] !== 'show'"
+                                                      class="glyphicons glyphicons-expand"></span>
+                                                <span ng-show="exRow[$index] === 'show'"
+                                                      class="glyphicons glyphicons-collapse-top"></span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input only-digits
+                                               ng-show="!material.isBinary && showMaterials && order.materials.length - 1 !== $index"
+                                               type="text" ng-model="material.quantity" id="{{material.name.mId}}{{$index}}"
+                                               ng-class="{'red-border':material.invalidPopup}"
+                                               uib-popover="{{material.popupMsg}}" popover-trigger="showpopup" ng-blur="validate(material,$index,'b')"
+                                               ng-focus="hidePop(material,$index)"
+                                               class="col-sm-1 form-control" ng-change="showRecomQuantity(material.quantity)"
+                                               maxlength="12" tabindex="{{$index+100}}"/>
+
+                                        <p class="text-center temp" ng-show="material.isBinary && showMaterials">1</p>
+                                        <p class="text-center litetext fc-color-red" ng-show="material.showRecommended && material.recomQ != '-1'" style="margin-top:5px;">{{resourceBundle['order.recommended']}}: {{material.recomQ}}</p>
+                                        <div ng-show="material.showRecommended">
+                                            <span class="litetext pull-left" ng-class="{'required': oCfg.orrm}">{{resourceBundle['reason']}}</span>
+                                            <select class="form-control"
+                                                    ng-change="material.mrsn=''"
+                                                    ng-model="material.rsn" ng-show="isDef(reasons)" ng-change="material.mrsn = ''">
+                                                <option ng-repeat="reason in reasons" value="{{reason}}" ng-selected="material.rsn == reason">{{reason|| resourceBundle['select'] + ' ' + resourceBundle['reason.lowercase'] }}</option>
+                                            </select>
+                                            <textarea type="text" class="form-control"  ng-show="isUndef(reasons) || material.rsn.toLowerCase() == 'others'"
+                                                   ng-model="material.mrsn" placeholder="{{resourceBundle['enterreason']}}" maxlength="160" style="margin-top: 4px;"></textarea>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <a ng-show="showMaterials && order.materials.length - 1 !== $index" href=""
+                                           ng-click="deleteRow($index)">
+                                            <span class="glyphicons glyphicons-bin temp"></span>
+                                        </a>
+                                    </td>
+                                    <td ng-show="showCustInv" ng-class=" {'alert-danger' : material.cevent == 200,
+                                     'alert-info' : material.cevent == 202,
+                                     'alert-warning' : material.cevent == 201}">
+                                        <p ng-show="order.materials.length>$index+1"
+                                           class="text-center temp">{{material.cstock}} <span class="litetext" ng-show="showMinMax"><span uib-tooltip="(min,max)">{{material.cmm}}</span></span>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr data-ng-switch-when="show">
+                                    <td colspan=100% class="partialview">
+                                        <div ng-init="view='views/inventory/view-message.html' ; mid = material.mId ; kid = material.kId ; index = $index ; min = material.name.reord; max = material.name.max;"
+                                             ng-include="'views/partial.html'"></div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="pull-right">
+                                        <button type="button"
+                                                ng-disabled="invalidPopup != 0 || (!oCfg.ao && order.materials.length<=1) || !addOrder.$valid"
+                                                ng-click="submitted=true; addOrder.$valid && update()"
+                                                class="btn btn-sm btn-primary" tabindex=200>{{resourceBundle['submit']}}
+                                        </button>
+                                        <button type="button" ng-disabled="isUndef(order.ent)"
+                                                class="btn btn-sm btn-default" ng-click="reset()" tabindex=201>
+                                            {{resourceBundle['reset']}}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
