@@ -60,10 +60,8 @@
         <module>modules/tags</module>
         <module>modules/users</module>
         <module>modules/reports</module>
-        <module>modules/reports-enterprise</module>
         <module>modules/bulkuploads</module>
         <module>modules/logi</module>
-        <module>modules/api-enterprise</module>
     </modules>
 
     <dependencies>

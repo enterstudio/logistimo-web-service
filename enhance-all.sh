@@ -38,8 +38,6 @@ cd ../predictions
 mvn datanucleus:enhance
 cd ../reports
 mvn datanucleus:enhance
-cd ../reports-enterprise
-mvn datanucleus:enhance
 cd ../tags
 mvn datanucleus:enhance
 cd ../users
