@@ -21,34 +21,31 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.reports.constants;
+package com.logistimo.reports.plugins.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
- * Created by mohan on 25/03/17.
+ * @author Mohan Raja
  */
-public enum ReportType {
-  INV_ABNORMAL_STOCK("ias"),
-  INV_REPLENISHMENT("ir"),
-  INV_TRANSACTION_COUNT("itc"),
-  AS_ASSET_STATUS("aas");
+@Service
+public class ReportServiceCollection {
+  private Map<String, IReportService> builders;
 
-  private String value;
-
-  ReportType(String value) {
-    this.value = value;
+  @Autowired
+  ReportServiceCollection(Map<String, IReportService> reportBuilders) {
+    this.builders = reportBuilders;
   }
 
-  public static ReportType getType(String value) {
-    for (ReportType type : ReportType.values()) {
-      if (type.value.equals(value)) {
-        return type;
-      }
+  public IReportService getReportService(String reportType) {
+    if (builders.containsKey(reportType)) {
+      return builders.get(reportType);
     }
-    return null;
+    throw new UnsupportedOperationException("unsupported report service");
   }
 
-  @Override
-  public String toString() {
-    return value;
-  }
 }

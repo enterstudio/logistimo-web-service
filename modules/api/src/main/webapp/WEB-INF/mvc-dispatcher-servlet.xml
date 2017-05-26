@@ -9,7 +9,7 @@
 	    http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
-    <context:component-scan base-package="com.logistimo.api" />
+     <context:component-scan base-package="com.logistimo" />
 
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:message-converters>

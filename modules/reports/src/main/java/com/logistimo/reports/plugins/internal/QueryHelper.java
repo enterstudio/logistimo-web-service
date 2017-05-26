@@ -25,10 +25,8 @@ package com.logistimo.reports.plugins.internal;
 
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
-import com.logistimo.logger.XLog;
-import com.logistimo.reports.constants.ReportType;
-import com.logistimo.reports.constants.ReportViewType;
 import com.logistimo.services.utils.ConfigUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -36,14 +34,17 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mohan Raja
  */
 public class QueryHelper {
-
-  private static final XLog xLogger = XLog.getLog(QueryHelper.class);
 
   /**
    * UI Variables
@@ -115,11 +116,13 @@ public class QueryHelper {
 
   public static final String TOKEN_COLUMNS = "TOKEN_COLUMNS";
   public static final Integer MONTHS_LIMIT = 3;
+  public static final Integer WEEKS_LIMIT = 4;
   public static final Integer DAYS_LIMIT = 7;
   public static final String PERIODICITY_MONTH = "m";
-  public static final String PERIODICITY_DAY = "d";
+  public static final String PERIODICITY_WEEK = "w";
 
   public static final String MONTH = "month";
+  public static final String WEEK = "week";
   public static final String DAY = "day";
 
   public static final String LEVEL_DAY = "d";
@@ -186,6 +189,10 @@ public class QueryHelper {
         periodicity = MONTH;
         dateFormat = DATE_FORMAT_MONTH;
         break;
+      case PERIODICITY_WEEK:
+        periodicity = WEEK;
+        dateFormat = DATE_FORMAT_DAILY;
+        break;
       default:
         periodicity = DAY;
         dateFormat = DATE_FORMAT_DAILY;
@@ -197,7 +204,11 @@ public class QueryHelper {
     String to;
     if (jsonObject.has(LEVEL) && LEVEL_DAY.equals(jsonObject.getString(LEVEL))) {
       DateTime toDateTime = dateTimeFormatter.parseDateTime(jsonObject.getString(FROM));
-      toDateTime = toDateTime.plusMonths(1).minusDays(1);
+      if(PERIODICITY_WEEK.equals(jsonObject.getString(LEVEL_PERIODICITY))) {
+        toDateTime = toDateTime.plusWeeks(1).minusDays(1);
+      } else {
+        toDateTime = toDateTime.plusMonths(1).minusDays(1);
+      }
       to = dateTimeFormatter.print(toDateTime);
       from = dateTimeFormatter.print(dateTimeFormatter.parseDateTime(jsonObject.getString(FROM)));
     } else {
@@ -226,10 +237,6 @@ public class QueryHelper {
         }
       }
     }
-    return getFinalFilters(filters);
-  }
-
-  private static Map<String, String> getFinalFilters(Map<String, String> filters) {
     if(filters.containsKey(TOKEN+QUERY_ATYPE) && filters.containsKey(TOKEN+QUERY_MTYPE)){
       filters.remove(TOKEN+QUERY_MTYPE);
     }
@@ -253,10 +260,10 @@ public class QueryHelper {
     }
   }
 
-  public static String getQueryID(Map<String, String> filters, ReportType type) {
+  public static String getQueryID(Map<String, String> filters, String type) {
     String prefix =
         StringUtils.equals(ConfigUtil.get("reports.callisto.prefix"), "report.type")
-            ? type.toString().toUpperCase() + CharacterConstants.UNDERSCORE : CharacterConstants.EMPTY;
+            ? type.toUpperCase() + CharacterConstants.UNDERSCORE : CharacterConstants.EMPTY;
     String suffix =
         StringUtils.equals(ConfigUtil.get("reports.callisto.suffix"), "periodicity")
             ? CharacterConstants.UNDERSCORE + filters.get(TOKEN_PERIODICITY).toUpperCase() : CharacterConstants.EMPTY;
@@ -268,17 +275,5 @@ public class QueryHelper {
     }
     queryId.setLength(queryId.length() - 1);
     return queryId.toString() + suffix;
-  }
-
-
-  public static String getSelectiveFilters(Map<String,String> filters,ReportType type, ReportViewType viewType){
-    StringBuilder columns = new StringBuilder("");
-    if(type == ReportType.INV_ABNORMAL_STOCK || type == ReportType.INV_TRANSACTION_COUNT){
-        if(!filters.containsKey(TOKEN+QUERY_ENTITY) && viewType != ReportViewType.BY_ENTITY
-                && !filters.containsKey(TOKEN+QUERY_MATERIAL) && viewType != ReportViewType.BY_MATERIAL){
-          columns.append("lkc");
-        }
-    }
-    return columns.toString();
   }
 }

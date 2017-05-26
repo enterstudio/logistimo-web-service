@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.logistimo</groupId>
-    <artifactId>web</artifactId>
+    <artifactId>logistimo-web</artifactId>
     <packaging>pom</packaging>
     <version>2.4.0</version>
     <name>Logistimo web Parent Project</name>
@@ -60,8 +60,10 @@
         <module>modules/tags</module>
         <module>modules/users</module>
         <module>modules/reports</module>
+        <module>modules/reports-enterprise</module>
         <module>modules/bulkuploads</module>
         <module>modules/logi</module>
+        <module>modules/api-enterprise</module>
     </modules>
 
     <dependencies>
