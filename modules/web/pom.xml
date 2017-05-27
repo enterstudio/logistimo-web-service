@@ -27,145 +27,24 @@
 	http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.logistimo</groupId>
-    <artifactId>logistimo-api</artifactId>
+    <artifactId>logistimo-web</artifactId>
 
     <!-- Output to jar format -->
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <version>2.4.0</version>
 
-    <name>api</name>
+    <name>web</name>
+
+    <properties>
+        <build.number>SNAPSHOT</build.number>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-common</artifactId>
+            <artifactId>logistimo-api</artifactId>
             <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-media</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-customreports</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-core</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-exports</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-auth</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo.inventory</groupId>
-            <artifactId>logistimo-optimization</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-predictions</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-reports</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-inventory</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-config</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-materials</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-orders</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-entities</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-accounting</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-activity</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-mnltransactions</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-bulkuploads</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.logistimo</groupId>
-            <artifactId>logistimo-dashboards</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <version>1.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.jdo</groupId>
-            <artifactId>jdo-api</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.2.10</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -241,6 +120,61 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/unwar/</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.5</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/bin.xml</descriptor>
+                    </descriptors>
+                    <finalName>logi-${project.version}.${build.number}</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>create-archive</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/unit-tests.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+
             </plugin>
         </plugins>
     </build>
