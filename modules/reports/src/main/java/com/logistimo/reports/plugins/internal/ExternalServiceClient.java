@@ -27,6 +27,7 @@ import com.logistimo.reports.plugins.IExteranalServiceClient;
 import com.logistimo.reports.plugins.config.ExternalServiceClientConfiguration;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 /**
@@ -35,6 +36,10 @@ import javax.ws.rs.core.Response;
 public class ExternalServiceClient implements IExteranalServiceClient {
   ExternalServiceClientConfiguration configuration;
   Client client;
+
+  public static ExternalServiceClient getNewInstance() {
+    return new ExternalServiceClient(new ExternalServiceClientConfiguration(), ClientBuilder.newClient());
+  }
 
   public ExternalServiceClient(ExternalServiceClientConfiguration configuration, Client client) {
     this.configuration = configuration;

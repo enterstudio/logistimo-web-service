@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<jdoconfig xmlns="http://xmlns.jcp.org/xml/ns/jdo/jdoconfig"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://xmlns.jcp.org/xml/ns/jdo/jdoconfig">
+
+    <!-- Optimistic Txn PMF -->
+    <persistence-manager-factory name="Optimistic">
+        <property name="javax.jdo.PersistenceManagerFactoryClass"
+                  value="org.datanucleus.api.jdo.JDOPersistenceManagerFactory"/>
+        <property name="javax.jdo.option.ConnectionURL"
+                  value="jdbc:mariadb://localhost/logistimo?useUnicode=true&amp;characterEncoding=UTF-8"/>
+        <property name="javax.jdo.option.ConnectionDriverName" value="org.mariadb.jdbc.Driver"/>
+        <property name="javax.jdo.option.ConnectionUserName" value="logistimo"/>
+        <property name="javax.jdo.option.ConnectionPassword" value="logistimo"/>
+        <property name="javax.jdo.option.Optimistic" value="true"/>
+        <property name="datanucleus.schema.autoCreateAll" value="false"/>
+        <property
+                name="javax.jdo.listener.InstanceLifecycleListener.com.logistimo.events.entity.callbacks.PostPutCallbacks"
+                value="com.logistimo.events.entity.Event"/>
+        <property name="datanucleus.connectionPoolingType" value="DBCP"/>
+        <!-- Pooling of Connections -->
+        <property name="datanucleus.connectionPool.maxIdle" value="10"/>
+        <property name="datanucleus.connectionPool.minIdle" value="3"/>
+        <property name="datanucleus.connectionPool.maxActive" value="5"/>
+        <property name="datanucleus.connectionPool.maxWait" value="60"/>
+
+        <!-- Pooling of PreparedStatements -->
+        <property name="datanucleus.connectionPool.maxStatements" value="20"/>
+
+        <property name="datanucleus.connectionPool.testSQL" value="SELECT 1"/>
+
+        <property name="datanucleus.connectionPool.timeBetweenEvictionRunsMillis" value="2400000"/>
+        <property name="datanucleus.connectionPool.minEvictableIdleTimeMillis" value="18000000"/>
+        <!-- <property name="datanucleus.cache.level2.type" value="logiredis"/>
+        <property name="datanucleus.cache.level2.cacheName" value="dn_"/>
+        <property name="datanucleus.cache.level2.redis.servers" value="redishost"/>
+        <property name="datanucleus.cache.level2.redis.database" value="1"/>
+        <property name="datanucleus.cache.level2.redis.port" value="6379"/>
+        <property name="datanucleus.cache.level2.redis.sentinels" value="sentinelhost"/>
+        <property name="datanucleus.cache.level2.redis.timeout" value="5000"/>
+        <property name="datanucleus.cache.level2.redis.expirySeconds" value="86400"/> -->
+    </persistence-manager-factory>
+
+
+</jdoconfig>

@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.logistimo</groupId>
-    <artifactId>web</artifactId>
+    <artifactId>logistimo</artifactId>
     <packaging>pom</packaging>
     <version>2.4.0</version>
     <name>Logistimo web Parent Project</name>
@@ -62,6 +62,7 @@
         <module>modules/reports</module>
         <module>modules/bulkuploads</module>
         <module>modules/logi</module>
+        <module>modules/web</module>
     </modules>
 
     <dependencies>
@@ -94,8 +95,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
+            <version>4.10</version>
         </dependency>
     </dependencies>
 
