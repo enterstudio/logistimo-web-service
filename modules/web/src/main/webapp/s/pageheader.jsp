@@ -85,16 +85,7 @@
 	<head>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> <!--  This is placed to enable Google Maps in certain views -->
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <!-- @if !isCustomDeployment -->
         <title>Logistimo</title>
-        <!-- @endif -->
-        <!-- @if isCustomDeployment -->
-        <!-- comments:uncomment-block html -->
-        <!--
-        <title><!-- @echo custom.title --></title>
-        -->
-        <!-- endcomments -->
-        <!-- @endif -->
 	<link href="/css/reset-fonts-grids.css" rel="stylesheet" type="text/css" />
 	<link href="/css/tabview.css" rel="stylesheet" type="text/css" />
 	<link href="/css/sg.css" rel="stylesheet" type="text/css" />
@@ -142,16 +133,7 @@
             <div class="imagewrapper"><%= pageHeader %></div>
 			<% } else { %>
 			<div>
-                <!-- @if !isCustomDeployment -->
-                <img class="imagewrapper" src="/images/logo.png"/>
-                <!-- @endif -->
-                <!-- @if isCustomDeployment -->
-                <!-- comments:uncomment-block html -->
-                <!--
-                <img class="imagewrapper" src="<!-- @echo custom.logo -->"/>
-                -->
-                <!-- endcomments -->
-                <!-- @endif -->
+                <img class="imagewrapper" src="/images/acquia_marina_logo.png"/>
 			</div>
 			<% } // end if %>
 		</div>

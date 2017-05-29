@@ -171,16 +171,7 @@
 			<div class="imagewrapper"><%= pageHeader %></div>
 		<% } else { %>
 		<div style="background-color:white">
-            <!-- @if !isCustomDeployment -->
             <img class="imagewrapper" src="/images/acquia_marina_logo.png"/>
-            <!-- @endif -->
-            <!-- @if isCustomDeployment -->
-            <!-- comments:uncomment-block html -->
-            <!--
-            <img class="imagewrapper" src="<!-- @echo custom.logo -->"/>
-            -->
-            <!-- endcomments -->
-            <!-- @endif -->
 		</div>
 		<% } %>
 		<% if ( size > 0 ) { %>

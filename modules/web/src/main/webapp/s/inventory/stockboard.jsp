@@ -271,16 +271,7 @@
 		<table width="100%">
 			<tr>
 				<td style="width:20%">
-                    <!-- @if !isCustomDeployment -->
-                    <img class="imagewrapper" src="/images/logo.png"/>
-                    <!-- @endif -->
-                    <!-- @if isCustomDeployment -->
-                    <!-- comments:uncomment-block html -->
-                    <!--
-                    <img class="imagewrapper" src="<!-- @echo custom.logo -->"/>
-                    -->
-                    <!-- endcomments -->
-                    <!-- @endif -->
+                    <img class="imagewrapper" src="/images/acquia_marina_logo.png"/>
                 </td>
 				<% if ( hasNoErrors ) { %>
 				<td style="width:80%;text-align:left;font-size:16pt;color:brown"><b><%= kioskName %>, <%= kioskLocation %></b></td>

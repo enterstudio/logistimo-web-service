@@ -22,6 +22,7 @@
     "grunt-string-replace": "^1.0.0",
     "jshint-jenkins-checkstyle-reporter": "^0.1.2",
     "jshint-stylish": "^2.2.0",
-    "json-string-replace": "file:json-string-replace-0.0.2.tgz"
+    "json-string-replace": "file:json-string-replace-0.0.2.tgz",
+    "require": "^2.4.20"
   }
 }

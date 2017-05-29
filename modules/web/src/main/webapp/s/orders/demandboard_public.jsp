@@ -103,16 +103,7 @@
 		<div id="hd">
 			<% if ( !hasBanner ) { %>
 			<div style="padding:10px;">
-                <!-- @if !isCustomDeployment -->
-                <img src="/images/logo.png"/>
-                <!-- @endif -->
-                <!-- @if isCustomDeployment -->
-                <!-- comments:uncomment-block html -->
-                <!--
-                <img class="imagewrapper" src="<!-- @echo custom.logo -->"/>
-                -->
-                <!-- endcomments -->
-                <!-- @endif -->
+                <img src="/images/acquia_marina_logo.png"/>
 			</div>
 			<% } else { %>
 			<%= bannerDiv %>
