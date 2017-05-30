@@ -36,6 +36,7 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.constants.CharacterConstants;
 
 import com.logistimo.services.utils.ConfigUtil;
+import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.PropertyUtil;
 import com.logistimo.constants.QueryConstants;
 import com.logistimo.logger.XLog;
@@ -103,7 +104,7 @@ public class DomainLinkUpdater {
         queryStr.append("sdId").append(QueryConstants.D_EQUAL).append("dIdParam");
         queryStr.append(QueryConstants.PARAMETERS).append(QueryConstants.LONG)
             .append(CharacterConstants.SPACE).append("dIdParam");
-        Map<String, Object> paramMap = new HashMap<String, Object>(2);
+        Map<String, Object> paramMap = new HashMap<>(2);
         paramMap.put("dIdParam", Long.parseLong(childDomainId));
         QueryParams qp = new QueryParams(queryStr.toString(), paramMap);
 
@@ -115,6 +116,10 @@ public class DomainLinkUpdater {
             e.getMessage(), childDomainId, e);
       }
     }
+
+    // Update domain links for users
+    updateDomainLinksForUsers(childDomainIds, sourceDomainId, isAdd);
+
   }
 
   /**
@@ -139,5 +144,31 @@ public class DomainLinkUpdater {
     paramMap.put("kIdParam", id);
     xLogger.fine("Exiting getQuery query: {0} params: {1}", queryStr.toString(), paramMap);
     return new QueryParams(queryStr.toString(), paramMap);
+  }
+
+  private static void updateDomainLinksForUsers(String childDomainIds, Long sourceDomainId, boolean isAdd) {
+    for (String childDomainId : childDomainIds.split(CharacterConstants.COMMA)) {
+      try {
+        xLogger.info("Scheduling task for updating domain ids of UserAccount for domain: {0}",
+            childDomainId);
+        StringBuilder queryStr = new StringBuilder();
+        queryStr.append(QueryConstants.SELECT_FROM)
+            .append(JDOUtils.getImplClass(IUserAccount.class).getName());
+        queryStr.append(QueryConstants.WHERE);
+        queryStr.append(" sdId").append(QueryConstants.D_EQUAL).append("dIdParam");
+        queryStr.append(QueryConstants.PARAMETERS).append(QueryConstants.LONG)
+            .append(CharacterConstants.SPACE).append("dIdParam");
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("dIdParam", Long.parseLong(childDomainId));
+        QueryParams qp = new QueryParams(queryStr.toString(), paramMap);
+
+        PagedExec.exec(isAdd ? 1L : 0L, qp, new PageParams(null, PageParams.DEFAULT_SIZE),
+            PagedExec.loadProcessor(EntityDomainUpdateProcessor.class.getName()),
+            "0" + CharacterConstants.COLON + sourceDomainId, null, 0, true);
+      } catch (Exception e) {
+        xLogger.severe("{0} when scheduling task for updating domain ids of users for domain: {1}",
+            e.getMessage(), childDomainId, e);
+      }
+    }
   }
 }
