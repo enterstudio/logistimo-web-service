@@ -646,12 +646,12 @@ public class DashboardService implements IDashboardService {
       query.append("SELECT ").append(colName).append(isDistrict ? ",KID" : "")
           .append(", STAT, COUNT(1) COUNT FROM (SELECT A.")
           .append(colName).append(isDistrict ? ",KID" : "").append(", IF(ASF.STAT = 'tu', 'tu',")
-          .append("IFNULL((SELECT (SELECT IF(ABNSTATUS = 1, 'tl', 'th') FROM ASSETSTATUS AI WHERE")
-          .append(" AI.ASSETID = A.ID AND AI.TYPE = 1 AND ")
-          .append("AI.STATUS = 3 AND AI.TS <= DATE_SUB(NOW(), ")
-          .append(period).append(") LIMIT 1) FROM ASSETSTATUS AO WHERE AO.TYPE = 1 AND ")
-          .append("AO.ASSETID = A.ID AND AO.TS <= DATE_SUB(NOW(), ").append(period)
-          .append(") GROUP BY AO.ASSETID),'tn')) STAT FROM (SELECT A.ID,")
+          .append("(SELECT IF(MAX(ABNSTATUS) = 2, 'th', IF(MAX(ABNSTATUS) = 1, 'tl', 'tn'))")
+          .append("FROM ASSETSTATUS AST WHERE ")
+          .append("AST.ASSETID = A.ID AND AST.TYPE = 1 AND ")
+          .append("AST.STATUS = 3 AND ")
+          .append("AST.TS <= DATE_SUB(NOW(), ").append(period)
+          .append("))) STAT FROM (SELECT A.ID,")
           .append(isDistrict ? "KID," : "")
           .append("(SELECT ").append(colName).append(" FROM KIOSK WHERE KIOSKID = A.KID)")
           .append(colName)
@@ -685,7 +685,7 @@ public class DashboardService implements IDashboardService {
         query.append(" AND KID IS NOT NULL");
       }
       query.append(
-          ") A LEFT JOIN (SELECT ASSETID, IF(SUM(STATUS) > 0, 'tu', 'tk') STAT FROM ASSETSTATUS ASI, ")
+          ") A LEFT JOIN (SELECT ASSETID, IF(MIN(STATUS) = 0, 'tk', 'tu') STAT FROM ASSETSTATUS ASI, ")
           .append("ASSET_DOMAINS AD WHERE ASI.TYPE = 3 AND ")
           .append("ASI.ASSETID=AD.ID_OID AND AD.DOMAIN_ID=")
           .append(domainId).append(" AND TS <= DATE_SUB(NOW(), ").append(period)
