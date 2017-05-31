@@ -1365,7 +1365,7 @@ reportControllers.controller('UsrActController', ['$scope', 'reportService', '$w
         $scope.cWidth = "600";
         $scope.cType = "stackedcolumn2d";
         $scope.cOptions = {
-            "yAxisName": "Quantity",
+            "yAxisName": "Count",
             "exportEnabled": '1',
             "theme": "fint"
         };
@@ -1402,7 +1402,7 @@ reportControllers.controller('UsrActController', ['$scope', 'reportService', '$w
                 $scope.fcData.stDate = formatDate2Url($scope.from);
                 var endDate = changeToLastDayOfMonth($scope.to);
                 $scope.fcData.enDate = formatDate2Url(endDate);
-                $scope.cOptions.caption = $scope.resourceBundle['report.useractivity'] + " - " + $scope.resourceBundle['logins'];
+                $scope.setCView($scope.cView);
                 $scope.cOptions.subcaption = "From: " + formatDate($scope.from) + " To: " + formatDate(endDate) + " User: " + $scope.rep.usr.text;
                 $scope.cOptions.subCaptionFontSize = 10;
                 reportService.getFChartData($scope.fcData).then(function (data) {
