@@ -174,15 +174,17 @@ registerWidget('ir', 'rpt-replenishment', 'Inventory', 'Replenishment response t
                 }
             });
             var filterSeriesIndex = undefined;
+            var isCompare = false;
             if(compareFields.length > 1) {
                 if(compareFields.indexOf("") != -1) {
                     compareFields.splice(compareFields.indexOf(""), 1);
                 }
                 filterSeriesIndex = 0;
+                isCompare = true;
             }
             var cData = [];
             for (var i = 0; i < compareFields.length; i++) {
-                cData[i] = getReportFCSeries(chartData, $scope.metrics.primary, compareFields[i], "line", linkDisabled, filterSeriesIndex);
+                cData[i] = getReportFCSeries(chartData, $scope.metrics.primary, compareFields[i], "line", linkDisabled, filterSeriesIndex, isCompare ? "0" : "1");
             }
             $scope.cOptions.caption = $scope.primaryMetric[$scope.metrics.primary - 1].name;
             $scope.cOptions.subcaption = $scope.getReportCaption();
