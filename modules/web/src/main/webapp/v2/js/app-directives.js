@@ -741,9 +741,12 @@ logistimoApp.directive('domainSelect', function () {
                     function setNonSUQueryResults(childDomains) {
                         var rData = {results: []};
                         if (checkNotNullEmpty(childDomains)) {
-                            childDomains.forEach(function (d) {
+                            childDomains.some(function (d) {
                                 if (d.name.toLowerCase().indexOf(query.term.toLowerCase()) == 0) {
                                     rData.results.push({'text': d.name, 'id': d.dId});
+                                    if(rData.results.length == 10) {
+                                        return true;
+                                    }
                                 }
                             });
                         }
