@@ -153,7 +153,7 @@
                     <rpt-entity-filter ng-disabled="filter.mentity || filter.st || filter.dis || filter.tlk || filter.cty"
                                        place-holder="Select {{resourceBundle['kiosk.lowercase']}}"
                                        filter-model="filter.entity" ng-if="cards.ec == 'i'"></rpt-entity-filter>
-                    <span ng-show="filter.st || filter.dis || filter.tlk || filter.cty"
+                    <span ng-show="(filter.st || filter.dis || filter.tlk || filter.cty) && cards.ec == 'i'"
                           class="limit">{{resourceBundle['filter.disable.entity']}}</span>
                     <div class="filter-compare">
                         <span ng-if="activeMetric == 'ot' && compare.type == undefined && (filter.entity != undefined || filter.etag != undefined)"
