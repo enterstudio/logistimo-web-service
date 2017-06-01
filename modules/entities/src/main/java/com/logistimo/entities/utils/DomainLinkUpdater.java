@@ -43,8 +43,10 @@ import com.logistimo.logger.XLog;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 /**
  * The {@code DomainLinkUpdater} class adds/removes domain ids based on linked domain from all entities and its related objects.
@@ -58,19 +60,20 @@ public class DomainLinkUpdater {
   private static final XLog xLogger = XLog.getLog(DomainLinkUpdater.class);
 
   /**
-   * Update Entity, Asset domain ids and all its related objects domain ids of {@code childDomainIds} with
+   * Update Entity, Asset domain ids and all its related objects domain ids of {@code childDomainIdsStr} with
    * {@code sourceDomainId} and all its ancestors
    *
    * @throws ServiceException when there is error in fetching object
    *                          using {@link com.logistimo.entities.service.EntitiesService}.
    */
-  public static void updateDomainLinks(Long sourceDomainId, String childDomainIds, boolean isAdd)
+  public static void updateDomainLinks(Long sourceDomainId, String childDomainIdsStr, boolean isAdd)
       throws ServiceException {
     String relatedObjectsStr = ConfigUtil.get(ENTITY_DOMAIN_UPDATE_PROP);
     Map<String, String[]> relatedClassesMap = PropertyUtil.parseProperty(relatedObjectsStr);
     EntitiesService as = new EntitiesServiceImpl();
     Set<Long> kioskIds = new HashSet<>();
-    for (String child : childDomainIds.split(CharacterConstants.COMMA)) {
+    List<String> childDomainIds = Arrays.asList(childDomainIdsStr.split(CharacterConstants.COMMA));
+    for (String child : childDomainIds) {
       kioskIds.addAll(as.getAllKioskIds(Long.parseLong(child)));
     }
     for (Long kioskId : kioskIds) {
@@ -93,7 +96,7 @@ public class DomainLinkUpdater {
     /**
      * Propagating domain IDs to Assets and domain tags in AssetManagementService
      */
-    for (String childDomainId : childDomainIds.split(CharacterConstants.COMMA)) {
+    for (String childDomainId : childDomainIds) {
       try {
         xLogger.info("Scheduling task for updating domain ids of Assets for domain: {0}",
             childDomainId);
@@ -104,7 +107,7 @@ public class DomainLinkUpdater {
         queryStr.append("sdId").append(QueryConstants.D_EQUAL).append("dIdParam");
         queryStr.append(QueryConstants.PARAMETERS).append(QueryConstants.LONG)
             .append(CharacterConstants.SPACE).append("dIdParam");
-        Map<String, Object> paramMap = new HashMap<>(2);
+        Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("dIdParam", Long.parseLong(childDomainId));
         QueryParams qp = new QueryParams(queryStr.toString(), paramMap);
 
@@ -118,7 +121,7 @@ public class DomainLinkUpdater {
     }
 
     // Update domain links for users
-    updateDomainLinksForUsers(childDomainIds, sourceDomainId, isAdd);
+    updateDomainLinksForUsers(sourceDomainId, childDomainIds, isAdd);
 
   }
 
@@ -146,8 +149,8 @@ public class DomainLinkUpdater {
     return new QueryParams(queryStr.toString(), paramMap);
   }
 
-  private static void updateDomainLinksForUsers(String childDomainIds, Long sourceDomainId, boolean isAdd) {
-    for (String childDomainId : childDomainIds.split(CharacterConstants.COMMA)) {
+  private static void updateDomainLinksForUsers(Long sourceDomainId, List<String> childDomainIds, boolean isAdd) {
+    for (String childDomainId : childDomainIds) {
       try {
         xLogger.info("Scheduling task for updating domain ids of UserAccount for domain: {0}",
             childDomainId);
