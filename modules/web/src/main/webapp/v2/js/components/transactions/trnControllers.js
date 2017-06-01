@@ -1180,7 +1180,7 @@ trnControllers.controller('BatchTransactionCtrl', ['$scope', 'invService','$time
                             batch.ainvalidPopup = false;
                         }
                         eventName = 'hidepopup';
-                        if (!skipTrigger || (batch.invalidPopup == undefined || batch.invalidPopup)) {
+                        if (!skipTrigger || (batch.invalidPopup == undefined || batch.invalidPopup == true)) {
                             $scope.invalidPopup = $scope.invalidPopup <= 0 ? 0 : $scope.invalidPopup - 1;
                         }
                         batch.invalidPopup = false;
