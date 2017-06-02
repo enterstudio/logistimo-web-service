@@ -722,6 +722,7 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
                     $scope.entityTags.push(data.text);
                 });
             }
+            $scope.$parent.filters.d = undefined;
             if($scope.eTgs.length==0){
                 $scope.$parent.filters.d = "n";
                 $scope.entityTags = null;
@@ -927,9 +928,11 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
         });
         $scope.$on("resetRequest", function () {
             $scope.eTgs = [];
-            $scope.inv.enTgs.forEach(function(data){
-                $scope.eTgs.push({"id" : data, "text" : data});
-            });
+            if(checkNotNullEmpty($scope.inv) && checkNotNullEmpty($scope.inv.enTgs)){
+                $scope.inv.enTgs.forEach(function(data){
+                    $scope.eTgs.push({"id" : data, "text" : data});
+                });
+            }
             $scope.fvmtag = null;
             $scope.applyFilters();
             $scope.showFilter = false;
