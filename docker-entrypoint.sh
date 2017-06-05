@@ -13,19 +13,20 @@ sed -ri "$ a logi.host.server=$LOGI_HOST" $TOMCAT_HOME/webapps/ROOT/WEB-INF/clas
         && sed -ri "s/name="javax.jdo.option.ConnectionUserName" value="logistimo"/name="javax.jdo.option.ConnectionUserName" value=$MYSQL_USER/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/META-INF/jdoconfig.xml \
         && sed -ri "s/name="javax.jdo.option.ConnectionPassword" value="logistimo"/name="javax.jdo.option.ConnectionPassword" value=$MYSQL_PASS/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/META-INF/jdoconfig.xml \
         && sed -ri "s/localhost:50070/$HADOOP_HOST:50070/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
-	&& sed -ri "s/redis.server=localhost/redis.server=$REDIS_HOST/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
+        && sed -ri "s/redis.server=localhost/redis.server=$REDIS_HOST/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "s/task.server=true/task.server=$TASK_SERVER/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "s/export.route.start=true/export.route.start=$TASK_EXPORT/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "/task.url/ s/localhost:8080/localhost:$TASK_PORT/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "s/mail.smtp.host=localhost/mail.smtp.host=$EMAIL_HOST/g;s/mail.smtp.port=25/mail.smtp.port=$EMAIL_PORT/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
-        && sed -ri "s/email.fromaddress=logistimo@gmail.com/email.fromaddress=$EMAIL_FROMADDRESS/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
+        && sed -ri "s/email.fromaddress=service@openlogistimo.com/email.fromaddress=$EMAIL_FROMADDRESS/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "s/email.fromname=Logistimo Service/email.fromname=$EMAIL_FROMNAME/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "s/local.environment=true/local.environment=$LOCAL_ENV/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
+        && sed -ri "s/callisto.url=http:\/\/localhost:8090/callisto.url=http:\/\/$CALLISTO_HOST:$CALLISTO_PORT/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties \
         && sed -ri "s/, CONSOLE/, datalog/g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/log4j.properties \
         && sed -ri "s~lgweb.log~logs\/lgweb.log~g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/log4j.properties \
         && sed -ri "s~mobile.log~logs\/mobile.log~g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/log4j.properties \
         && sed -ri "/Jad\/Jar download servlet/,+4d" $TOMCAT_HOME/webapps/ROOT/WEB-INF/web.xml \
-	&& sed -ri "s/8080/$TASK_PORT/g" $TOMCAT_HOME/conf/server.xml
+        && sed -ri "s/8080/$TASK_PORT/g" $TOMCAT_HOME/conf/server.xml
 
 
 exec $TOMCAT_HOME/bin/catalina.sh run
