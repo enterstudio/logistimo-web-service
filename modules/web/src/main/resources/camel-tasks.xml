@@ -41,6 +41,7 @@
             <choice>
                 <when>
                     <simple>${body.params[action]} == '[be]'</simple>
+                    <marshal ref="gson"/>
                     <log message="Routing message to export queue with data ${body}"/>
                     <to uri="seda:exports"/>
                 </when>
@@ -64,7 +65,7 @@
         <!-- Camel route to move messages from the export queue -->
         <route id="exportQueueRoute" errorHandlerRef="expDeadLetterErrorHandler" autoStartup="{{export.route.start}}">
             <from uri="seda:exports?concurrentConsumers={{export.pool.size}}"/>
-            <!--<unmarshal ref="gson"/>-->
+            <unmarshal ref="gson"/>
             <log message="Routing message from export queue to task ${body}"/>
             <bean ref="taskExecutor"/>
         </route>
