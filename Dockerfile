@@ -1,4 +1,4 @@
-FROM tomcat:7
+FROM tomcat:7-jre8
 MAINTAINER  <dockers@logistimo.com>
 
 ARG warname
