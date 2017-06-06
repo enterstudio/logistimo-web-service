@@ -23,9 +23,9 @@
 
 package com.logistimo.auth.service;
 
+import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.users.entity.IUserToken;
-import com.sun.media.sound.InvalidDataException;
 
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.services.ObjectNotFoundException;
