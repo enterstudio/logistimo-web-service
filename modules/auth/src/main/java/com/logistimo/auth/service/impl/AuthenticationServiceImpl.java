@@ -26,6 +26,7 @@ package com.logistimo.auth.service.impl;
 import com.logistimo.AppFactory;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.dao.JDOUtils;
+import com.logistimo.exception.InvalidDataException;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.services.utils.ConfigUtil;
@@ -57,7 +58,6 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.IUserToken;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.sun.media.sound.InvalidDataException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -72,7 +72,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 
