@@ -22,13 +22,11 @@
  */
 
 .report-pane {
-    position: absolute;
+    position: relative;
     margin-top: -5px;
     margin-bottom: 5px;
     top: 10px;
     bottom: 0;
-    right: 15px;
-    left: 15px;
 }
 
 .report-menu {
