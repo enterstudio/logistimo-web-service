@@ -28,7 +28,6 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.logistimo.api.models.OrderUpdateModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.dao.JDOUtils;
-import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.events.generators.EventGeneratorFactory;
@@ -38,9 +37,6 @@ import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
-import com.logistimo.materials.entity.IMaterial;
-import com.logistimo.materials.service.MaterialCatalogService;
-import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
@@ -99,7 +95,6 @@ import com.logistimo.api.models.OrderModel;
 import com.logistimo.api.models.OrderResponseModel;
 import com.logistimo.api.models.OrderStatusModel;
 import com.logistimo.api.models.PaymentModel;
-import com.logistimo.utils.MsgUtil;
 import com.logistimo.api.util.SecurityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -241,46 +236,12 @@ public class OrdersController {
         throw new LogiException("O004", user.getUsername(), LocalDateUtil.format(o.getUpdatedOn(), user.getLocale(), user.getTimezone()));
       }
       if (IOrder.COMPLETED.equals(status.st) || IOrder.FULFILLED.equals(status.st)) {
-        EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
-        MaterialCatalogService
-            mcs =
-            Services.getService(MaterialCatalogServiceImpl.class, locale);
-        if (o.getServicingKiosk() != null) {
-          IKiosk kiosk = as.getKiosk(o.getKioskId(), false);
-          IKiosk vendor = as.getKiosk(o.getServicingKiosk(), false);
-          boolean checkBatchMgmt = kiosk.isBatchMgmtEnabled() && !vendor.isBatchMgmtEnabled();
-          if (checkBatchMgmt) {
-            List<String> berrorMaterials = new ArrayList<>(1);
-            for (IDemandItem demandItem : o.getItems()) {
-              IMaterial material = mcs.getMaterial(demandItem.getMaterialId());
-              if (material.isBatchEnabled() && BigUtil.greaterThanZero(demandItem.getQuantity())) {
-                berrorMaterials.add(material.getName());
-              }
-            }
-            if (!berrorMaterials.isEmpty()) {
-              StringBuilder builder = new StringBuilder();
-              builder.append(backendMessages.getString("orders.restricted.error.1"))
-                  .append(" ")
-                  .append(berrorMaterials.size())
-                  .append(" ")
-                  .append(backendMessages.getString("materials"))
-                  .append(" ")
-                  .append(backendMessages.getString("to"))
-                  .append(" ")
-                  .append(kiosk.getName())
-                  .append(" ")
-                  .append(backendMessages.getString("orders.restricted.error.2"))
-                  .append(MsgUtil.newLine())
-                  .append(StringUtil.getCSV(berrorMaterials));
-              throw new BadRequestException(builder.toString());
-            }
-          }
-        }
         SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_CSV);
         Date efd = null;
         if (status.efd != null) {
           efd = sdf.parse(status.efd);
         }
+
         IShipmentService shipmentService = Services.getService(ShipmentService.class,
             user.getLocale());
         List<IShipment> shipments = shipmentService.getShipmentsByOrderId(orderId);

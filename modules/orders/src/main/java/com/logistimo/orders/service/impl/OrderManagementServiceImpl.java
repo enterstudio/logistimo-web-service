@@ -535,6 +535,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           mcs =
           Services.getService(MaterialCatalogServiceImpl.class, this.getLocale());
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, this.getLocale());
+
       ShipmentModel model = new ShipmentModel();
       if (expectedFulfilmentDate != null) {
         model.ead = new SimpleDateFormat(Constants.DATE_FORMAT).format(expectedFulfilmentDate);

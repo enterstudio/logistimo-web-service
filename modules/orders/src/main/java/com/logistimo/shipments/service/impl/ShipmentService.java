@@ -86,14 +86,12 @@ import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
 import com.logistimo.shipments.entity.IShipmentItemBatch;
+import com.logistimo.shipments.entity.ShipmentItem;
 import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.LockUtil;
-import com.logistimo.utils.MsgUtil;
+import com.logistimo.utils.*;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -570,6 +568,14 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       shipment.setUpdatedOn(new Date());
       if (status == ShipmentStatus.SHIPPED || (prevStatus != ShipmentStatus.SHIPPED &&
           status == ShipmentStatus.FULFILLED)) {
+
+        //To check for batch enabled materials and vendor
+
+        if(status==ShipmentStatus.SHIPPED ){
+
+          checkShipmentRequest(shipment.getKioskId(),shipment.getServicingKiosk(),shipment.getShipmentItems());
+        }
+
         DomainConfig dc = DomainConfig.getInstance(shipment.getDomainId());
         InventoryManagementService
             ims =
@@ -2313,6 +2319,46 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
     }
     responseModel.status = true;
     return responseModel;
+  }
+
+  public void checkShipmentRequest(Long customerKioskId,Long vendorKioskId,List itemList) throws ServiceException{
+
+    EntitiesService as = Services.getService(EntitiesServiceImpl.class);
+    IKiosk customerKiosk=as.getKiosk(customerKioskId);
+    IKiosk vendorKiosk=as.getKiosk(vendorKioskId);
+
+    boolean checkBEMaterials=customerKiosk.isBatchMgmtEnabled() && !vendorKiosk.isBatchMgmtEnabled();
+    if(checkBEMaterials){
+      MaterialCatalogService
+              materialCatalogService =
+              Services.getService(MaterialCatalogServiceImpl.class);
+      List<String> berrorMaterials = new ArrayList<>(1);
+
+
+      Long materialId=null;
+      BigDecimal quantity=null;
+      for (Object item : itemList) {
+
+        if(item instanceof ShipmentItem){
+          materialId=((ShipmentItem) item).getMaterialId();
+          quantity=((ShipmentItem) item).getQuantity();
+        }else if(item instanceof IDemandItem){
+          materialId=((IDemandItem) item).getMaterialId();
+          quantity=((IDemandItem) item).getQuantity();
+        }
+        if(materialId!=null && quantity!=null) {
+          IMaterial material = materialCatalogService.getMaterial(materialId);
+          if (material.isBatchEnabled() && BigUtil.greaterThanZero(quantity)) {
+            berrorMaterials.add(material.getName());
+          }
+        }
+      }
+
+      if (!berrorMaterials.isEmpty()) {
+        throw new ServiceException("O005",berrorMaterials.size(),customerKiosk.getName(),StringUtil.getCSV(berrorMaterials));
+      }
+
+    }
   }
 
 }

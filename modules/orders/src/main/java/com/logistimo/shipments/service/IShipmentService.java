@@ -128,4 +128,6 @@ public interface IShipmentService extends Service {
 
   Map<String, Object> getShipmentItemAsMap(IShipmentItem shipment, String currency,
                                            Locale locale, String timezone);
+
+  public void checkShipmentRequest(Long customerKioskId,Long vendorKioskId,List itemList) throws ServiceException;
 }
