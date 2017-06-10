@@ -423,11 +423,11 @@ logistimoApp.filter('orderObjectBy', function () {
 });
 logistimoApp.config(['uiGmapGoogleMapApiProvider', function (GoogleMapApi) {
     GoogleMapApi.configure({
-        key: 'AIzaSyCWMVddkt2dvTfDrZikF77Mana4g8mZ7Vg',
+        key: 'google-key',
         v: '3.24',
         libraries: 'weather,geometry,visualization',
         isGoogleMapsForWork: true,
-        client : 'gme-logistimoindiaprivate'
+        client : 'google-client-id'
     });
 }]);
 

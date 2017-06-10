@@ -30,14 +30,18 @@ module.exports = function(grunt) {
 
     grunt.config.set('baseurl', ".");
 
-    grunt.config.set("custom", {
-        contact : "+919999999999",
-        mail : "mysupport@email.com",
-        title : "Logistimo",
-        googleid : "123456",
-        privacylink : "http://customlink.com",
-        logo : "custom_logo.png"
-    });
+    if(grunt.option("custom") != undefined) {
+        grunt.config.set("custom", {
+            contact: "+919999999999",
+            mail: "mysupport@email.com",
+            title: "Logistimo",
+            googleid: "123456",
+            googlekey: "",
+            privacylink: "http://customlink.com",
+            logo: "custom_logo.png",
+            rbChanges : false
+        });
+    }
 
     require('./grunt-tasks.js')(grunt);
 

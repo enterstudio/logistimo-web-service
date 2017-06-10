@@ -28,10 +28,6 @@
 /*global module:false*/
 module.exports = function(grunt, ref) {
     'use strict';
-    var custom = {
-        title : 'My custom title',
-        googleid : 'my-client-id'
-    };
 
     // Project configuration.
     grunt.config.merge({
@@ -79,17 +75,19 @@ module.exports = function(grunt, ref) {
         if: {
             default: {
                 options: {
-                    test: function(){ return grunt.option('custom') != undefined; }
+                    test: function(){ return grunt.config('custom') != undefined; }
                 },
-                ifTrue: [ 'copy:favicon', 'copy:helpFavicon', 'string-replace:custom', 'string-replace:helpcustom' ]
+                ifTrue: ['copy:favicon', 'copy:helpFavicon', 'string-replace:custom']
+
             },
-            rb : {
+            rb: {
+
                 options: {
-                    test: function () {
-                        return grunt.option('custom') != undefined;
-                    }
+                    config: 'custom.rbChanges'
                 },
-                ifTrue: ['json_string_replace:default', 'json_string_replace:properties']
+                ifTrue: ['json_string_replace:default', 'json_string_replace:properties',
+                    'string-replace:helpcustom']
+
             }
         },
         copy: {
@@ -112,11 +110,11 @@ module.exports = function(grunt, ref) {
                 dest: 'target/grunt/webapp/'
             },
             favicon: {
-                src: 'target/grunt/webapp/custom_favicon.ico',
+                src: 'target/grunt/webapp/<%= custom.favicon%>',
                 dest: 'target/grunt/webapp/titleiconnew.ico'
             },
             helpFavicon: {
-                src: 'target/grunt/webapp/s/help/themes/Tabs/images/custom_favicon.ico',
+                src: 'target/grunt/webapp/s/help/themes/Tabs/images/<%= custom.favicon%>',
                 dest: 'target/grunt/webapp/s/help/themes/Tabs/images/titleiconnew.ico'
             },
             resource : {
@@ -259,9 +257,11 @@ module.exports = function(grunt, ref) {
                     'target/grunt/webapp/v2/views/login.html': 'target/grunt/webapp/v2/views/login.html',
                     'target/grunt/webapp/v2/views/menu.html': 'target/grunt/webapp/v2/views/menu.html',
                     'target/grunt/webapp/v2/views/forgot-password.html': 'target/grunt/webapp/v2/views/forgot-password.html',
-                    'target/grunt/webapp/v2/mobile-pwd.reset-success.html': 'target/grunt/webapp/v2/mobile-pwd.reset-success.html',
+                    'target/grunt/webapp/v2/mobile-pwd-reset-success.html': 'target/grunt/webapp/v2/mobile-pwd-reset-success.html',
                     'target/grunt/webapp/v2/password-request.html': 'target/grunt/webapp/v2/password-request.html',
-                    'target/grunt/webapp/v2/password-request-success.html': 'target/grunt/webapp/v2/password-request-success.html'
+                    'target/grunt/webapp/v2/password-reset-success.html': 'target/grunt/webapp/v2/password-reset-success.html',
+                    'target/grunt/webapp/v2/password-reset-error.html': 'target/grunt/webapp/v2/password-reset-error.html',
+                    'target/grunt/webapp/v2/help/': 'target/grunt/webapp/v2/help/**/*.html'
                 },
                 options: {
                     replacements: [
@@ -282,8 +282,14 @@ module.exports = function(grunt, ref) {
                             pattern: "http://www.logistimo.com/privacy-policy.html",
                             replacement: "<%= custom.privacylink %>"
                         }, {
-                            pattern: "images/acquia_marina_logo.png",
-                            replacement: "images/<%= custom.logo %>"
+                            pattern: "acquia_marina_logo.png",
+                            replacement: "<%= custom.logo %>"
+                        },{
+                            pattern: "google-client-id",
+                            replacement: "<%= custom.googleid %>"
+                        },{
+                            pattern: "google-key",
+                            replacement: "<%= custom.googlekey %>"
                         }
                     ]
                 }
@@ -307,12 +313,6 @@ module.exports = function(grunt, ref) {
                         },{
                             pattern: /Entities/g,
                             replacement: "Stores"
-                        },{
-                            pattern: "<title>Logistimo</title>",
-                            replacement: "<title>My custom title</title>"
-                        },{
-                            pattern: "acquia_marina_logo.png",
-                            replacement: "custom_logo.png"
                         }
                     ]
                 }
@@ -537,9 +537,16 @@ module.exports = function(grunt, ref) {
     grunt.loadNpmTasks('grunt-shell');
 
 
-    grunt.registerTask('default',['copy:main','copy:properties','rename:en','rename:fr','propertiesToJSON:en','propertiesToJSON:fr','shell:convertUTF8','copy:res2src','copy:rb2src']);
-    grunt.registerTask('development',['clean:dist', 'env:dev', 'copy:src','copy:main','copy:properties','if:default', 'rename:en', 'rename:fr', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',  'rename:resource','cssmin:prod', 'preprocess:beforeUglify', 'toggleComments', 'html2js', 'ngAnnotate', 'string-replace:dist', 'uglify', 'preprocess:afterUglify']);
-    grunt.registerTask('production',['clean:dist', 'env:prod', 'copy:src','copy:main','copy:properties', 'if:default', 'rename:en', 'rename:fr', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb', 'rename:resource', 'cssmin:prod', 'preprocess:beforeUglify', 'toggleComments', 'html2js', 'ngAnnotate', 'string-replace:dist', 'uglify', 'preprocess:afterUglify']);
+    grunt.registerTask('default',['copy:main','copy:properties','rename:en','rename:fr','propertiesToJSON:en',
+        'propertiesToJSON:fr','shell:convertUTF8','copy:res2src','copy:rb2src']);
+    grunt.registerTask('development',['clean:dist', 'env:dev', 'copy:src','copy:main','copy:properties','if:default',
+        'rename:en', 'rename:fr', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',
+        'rename:resource','cssmin:prod', 'preprocess:beforeUglify', 'toggleComments', 'html2js', 'ngAnnotate',
+        'string-replace:dist', 'uglify', 'preprocess:afterUglify']);
+    grunt.registerTask('production',['clean:dist', 'env:prod', 'copy:src','copy:main','copy:properties', 'if:default',
+        'rename:en', 'rename:fr', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',
+        'rename:resource', 'cssmin:prod', 'preprocess:beforeUglify', 'toggleComments', 'html2js', 'ngAnnotate',
+        'string-replace:dist', 'uglify', 'preprocess:afterUglify']);
 
     function rename(moduleName) {
         return moduleName.replace('../modules/web/src/main/webapp/v2/', '');
