@@ -43,12 +43,18 @@ public class ConfigUtil {
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("samaanguru.properties"));
 
+    }catch(Exception e) {
+      throw new RuntimeException("Unable to load samaanguru.properties", e);
+    }
+
+    try{
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("beans.properties"));
-
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    properties.putAll(System.getProperties());
   }
 
   public static String get(String name) {
@@ -104,5 +110,9 @@ public class ConfigUtil {
 
   public static String getDomain() {
     return ConfigUtil.get("logi.domain", Constants.DEFAULT);
+  }
+
+  public static Properties getProperties() {
+    return (Properties) properties.clone();
   }
 }

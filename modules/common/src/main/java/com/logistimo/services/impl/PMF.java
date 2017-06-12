@@ -24,6 +24,7 @@
 package com.logistimo.services.impl;
 
 import com.logistimo.logger.XLog;
+import com.logistimo.services.utils.ConfigUtil;
 
 import java.util.Collection;
 
@@ -35,9 +36,7 @@ public final class PMF {
 
   private static final XLog xlogger = XLog.getLog(PMF.class);
 
-  private static final PersistenceManagerFactory pmfInstance =
-      JDOHelper.getPersistenceManagerFactory("Optimistic");
-
+  private static final PersistenceManagerFactory pmfInstance = JDOHelper.getPersistenceManagerFactory(ConfigUtil.getProperties());
 
   private PMF() {
   }
