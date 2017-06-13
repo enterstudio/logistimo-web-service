@@ -653,7 +653,7 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
         return {
             restrict: 'E',
             scope: {
-                filterType: '=',
+                filterType: '@',
                 filterModel: '=',
                 placeHolder: '@'
             },
