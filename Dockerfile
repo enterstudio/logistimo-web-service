@@ -1,5 +1,29 @@
+#
+# Copyright © 2017 Logistimo.
+#
+# This file is part of Logistimo.
+#
+# Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+# low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# You can be released from the requirements of the license by purchasing a commercial license. To know more about
+# the commercial license, please contact us at opensource@logistimo.com
+#
+
+
 FROM tomcat:7-jre8
-MAINTAINER  <dockers@logistimo.com>
+MAINTAINER dockers@logistimo.com
 
 ARG warname
 
@@ -9,29 +33,50 @@ RUN rm -rf $TOMCAT_HOME/webapps/*
 
 ADD modules/web/target/$warname $TOMCAT_HOME/webapps/
 
+RUN  wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/org/apache/commons/commons-pool2/2.2/commons-pool2-2.2.jar \
+        && wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/redis/clients/jedis/2.5.2/jedis-2.5.2.jar \
+        && wget -P $TOMCAT_HOME/lib/ http://central.maven.org/maven2/com/bluejeans/tomcat-redis-session-manager/2.0.0/tomcat-redis-session-manager-2.0.0.jar
+
+ADD dockerfiles/context.xml $TOMCAT_HOME/conf/
+
 RUN unzip -o $TOMCAT_HOME/webapps/$warname \
         -d $TOMCAT_HOME/webapps/ROOT/ \
         && rm -rf $TOMCAT_HOME/webapps/$warname
 
-ENV MYSQL_HOST=localhost \
+ENV MYSQL_HOST_URL="jdbc:mariadb://localhost/logistimo?useUnicode=true&amp;characterEncoding=UTF-8" \
         MYSQL_USER=logistimo \
         MYSQL_PASS=logistimo \
-        HADOOP_HOST=localhost \
+        MYSQL_DATABASE=logistimo \
         REDIS_HOST=localhost \
+        SENTINEL_HOST= \
+        SENTINEL_MASTER= \
+        HADOOP_HOST=localhost \
+        MEDIA_HOST_URL=http://localhost:50070/webhdfs/v1 \
+        ZKR_HOST=localhost:2181 \
         LOGI_HOST=localhost \
+        ACTIVEMQ_HOST=tcp://localhost:61616 \
         TASK_SERVER=true \
+        TASK_URL=http://localhost:8080 \
+        TASK_QUEUE_TYPE=simple \
         TASK_EXPORT=true \
         EMAIL_HOST=localhost \
         EMAIL_PORT=25 \
-        EMAIL_FROMADDRESS=dockers@logsitimo.com \
+        EMAIL_FROMADDRESS=service@logistimo.com \
         EMAIL_FROMNAME=Logistimo\ Service \
         TASK_PORT=8080 \
-        CALLISTO_HOST=localhost \
-        CALLISTO_PORT=8090 \
-        LOCAL_ENV=true
+        CALLISTO_HOST_URL=http://localhost:8090 \
+        LOCAL_ENV=true \
+        JAVA_XMS=1024m \
+        JAVA_XMX=1024m \
+        JMX_AGENT_PORT=8088
 
+ENV JAVA_OPTS $JAVA_OPTS
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN cd $TOMCAT_HOME && wget http://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.7/jmx_prometheus_javaagent-0.7.jar
+
+ADD dockerfiles/jmx_exporter.json $TOMCAT_HOME/jmx_exporter.json
+
+COPY dockerfiles/docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN chmod +x /docker-entrypoint.sh
 
