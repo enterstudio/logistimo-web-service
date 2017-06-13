@@ -214,6 +214,10 @@ public class Constants {
   public static final String TYPE_SHIPMENT = "s";
   public static final String MATERIAL_TAG = "mTag";
 
+  public static final int FREQ_TYPE_DAILY = 0;
+  public static final int FREQ_TYPE_WEEKLY = 1;
+  public static final int FREQ_TYPE_MONTHLY = 2;
+
 
   public static String getVerticalDisplay(String vertical) {
     String verticalDisplay = "Default";

@@ -26,19 +26,15 @@ package com.logistimo.proto;
 import java.math.BigDecimal;
 
 /**
- * Created by vani on 18/01/17.
+ * Created by vani on 21/03/17.
  */
-public class MobileTransactionModel {
+public class MobileTransModel {
   /**
-   * Material id
+   * Transaction entry time in milliseconds (time at which the transaction is entered on the mobile)
    */
-  public Long mid;
+  public Long entm;
   /**
-   * Material name - optional
-   */
-  public String mnm;
-  /**
-   * Type of transaction
+   * Transaction type
    */
   public String ty;
   /**
@@ -46,9 +42,25 @@ public class MobileTransactionModel {
    */
   public BigDecimal q;
   /**
-   * Timestamp
+   * Opening stock
    */
-  public String t;
+  public BigDecimal ostk;
+  /**
+   * Batch ID
+   */
+  public String bid;
+  /**
+   * Batch expiry date in dd/mm/yyyy format
+   */
+  public String bexp;
+  /**
+   * Batch manufacturer name
+   */
+  public String bmfnm;
+  /**
+   * Batch manufactured date in dd/mm/yyyy format
+   */
+  public String bmfdt;
   /**
    * Reason
    */
@@ -58,71 +70,15 @@ public class MobileTransactionModel {
    */
   public String mst;
   /**
-   * Opening stock
-   */
-  public BigDecimal ostk;
-  /**
-   * Closing stock
-   */
-  public BigDecimal cstk;
-  /**
-   * User ID
-   */
-  public String uid;
-  /**
-   * User name
-   */
-  public String u;
-  /**
-   * Linked kiosk id
-   */
-  public Long lkid;
-  /**
-   * Linked kiosk name
-   */
-  public String lknm;
-  /**
-   * Batch ID
-   */
-  public String bid;
-  /**
-   * Opening stock in batch
-   */
-  public BigDecimal ostkb;
-  /**
-   * Batch expiry - DD/MM/YYYY
-   */
-  public String bexp;
-  /**
-   * Batch manufacturer name
-   */
-  public String bmfnm;
-  /**
-   * Batch manufactured date - DD/MM/YYYY
-   */
-  public String bmfdt;
-  /**
-   * Closing stock in batch
-   */
-  public BigDecimal cstkb;
-  /**
-   * Actual date of transaction
+   * Actual date of transaction in dd/mm/yyyy format
    */
   public String atd;
   /**
-   * Tracking object type
+   * Linked Kiosk ID
    */
-  public String troty;
+  public Long lkid;
   /**
-   * Tracking object id
+   * Geo model
    */
-  public String trid;
-  /**
-   * Material tag(s)
-   */
-  public String tg;
-  /**
-   * Entry time
-   */
-  public Long svtm;
+  public MobileGeoModel geo;
 }

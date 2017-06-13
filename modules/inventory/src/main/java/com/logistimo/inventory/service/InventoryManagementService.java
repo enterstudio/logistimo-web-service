@@ -26,18 +26,19 @@ package com.logistimo.inventory.service;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.inventory.entity.*;
+import com.logistimo.inventory.models.ErrorDetailModel;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.DuplicationException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
-import org.json.JSONObject;
 
 import javax.jdo.PersistenceManager;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface InventoryManagementService extends Service {
 
@@ -314,6 +315,10 @@ public interface InventoryManagementService extends Service {
       throws ServiceException, DuplicationException;
 
   ITransaction updateInventoryTransaction(Long domainId, ITransaction inventoryTransaction,
+                                          boolean skipPred, boolean skipVal, PersistenceManager pm)
+      throws ServiceException, DuplicationException;
+
+  ITransaction updateInventoryTransaction(Long domainId, ITransaction inventoryTransaction,
                                           boolean skipPred,
                                           PersistenceManager pm)
       throws ServiceException, DuplicationException;
@@ -433,6 +438,16 @@ public interface InventoryManagementService extends Service {
 
   boolean validateEntityBatchManagementUpdate(Long kioskId) throws ServiceException;
   boolean validateMaterialBatchManagementUpdate(Long materialId) throws ServiceException;
+
+  /**
+   * Updates multiple inventories by persisting multiple transactions (of one or more types and one or more material)
+   * @param materialTransactionsMap - map of material id to list of transactions to be persisted
+   * @param domainId - domain ID
+   * @param userId - user ID
+   * @return - Map<Long,List<ErrorDetailModel>> - A map of material id and the details of the errors that were encountered while persisting the transactions
+   * @throws ServiceException
+   */
+  Map<Long,List<ErrorDetailModel>> updateMultipleInventoryTransactions(Map<Long,List<ITransaction>> materialTransactionsMap, Long domainId, String userId) throws ServiceException;
 
   /**
    * Get the unusable stock (stock total stock expiring before consumption) for a specified kiosk and material

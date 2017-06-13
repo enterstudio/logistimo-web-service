@@ -36,6 +36,8 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
 import com.logistimo.entities.entity.IKiosk;
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -46,6 +48,8 @@ import com.logistimo.events.processor.EventPublisher;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
 import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.inventory.MobileTransactionsHandler;
+import com.logistimo.inventory.MobileTransactionsHandlerFactory;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.IInvntryDao;
 import com.logistimo.inventory.dao.ITransDao;
@@ -53,6 +57,7 @@ import com.logistimo.inventory.dao.impl.InvntryDao;
 import com.logistimo.inventory.dao.impl.TransDao;
 import com.logistimo.inventory.entity.*;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
+import com.logistimo.inventory.models.ErrorDetailModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IHandlingUnit;
@@ -107,6 +112,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   private ITagDao tagDao = new TagDao();
   private IInvntryDao invntryDao = new InvntryDao();
   private ITransDao transDao = new TransDao();
+
+  private static final int LOCK_RETRY_COUNT = 25;
+  private static final int LOCK_RETRY_DELAY_IN_MILLISECONDS = 2400;
 
   // Post inv.-transaction-commit hook
   private static void doPostTransactionCommitHook(List<ITransaction> transList,
@@ -1285,9 +1293,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           // Get the kiosk and material Ids
           Long kioskId = trans.getKioskId();
           Long materialId = trans.getMaterialId();
-          lockKey = Constants.TX + kioskId + Constants._M + materialId;
+          lockKey = Constants.TX + kioskId;
           if (ITransaction.TYPE_TRANSFER.equals(tType)) {
-            destLockKey = Constants.TX + trans.getLinkedKioskId() + Constants._M + materialId;
+            destLockKey = Constants.TX + trans.getLinkedKioskId();
             lockStatus = LockUtil.doubleLock(lockKey, destLockKey, 25, 200);
           } else {
             lockStatus = LockUtil.lock(lockKey, 25, 200);
@@ -1396,8 +1404,20 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                   getInventoryBatch(trans.getLinkedKioskId(), materialId, trans.getBatchId(), pm);
             }
           }
+          try {
+            checkLinkExists(trans);
+          } catch (LogiException e) {
+            trans.setMsgCode(e.getCode());
+            trans.setMessage(e.getMessage());
+            errors.add(trans);
+            continue;
+          }
+
           if (!trans.useCustomTimestamp()) {
             trans.setTimestamp(timestamp);
+            if (trans.getEntryTime() != null && trans.getEntryTime().getTime() > timestamp.getTime()) {
+              trans.setEntryTime(timestamp);
+            }
           }
           // Update tags for querying purpose
           List<String> tags = in.getTags(TagUtil.TYPE_MATERIAL);
@@ -1577,6 +1597,24 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     if (errorList != null && !errorList.isEmpty()) {
       return errorList.get(
           0); // Since the list has only one Transaction, the errorList also cannot have more than one Transaction
+    } else {
+      return null;
+    }
+  }
+
+  public ITransaction updateInventoryTransaction(Long domainId, ITransaction inventoryTransaction,
+                                                 boolean skipPred, boolean skipVal, PersistenceManager pm) throws ServiceException, DuplicationException {
+    if (inventoryTransaction == null) {
+      throw new ServiceException("Invalid parameter passed, testing failed transaction");
+    }
+
+    List<ITransaction> list = new ArrayList<>(1);
+    list.add(inventoryTransaction);
+    List<ITransaction> errorList = updateInventoryTransactions(domainId, list, skipVal, skipPred, pm);
+    if (errorList != null && !errorList.isEmpty()) {
+      // Since the list has only one Transaction, the errorList also cannot have more than one Transaction
+      return errorList.get(
+          0);
     } else {
       return null;
     }
@@ -1824,7 +1862,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       }
       // Check of linked kiosk, if transfer
       if (ITransaction.TYPE_TRANSFER.equals(transType) && trans.getLinkedKioskId() == null) {
-        throw new LogiException("M003");
+        throw new LogiException("M003",(Object[]) null);
       }
     } else if (ITransaction.TYPE_RECEIPT.equals(transType) || ITransaction.TYPE_ORDER
         .equals(transType) || ITransaction.TYPE_RETURN.equals(transType)) {
@@ -3531,6 +3569,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     }
     return true;
   }
+
   public Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTag,
                               Long materialId, String materialTag, int matType,
                               boolean onlyNonZeroStk, String pdos, LocationSuggestionModel location, PageParams params) throws ServiceException {
@@ -3559,6 +3598,220 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       pm.close();
     }
     return allowUpdate;
+  }
+
+  public Map<Long,List<ErrorDetailModel>> updateMultipleInventoryTransactions(Map<Long,List<ITransaction>> materialTransactionsMap, Long domainId, String userId) throws ServiceException {
+    if (materialTransactionsMap == null || materialTransactionsMap.isEmpty() || domainId == null || StringUtils.isEmpty(userId)) {
+      throw new ServiceException("Missing or invalid mandatory attributes while updating multiple inventory transactions");
+    }
+    PersistenceManager pm = null;
+    javax.jdo.Transaction tx = null;
+    Map<Long, LockUtil.LockStatus> locks = null;
+    Map<Long,List<ErrorDetailModel>> materialErrorDetailModelsMap = new HashMap<>(1);
+    try {
+      pm = PMF.get().getPersistenceManager();
+      tx = pm.currentTransaction();
+      tx.begin();
+      // Iterate over the map and validate transactions for each material
+      Set<Long> mids = materialTransactionsMap.keySet();
+      Map<Long,Integer> midCountMap = new HashMap<>();
+      List<ITransaction> validTransactions = null;
+      Map<Long,Integer> midFailedFromPositionMap = new HashMap<>();
+      for (Long mid : mids) {
+        List<ITransaction> transactions = materialTransactionsMap.get(mid);
+        // Pass it through data validation
+        int invalidStartPosition = TransactionUtil.filterInvalidTransactions(transactions);
+        if (invalidStartPosition != -1) {
+          updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M010", invalidStartPosition);
+        }
+        if (transactions.isEmpty()) {
+          // No more transactions to process. Continue to the next material.
+          continue;
+        }
+        MobileTransactionsHandler mobTransHandler = MobileTransactionsHandlerFactory.getInstance(
+            MobileTransactionsHandlerFactory.POLICY_1);
+        ITransaction transaction = transactions.get(0);
+        Long kioskId = transaction.getKioskId();
+        Long materialId = transaction.getMaterialId();
+        String batchId = transaction.getBatchId();
+        Set<Long> kiosksToLock = getKioskIdsToLock(transactions);
+        Map<Long,LockUtil.LockStatus> kidLockStatusMap = lockKiosks(kiosksToLock);
+        locks = new HashMap<>(kiosksToLock.size());
+        for(Map.Entry<Long,LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()){
+          if (!locks.containsKey(entry.getKey())) {
+            locks.put(entry.getKey(),entry.getValue());
+          }
+          if (!LockUtil.isLocked(entry.getValue())) {
+            throw new ServiceException(backendMessages.getString("lockinventory.failed"));
+          }
+        }
+        ITransaction lastWebTrans = getLastWebTransaction(kioskId, materialId, batchId);
+        int rejectUntilPosition = mobTransHandler.applyPolicy(transactions, lastWebTrans);
+        if (rejectUntilPosition != -1) {
+          updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M011", rejectUntilPosition);
+          midCountMap.put(mid,rejectUntilPosition);
+        }
+        if (transactions.isEmpty()) {
+          // No more transactions to process. Continue to next material.
+          continue;
+        }
+        try {
+          mobTransHandler.addStockCountIfNeeded(lastWebTrans, transactions);
+        } catch (LogiException e) {
+          // Reject all transactions
+          transactions.clear();
+          updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap, materialErrorDetailModelsMap, transaction.getMaterialId());
+        }
+        if (transactions.isEmpty()) {
+          continue;
+        }
+        // Add valid transactions for this material into the main list
+        if (validTransactions == null) {
+          validTransactions = new ArrayList<>(transactions.size());
+        }
+        validTransactions.addAll(transactions);
+      }
+      // If no validTransactions, return
+      if (validTransactions == null || validTransactions.isEmpty()) {
+        return materialErrorDetailModelsMap;
+      }
+      // Shuffle and sort the transactions by entry time
+      Collections.sort(validTransactions, new EntryTimeComparator());
+      // Iterate through every valid transaction
+      for (ITransaction transaction : validTransactions) {
+        if (midFailedFromPositionMap.containsKey(transaction.getMaterialId())) {
+          // Do not process for this material
+          continue;
+        }
+        try {
+          ITransaction error = updateInventoryTransaction(domainId, transaction, false, true, pm);
+          if (error != null) {
+            xLogger.warn("Error while updating inventory, errorCode: {0}, errorMessage: {1}", error.getMsgCode(), error.getMessage());
+            updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap, materialErrorDetailModelsMap, transaction.getMaterialId());
+            continue;
+          }
+        } catch (DuplicationException | ServiceException e) {
+          xLogger.severe(
+              "Exception while updating inventory transaction for kid: {0}, mid: {1}, bid: {2}", transaction.getKioskId(), transaction.getMaterialId(), transaction.getBatchId(), e);
+          updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap, materialErrorDetailModelsMap, transaction.getMaterialId());
+          continue;
+        }
+        if (!transaction.isSystemCreated()) {
+          if (midCountMap.containsKey(transaction.getMaterialId())) {
+            int rejectUntilPosition = midCountMap.get(transaction.getMaterialId());
+            midCountMap.put(transaction.getMaterialId(), rejectUntilPosition + 1);
+          } else {
+            midCountMap.put(transaction.getMaterialId(), 0);
+          }
+        }
+      }
+      tx.commit();
+    } finally {
+      if (tx != null && tx.isActive()) {
+        tx.rollback();
+      }
+      if (locks != null) {
+        releaseAllLocks(locks);
+      }
+      if (!pm.isClosed()) {
+        pm.close();
+      }
+    }
+    return materialErrorDetailModelsMap;
+  }
+
+  private void updateMaterialErrorDetailModelsMap(Long mid, Map<Long,List<ErrorDetailModel>> materialErrorDetailModelsMap, String errorCode, int position) {
+    if (materialErrorDetailModelsMap == null) {
+      materialErrorDetailModelsMap = new HashMap<>(1);
+    }
+    List<ErrorDetailModel> errorDetailModels;
+    if (materialErrorDetailModelsMap.containsKey(mid)) {
+      errorDetailModels = materialErrorDetailModelsMap.get(mid);
+    } else {
+      errorDetailModels = new ArrayList<>(1);
+    }
+    errorDetailModels.add(new ErrorDetailModel(errorCode, position));
+    materialErrorDetailModelsMap.put(mid,errorDetailModels);
+  }
+
+  private void updateFailedFromPositionMap(Map<Long,Integer> midFailedFromPositionMap, Map<Long,Integer> midCountMap, Map<Long,List<ErrorDetailModel>> materialErrorDetailModelsMap, Long mid) {
+    int failedFromPosition = 0;
+    if (midCountMap.containsKey(mid)) {
+      failedFromPosition = midCountMap.get(mid) + 1;
+    }
+    midFailedFromPositionMap.put(mid, failedFromPosition);
+    updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M012", failedFromPosition);
+  }
+
+  private void releaseAllLocks(Map<Long,LockUtil.LockStatus> kidLockStatusMap) {
+    for (Map.Entry<Long, LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()) {
+      String key = Constants.TX + entry.getKey();
+      if (LockUtil.shouldReleaseLock(entry.getValue())) {
+        LockUtil.release(key);
+      }
+    }
+  }
+
+  public ITransaction getLastWebTransaction(Long kid, Long mid, String bid) throws ServiceException{
+    // Get the latest transaction
+    PageParams pageParams = new PageParams(0,1);
+    Results results = getInventoryTransactions(null, null, null, kid, mid,
+        null,
+        null, null, null, null, pageParams, bid, false, null);
+    ITransaction lastWebTrans = null;
+    if (results.getSize() == 1) {
+      lastWebTrans = (ITransaction) results.getResults().get(0);
+    }
+    return lastWebTrans;
+  }
+
+  private void checkLinkExists(ITransaction trans) throws LogiException {
+    if (ITransaction.TYPE_RECEIPT.equals(trans.getType()) || ITransaction.TYPE_ISSUE
+        .equals(trans.getType())) {
+      if (trans.getLinkedKioskId() != null) {
+        EntitiesService es =
+            Services.getService(EntitiesServiceImpl.class);
+        String linkType;
+        if (ITransaction.TYPE_RECEIPT.equals(trans.getType())) {
+          linkType = IKioskLink.TYPE_VENDOR;
+        } else {
+          linkType = IKioskLink.TYPE_CUSTOMER;
+        }
+        if (!es.hasKioskLink(trans.getKioskId(), linkType, trans.getLinkedKioskId())) {
+          throw new LogiException("M030", (Object[]) null);
+        }
+      }
+    }
+  }
+
+  // Get the unique list of kiosk ids to lock. This includes kid and lkid (in case the transaction type is transfer)
+  private Set<Long> getKioskIdsToLock(List<ITransaction> transactions) {
+    Set<Long> kidsToLock = new HashSet<>(1);
+    for (ITransaction trn : transactions) {
+        kidsToLock.add(trn.getKioskId());
+      if (ITransaction.TYPE_TRANSFER.equals(trn.getType()) && !kidsToLock.contains(trn.getLinkedKioskId())) {
+        kidsToLock.add(trn.getLinkedKioskId());
+      }
+    }
+    return kidsToLock;
+  }
+
+  // Lock the kiosks and return a map of the kiosk id and the lock status
+  private Map<Long,LockUtil.LockStatus> lockKiosks(Set<Long> kioskIds) {
+    Map<Long,LockUtil.LockStatus> kidLockStatusMap = new HashMap<>(kioskIds.size());
+    for (Long kioskId : kioskIds) {
+      String key = Constants.TX + kioskId;
+      LockUtil.LockStatus lockStatus = LockUtil.lock(key,LOCK_RETRY_COUNT,LOCK_RETRY_DELAY_IN_MILLISECONDS);
+      kidLockStatusMap.put(kioskId, lockStatus);
+    }
+    return kidLockStatusMap;
+  }
+
+  public class EntryTimeComparator implements Comparator<ITransaction> {
+    @Override
+    public int compare(ITransaction o1, ITransaction o2) {
+      return o1.getEntryTime().compareTo(o2.getEntryTime());
+    }
   }
 
   public boolean validateMaterialBatchManagementUpdate(Long materialId) throws ServiceException {

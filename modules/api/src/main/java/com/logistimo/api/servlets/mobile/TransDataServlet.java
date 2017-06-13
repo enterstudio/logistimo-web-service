@@ -26,30 +26,31 @@ package com.logistimo.api.servlets.mobile;
 import com.logistimo.api.servlets.JsonRestServlet;
 import com.logistimo.api.servlets.mobile.builders.MobileTransactionsBuilder;
 import com.logistimo.api.servlets.mobile.models.ParsedRequest;
-import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.api.util.GsonUtil;
+import com.logistimo.api.util.RESTUtil;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
+import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.proto.MobileTransactionsModel;
+import com.logistimo.proto.RestConstantsZ;
 import com.logistimo.reports.entity.slices.IDaySlice;
 import com.logistimo.reports.entity.slices.ISlice;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.api.util.GsonUtil;
-import com.logistimo.proto.RestConstantsZ;
-import com.logistimo.constants.Constants;
+import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.QueryUtil;
-import com.logistimo.api.util.RESTUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.users.entity.IUserAccount;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -338,6 +339,7 @@ public class TransDataServlet extends JsonRestServlet {
     String password = req.getParameter(RestConstantsZ.PASSWORD);
     String sizeStr = req.getParameter(RestConstantsZ.SIZE);
     String endDateStr = req.getParameter(RestConstantsZ.ENDDATE);
+    String tag = req.getParameter(JsonTagsZ.TAGS);
 
     String offsetStr = req.getParameter(Constants.OFFSET);
     int offset = 0;
@@ -410,7 +412,7 @@ public class TransDataServlet extends JsonRestServlet {
           Results
               results =
               RESTUtil
-                  .getTransactions(domainId, kioskId, locale, timezone, dc, endDate, pageParams);
+                  .getTransactions(domainId, kioskId, locale, timezone, dc, endDate, pageParams, tag);
           transactionList = (Vector<Hashtable<String, String>>) results.getResults();
         }
       } catch (Exception e) {
@@ -494,6 +496,7 @@ public class TransDataServlet extends JsonRestServlet {
           .put(RestConstantsZ.TRANSACTION_TYPE, req.getParameter(RestConstantsZ.TRANSACTION_TYPE));
       reqParamsMap.put(RestConstantsZ.STARTDATE, req.getParameter(RestConstantsZ.STARTDATE));
       reqParamsMap.put(RestConstantsZ.MATERIAL_ID, req.getParameter(RestConstantsZ.MATERIAL_ID));
+      reqParamsMap.put(RestConstantsZ.TAGS, req.getParameter(RestConstantsZ.TAGS));
 
       ParsedRequest parsedRequest = parseGetTransactionsRequestParams(reqParamsMap, backendMessages,
           timezone);
@@ -513,7 +516,7 @@ public class TransDataServlet extends JsonRestServlet {
       Results
           results =
           ims.getInventoryTransactionsByKiosk(kioskId,
-              (Long) parsedRequest.parsedReqMap.get(RestConstantsZ.MATERIAL_ID), null,
+              (Long) parsedRequest.parsedReqMap.get(RestConstantsZ.MATERIAL_ID), (String) parsedRequest.parsedReqMap.get(RestConstantsZ.TAGS),
               (Date) parsedRequest.parsedReqMap.get(RestConstantsZ.STARTDATE),
               (Date) parsedRequest.parsedReqMap.get(RestConstantsZ.ENDDATE),
               (String) parsedRequest.parsedReqMap.get(RestConstantsZ.TRANSACTION_TYPE), pageParams,
@@ -620,6 +623,10 @@ public class TransDataServlet extends JsonRestServlet {
         return parsedRequest;
       }
     }
+      String materialTag = reqParamsMap.get(RestConstantsZ.TAGS);
+      if(StringUtils.isNotEmpty(materialTag)) {
+          parsedRequest.parsedReqMap.put(RestConstantsZ.TAGS, materialTag);
+      }
     return parsedRequest;
   }
 

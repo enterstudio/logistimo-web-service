@@ -477,3 +477,7 @@ ship.reason.update.error=Error while updating Reason for Shipment
 ship.expected.date.parse.error=Error while parsing expected fulfillment date
 ship.package.size.update.success=Package size updated successfully.
 ship.package.size.update.error=Error while updating package size
+error.invaliddata.frommobile=Invalid data
+transactions.processing.inprogress=Transactions processing in progress, please try again after sometime
+openingstock.mismatch=Opening stock did not match
+lockinventory.failed=Unable to lock inventory. Please retry after sometime

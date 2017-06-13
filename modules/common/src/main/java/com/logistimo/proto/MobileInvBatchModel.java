@@ -26,103 +26,43 @@ package com.logistimo.proto;
 import java.math.BigDecimal;
 
 /**
- * Created by vani on 18/01/17.
+ * Created by vani on 24/03/17.
  */
-public class MobileTransactionModel {
-  /**
-   * Material id
-   */
-  public Long mid;
-  /**
-   * Material name - optional
-   */
-  public String mnm;
-  /**
-   * Type of transaction
-   */
-  public String ty;
-  /**
-   * Quantity
-   */
-  public BigDecimal q;
-  /**
-   * Timestamp
-   */
-  public String t;
-  /**
-   * Reason
-   */
-  public String rsn;
-  /**
-   * Material status
-   */
-  public String mst;
-  /**
-   * Opening stock
-   */
-  public BigDecimal ostk;
-  /**
-   * Closing stock
-   */
-  public BigDecimal cstk;
-  /**
-   * User ID
-   */
-  public String uid;
-  /**
-   * User name
-   */
-  public String u;
-  /**
-   * Linked kiosk id
-   */
-  public Long lkid;
-  /**
-   * Linked kiosk name
-   */
-  public String lknm;
+public class MobileInvBatchModel {
   /**
    * Batch ID
    */
   public String bid;
   /**
-   * Opening stock in batch
-   */
-  public BigDecimal ostkb;
-  /**
-   * Batch expiry - DD/MM/YYYY
-   */
-  public String bexp;
-  /**
    * Batch manufacturer name
    */
   public String bmfnm;
   /**
-   * Batch manufactured date - DD/MM/YYYY
+   * Batch manufactured date in dd/mm/yyyy format
    */
   public String bmfdt;
   /**
-   * Closing stock in batch
+   * Batch expiry date in dd/mm/yyyy format
    */
-  public BigDecimal cstkb;
+  public String bexp;
   /**
-   * Actual date of transaction
+   * Quantity
    */
-  public String atd;
+  public BigDecimal q;
   /**
-   * Tracking object type
+   * Allocated quantity
    */
-  public String troty;
+  public BigDecimal alq;
   /**
-   * Tracking object id
+   * Available quantity
    */
-  public String trid;
+  public BigDecimal avq;
   /**
-   * Material tag(s)
+   * Last updated time of batch
    */
-  public String tg;
+  public String t;
   /**
-   * Entry time
+   * Batch stock count (if any)
    */
-  public Long svtm;
+  public MobileStkCntdModel scntd;
 }

@@ -219,10 +219,21 @@ public class Transaction implements ITransaction {
   @Persistent
   private Double alt;
 
+  /**
+   * Entry time
+   */
+  @Persistent
+  private Date et;
+
+  /**
+   * Only used by Rest API while updating order quantity. Mapped to sdrsn in DemandItem
+   */
   @NotPersistent
   private String
       eoqrsn;
-  // Only used by Rest API while updating order quantity. Mapped to sdrsn in DemandItem
+
+  @NotPersistent
+  private boolean systemCreated;
 
   public static String getDisplayName(String transType, Locale locale) {
     return getDisplayName(transType, DomainConfig.TRANSNAMING_DEFAULT, locale);
@@ -779,6 +790,42 @@ public class Transaction implements ITransaction {
   @Override
   public void setEatd(Boolean eatd) {
     this.eatd = eatd;
+  }
+
+  @Override
+  public Date getEntryTime() { return et;}
+
+  @Override
+  public void setEntryTime(Date et) { this.et = et;}
+
+  public boolean isSystemCreated() {
+    return systemCreated;
+  }
+
+  public void setSystemCreated(boolean systemCreated) {
+    this.systemCreated = systemCreated;
+  }
+
+  @Override
+  public BigDecimal getQuantity(boolean returnActualValue) {
+    if (returnActualValue) {
+      return q;
+    }
+    return getQuantity();
+  }
+  @Override
+  public BigDecimal getOpeningStock(boolean returnActualValue) {
+    if (returnActualValue) {
+      return os;
+    }
+    return getQuantity();
+  };
+  @Override
+  public BigDecimal getOpeningStockByBatch(boolean returnActualValue) {
+    if (returnActualValue) {
+      return q;
+    }
+    return getQuantity();
   }
 
 }

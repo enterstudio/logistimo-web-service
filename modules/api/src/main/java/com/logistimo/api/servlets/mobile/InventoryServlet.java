@@ -31,17 +31,23 @@ import com.google.gson.GsonBuilder;
 
 import com.logistimo.AppFactory;
 import com.logistimo.api.servlets.JsonRestServlet;
+import com.logistimo.api.servlets.mobile.builders.MobileTransactionsBuilder;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.ITransDao;
 import com.logistimo.inventory.dao.impl.TransDao;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.ITransaction;
+import com.logistimo.inventory.models.ErrorDetailModel;
+import com.logistimo.inventory.models.MobileTransactionCacheModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.proto.MobileUpdateInvTransRequest;
+import com.logistimo.proto.MobileUpdateInvTransResponse;
 import com.logistimo.services.taskqueue.ITaskService;
 
 import org.apache.commons.lang.StringUtils;
@@ -78,6 +84,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
@@ -105,6 +112,8 @@ public class InventoryServlet extends JsonRestServlet {
 
   private static ITaskService taskService = AppFactory.get().getTaskService();
   private ITransDao transDao = new TransDao();
+
+  MobileTransactionsBuilder mobTransBuilder = new MobileTransactionsBuilder();
 
   // Get the material info. including material-id to stock-on-hand for the update-inventory return object
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -292,7 +301,9 @@ public class InventoryServlet extends JsonRestServlet {
     if (RestConstantsZ.ACTION_GETINVENTORY.equalsIgnoreCase(action)) {
       getInventory(req, resp, backendMessages, messages);
     } else if (RestConstantsZ.ACTION_UPDINVENTORY.equalsIgnoreCase(action)) {
-      updateInventoryTransactions(req, resp, backendMessages, messages);
+      updateInventoryTransactionsv1(req, resp, backendMessages, messages);
+    } else if (RestConstantsZ.ACTION_UPDATEINVENTORYTRANSACTIONS.equalsIgnoreCase(action)) {
+      updateInventoryTransactions(req, resp, backendMessages);
     } else {
       throw new ServiceException("Invalid action: " + action);
     }
@@ -571,7 +582,7 @@ public class InventoryServlet extends JsonRestServlet {
   }
 
   @SuppressWarnings("rawtypes")
-  public void updateInventoryTransactions(HttpServletRequest req, HttpServletResponse resp,
+  public void updateInventoryTransactionsv1(HttpServletRequest req, HttpServletResponse resp,
                                           ResourceBundle backendMessages, ResourceBundle messages)
       throws IOException {
     boolean status = true;
@@ -804,6 +815,135 @@ public class InventoryServlet extends JsonRestServlet {
       resp.setStatus(500);
     }
     xLogger.fine("Exiting scheduleExport");
+  }
+
+  /**
+   * Updates inventories from the list of transactions sent from the mobile.
+   * @param req - Request object containing the json with the mobile inventory transactions
+   * @param resp
+   * @throws IOException
+   */
+  public void updateInventoryTransactions(HttpServletRequest req, HttpServletResponse resp, ResourceBundle backendMessages) throws IOException {
+    String reqJsonStr = req.getParameter(RestConstantsZ.JSON_STRING);
+    MobileUpdateInvTransRequest
+        mobUpdateInvTransReq = null;
+    int statusCode = HttpServletResponse.SC_OK;
+    Long domainId = null;
+    String errorMessage = null;
+    boolean getResponseFromCache = false;
+    Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap = null;
+    try {
+      if (StringUtils.isEmpty(reqJsonStr)) {
+        throw new InvalidDataException(backendMessages.getString("error.invaliddata.frommobile"));
+      }
+      mobUpdateInvTransReq = mobTransBuilder.buildMobileUpdateInvTransRequest(reqJsonStr);
+      validateMobileUpdateInvTransRequest(mobUpdateInvTransReq, backendMessages);
+      IUserAccount u = RESTUtil.authenticate(mobUpdateInvTransReq.uid, null, mobUpdateInvTransReq.kid, req, resp);
+      domainId = u.getDomainId();
+      boolean isDuplicate = false;
+      // Deduplicate by transaction send time
+      if (TransactionUtil
+          .deduplicateBySendTimePartial(String.valueOf(mobUpdateInvTransReq.sntm),
+              mobUpdateInvTransReq.uid,
+              mobUpdateInvTransReq.pid)) {
+        isDuplicate = true;
+      }
+      if (!isDuplicate) {
+        Map<Long,List<ITransaction>> materialTransactionsMap = mobTransBuilder.buildMaterialTransactionsMap(mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
+            mobUpdateInvTransReq.trns);
+        if (materialTransactionsMap == null || materialTransactionsMap.isEmpty()) {
+          throw new InvalidDataException(backendMessages.getString("error.invaliddata.frommobile"));
+        }
+        InventoryManagementService
+            ims =
+            Services.getService(InventoryManagementServiceImpl.class);
+        midErrorDetailModelsMap = ims.updateMultipleInventoryTransactions(materialTransactionsMap, domainId,
+            mobUpdateInvTransReq.uid);
+      } else {
+        MobileTransactionCacheModel mobileTransactionCacheModel = TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
+            mobUpdateInvTransReq.uid,
+            mobUpdateInvTransReq.pid);
+        if (mobileTransactionCacheModel.getStatus() == TransactionUtil.IN_PROGRESS) {
+            throw new LogiException(backendMessages.getString("transactions.processing.inprogress"));
+        } else if (mobileTransactionCacheModel.getStatus() == TransactionUtil.COMPLETED) {
+          // Get the response from the cache
+          getResponseFromCache = true;
+        }
+      }
+    } catch (UnauthorizedException ue) {
+      xLogger.warn("Exception when updating inventory transactions {0}", ue);
+      statusCode = HttpServletResponse.SC_UNAUTHORIZED;
+      errorMessage = ue.getMessage();
+    } catch (InvalidDataException e) {
+      xLogger.warn("Exception when updating inventory transactions {0}", e);
+      statusCode = HttpServletResponse.SC_BAD_REQUEST;
+      errorMessage = e.getMessage();
+    } catch (ServiceException e) {
+      xLogger.severe("Exception when updating inventory transactions {0}", e);
+      statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+      errorMessage = e.getMessage();
+    } catch (Exception e) {
+      xLogger.severe("Exception when updating inventory transactions {0}", e);
+      statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+      errorMessage = e.getMessage();
+    }
+    try {
+      String
+          mobUpdateInvTransRespJsonStr = null;
+      if (statusCode != HttpServletResponse.SC_BAD_REQUEST && statusCode != HttpServletResponse.SC_UNAUTHORIZED) {
+        mobUpdateInvTransRespJsonStr = createMobUpdateInvTransRespJsonStr(mobUpdateInvTransReq, errorMessage, midErrorDetailModelsMap, domainId, getResponseFromCache);
+      }
+      if (mobUpdateInvTransRespJsonStr != null) {
+        sendJsonResponse(resp, statusCode, mobUpdateInvTransRespJsonStr);
+      } else {
+        sendJsonResponse(resp, statusCode, errorMessage);
+      }
+    } catch (Exception e) {
+      xLogger.severe("Exception when sending update inventory transactions response", e);
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  private void validateMobileUpdateInvTransRequest(MobileUpdateInvTransRequest mobUpdateInvTransReq, ResourceBundle backendMessages) throws
+      InvalidDataException {
+    if (StringUtils.isEmpty(mobUpdateInvTransReq.uid) || mobUpdateInvTransReq.kid == null || mobUpdateInvTransReq.sntm == null || mobUpdateInvTransReq.trns == null || mobUpdateInvTransReq.trns.isEmpty()) {
+      throw new InvalidDataException(backendMessages.getString("error.invaliddata.frommobile"));
+    }
+  }
+
+  private String createMobUpdateInvTransRespJsonStr(MobileUpdateInvTransRequest mobUpdateInvTransReq, String errorMessage, Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap, Long domainId, boolean getResponseFromCache) {
+    String mobUpdateInvTransRespJsonStr = null;
+    if (getResponseFromCache) {
+      String mobUpdateInvTransRespJsonStrInCache =
+          TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
+              mobUpdateInvTransReq.uid,
+              mobUpdateInvTransReq.pid).getResponse();
+      // If the response string from cache does not have part if, set it from the request
+      if(mobUpdateInvTransReq.pid != null) {
+        mobUpdateInvTransRespJsonStr =
+            mobTransBuilder
+                .buildUpdateInvTransResponseWithPartialID(mobUpdateInvTransRespJsonStrInCache,
+                    mobUpdateInvTransReq.pid);
+      } else {
+        return mobUpdateInvTransRespJsonStrInCache;
+      }
+    } else {
+      MobileUpdateInvTransResponse
+          mobUpdateInvTransResp =
+          mobTransBuilder.buildMobileUpdateInvTransResponse(
+              domainId, mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
+              mobUpdateInvTransReq.pid, errorMessage, midErrorDetailModelsMap,
+              mobUpdateInvTransReq.trns);
+      if (mobUpdateInvTransResp != null) {
+        mobUpdateInvTransRespJsonStr = new Gson().toJson(mobUpdateInvTransResp);
+        TransactionUtil.setObjectInCache(String.valueOf(mobUpdateInvTransReq.sntm),
+            mobUpdateInvTransReq.uid,
+            mobUpdateInvTransReq.pid,
+            new MobileTransactionCacheModel(TransactionUtil.COMPLETED,
+                mobUpdateInvTransRespJsonStr));
+      }
+    }
+    return mobUpdateInvTransRespJsonStr;
   }
 
 }

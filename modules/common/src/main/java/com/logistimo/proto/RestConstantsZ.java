@@ -88,7 +88,7 @@ public class RestConstantsZ {
   public static final String ACTION_GETORDERS = "gos";
   public static final String ACTION_GETORDER = "go";
   public static final String ACTION_CANCELORDER = "co";
-  public static final String ACTION_UPDATEORDER = "uo";
+  public static final String ACTION_UPDATEORDER_OLD = "uo";
   public static final String ACTION_UPDATEORDERSTATUS = "uos";
   public static final String ACTION_CREATEUSERKIOSK = "cuk";
   public static final String ACTION_UPDATEUSERKIOSK = "uuk";
@@ -103,6 +103,9 @@ public class RestConstantsZ {
   public static final String ACTION_GETTRANSACTIONS_OLD = "gtrn";
   public static final String ACTION_GETSHPIPMENTS = "gs";
   public static final String ACTION_GETTRANSACTIONS = "gt";
+  public static final String ACTION_UPDATEINVENTORYTRANSACTIONS = "uit";
+  public static final String TAGS = "tg";
+  public static final String ACTION_UPDATEORDER = "updo";
 
   // Filter types
   public static final String FILTER_ONLYSTOCK = "onlystck";

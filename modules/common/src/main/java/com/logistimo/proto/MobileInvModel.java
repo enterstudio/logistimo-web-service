@@ -24,105 +24,78 @@
 package com.logistimo.proto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
- * Created by vani on 18/01/17.
+ * Created by vani on 24/03/17.
  */
-public class MobileTransactionModel {
+public class MobileInvModel {
   /**
-   * Material id
+   * Kiosk ID
+   */
+  public Long kid;
+  /**
+   * Material ID
    */
   public Long mid;
   /**
-   * Material name - optional
+   * Short material ID
    */
-  public String mnm;
-  /**
-   * Type of transaction
-   */
-  public String ty;
+  public Long smid;
   /**
    * Quantity
    */
   public BigDecimal q;
   /**
-   * Timestamp
+   * Allocated quantity
+   */
+  public BigDecimal alq;
+  /**
+   * In transit quantity
+   */
+  public BigDecimal itq;
+  /**
+   * Available quantity
+   */
+  public BigDecimal avq;
+  /**
+   * Min.
+   */
+  public BigDecimal min;
+  /**
+   * Max.
+   */
+  public BigDecimal max;
+  /**
+   * Duration of stock (stock availability period)
+   */
+  public BigDecimal dsq;
+  /**
+   * Duration of min
+   */
+  public BigDecimal dmin;
+  /**
+   * Duration of max
+   */
+  public BigDecimal dmax;
+  /**
+   * Consumption rate model
+   */
+  public MobileConsRateModel cr;
+  /**
+   * Stock counted model
+   */
+  public MobileStkCntdModel scntd;
+  /**
+   * Non expired batches
+   */
+  public List<MobileInvBatchModel> bt;
+  /**
+   * Expired batches
+   */
+  public List<MobileInvBatchModel> xbt;
+  /**
+   * Last updated time of inventory
    */
   public String t;
-  /**
-   * Reason
-   */
-  public String rsn;
-  /**
-   * Material status
-   */
-  public String mst;
-  /**
-   * Opening stock
-   */
-  public BigDecimal ostk;
-  /**
-   * Closing stock
-   */
-  public BigDecimal cstk;
-  /**
-   * User ID
-   */
-  public String uid;
-  /**
-   * User name
-   */
-  public String u;
-  /**
-   * Linked kiosk id
-   */
-  public Long lkid;
-  /**
-   * Linked kiosk name
-   */
-  public String lknm;
-  /**
-   * Batch ID
-   */
-  public String bid;
-  /**
-   * Opening stock in batch
-   */
-  public BigDecimal ostkb;
-  /**
-   * Batch expiry - DD/MM/YYYY
-   */
-  public String bexp;
-  /**
-   * Batch manufacturer name
-   */
-  public String bmfnm;
-  /**
-   * Batch manufactured date - DD/MM/YYYY
-   */
-  public String bmfdt;
-  /**
-   * Closing stock in batch
-   */
-  public BigDecimal cstkb;
-  /**
-   * Actual date of transaction
-   */
-  public String atd;
-  /**
-   * Tracking object type
-   */
-  public String troty;
-  /**
-   * Tracking object id
-   */
-  public String trid;
-  /**
-   * Material tag(s)
-   */
-  public String tg;
-  /**
-   * Entry time
-   */
-  public Long svtm;
 }

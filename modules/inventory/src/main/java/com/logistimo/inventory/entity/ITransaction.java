@@ -214,4 +214,17 @@ public interface ITransaction
 
   void setEditOrderQtyRsn(String eoqrsn);
 
+  Date getEntryTime();
+
+  void setEntryTime(Date et);
+
+  boolean isSystemCreated();
+
+  void setSystemCreated(boolean systemCreated);
+
+  BigDecimal getQuantity(boolean returnActualValue);
+
+  BigDecimal getOpeningStock(boolean returnActualValue);
+
+  BigDecimal getOpeningStockByBatch(boolean returnActualValue);
 }

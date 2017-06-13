@@ -32,36 +32,12 @@ import com.logistimo.accounting.entity.IAccount;
 import com.logistimo.accounting.service.IAccountingService;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
 import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.api.servlets.mobile.models.ParsedRequest;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.entity.IKioskLink;
-import com.logistimo.entities.models.UserEntitiesModel;
-import com.logistimo.entities.service.EntitiesService;
-import com.logistimo.entities.service.EntitiesServiceImpl;
-import com.logistimo.exports.BulkExportMgr;
-import com.logistimo.inventory.TransactionUtil;
-import com.logistimo.inventory.dao.ITransDao;
-import com.logistimo.inventory.dao.impl.TransDao;
-import com.logistimo.inventory.entity.IInvntry;
-import com.logistimo.inventory.entity.IInvntryBatch;
-import com.logistimo.inventory.entity.ITransaction;
-import com.logistimo.inventory.service.InventoryManagementService;
-import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
-import com.logistimo.materials.entity.IHandlingUnit;
-import com.logistimo.materials.entity.IMaterial;
-import com.logistimo.materials.service.IHandlingUnitService;
-import com.logistimo.materials.service.MaterialCatalogService;
-import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
-import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.orders.entity.IOrder;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import org.apache.commons.lang.StringUtils;
 import com.logistimo.communications.service.SMSService;
 import com.logistimo.config.models.ActualTransConfig;
 import com.logistimo.config.models.CapabilityConfig;
@@ -75,16 +51,37 @@ import com.logistimo.config.models.OrdersConfig;
 import com.logistimo.config.models.SMSConfig;
 import com.logistimo.config.models.SupportConfig;
 import com.logistimo.config.models.SyncConfig;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.entities.entity.IKiosk;
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.models.UserEntitiesModel;
+import com.logistimo.entities.service.EntitiesService;
+import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.entity.IJobStatus;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exports.BulkExportMgr;
+import com.logistimo.inventory.TransactionUtil;
+import com.logistimo.inventory.dao.ITransDao;
+import com.logistimo.inventory.dao.impl.TransDao;
+import com.logistimo.inventory.entity.IInvntry;
+import com.logistimo.inventory.entity.IInvntryBatch;
+import com.logistimo.inventory.entity.ITransaction;
+import com.logistimo.inventory.service.InventoryManagementService;
+import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
+import com.logistimo.materials.entity.IHandlingUnit;
+import com.logistimo.materials.entity.IMaterial;
+import com.logistimo.materials.service.IHandlingUnitService;
+import com.logistimo.materials.service.MaterialCatalogService;
+import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
+import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
+import com.logistimo.orders.entity.IOrder;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
 import com.logistimo.proto.BasicOutput;
 import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.proto.MaterialRequest;
@@ -92,20 +89,23 @@ import com.logistimo.proto.ProtocolException;
 import com.logistimo.proto.RestConstantsZ;
 import com.logistimo.proto.UpdateInventoryInput;
 import com.logistimo.proto.UpdateOrderRequest;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.JobUtil;
-import com.logistimo.utils.LocalDateUtil;
-
-import com.logistimo.constants.SourceConstants;
-import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.services.impl.PMF;
+import com.logistimo.services.taskqueue.ITaskService;
+import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.BigUtil;
+import com.logistimo.utils.JobUtil;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.StringUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -1899,7 +1899,7 @@ public class RESTUtil {
   // Method to get transaction history
   @SuppressWarnings("unchecked")
   public static Results getTransactions(Long domainId, Long kioskId, Locale locale, String timezone,
-                                        DomainConfig dc, Date untilDate, PageParams pageParams)
+                                        DomainConfig dc, Date untilDate, PageParams pageParams, String materialTag)
       throws ServiceException {
     // Get the services
     InventoryManagementService
@@ -1911,7 +1911,7 @@ public class RESTUtil {
     // Get the transactions
     Results
         results =
-        ims.getInventoryTransactionsByKiosk(kioskId, null, null, untilDate, null, pageParams, null,
+        ims.getInventoryTransactionsByKiosk(kioskId, materialTag, null, untilDate, null, pageParams, null,
             false, null);
     List<ITransaction> transactions = (List<ITransaction>) results.getResults();
     String cursor = results.getCursor();
@@ -2009,6 +2009,7 @@ public class RESTUtil {
         transaction.put(JsonTagsZ.ACTUAL_TRANSACTION_DATE,
             LocalDateUtil.formatCustom(atd, Constants.DATE_FORMAT, null));
       }
+      transaction.put(JsonTagsZ.TAGS, StringUtil.getCSV(trans.getTags(TagUtil.TYPE_MATERIAL)));
 
       transData.add(transaction);
     }

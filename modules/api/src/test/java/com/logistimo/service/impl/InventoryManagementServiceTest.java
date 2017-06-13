@@ -24,19 +24,21 @@
 package com.logistimo.service.impl;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.constants.Constants;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.inventory.entity.IInvntry;
 
 import com.logistimo.inventory.entity.IInvntryEvntLog;
+import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.entity.Invntry;
 import com.logistimo.inventory.entity.InvntryEvntLog;
+import com.logistimo.inventory.entity.Transaction;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.impl.PMF;
 
 
 import java.math.BigDecimal;
@@ -45,7 +47,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.jdo.PersistenceManager;
+
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 /**
  * Created by charan on 24/10/16.
@@ -107,4 +116,47 @@ public class InventoryManagementServiceTest {
     boolean changeAllowed = ims.validateMaterialBatchManagementUpdate(materialId);
     assertEquals("Results match", false, changeAllowed);
   }
+
+
+  /*
+  @Test
+  public void testUpdateMultipleInventoryTransactions() throws Exception{
+    // Create Transaction objects
+    List<ITransaction> transactions = createTransactions();
+    String userId = "hari";
+    Long domainId = 1l;
+    InventoryManagementServiceImpl ims = spy(InventoryManagementServiceImpl.class);
+    ims.updateMultipleInventoryTransactions(transactions, domainId, userId);
+  }
+
+  private List<ITransaction> createTransactions() throws Exception{
+      List<ITransaction> transactions = new ArrayList<>(1);
+      String userId = "hari";
+
+      ITransaction trans1 = new Transaction();
+      trans1.setKioskId(1l);
+      trans1.setMaterialId(2l);
+      trans1.setQuantity(new BigDecimal(100));
+      trans1.setOpeningStock(new BigDecimal(1000));
+      trans1.setType(ITransaction.TYPE_ISSUE);
+      trans1.setEntryTime(new Date());
+      trans1.setSourceUserId(userId);
+
+      ITransaction trans2 = new Transaction();
+      trans2.setKioskId(1l);
+      trans2.setMaterialId(2l);
+      trans2.setQuantity(new BigDecimal(100));
+      trans2.setOpeningStock(new BigDecimal(1000));
+      trans2.setType(ITransaction.TYPE_ISSUE);
+      trans2.setEntryTime(new Date());
+      trans2.setSourceUserId(userId);
+
+      transactions.add(trans1);
+      transactions.add(trans2);
+
+      return transactions;
+
+  }*/
 }
+
+

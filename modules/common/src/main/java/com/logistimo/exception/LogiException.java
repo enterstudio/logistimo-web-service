@@ -25,6 +25,8 @@ package com.logistimo.exception;
 
 import com.logistimo.services.Resources;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -77,6 +79,8 @@ public class LogiException extends Exception {
       message = errors.getString(code);
       if (params != null && params.length > 0) {
         return MessageFormat.format(message, params);
+      } else if (StringUtils.isNotEmpty(message)) {
+        return message;
       }
     } catch (Exception ignored) {
       // ignored

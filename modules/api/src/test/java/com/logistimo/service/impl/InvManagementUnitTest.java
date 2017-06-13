@@ -28,6 +28,7 @@ import com.logistimo.inventory.entity.Invntry;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.utils.BigUtil;
+
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
@@ -84,7 +85,5 @@ public class InvManagementUnitTest {
       assertTrue(e.getMessage().startsWith("Unable to allocate stock for material"),
           "Message does not match");
     }
-
-
   }
 }

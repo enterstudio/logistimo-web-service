@@ -23,6 +23,8 @@
 
 package com.logistimo.utils;
 
+import com.logistimo.LgTestCase;
+import com.logistimo.api.servlets.mobile.builders.MobileTransactionsBuilder;
 import com.logistimo.bulkuploads.BulkUploadMgr;
 import com.logistimo.bulkuploads.MnlTransactionUtil;
 import com.logistimo.dao.DaoFactory;
@@ -30,33 +32,41 @@ import com.logistimo.dao.DaoFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.IInvntryDao;
 import com.logistimo.inventory.dao.impl.InvntryDao;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
+import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.mnltransactions.entity.IMnlTransaction;
 import com.logistimo.mnltransactions.entity.MnlTransaction;
+import com.logistimo.proto.MobileGeoModel;
+import com.logistimo.proto.MobileTransModel;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.utils.LocalDateUtil;
 
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created by charan on 24/10/16.
  */
-public class TransactionUtilTest {
-
-  @Before
-  public void setup() throws ServiceException {
-  }
+public class TransactionUtilTest extends LgTestCase{
+  private static final XLog xLogger = XLog.getLog(TransactionUtilTest.class);
 
   @Test
   public void testParseUploadMnlTransactions() throws ServiceException {
@@ -106,6 +116,4 @@ public class TransactionUtilTest {
     assertTrue("Inventory log not found", found);
 
   }
-
-
 }
