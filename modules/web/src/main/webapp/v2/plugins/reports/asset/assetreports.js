@@ -80,6 +80,8 @@ function AssetReportController(s, timeout, getData) {
                 tableHeading[0] = s.resourceBundle['manufacturer'];
             } else if (tableHeading[0].toLowerCase() == 'dmodel') {
                 tableHeading[0] = s.resourceBundle['asset.model'];
+            } else if (tableHeading[0].toLowerCase() == 'dvid') {
+                tableHeading[0] = s.resourceBundle['asset.serial.number'];
             } else {
                 tableHeading[0] = tableHeading[0].charAt(0).toUpperCase() + tableHeading[0].slice(1);
             }
