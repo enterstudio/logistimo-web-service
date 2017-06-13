@@ -1691,6 +1691,23 @@ entityControllers.controller('RelationAddController', ['$scope', 'entityService'
             });
         }
     };
+    $scope.searchEntity = function() {
+        $scope.loading = true;
+        $scope.showLoading();
+        entityService.getAll($scope.offset, $scope.size,null,$scope.enm).then(function(data) {
+            $scope.entities = data.data.results.length > 0 ? data.data.results : undefined;
+            $scope.filtered = angular.copy($scope.entities);
+            $scope.selAll = false;
+            $scope.setResults(data.data);
+            $scope.setLink();
+        }).catch(function error(msg) {
+            $scope.setResults(null);
+            $scope.showErrorMsg(msg);
+        }).finally(function() {
+            $scope.loading = false;
+            $scope.hideLoading();
+        });
+    };
     $scope.resetLinks = function () {
         $scope.filtered = angular.copy($scope.entities);
         $scope.setLink();
