@@ -27,44 +27,41 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
+import com.logistimo.api.security.SecurityMgr;
+import com.logistimo.api.util.SessionMgr;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.models.Temperature;
 import com.logistimo.assets.models.TemperatureResponse;
 import com.logistimo.bulkuploads.BulkUploadMgr;
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.communications.service.EmailService;
+import com.logistimo.communications.service.MessageService;
+import com.logistimo.config.entity.IConfig;
+import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.ConfigurationException;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.entity.IJobStatus;
+import com.logistimo.entity.IUploaded;
 import com.logistimo.exports.BulkExportMgr;
 import com.logistimo.exports.BulkExportMgr.ExportParams;
 import com.logistimo.exports.handlers.OrderExportHandler;
 import com.logistimo.exports.pagination.processor.ExportProcessor;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
-import com.logistimo.reports.ReportsConstants;
-import com.logistimo.services.blobstore.BlobstoreService;
-import com.logistimo.services.storage.StorageUtil;
-import com.logistimo.services.taskqueue.ITaskService;
-import com.logistimo.services.utils.ConfigUtil;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import com.logistimo.communications.service.EmailService;
-import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.communications.service.MessageService;
-import com.logistimo.config.models.AssetSystemConfig;
-import com.logistimo.config.models.ConfigurationException;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.entity.IConfig;
-import com.logistimo.entity.IJobStatus;
-import com.logistimo.entity.IUploaded;
 import com.logistimo.pagination.Executor;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.PagedExec;
@@ -72,32 +69,32 @@ import com.logistimo.pagination.PagedExec.Finalizer;
 import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.pagination.processor.Processor;
+import com.logistimo.reports.ReportsConstants;
 import com.logistimo.reports.generators.ReportData;
 import com.logistimo.reports.generators.ReportDataGenerator;
 import com.logistimo.reports.generators.ReportDataGeneratorFactory;
+import com.logistimo.reports.utils.ReportsUtil;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.UploadService;
+import com.logistimo.services.blobstore.BlobstoreService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.UploadServiceImpl;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.JobUtil;
-import com.logistimo.utils.LocalDateUtil;
-
-import com.logistimo.reports.utils.ReportsUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.utils.StringUtil;
-
+import com.logistimo.services.storage.StorageUtil;
+import com.logistimo.services.taskqueue.ITaskService;
+import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.users.UserUtils;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.JobUtil;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.StringUtil;
 
-import com.logistimo.logger.XLog;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -404,6 +401,12 @@ public class ExportServlet extends SgServlet {
           req.getParameter(
               "asset"); // Asset name i.e., Temperature logger/ ILR/ Walk in cooler/freezer
       String sensorName = req.getParameter("snsname"); // Sensor name i.e., A,B,C,D
+      if(sensorName == null) {
+        xLogger.warn("Sensor name is mandatory to export power data");
+        JobUtil.setJobFailed(Long.valueOf(req.getParameter("jobid")),
+            "Error in exporting raw temperature and power data for: " + deviceId);
+        return;
+      }
 
       int retryCount = retry != null ? Integer.valueOf(retry) : 0;
       long end = LocalDateUtil.getCurrentTimeInSeconds(tz);
@@ -442,9 +445,6 @@ public class ExportServlet extends SgServlet {
           assetModelId =
               asc.getAsset(aType).monitoringPositions == null ? IAsset.MONITORING_ASSET
                   : IAsset.MONITORED_ASSET;
-          sensorName =
-              assetModelId == IAsset.MONITORED_ASSET ? asc.getAsset(aType).monitoringPositions
-                  .get(Integer.parseInt(sensor) - 1).sId : sensor;
         }
       } catch (ConfigurationException | ParseException e) {
         xLogger.severe("Error in getting parameters from request header:", e);

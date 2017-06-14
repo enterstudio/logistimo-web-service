@@ -1971,6 +1971,7 @@ logistimoApp.directive('exportData', function () {
             assetVendor: '=',
             sensor: '=',
             sensorName: '=',
+            sensorId: '=',
             assetType: '=',
             reason: '=',
             discType: '=',
@@ -2180,6 +2181,9 @@ logistimoApp.directive('exportData', function () {
                     }
                     if(checkNotNullEmpty($scope.to)) {
                         extraParams += '&to=' + $scope.to;
+                    }
+                    if(checkNotNullEmpty($scope.sensorId)) {
+                        extraParams += '&snsname=' + $scope.sensorId;
                     }
                 }
 
