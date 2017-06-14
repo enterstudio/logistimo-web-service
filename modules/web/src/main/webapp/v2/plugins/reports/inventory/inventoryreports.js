@@ -118,12 +118,19 @@ function InventoryReportController(s, timeout, getData) {
         }, 500);
     };
 
+    resetCards = function() {
+        s.cards = {};
+        if(s.hideMaterialTagFilter){
+            s.cards.mc = 'i';
+        }
+    };
+
     s.resetFilters = function() {
         s.filter = {};
         s.compare = {type:undefined};
         s.metrics = {};
         resetMetrics();
-        s.cards = {};
+        resetCards();
         s.filter.periodicity = "m";
         s.dateMode = 'month';
         var year = new Date();
