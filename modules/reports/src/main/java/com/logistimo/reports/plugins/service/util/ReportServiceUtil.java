@@ -467,10 +467,11 @@ public class ReportServiceUtil {
   private String getTableByEntityKey(String string) throws ServiceException {
     String key;EntitiesService es = Services.getService(EntitiesServiceImpl.class);
     IKiosk k = es.getKiosk(Long.valueOf(string), false);
-    key = k.getName() + CharacterConstants.PIPE + string;
-    key += (StringUtils.isNotEmpty(k.getLocation()))
-            ? CharacterConstants.PIPE + k.getLocation()
-            : CharacterConstants.EMPTY;
+    key = k.getName() + CharacterConstants.PIPE + string +
+        CharacterConstants.PIPE + k.getCity() +
+        CharacterConstants.PIPE + k.getTaluk() +
+        CharacterConstants.PIPE + k.getDistrict() +
+        CharacterConstants.PIPE + k.getState();
     return key;
   }
 

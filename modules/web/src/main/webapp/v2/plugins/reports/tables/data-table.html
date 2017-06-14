@@ -66,7 +66,12 @@
                             {{$index + 1 + offset }}
                         </td>
                         <td class="text-left" ng-if="activeMetric == 'kt'"><a href="#/setup/entities/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}} </a>
-                            <span class="litetext">{{key.split('|')[2]}}</span>
+                            <span class="litetext">{{
+                                key.split('|')[2] +
+                                (key.split('|')[2] ? ', ':'') + key.split('|')[3] +
+                                (key.split('|')[3] ? ', ':'') + key.split('|')[4] +
+                                (key.split('|')[4] ? ', ':'') + key.split('|')[5]
+                                }}</span>
                         </td>
                         <td class="text-left" ng-if="activeMetric == 'at'">{{key.split('_').splice(1,key.split('_').length).join()}} </a>
                         </td>

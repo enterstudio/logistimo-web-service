@@ -129,10 +129,22 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
         function getReportTableDataAsCSV(data, heading, tableSeriesNo) {
             var comma = ",";
             var nl = "\r\n";
-            var csvData = heading.join(comma);
+            var csvHeading = angular.copy(heading);
+            if(csvHeading[0] == $scope.resourceBundle['kiosk']) {
+                csvHeading.splice(1, 0, $scope.resourceBundle['state']);
+                csvHeading.splice(1, 0, $scope.resourceBundle['district']);
+                csvHeading.splice(1, 0, $scope.resourceBundle['taluk']);
+                csvHeading.splice(1, 0, $scope.resourceBundle['city']);
+            }
+            var csvData = csvHeading.join(comma);
             csvData += nl;
             for(var key in data) {
-                csvData += key.split("|")[0];
+                var location = key.split("|");
+                csvData += location[0];
+                csvData += comma + location[2];
+                csvData += comma + location[3];
+                csvData += comma + location[4];
+                csvData += comma + location[5];
                 for (var j = 0; j < heading.length-1; j++) {
                     csvData += comma + data[key][j][tableSeriesNo].value || 0;
                 }
