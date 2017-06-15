@@ -1079,8 +1079,8 @@ logistimoApp.directive('ngFocusAsync', ['$parse', function ($parse) {
     };
 }]);
 logistimoApp.directive('datePicker', function ($compile) {
-    var day = '<span {{noclear}} class="datepick"><input type="text" ng-readonly="true" class="form-control datepickerreadonly" ng-class="extraClass" datepicker-options="dateOptions" placeholder="{{placeHolder}}" ng-click="open($event)" ng-focus-async="!IE && open($event)" ng-change="IE && validate()" uib-datepicker-popup="dd MMM yyyy" ng-model="dateModel" is-open="opened" close-text="Close" ng-disabled="disabled" ng-class="{datepickerreadonly: datePickerReadOnly}"/></span>';
-    var month = '<span {{noclear}} class="datepick"><input type="text" ng-readonly="true" class="form-control datepickerreadonly" datepicker-mode="mMode" datepicker-options="dateOptions" placeholder="{{placeHolder}}" ng-click="open($event)" ng-focus-async="!IE && open($event)" ng-change="IE && validate()" uib-datepicker-popup="{{format}}" ng-disabled="disabled" ng-model="dateModel" is-open="opened" close-text="Close" ng-class="{datepickerreadonly: datePickerReadOnly}"/></span>';
+    var day = '<span {{noclear}} class="datepick"><input type="text" ng-readonly="true" class="form-control datepickerreadonly" ng-class="extraClass" datepicker-options="dateOptions" placeholder="{{placeHolder}}" ng-click="open($event)" ng-focus-async="!IE && open($event)" ng-change="IE && validate()" uib-datepicker-popup="dd MMM yyyy" ng-model="dateModel" is-open="opened" close-text="Close" ng-disabled="disabled" ng-class="{datepickerreadonly: datePickerReadOnlyCss}"/></span>';
+    var month = '<span {{noclear}} class="datepick"><input type="text" ng-readonly="true" class="form-control datepickerreadonly" datepicker-mode="mMode" datepicker-options="dateOptions" placeholder="{{placeHolder}}" ng-click="open($event)" ng-focus-async="!IE && open($event)" ng-change="IE && validate()" uib-datepicker-popup="{{format}}" ng-disabled="disabled" ng-model="dateModel" is-open="opened" close-text="Close" ng-class="{datepickerreadonly: datePickerReadOnlyCss}"/></span>';
     return {
         restrict: 'AE',
         replace: true,
@@ -1097,6 +1097,10 @@ logistimoApp.directive('datePicker', function ($compile) {
             extraClass:'@'
         },
         controller: ['$scope', function ($scope) {
+            $scope.datePickerReadOnlyCss = true;
+            $scope.$watch('datePickerReadOnly', function(newValue){
+                $scope.datePickerReadOnlyCss = newValue;
+            });
             $scope.dateOptions = {};
             $scope.dateOptions.minDate = constructDate($scope.minDate);
             $scope.dateOptions.maxDate = constructDate($scope.maxDate);
