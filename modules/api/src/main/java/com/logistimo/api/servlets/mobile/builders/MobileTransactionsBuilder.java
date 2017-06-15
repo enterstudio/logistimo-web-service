@@ -524,10 +524,18 @@ public class MobileTransactionsBuilder {
     trans.setLinkedKioskId(mobTrans.lkid);
     MobileGeoModel mobileGeo = mobTrans.geo;
     if (mobileGeo != null) {
-      trans.setLatitude(mobileGeo.lat);
-      trans.setLongitude(mobileGeo.lng);
+      if (mobileGeo.lat != null) {
+        trans.setLatitude(mobileGeo.lat);
+      }
+      if (mobileGeo.lng != null) {
+        trans.setLongitude(mobileGeo.lng);
+      }
+      if (mobileGeo.galt != null) {
       trans.setAltitude(mobileGeo.galt);
+      }
+      if (mobileGeo.gacc != null) {
       trans.setGeoAccuracy(mobileGeo.gacc);
+      }
       trans.setGeoErrorCode(mobileGeo.gerr);
     }
     return trans;
