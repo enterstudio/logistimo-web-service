@@ -30,7 +30,7 @@ sed -ri "$ a logi.host.server=$LOGI_HOST" $TOMCAT_HOME/webapps/ROOT/WEB-INF/clas
         && sed -ri "/Jad\/Jar download servlet/,+4d" $TOMCAT_HOME/webapps/ROOT/WEB-INF/web.xml \
         && sed -ri "s/8080/$TASK_PORT/g" $TOMCAT_HOME/conf/server.xml
 
-if [[ "$SENTINEL_HOSTS" != "" ]]
+if [[ "$SENTINEL_HOST" != "" ]]
 then
         sed -ri "s~<\!\-\- <Context sessionCookiePath=\"\/\" crossContext=\"true\"> \-\->~<Context sessionCookiePath=\"\/\" crossContext=\"true\">~g;s~<\!\-\- <Valve className~<Valve className~g;s~sentinels=\"\"\/> \-\->~sentinels=\"$SENTINEL_HOST\"\/>~g;s~host=\"localhost\"~host=\"$REDIS_HOST\"~g;s~sentinelMaster=\"\"~sentinelMaster=\"$SENTINEL_MASTER\"~g" $TOMCAT_HOME/conf/context.xml
         sed -ri "/<Context>/d" $TOMCAT_HOME/conf/context.xml
