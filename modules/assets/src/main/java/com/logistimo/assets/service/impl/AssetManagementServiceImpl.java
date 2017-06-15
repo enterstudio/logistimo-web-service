@@ -24,13 +24,18 @@
 package com.logistimo.assets.service.impl;
 
 import com.google.common.base.Preconditions;
+
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.entity.IAssetRelation;
 import com.logistimo.assets.entity.IAssetStatus;
 import com.logistimo.assets.models.AssetModel;
 import com.logistimo.assets.service.AssetManagementService;
-import com.logistimo.config.models.*;
+import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.ConfigurationException;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.EventSpec;
+import com.logistimo.config.models.EventsConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.utils.DomainsUtil;
@@ -47,7 +52,18 @@ import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
 import com.logistimo.utils.QueryUtil;
 import com.sun.rowset.CachedRowSetImpl;
+
 import org.apache.commons.lang.StringUtils;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
@@ -55,10 +71,6 @@ import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.jdo.datastore.JDOConnection;
 import javax.sql.rowset.CachedRowSet;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.*;
 
 /**
  * Created by kaniyarasu on 02/11/15.
@@ -837,18 +849,15 @@ public class AssetManagementServiceImpl extends ServiceImpl implements AssetMana
       java.sql.Connection sqlConn = (java.sql.Connection) conn;
       statement = sqlConn.createStatement();
       CachedRowSet rowSet = new CachedRowSetImpl();
-      String query = "SELECT STAT, COUNT(1) COUNT FROM (SELECT ID, IF(ASF.STAT = 'tu', 'tu', " +
-          "IFNULL((SELECT (SELECT IF(ABNSTATUS = 1, 'tl', 'th') FROM ASSETSTATUS AI WHERE AI.ASSETID = AO.ASSETID "
-          +
-          "AND AI.TYPE = 1 AND AI.STATUS = 3 LIMIT 1) FROM ASSETSTATUS AO WHERE AO.TYPE = 1 AND AO.ASSETID = ASF.ASSETID "
-          +
-          "GROUP BY AO.ASSETID), 'tn')) STAT FROM (SELECT ID FROM ASSET WHERE TYPE IN (TOKEN_TYPE) AND KID = TOKEN_KID) A "
-          +
-          "LEFT JOIN (SELECT ASSETID, IF(SUM(STATUS) > 0, 'tu', 'tk') STAT FROM ASSETSTATUS ASI WHERE ASI.TYPE = 3 AND "
-          +
-          "ASI.ASSETID IN (SELECT ID FROM ASSET WHERE TYPE IN (TOKEN_TYPE) AND KID = TOKEN_KID) GROUP BY ASI.ASSETID) ASF "
-          +
-          "ON A.ID = ASF.ASSETID) T GROUP BY T.STAT";
+      String
+          query =
+          "SELECT STAT, COUNT(1) COUNT FROM (SELECT ID, IF(ASF.STAT = 'tu', 'tu',(SELECT IF(MAX(ABNSTATUS) = 2, 'th', "
+              + "IF(MAX(ABNSTATUS) = 1, 'tl', 'tn')) FROM ASSETSTATUS AO WHERE AO.ASSETID = ASF.ASSETID AND AO.TYPE = 1 AND AO.STATUS = 3 "
+              + ")) STAT FROM (SELECT A.ID FROM ASSET A WHERE TYPE IN (TOKEN_TYPE) AND KID = TOKEN_KID AND "
+              + "EXISTS(SELECT 1 FROM ASSETRELATION R WHERE A.ID = R.ASSETID AND R.TYPE = 2)) A "
+              + "LEFT JOIN (SELECT ASSETID, IF(MIN(STATUS) = 0, 'tk', 'tu') STAT FROM ASSETSTATUS ASI WHERE ASI.TYPE = 3 AND "
+              + "ASI.ASSETID IN (SELECT ID FROM ASSET WHERE TYPE IN (TOKEN_TYPE) AND KID = TOKEN_KID) GROUP BY ASI.ASSETID) ASF "
+              + "ON A.ID = ASF.ASSETID) T GROUP BY T.STAT";
       query = query.replace("TOKEN_TYPE", csv).replace("TOKEN_KID", String.valueOf(entityId));
       rowSet.populate(statement.executeQuery(query));
       Map<String, Integer> stats = new HashMap<>(4);
