@@ -83,10 +83,6 @@ public class MobileInvModel {
    */
   public MobileConsRateModel cr;
   /**
-   * Stock counted model
-   */
-  public MobileStkCntdModel scntd;
-  /**
    * Non expired batches
    */
   public List<MobileInvBatchModel> bt;

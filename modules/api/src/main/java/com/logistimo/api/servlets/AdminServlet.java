@@ -228,7 +228,7 @@ public class AdminServlet extends HttpServlet {
     } else if (JDOUtils.getImplClass(IOrder.class).getSimpleName().equals(kind)) { // Order counters
       // Remove domain-wide order counter
       try {
-        Counter.getOrderCounter(domainId, null, null).delete();
+        Counter.getOrderCounter(domainId, null,null).delete();
       } catch (Exception e) {
         xLogger.warn("{0} when removing domain-wide order for domainId {1}: {2}",
             e.getClass().getName(), domainId, e.getMessage());

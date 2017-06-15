@@ -78,6 +78,7 @@ public class LogiCounter implements ICounter {
   private static final String INTEGER = "Integer ";
   private static final String TAG_OBJECT = "Tag ";
   private static final String NAME = "name";
+  private static final String O_TAGS = "otgs";
   private Long domainId = null;
   private Map<String, Object> keys = null;
 
@@ -183,6 +184,17 @@ public class LogiCounter implements ICounter {
           variables.append(TAG_OBJECT).append(K_TAGS + PARAM);
           imports.append("import com.logistimo.tags.entity.Tag;");
         }
+      } else if (keys.containsKey(O_TAGS)) {
+        if (isValueValid(keys.get(O_TAGS))) {
+          filter.append(QueryConstants.AND).append(
+              O_TAGS + QueryConstants.DOT_CONTAINS + O_TAGS + PARAM + CharacterConstants.C_BRACKET);
+          filter.append(QueryConstants.AND).append(O_TAGS + PARAM).append(CharacterConstants.DOT)
+              .append(NAME).append(QueryConstants.D_EQUAL)
+              .append(CharacterConstants.S_QUOTE).append(keys.get(O_TAGS))
+              .append(CharacterConstants.S_QUOTE);
+          variables.append(TAG_OBJECT).append(O_TAGS + PARAM);
+          imports.append("import com.logistimo.tags.entity.Tag;");
+        }
       }
 
       String tableName = String.valueOf(keys.get(TABLE_NAME));
@@ -195,7 +207,7 @@ public class LogiCounter implements ICounter {
       for (String s : keys.keySet()) {
         Object value = keys.get(s);
         if (!isValueValid(value) || TABLE_NAME.equals(s) || TAGS.equals(s) || K_TAGS.equals(s)
-            || ORDER_TYPE.equals(s)) {
+            || ORDER_TYPE.equals(s) || O_TAGS.equals(s)) {
           continue;
         }
         if (tableName.endsWith(ORDER) && s.equals(K_ID) && IOrder.TYPE_SALE

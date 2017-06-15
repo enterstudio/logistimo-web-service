@@ -24,12 +24,11 @@
 package com.logistimo.utils;
 
 import com.logistimo.AppFactory;
-import com.logistimo.dao.JDOUtils;
-
-import com.logistimo.entities.entity.IUserToKiosk;
 
 import com.logistimo.models.ICounter;
 import com.logistimo.constants.QueryConstants;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,6 +53,9 @@ public class Counter {
   private static final String LINKED_KIOSK_NAME = "lknm";
   private static final String ORD_TYPE = "oty";
   public static final String OBJECT_TYPE = "objType";
+  private static final String O_TAGS = "otgs";
+  private static final String TYPE_ENTITY = "en";
+  private static final String TYPE_ORDER = "or";
 
   private static ICounter getInstance(Long domainId, Map<String, Object> keys) {
     return AppFactory.get().getCounter().init(domainId, keys);
@@ -129,10 +131,21 @@ public class Counter {
     return getInstance(domainId, map);
   }
 
-  public static ICounter getOrderCounter(Long domainId, String tag, Integer ordType) {
+  public static ICounter getOrderCounter(Long domainId, String tag, Integer ordType,  String... tgType) {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put(OBJECT_TYPE, "orders");
-    map.put(K_TAGS, tag);
+    if (tgType != null && tgType.length > 0) {
+      switch (tgType[0]) {
+        case TYPE_ORDER:
+          map.put(O_TAGS, tag);
+          break;
+        default:
+          map.put(K_TAGS, tag);
+          break;
+      }
+    } else {
+      map.put(K_TAGS, tag);
+    }
     map.put(ORD_TYPE, ordType);
     return getInstance(domainId, map);
   }

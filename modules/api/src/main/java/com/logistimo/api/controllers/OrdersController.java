@@ -644,7 +644,7 @@ public class OrdersController {
           && endDate == null && rid == null) {
         ICounter counter;
         if (tag != null && !tag.isEmpty()) {
-          counter = Counter.getOrderCounter(domainId, tag, oty);
+          counter = Counter.getOrderCounter(domainId, tag, oty, tgType);
         } else if (oty == IOrder.TRANSFER) {
           counter = Counter.getTransferOrderCounter(domainId, entityId, otype);
         } else {

@@ -61,8 +61,4 @@ public class MobileInvBatchModel {
    * Last updated time of batch
    */
   public String t;
-  /**
-   * Batch stock count (if any)
-   */
-  public MobileStkCntdModel scntd;
 }
