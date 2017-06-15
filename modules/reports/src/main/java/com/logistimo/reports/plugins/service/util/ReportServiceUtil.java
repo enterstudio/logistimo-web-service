@@ -468,10 +468,10 @@ public class ReportServiceUtil {
     String key;EntitiesService es = Services.getService(EntitiesServiceImpl.class);
     IKiosk k = es.getKiosk(Long.valueOf(string), false);
     key = k.getName() + CharacterConstants.PIPE + string +
-        CharacterConstants.PIPE + k.getCity() +
-        CharacterConstants.PIPE + k.getTaluk() +
-        CharacterConstants.PIPE + k.getDistrict() +
-        CharacterConstants.PIPE + k.getState();
+        CharacterConstants.PIPE + (StringUtils.isEmpty(k.getCity())? CharacterConstants.EMPTY : k.getCity()) +
+        CharacterConstants.PIPE + (StringUtils.isEmpty(k.getTaluk())? CharacterConstants.EMPTY : k.getTaluk()) +
+        CharacterConstants.PIPE + (StringUtils.isEmpty(k.getDistrict())? CharacterConstants.EMPTY : k.getDistrict()) +
+        CharacterConstants.PIPE + (StringUtils.isEmpty(k.getState())? CharacterConstants.EMPTY : k.getState());
     return key;
   }
 
