@@ -1561,6 +1561,12 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                                 if(checkNotNullEmpty($scope.mtag) && $scope.mtag.length == 1) {
                                     bd.link += "&mtag=" + $scope.mtag[0].text;
                                 }
+                                if(event != 'n'){
+                                    bd.link += "&abntype="+event;
+                                    if(checkNotNullEmpty($scope.period) && $scope.period != '0'){
+                                        bd.link += "&dur="+$scope.period;
+                                    }
+                                }
                             } else if(event == 'a' || event == 'i') {
                                 var fromDate = angular.copy($scope.date || $scope.today);
                                 fromDate.setDate(fromDate.getDate() - ($scope.period || $scope.aper) + ($scope.date ? 1 : 0));
@@ -1629,11 +1635,18 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                                 event == INVENTORY.stock.UNDERSTOCK || event == INVENTORY.stock.OVERSTOCK)
                                 && data[n].value != 0) {
                                 bd.link = "N-#/inventory/?abntype="+event + "&mid="+data[n].mid;
+                                if(checkNotNullEmpty($scope.period) && $scope.period != '0'){
+                                    bd.link += "&dur="+$scope.period;
+                                }
                                 addLocationLink();
                             }else if(event == 'n' && checkNotNullEmpty(data[n].mid) && data[n].value != 0){
                                 bd.link = "N-#/inventory/?mid="+data[n].mid;
                                 addLocationLink();
                             }
+                            if(checkNotNullEmpty(bd.link) && checkNotNullEmpty($scope.eTag) && $scope.eTag.length == 1){
+                                bd.link += "&etag="+$scope.eTag[0].text;
+                            }
+
                             function addLocationLink(){
                                 if(checkNotNullEmpty($scope.links) && $scope.links.length > 0){
                                     for(var l = 0; l<$scope.links.length; l++){
