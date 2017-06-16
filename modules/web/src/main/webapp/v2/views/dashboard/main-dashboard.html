@@ -93,7 +93,7 @@
                         <button type="button" ng-click="hardRefreshDashboard()" class="btn btn-sm btn-default pull-right" tooltip-placement="top" uib-tooltip="{{resourceBundle['upgrade']}}">
                             <span class="glyphicons pt2 glyphicons-refresh"></span>
                         </button>
-                        <span class="litetext cbx pull-right rPad10">{{resourceBundle['asof']}} {{dashboardView.ut}}</span>
+                        <span ng-show="isDef(dashboardView)" class="litetext cbx pull-right rPad10">{{resourceBundle['asof']}} {{dashboardView.ut}}</span>
                     </div>
                 </div>
             </div>

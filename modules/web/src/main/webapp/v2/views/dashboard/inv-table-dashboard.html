@@ -83,7 +83,7 @@
                             <button type="button" ng-click="hardRefreshDashboard()" class="btn btn-sm btn-default pull-right" tooltip-placement="top" uib-tooltip="{{resourceBundle['upgrade']}}">
                                 <span class="glyphicons pt2 glyphicons-refresh"></span>
                             </button>
-                            <span class="litetext pull-right cbx rPad10">{{resourceBundle['asof']}} {{dbdata.ut}}</span>
+                            <span ng-show="isDef(dbdata)" class="litetext pull-right cbx rPad10">{{resourceBundle['asof']}} {{dbdata.ut}}</span>
                         </div>
                     </ul>
                     <h4 class="text-center mb0 col-sm-12">Inventory <span uib-tooltip="% of inventory items that are normal or abnormal (zero stock, < min. or > max) across all {{resourceBundle['kiosks.lowercase']}} in this jurisdiction. An inventory item is a material at a {{resourceBundle['kiosk.lowercase']}}." style="display: inline" class="litetext glyphicons glyphicons-info-sign"></span></h4>
