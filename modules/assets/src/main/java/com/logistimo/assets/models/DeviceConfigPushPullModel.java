@@ -23,13 +23,28 @@
 
 package com.logistimo.assets.models;
 
+import com.logistimo.assets.entity.IAsset;
+
 /**
  * Created by kaniyarasu on 08/04/15.
  */
 public class DeviceConfigPushPullModel {
+  /**
+   * Vendor id
+   */
   public String vId;
+  /**
+   * Device id
+   */
   public String dId;
-  public Integer typ = 1;
+  /**
+   * Communication channel type
+   */
+  public Integer typ = IAsset.COMM_CHANNEL_INTERNET;
+  /**
+   * Status updated by
+   */
+  public String stub;
 
   public DeviceConfigPushPullModel(String vId, String dId) {
     this.vId = vId;

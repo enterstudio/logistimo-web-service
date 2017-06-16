@@ -1011,3 +1011,6 @@ power.cut.freq=Fréquence de coupure de courant
 avg.power.cut.freq=Fréquence moyenne de coupure de puissance (par actif)
 valid.quantity=Entrez la quantité de lot valide pour
 Customers=Les clients
+config.device.pull=Dernière configuration de la configuration
+config.device.requested=Demandé pour extraire la configuration
+requested=Traduire

@@ -1012,3 +1012,6 @@ power.cut.freq=Power cut frequency
 avg.power.cut.freq=Average power cut frequency (per asset)
 valid.quantity=Please enter valid batch quantity for
 Customers=Customers
+config.device.pull=Configuration last pulled
+config.device.requested=Requested to pull configuration
+requested=requested

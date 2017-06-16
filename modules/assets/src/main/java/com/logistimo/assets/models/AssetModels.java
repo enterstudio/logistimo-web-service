@@ -177,6 +177,14 @@ public class AssetModels {
     public String ftime;
     public String fstut; // Formatted update status from field 'stut'
     public Boolean isActive;
+    /**
+     * Status updated by user id
+     */
+    public String stub;
+    /**
+     * Status updated by username
+     */
+    public String stubn;
   }
 
   public static class DeviceReadyModel {

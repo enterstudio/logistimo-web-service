@@ -1129,6 +1129,13 @@ assetControllers.controller('AssetDetailsController', ['$injector', '$scope', '$
                 };
 
                 $scope.assetDetails = getFilteredResults(data.data, ASSET);
+                if($scope.assetDetails.cfg.st == 1) {
+                    $scope.tempData = $scope.resourceBundle['config.device.pull'];
+                } else if($scope.assetDetails.cfg.st == 2) {
+                    $scope.tempData = $scope.resourceBundle['temperature.device.configured'];
+                } else if($scope.assetDetails.cfg.st == 3) {
+                    $scope.tempData = $scope.resourceBundle['config.device.requested'];
+                }
                 if(checkNotNullEmpty($scope.assetDetails) && checkNotNullEmpty($scope.assetDetails.typ)){
                     $scope.updateCurrentAsset($scope.assetDetails.typ);
                     if(checkNotNullEmpty($scope.assetDetails.entity)){
@@ -1847,6 +1854,7 @@ assetControllers.controller('AssetConfigController', ['$scope', 'assetService',
                 $scope.configEditable = false;
                 $scope.showSuccess($scope.resourceBundle['deviceconfig.success']);
                 $scope.getAssetConfig();
+                $scope.getAssetDetails();
             }).catch(function error(err) {
                 if(checkNotNullEmpty(err.data) && checkNotNullEmpty(err.data.message)){
                     $scope.showWarning(JSON.parse(err.data.message).message);
@@ -1987,6 +1995,7 @@ assetControllers.controller('AssetConfigController', ['$scope', 'assetService',
                 $scope.sendingConfigPullRequest = true;
             assetService.pushPullConfig($scope.configPushPullRequest, $scope.domainId).then(function (data) {
                 $scope.showSuccess($scope.resourceBundle['config.pushsuccess']);
+                $scope.getAssetDetails();
             }).catch(function error(err) {
                 if(checkNotNullEmpty(err.data) && checkNotNullEmpty(err.data.message)){
                     $scope.showWarning(JSON.parse(err.data.message).message);

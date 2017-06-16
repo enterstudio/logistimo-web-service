@@ -40,7 +40,10 @@
                 </div>
                 <div class="pull-right  mini-desc">
                     <div ng-show="isDef(assetDetails.cfg) && isDef(assetDetails.cfg.stut) && assetDetails.cfg.st > 0">
-                        {{resourceBundle['temperature.device.configured']}} {{resourceBundle['on']}} {{assetDetails.cfg.fstut}}<span ng-show="isDef(assetDetails.drdy) && isDef(assetDetails.drdy.time)">,
+                        {{tempData}} {{resourceBundle['on']}}
+                        {{assetDetails.cfg.fstut}} <span ng-show="assetDetails.cfg.st == 1 && isDef(assetDetails.cfg.stub)">{{resourceBundle['requested']}} </span> <span ng-show="isDef(assetDetails.cfg.stub)">by <a
+                            href="#/setup/users/all/details?userId={{assetDetails.cfg.stub}}" target="_new">{{assetDetails.cfg.stubn}}</a></span><span
+                            ng-show="isDef(assetDetails.drdy) && isDef(assetDetails.drdy.time)">,
                                  {{resourceBundle['temperature.device.confirmed']}} {{assetDetails.drdy.fTime}}
                     </span>
                     </div>

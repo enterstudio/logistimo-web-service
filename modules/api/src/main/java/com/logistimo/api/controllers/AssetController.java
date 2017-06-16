@@ -58,8 +58,10 @@ import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
+import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -472,8 +474,9 @@ public class AssetController {
   public
   @ResponseBody
   void updateAssetConfig(@RequestBody AssetModels.AssetConfigModel assetConfigModel,
-                         @RequestParam(defaultValue = "false") Boolean pushConfig)
+                         @RequestParam(defaultValue = "false") Boolean pushConfig, HttpServletRequest request)
       throws ServiceException {
+    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     if (assetConfigModel != null) {
       AssetUtil.registerConfig(new Gson().toJson(assetConfigModel));
 
@@ -483,9 +486,16 @@ public class AssetController {
             assetConfigModel.vId,
             assetConfigModel.dId
         );
-
-        if (assetConfigModel.configuration.getComm().getChnl() == 1) {
-          deviceConfigPushPullModel.typ = 0;
+        deviceConfigPushPullModel.stub = sUser.getUsername();
+        List<String> manufacturers = StringUtil.getList(ConfigUtil.get("assets.manufacturers.noconfigpull"));
+        if (manufacturers != null) {
+          for (String manc : manufacturers) {
+            if (!manc.equalsIgnoreCase(deviceConfigPushPullModel.vId)
+                && assetConfigModel.configuration.getComm().getChnl()
+                == IAsset.COMM_CHANNEL_INTERNET) {
+              deviceConfigPushPullModel.typ = IAsset.COMM_CHANNEL_SMS;
+            }
+          }
         }
         try {
           AssetUtil.pushDeviceConfig(new Gson().toJson(deviceConfigPushPullModel));
@@ -592,6 +602,8 @@ public class AssetController {
   @ResponseBody
   String pushPullDeviceConfig(@RequestBody DeviceConfigPushPullModel configModel,
                               HttpServletRequest request) throws ServiceException {
+    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
+    configModel.stub = sUser.getUsername();
     String json = new Gson().toJson(configModel);
     try {
       AssetUtil.pushDeviceConfig(json);

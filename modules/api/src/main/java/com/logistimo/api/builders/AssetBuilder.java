@@ -370,6 +370,16 @@ public class AssetBuilder {
     if (assetDetailsModel.cfg != null && assetDetailsModel.cfg.stut != null) {
       assetDetailsModel.cfg.fstut = formatDate(assetDetailsModel.cfg.stut, locale, timezone);
     }
+    if (assetDetailsModel.cfg != null && assetDetailsModel.cfg.stub != null) {
+      try {
+        UsersService service = Services.getService(UsersServiceImpl.class);
+        IUserAccount ua = service.getUserAccount(assetDetailsModel.cfg.stub);
+        assetDetailsModel.cfg.stubn = ua.getFullName();
+      } catch (Exception e) {
+        xLogger.warn("Error while fetching the user details for {0} and with asset: {1}",
+            assetDetailsModel.cfg.stub, assetModel.dId, e);
+      }
+    }
     assetDetailsModel.ws = assetModel.ws;
     if (assetDetailsModel.ws != null && assetDetailsModel.ws.stut != null) {
       assetDetailsModel.ws.fstut = formatDate(assetDetailsModel.ws.stut, locale, timezone);

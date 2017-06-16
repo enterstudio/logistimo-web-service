@@ -58,6 +58,9 @@ public interface IAsset extends IOverlappedDomain {
   int STATUS_DEVICE_DISCONNECTED = 1;
   int STATUS_POWER_OUTAGE = 1;
 
+  int COMM_CHANNEL_SMS = 0;
+  int COMM_CHANNEL_INTERNET = 1;
+
   String getModel();
 
   void setModel(String model);
