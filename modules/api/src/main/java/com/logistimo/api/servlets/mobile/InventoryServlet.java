@@ -844,7 +844,7 @@ public class InventoryServlet extends JsonRestServlet {
       // Deduplicate by transaction send time
       if (TransactionUtil
           .deduplicateBySendTimePartial(String.valueOf(mobUpdateInvTransReq.sntm),
-              mobUpdateInvTransReq.uid,
+              mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
               mobUpdateInvTransReq.pid)) {
         isDuplicate = true;
       }
@@ -861,7 +861,7 @@ public class InventoryServlet extends JsonRestServlet {
             mobUpdateInvTransReq.uid);
       } else {
         MobileTransactionCacheModel mobileTransactionCacheModel = TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
-            mobUpdateInvTransReq.uid,
+            mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
             mobUpdateInvTransReq.pid);
         if (mobileTransactionCacheModel.getStatus() == TransactionUtil.IN_PROGRESS) {
             throw new LogiException(backendMessages.getString("transactions.processing.inprogress"));
@@ -916,7 +916,7 @@ public class InventoryServlet extends JsonRestServlet {
     if (getResponseFromCache) {
       String mobUpdateInvTransRespJsonStrInCache =
           TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
-              mobUpdateInvTransReq.uid,
+              mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
               mobUpdateInvTransReq.pid).getResponse();
       // If the response string from cache does not have part if, set it from the request
       if(mobUpdateInvTransReq.pid != null) {
@@ -937,7 +937,7 @@ public class InventoryServlet extends JsonRestServlet {
       if (mobUpdateInvTransResp != null) {
         mobUpdateInvTransRespJsonStr = new Gson().toJson(mobUpdateInvTransResp);
         TransactionUtil.setObjectInCache(String.valueOf(mobUpdateInvTransReq.sntm),
-            mobUpdateInvTransReq.uid,
+            mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
             mobUpdateInvTransReq.pid,
             new MobileTransactionCacheModel(TransactionUtil.COMPLETED,
                 mobUpdateInvTransRespJsonStr));

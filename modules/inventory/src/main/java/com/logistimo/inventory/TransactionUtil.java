@@ -429,24 +429,24 @@ public class TransactionUtil {
     return name;
   }
 
-  public static boolean deduplicateBySendTimePartial(String timestampSendMillis, String userId,
+  public static boolean deduplicateBySendTimePartial(String timestampSendMillis, String userId, Long kioskId,
                                                      String partialId) {
     // Global checking without partial ID - skip write when partial id is available
     return
-        deduplicateBySendTimePartial(timestampSendMillis, userId, null,
+        deduplicateBySendTimePartial(timestampSendMillis, userId, kioskId, null,
             partialId != null)
             ||
-            (partialId != null && deduplicateBySendTimePartial(timestampSendMillis, userId,
+            (partialId != null && deduplicateBySendTimePartial(timestampSendMillis, userId, kioskId,
                 partialId, false)); //Check with partial ID
   }
 
-  public static boolean deduplicateBySendTimePartial(String timestampSendMillis, String userId,
+  public static boolean deduplicateBySendTimePartial(String timestampSendMillis, String userId, Long kioskId,
                                                      String partialId,
                                                      boolean skipWrite) {
     try {
       MemcacheService cache = AppFactory.get().getMemcacheService();
       String
-          cacheKey = createKey(timestampSendMillis, userId, partialId);
+          cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
       if (cache != null) {
         // Get last checksum
         if (cache.get(cacheKey) != null) {
@@ -465,11 +465,11 @@ public class TransactionUtil {
     return false;
   }
 
-  public static void setObjectInCache(String timestampSendMillis, String userId,
+  public static void setObjectInCache(String timestampSendMillis, String userId, Long kioskId,
                                       String partialId, MobileTransactionCacheModel mobileTransactionCacheModel) {
     try {
       MemcacheService cache = AppFactory.get().getMemcacheService();
-      String cacheKey = createKey(timestampSendMillis, userId, partialId);
+      String cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
       if (cache != null) {
         // Get last checksum
         if (cache.get(cacheKey) != null) {
@@ -482,15 +482,15 @@ public class TransactionUtil {
     }
   }
 
-  public static MobileTransactionCacheModel getObjectFromCache(String timestampSendMillis, String userId,
+  public static MobileTransactionCacheModel getObjectFromCache(String timestampSendMillis, String userId, Long kioskId,
                                      String partialId) {
     try {
       MemcacheService cache = AppFactory.get().getMemcacheService();
       if (cache != null) {
-        String cacheKey = createKey(timestampSendMillis, userId, partialId);
+        String cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
         MobileTransactionCacheModel cacheModel = (MobileTransactionCacheModel) cache.get(cacheKey);
         if (cacheModel == null) {
-          cacheKey = createKey(timestampSendMillis, userId, null);
+          cacheKey = createKey(timestampSendMillis, userId, kioskId, null);
           cacheModel = (MobileTransactionCacheModel) cache.get(cacheKey);
         }
         return cacheModel;
@@ -502,11 +502,11 @@ public class TransactionUtil {
     return null;
   }
 
-  public static String createKey(String timestampSendMillis, String userId,
+  public static String createKey(String timestampSendMillis, String userId, Long kioskId,
                                  String partialId) {
     String
         cacheKey =
-        TRANSACTION_CHECKSUM_KEY_PREFIX + userId + CharacterConstants.DOT + timestampSendMillis;
+        TRANSACTION_CHECKSUM_KEY_PREFIX + userId + CharacterConstants.DOT + (kioskId != null ? kioskId.toString() + CharacterConstants.DOT : CharacterConstants.EMPTY) + timestampSendMillis;
     if (partialId != null) {
       cacheKey += CharacterConstants.DOT + partialId;
     }
