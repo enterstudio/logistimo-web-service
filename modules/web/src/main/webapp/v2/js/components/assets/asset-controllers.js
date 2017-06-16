@@ -1129,12 +1129,14 @@ assetControllers.controller('AssetDetailsController', ['$injector', '$scope', '$
                 };
 
                 $scope.assetDetails = getFilteredResults(data.data, ASSET);
-                if($scope.assetDetails.cfg.st == 1) {
-                    $scope.tempData = $scope.resourceBundle['config.device.pull'];
-                } else if($scope.assetDetails.cfg.st == 2) {
-                    $scope.tempData = $scope.resourceBundle['temperature.device.configured'];
-                } else if($scope.assetDetails.cfg.st == 3) {
-                    $scope.tempData = $scope.resourceBundle['config.device.requested'];
+                if(checkNotNullEmpty($scope.assetDetails.cfg)) {
+                    if ($scope.assetDetails.cfg.st == 1) {
+                        $scope.tempData = $scope.resourceBundle['config.device.pull'];
+                    } else if ($scope.assetDetails.cfg.st == 2) {
+                        $scope.tempData = $scope.resourceBundle['temperature.device.configured'];
+                    } else if ($scope.assetDetails.cfg.st == 3) {
+                        $scope.tempData = $scope.resourceBundle['config.device.requested'];
+                    }
                 }
                 if(checkNotNullEmpty($scope.assetDetails) && checkNotNullEmpty($scope.assetDetails.typ)){
                     $scope.updateCurrentAsset($scope.assetDetails.typ);

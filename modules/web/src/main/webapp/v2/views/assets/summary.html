@@ -33,7 +33,7 @@
                              to="tday"
                              sensor-name="currentAsset.at == 2 ? (getMonitoringPointName(currentMpId) + (isDef(assetRelations) && isDef(assetRelations[currentMpId]) && isDef(assetRelations[currentMpId].sId)?': '+assetRelations[currentMpId].sId :'')): currentSensor"
                              sensor="currentAsset.at == 1?currentSensor:currentMpId"
-                             sensor-id="currentAsset.mps[currentMpId].sId">
+                             sensor-id="currentAsset.at == 1?currentSensor:currentAsset.mps[currentMpId].sId">
                 </export-data>
             </span>
         </div>
