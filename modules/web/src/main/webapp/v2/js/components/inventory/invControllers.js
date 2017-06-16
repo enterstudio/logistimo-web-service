@@ -158,7 +158,7 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
         $scope.$watch("loc.state.label", watchfn("state", null, $location, $scope, null, null, true, ["mid", "etag", "mtag", "dur","batchno","abntype","ebf","district","taluk","pdos"]));
         $scope.$watch("loc.district.label", watchfn("district", null, $location, $scope, null, null, true, ["mid", "etag", "mtag", "dur","batchno","abntype","ebf","state","taluk","pdos"]));
         $scope.$watch("loc.taluk.label", watchfn("taluk", null, $location, $scope, null, null, true, ["mid", "etag", "mtag", "dur","batchno","abntype","ebf","state","district","pdos"]));
-        $scope.$watch("batchno", watchfn("batchno", "", $location, $scope));
+        $scope.$watch("batchno", watchfn("batchno", "", $location, $scope, null, null, true, ["mid", "state", "district", "taluk"]));
         $scope.$watch("abntype", watchfn("abntype", "", $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag", "dur", "state", "district", "taluk"]));
         $scope.$watch("dur", watchfn("dur", null, $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag", "abntype", "state", "district", "taluk"]));
         $scope.$watch("etag", watchfn("etag", null, $location, $scope, null, null, true, ["abntype", "mid", "dur","mtag","ebf", "state", "district", "taluk","pdos"]));
