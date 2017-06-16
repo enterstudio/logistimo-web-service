@@ -33,8 +33,8 @@
     <Valve className="org.apache.catalina.valves.CometConnectionManagerValve" />
     -->
 
-<!-- <Valve className="com.orangefunction.tomcat.redissessions.RedisSessionHandlerValve" />
-    <Manager className="com.orangefunction.tomcat.redissessions.RedisSessionManager"
+<!-- <Valve className="com.bluejeans.tomcat.redissessions.RedisSessionHandlerValve" />
+    <Manager className="com.bluejeans.tomcat.redissessions.RedisSessionManager"
             host="localhost"
             port="6379"
             database="0"
