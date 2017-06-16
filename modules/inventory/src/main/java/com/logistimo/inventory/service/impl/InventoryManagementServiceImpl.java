@@ -1605,7 +1605,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   public ITransaction updateInventoryTransaction(Long domainId, ITransaction inventoryTransaction,
                                                  boolean skipPred, boolean skipVal, PersistenceManager pm) throws ServiceException, DuplicationException {
     if (inventoryTransaction == null) {
-      throw new ServiceException("Invalid parameter passed, testing failed transaction");
+      throw new ServiceException("Invalid parameter passed");
     }
 
     List<ITransaction> list = new ArrayList<>(1);

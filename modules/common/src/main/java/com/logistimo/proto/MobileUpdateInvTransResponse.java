@@ -42,15 +42,15 @@ public class MobileUpdateInvTransResponse {
    */
   public String ms;
   /**
-   * Error code
+   * Kiosk ID
    */
-  public String ec;
+  public Long kid;
   /**
    * Inventory model
    */
   public List<MobileInvModel> inv;
   /**
-   * Transactions that were rejected or that are in error
+   * Transactions that are rejected
    */
   public List<MobileTransErrModel> errs;
   /**

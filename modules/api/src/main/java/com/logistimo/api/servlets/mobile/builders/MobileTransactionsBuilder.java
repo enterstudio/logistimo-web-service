@@ -222,8 +222,9 @@ public class MobileTransactionsBuilder {
       } else {
         mobUpdateInvTransResp.st = PARTIAL_ERROR;
       }
+      mobUpdateInvTransResp.kid = kioskId;
       if (mobUpdateInvTransResp.st == ERROR || mobUpdateInvTransResp.st == PARTIAL_ERROR) {
-        mobUpdateInvTransResp.errs = buildErrorModelList(kioskId, midErrorDetailModels);
+        mobUpdateInvTransResp.errs = buildErrorModelList(midErrorDetailModels);
       }
       mobUpdateInvTransResp.inv =
           buildMobileInvModelList(domainId, userId, kioskId, mobMatTransList);
@@ -292,7 +293,6 @@ public class MobileTransactionsBuilder {
       IUserAccount user = us.getUserAccount(userId);
       Locale locale = user.getLocale();
       String timezone = user.getTimezone();
-      inv.kid = inventory.getKioskId();
       inv.mid = inventory.getMaterialId();
       inv.smid = inventory.getShortId();
       inv.q = inventory.getStock();
@@ -541,30 +541,28 @@ public class MobileTransactionsBuilder {
     return trans;
   }
 
-  private List<MobileTransErrModel> buildErrorModelList(Long kid, Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap) {
+  private List<MobileTransErrModel> buildErrorModelList(Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap) {
     if (midErrorDetailModelsMap == null || midErrorDetailModelsMap.isEmpty()) {
       return null;
     }
     List<MobileTransErrModel> mobileTransErrModels = new ArrayList<>(midErrorDetailModelsMap.size());
     Set<Long> mids = midErrorDetailModelsMap.keySet();
     for (Long mid : mids) {
-      MobileTransErrModel mobileTransErrModel = buildMobileTransErrorModel(kid, mid, midErrorDetailModelsMap.get(mid));
+      MobileTransErrModel mobileTransErrModel = buildMobileTransErrorModel(mid, midErrorDetailModelsMap.get(mid));
       mobileTransErrModels.add(mobileTransErrModel);
     }
     return mobileTransErrModels;
   }
 
-  private MobileTransErrModel buildMobileTransErrorModel(Long kid, Long mid,
+  private MobileTransErrModel buildMobileTransErrorModel(Long mid,
                                                        List<ErrorDetailModel> errorDetailModels) {
-    if (kid == null || mid == null || errorDetailModels == null || errorDetailModels.isEmpty()) {
+    if (mid == null || errorDetailModels == null || errorDetailModels.isEmpty()) {
       return null;
     }
     MobileTransErrModel mobileTransErrModel = new MobileTransErrModel();
-    mobileTransErrModel.kid = kid;
     mobileTransErrModel.mid = mid;
     mobileTransErrModel.errdtl = buildMobileTransErrorDetailModel(errorDetailModels);
     return mobileTransErrModel;
-
   }
 
   private List<MobileTransErrorDetailModel> buildMobileTransErrorDetailModel(List<ErrorDetailModel> errorDetailModels) {

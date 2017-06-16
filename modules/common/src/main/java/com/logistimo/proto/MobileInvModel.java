@@ -31,10 +31,6 @@ import java.util.List;
  */
 public class MobileInvModel {
   /**
-   * Kiosk ID
-   */
-  public Long kid;
-  /**
    * Material ID
    */
   public Long mid;

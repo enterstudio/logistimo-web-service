@@ -881,11 +881,11 @@ public class InventoryServlet extends JsonRestServlet {
     } catch (ServiceException e) {
       xLogger.severe("Exception when updating inventory transactions {0}", e);
       statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-      errorMessage = e.getMessage();
+      errorMessage = backendMessages.getString("error.systemerror");
     } catch (Exception e) {
       xLogger.severe("Exception when updating inventory transactions {0}", e);
       statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-      errorMessage = e.getMessage();
+      errorMessage = backendMessages.getString("error.systemerror");
     }
     try {
       String
