@@ -32,7 +32,7 @@
     <!-- Output to jar format -->
     <packaging>jar</packaging>
 
-    <version>2.4.0</version>
+    <version>2.5.0</version>
 
     <name>Reports</name>
 
@@ -44,52 +44,52 @@
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-common</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-config</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-tags</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-entities</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-activity</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-users</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-materials</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-conversations</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-inventory</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-orders</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

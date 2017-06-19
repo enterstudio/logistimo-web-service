@@ -32,7 +32,7 @@
     <!-- Output to jar format -->
     <packaging>jar</packaging>
 
-    <version>2.4.0</version>
+    <version>2.5.0</version>
 
     <name>activity</name>
 
@@ -44,12 +44,12 @@
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-common</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>logistimo-conversations</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.datanucleus</groupId>
