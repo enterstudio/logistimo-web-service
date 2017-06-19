@@ -65,6 +65,10 @@ function AssetReportController(s, timeout, getData) {
         "valueFontColor": "#000000"
     };
 
+    if(s.reportStartDate) {
+        s.fromTooltip = "This report has been enabled from June 2017";
+    }
+
     s.updateTableHeading = function(tableHeading, dateFormat) {
         dateFormat = dateFormat || "mmm dd, yyyy";
         if (checkNotNullEmpty(tableHeading) && tableHeading.length > 0) {
@@ -127,12 +131,12 @@ function AssetReportController(s, timeout, getData) {
         s.cards = {};
         s.filter.periodicity = "m";
         s.dateMode = 'month';
-        var year = new Date();
-        year.setHours(0,0,0,0);
-        year.setDate(1);
-        s.filter.to = new Date(year);
-        year.setMonth(year.getMonth() - s.MAX_MONTHS);
-        s.filter.from = new Date(year);
+        var fromDate = new Date();
+        fromDate.setHours(0,0,0,0);
+        fromDate.setDate(1);
+        s.filter.to = new Date(fromDate);
+        fromDate.setMonth(fromDate.getMonth() - s.MAX_MONTHS);
+        s.filter.from = getReportFromDate(fromDate);
         s.skipDateWarn = true;
         s.maxDate = new Date();
         s.size = s.PAGE_SIZE;
@@ -354,6 +358,16 @@ function AssetReportController(s, timeout, getData) {
         }
     });
 
+    function getReportFromDate(fromDate) {
+        if(s.reportStartDate && fromDate.getTime() < s.reportStartDate.getTime()) {
+            fromDate = angular.copy(s.reportStartDate);
+            if(s.filter.periodicity == 'w') {
+                fromDate.setDate(fromDate.getDate() + (fromDate.getDay() == 0 ? -6 : 1 - fromDate.getDay()));
+            }
+        }
+        return fromDate;
+    }
+
     s.$watch("filter.periodicity",function(newValue,oldValue){
         if(newValue != oldValue) {
             if(s.hideFilter && s.tempFilters['filter']['periodicity'] != newValue) {
@@ -368,7 +382,7 @@ function AssetReportController(s, timeout, getData) {
                     s.dateMode = 'month';
                     fromDate.setDate(1);
                     fromDate.setMonth(fromDate.getMonth() - s.MAX_MONTHS);
-                    s.filter.from = new Date(fromDate);
+                    s.filter.from = getReportFromDate(fromDate);
                     var toDate = new Date();
                     toDate.setHours(0,0,0,0);
                     toDate.setDate(1);
@@ -376,7 +390,7 @@ function AssetReportController(s, timeout, getData) {
                 } else if (newValue == 'w') {
                     fromDate.setDate(fromDate.getDate() - s.MAX_WEEKS * 7);
                     fromDate.setDate(fromDate.getDate() + (fromDate.getDay() == 0 ? -6 : 1 - fromDate.getDay()));
-                    s.filter.from = new Date(fromDate);
+                    s.filter.from = getReportFromDate(fromDate);
                     toDate = new Date();
                     toDate.setHours(0,0,0,0);
                     toDate.setDate(toDate.getDate() + (toDate.getDay() == 0 ? -6 : 1 - toDate.getDay()));
@@ -384,7 +398,7 @@ function AssetReportController(s, timeout, getData) {
                     s.dateMode = 'week';
                 } else {
                     fromDate.setDate(fromDate.getDate() - s.MAX_DAYS + 1);
-                    s.filter.from = new Date(fromDate);
+                    s.filter.from = getReportFromDate(fromDate);
                     s.filter.to = new Date();
                     s.filter.to.setHours(0,0,0,0);
                     s.dateMode = 'day';
@@ -463,6 +477,7 @@ function AssetReportController(s, timeout, getData) {
             } else {
                 s.filter.from.setDate(s.filter.from.getDate() - s.MAX_DAYS);
             }
+            s.filter.from = getReportFromDate(s.filter.from);
         }
     }
 

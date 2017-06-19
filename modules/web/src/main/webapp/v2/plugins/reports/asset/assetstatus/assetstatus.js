@@ -45,6 +45,8 @@ registerWidget('aas', 'rpt-asset-status', 'Assets', 'Asset status','asset/assets
 
     function ReportAssetStatusController($scope, $timeout, reportsServiceCore,domainCfgService) {
 
+        $scope.reportStartDate = new Date(2017, 5, 1);
+
         AssetReportController.call(this, $scope, $timeout, getData);
 
         $scope.cType = "mscolumn2d";
