@@ -50,6 +50,7 @@ import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.shipments.service.impl.ShipmentService;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -262,6 +264,8 @@ public class ConversationController {
             shipmentService =
             Services.getService(ShipmentService.class, user.getLocale());
         iMessage = shipmentService.addMessage(objId, message.data, user.getUsername());
+      }else if ("APPROVAL".equals(objType)) {
+
       } else {
         throw new InvalidDataException("Unrecognised object type " + objType);
       }
@@ -275,4 +279,30 @@ public class ConversationController {
     }
   }
 
+  @ResponseBody
+  @RequestMapping(value = "/add_message/{objectType}/{objectId}", method = RequestMethod.POST)
+  public MessageModel addMessageWithUserID(@PathVariable String objectType,
+                                           @PathVariable String objectId, @RequestBody StringRequestObj message,
+                                           HttpServletRequest request) {
+    if (StringUtils.isEmpty(message.userId)) {
+      throw new InvalidServiceException("User id is not present in request.");
+    }
+
+    SecureUserDetails user = SecurityUtils.getUserDetails(request);
+    if (user != null) {
+      if (!message.userId.equalsIgnoreCase(user.getUsername())) {
+        throw new InvalidServiceException(
+            "User id in the request not same as the user id in the session.");
+      }
+    }
+    try {
+      ConversationService cs = Services.getService(ConversationServiceImpl.class);
+      IMessage iMessage = cs.addMsgToConversation(objectType, objectId, message.data,
+          message.userId, Collections.singleton(objectType + objectId), message.domainId, null);
+      return new MessageBuilder().buildModel(iMessage);
+    } catch (Exception e) {
+      xLogger.severe("Failed to add message to object", e);
+      throw new InvalidServiceException("Failed to add message to object");
+    }
+  }
 }

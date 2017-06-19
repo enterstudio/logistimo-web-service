@@ -28,4 +28,6 @@ package com.logistimo.api.request;
  */
 public class StringRequestObj {
   public String data;
+  public String userId;
+  public Long domainId;
 }
