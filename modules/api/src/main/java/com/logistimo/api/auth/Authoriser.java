@@ -188,15 +188,18 @@ public class Authoriser {
 
   public static boolean authoriseSMS(String mobileNumber, String userMobileNumber, String userId,
                                      String tokenSuffix) throws Exception {
-    userMobileNumber = userMobileNumber.replaceAll("[+ ]", "");
-    boolean isAuthorised = userMobileNumber.equals(mobileNumber);
-    if (!isAuthorised) {
-      AuthenticationService as = Services.getService(AuthenticationServiceImpl.class);
-      String token = as.getUserToken(userId);
-      if (token != null) {
-        isAuthorised = token.endsWith(tokenSuffix);
-      }
+    boolean isAuthorised;
+
+    //If token is present validate token else validate mobile number
+    AuthenticationService as = Services.getService(AuthenticationServiceImpl.class);
+    String token = as.getUserToken(userId);
+    if (token != null) {
+      isAuthorised = token.endsWith(tokenSuffix);
+    }else{
+      userMobileNumber = userMobileNumber.replaceAll("[+ ]", "");
+      isAuthorised = userMobileNumber.equals(mobileNumber);
     }
+
     return isAuthorised;
   }
 }

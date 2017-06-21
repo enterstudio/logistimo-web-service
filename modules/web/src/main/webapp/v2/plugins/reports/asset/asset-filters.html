@@ -35,7 +35,10 @@
             <div class="form-inline noLRpad filter-fixed">
                 <div class="form-group">
                     <span ng-show="activeMetric == 'ot'">
-                        <rpt-date-filter filter-model="filter.from" mode="dateMode" opened="fopen" close-model="topen"
+                        <rpt-date-filter uib-tooltip="{{fromTooltip}}"
+                                         tooltip-append-to-body="true"
+                                         filter-model="filter.from" mode="dateMode" opened="fopen" close-model="topen"
+                                         min-date="reportStartDate"
                                          max-date="today"></rpt-date-filter>
                         -
                     </span>

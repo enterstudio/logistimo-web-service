@@ -32,6 +32,7 @@ import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.services.utils.ConfigUtil;
 
 import org.apache.commons.lang.StringUtils;
+
 import com.logistimo.config.models.DomainConfig;
 
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
@@ -39,6 +40,7 @@ import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.keys.AesKey;
 import org.jose4j.lang.JoseException;
+
 import com.logistimo.communications.service.EmailService;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.MessageService;
@@ -221,6 +223,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
         q = pm.newQuery(JDOUtils.getImplClass(IUserToken.class));
         q.setResult("token");
         q.setFilter("userId == '" + userId + "'");
+        q.setUnique(true);
         return (String) q.execute();
       } catch (JDOObjectNotFoundException ignored) {
       } finally {
@@ -257,7 +260,6 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
   }
 
   /**
-   *
    * @param userId
    * @param mode
    * @return
@@ -420,21 +422,21 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
   /**
    * Encrypt the otp to be send via mail
    */
- @Override
+  @Override
   public String createJWT(String userid, long ttlMillis) {
-   Key key = new AesKey(ConfigUtil.get(JWTKEY).getBytes());
-   JsonWebEncryption jwe = new JsonWebEncryption();
-   jwe.setKey(key);
-   jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A128KW);
-   jwe.setEncryptionMethodHeaderParameter(
-       ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
-   jwe.setPayload(userid + "&&" + ttlMillis);
-   try {
-     return jwe.getCompactSerialization();
-   } catch (JoseException e) {
-     xLogger.warn("Unable to get the jwt service: {0}", e.getMessage());
-   }
-   return null;
+    Key key = new AesKey(ConfigUtil.get(JWTKEY).getBytes());
+    JsonWebEncryption jwe = new JsonWebEncryption();
+    jwe.setKey(key);
+    jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A128KW);
+    jwe.setEncryptionMethodHeaderParameter(
+        ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
+    jwe.setPayload(userid + "&&" + ttlMillis);
+    try {
+      return jwe.getCompactSerialization();
+    } catch (JoseException e) {
+      xLogger.warn("Unable to get the jwt service: {0}", e.getMessage());
+    }
+    return null;
   }
 
   /**
@@ -489,7 +491,6 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
 
     return null;
   }
-
 
 
   @Override
