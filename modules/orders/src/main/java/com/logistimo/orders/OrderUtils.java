@@ -532,7 +532,7 @@ public class OrderUtils {
   public static boolean isValidOrderStatus(String status) {
     return status.equalsIgnoreCase(IOrder.PENDING) || status.equalsIgnoreCase(IOrder.COMPLETED) ||
         status.equalsIgnoreCase(IOrder.CHANGED) || status.equalsIgnoreCase(IOrder.BACKORDERED)
-        || status.equalsIgnoreCase(IOrder.CANCELLED) | status.equalsIgnoreCase(IOrder.FULFILLED);
+        || status.equalsIgnoreCase(IOrder.CANCELLED) || status.equalsIgnoreCase(IOrder.FULFILLED);
   }
 
   /**
