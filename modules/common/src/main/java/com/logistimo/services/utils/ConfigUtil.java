@@ -25,8 +25,8 @@ package com.logistimo.services.utils;
 
 import org.apache.commons.lang.StringUtils;
 import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
 
-import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -34,15 +34,15 @@ import java.util.Properties;
  */
 public class ConfigUtil {
 
-
   private static final Properties properties;
+  private static final XLog xLogger;
 
   static {
     properties = new Properties();
+    xLogger = XLog.getLog(ConfigUtil.class);
     try {
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("samaanguru.properties"));
-
     }catch(Exception e) {
       throw new RuntimeException("Unable to load samaanguru.properties", e);
     }
@@ -50,8 +50,15 @@ public class ConfigUtil {
     try{
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("beans.properties"));
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to load beans.properties", e);
+    }
+
+    try{
+      properties.load(Thread.currentThread().getContextClassLoader()
+          .getResourceAsStream("custom-beans.properties"));
+    }catch(Exception ignored){
+      xLogger.info("Unable to load custom-beans.properties", ignored);
     }
 
     properties.putAll(System.getProperties());

@@ -27,12 +27,10 @@
 package com.logistimo.reports.utils;
 
 import com.google.gson.Gson;
-import com.logistimo.AppFactory;
+
 import com.logistimo.config.models.ReportObjDimType;
 import com.logistimo.config.models.ReportObjDimValue;
-import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
-import com.logistimo.constants.QueryConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
@@ -41,11 +39,6 @@ import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.inventory.dao.IInvntryDao;
-import com.logistimo.inventory.dao.impl.InvntryDao;
-import com.logistimo.inventory.entity.IInvntry;
-import com.logistimo.inventory.models.InvntrySnapshot;
 import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
@@ -58,6 +51,8 @@ import com.logistimo.reports.entity.slices.IMonthSlice;
 import com.logistimo.reports.entity.slices.IReportsSlice;
 import com.logistimo.reports.entity.slices.ISlice;
 import com.logistimo.reports.entity.slices.SliceDateComparator;
+import com.logistimo.reports.generators.IReportDataGeneratorFactory;
+import com.logistimo.reports.service.ReportsService;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
@@ -70,17 +65,28 @@ import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.QueryUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.util.*;
 
 
 /**
@@ -359,19 +365,19 @@ public class ReportsUtil {
       String materialIdStr = request.getParameter("materialid");
       // Get status
       String statusStr = (StringUtils.isNotEmpty(request.getParameter("status"))) ?
-              URLDecoder.decode(request.getParameter("status"), Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("status"), Constants.UTF8) : null;
       // Get flag to indicate whether only the latest entries are to be included (used by Demand Board maps)
       String latestFlag = request.getParameter("latest");
       // Get dimensional filters
       String state = (StringUtils.isNotEmpty(request.getParameter("state"))) ?
-              URLDecoder.decode(request.getParameter("state"), Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("state"), Constants.UTF8) : null;
       String district = (StringUtils.isNotEmpty(request.getParameter("district"))) ?
-              URLDecoder.decode(request.getParameter("district"), Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("district"), Constants.UTF8) : null;
       String poolgroup = (StringUtils.isNotEmpty(request.getParameter("poolgroup"))) ?
-              URLDecoder.decode(request.getParameter("poolgroup"), Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("poolgroup"), Constants.UTF8) : null;
       // Get vendor id
       String otype = (StringUtils.isNotEmpty(request.getParameter("otype"))) ?
-              URLDecoder.decode(request.getParameter("otype"),Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("otype"), Constants.UTF8) : null;
       // order type = sale or purchase; typically, sent with a get orders request
       // User Id
       String userIdFilter = request.getParameter("uid");
@@ -382,20 +388,20 @@ public class ReportsUtil {
       String abnDuration = request.getParameter("dur");
       //location filter from stock views page
       LocationSuggestionModel location = parseLocation(
-              (request.getParameter("loc") != null)
-                  ? URLDecoder.decode(request.getParameter("loc"), "UTF-8")
-                  : null);
+          (request.getParameter("loc") != null)
+              ? URLDecoder.decode(request.getParameter("loc"), "UTF-8")
+              : null);
       // Tags, if any
       String materialTag = (StringUtils.isNotEmpty(request.getParameter("mtag"))) ?
-              URLDecoder.decode(request.getParameter("mtag"),Constants.UTF8): null;
+          URLDecoder.decode(request.getParameter("mtag"), Constants.UTF8) : null;
       String kioskTag = (StringUtils.isNotEmpty(request.getParameter("ktag"))) ?
-              URLDecoder.decode(request.getParameter("ktag"),Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("ktag"), Constants.UTF8) : null;
       if (StringUtils.isEmpty(kioskTag)) {
         kioskTag = (StringUtils.isNotEmpty(request.getParameter("etag"))) ?
-                URLDecoder.decode(request.getParameter("etag"),Constants.UTF8) : null;
+            URLDecoder.decode(request.getParameter("etag"), Constants.UTF8) : null;
       }
       String orderTag = (StringUtils.isNotEmpty(request.getParameter("otag"))) ?
-              URLDecoder.decode(request.getParameter("otag"),Constants.UTF8) : null;
+          URLDecoder.decode(request.getParameter("otag"), Constants.UTF8) : null;
       // Get domain Id
       Long domainId = null;
       if (StringUtils.isNotEmpty(domainIdStr)) {
@@ -485,7 +491,7 @@ public class ReportsUtil {
   public static LocationSuggestionModel parseLocation(String loc) {
     try {
       if (loc != null) {
-        return new Gson().fromJson(loc,LocationSuggestionModel.class);
+        return new Gson().fromJson(loc, LocationSuggestionModel.class);
       }
     } catch (JSONException e) {
       xLogger.warn("Error in parsing location filter object", e);
@@ -493,13 +499,14 @@ public class ReportsUtil {
     return null;
   }
 
-  public static List<ISlice> fillMissingSlicesWithDefaultValues(List<? extends  ISlice> slices,String periodType){
+  public static List<ISlice> fillMissingSlicesWithDefaultValues(List<? extends ISlice> slices,
+                                                                String periodType) {
     int n = slices.size();
     //startDate is the date of last slice , as results are order by desc date
-    Date startDate = slices.get(n-1).getDate();
+    Date startDate = slices.get(n - 1).getDate();
     // endDate is the date of the first slice.
     Date endDate = slices.get(0).getDate();
-    return fillMissingSlices(slices,startDate,endDate,periodType, true);
+    return fillMissingSlices(slices, startDate, endDate, periodType, true);
   }
 
   /**
@@ -514,78 +521,90 @@ public class ReportsUtil {
    * @return
    */
 
-  public static List<ISlice> fillMissingSlices(List<? extends ISlice> slices, Date startDate, Date endDate, String periodType, Boolean initMissingSlicesWithDefaultValues) {
-    xLogger.info( "Entering fillMissingSlices, between startDate: {0}, endDate: {1}, periodType: {2} ", startDate, endDate, periodType );
+  public static List<ISlice> fillMissingSlices(List<? extends ISlice> slices, Date startDate,
+                                               Date endDate, String periodType,
+                                               Boolean initMissingSlicesWithDefaultValues) {
+    xLogger
+        .info("Entering fillMissingSlices, between startDate: {0}, endDate: {1}, periodType: {2} ",
+            startDate, endDate, periodType);
     // If slices == null or empty, log a warning message and return null
-    if ( slices == null || slices.isEmpty() ) {
-      xLogger.warn( "Inside fillMissingSlices, slices is null or empty" );
+    if (slices == null || slices.isEmpty()) {
+      xLogger.warn("Inside fillMissingSlices, slices is null or empty");
       return null;
     }
-    if ( ! ( ISlice.DAILY.equals( periodType ) || ISlice.MONTHLY.equals( periodType ) ) ) {
-      xLogger.warn( "Invalid periodType: periodType: {0}", periodType );
+    if (!(ISlice.DAILY.equals(periodType) || ISlice.MONTHLY.equals(periodType))) {
+      xLogger.warn("Invalid periodType: periodType: {0}", periodType);
       return null;
     }
     // The slices is assumed to be incomplete.
     List<ISlice> newList = new ArrayList<ISlice>();
     int n = slices.size(); // Size of the incomplete arraylist of slices
     int i = n - 2;
-    ISlice prevSlice = slices.get( n - 1 ); // Make the last element in the arrayList as previous Slice
-    if ( prevSlice == null ) {
-      xLogger.warn( "Inside fillMissingSlices, prevSlice is null or empty" );
+    ISlice
+        prevSlice =
+        slices.get(n - 1); // Make the last element in the arrayList as previous Slice
+    if (prevSlice == null) {
+      xLogger.warn("Inside fillMissingSlices, prevSlice is null or empty");
       return null;
     }
-    while ( i >= 0 ) {
-      newList.add( prevSlice );
-      ISlice curSlice = slices.get( i ); // Current slice is one element before the previous slice
-      if ( curSlice == null ) {
-        xLogger.warn( "Inside fillMissingSlices, curSlice is null or empty" );
+    while (i >= 0) {
+      newList.add(prevSlice);
+      ISlice curSlice = slices.get(i); // Current slice is one element before the previous slice
+      if (curSlice == null) {
+        xLogger.warn("Inside fillMissingSlices, curSlice is null or empty");
         return null;
       }
-      if ( diffInDates( curSlice.getDate(), prevSlice.getDate(), periodType )  > 1 ) {
+      if (diffInDates(curSlice.getDate(), prevSlice.getDate(), periodType) > 1) {
         // Get new slices from prevSlice.date to curSlice.date, slice type is decided by filterType, new slices are initialized from prevSlice
-        List<ISlice> newSlices = getNewSlices( prevSlice, curSlice.getDate(), periodType, initMissingSlicesWithDefaultValues);
-        if ( newSlices == null || newSlices.isEmpty() ) {
-          xLogger.warn( "Inside fillMissingSlices, newSlices is null or empty" );
+        List<ISlice>
+            newSlices =
+            getNewSlices(prevSlice, curSlice.getDate(), periodType,
+                initMissingSlicesWithDefaultValues);
+        if (newSlices == null || newSlices.isEmpty()) {
+          xLogger.warn("Inside fillMissingSlices, newSlices is null or empty");
           return null;
         }
-        newList.addAll( newSlices );
+        newList.addAll(newSlices);
       }
       prevSlice = curSlice;
       i--;
     }
-    newList.add( prevSlice ); // Add the last slice here
-    if ( diffInDates( endDate, prevSlice.getDate(), periodType ) > 1 ) { //Earlier > 1
-      List<ISlice> newSlices = getNewSlices( prevSlice, endDate, periodType, initMissingSlicesWithDefaultValues);
-      if ( newSlices == null || newSlices.isEmpty() ) {
-        xLogger.warn( "Inside fillMissingSlices, newSlices is null or empty" );
+    newList.add(prevSlice); // Add the last slice here
+    if (diffInDates(endDate, prevSlice.getDate(), periodType) > 1) { //Earlier > 1
+      List<ISlice>
+          newSlices =
+          getNewSlices(prevSlice, endDate, periodType, initMissingSlicesWithDefaultValues);
+      if (newSlices == null || newSlices.isEmpty()) {
+        xLogger.warn("Inside fillMissingSlices, newSlices is null or empty");
         return null;
       }
-      newList.addAll( newSlices );
+      newList.addAll(newSlices);
     }
 
     // Sort the newList in descending order of date.
-    Collections.sort( newList, new SliceDateComparator() );
+    Collections.sort(newList, new SliceDateComparator());
 
     return newList;
   }
 
   // This method creates new Slices between fromSlice.date and toSlice date, initializes them from fromSlice
   // The type of Slice created is based on filterType
-  private static List<ISlice> getNewSlices(ISlice fromSlice, Date toSliceDate, String periodType, Boolean initMissingSlicesWithDefaultValues) {
+  private static List<ISlice> getNewSlices(ISlice fromSlice, Date toSliceDate, String periodType,
+                                           Boolean initMissingSlicesWithDefaultValues) {
     Date nextSliceDate;
     List<ISlice> newSlices = new ArrayList<ISlice>();
-    nextSliceDate = getNextSliceDate( fromSlice.getDate(), periodType );
+    nextSliceDate = getNextSliceDate(fromSlice.getDate(), periodType);
     ISlice prevSlice = fromSlice;
-    while ( diffInDates( toSliceDate, nextSliceDate , periodType ) > 0 ) { // Earlier > 0
+    while (diffInDates(toSliceDate, nextSliceDate, periodType) > 0) { // Earlier > 0
       ISlice newSlice = JDOUtils.createInstance(IReportsSlice.class);
       newSlice.setDate(nextSliceDate, null, periodType); // Set the are for the newSlice to be date1
-      if(!initMissingSlicesWithDefaultValues){
-        initFromPrevSlice( prevSlice, newSlice );
+      if (!initMissingSlicesWithDefaultValues) {
+        initFromPrevSlice(prevSlice, newSlice);
       }
-      newSlices.add( newSlice );
+      newSlices.add(newSlice);
       prevSlice = newSlice;
       // date1 = getNextSliceDate( date1, filterType );
-      nextSliceDate = getNextSliceDate( prevSlice.getDate(), periodType );
+      nextSliceDate = getNextSliceDate(prevSlice.getDate(), periodType);
     }
     return newSlices;
   }
@@ -727,7 +746,9 @@ public class ReportsUtil {
         objectValue = u.getFullName();
       } else {
         DomainsService ds = Services.getService(DomainsServiceImpl.class);
-        IDomain domain = ds.getDomain(Long.valueOf(sliceMap.get(ReportsConstants.DOMAIN).toString()));
+        IDomain
+            domain =
+            ds.getDomain(Long.valueOf(sliceMap.get(ReportsConstants.DOMAIN).toString()));
         objectValue = domain.getName();
       }
 
@@ -798,6 +819,11 @@ public class ReportsUtil {
         typeName = "";
     }
     return typeName;
+  }
+
+  public static IReportDataGeneratorFactory getReportDataGeneratorFactory()
+      throws ServiceException {
+    return ((ReportsService) Services.getService("reports")).getReportDataGeneratorFactory();
   }
 
 }

@@ -58,7 +58,11 @@ public abstract class AppFactory {
   protected IBackendService backendService;
 
   public static AppFactory get() {
-    return _instance;
+    if(_instance == null) {
+      return (AppFactory) createInstance(APPFACTORY);
+    } else {
+      return _instance;
+    }
   }
 
   public static Object createInstance(String type) {

@@ -27,54 +27,34 @@
 package com.logistimo.reports.service.impl;
 
 import com.logistimo.AppFactory;
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.domains.entity.IDomain;
-import com.logistimo.domains.service.DomainsService;
-import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.inventory.models.InvntrySnapshot;
-import com.logistimo.reports.ReportsConstants;
-import com.logistimo.reports.entity.ReportSchedule;
-import com.logistimo.reports.service.ReportsService;
-import com.logistimo.services.cache.MemcacheService;
-
 import com.logistimo.config.models.DomainConfig;
-import com.logistimo.reports.models.DomainCounts;
-import com.logistimo.reports.entity.slices.IDomainStats;
-import com.logistimo.reports.entity.IReportSchedule;
-import com.logistimo.reports.entity.slices.IDaySlice;
-import com.logistimo.reports.entity.slices.IMonthSlice;
-import com.logistimo.reports.entity.slices.ISlice;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.inventory.models.InvntrySnapshot;
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
+import com.logistimo.reports.entity.IReportSchedule;
+import com.logistimo.reports.entity.ReportSchedule;
+import com.logistimo.reports.entity.slices.IDomainStats;
+import com.logistimo.reports.entity.slices.ISlice;
+import com.logistimo.reports.generators.IReportDataGeneratorFactory;
 import com.logistimo.reports.generators.ReportData;
 import com.logistimo.reports.generators.ReportDataGenerator;
 import com.logistimo.reports.generators.ReportDataGeneratorFactory;
-import com.logistimo.reports.generators.ReportingDataException;
+import com.logistimo.reports.models.DomainCounts;
+import com.logistimo.reports.service.ReportsService;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
+import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.impl.ServiceImpl;
-import com.logistimo.constants.CharacterConstants;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.QueryUtil;
-import com.logistimo.reports.utils.ReportsUtil;
-import com.logistimo.logger.XLog;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 
 /**
  * @author arun
@@ -82,6 +62,8 @@ import javax.jdo.Query;
 public class ReportsServiceImpl extends ServiceImpl implements ReportsService {
 
   private static final XLog xLogger = XLog.getLog(ReportsServiceImpl.class);
+
+  private IReportDataGeneratorFactory reportDataGeneratorFactory = new ReportDataGeneratorFactory();
 
   @Override
   public InvntrySnapshot getInventorySnapshot(Long kioskId, Long materialId, Date date,
@@ -105,11 +87,9 @@ public class ReportsServiceImpl extends ServiceImpl implements ReportsService {
                                   PageParams pageParams, DomainConfig dc, String sourceUserId)
       throws ServiceException {
     try {
-      ReportDataGenerator rdg = ReportDataGeneratorFactory.getInstance(reportType);
+      ReportDataGenerator rdg = reportDataGeneratorFactory.getInstance(reportType);
       return rdg.getReportData(from, until, frequency, filters, locale, timezone, pageParams, dc,
           sourceUserId);
-    } catch (ReportingDataException e) {
-      throw new ServiceException(e.getMessage());
     } catch (Exception e) {
       // Added this block because getReportData does not throw ReportingDataException in StockEventDataGenerator.
       throw new ServiceException(e.getMessage());
@@ -250,5 +230,10 @@ public class ReportsServiceImpl extends ServiceImpl implements ReportsService {
   @Override
   public String getReportLastRunTime(String appName) {
     return null;
+  }
+
+  @Override
+  public IReportDataGeneratorFactory getReportDataGeneratorFactory() {
+    return reportDataGeneratorFactory;
   }
 }

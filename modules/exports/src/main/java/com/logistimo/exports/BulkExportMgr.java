@@ -65,8 +65,8 @@ import com.logistimo.pagination.Results;
 import com.logistimo.reports.ReportsConstants;
 import com.logistimo.reports.entity.slices.IMonthSlice;
 import com.logistimo.reports.entity.slices.ISlice;
+import com.logistimo.reports.generators.IReportDataGeneratorFactory;
 import com.logistimo.reports.generators.ReportDataGenerator;
-import com.logistimo.reports.generators.ReportDataGeneratorFactory;
 import com.logistimo.reports.utils.ReportsUtil;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
@@ -80,14 +80,26 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Export data in bulk
@@ -121,7 +133,7 @@ public class BulkExportMgr {
 
   // Get the query parameters for a given type of export
   // NOTE: The keys in params are the same as the request parameter keys in ExportServlet.batchExport()
-  public static QueryParams getQueryParams(String type, Long domainId, HttpServletRequest req)
+  public static QueryParams getQueryParams(String type, Long domainId, IReportDataGeneratorFactory iReportDataGeneratorFactory, HttpServletRequest req)
       throws Exception {
     if (type == null || type.isEmpty() || domainId == null) {
       throw new IllegalArgumentException(
@@ -252,20 +264,20 @@ public class BulkExportMgr {
             e.getClass().getName(), expiresBeforeStr, e.getMessage());
       }
     }
-    if(StringUtils.isNotEmpty(eTags)){
+    if (StringUtils.isNotEmpty(eTags)) {
       eTags = URLDecoder.decode(eTags, "UTF-8");
     }
 
-    if(StringUtils.isNotEmpty(mTag)){
+    if (StringUtils.isNotEmpty(mTag)) {
       mTag = URLDecoder.decode(mTag, "UTF-8");
     }
 
-    if(StringUtils.isNotEmpty(reason)){
+    if (StringUtils.isNotEmpty(reason)) {
       reason = URLDecoder.decode(reason, "UTF-8");
     }
 
     if (isReportType) {
-      return getReportQueryParams(type, domainId, req);
+      return getReportQueryParams(type, domainId, iReportDataGeneratorFactory, req);
       // TODO: return getReportQueryParams(...) - use ReportDataGeneratorFactory, get generator instance based on type, ReportDataGenerator.getQueryParams(...filters...) - DO NULL CHECK AND LOG Severe error; for filters use ReportUtils.getFilters
     }
     UsersService as = Services.getService(UsersServiceImpl.class);
@@ -304,12 +316,12 @@ public class BulkExportMgr {
           null,
           null,
           domainId,
-          null,IInvntry.ALL,false,location,false, pdos);
+          null, IInvntry.ALL, false, location, false, pdos);
     } else if (TYPE_TRANSACTIONS.equals(type)) {
       ITransDao transDao = new TransDao();
       return transDao.buildTransactionsQuery(from, to, domainId, kioskId, materialId,
-          trnType!=null? Collections.singletonList(trnType): null, lkIdParam, eTags, mTag,
-          kioskIds, batchIdStr, hasAtd, reason, null );
+          trnType != null ? Collections.singletonList(trnType) : null, lkIdParam, eTags, mTag,
+          kioskIds, batchIdStr, hasAtd, reason, null);
     }
     // Form query params.
     String queryStr = "";
@@ -504,7 +516,7 @@ public class BulkExportMgr {
 
   // Private method that returns the report query params
   private static QueryParams getReportQueryParams(
-      String type, Long domainId, HttpServletRequest req) {
+      String type, Long domainId, IReportDataGeneratorFactory iReportDataGeneratorFactory, HttpServletRequest req) {
     xLogger.fine("Entering getReportQueryParams");
     // use ReportDataGeneratorFactory, get generator instance based on type, ReportDataGenerator.getQueryParams(...filters...)
     //Read the required parameters for generating report query
@@ -561,7 +573,7 @@ public class BulkExportMgr {
     PageParams pageParams = null;
     QueryParams qp = null;
     try {
-      ReportDataGenerator rdg = ReportDataGeneratorFactory.getInstance(type);
+      ReportDataGenerator rdg = iReportDataGeneratorFactory.getInstance(type);
       qp =
           rdg.getReportQuery(
               from, to, frequencyStr, filters, locale, timezone, pageParams, dc, sourceUserIdStr);
@@ -862,7 +874,8 @@ public class BulkExportMgr {
     public String sensorName;
     public String emailId;
 
-    public ExportParams() {}
+    public ExportParams() {
+    }
 
     public ExportParams(String exportParamsJSON) throws JSONException {
       JSONObject json = new JSONObject(exportParamsJSON);
