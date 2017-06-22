@@ -54,17 +54,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.*;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -573,12 +563,16 @@ public class TransDataServlet extends JsonRestServlet {
         return parsedRequest;
       }
     }
+
     parsedRequest.parsedReqMap.put(RestConstantsZ.SIZE, size);
+    List<String> dateFormats=new ArrayList<>(2);
+    dateFormats.add(Constants.DATETIME_IN_MILLI_FORMAT);
+    dateFormats.add(Constants.DATE_FORMAT);
     String endDateStr = reqParamsMap.get(RestConstantsZ.ENDDATE);
     Date endDate = new Date();
     if (StringUtils.isNotEmpty(endDateStr)) {
       try {
-        endDate = LocalDateUtil.parseCustom(endDateStr, Constants.DATE_FORMAT, timezone);
+        endDate = LocalDateUtil.parseDate(endDateStr, dateFormats, timezone);
         parsedRequest.parsedReqMap.put(RestConstantsZ.ENDDATE, endDate);
       } catch (ParseException pe) {
         parsedRequest.errMessage = backendMessages.getString("error.invalidenddate");
@@ -593,7 +587,7 @@ public class TransDataServlet extends JsonRestServlet {
     Date startDate = null;
     if (StringUtils.isNotEmpty(startDateStr)) {
       try {
-        startDate = LocalDateUtil.parseCustom(startDateStr, Constants.DATE_FORMAT, timezone);
+        startDate = LocalDateUtil.parseDate(startDateStr, dateFormats, timezone);
         parsedRequest.parsedReqMap.put(RestConstantsZ.STARTDATE, startDate);
       } catch (ParseException pe) {
         parsedRequest.errMessage = backendMessages.getString("error.notvalidstartdate");

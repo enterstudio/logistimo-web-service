@@ -23,9 +23,9 @@
 
 package com.logistimo.api.servlets.mobile.builders;
 
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.pagination.Results;
-import com.logistimo.services.Services;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import com.logistimo.accounting.models.CreditData;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
@@ -33,32 +33,42 @@ import com.logistimo.activity.entity.IActivity;
 import com.logistimo.activity.models.ActivityModel;
 import com.logistimo.activity.service.ActivityService;
 import com.logistimo.activity.service.impl.ActivityServiceImpl;
+import com.logistimo.api.models.OrderMinimumResponseModel;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.pagination.Results;
 import com.logistimo.proto.MobileConversationModel;
 import com.logistimo.proto.MobileDemandItemModel;
 import com.logistimo.proto.MobileOrderModel;
 import com.logistimo.proto.MobileOrdersModel;
 import com.logistimo.proto.MobileShipmentModel;
+import com.logistimo.proto.RestConstantsZ;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by vani on 03/11/16.
@@ -88,6 +98,7 @@ public class MobileOrderBuilder {
     mom.ost = o.getStatus();
     mom.q = o.getNumberOfItems();
     mom.cbid = o.getUserId();
+    mom.tm = LocalDateUtil.formatCustom(o.getUpdatedOn(), Constants.DATETIME_FORMAT, null);
     try {
       user = as.getUserAccount(o.getUserId());
       mom.cbn = user.getFullName();
@@ -262,5 +273,200 @@ public class MobileOrderBuilder {
       mom.os = momList;
     }
     return mom;
+  }
+
+  /**
+   * Method to build the order response json
+   *
+   * @param orders    List of Orders
+   * @param locale    user's locale
+   * @param timezone  user's timezone
+   * @param orderType Order type required for adding approval status
+   * @return JsonObject - response
+   */
+  public JsonObject buildOrdersResponse(List<IOrder> orders, Locale locale, String timezone,
+                                        int orderType) throws Exception {
+
+    if (orders != null && !orders.isEmpty()) {
+      Map<String, String> userMap = new HashMap<>();
+      //Get the kiosk as a map
+      Map<Long, Kiosk> kioskMap = getKioskMap(orders);
+      List<OrderMinimumResponseModel> orderResponseList = new ArrayList<>(orders.size());
+      /*Set<Long> orderIds = getOrderIds(orders);
+      HashMap<Long,IOrderApprovalMapping> orderApprovalMap = getOrderApprovalStatus(orderIds,orderType);*/
+      for (IOrder order : orders) {
+        OrderMinimumResponseModel
+            model =
+            buildMinimumOrder(order, userMap, kioskMap, locale, timezone /*orderApprovalMap.get(order.getOrderId())*/);
+        orderResponseList.add(model);
+      }
+      return buildOrderJson(orderResponseList);
+    }
+    return null;
+  }
+
+  /**
+   * Method to build json response
+   *
+   * @param orderMinRespModelList Orders model
+   * @return json response
+   */
+  private JsonObject buildOrderJson(List<OrderMinimumResponseModel> orderMinRespModelList) {
+    JsonObject jsonObject = new JsonObject();
+    Gson gson = new Gson();
+    String orderString = gson.toJson(orderMinRespModelList);
+    JsonElement mElement = gson.fromJson(orderString, JsonElement.class);
+    jsonObject.add(RestConstantsZ.MINI_RESP_ORDER_KEY, gson.toJsonTree(mElement));
+    return jsonObject;
+  }
+
+/*  private Set<Long> getOrderIds(List<IOrder> orderList) {
+    Set<Long> orderIdSet = new HashSet<>();
+    if (orderList != null && !orderList.isEmpty()) {
+      for (IOrder order : orderList) {
+        orderIdSet.add(order.getOrderId());
+      }
+    }
+    return orderIdSet;
+  }*/
+
+
+ /* private HashMap<Long, IOrderApprovalMapping> getOrderApprovalStatus(Set<Long> orderIds,int orderType) {
+    HashMap<Long,IOrderApprovalMapping> orderMap = new HashMap<>();
+    try {
+
+      OrderManagementService
+          orderManagementService =
+          Services.getService(OrderManagementServiceImpl.class);
+      List<IOrderApprovalMapping>
+          orderApprovalMappingList =
+          orderManagementService.getOrdersApprovalStatus(orderIds,orderType);
+      for (IOrderApprovalMapping orderApprovalMapping : orderApprovalMappingList) {
+        orderMap.put(orderApprovalMapping.getOrderId(), orderApprovalMapping);
+      }
+
+    } catch (ServiceException e) {
+
+    }
+    return orderMap;
+  }*/
+
+  /**
+   * Populate field of minimum response model
+   *
+   * @param order    - Order object
+   * @param userMap  - Map which has user name as keys and user full name as value
+   * @param kioskMap -Map which has the Kiosk ID as key and associated kiosk details as value
+   * @param locale   -User's locale
+   * @param timezone -User's timezone
+   */
+  private OrderMinimumResponseModel buildMinimumOrder(IOrder order, Map<String, String> userMap,
+                                                      Map<Long, Kiosk> kioskMap, Locale locale,
+                                                      String timezone/*,
+                          IOrderApprovalMapping approvalMapping*/) throws Exception {
+
+    OrderMinimumResponseModel model = new OrderMinimumResponseModel();
+    model.setTid(order.getOrderId());
+    model.setOst(order.getStatus());
+    model.setQ(order.getNumberOfItems());
+    model.setCbid(order.getUserId());
+
+    List<String> otgs = order.getTags(TagUtil.TYPE_ORDER);
+    if ((otgs != null) && !otgs.isEmpty()) {
+      model.setTg(StringUtil.getCSV(otgs));
+    }
+
+    model.setCbn(getUserName(userMap, order.getUserId()));
+    model.setUbid(order.getUpdatedBy());
+    model.setUbn(getUserName(userMap, order.getUpdatedBy()));
+    String createdTime = LocalDateUtil.format(order.getCreatedOn(), locale, timezone);
+    model.setT(createdTime);
+    if (order.getUpdatedOn() != null) {
+      String updatedTime = LocalDateUtil.format(order.getUpdatedOn(), locale, timezone);
+      model.setUt(updatedTime);
+    }
+    //Set the source kiosk details
+    model.setKid(order.getKioskId());
+    if (kioskMap.containsKey(order.getKioskId())) {
+      Kiosk kiosk = kioskMap.get(order.getKioskId());
+      model.setKnm(kiosk.getName());
+      model.setKcty(kiosk.getCity());
+    }
+    //Set the servicing kiosk details
+    if (order.getServicingKiosk() != null) {
+      model.setVid(order.getServicingKiosk());
+      if (kioskMap.containsKey(order.getServicingKiosk())) {
+        Kiosk vendor = kioskMap.get(order.getServicingKiosk());
+        model.setVnm(vendor.getName());
+        model.setVcty(vendor.getCity());
+      }
+    }
+
+    JsonObject jsonObject = new JsonObject();
+     /* jsonObject.addProperty(RestConstantsZ.STATUS,approvalMapping.getStatus());
+      jsonObject.addProperty(RestConstantsZ.TIME,new Date().toString());*/
+    model.setApprvl(jsonObject);
+    return model;
+  }
+
+  /**
+   * Method gets the user details from map if it is present, else retrieves it from DB and puts it to map
+   *
+   * @param userMap Map details with username as key and user details as value
+   * @param userId  User Id
+   * @return User full name
+   * @throws ServiceException        from service layer
+   * @throws ObjectNotFoundException If user not found
+   */
+  private String getUserName(Map<String, String> userMap, String userId)
+      throws ObjectNotFoundException, ServiceException {
+    if (userMap.containsKey(userId)) {
+      userMap.get(userId);
+    }
+    UsersService usersService = Services.getService(UsersServiceImpl.class);
+    IUserAccount userAccount = usersService.getUserAccount(userId);
+    userMap.put(userId, userAccount.getFullName());
+    return userAccount.getFullName();
+  }
+
+  /**
+   * Method takes the unique kiosk ids from the given set of orders and returns a map with kiosk id as key and kiosk object as value
+   *
+   * @param orderList List of orders
+   * @return returns a map with kiosk id as key and kiosk object as value
+   */
+  private Map<Long, Kiosk> getKioskMap(List<IOrder> orderList) throws ServiceException {
+    Set<Long> kioskIdList = new HashSet<>();
+    for (IOrder order : orderList) {
+      kioskIdList.add(order.getKioskId());
+      kioskIdList.add(order.getServicingKiosk());
+    }
+    EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
+    List<IKiosk> kioskList = entitiesService.getKiosksByIds(new ArrayList<>(kioskIdList));
+    Map<Long, Kiosk> kioskMap = new HashMap<>(kioskIdList.size());
+    for (IKiosk kiosk : kioskList) {
+      //Add the kiosk details to the map
+      kioskMap.put(kiosk.getKioskId(), new Kiosk(kiosk.getName(), kiosk.getCity()));
+    }
+    return kioskMap;
+  }
+
+
+  class Kiosk {
+    private String name;
+    private String city;
+
+    Kiosk(String name, String city) {
+      this.city = city;
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getCity() {
+      return city;
+    }
   }
 }

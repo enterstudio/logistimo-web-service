@@ -156,4 +156,10 @@ public class UpdateOrderRequest {
    * Transfer or Non transfer
    */
   public Integer trf;
+
+  /**
+   * Updated time sent in the last response
+   */
+
+  public String tm;
 }

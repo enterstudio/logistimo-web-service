@@ -525,8 +525,7 @@ public class OrdersController {
       if (order == null) {
         throw new Exception(backendMessages.getString("order.none") + " " + orderId);
       }
-      if (!orderUpdatedAt.equals(
-          LocalDateUtil.formatCustom(order.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
+      if (!OrderUtils.validateOrderUpdatedTime(orderUpdatedAt,order.getUpdatedOn())) {
         throw new LogiException("O004", user.getUsername(),
             LocalDateUtil.format(order.getUpdatedOn(), user.getLocale(), user.getTimezone()));
       }

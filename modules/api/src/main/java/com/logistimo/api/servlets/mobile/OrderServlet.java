@@ -41,7 +41,6 @@ import com.logistimo.exception.LogiException;
 import org.apache.commons.lang.StringUtils;
 
 import com.logistimo.config.models.DomainConfig;
-import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -94,6 +93,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -125,7 +125,12 @@ public class OrderServlet extends JsonRestServlet {
     xLogger.fine("OrderServlet: Entering doGet");
     String action = req.getParameter(RestConstantsZ.ACTION);
     if (RestConstantsZ.ACTION_GETORDERS.equals(action)) {
-      getOrders(req, resp, backendMessages, messages);
+      if (RestConstantsZ.MINIMUM_RESP_VALUE.equalsIgnoreCase(req
+          .getParameter(RestConstantsZ.MINIMUM_RESPONSE))) {
+        getOrdersMinimumResponse(req, resp, backendMessages);
+      } else {
+        getOrders(req, resp, backendMessages, messages);
+      }
     } else if (RestConstantsZ.ACTION_GETORDER.equals(action)) {
       getOrCancelOrder(req, resp, false, backendMessages, messages);
     } else if (RestConstantsZ.ACTION_CANCELORDER.equals(action)) {
@@ -151,6 +156,100 @@ public class OrderServlet extends JsonRestServlet {
     } else {
       processGet(req, resp, backendMessages, messages);
     }
+  }
+
+  /**
+   * Method to get the minimum details of orders for the order listing
+   *
+   * @param request         - HttpServletRequest
+   * @param response        - HttpServletResponse
+   * @param backendMessages - Error messages resource bundle
+   */
+  private void getOrdersMinimumResponse(HttpServletRequest request, HttpServletResponse response,
+                                        ResourceBundle backendMessages) {
+    // Get request parameters
+    String userId = request.getParameter(RestConstantsZ.USER_ID);
+    String kioskIdStr = request.getParameter(RestConstantsZ.KIOSK_ID);
+    String status = request.getParameter(RestConstantsZ.STATUS);
+    String size = request.getParameter(RestConstantsZ.SIZE);
+    String otype = request.getParameter(RestConstantsZ.ORDER_TYPE);
+    String transfers = request.getParameter(RestConstantsZ.TRANSFERS);
+    String reqOffset = request.getParameter(RestConstantsZ.OFFSET);
+    String message = null;
+    Long kioskId = null;
+    int statusCode = HttpServletResponse.SC_OK;
+    JsonObject jsonObject = null;
+    try {
+      //Get kiosk from request
+      if (StringUtils.isBlank(kioskIdStr)) {
+        throw new ServiceException(backendMessages.getString("error.nokiosk"));
+      }
+      kioskId = Long.parseLong(kioskIdStr);
+      //validate token and kiosk
+      IUserAccount u = RESTUtil.authenticate(userId, null, kioskId, request, response);
+      //Get the max results from request
+      int maxResults = PageParams.DEFAULT_SIZE;
+      if (StringUtils.isNotBlank(size)) {
+        try {
+          maxResults = Integer.parseInt(size);
+        } catch (NumberFormatException e) {
+          xLogger.warn("Invalid max orders received. Reset to default size", size, e.getMessage());
+        }
+      }
+      //Get the offset from request
+      int offset = 0;
+      if (StringUtils.isNotBlank(reqOffset)) {
+        try {
+          offset = Integer.parseInt(reqOffset);
+        } catch (NumberFormatException e) {
+          xLogger.warn("Invalid offset received. Reset to 0", reqOffset, e.getMessage());
+        }
+      }
+      PageParams pageParams = new PageParams(offset, maxResults);
+
+      // If order type is invalid or not sales, it is set to purchase
+      if (!OrderUtils.isValidOrderType(otype)) {
+        otype = IOrder.TYPE_PURCHASE;
+      }
+      //Based on whether transfer is requested or not, set the flag
+      boolean isTransfer = OrderUtils.isTransfer(transfers);
+
+      //Get orders for specified entity, status, order type and transfers
+      OrderManagementService
+          oms =
+          Services.getService(OrderManagementServiceImpl.class, u.getLocale());
+      List<IOrder> ordersList = oms.getOrders(kioskId, status, pageParams, otype, isTransfer);
+      if (ordersList == null || ordersList.isEmpty()) {
+        message = backendMessages.getString("error.noorders");
+      } else {
+        int orderApprovalType = OrderUtils.getOrderApprovalType(otype, isTransfer);
+        jsonObject =
+            new MobileOrderBuilder()
+                .buildOrdersResponse(ordersList, u.getLocale(), u.getTimezone(), orderApprovalType);
+      }
+    } catch (NumberFormatException e) {
+      xLogger.severe(" Exception when getting kiosk", e);
+      message = backendMessages.getString("error.nokiosk");
+    } catch (UnauthorizedException e) {
+      xLogger.severe(" User unauthorized", e);
+      statusCode = HttpServletResponse.SC_UNAUTHORIZED;
+      message = backendMessages.getString("error.userNotAuthorized");
+    } catch (ServiceException e) {
+      xLogger.severe(" Service Exception", e);
+      message = e.getMessage();
+    } catch (Exception e) {
+      xLogger.severe(" Exception when fetching orders for kiosk {0}: {1}", kioskId, e);
+      message = backendMessages.getString("error.systemerror");
+    }
+    try {
+      String resp = GsonUtil.buildResponse(jsonObject, message, RESTUtil.VERSION_01);
+      sendJsonResponse(response, statusCode, resp);
+    } catch (Exception e1) {
+      xLogger.severe("Protocol exception when sending orders for kiosk {0}: {1}", kioskId,
+          e1);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
   }
 
   // Get orders for a given kiosk
@@ -578,8 +677,9 @@ public class OrderServlet extends JsonRestServlet {
     String jsonInput = req.getParameter(RestConstantsZ.JSON_STRING);
     // Get password (in case of SMS)
     String password = req.getParameter(RestConstantsZ.PASSWORD);
-
+    String errorCode = null;
     OrderResults or = null;
+    MobileOrderModel mom = null;
     IOrder o = null;
     String message = null;
     boolean status = true;
@@ -595,6 +695,7 @@ public class OrderServlet extends JsonRestServlet {
       status = false;
     } else {
       UpdateOrderRequest uoReq = GsonUtil.updateOrderInputFromJson(jsonInput);
+
       try {
         List<String> orderTags = StringUtil.getList(uoReq.tg);
         // Get the domain Id
@@ -663,6 +764,7 @@ public class OrderServlet extends JsonRestServlet {
             message = backendMessages.getString("error.unabletoupdateorder");
             status = false;
           }
+
           String signature = null;
           MemcacheService
               cache = null;
@@ -671,8 +773,20 @@ public class OrderServlet extends JsonRestServlet {
               oms =
               Services.getService(OrderManagementServiceImpl.class,
                   locale);
+          if (RestConstantsZ.TYPE_REORDER.equalsIgnoreCase(type)) {
+
+            o = oms.getOrder(uoReq.tid);
+            if (!OrderUtils.validateOrderUpdatedTime(uoReq.tm, o.getUpdatedOn())) {
+              errorCode = "O004";
+              status = false;
+              mom = buildOrderModel(timezone, o, locale, includeBatchDetails);
+            }
+
+          }
+
           if (status) {
             if ("oo".equals(type)) {
+
               signature = CommonUtils.getMD5(jsonInput);
               cache = AppFactory.get().getMemcacheService();
               Integer lastStatus = (Integer) cache.get(signature);
@@ -851,32 +965,16 @@ public class OrderServlet extends JsonRestServlet {
 
     // Send the order output as response
     String jsonString = null;
+
     if (status) {
-      MobileOrderModel mom = null;
-      if (o != null) {
-        DomainConfig dc = DomainConfig.getInstance(o.getDomainId());
-        boolean isAccounting = dc.isAccountingEnabled();
-        MobileOrderBuilder mob = new MobileOrderBuilder();
-        mom = mob.build(o, locale, timezone, true, isAccounting, true, includeBatchDetails);
-      }
+      mom = buildOrderModel(timezone, o, locale, includeBatchDetails);
+
       // Get JSON output
-      try {
-        jsonString = GsonUtil.buildGetOrderResponseModel(status, mom, message, RESTUtil.VERSION_01);
-      } catch (Exception e) {
-        xLogger.severe("Protocol exception: {0}", e.getMessage());
-        message = backendMessages.getString("error.invaliddata");
-        status = false;
-      }
+      jsonString = buildJsonResponse(resp, status, mom, message, errorCode);
     }
     // If errors, try and get the error message for sending back
     if (!status) {
-      try {
-        jsonString =
-            GsonUtil.buildGetOrderResponseModel(status, null, message, RESTUtil.VERSION_01);
-      } catch (Exception e1) {
-        xLogger.severe("Protocol exception when getting error response: {0}", e1.getMessage());
-        resp.setStatus(500);
-      }
+      jsonString = buildJsonResponse(resp, status, mom, message, errorCode);
     }
 
     // Send back response
@@ -888,6 +986,53 @@ public class OrderServlet extends JsonRestServlet {
 
     xLogger.fine("Exiting createOrUpdateOrder");
   }
+
+  /**
+   * Builds a json from the order model
+   *
+   * @param response         http response
+   * @param status           error status
+   * @param mobileOrderModel order model
+   * @param message          error message
+   * @param errorCode        error code
+   * @return Json string
+   */
+  private String buildJsonResponse(HttpServletResponse response, boolean status,
+                                   MobileOrderModel mobileOrderModel, String message,
+                                   String errorCode) {
+    try {
+      return
+          GsonUtil
+              .buildOrderJson(status, mobileOrderModel, message, RESTUtil.VERSION_01, errorCode);
+    } catch (Exception e1) {
+      xLogger.severe("Protocol exception when getting error response", e1);
+      if (mobileOrderModel != null) {
+        buildJsonResponse(response, status, null, message, errorCode);
+      }
+      response.setStatus(500);
+    }
+    return null;
+  }
+
+  /**
+   * Builds a order model from the order object
+   *
+   * @param timezone user's timezone
+   * @param order    Order
+   * @param locale   user's locale
+   * @return MobileOrderModel order model
+   */
+  private MobileOrderModel buildOrderModel(String timezone, IOrder order, Locale locale,
+                                           boolean includeBatch) {
+    if (order == null) {
+      return null;
+    }
+    DomainConfig dc = DomainConfig.getInstance(order.getDomainId());
+    boolean isAccounting = dc.isAccountingEnabled();
+    return new MobileOrderBuilder()
+        .build(order, locale, timezone, true, isAccounting, true, includeBatch);
+  }
+
 
   // Update status of an order - DEPRECATED
   @SuppressWarnings("rawtypes")

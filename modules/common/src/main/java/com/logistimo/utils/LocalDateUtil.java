@@ -136,6 +136,25 @@ public class LocalDateUtil {
     }
     return sdf.parse(timestampStr);
   }
+  public static Date parseDate(String timestampStr, List<String> dateFormats, String timezone)
+          throws ParseException {
+    Date date=null;
+    SimpleDateFormat sdf = new SimpleDateFormat();
+    for(String s:dateFormats){
+      sdf.applyPattern(s);
+      if (timezone != null && !timezone.isEmpty()) {
+        sdf.setTimeZone(TimeZone.getTimeZone(timezone));
+      }
+      try {
+        date = sdf.parse(timestampStr);
+      }catch (ParseException ignored){
+      }
+    }
+    if(date==null){
+      throw new ParseException(timestampStr,0);
+    }
+    return date;
+  }
 
   public static Date parse(String timestampStr, Locale locale, String timezone)
       throws ParseException {

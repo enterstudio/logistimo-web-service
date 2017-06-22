@@ -73,12 +73,14 @@ import com.logistimo.models.ResponseModel;
 import com.logistimo.models.shipments.ShipmentItemModel;
 import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.OrderResults;
+import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.dao.IOrderDao;
 import com.logistimo.orders.dao.OrderUpdateStatus;
 import com.logistimo.orders.dao.impl.OrderDao;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.entity.Order;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
@@ -106,6 +108,8 @@ import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.LockUtil;
 import com.logistimo.utils.MsgUtil;
 import com.logistimo.utils.QueryUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -137,7 +141,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       "/s2/api/entities/task/updateentityactivitytimestamps";
   private static ITaskService taskService = AppFactory.get().getTaskService();
   private ITagDao tagDao = new TagDao();
-  private IOrderDao orderDao =  new OrderDao();
+  private IOrderDao orderDao = new OrderDao();
   private ITransDao transDao = new TransDao();
 
   // Get a demand item with same material ID
@@ -535,7 +539,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           mcs =
           Services.getService(MaterialCatalogServiceImpl.class, this.getLocale());
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, this.getLocale());
-
       ShipmentModel model = new ShipmentModel();
       if (expectedFulfilmentDate != null) {
         model.ead = new SimpleDateFormat(Constants.DATE_FORMAT).format(expectedFulfilmentDate);
@@ -583,9 +586,12 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     ConversationService
         cs =
         Services.getService(ConversationServiceImpl.class, this.getLocale());
-    IMessage iMessage = cs.addMsgToConversation("ORDER", orderId.toString(), message, updatingUserId,
-        Collections.singleton("ORDER:" + orderId), domainId, pm);
-    generateOrderCommentEvent(domainId, IEvent.COMMENTED, JDOUtils.getImplClassName(IOrder.class), orderId.toString(), null, null);
+    IMessage
+        iMessage =
+        cs.addMsgToConversation("ORDER", orderId.toString(), message, updatingUserId,
+            Collections.singleton("ORDER:" + orderId), domainId, pm);
+    generateOrderCommentEvent(domainId, IEvent.COMMENTED, JDOUtils.getImplClassName(IOrder.class),
+        orderId.toString(), null, null);
     return iMessage;
 
   }
@@ -776,6 +782,110 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     xLogger.fine("Exiting getOrders");
     return results;
   }
+
+  /**
+   * Get orders based on kiosk,status,ordertype
+   *
+   * @param kioskId    - Kiosk ID
+   * @param status     -Order status
+   * @param pageParams -Page params with max results and offset
+   * @param orderType  -Order type sle for sales and prc for purchase
+   * @param isTransfer - True for transfers, false if it is sales/purchase
+   * @return List of IOrder
+   * @throws ServiceException from service layer
+   */
+  public List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams,
+                                String orderType, boolean isTransfer) throws ServiceException {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    List<String> parameters = new ArrayList<>(1);
+    StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER` ");
+    Query query = null;
+    List<IOrder> results;
+    try {
+
+      //Set the oty based on transfer or not
+      queryBuilder.append(" WHERE OTY=").append(isTransfer ? "=" : "!=")
+          .append(CharacterConstants.QUESTION);
+      parameters.add(String.valueOf(IOrder.TRANSFER));
+
+      //If the order type is purchase append kid, if it is sales append the lkid
+      if (OrderUtils.isValidOrderType(orderType)) {
+        if (orderType.equalsIgnoreCase(IOrder.TYPE_PURCHASE)) {
+          queryBuilder.append(" AND KID =").append(CharacterConstants.QUESTION);
+        } else {
+          queryBuilder.append(" AND SKID =").append(CharacterConstants.QUESTION);
+        }
+        parameters.add(String.valueOf(kioskId));
+      }
+      //Append status information
+      if (StringUtils.isNotBlank(status) && OrderUtils.isValidOrderStatus(status)) {
+        queryBuilder.append("AND ST=").append(CharacterConstants.QUESTION);
+        parameters.add(status);
+      }
+
+      queryBuilder.append(" ORDER BY UON DESC");
+      queryBuilder.append(" LIMIT ").append(pageParams.getOffset()).append(CharacterConstants.COMMA)
+          .append(pageParams.getSize());
+      query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
+      query.setClass(Order.class);
+      results = (List<IOrder>) query.executeWithArray(parameters.toArray());
+      results = (List<IOrder>) pm.detachCopyAll(results);
+    } catch (Exception e) {
+      xLogger.warn("Exception while fetching orders minimum response", e);
+      throw new ServiceException("Service exception fetching order details");
+    } finally {
+      if (query != null) {
+        try {
+          query.closeAll();
+        } catch (Exception e) {
+          xLogger.warn("Exception while closing query", e);
+        }
+      }
+      pm.close();
+    }
+    return results;
+  }
+
+  /**
+   *  Get the order approval status for the set of Order Ids for the given order type
+   * @param orderIds
+   * @param approvalType
+   * @return
+   */
+ /* public List<IOrderApprovalMapping> getOrdersApprovalStatus(Set<Long> orderIds, int approvalType) {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER_APPROVAL_MAPPING` ");
+    Query query = null;
+    List<IOrderApprovalMapping> results = null;
+    try {
+      if (orderIds != null && !orderIds.isEmpty()) {
+        queryBuilder.append("WHERE OID IN (");
+        for (Long orderId : orderIds) {
+          queryBuilder.append(orderId).append(CharacterConstants.COMMA);
+        }
+        queryBuilder.setLength(queryBuilder.length() - 1);
+        queryBuilder.append(" )");
+        queryBuilder.append(" AND OTYPE=").append(approvalType);
+        queryBuilder.append(" ORDER BY OID ASC");
+        query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
+        query.setClass(OrderApprovalMapping.class);
+        results = (List<IOrderApprovalMapping>) query.execute();
+        return (List<IOrderApprovalMapping>) pm.detachCopyAll(results);
+      }
+    } catch (Exception e) {
+      xLogger.warn("Exception while fetching approval status", e);
+    } finally {
+      if (query != null) {
+        try {
+          query.closeAll();
+        } catch (Exception ignored) {
+          xLogger.warn("Exception while closing query", ignored);
+        }
+      }
+      pm.close();
+    }
+    return results;
+  }*/
 
   /**
    * Get orders placed by a certain user
@@ -1476,7 +1586,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       cs.addMsgToConversation("ORDER", String.valueOf(o.getOrderId()), message, userId,
           Collections.singleton("ORDER:" + o.getOrderId())
           , o.getDomainId(), pm);
-      generateOrderCommentEvent(domainId, IEvent.COMMENTED, JDOUtils.getImplClassName(IOrder.class), o.getOrderId().toString(), null, null);
+      generateOrderCommentEvent(domainId, IEvent.COMMENTED, JDOUtils.getImplClassName(IOrder.class),
+          o.getOrderId().toString(), null, null);
     }
     o.setReferenceID(referenceId);
   }
@@ -1599,7 +1710,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     Long domainId = o.getDomainId();
     // Check to ensure that the transaction's domain is the same as that of the kiosk on which it is being made (superdomains)
     try {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class,getLocale());
+      EntitiesService as = Services.getService(EntitiesServiceImpl.class, getLocale());
       domainId =
           as.getKiosk(kioskId, false)
               .getDomainId(); // this ensures that the transactions' domain ID will be the same as that of the kiosk, independent of its source domain
@@ -1878,7 +1989,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
 
-
   public List<String> getIdSuggestions(Long domainId, String id, String type, Integer oty,
                                        List<Long> kioskIds) throws ServiceException {
     List<String> filterIds = new ArrayList<>();
@@ -1929,7 +2039,9 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     return filterIds;
   }
 
-  public BigDecimal getLeadTime(Long kid, Long mid, float orderPeriodicityInConfig, LeadTimeAvgConfig leadTimeAvgConfig, float leadTimeDefaultInConfig) throws ServiceException {
+  public BigDecimal getLeadTime(Long kid, Long mid, float orderPeriodicityInConfig,
+                                LeadTimeAvgConfig leadTimeAvgConfig, float leadTimeDefaultInConfig)
+      throws ServiceException {
     BigDecimal avgLeadTime = BigDecimal.ZERO;
     if (kid == null || mid == null) {
       xLogger.warn("Either Kiosk ID or material ID is null, kid: {0}, mid: {1}", kid, mid);
@@ -1948,20 +2060,20 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
     InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
     EntitiesService es = Services.getService(EntitiesServiceImpl.class);
-    Results results = es.getLinkedKiosks(kid, IKioskLink.TYPE_VENDOR,null,null);
+    Results results = es.getLinkedKiosks(kid, IKioskLink.TYPE_VENDOR, null, null);
     boolean kskHasMoreThanOneVnd = false;
     if (results.getResults().size() > 1) {
       kskHasMoreThanOneVnd = true;
     }
     IInvntry inv = ims.getInventory(kid, mid);
-    BigDecimal orderPeriodicity  = inv.getOrderPeriodicity();
+    BigDecimal orderPeriodicity = inv.getOrderPeriodicity();
     if (BigUtil.equalsZero(orderPeriodicity)) {
       orderPeriodicity = new BigDecimal(orderPeriodicityInConfig);
     }
     int maxHistoricalPeriod = orderPeriodicity.multiply(new BigDecimal(maxOrderPeriods)).intValue();
     List<String> parameters = new ArrayList<>(1);
     StringBuilder sqlQuery = new StringBuilder("SELECT AVG(DLT_ALIAS)");
-    if(!excludeProcessingTime) {
+    if (!excludeProcessingTime) {
       sqlQuery.append(" + AVG(PT_ALIAS)");
     }
     sqlQuery.append(", COUNT(1) FROM (");
@@ -1971,22 +2083,25 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     }
     sqlQuery.append(" FROM `ORDER` WHERE ");
     if (kskHasMoreThanOneVnd) {
-    sqlQuery.append("ID IN (SELECT DISTINCT OID FROM DEMANDITEM WHERE KID = ").append(CharacterConstants.QUESTION);
-    parameters.add(String.valueOf(kid));
-    sqlQuery.append(" AND MID = ").append(CharacterConstants.QUESTION).append(CharacterConstants.C_BRACKET);
-    parameters.add(String.valueOf(mid));
+      sqlQuery.append("ID IN (SELECT DISTINCT OID FROM DEMANDITEM WHERE KID = ")
+          .append(CharacterConstants.QUESTION);
+      parameters.add(String.valueOf(kid));
+      sqlQuery.append(" AND MID = ").append(CharacterConstants.QUESTION)
+          .append(CharacterConstants.C_BRACKET);
+      parameters.add(String.valueOf(mid));
     } else {
       sqlQuery.append("KID = ").append(CharacterConstants.QUESTION);
       parameters.add(String.valueOf(kid));
     }
     sqlQuery.append(" AND ST = '").append(IOrder.FULFILLED).append("'");
 
-    sqlQuery.append(" AND UON >= (DATE_SUB(NOW(),INTERVAL ").append(maxHistoricalPeriod).append(" DAY))").append(" ORDER BY UON DESC LIMIT 0,").append(maxNumberOfOrders);
+    sqlQuery.append(" AND UON >= (DATE_SUB(NOW(),INTERVAL ").append(maxHistoricalPeriod)
+        .append(" DAY))").append(" ORDER BY UON DESC LIMIT 0,").append(maxNumberOfOrders);
     sqlQuery.append(") ALIAS");
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query query = pm.newQuery("javax.jdo.query.SQL", sqlQuery.toString());
     try {
-       List queryResults = (List) query.executeWithArray(parameters.toArray());
+      List queryResults = (List) query.executeWithArray(parameters.toArray());
       if (queryResults != null && !queryResults.isEmpty()) {
         Iterator iterator = queryResults.iterator();
         while (iterator.hasNext()) {
@@ -2069,26 +2184,28 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     List<IMaterial> materialsNotExisting = new ArrayList<>(1);
     try {
       InventoryManagementService
-      ims =
-      Services.getService(InventoryManagementServiceImpl.class);
+          ims =
+          Services.getService(InventoryManagementServiceImpl.class);
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
       for (IDemandItem demandItem : order.getItems()) {
         IInvntry inv = ims.getInventory(kioskId, demandItem.getMaterialId());
         if (inv == null && BigUtil.greaterThanZero(demandItem.getQuantity())) {
-        IMaterial material = mcs.getMaterial(demandItem.getMaterialId());
-        materialsNotExisting.add(material);
+          IMaterial material = mcs.getMaterial(demandItem.getMaterialId());
+          materialsNotExisting.add(material);
         }
       }
     } catch (ServiceException e) {
-     xLogger.warn("Exception while getting materials not existing in kioskId {0}", kioskId, e);
-     }
+      xLogger.warn("Exception while getting materials not existing in kioskId {0}", kioskId, e);
+    }
     return materialsNotExisting;
   }
 
   private void validateOrderStatusChange(IOrder order, String newStatus) throws ServiceException {
-    List<IMaterial> materialsNotExistingInVendor = getMaterialsNotExistingInKiosk(order.getServicingKiosk(), order);
+    List<IMaterial>
+        materialsNotExistingInVendor =
+        getMaterialsNotExistingInKiosk(order.getServicingKiosk(), order);
     if ((IOrder.CONFIRMED.equals(newStatus) || IOrder.COMPLETED.equals(newStatus)) &&
-      materialsNotExistingInVendor != null && !materialsNotExistingInVendor.isEmpty()) {
+        materialsNotExistingInVendor != null && !materialsNotExistingInVendor.isEmpty()) {
       EntitiesService as = Services.getService(EntitiesServiceImpl.class);
       IKiosk vnd = as.getKiosk(order.getServicingKiosk(), false);
       String errorCode = "I003";
@@ -2098,7 +2215,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         errorCode = "I004";
       }
       throw new ServiceException(errorCode, MsgUtil.bold(vnd.getName()),
-      MaterialUtils.getMaterialNamesString(materialsNotExistingInVendor));
-      }
+          MaterialUtils.getMaterialNamesString(materialsNotExistingInVendor));
+    }
   }
 }
