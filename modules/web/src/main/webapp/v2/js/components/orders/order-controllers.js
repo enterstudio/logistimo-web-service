@@ -2004,6 +2004,9 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                 $scope.showWarning($scope.resourceBundle['quantity.invalid']+' '+invalidQMats.slice(0,-2));
             } else {
                 $scope.showLoading();
+                if ($scope.timestamp == undefined) {
+                    $scope.timestamp = new Date().getTime();
+                }
                 var fOrder = constructFinalOrder();
                 if($scope.type != "1") {
                     skipCheck = true;
@@ -2023,12 +2026,34 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                         });
                     }
                 }).catch(function error(msg) {
-                    $scope.showErrorMsg(msg);
+                    if(msg.status == 504 || msg.status == 404) {
+                        // Allow resubmit or cancel.
+                        handleTimeout();
+                    } else {
+                        $scope.showErrorMsg(msg);
+                    }
                 }).finally(function(){
                     $scope.hideLoading();
                 });
             }
         };
+
+        function handleTimeout() {
+            $scope.modalInstance = $uibModal.open({
+                template: '<div class="modal-header ws">' +
+                '<h3 class="modal-title">{{resourceBundle["connection.timedout"]}}</h3>' +
+                '</div>' +
+                '<div class="modal-body ws">' +
+                '<p>{{resourceBundle["connection.timedout"]}}.</p>' +
+                '</div>' +
+                '<div class="modal-footer ws">' +
+                '<button class="btn btn-primary" ng-click="update();cancel()">{{resourceBundle.resubmit}}</button>' +
+                '<button class="btn btn-default" ng-click="cancel()">{{resourceBundle.cancel}}</button>' +
+                '</div>',
+                scope: $scope
+            });
+        }
+
         $scope.proceed = function() {
             $scope.update(true);
             $scope.cancel();
@@ -2081,6 +2106,7 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                 }
             });
             ft['rid'] = $scope.order.rid;
+            ft['signature'] = $scope.curUser + $scope.timestamp;
             return ft;
         }
         $scope.$watch('mtag', function (name, oldVal) {
