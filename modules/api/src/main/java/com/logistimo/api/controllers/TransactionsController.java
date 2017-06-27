@@ -27,6 +27,7 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import com.logistimo.AppFactory;
 import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.util.DedupUtil;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
@@ -60,7 +61,6 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
-import com.logistimo.utils.Counter;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.api.util.SessionMgr;
 import com.logistimo.constants.SourceConstants;
@@ -105,13 +105,6 @@ import javax.servlet.http.HttpServletRequest;
 public class TransactionsController {
 
   private static final XLog xLogger = XLog.getLog(TransactionsController.class);
-  private static final int
-      CACHE_EXPIRY =
-      ConfigUtil.getInt("cache.expiry.for.transaction.signature", 900);
-  // 15 minutes
-  private static final int PENDING = 0;
-  private static final int SUCCESS = 1;
-  private static final int FAILED = 2;
   TransactionBuilder builder = new TransactionBuilder();
   ITransDao transDao =new TransDao();
 
@@ -489,29 +482,28 @@ public class TransactionsController {
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
 
     MemcacheService cache = null;
-    String
-        signature =
+    String signature =
         transaction.get("signature") != null ? String.valueOf(transaction.get("signature")) : null;
     if (signature != null) {
       cache = AppFactory.get().getMemcacheService();
-    }
-    if (signature != null && cache != null) {
-      // Check if the signature exists in cache
-      Integer lastStatus = (Integer) cache.get(signature);
-      if (lastStatus != null) {
-        switch (lastStatus) {
-          case SUCCESS:
-            return backendMessages.getString("transactions.create.success");
-          case PENDING:
-            return backendMessages.getString("transaction.verify.message");
-          case FAILED:
-            setSignatureAndStatus(cache, signature, PENDING);
-            break;
-          default:
-            break;
+      if (cache != null) {
+        // Check if the signature exists in cache
+        Integer lastStatus = (Integer) cache.get(signature);
+        if (lastStatus != null) {
+          switch (lastStatus) {
+            case DedupUtil.SUCCESS:
+              return backendMessages.getString("transactions.create.success");
+            case DedupUtil.PENDING:
+              return backendMessages.getString("transaction.verify.message");
+            case DedupUtil.FAILED:
+              DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.PENDING);
+              break;
+            default:
+              break;
+          }
+        } else {
+          DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.PENDING);
         }
-      } else {
-        setSignatureAndStatus(cache, signature, PENDING);
       }
     }
 
@@ -645,14 +637,14 @@ public class TransactionsController {
             MsgUtil.newLine() + errorMsg + MsgUtil.newLine() + MsgUtil.newLine() +
             backendMessages.getString("transactions.resubmit");
       }
-      setSignatureAndStatus(cache, signature, SUCCESS);
+      DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.SUCCESS);
     } catch (ServiceException e) {
       xLogger.severe("Error in creating transaction: {0}", e);
-      setSignatureAndStatus(cache, signature, FAILED);
+      DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.FAILED);
       throw new InvalidServiceException(backendMessages.getString("transactions.create.error"));
     } catch (DuplicationException | ParseException e) {
       xLogger.warn("Error in creating transaction: {0}", e);
-      setSignatureAndStatus(cache, signature, FAILED);
+      DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.FAILED);
       throw new InvalidServiceException(
           backendMessages.getString("transactions.create.error") + ". " + e.getMessage());
     }
@@ -729,13 +721,6 @@ public class TransactionsController {
       xLogger.severe("Error in reading user details : {0}", userId);
     }
     return permission;
-  }
-
-  // Set the signature and status in cache
-  private void setSignatureAndStatus(MemcacheService cache, String signature, int status) {
-    if (signature != null && cache != null) {
-      cache.put(signature, status, CACHE_EXPIRY);
-    }
   }
   @RequestMapping(value = "/statusmandatory", method = RequestMethod.GET)
   public

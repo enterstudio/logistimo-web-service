@@ -23,39 +23,42 @@
 
 package com.logistimo.orders;
 
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.FieldsConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
+import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.entity.IInvntry;
-import com.logistimo.orders.models.UpdatedOrder;
-import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.service.OrderManagementService;
-import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.models.shipments.ShipmentItemModel;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
+import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.UpdatedOrder;
+import com.logistimo.orders.service.OrderManagementService;
+import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.proto.FulfillmentBatchMaterialRequest;
 import com.logistimo.proto.FulfillmentMaterialRequest;
 import com.logistimo.proto.UpdateOrderStatusRequest;
-import com.logistimo.shipments.ShipmentStatus;
-import com.logistimo.shipments.entity.IShipment;
-import com.logistimo.shipments.service.IShipmentService;
-import com.logistimo.shipments.service.impl.ShipmentService;
-
-import com.logistimo.config.models.DomainConfig;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.shipments.ShipmentStatus;
+import com.logistimo.shipments.entity.IShipment;
+import com.logistimo.shipments.service.IShipmentService;
+import com.logistimo.shipments.service.impl.ShipmentService;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
-import com.logistimo.constants.SourceConstants;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.utils.LocalDateUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +67,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static com.logistimo.orders.entity.IOrder.NONTRANSFER;
 
 
 /**
@@ -324,7 +329,8 @@ public class OrderUtils {
         ss.updateShipmentData("date", eadStr, previousUpdatedTime, uosReq.sid, uosReq.uid);
       }
       updated =
-          ss.updateShipmentStatus(uosReq.sid, shipmentStatus, uosReq.ms, uosReq.uid, uosReq.rsnco).status;
+          ss.updateShipmentStatus(uosReq.sid, shipmentStatus, uosReq.ms, uosReq.uid,
+              uosReq.rsnco).status;
     }
 
     if (updated) {
@@ -515,4 +521,74 @@ public class OrderUtils {
 
     return name;
   }
+
+
+  /**
+   * Validate order status
+   *
+   * @param status Order status from request
+   * @return true if status is valid, false otherwise
+   */
+  public static boolean isValidOrderStatus(String status) {
+    return status.equalsIgnoreCase(IOrder.PENDING) || status.equalsIgnoreCase(IOrder.COMPLETED) ||
+        status.equalsIgnoreCase(IOrder.CHANGED) || status.equalsIgnoreCase(IOrder.BACKORDERED)
+        || status.equalsIgnoreCase(IOrder.CANCELLED) || status.equalsIgnoreCase(IOrder.FULFILLED);
+  }
+
+  /**
+   * Validate order type. Valid types are sle for sales and prc for purchase
+   *
+   * @param orderType - Sle/prc
+   * @return boolean to indicate if valid or no
+   */
+  public static boolean isValidOrderType(String orderType) {
+    return StringUtils.isNotBlank(orderType) && (
+        orderType.equalsIgnoreCase(IOrder.TYPE_PURCHASE) || orderType
+            .equalsIgnoreCase(IOrder.TYPE_SALE));
+  }
+
+  /**
+   * Set the order type as sales,purchase and transfers for approvals
+   *
+   * @param orderType - Sle/prc
+   * @return 0-TRANSFER, 1- PURCHASE, 2-SALES
+   */
+  public static int getOrderApprovalType(String orderType, boolean isTransfer) {
+    int status = -1;
+    if (isTransfer) {
+      return 0;
+    } else if (StringUtils.isNotBlank(orderType) && orderType
+        .equalsIgnoreCase(IOrder.TYPE_PURCHASE)) {
+      return 1;
+    } else if (StringUtils.isNotBlank(orderType) && orderType.equalsIgnoreCase(IOrder.TYPE_SALE)) {
+      return 2;
+    }
+    return status;
+  }
+
+  /**
+   * @param transfers has 1 or 0
+   * @return If the transfer value is set to 1, set type as transfers. Default type is non transfers
+   */
+  public static boolean isTransfer(String transfers) {
+    try {
+      return StringUtils.isNotBlank(transfers) && Integer.parseInt(transfers) == NONTRANSFER;
+    } catch (NumberFormatException e) {
+      xLogger.warn("Number format exception: {0}", e.getMessage());
+    }
+    return false;
+  }
+
+  /**
+   * Method to validate the last updated time received in the request with the actual order updated time.
+   *
+   * @param lastUpdatedTime  Time received from client
+   * @param orderUpdatedTime Last updated time present in db
+   * @return true if lastUpdatedTime is blank or equal to orderUpdatedTime
+   */
+  public static boolean validateOrderUpdatedTime(String lastUpdatedTime, Date orderUpdatedTime) {
+    return StringUtils.isBlank(lastUpdatedTime) || lastUpdatedTime.equalsIgnoreCase(
+        LocalDateUtil.formatCustom(orderUpdatedTime, Constants.DATETIME_FORMAT, null));
+  }
+
 }

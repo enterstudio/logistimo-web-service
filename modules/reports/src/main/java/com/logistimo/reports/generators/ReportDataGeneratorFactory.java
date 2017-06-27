@@ -32,14 +32,15 @@ import com.logistimo.reports.ReportsConstants;
  * @author Arun
  *         Factory for creating report generators
  */
-public class ReportDataGeneratorFactory {
+public class ReportDataGeneratorFactory implements IReportDataGeneratorFactory {
 
   /**
    * Create an instance of a report generator
    *
    * @param reportType The type of report generator as described in ReportData
    */
-  public static ReportDataGenerator getInstance(String reportType) throws ReportingDataException {
+  @Override
+  public ReportDataGenerator getInstance(String reportType) throws ReportingDataException {
     if (ReportsConstants.TYPE_TRANSACTION0.equals(reportType) || ReportsConstants.TYPE_TRANSACTION_RAW
         .equals(reportType)) {
       return new TransReportDataGenerator();
@@ -59,34 +60,6 @@ public class ReportDataGeneratorFactory {
     } else if (ReportsConstants.TYPE_USERACTIVITY.equals(reportType) || ReportsConstants.TYPE_DOMAINACTIVITY
         .equals(reportType)) {
       return new ActivityDataGenerator();
-    } else if (ReportsConstants.TYPE_STOCKEVENT.equals(reportType)) {
-      return new StockEventDataGenerator();
-    } else {
-      throw new ReportingDataException("Invalid reportType: " + reportType);
-    }
-  }
-
-  public static ReportDataGenerator getInstanceV2(String reportType) throws ReportingDataException {
-
-    if (ReportsConstants.TYPE_TRANSACTION0.equals(reportType) || ReportsConstants.TYPE_TRANSACTION_RAW
-        .equals(reportType)) {
-      return new TransReportDataGenerator();
-    } else if (ReportsConstants.TYPE_STOCK.equals(reportType)) {
-      return new StockReportDataGenerator();
-    } else if (ReportsConstants.TYPE_DEMANDBOARD.equals(reportType)) {
-      return new DemandBoardDataGenerator();
-    } else if (ReportsConstants.TYPE_ORDERS.equals(reportType)) {
-      return new OrdersDataGenerator();
-    } else if (ReportsConstants.TYPE_CONSUMPTION.equals(reportType) || ReportsConstants.TYPE_TRANSACTION
-        .equals(reportType) ||
-        ReportsConstants.TYPE_STOCKEVENTRESPONSETIME.equals(reportType)
-        || ReportsConstants.TYPE_ORDERRESPONSETIMES.equals(reportType)) {
-      return new com.logistimo.reports.generators.TransTrendsDataGenerator(reportType);
-    } else if (ReportsConstants.TYPE_STOCKLEVEL.equals(reportType)) {
-      return new StockLevelDataGenerator();
-    } else if (ReportsConstants.TYPE_USERACTIVITY.equals(reportType) || ReportsConstants.TYPE_DOMAINACTIVITY
-        .equals(reportType)) {
-      return new com.logistimo.reports.generators.ActivityDataGenerator();
     } else if (ReportsConstants.TYPE_STOCKEVENT.equals(reportType)) {
       return new StockEventDataGenerator();
     } else {

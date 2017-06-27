@@ -50,9 +50,7 @@ public class RestConstantsZ {
   public static final String MATERIAL_IDS = "mids";
   public static final String MIN_RESPONSE = "mrsp";
   public static final String NOTIFICATION = "n";
-  public static final String
-      NUM_RESULTS =
-      "r";
+  public static final String NUM_RESULTS = "r";
   // DEPRECATED: used only when fetching orders; user SIZE instead
   public static final String OLD_PASSWORD = "opwd";
   public static final String ONLY_AUTHENTICATE = "oa";
@@ -77,6 +75,10 @@ public class RestConstantsZ {
   public static final String USER_AGENT = "User-Agent";
   public static final String IP_ADDRESS = "X-REAL-IP";
   public static final String PREVIOUS_UPDATED_TIME="put";
+  public static final String MINIMUM_RESPONSE="mrsp";
+  public static final String TRANSFERS="transfers";
+  public static final String OFFSET="o";
+  public static final String MINIMUM_RESP_VALUE="1";
 
 
   // Action values
@@ -169,4 +171,11 @@ public class RestConstantsZ {
       return "unkown";
     }
   }
+
+  //Response fields
+  public static final String MINI_RESP_ORDER_KEY="os";
+
+  public static final int ORDERS_SUC_STATUS_CODE=0;
+  public static final int ORDERS_FAIL_STATUS_CODE=1;
+
 }

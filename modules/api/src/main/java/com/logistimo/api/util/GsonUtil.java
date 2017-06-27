@@ -28,6 +28,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import com.logistimo.constants.Constants;
 import com.logistimo.entities.models.UserEntitiesModel;
 import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.proto.MobileOrderModel;
@@ -35,6 +36,7 @@ import com.logistimo.proto.MobileOrdersModel;
 import com.logistimo.proto.MobileTransactionsModel;
 import com.logistimo.proto.RelationshipInput;
 import com.logistimo.proto.RelationshipInputDeserializer;
+import com.logistimo.proto.RestConstantsZ;
 import com.logistimo.proto.SetupDataInput;
 import com.logistimo.proto.SetupDataInputDeserializer;
 import com.logistimo.proto.UpdateInventoryInput;
@@ -42,9 +44,9 @@ import com.logistimo.proto.UpdateInventoryInputDeserializer;
 import com.logistimo.proto.UpdateOrderRequest;
 import com.logistimo.proto.UpdateOrderStatusRequest;
 import com.logistimo.users.entity.IUserAccount;
-
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.LocalDateUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -58,8 +60,10 @@ import java.util.Vector;
  */
 public class GsonUtil {
 
-  public static String authenticateOutputToJson(boolean hasNoError, String message, String expiryTime,
-                                                UserEntitiesModel userEntitiesModel, Hashtable<String, Object> config,
+  public static String authenticateOutputToJson(boolean hasNoError, String message,
+                                                String expiryTime,
+                                                UserEntitiesModel userEntitiesModel,
+                                                Hashtable<String, Object> config,
                                                 String version) {
     Gson
         gson =
@@ -507,6 +511,31 @@ public class GsonUtil {
     return jsonString;
   }
 
+  public static String buildOrderJson(boolean status, MobileOrderModel mom,
+                                      String message, String version, String errorCode) {
+    Gson gson = new Gson();
+    String jsonString = null;
+    String statusCode = status ? "0" : "1";
+    JsonObject jsonObject = new JsonObject();
+    if (mom != null) {
+      String orderString = gson.toJson(mom);
+      JsonElement mElement = gson.fromJson(orderString, JsonElement.class);
+      jsonObject = (JsonObject) gson.toJsonTree(mElement);
+    }
+    if (!status) {
+      jsonObject.addProperty(JsonTagsZ.MESSAGE, message);
+      jsonString = gson.toJson(jsonObject);
+      jsonObject.addProperty(JsonTagsZ.ERROR_CODE, errorCode);
+    }
+    jsonObject.addProperty(JsonTagsZ.VERSION, version);
+    jsonObject.addProperty(JsonTagsZ.STATUS, statusCode);
+
+    if (jsonObject != null) {
+      jsonString = gson.toJson(jsonObject);
+    }
+    return jsonString;
+  }
+
   /**
    *
    * @param status
@@ -518,7 +547,6 @@ public class GsonUtil {
   public static String buildGetOrdersResponseModel(boolean status, MobileOrdersModel mom,
                                                    String message, String version) {
     Gson gson = new Gson();
-    String jsonString = null;
     String statusCode = status ? "0" : "1";
     JsonObject jsonObject = new JsonObject();
     if (status) {
@@ -529,15 +557,31 @@ public class GsonUtil {
       }
     } else {
       jsonObject.addProperty(JsonTagsZ.MESSAGE, message);
-      jsonString = gson.toJson(jsonObject);
     }
     jsonObject.addProperty(JsonTagsZ.VERSION, version);
     jsonObject.addProperty(JsonTagsZ.STATUS, statusCode);
+    return gson.toJson(jsonObject);
+  }
 
-    if (jsonObject != null) {
-      jsonString = gson.toJson(jsonObject);
+  /**
+   * Method to build the response
+   *
+   * @param jsonObject- response json
+   * @param errorMsg    -Error message
+   * @param version     -version
+   * @return response String
+   */
+  public static String buildResponse(JsonObject jsonObject, String errorMsg, String version) {
+
+    short statusCode = RestConstantsZ.ORDERS_SUC_STATUS_CODE;
+    if (StringUtils.isNotBlank(errorMsg)) {
+      jsonObject = new JsonObject();
+      jsonObject.addProperty(JsonTagsZ.MESSAGE, errorMsg);
+      statusCode = RestConstantsZ.ORDERS_FAIL_STATUS_CODE;
     }
-    return jsonString;
+    jsonObject.addProperty(JsonTagsZ.VERSION, version);
+    jsonObject.addProperty(JsonTagsZ.STATUS, statusCode);
+    return new Gson().toJson(jsonObject);
   }
 
   /**
@@ -553,10 +597,10 @@ public class GsonUtil {
   /**
    * Builds a json string output from the mobile transactions model
    *
-   * @param hasNoError  - true indicating that there was no error and false indicating there was error
-   * @param mtm     - model containing the transactions as expected by the mobile
-   * @param message - Error message if status is false
-   * @param version -
+   * @param hasNoError - true indicating that there was no error and false indicating there was error
+   * @param mtm        - model containing the transactions as expected by the mobile
+   * @param message    - Error message if status is false
+   * @param version    -
    * @return Json string containing version, status and either error message or transactions
    */
   public static String buildGetTransactionsResponseModel(boolean hasNoError,
@@ -577,7 +621,6 @@ public class GsonUtil {
     }
     jsonObject.addProperty(JsonTagsZ.VERSION, version);
     jsonObject.addProperty(JsonTagsZ.STATUS, statusCode);
-
 
     jsonString = gson.toJson(jsonObject);
 

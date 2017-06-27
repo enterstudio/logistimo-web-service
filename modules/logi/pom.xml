@@ -58,7 +58,7 @@
             <version>2.5.0</version>
         </dependency>
         <dependency>
-            <groupId>com.logistimo.inventory</groupId>
+            <groupId>com.logistimo</groupId>
             <artifactId>logistimo-optimization</artifactId>
             <version>2.5.0</version>
         </dependency>

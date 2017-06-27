@@ -70,9 +70,9 @@ import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.pagination.processor.Processor;
 import com.logistimo.reports.ReportsConstants;
+import com.logistimo.reports.generators.IReportDataGeneratorFactory;
 import com.logistimo.reports.generators.ReportData;
 import com.logistimo.reports.generators.ReportDataGenerator;
-import com.logistimo.reports.generators.ReportDataGeneratorFactory;
 import com.logistimo.reports.utils.ReportsUtil;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
@@ -320,7 +320,8 @@ public class ExportServlet extends SgServlet {
 
   // Do a batch export of items using the paginator
   private void batchExport(HttpServletRequest req, HttpServletResponse resp,
-                           ResourceBundle backendMessages, ResourceBundle messages) {
+                           ResourceBundle backendMessages, ResourceBundle messages)
+      throws ServiceException {
     xLogger.fine("Entered batchExport");
     // Get request parameters
     String
@@ -354,6 +355,8 @@ public class ExportServlet extends SgServlet {
       xLogger.severe("Failed to created ExportParams from request.");
       return;
     }
+    IReportDataGeneratorFactory
+        iReportDataGeneratorFactory = ReportsUtil.getReportDataGeneratorFactory();
     if ("powerdata".equals(exportType)) {
       int size = 500;
       try {
@@ -592,7 +595,7 @@ public class ExportServlet extends SgServlet {
           "Exporting {0} in domain {1} to users {2} initated by {3}; data duration from {4} to {5}",
           exportType, domainIdStr, userIds, sourceUserId, fromDateStr, toDateStr);
       try {
-        ReportDataGenerator rdg = ReportDataGeneratorFactory.getInstanceV2(exportType);
+        ReportDataGenerator rdg = iReportDataGeneratorFactory.getInstance(exportType);
         ReportData
             rd =
             rdg.getReportData(from, to, frequencyStr, filters, locale, timezone, pageParams, dc,
@@ -621,7 +624,7 @@ public class ExportServlet extends SgServlet {
       // Get the query params. object
       QueryParams qp = null;
       try {
-        qp = BulkExportMgr.getQueryParams(exportType, domainId, req);
+        qp = BulkExportMgr.getQueryParams(exportType, domainId, iReportDataGeneratorFactory, req);
       } catch (Exception e) {
         xLogger
             .severe("Invalid query params for export of {0} in domain {1}. Aborting...", exportType,

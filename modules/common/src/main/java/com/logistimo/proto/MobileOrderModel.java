@@ -199,4 +199,9 @@ public class MobileOrderModel {
    * Order updated by user name
    */
   public String ubn;
+
+  /**
+   * Order updated time in milliseconds
+   */
+  public String tm;
 }

@@ -106,9 +106,11 @@ public class Constants {
 
   // Date format
   public static final String DATE_FORMAT = "dd/MM/yyyy";
+
   public static final String DATE_FORMAT_CSV = "yyyy-MM-dd";
   public static final String DATE_FORMAT_MONTH ="yyyy-MM";
   public static final String DATETIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
+  public static final String DATETIME_IN_MILLI_FORMAT = "dd/MM/yyyy HH:mm:ss.SSS";
   public static final String DATETIME_CSV_FORMAT = "yyyy-MM-dd HH:mm:ss";
   public static final String DATETIME_CSV_MILLIS_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
   public static final int MAX_REPORT_DURATION = 365; // days

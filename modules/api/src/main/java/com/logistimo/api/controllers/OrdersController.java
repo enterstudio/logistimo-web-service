@@ -25,30 +25,66 @@ package com.logistimo.api.controllers;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+import com.logistimo.AppFactory;
+import com.logistimo.api.builders.DemandBuilder;
+import com.logistimo.api.builders.OrderBuilder;
+import com.logistimo.api.models.DemandItemBatchModel;
+import com.logistimo.api.models.DemandModel;
+import com.logistimo.api.models.OrderMaterialsModel;
+import com.logistimo.api.models.OrderModel;
+import com.logistimo.api.models.OrderResponseModel;
+import com.logistimo.api.models.OrderStatusModel;
 import com.logistimo.api.models.OrderUpdateModel;
+import com.logistimo.api.models.PaymentModel;
+import com.logistimo.api.security.SecurityMgr;
+import com.logistimo.api.util.DedupUtil;
+import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.api.util.SessionMgr;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.EventsConfig;
+import com.logistimo.config.models.OrdersConfig;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.events.generators.EventGeneratorFactory;
 import com.logistimo.events.generators.OrdersEventGenerator;
+import com.logistimo.exception.BadRequestException;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
+import com.logistimo.inventory.exceptions.InventoryAllocationException;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
+import com.logistimo.models.ICounter;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.dao.IOrderDao;
 import com.logistimo.orders.dao.impl.OrderDao;
-import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.pagination.Navigator;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.services.cache.MemcacheService;
+import com.logistimo.services.impl.PMF;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.shipments.service.impl.ShipmentService;
@@ -56,46 +92,14 @@ import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
+import com.logistimo.utils.BigUtil;
+import com.logistimo.utils.Counter;
+import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.LockUtil;
+import com.logistimo.utils.MsgUtil;
+import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.models.EventsConfig;
-import com.logistimo.config.models.OrdersConfig;
-import com.logistimo.pagination.Navigator;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.inventory.exceptions.InventoryAllocationException;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.Counter;
-import com.logistimo.models.ICounter;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.constants.SourceConstants;
-import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.DemandBuilder;
-import com.logistimo.api.builders.OrderBuilder;
-import com.logistimo.exception.BadRequestException;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.DemandItemBatchModel;
-import com.logistimo.api.models.DemandModel;
-import com.logistimo.api.models.OrderMaterialsModel;
-import com.logistimo.api.models.OrderModel;
-import com.logistimo.api.models.OrderResponseModel;
-import com.logistimo.api.models.OrderStatusModel;
-import com.logistimo.api.models.PaymentModel;
-import com.logistimo.api.util.SecurityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -125,6 +129,8 @@ public class OrdersController {
 
   public static final String WARN_PREFIX = "w:";
   private static final XLog xLogger = XLog.getLog(OrdersController.class);
+  private static final String CACHE_KEY = "order";
+
   OrderBuilder builder = new OrderBuilder();
   private IOrderDao orderDao = new OrderDao();
 
@@ -525,8 +531,7 @@ public class OrdersController {
       if (order == null) {
         throw new Exception(backendMessages.getString("order.none") + " " + orderId);
       }
-      if (!orderUpdatedAt.equals(
-          LocalDateUtil.formatCustom(order.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
+      if (!OrderUtils.validateOrderUpdatedTime(orderUpdatedAt, order.getUpdatedOn())) {
         throw new LogiException("O004", user.getUsername(),
             LocalDateUtil.format(order.getUpdatedOn(), user.getLocale(), user.getTimezone()));
       }
@@ -678,12 +683,22 @@ public class OrdersController {
     ResourceBundle messages = Resources.get().getBundle("Messages", locale);
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    OrderMaterialsModel model = new OrderMaterialsModel();
+    MemcacheService cache = null;
+    String signature = orders.get("signature") != null ?
+            CACHE_KEY + String.valueOf(orders.get("signature")) : null;
+    if (signature != null) {
+      cache = AppFactory.get().getMemcacheService();
+      if (cache != null) {
+        OrderMaterialsModel oModel = validateSignature(model, cache, signature);
+        if (oModel != null)
+          return oModel;
+      }
+    }
     DomainConfig dc = DomainConfig.getInstance(domainId);
     Long kioskId = Long.parseLong(String.valueOf(orders.get("kioskid")));
-    Long
-        vendorKioskId =
-        orders.get("vkioskid") != null ? Long.parseLong(String.valueOf(orders.get("vkioskid")))
-            : null;
+    Long vendorKioskId = orders.get("vkioskid") != null ?
+        Long.parseLong(String.valueOf(orders.get("vkioskid"))) : null;
     String ordMsg = null;
     if (orders.get("ordMsg") != null) {
       ordMsg = String.valueOf(orders.get("ordMsg"));
@@ -695,8 +710,6 @@ public class OrdersController {
     if (orders.get("rid") != null) {
       referenceId = String.valueOf(orders.get("rid"));
     }
-
-    OrderMaterialsModel model = new OrderMaterialsModel();
     try {
       SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT);
       Date edd = null;
@@ -773,11 +786,45 @@ public class OrdersController {
                 + "</b> " + backendMessages.getString("created.successwith") + " <b>" + order.size()
                 + "</b> " + backendMessages.getString("items.lowercase") + ". ";
       }
+      DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.SUCCESS);
     } catch (Exception e) {
       xLogger.severe("Error in creating Order on domain {0}", domainId, e);
       throw new InvalidServiceException(backendMessages.getString("order.create.error"));
     }
     return model;
+  }
+
+  /**
+   * Check if the signature exists in cache
+   * @param model
+   * @param cache
+   * @param signature
+   * @return
+   */
+  private OrderMaterialsModel validateSignature(OrderMaterialsModel model, MemcacheService cache,
+                                                String signature) {
+    Integer lastStatus = (Integer) cache.get(signature);
+    if (lastStatus != null) {
+      switch (lastStatus) {
+        case DedupUtil.SUCCESS:
+          model.msg = "This order request was previously successful. "
+              + "Please check " + MsgUtil.bold("Orders") + " listing page.";
+          return model;
+        case DedupUtil.PENDING:
+          model.msg = "The previous order request may or may not have been successful. Please "
+              + "click the 'Orders' page to see if they are already submitted. If not, "
+              + "please create the order again. We are sorry for the inconvenience caused.";
+          return model;
+        case DedupUtil.FAILED:
+          DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.PENDING);
+          break;
+        default:
+          break;
+      }
+    } else {
+      DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.PENDING);
+    }
+    return null;
   }
 
   private ITransaction getInventoryTransaction(Long domainId, Long kioskId, Long materialId,

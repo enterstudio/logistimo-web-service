@@ -89,6 +89,7 @@ function InventoryReportController(s, timeout, getData) {
 
     s.setMetric = function (metric) {
         if(s.activeMetric != metric) {
+            s.oldMetric = s.activeMetric;
             s.activeMetric = metric;
             s.qFilter = angular.copy(s.filter);
             s.size = s.PAGE_SIZE;
@@ -118,12 +119,12 @@ function InventoryReportController(s, timeout, getData) {
         }, 500);
     };
 
-    resetCards = function() {
+    function resetCards() {
         s.cards = {};
         if(s.hideMaterialTagFilter){
             s.cards.mc = 'i';
         }
-    };
+    }
 
     s.resetFilters = function() {
         s.filter = {};
@@ -446,7 +447,12 @@ function InventoryReportController(s, timeout, getData) {
             if(s.hideFilter && s.tempFilters['filter']['from'].getTime() != newValue.getTime()) {
                 s.hideFilter = false;
                 copyFilters();
-                s.tempFilters['filter']['from'] = oldValue;
+                if(s.oldMetric != undefined && s.oldMetric != 'ot' && s.activeMetric == 'ot') {
+                    s.tempFilters['filter']['from'] = newValue;
+                    s.oldMetric = undefined;
+                } else {
+                    s.tempFilters['filter']['from'] = oldValue;
+                }
             }
             var toDate = new Date(newValue);
             //if to date is beyond limit, reset to limit

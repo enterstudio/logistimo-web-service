@@ -25,6 +25,7 @@ package com.logistimo.reports.service;
 
 
 import com.logistimo.inventory.models.InvntrySnapshot;
+import com.logistimo.reports.generators.IReportDataGeneratorFactory;
 import com.logistimo.reports.models.DomainCounts;
 
 import com.logistimo.config.models.DomainConfig;
@@ -117,4 +118,10 @@ public interface ReportsService extends Service {
    * @param appName - Application name registered in Analytics
    */
   String getReportLastRunTime(String appName);
+
+  /**
+   * Gets the respective ReportDataGeneratorFactory implementation
+   * @return
+   */
+  IReportDataGeneratorFactory getReportDataGeneratorFactory();
 }

@@ -24,15 +24,13 @@
 package com.logistimo.orders.service;
 
 import com.logistimo.config.models.LeadTimeAvgConfig;
-import com.logistimo.config.models.OptimizerConfig;
-import com.logistimo.exception.LogiException;
-import com.logistimo.orders.models.UpdatedOrder;
-import com.logistimo.orders.entity.IDemandItem;
-import com.logistimo.orders.entity.IOrder;
-
 import com.logistimo.conversations.entity.IMessage;
+import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.orders.OrderResults;
+import com.logistimo.orders.entity.IDemandItem;
+import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
@@ -43,6 +41,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.jdo.PersistenceManager;
 
@@ -245,4 +244,8 @@ public interface OrderManagementService extends Service {
 
   void updateOrderMetadata(Long orderId, String updatedBy, PersistenceManager pm);
 
+   List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams, String orderType, boolean isTransfer)
+       throws ServiceException;
+
+    /*List<IOrderApprovalMapping> getOrdersApprovalStatus(Set<Long> orderIds,int orderAppprovalType);*/
 }
