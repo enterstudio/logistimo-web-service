@@ -25,6 +25,7 @@ package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
 import com.logistimo.api.builders.DomainBuilder;
+import com.logistimo.api.models.superdomains.DomainDBModel;
 import com.logistimo.api.models.superdomains.DomainModel;
 import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.auth.SecurityConstants;
@@ -125,13 +126,13 @@ public class DomainController {
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public
   @ResponseBody
-  IDomain getDomainById(@RequestParam Long domainId) {
+  DomainDBModel getDomainById(@RequestParam Long domainId) {
     if (domainId == null) {
       throw new InvalidDataException("Invalid domain id");
     }
     try {
       DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      return ds.getDomain(domainId);
+      return builder.buildDomainModel(ds.getDomain(domainId));
     } catch (ServiceException | ObjectNotFoundException e) {
       xLogger.severe("Unable to fetch the details of the switching domain", e);
       throw new InvalidServiceException("Unable to fetch the details of the switching domain");
@@ -258,7 +259,7 @@ public class DomainController {
   @RequestMapping(value = "/current", method = RequestMethod.GET)
   public
   @ResponseBody
-  IDomain getCurrentDomain(HttpServletRequest request) {
+  DomainDBModel getCurrentDomain(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
     return getDomainById(domainId);
@@ -267,7 +268,7 @@ public class DomainController {
   @RequestMapping(value = "/currentUser", method = RequestMethod.GET)
   public
   @ResponseBody
-  IDomain getCurrentUserDomain(HttpServletRequest request) {
+  DomainDBModel getCurrentUserDomain(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     return getDomainById(sUser.getDomainId());
   }

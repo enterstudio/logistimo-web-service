@@ -21,30 +21,5 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.reports.plugins.service;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-
-/**
- * @author Mohan Raja
- */
-@Service
-public class ReportServiceCollection {
-  private Map<String, IReportService> builders;
-
-  @Autowired
-  ReportServiceCollection(Map<String, IReportService> reportBuilders) {
-    this.builders = reportBuilders;
-  }
-
-  public IReportService getReportService(String reportType) {
-    if (builders.containsKey(reportType)) {
-      return builders.get(reportType);
-    }
-    throw new UnsupportedOperationException("Unsupported report service:" + reportType);
-  }
-
-}
+.glyphicons-cogwheel:before{content:"\e019"}
+.glyphicons-table:before{content:"\e011"}

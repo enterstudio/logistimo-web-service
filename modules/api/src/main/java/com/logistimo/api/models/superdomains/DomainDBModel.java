@@ -21,30 +21,60 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.reports.plugins.service;
+package com.logistimo.api.models.superdomains;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
+import java.util.Date;
 
 /**
  * @author Mohan Raja
  */
-@Service
-public class ReportServiceCollection {
-  private Map<String, IReportService> builders;
-
-  @Autowired
-  ReportServiceCollection(Map<String, IReportService> reportBuilders) {
-    this.builders = reportBuilders;
-  }
-
-  public IReportService getReportService(String reportType) {
-    if (builders.containsKey(reportType)) {
-      return builders.get(reportType);
-    }
-    throw new UnsupportedOperationException("Unsupported report service:" + reportType);
-  }
-
+public class DomainDBModel {
+  /**
+   * Domain ID
+   */
+  public Long dId;
+  /**
+   * Domain Name
+   */
+  public String name;
+  /**
+   * Normalised domain name
+   */
+  public String nNm;
+  /**
+   * Description of domain
+   */
+  public String description;
+  /**
+   * Owner id of domain
+   */
+  public String ownerId;
+  /**
+   * Domain created on date
+   */
+  public Date createdOn;
+  /**
+   * Domain active status
+   */
+  public boolean isActive = true;
+  /**
+   * Report enabled status on domain
+   */
+  public Boolean rptEnabled = true;
+  /**
+   * Identifier to check whether domain has child
+   */
+  public Boolean hasChild = false;
+  /**
+   * Identifier to check whether domain has parent
+   */
+  public Boolean hasParent = false;
+  /**
+   * Domain updated by user id
+   */
+  public String ub;
+  /**
+   * Domain updated on date
+   */
+  public Date uo;
 }

@@ -23,6 +23,7 @@
 
 package com.logistimo.api.builders;
 
+import com.logistimo.api.models.superdomains.DomainDBModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.dao.JDOUtils;
 
@@ -438,4 +439,20 @@ public class DomainBuilder {
   }
 
 
+  public DomainDBModel buildDomainModel(IDomain domain) {
+    DomainDBModel model = new DomainDBModel();
+    model.dId = domain.getId();
+    model.name = domain.getName();
+    model.nNm = domain.getNormalizedName();
+    model.description = domain.getDescription();
+    model.ownerId = domain.getOwnerId();
+    model.createdOn = domain.getCreatedOn();
+    model.isActive = domain.isActive();
+    model.rptEnabled = domain.isReportEnabled();
+    model.hasChild = domain.getHasChild();
+    model.hasParent = domain.getHasParent();
+    model.ub = domain.getLastUpdatedBy();
+    model.uo = domain.getLastUpdatedOn();
+    return model;
+  }
 }
