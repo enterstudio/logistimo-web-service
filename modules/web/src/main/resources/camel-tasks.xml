@@ -35,6 +35,13 @@
 
         <template id="camel-client"></template>
 
+        <!--error handler and redelivery processing-->
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <redeliveryPolicy maximumRedeliveries="{{task.queue.max.retry}}" redeliveryDelay="{{task.queue.waittime}}"/>
+        </onException>
+
+
         <route id="directRoute">
             <from uri="direct:tasks"/>
             <!--<log message="direct route with ${body.params[action]}"/>-->
@@ -43,12 +50,12 @@
                     <simple>${body.params[action]} == '[be]'</simple>
                     <marshal ref="gson"/>
                     <log message="Routing message to export queue with data ${body}"/>
-                    <to uri="seda:exports"/>
+                    <to uri="activemq:queue:exports"/>
                 </when>
                 <otherwise>
                     <marshal ref="gson"/>
                     <log message="Routing message to task queue with data ${body}"/>
-                    <to uri="seda:tasks"/>
+                    <to uri="activemq:queue:tasks"/>
                 </otherwise>
             </choice>
         </route>
@@ -56,7 +63,7 @@
         <!-- Camel route to move messages from the task queue -->
         <route id="taskQueueRoute" errorHandlerRef="tskDeadLetterErrorHandler" autoStartup="{{task.server}}">
             <!-- from uri="rabbitmq://172.31.25.38/logistimo?queue=tasks&amp;vhost=%2Flogistimo&amp;connectionFactory=#rabbitmq"/ -->
-            <from uri="seda:tasks?concurrentConsumers={{task.pool.size}}"/>
+            <from uri="activemq:queue:tasks?concurrentConsumers={{task.pool.size}}&amp;maxConcurrentConsumers={{task.pool.size}}"/>
             <unmarshal ref="gson"/>
             <log message="Routing message from task queue to task ${body}"/>
             <bean ref="taskExecutor"/>
@@ -64,21 +71,21 @@
 
         <!-- Camel route to move messages from the export queue -->
         <route id="exportQueueRoute" errorHandlerRef="expDeadLetterErrorHandler" autoStartup="{{export.route.start}}">
-            <from uri="seda:exports?concurrentConsumers={{export.pool.size}}"/>
+            <from uri="activemq:queue:exports?concurrentConsumers={{export.pool.size}}&amp;maxConcurrentConsumers={{export.pool.size}}"/>
             <unmarshal ref="gson"/>
             <log message="Routing message from export queue to task ${body}"/>
             <bean ref="taskExecutor"/>
         </route>
 
         <route id="assetAlarmsRoute" errorHandlerRef="assetAlarmsErrorHandler" autoStartup="{{task.server}}">
-            <from uri="seda:queue:asset-alarms"/>
+            <from uri="activemq:queue:asset-alarms"/>
             <unmarshal ref="assetStatusRequest"/>
             <log message="Routing message from queue to Logistimo Web ${body}"/>
             <bean ref="assetAlarmsMessagingProcessor"/>
         </route>
 
         <route id="approvalStatusUpdateRoute" errorHandlerRef="approvalStatusUpdateErrorHandler"
-          autoStartup="{{task.server}}">
+               autoStartup="{{task.server}}">
             <from uri="activemq:queue:approval-status-update"/>
             <unmarshal ref="approvalStatusUpdateEvent"/>
             <log message="Routing message from topic to Logistimo Web ${body}"/>
@@ -88,7 +95,7 @@
     </camelContext>
 
     <bean id="approvalStatusProcessor"
-      class="com.logistimo.orders.approvals.utils.ApprovalStatusUpdateEventProcessor">
+          class="com.logistimo.orders.approvals.utils.ApprovalStatusUpdateEventProcessor">
     </bean>
 
     <bean id="approvalStatusUpdateErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
@@ -105,7 +112,7 @@
     </bean>
 
     <bean id="assetAlarmsErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
-        <property name="deadLetterUri" value="seda:queue:asset-alarms-deadletter"/>
+        <property name="deadLetterUri" value="activemq:queue:asset-alarms-deadletter"/>
         <property name="redeliveryPolicy" ref="assetAlarmsRedeliveryPolicyConfig"/>
     </bean>
 
@@ -115,7 +122,7 @@
     </bean>
 
     <bean id="tskDeadLetterErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
-        <property name="deadLetterUri" value="seda:taskdead"/>
+        <property name="deadLetterUri" value="activemq:queue:taskdead"/>
         <property name="redeliveryPolicy" ref="tskRedeliveryPolicyConfig"/>
     </bean>
 
@@ -126,7 +133,7 @@
 
 
     <bean id="expDeadLetterErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
-        <property name="deadLetterUri" value="seda:exportdead"/>
+        <property name="deadLetterUri" value="activemq:queue:exportdead"/>
         <property name="redeliveryPolicy" ref="expRedeliveryPolicyConfig"/>
     </bean>
 
@@ -137,6 +144,11 @@
 
     <bean id="taskExecutor" class="com.logistimo.services.taskqueue.JMSTaskProcessor">
 
+    </bean>
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <!-- vm://myBroker is the vm protocol, and myBroker is the broker name -->
+        <property name="brokerURL"
+                  value="failover:(tcp://localhost:61616)?nested.wireFormat.maxInactivityDuration=1000&amp;jms.prefetchPolicy.queuePrefetch=1"/>
     </bean>
 
     <!-- define the gson data format, where we configure the data format using the properties -->
