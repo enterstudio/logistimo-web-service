@@ -29,8 +29,8 @@ import com.logistimo.api.models.DashboardModel;
 import com.logistimo.api.models.MainDashboardModel;
 import com.logistimo.api.models.SessionDashboardModel;
 import com.logistimo.api.request.DBWUpdateRequest;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.api.util.SessionMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
@@ -111,14 +111,9 @@ public class DashboardController {
   List<DashboardModel> getAll(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-    try {
-      IDashboardService ds = Services.getService(DashboardService.class);
-      List<IDashboard> dbList = ds.getDashBoards(domainId);
-      return builder.buildDashboardModelList(dbList);
-    } catch (ServiceException e) {
-      xLogger.warn("Error in getting Dashboard for domain {0}", domainId);
-      throw new InvalidServiceException("Error in getting Dashboard for " + domainId);
-    }
+    IDashboardService ds = Services.getService(DashboardService.class);
+    List<IDashboard> dbList = ds.getDashBoards(domainId);
+    return builder.buildDashboardModelList(dbList);
   }
 
   @RequestMapping(value = "/{dbId}", method = RequestMethod.GET)

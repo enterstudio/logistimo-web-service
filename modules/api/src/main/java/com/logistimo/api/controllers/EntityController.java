@@ -25,23 +25,40 @@ package com.logistimo.api.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+
 import com.logistimo.AppFactory;
-import com.logistimo.api.auth.Authoriser;
 import com.logistimo.api.builders.EntityBuilder;
 import com.logistimo.api.builders.InventoryBuilder;
 import com.logistimo.api.builders.StockBoardBuilder;
 import com.logistimo.api.builders.UserBuilder;
-import com.logistimo.api.models.*;
-import com.logistimo.api.request.*;
-import com.logistimo.api.security.SecurityMgr;
+import com.logistimo.api.models.EntityApproversModel;
+import com.logistimo.api.models.EntityDomainModel;
+import com.logistimo.api.models.EntityModel;
+import com.logistimo.api.models.EntitySummaryModel;
+import com.logistimo.api.models.InventoryModel;
+import com.logistimo.api.models.PermissionModel;
+import com.logistimo.api.models.RelationModel;
+import com.logistimo.api.models.StockBoardModel;
+import com.logistimo.api.request.AddMaterialsRequestObj;
+import com.logistimo.api.request.EditMaterialsReqObj;
+import com.logistimo.api.request.NetworkViewResponseObj;
+import com.logistimo.api.request.RemoveMaterialsRequestObj;
+import com.logistimo.api.request.ReorderEntityRequestObj;
 import com.logistimo.api.util.DomainRemover;
 import com.logistimo.api.util.SearchUtil;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.api.util.SessionMgr;
+import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.SecurityUtil;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
-import com.logistimo.config.models.*;
+import com.logistimo.config.models.ApprovalsConfig;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.config.models.KioskConfig;
+import com.logistimo.config.models.Permissions;
+import com.logistimo.config.models.StockboardConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.CharacterConstants;
@@ -50,6 +67,8 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.entities.auth.EntityAuthoriser;
+import com.logistimo.entities.entity.IApprovers;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.EntityLinkModel;
@@ -85,18 +104,33 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
+import com.logistimo.utils.GsonUtils;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
 import com.logistimo.utils.QueryUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
 @Controller
 @RequestMapping("/entities")
@@ -182,6 +216,44 @@ public class EntityController {
         + backendMessages.getString("create.success");
   }
 
+  @RequestMapping(value = "/approvers", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  String setApprovers(@RequestBody EntityApproversModel model, @RequestParam Long kioskId, HttpServletRequest request)
+      throws ServiceException {
+    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
+    Locale locale = sUser.getLocale();
+    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    try{
+      EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
+      IKiosk kiosk = as.getKiosk(kioskId);
+      List<IApprovers> approversList = builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId());
+      as.addApprovers(kioskId, approversList, sUser.getUsername());
+      } catch (ServiceException se) {
+      xLogger.warn("Error fetching Entity details for " + model.entityId, se);
+    throw new InvalidServiceException(
+        backendMessages.getString("kiosk.detail.fetch.error") + " " + model.entityId);
+  }
+    return "Approvers are updated successfully";
+  }
+
+  @RequestMapping(value = "/approvers", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  EntityApproversModel getApprovers(@RequestParam Long kioskId, HttpServletRequest request) {
+    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
+    Locale locale = sUser.getLocale();
+    EntityApproversModel model = null;
+    EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
+    UsersService us = Services.getService(UsersServiceImpl.class, locale);
+    List<IApprovers> approversList = as.getApprovers(kioskId);
+    if (approversList != null && approversList.size() > 0) {
+      model = builder.buildApprovalsModel(approversList, us, locale, sUser.getTimezone());
+
+    }
+    return model;
+  }
+
   @RequestMapping(value = "/update", method = RequestMethod.POST)
   public
   @ResponseBody
@@ -204,7 +276,7 @@ public class EntityController {
               ksk, false);
 
       if (k.getName() != null) {
-        if (!Authoriser.authoriseEntity(request, k.getKioskId())) {
+        if (!EntityAuthoriser.authoriseEntity(sUser, k.getKioskId())) {
           throw new UnauthorizedException(backendMessages.getString("permission.denied"));
         }
         as.updateKiosk(k, domainId);
@@ -234,13 +306,17 @@ public class EntityController {
     try {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       usersService = Services.getService(UsersServiceImpl.class, locale);
-      Integer permission = Authoriser.authoriseEntityPerm(request, entityId);
-      if (Authoriser.NO_ACCESS.equals(permission)) {
+      Integer permission = EntityAuthoriser.authoriseEntityPerm(sUser, entityId);
+      if (GenericAuthoriser.NO_ACCESS.equals(permission)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IKiosk k = as.getKiosk(entityId);
       IUserAccount u = null;
       IUserAccount lu = null;
+      boolean found = false;
+      boolean isPa = false;
+      boolean isSa = false;
+      ApprovalsConfig.OrderConfig orderConfig = null;
       if (k != null) {
         try {
           u = usersService.getUserAccount(k.getRegisteredBy());
@@ -256,9 +332,40 @@ public class EntityController {
           xLogger.warn("Error while getting entity, fetching user details for {0}: {1}",
               k.getUpdatedBy(), e.getMessage());
         }
+        try {
+          DomainConfig dc = DomainConfig.getInstance(k.getDomainId());
+          ApprovalsConfig ac = dc.getApprovalsConfig();
+          orderConfig = ac.getOrderConfig();
+          if(orderConfig.getPurchaseSalesOrderApproval() != null && orderConfig.getPurchaseSalesOrderApproval().size() > 0) {
+            List<ApprovalsConfig.PurchaseSalesOrderConfig> psoa = orderConfig.getPurchaseSalesOrderApproval();
+            List<String> currentEntityTags = k.getTags();
+            if(currentEntityTags != null && currentEntityTags.size() > 0) {
+              for(ApprovalsConfig.PurchaseSalesOrderConfig ps : psoa) {
+                List<String> eTags = ps.getEntityTags();
+                for(String eTag : eTags) {
+                  if(currentEntityTags.contains(eTag)) {
+                    found = true;
+                    if(ps.isPurchaseOrderApproval()) {
+                      isPa = true;
+                    }
+                    if(ps.isSalesOrderApproval()) {
+                      isSa = true;
+                    }
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        } catch (Exception e) {
+          //do nothing
+        }
       }
       model = builder.buildModel(k, u, lu, locale, sUser.getTimezone());
       model.perm = permission;
+      model.appr = found;
+      model.ipa = isPa;
+      model.isa = isSa;
     } catch (ServiceException se) {
       xLogger.warn("Error fetching Entity details for " + entityId, se);
       throw new InvalidServiceException(
@@ -279,7 +386,7 @@ public class EntityController {
     int customerCount;
     int vendorsCount;
     try {
-      if (!Authoriser.authoriseEntity(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       EntitiesService as = Services.getService(EntitiesServiceImpl.class);
@@ -310,9 +417,9 @@ public class EntityController {
     try {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       //TODO Extend behavior to check if the requested entity has a relation to user's entities. Temporarily commented.
-      if (!Authoriser.authoriseEntityDomain(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntityDomain(sUser, entityId, SecurityUtils.getDomainId(request))) {
         try {
-          if (srcEntityId == null || (!Authoriser.authoriseEntityDomain(request, srcEntityId)
+          if (srcEntityId == null || (!EntityAuthoriser.authoriseEntityDomain(sUser, srcEntityId, SecurityUtils.getDomainId(request))
               && as.getKioskLink(srcEntityId, IKioskLink.TYPE_VENDOR, entityId) == null)) {
             throw new UnauthorizedException(backendMessages.getString("permission.denied"));
           }
@@ -344,7 +451,7 @@ public class EntityController {
     EntitiesService as;
     try {
       as = Services.getService(EntitiesServiceImpl.class, locale);
-      if (!Authoriser.authoriseEntity(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IKiosk k = as.getKiosk(entityId, false);
@@ -409,7 +516,7 @@ public class EntityController {
     try {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       //TODO: Temporary fix. Required for Order listing on a sales order.
-      if (!Authoriser.authoriseEntityDomain(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntityDomain(sUser, entityId, SecurityUtils.getDomainId(request))) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IKiosk k = as.getKiosk(entityId, false);
@@ -771,7 +878,7 @@ public class EntityController {
               "dummy/" + tag, 0);
       PageParams pageParams = new PageParams(navigator.getCursor(offset), offset, size);
       Results results;
-      if (!Authoriser.authoriseEntity(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntity(user, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       if (tag != null) {
@@ -803,7 +910,7 @@ public class EntityController {
     try {
       InventoryManagementService ims =
           Services.getService(InventoryManagementServiceImpl.class, sUser.getLocale());
-      if (!Authoriser.authoriseEntity(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       counts.put("oos", ims.getOutOfStockCounts(entityId));
@@ -833,7 +940,7 @@ public class EntityController {
     List<EntitySummaryModel> summaryModelList;
     try {
       rs = Services.getService("reports",locale);
-      if (!Authoriser.authoriseEntity(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       results = rs.getMonthlyUsageStatsForKiosk(domainId, entityId, startDate);
@@ -865,7 +972,7 @@ public class EntityController {
       try {
 
         AppFactory.get().getTaskService().schedule(ITaskService.QUEUE_DEFAULT, ADD_MATERIALS_TASKS,
-            new Gson().toJson(addMaterialsRequestObj));
+            GsonUtils.toJson(addMaterialsRequestObj));
         return backendMessages.getString("schedule.task.add.success") + " " +
             addMaterialsRequestObj.materials.size() + " " +
             backendMessages.getString("materials.for") + " " +
@@ -991,20 +1098,14 @@ public class EntityController {
     Results kioskResults;
     if (removeMaterialsRequestObj.entityIds == null || removeMaterialsRequestObj.entityIds
         .isEmpty()) {
-      try {
-        as = Services.getService(EntitiesServiceImpl.class, locale);
-        kioskResults = as.getAllKiosks(domainId, null, null);
-        if (kioskResults.getResults().size() > 0) {
-          List entities = kioskResults.getResults();
-          for (Object o : entities) {
-            IKiosk k = (IKiosk) o;
-            removeMaterialsRequestObj.entityIds.add(k.getKioskId());
-          }
+      as = Services.getService(EntitiesServiceImpl.class, locale);
+      kioskResults = as.getAllKiosks(domainId, null, null);
+      if (kioskResults.getResults().size() > 0) {
+        List entities = kioskResults.getResults();
+        for (Object o : entities) {
+          IKiosk k = (IKiosk) o;
+          removeMaterialsRequestObj.entityIds.add(k.getKioskId());
         }
-      } catch (ServiceException se) {
-        xLogger.warn("Error fetching entities for domain" + domainId, se);
-        throw new InvalidServiceException(
-            backendMessages.getString("domain.kiosks.fetch.error") + " " + domainId);
       }
     }
     boolean
@@ -1041,13 +1142,7 @@ public class EntityController {
         params.put("materialid", midsStr);
         multiValuedParams.add("materialid");
       }
-      try {
-        as = Services.getService(EntitiesServiceImpl.class, locale);
-      } catch (ServiceException se) {
-        xLogger.warn("Error fetching entities for domain" + domainId, se);
-        throw new InvalidServiceException(
-            backendMessages.getString("domain.kiosks.fetch.error") + " " + domainId);
-      }
+      as = Services.getService(EntitiesServiceImpl.class, locale);
       if (hasKiosks) {
         for (int i = 0; i < removeMaterialsRequestObj.entityIds.size(); i++) {
           try {
@@ -1116,7 +1211,7 @@ public class EntityController {
     List<String> errMat = new ArrayList<String>();
     String kioskName;
     try {
-      if (!Authoriser.authoriseEntity(request, entityId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       kioskName = as.getKiosk(entityId).getName();
@@ -1349,7 +1444,7 @@ public class EntityController {
     try {
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
       UsersService us = Services.getService(UsersServiceImpl.class, locale);
-      if (!Authoriser.authoriseUser(request, userId)) {
+      if (!GenericAuthoriser.authoriseUser(request, userId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IUserAccount u = us.getUserAccount(userId);
@@ -1632,7 +1727,7 @@ public class EntityController {
     EntitiesServiceImpl as;
     try {
       as = Services.getService(EntitiesServiceImpl.class, locale);
-      if (!Authoriser.authoriseEntity(request, eId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, eId)) {
         ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
@@ -1768,7 +1863,7 @@ public class EntityController {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       us = Services.getService(UsersServiceImpl.class, locale);
 
-      if (!Authoriser.authoriseEntity(request, eId)) {
+      if (!EntityAuthoriser.authoriseEntity(sUser, eId)) {
         ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }

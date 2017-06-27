@@ -23,14 +23,23 @@
 
 package com.logistimo.api.errors;
 
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.ConfigurationServiceException;
 import com.logistimo.exception.ErrorResource;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.InvalidTaskException;
+import com.logistimo.exception.LogiException;
+import com.logistimo.exception.SystemException;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exception.ValidationException;
+import com.logistimo.logger.XLog;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,12 +49,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Locale;
+
 /**
  * Created by Mohan Raja on 12/03/15
  */
 
 @ControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler {
+
+  private static final XLog XLOGGER = XLog.getLog(ErrorHandler.class);
+
 
   @ExceptionHandler({InvalidServiceException.class})
   protected ResponseEntity<Object> handleInvalidServiceRequest(RuntimeException e,
@@ -90,6 +104,46 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   protected ResponseEntity<Object> handleInvalidTaskRequest(RuntimeException e,
                                                             WebRequest request) {
     return handleInvalidServiceRequest(e, request);
+  }
+
+  @ExceptionHandler({ValidationException.class})
+  protected ResponseEntity<Object> handleValidationException(ValidationException e,
+                                                             WebRequest request, Locale locale) {
+    return handleBadRequest(e, request, locale);
+  }
+
+  @ExceptionHandler({ObjectNotFoundException.class})
+  protected ResponseEntity<Object> handleObjectNotFoundException(ValidationException e,
+                                                                 WebRequest request,
+                                                                 Locale locale) {
+    ErrorResource error = new ErrorResource("[Not found]", e.getLocalisedMessage(locale));
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return handleExceptionInternal(e, error, headers, HttpStatus.NOT_FOUND, request);
+  }
+
+  private ResponseEntity<Object> handleBadRequest(ValidationException e, WebRequest request,
+                                                  Locale locale) {
+    ErrorResource error = new ErrorResource("[Bad Request]", e.getLocalisedMessage(locale));
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return handleExceptionInternal(e, error, headers, HttpStatus.BAD_REQUEST, request);
+  }
+
+  @ExceptionHandler({ServiceException.class, SystemException.class, Exception.class})
+  @Order(Ordered.LOWEST_PRECEDENCE)
+  protected ResponseEntity<Object> handleServiceException(Exception e,
+                                                          WebRequest request,
+                                                          Locale locale) {
+
+    XLOGGER.severe("{2}: {0} failed for user {1}", request.getContextPath(),
+        SecurityUtils.getUserDetails(), e);
+    ErrorResource
+        error =
+        new ErrorResource("[System error]", LogiException.constructMessage("G001", locale, null));
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return handleExceptionInternal(e, error, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 
 }

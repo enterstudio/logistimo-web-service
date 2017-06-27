@@ -111,6 +111,7 @@ public class DomainConfig implements Serializable {
   public static final String MESSAGES = "msgs";
   public static final String ACCOUNTING = "accntng";
   public static final String INVENTORY = "invntry";
+  public static final String APPROVALS = "approvals";
   public static final String VENDOR_ID = "vid";
   public static final String EVENTS = "evnts";
   public static final String ORDERS = "orders";
@@ -217,6 +218,8 @@ public class DomainConfig implements Serializable {
   private String wastageReasons = null; // DEPRECATED as of 28/4/2012
   // Inventory config
   private InventoryConfig inventoryConfig = null;
+  // Approval config
+  private ApprovalsConfig approvalsConfig = null;
   // Event specification for this domain
   private EventsConfig eventsConfig = null;
   // Bulletin board config.
@@ -265,6 +268,7 @@ public class DomainConfig implements Serializable {
   public DomainConfig() {
     optimizerConfig = new OptimizerConfig();
     inventoryConfig = new InventoryConfig();
+    approvalsConfig = new ApprovalsConfig();
     ordersConfig = new OrdersConfig();
     capabilityMap = new HashMap<String, CapabilityConfig>();
     accountingConfig = new AccountingConfig();
@@ -535,6 +539,11 @@ public class DomainConfig implements Serializable {
         inventoryConfig = new InventoryConfig(json.getJSONObject(INVENTORY));
       } catch (JSONException e) {
         inventoryConfig = new InventoryConfig();
+      }
+      try{
+        approvalsConfig = new ApprovalsConfig(json.getJSONObject(APPROVALS));
+      } catch (JSONException e) {
+        approvalsConfig = new ApprovalsConfig();
       }
       // FOR BACKWARD COMPATIBILITY
       try {
@@ -859,6 +868,9 @@ public class DomainConfig implements Serializable {
       // Inventory config.
       if (inventoryConfig != null) {
         json.put(INVENTORY, inventoryConfig.toJSONObject());
+      }
+      if (approvalsConfig != null) {
+        json.put(APPROVALS, approvalsConfig.toJSONObject());
       }
       // Events config.
       if (eventsConfig != null) {
@@ -1520,6 +1532,14 @@ public class DomainConfig implements Serializable {
 
   public void setDashboardConfig(DashboardConfig dashboardConfig) {
     this.dashboardConfig = dashboardConfig;
+  }
+
+  public ApprovalsConfig getApprovalsConfig() {
+    return approvalsConfig;
+  }
+
+  public void setApprovalsConfig(ApprovalsConfig approvalsConfig) {
+    this.approvalsConfig = approvalsConfig;
   }
 
   public boolean getUiPreference() {

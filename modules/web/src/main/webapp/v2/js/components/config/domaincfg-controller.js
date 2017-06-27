@@ -464,6 +464,168 @@ domainCfgControllers.controller('CapabilitiesConfigurationController', ['$scope'
     }
 ]);
 
+domainCfgControllers.controller('ApprovalConfigurationController',['$scope','domainCfgService',
+function($scope,domainCfgService){
+    var ty = {ps:true, t:false};
+    var hdng = {ps: "Purchases and sales", t: "Transfers/Releases"};
+    var info = {ps: "Specify entity tags and enable approvals for purchase or sales orders for entities with these tags. For sales orders, approvals will be enabled at the time of shipping.",
+                t: "Specify one or more primary or secondary approvers for transfer/release orders. Approval request will be sent to all primary approvers first, and on request expiry, it will be sent to all the secondary approvers, if specified."}
+    $scope.init = function(){
+        $scope.orderType = ty;
+        $scope.spc = false;
+        $scope.stc = false;
+        $scope.heading = hdng.ps;
+        $scope.info = info.ps;
+        $scope.aprvls = {order:{}};
+        $scope.isAdd = true;
+        $scope.orderCfg = {psoa: [], px: 24, sx: 24, tx: 24};
+        $scope.edit = false;
+        $scope.preSelectedTags = [];
+    };
+    $scope.init();
+
+    $scope.populatePreSelected = function(newval, oldval) {
+        $scope.preSelectedTags = [];
+       if(checkNotNullEmpty($scope.orderCfg.psoa) && $scope.orderCfg.psoa.length > 0) {
+           $scope.orderCfg.psoa.some(function(data){
+                if(checkNotNullEmpty(data.enTgs) && data.enTgs.length > 0) {
+                    for(var i in data.enTgs) {
+                        $scope.preSelectedTags.push(data.enTgs[i]);
+                    }
+                }
+           })
+       }
+    };
+    $scope.addRow = function(){
+        if(checkNullEmpty($scope.orderCfg.psoa)) {
+            $scope.orderCfg = {psoa : []};
+        }
+        $scope.orderCfg.psoa.push({enTgs : [], poa: false, soa: false});
+    };
+    $scope.deleteRow = function(index) {
+        $scope.orderCfg.psoa.splice(index, 1);
+    };
+    $scope.tabContent = function(type){
+        angular.forEach(ty, function(value,key) {
+            if(key === type)
+                ty[key] = true;
+            else
+                ty[key] = false;
+        });
+        if(type == 'ps') {
+            $scope.heading = hdng.ps;
+            $scope.info = info.ps;
+        } else {
+            $scope.heading = hdng.t;
+            $scope.info = info.t;
+        }
+        $scope.orderType = ty;
+    };
+    $scope.getFilteredUsers = function() {
+
+        if(checkNotNullEmpty($scope.orderCfg.pa)) {
+            var pap = $scope.orderCfg.pa;
+            $scope.orderCfg.pa = [];
+            for(var i=0; i< pap.length; i++) {
+                $scope.orderCfg.pa.push({"id": pap[i].id, "text": pap[i].fnm+' ['+pap[i].id+']'});
+            }
+        }
+
+        if(checkNotNullEmpty($scope.orderCfg.sa)) {
+            var sas = $scope.orderCfg.sa;
+            $scope.orderCfg.sa = [];
+            for(var i=0; i< sas.length; i++) {
+                $scope.orderCfg.sa.push({"id": sas[i].id, "text": sas[i].fnm+' ['+sas[i].id+']'});
+            }
+        }
+    };
+    $scope.updateTags = function() {
+        if(checkNotNullEmpty($scope.orderCfg)) {
+            if(checkNotNullEmpty($scope.orderCfg.psoa) && $scope.orderCfg.psoa.length > 0) {
+                $scope.orderCfg.psoa.some(function(data) {
+                    if(checkNotNullEmpty(data.enTgs)) {
+                        data.eTgs = [];
+                        for(var i=0; i<data.enTgs.length; i++) {
+                            data.eTgs.push(data.enTgs[i].text);
+                        }
+                    } else if(checkNotNullEmpty(data.eTgs)) {
+                        data.enTgs = [];
+                        for(var i=0 ; i<data.eTgs.length; i++) {
+                            data.enTgs.push({"id" : data.eTgs[i], "text" : data.eTgs[i]});
+                        }
+                    }
+                });
+            }
+        }
+    };
+    $scope.validateApprovals = function() {
+        if((checkNullEmpty($scope.orderCfg.psoa) || $scope.orderCfg.psoa.length == 0) && checkNullEmpty($scope.pa) && checkNullEmpty($scope.sa)) {
+            $scope.showWarning("No approvals configured.");
+            $scope.continue = false;
+            return;
+        } else if(checkNullEmpty($scope.orderCfg.pa) && checkNotNullEmpty($scope.orderCfg.sa)) {
+            $scope.showWarning("Please select primary approvers for approving transfer orders.");
+            $scope.continue = false;
+            return;
+        } else {
+            $scope.orderCfg.psoa.some(function(data){
+                if(checkNotNullEmpty(data)) {
+                    if(checkNullEmpty(data.enTgs)){
+                        $scope.showWarning("Please configure entity tags for purchase/sales order approvals.");
+                        $scope.continue = false;
+                        return;
+                    }
+                    if(!data.poa && !data.soa) {
+                        $scope.showWarning("Please select the time when approval is required.");
+                        $scope.continue = false;
+                        return;
+                    }
+                }
+            });
+        }
+    };
+
+    $scope.setApprovalsConfiguration = function() {
+        $scope.continue = true;
+        if(checkNotNullEmpty($scope.orderCfg)) {
+            $scope.validateApprovals();
+            if($scope.continue) {
+                $scope.showLoading();
+                $scope.updateTags();
+                domainCfgService.setApprovalsConfig($scope.orderCfg).then(function (data) {
+                    $scope.showSuccess(data.data);
+                }).catch(function error(msg) {
+                    $scope.showErrorMsg(msg, true);
+                }).finally(function (){
+                    $scope.getApprovalsConfiguration();
+                    $scope.hideLoading();
+                });
+            }
+        }else {
+            $scope.showWarning("No approvals configured.")
+        }
+    };
+
+    $scope.getApprovalsConfiguration = function() {
+        $scope.showLoading();
+        domainCfgService.getApprovalsConfig().then(function(data) {
+            if(checkNotNullEmpty(data.data)) {
+                $scope.orderCfg = data.data;
+                $scope.updateTags();
+            } else {
+                $scope.orderCfg = {psoa : []};
+            }
+        }).catch(function error(msg) {
+            $scope.showErrorMsg(msg, true);
+        }).finally(function() {
+           $scope.hideLoading();
+        });
+    };
+
+    $scope.getApprovalsConfiguration();
+
+}]);
+
 domainCfgControllers.controller('InventoryConfigurationController', ['$scope', 'domainCfgService','OPTIMIZER','configService','$timeout',
     function ($scope, domainCfgService,OPTIMIZER,configService,$timeout) {
         $scope.inv = {};

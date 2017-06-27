@@ -77,11 +77,7 @@ public class HumanProtocolMessageHandler extends MessageHandler {
       tokens[0] = message;
     }
     // Init. services
-    try {
-      ims = Services.getService(InventoryManagementServiceImpl.class);
-    } catch (ServiceException e) {
-      throw new MessageHandlingException(e.getMessage());
-    }
+    ims = Services.getService(InventoryManagementServiceImpl.class);
   }
 
   @Override

@@ -23,16 +23,13 @@
 
 package com.logistimo.utils;
 
+import com.logistimo.LgTestCase;
 import com.logistimo.bulkuploads.BulkUploadMgr;
 import com.logistimo.bulkuploads.MnlTransactionUtil;
-import com.logistimo.dao.JDOUtils;
-
-import com.logistimo.LgTestCase;
 import com.logistimo.config.models.DomainConfig;
-import com.logistimo.inventory.TransactionUtil;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.mnltransactions.entity.IMnlTransaction;
-import com.logistimo.mnltransactions.entity.MnlTransaction;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;

@@ -31,6 +31,7 @@ import com.logistimo.AppFactory;
 import com.logistimo.activity.entity.IActivity;
 import com.logistimo.activity.service.ActivityService;
 import com.logistimo.activity.service.impl.ActivityServiceImpl;
+import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventSpec;
 import com.logistimo.config.models.LeadTimeAvgConfig;
@@ -88,7 +89,6 @@ import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.DuplicationException;
 import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
@@ -110,6 +110,7 @@ import com.logistimo.utils.MsgUtil;
 import com.logistimo.utils.QueryUtil;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -122,6 +123,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -133,6 +135,7 @@ import javax.jdo.Transaction;
 /**
  * @author arun
  */
+@Service
 public class OrderManagementServiceImpl extends ServiceImpl implements OrderManagementService {
 
   private static final XLog xLogger = XLog.getLog(OrderManagementServiceImpl.class);
@@ -156,6 +159,82 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       }
     }
     return null;
+  }
+
+    /**
+     * Checks if any of the entity tags of the entity associated with this order is configured for approval in domain approval config
+     * @param order
+     * @param locale
+     * @return
+     */
+    public boolean isApprovalRequired(IOrder order, Locale locale, String approvalType) {
+    boolean required = false;
+    if(order != null) {
+      IKiosk kiosk = null;
+      List<String> entityTags;
+        List<String> configTags;
+      try {
+        EntitiesService es = Services.getService(EntitiesServiceImpl.class, locale);
+        kiosk = es.getKiosk(order.getKioskId());
+      } catch (ServiceException e) {
+        xLogger.fine("Error while fetching entity details: {0}", order.getKioskId(), e);
+      }
+
+      if(kiosk != null) {
+          entityTags = kiosk.getTags();
+          if(entityTags != null && entityTags.size() > 0) {
+              DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
+              ApprovalsConfig ac = dc.getApprovalsConfig();
+              ApprovalsConfig.OrderConfig orderConfig = ac.getOrderConfig();
+              if(orderConfig != null) {
+                if (ApprovalsConfig.TRANSFER_ORDER_APPROVAL.equals(approvalType)) {
+                      if(orderConfig.getPrimaryApprovers() != null && orderConfig.getPrimaryApprovers().size() > 0) {
+                          required = true;
+
+                      }
+                  } else {
+                      List<ApprovalsConfig.PurchaseSalesOrderConfig> psoa = orderConfig.getPurchaseSalesOrderApproval();
+                      for(ApprovalsConfig.PurchaseSalesOrderConfig ps : psoa) {
+                          configTags = ps.getEntityTags();
+                          if(configTags != null && configTags.size() > 0) {
+                              required = isTagConfigured(entityTags, configTags, approvalType, ps);
+                          }
+                          if(required) {
+                              break;
+                          }
+                      }
+                  }
+              }
+          }
+        }
+      }
+      return required;
+  }
+
+    /** Checks whether purchase or sales order approval is configured
+     * @param entityTags
+     * @param configTags
+     * @param approvalType
+     * @param ps
+     * @return
+     */
+  public boolean isTagConfigured(List<String> entityTags, List<String> configTags, String approvalType, ApprovalsConfig.PurchaseSalesOrderConfig ps) {
+    boolean found = false;
+    for(String entityTag : entityTags) {
+        for(String configTag : configTags) {
+            if(entityTag.equals(configTag)) {
+              if (ApprovalsConfig.PURCHASE_ORDER_APPROVAL.equals(approvalType)) {
+                    found = ps.isPurchaseOrderApproval();
+              } else if (ApprovalsConfig.SALES_ORDER_APPROVAL.equals(approvalType)) {
+                    found = ps.isSalesOrderApproval();
+                }
+                if(found) {
+                    break;
+                }
+            }
+        }
+    }
+    return found;
   }
 
   public IOrder getOrder(Long orderId) throws ObjectNotFoundException, ServiceException {
@@ -192,6 +271,21 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     }
     xLogger.fine("Exiting getOrder");
     return o;
+  }
+
+  @Override
+  public void updateOrderVisibility(Long orderId) throws ObjectNotFoundException {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    IOrder o;
+    try {
+      o = JDOUtils.getObjectById(IOrder.class, orderDao.createKey(orderId), pm);
+      o.setVisibleToVendor(true);
+      pm.makePersistent(o);
+    } catch (JDOObjectNotFoundException e) {
+      throw new ObjectNotFoundException(e.getMessage());
+    } finally {
+      pm.close();
+    }
   }
 
   /**
@@ -583,8 +677,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   private IMessage addMessageToOrder(Long orderId, Long domainId, String message,
                                      String updatingUserId,
                                      PersistenceManager pm) throws ServiceException {
-    ConversationService
-        cs =
+    ConversationService cs =
         Services.getService(ConversationServiceImpl.class, this.getLocale());
     IMessage
         iMessage =
@@ -730,7 +823,13 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       }
       // Filter transfer order
       if (orderType != null) {
-        filters += " && oty == otyParam";
+          if(orderType == IOrder.TRANSFER) {
+              filters += " && oty == otyParam";
+          } else {
+              orderType = IOrder.TRANSFER;
+              filters += " && oty != otyParam";
+          }
+
         declarations += ", Integer otyParam";
         paramMap.put("otyParam", orderType);
       }
@@ -845,47 +944,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     }
     return results;
   }
-
-  /**
-   *  Get the order approval status for the set of Order Ids for the given order type
-   * @param orderIds
-   * @param approvalType
-   * @return
-   */
- /* public List<IOrderApprovalMapping> getOrdersApprovalStatus(Set<Long> orderIds, int approvalType) {
-    PersistenceManager pm = PMF.get().getPersistenceManager();
-    StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER_APPROVAL_MAPPING` ");
-    Query query = null;
-    List<IOrderApprovalMapping> results = null;
-    try {
-      if (orderIds != null && !orderIds.isEmpty()) {
-        queryBuilder.append("WHERE OID IN (");
-        for (Long orderId : orderIds) {
-          queryBuilder.append(orderId).append(CharacterConstants.COMMA);
-        }
-        queryBuilder.setLength(queryBuilder.length() - 1);
-        queryBuilder.append(" )");
-        queryBuilder.append(" AND OTYPE=").append(approvalType);
-        queryBuilder.append(" ORDER BY OID ASC");
-        query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
-        query.setClass(OrderApprovalMapping.class);
-        results = (List<IOrderApprovalMapping>) query.execute();
-        return (List<IOrderApprovalMapping>) pm.detachCopyAll(results);
-      }
-    } catch (Exception e) {
-      xLogger.warn("Exception while fetching approval status", e);
-    } finally {
-      if (query != null) {
-        try {
-          query.closeAll();
-        } catch (Exception ignored) {
-          xLogger.warn("Exception while closing query", ignored);
-        }
-      }
-      pm.close();
-    }
-    return results;
-  }*/
 
   /**
    * Get orders placed by a certain user
@@ -1289,8 +1347,33 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           o.setNumberOfItems(demandList.size());
           o.setExpectedArrivalDate(eta);
           o.setDueDate(reqByDate);
-          o = pm.makePersistent(o);
           DomainConfig dc = DomainConfig.getInstance(domainId);
+          ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
+          if(approvalsConfig != null) {
+              String approvalType = "";
+              boolean isApprovalRequired = false;
+              if(o.getOrderType() == 0) {
+                approvalType = ApprovalsConfig.TRANSFER_ORDER_APPROVAL;
+              } else if(o.getOrderType() == 1) {
+                approvalType = ApprovalsConfig.PURCHASE_ORDER_APPROVAL;
+              }
+              if(StringUtils.isNotEmpty(approvalType)) {
+                  isApprovalRequired = isApprovalRequired(o, getLocale(), approvalType);
+              }
+            if (isApprovalRequired && ApprovalsConfig.PURCHASE_ORDER_APPROVAL
+                .equals(approvalType)) {
+                  o.setVisibleToCustomer(true);
+                  o.setVisibleToVendor(false);
+            } else if (isApprovalRequired && ApprovalsConfig.TRANSFER_ORDER_APPROVAL
+                .equals(approvalType)) {
+                  o.setVisibleToCustomer(false);
+                  o.setVisibleToVendor(false);
+              } else{
+                  o.setVisibleToCustomer(true);
+                  o.setVisibleToVendor(true);
+              }
+          }
+          o = pm.makePersistent(o);
           demandList = (List<IDemandItem>) pm.makePersistentAll(demandList);
           demandList = (List<IDemandItem>) pm.detachCopyAll(demandList);
           if (isSalesOrder != null && isSalesOrder && dc.getOrdersConfig()
@@ -1430,9 +1513,9 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     // Set tags
     o.setTgs(tagDao.getTagsByNames(kioskTags, ITag.KIOSK_TAG), TagUtil.TYPE_ENTITY);
     o.setTgs(tagDao.getTagsByNames(orderTags, ITag.ORDER_TAG), TagUtil.TYPE_ORDER);
-    if (orderType == 2) {
+    /*if (orderType == 2) {
       orderType = 1;
-    }
+    }*/
     o.setOrderType(orderType);
     // Add the order to this domain and parent domains (superdomains)
     // NOTE: kioskId has to be set in the order first, before this call, given addToDomain relies on the kiosk to get the domain Ids
@@ -1942,12 +2025,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     xLogger.fine("Exiting destroy");
   }
 
-  public Class<? extends Service> getInterface() {
-    xLogger.fine("Entering getInterface");
-    xLogger.fine("Exiting getInterface");
-    return OrderManagementServiceImpl.class;
-  }
-
   public void init(Services services) throws ServiceException {
     xLogger.fine("Entering init");
     // TODO Auto-generated method stub
@@ -1994,13 +2071,15 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     List<String> filterIds = new ArrayList<>();
     String filterQuery = "SELECT ID_OID FROM ORDER_DOMAINS WHERE DOMAIN_ID = " + domainId;
     StringBuilder sqlQuery = new StringBuilder();
-    if ("rid".equals(type)) {
-      sqlQuery.append("SELECT DISTINCT RID FROM `ORDER` WHERE ID IN (").append(filterQuery)
-          .append(") AND RID LIKE '").append(id).append("%' ");
-    } else if ("oid".equals(type)) {
-      sqlQuery.append("SELECT ID FROM `ORDER` WHERE ID IN(");
-      sqlQuery.append(filterQuery).append(" AND ID_OID LIKE '").append(id).append("%')");
-    }
+      if(StringUtils.isNotEmpty(type)) {
+          if ("rid".equals(type)) {
+              sqlQuery.append("SELECT DISTINCT RID FROM `ORDER` WHERE ID IN (").append(filterQuery)
+                      .append(") AND RID LIKE '").append(id).append("%' ");
+          } else if ("oid".equals(type)) {
+              sqlQuery.append("SELECT ID FROM `ORDER` WHERE ID IN(");
+              sqlQuery.append(filterQuery).append(" AND ID_OID LIKE '").append(id).append("%')");
+          }
+      }
     if (oty != null) {
       sqlQuery.append(" AND OTY = ").append(oty);
     }
@@ -2215,7 +2294,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         errorCode = "I004";
       }
       throw new ServiceException(errorCode, MsgUtil.bold(vnd.getName()),
-          MaterialUtils.getMaterialNamesString(materialsNotExistingInVendor));
-    }
+      MaterialUtils.getMaterialNamesString(materialsNotExistingInVendor));
+      }
   }
+
 }

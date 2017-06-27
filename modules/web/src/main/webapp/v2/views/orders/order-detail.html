@@ -37,6 +37,10 @@
                             </span>
                         </span>
                         <span class="badge currentstatus" ng-class="{'cancelled':order.st == ORDER.CANCELLED}">{{order.status}}</span>
+                        <div ng-show="order.appr && aprMsg" class="tooltip-wrapper" uib-tooltip="Approvers are not configured." tooltip-placement="right" style="display: inline-block">
+                            <button type="button" class="btn btn-sm btn-primary pr left-5" disabled>Request approval</button>
+                        </div>
+                        <button ng-show="order.appr && !aprMsg" type="button" class="btn btn-sm btn-primary pr left-5" ng-click="openApproval()">Request approval</button>
                         <div>
                             <span class="litetext lnk" ng-show="!edit.rid && (order.st == ORDER.PENDING || order.st == ORDER.CONFIRMED || order.st == ORDER.BACKORDERED)">{{order.rid? resourceBundle['referenceid'] + ": " + order.rid : "Add " + resourceBundle['referenceid'] }} </span>
                             <span class="litetext lnk" ng-show="order.rid && !(order.st == ORDER.PENDING || order.st == ORDER.CONFIRMED || order.st == ORDER.BACKORDERED)">{{order.rid? resourceBundle['referenceid'] + ": " + order.rid : "Add " + resourceBundle['referenceid'] }} </span>
@@ -117,7 +121,7 @@
                          ng-include="'views/transactions/view-map.html'"></div>
                 </div>
             </div>
-            <div class="row mt10">
+            <div class="row mt10" ng-show="!order.appr">
                 <div class="col-sm-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">

@@ -1,0 +1,90 @@
+<div class="box topbox">
+    <div class="row">
+        <div class="col-sm-9">
+            <div ng-controller="EntityApproversController">
+            <form class="form-horizontal">
+                <div class="bgr">
+                    <div class="title-heading">
+                        Purchase order
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <span class="litetext">Specify the primary and secondary approvers for purchase order</span>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label top14">Primary approvers</label>
+                                <div class="col-sm-8">
+                                    <div class="form-group" style="margin-top:15px;">
+                                        <div class="col-sm-10">
+                                            <domain-user-select only-active="true" users-model="eapr.pap" pre-selected="eapr.sap" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label top14">Secondary approvers</label>
+                                <div class="col-sm-8">
+                                    <div class="form-group" style="margin-top:15px;">
+                                        <div class="col-sm-10">
+                                            <domain-user-select only-active="true" users-model="eapr.sap" disabled="isUndef(eapr.pap)" pre-selected="eapr.pap" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="bgr">
+                    <div class="title-heading">
+                        Sales order
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <span class="litetext">Specify the primary and secondary approvers for sales order</span>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label top14">Primary approvers</label>
+                                <div class="col-sm-8">
+                                    <div class="form-group" style="margin-top:15px;">
+                                        <div class="col-sm-10">
+                                            <domain-user-select only-active="true" users-model="eapr.pas" pre-selected="eapr.sas" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label top14">Secondary approvers</label>
+                                <div class="col-sm-8">
+                                    <div class="form-group" style="margin-top:15px;">
+                                        <div class="col-sm-10">
+                                            <domain-user-select only-active="true" users-model="eapr.sas" disabled="isUndef(eapr.pas)" pre-selected="eapr.pas" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="pull-right">
+                                <button type="button" ng-click="setApprovers()" class="btn btn-primary">
+                                    {{resourceBundle['save']}}
+                                </button>
+                                <a href="#/setup/entities/detail/{{entityId}}/approvals"
+                                   class="btn btn-default">{{resourceBundle['cancel']}}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>

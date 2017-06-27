@@ -25,42 +25,44 @@ package com.logistimo.api.controllers;
 
 import com.google.gson.Gson;
 
+import com.logistimo.api.builders.SMSBuilder;
 import com.logistimo.api.models.InventoryTransactions;
+import com.logistimo.api.models.SMSModel;
 import com.logistimo.api.models.SMSRequestModel;
 import com.logistimo.api.models.SMSTransactionModel;
 import com.logistimo.api.servlets.mobile.builders.MobileTransactionsBuilder;
 import com.logistimo.api.util.SMSUtil;
+import com.logistimo.auth.GenericAuthoriser;
+import com.logistimo.communications.service.MessageService;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.inventory.TransactionUtil;
+import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.models.ErrorDetailModel;
 import com.logistimo.inventory.models.MobileTransactionCacheModel;
-import com.logistimo.proto.MobileMaterialTransModel;
-import com.logistimo.proto.MobileUpdateInvTransResponse;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.logistimo.communications.service.MessageService;
-import com.logistimo.services.Services;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.SMSBuilder;
-import com.logistimo.api.models.SMSModel;
-import com.logistimo.api.auth.Authoriser;
-import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
+import com.logistimo.proto.MobileMaterialTransModel;
+import com.logistimo.proto.MobileUpdateInvTransResponse;
+import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -102,7 +104,7 @@ public class SMSController {
 
       model.actualTS = SMSUtil.populateActualTransactionDate(ua.getDomainId(), model.actualTD);
 
-      if (!Authoriser
+      if (!GenericAuthoriser
           .authoriseSMS(smsReqModel.getAddress(), ua.getMobilePhoneNumber(), model.userId,
               model.token)) {
         xLogger.warn("SMS authentication failed. Mobile: {0}, User Mobile: {1}, Message: {2}",
@@ -199,7 +201,7 @@ public class SMSController {
       UsersService as = Services.getService(UsersServiceImpl.class);
       ua = as.getUserAccount(model.getUserId());
       //authorise user
-      if (!Authoriser
+      if (!GenericAuthoriser
           .authoriseSMS(smsMessage.getAddress(), ua.getMobilePhoneNumber(), model.getUserId(),
               model.getToken())) {
         xLogger.warn("SMS authentication failed. Mobile: {0}, User Mobile: {1}, Message: {2}",

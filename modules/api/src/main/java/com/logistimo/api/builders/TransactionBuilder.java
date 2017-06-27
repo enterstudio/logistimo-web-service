@@ -23,17 +23,9 @@
 
 package com.logistimo.api.builders;
 
-import org.apache.commons.lang.StringUtils;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
 import com.logistimo.api.models.TransactionModel;
-import com.logistimo.api.util.CommonUtil;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
@@ -42,11 +34,20 @@ import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.entity.ITransaction;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.CommonUtils;
+import com.logistimo.utils.LocalDateUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,7 +117,7 @@ public class TransactionBuilder {
         model.lknm = k1.getName();
         model.lklt = k1.getLatitude();
         model.lkln = k1.getLongitude();
-        model.lkadd = CommonUtil.getAddress(k1.getCity(),k1.getTaluk(), k1.getDistrict(), k1.getState());
+        model.lkadd = CommonUtils.getAddress(k1.getCity(), k1.getTaluk(), k1.getDistrict(), k1.getState());
       } catch (ServiceException e) {
         // Ignore .. Linked KioskId might have been deleted.
       }
@@ -135,7 +136,7 @@ public class TransactionBuilder {
     try {
       IKiosk k = accountsService.getKiosk(model.eid, false);
       model.enm = (model.eid != null ? k.getName() : "");
-      model.eadd = CommonUtil.getAddress(k.getCity(),k.getTaluk(), k.getDistrict(), k.getState());
+      model.eadd = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
     } catch (ServiceException e) {
       // Ignore .. KioskId might have been deleted.
       return null;

@@ -26,6 +26,7 @@ package com.logistimo.api.builders;
 import com.logistimo.api.constants.ConfigConstants;
 import com.logistimo.api.models.MenuStatsModel;
 import com.logistimo.api.models.configuration.AccountingConfigModel;
+import com.logistimo.api.models.configuration.ApprovalsConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.api.models.configuration.CapabilitiesConfigModel;
 import com.logistimo.api.models.configuration.DashboardConfigModel;
@@ -34,14 +35,15 @@ import com.logistimo.api.models.configuration.InventoryConfigModel;
 import com.logistimo.api.models.configuration.OrdersConfigModel;
 import com.logistimo.api.models.configuration.SupportConfigModel;
 import com.logistimo.api.models.configuration.TagsConfigModel;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.models.AccountingConfig;
 import com.logistimo.config.models.ActualTransConfig;
+import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.AssetConfig;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.CapabilityConfig;
@@ -66,6 +68,7 @@ import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.SystemException;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.entity.IOrder;
@@ -238,6 +241,31 @@ public class ConfigurationModelsBuilder {
     } catch (Exception e) {
       xLogger.warn("atdd value null", e);
     }
+    try {
+      UsersService
+          accountsService =
+          Services.getService(UsersServiceImpl.class, user.getLocale());
+      if(config.getApprovalsConfig() != null) {
+        model.apc = buildApprovalsConfigModel(config.getApprovalsConfig(), accountsService, domainId, locale, timezone);
+        if(model.apc.pa != null && model.apc.pa.size() > 0) {
+          model.toae = true;
+        }
+        if(model.apc.psoa != null && model.apc.psoa.size() > 0) {
+          List<ApprovalsConfigModel.PurchaseSalesOrderApproval> psoa = model.apc.psoa;
+          for(ApprovalsConfigModel.PurchaseSalesOrderApproval ps : psoa) {
+            if(!model.poae && ps.poa) {
+              model.poae = true;
+            }
+            if(!model.soae && ps.soa) {
+              model.soae = true;
+              break;
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      xLogger.fine("Unable to fetch approval config for {0}", domainId, e);
+    }
     model.allocateInventory = config.autoGI();
     if (SecurityConstants.ROLE_SERVICEMANAGER.equalsIgnoreCase(user.getRole())
         && config.getCapabilityMapByRole() != null) {
@@ -259,6 +287,54 @@ public class ConfigurationModelsBuilder {
       model.mdp = config.getDashboardConfig().getDbOverConfig().edm;
     }
     return model;
+  }
+
+  public ApprovalsConfig.OrderConfig buildApprovalsOrderConfig(ApprovalsConfigModel model, DomainConfig dc) {
+    if(model != null) {
+      ApprovalsConfig.OrderConfig orderConfig = new ApprovalsConfig.OrderConfig();
+      List<ApprovalsConfig.PurchaseSalesOrderConfig> purchaseSalesOrderConfigList = new ArrayList<>();
+      if(model.psoa != null && model.psoa.size() > 0) {
+        for(ApprovalsConfigModel.PurchaseSalesOrderApproval psa : model.psoa) {
+          ApprovalsConfig.PurchaseSalesOrderConfig psConfig = new ApprovalsConfig.PurchaseSalesOrderConfig();
+          psConfig.setPurchaseOrderApproval(psa.poa);
+          psConfig.setSalesOrderApproval(psa.soa);
+          psConfig.setEntityTags(psa.eTgs);
+          purchaseSalesOrderConfigList.add(psConfig);
+        }
+        orderConfig.setPurchaseSalesOrderApproval(purchaseSalesOrderConfigList);
+        if(model.pa != null && model.pa.size() > 0) {
+          List<String> puIds = new ArrayList<>();
+          for(int i=0; i<model.pa.size(); i++) {
+            puIds.add(model.pa.get(i).id);
+          }
+          orderConfig.setPrimaryApprovers(puIds);
+        }
+        if(model.sa != null && model.sa.size() > 0) {
+          List<String> suIds = new ArrayList<>();
+          for(int i=0; i<model.sa.size(); i++) {
+            suIds.add(model.sa.get(i).id);
+          }
+          orderConfig.setSecondaryApprovers(suIds);
+        }
+        if(model.px == 0) {
+          orderConfig.setPurchaseOrderApprovalExpiry(24);
+        } else {
+          orderConfig.setPurchaseOrderApprovalExpiry(model.px);
+        }
+        if(model.sx == 0) {
+          orderConfig.setSalesOrderApprovalExpiry(24);
+        } else {
+          orderConfig.setSalesOrderApprovalExpiry(model.sx);
+        }
+        if(model.tx == 0) {
+          orderConfig.setTransferOrderApprovalExpiry(24);
+        } else {
+          orderConfig.setTransferOrderApprovalExpiry(model.tx);
+        }
+        return orderConfig;
+      }
+    }
+    return null;
   }
 
   public GeneralConfigModel buildGeneralConfigModel(Long domainId, Locale locale, String timezone)
@@ -334,7 +410,7 @@ public class ConfigurationModelsBuilder {
             model.userpopulate = true;
             model.usrname = userAccount.getFullName();
           }
-        } catch (ServiceException e) {
+        } catch (SystemException e) {
           xLogger.severe("Error in fetching user details", e);
           throw new InvalidServiceException("Unable to fetch user details for " + model.usrid);
         } catch (ObjectNotFoundException e) {
@@ -929,6 +1005,50 @@ public class ConfigurationModelsBuilder {
     return model;
   }
 
+  public ApprovalsConfigModel buildApprovalsConfigModel(ApprovalsConfig config, UsersService as,Long domainId, Locale locale, String timezone){
+    if(config == null) {
+      return null;
+    }
+    ApprovalsConfigModel model = new ApprovalsConfigModel();
+    DomainConfig dc = DomainConfig.getInstance(domainId);
+    List<String> val = dc.getDomainData(ConfigConstants.APPROVALS);
+    if(val != null) {
+      model.createdBy = val.get(0);
+      model.lastUpdated = LocalDateUtil.format(new Date(Long.parseLong(val.get(1))), locale, timezone);
+      model.fn = getFullName(model.createdBy, locale);
+    }
+    ApprovalsConfig.OrderConfig orderConfig = config.getOrderConfig();
+    if(orderConfig != null) {
+      UserBuilder userBuilder = new UserBuilder();
+      if(orderConfig.getPrimaryApprovers() != null && orderConfig.getPrimaryApprovers().size() > 0) {
+        model.pa =
+            userBuilder.buildUserModels(constructUserAccount(as, orderConfig.getPrimaryApprovers()), locale,
+                timezone, true, 0);
+      }
+      if(orderConfig.getSecondaryApprovers() != null && orderConfig.getSecondaryApprovers().size() > 0) {
+        model.sa =
+            userBuilder.buildUserModels(constructUserAccount(as, orderConfig.getSecondaryApprovers()), locale,
+                timezone, true, 0);
+      }
+      model.px = orderConfig.getPurchaseOrderApprovalExpiry();
+      model.sx = orderConfig.getSalesOrderApprovalExpiry();
+      model.tx = orderConfig.getTransferOrderApprovalExpiry();
+      if(orderConfig.getPurchaseSalesOrderApproval() != null && orderConfig.getPurchaseSalesOrderApproval().size() > 0) {
+        List<ApprovalsConfig.PurchaseSalesOrderConfig> psocs = orderConfig.getPurchaseSalesOrderApproval();
+        List<ApprovalsConfigModel.PurchaseSalesOrderApproval> psoas = new ArrayList<>();
+        for(ApprovalsConfig.PurchaseSalesOrderConfig psos : psocs) {
+          ApprovalsConfigModel.PurchaseSalesOrderApproval psoa = new ApprovalsConfigModel.PurchaseSalesOrderApproval();
+          psoa.eTgs = psos.getEntityTags();
+          psoa.poa = psos.isPurchaseOrderApproval();
+          psoa.soa = psos.isSalesOrderApproval();
+          psoas.add(psoa);
+        }
+        model.psoa = psoas;
+      }
+    }
+    return model;
+  }
+
   public DashboardConfigModel buildDashboardConfigModel(DashboardConfig config, Long domainId,
                                                         Locale locale, String timezone)
       throws ServiceException, ObjectNotFoundException {
@@ -1218,5 +1338,20 @@ public class ConfigurationModelsBuilder {
     scm.em = ConfigUtil.get("support.email", GeneralConfig.DEFAULT_SUPPORT_EMAIL);
     scm.phnm = ConfigUtil.get("support.phone", GeneralConfig.DEFAULT_SUPPORT_PHONE);
     return scm;
+  }
+
+  private List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
+    if (userIds != null && userIds.size() > 0) {
+      List<IUserAccount> list = new ArrayList<>(userIds.size());
+      for (String userId : userIds) {
+        try {
+          list.add(as.getUserAccount(userId));
+        } catch (Exception ignored) {
+          // do nothing
+        }
+      }
+      return list;
+    }
+    return new ArrayList<>();
   }
 }

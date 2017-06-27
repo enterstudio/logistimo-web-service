@@ -23,19 +23,18 @@
 
 package com.logistimo.exports.handlers;
 
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.communications.service.MessageService;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.entity.IMessageLog;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.communications.service.MessageService;
-import com.logistimo.entity.IMessageLog;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.utils.LocalDateUtil;
 
 import java.util.Locale;
 
@@ -78,7 +77,7 @@ public class MessageLogExportHandler implements IExportHandler {
       str +=  messageLog.getEventType() + "," + StringEscapeUtils.escapeCsv( messageLog.getMessage()) + ",";
       str += status + ",";
       str += LocalDateUtil.format(messageLog.getTimestamp(), locale, timezone);
-    } catch (ServiceException | MessageHandlingException ignored) {
+    } catch (MessageHandlingException ignored) {
       // ignore
     }
     return str;

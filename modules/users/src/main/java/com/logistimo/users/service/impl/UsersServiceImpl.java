@@ -23,8 +23,6 @@
 
 package com.logistimo.users.service.impl;
 
-import com.google.gson.Gson;
-
 import com.logistimo.AppFactory;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
@@ -42,12 +40,13 @@ import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.exceptions.EventGenerationException;
 import com.logistimo.events.processor.EventPublisher;
 import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.SystemException;
 import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.logger.XLog;
-import com.logistimo.pagination.QueryParams;
 import com.logistimo.models.users.UserLoginHistoryModel;
 import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
@@ -64,12 +63,14 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.utils.Counter;
+import com.logistimo.utils.GsonUtils;
 import com.logistimo.utils.MessageUtil;
 import com.logistimo.utils.PasswordEncoder;
 import com.logistimo.utils.QueryUtil;
 import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -92,6 +93,7 @@ import javax.jdo.Transaction;
 /**
  * Created by charan on 04/03/17.
  */
+@Service
 public class UsersServiceImpl extends ServiceImpl implements UsersService {
 
   private static final XLog xLogger = XLog.getLog(UsersServiceImpl.class);
@@ -239,10 +241,10 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
 
   @SuppressWarnings("unchecked")
   public IUserAccount getUserAccount(String userId)
-      throws ServiceException, ObjectNotFoundException {
+      throws ObjectNotFoundException {
     xLogger.fine("Entering getUserAccount");
     if (userId == null) {
-      throw new ServiceException("Invalid user ID");
+      throw new IllegalArgumentException("Invalid user ID");
     }
 
     PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -255,7 +257,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       user = pm.detachCopy(user);
       return user;
     } catch (JDOObjectNotFoundException e) {
-      xLogger.warn("getUserAccount: User {0} does not exist in the database", userId, e);
+      xLogger.warn("getUserAccount: User {0} does not exist in the database", userId);
       notFound = true;
       exception = e;
     } catch (Exception e) {
@@ -265,12 +267,10 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       pm.close();
     }
     if (notFound) {
-      throw new ObjectNotFoundException(
-          messages.getString("user") + " '" + userId + "' " + backendMessages
-              .getString("error.notfound"));
+      throw new ObjectNotFoundException("USR001", userId);
     }
 
-    throw new ServiceException(exception);
+    throw new SystemException(exception);
   }
 
   public Results getUsers(Long domainId, IUserAccount user, boolean activeUsersOnly,
@@ -788,7 +788,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       pm.close();
     }
     if (userNotFound) {
-      throw new ObjectNotFoundException(exception);
+      throw new ObjectNotFoundException("USR001", userId);
     } else if (exception != null) {
       throw new ServiceException(exception);
     }
@@ -1167,7 +1167,8 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
             ulh =
             new UserLoginHistoryModel(userId, lgSrc, usrAgnt, ipAddr, loginTime, version);
         AppFactory.get().getTaskService()
-            .schedule(ITaskService.QUEUE_DEFAULT, LOGUSER_TASK_URL, new Gson().toJson(ulh));
+            .schedule(ITaskService.QUEUE_DEFAULT, LOGUSER_TASK_URL,
+                GsonUtils.toJson(ulh));
       }
     } catch (TaskSchedulingException e) {
       xLogger.warn(" {0} while updating the user login history, {1}", e.getMessage(), userId, e);
@@ -1499,5 +1500,54 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
         return o1.getFirstName().compareTo(o2.getFirstName());
       }
     });
+  }
+
+  @Override
+  public boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role) {
+    Map<String, Object> params = new HashMap<>(2);
+    params.put("domainIdParam", domainId);
+    params.put("userIdParam", userId);
+    String queryStr;
+    if (userId != null && userId.equals(rUserId)) {
+      return true;
+    } else if (SecurityUtil.compareRoles(role, SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
+      //Todo: Need to check user domainId and all its children domains
+      queryStr =
+          "SELECT userId FROM " + JDOUtils.getImplClass(IUserAccount.class).getName()
+              + " WHERE userId == userIdParam && dId.contains(domainIdParam)" +
+              " PARAMETERS String userIdParam, Long domainIdParam";
+    } else {
+      queryStr =
+          "SELECT userId FROM " + JDOUtils.getImplClass(IUserAccount.class).getName()
+              + " WHERE userId == userIdParam && registeredBy == registeredByParam && sdId == domainIdParam"
+              +
+              " PARAMETERS String userIdParam, String registeredByParam, Long domainIdParam";
+      params.put("registeredByParam", rUserId);
+    }
+    return getAccess(params, queryStr);
+  }
+
+  private boolean getAccess(Map<String, Object> params, String queryStr) {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    boolean hasAccess = false;
+    List<Long> results;
+    Query q = null;
+    try {
+      q = pm.newQuery(queryStr);
+      results = (List<Long>) q.executeWithMap(params);
+      if (results != null && results.size() == 1) {
+        hasAccess = true;
+      }
+    } finally {
+      if (q != null) {
+        try {
+          q.closeAll();
+        } catch (Exception ignored) {
+          xLogger.warn("Exception while closing query", ignored);
+        }
+      }
+      pm.close();
+    }
+    return hasAccess;
   }
 }

@@ -23,6 +23,7 @@
 
 package com.logistimo.api.models;
 
+import com.logistimo.api.models.configuration.ApprovalsConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.api.models.configuration.SupportConfigModel;
 
@@ -50,7 +51,19 @@ public class MenuStatsModel {
   public int mmt; // Min Max type
   public String mmd; // Min Max Duration
   public AssetConfigModel ac;
-
+  public ApprovalsConfigModel apc;
+  /**
+   * Is purchase order approval enabled
+   */
+  public boolean poae;
+  /**
+   * Is sales order approval enabled
+   */
+  public boolean soae;
+  /**
+   * Is transfer order approval enabled
+   */
+  public boolean toae;
   /**
    * Is Demand Only.. Disable Orders.. Just capture demand.
    */

@@ -27,8 +27,8 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.api.communications.MessageHandler;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.logger.XLog;
 
 import java.io.IOException;

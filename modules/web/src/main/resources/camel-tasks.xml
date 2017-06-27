@@ -77,11 +77,32 @@
             <bean ref="assetAlarmsMessagingProcessor"/>
         </route>
 
+        <route id="approvalStatusUpdateRoute" errorHandlerRef="approvalStatusUpdateErrorHandler"
+          autoStartup="{{task.server}}">
+            <from uri="activemq:queue:approval-status-update"/>
+            <unmarshal ref="approvalStatusUpdateEvent"/>
+            <log message="Routing message from topic to Logistimo Web ${body}"/>
+            <bean ref="approvalStatusProcessor"/>
+        </route>
+
     </camelContext>
+
+    <bean id="approvalStatusProcessor"
+      class="com.logistimo.orders.approvals.utils.ApprovalStatusUpdateEventProcessor">
+    </bean>
+
+    <bean id="approvalStatusUpdateErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
+        <property name="deadLetterUri" value="activemq:queue:asset-alarms-deadletter"/>
+        <property name="redeliveryPolicy" ref="approvalStatusUpdateRedeliveryPolicyConfig"/>
+    </bean>
+
+    <bean id="approvalStatusUpdateRedeliveryPolicyConfig" class="org.apache.camel.processor.RedeliveryPolicy">
+        <property name="maximumRedeliveries" value="3"/>
+        <property name="redeliveryDelay" value="5000"/>
+    </bean>
 
     <bean id="assetAlarmsMessagingProcessor" class="com.logistimo.assets.utils.AssetAlarmsMessagingProcessor">
     </bean>
-
 
     <bean id="assetAlarmsErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
         <property name="deadLetterUri" value="seda:queue:asset-alarms-deadletter"/>
@@ -126,4 +147,9 @@
     <bean id="assetStatusRequest" class="org.apache.camel.component.gson.GsonDataFormat">
         <property name="unmarshalType" value="com.logistimo.assets.models.AssetStatusRequest"/>
     </bean>
+
+    <bean id="approvalStatusUpdateEvent" class="org.apache.camel.component.gson.GsonDataFormat">
+        <property name="unmarshalType" value="com.logistimo.orders.approvals.utils.ApprovalStatusUpdateEvent"/>
+    </bean>
+
 </beans>

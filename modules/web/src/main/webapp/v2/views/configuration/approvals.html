@@ -1,0 +1,182 @@
+<div class="box topbox">
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="ApprovalConfigurationController">
+            <form ng-if="loading == false" class="form-horizontal" role="form" name="approvalConfigForm">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="domain-title-heading">
+                            <h4>Approval {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                            <span ng-show="orderCfg.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{orderCfg.lastUpdated}} {{resourceBundle['by']}}
+                                <a href="#setup/users/all/details?userId={{orderCfg.createdBy}}" target="_new">{{orderCfg.fn}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="title-heading">
+                                Order approvals
+                            </div>
+                            <p class="litetext">
+                                Specify configuration parameters for order approvals, including purchase orders, sales orders and transfer orders. Approvals can be configured by groups of entities identified by entity tags for purchase and sales orders.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bizinfo bizinfo-last">
+                        <div class="row overflowYHide">
+                            <div class="col-sm-2 " style="min-height:280px;">
+                                <ul class="nav nav-tabs-left extend">
+                                    <li ng-class="{active : orderType.ps}"><a href="" ng-click="tabContent('ps')">Purchases and sales</a></li>
+                                    <li ng-class="{active : orderType.t}"><a href="" ng-click="tabContent('t')">Transfers/Releases</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-10">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="bgr" style="margin: 0px;min-height:280px;">
+                                            <div class="title-heading">
+                                                {{heading}}
+                                            </div>
+                                            <div class="litetext" style="padding-left:5px;">
+                                                {{info}}
+                                            </div>
+                                            <div ng-show="orderType.ps" style="border:none;" class="mt10">
+                                                <div class="row">
+                                                    <div class="col-sm-10 ml32">
+                                                        <table class="table table-bordered table-condensed table-hover table-logistimo">
+                                                            <tbody>
+                                                            <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                                                <th class="col-sm-3 text-center">Entity tags</th>
+                                                                <th class="col-sm-4 text-center">Approvals</th>
+                                                                <th class="col-sm-0-2 text-center"></th>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="ps in orderCfg.psoa">
+                                                            <tr ng-class="{'alert alert-info' : exRow[$index]}">
+                                                                <td><p class="text-center temp">{{$index + 1}}</p></td>
+                                                                <td>
+                                                                    <domain-tag-select  tags-model="ps.enTgs" on-select="populatePreSelected()" pre-selected="preSelectedTags" type="'entity'" force-no-udf="'true'"></domain-tag-select>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="row">
+                                                                        <div class="col-sm-11">
+                                                                            <div class="form-group">
+                                                                                <label class="col-sm-2 control-label"></label>
+                                                                                <div class="col-sm-10 cbx">
+                                                                                    <input type="checkbox" ng-model="ps.poa"> Enable approvals for purchase orders <br/>
+                                                                                    <input type="checkbox" ng-model="ps.soa"> Enable approvals for sales orders <br/>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <span>
+                                                                        <button type="submit" value="delete" ng-click="deleteRow($index)"></button>
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td class="col-sm-1" colspan="100%">
+                                                                    <button type="button" ng-click="addRow()" class="btn btn-sm btn-primary"> + </button>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="orderType.t" style="border:none;" class="mt10">
+                                                <div class="row">
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">Primary approvers</label>
+                                                            <div class="col-sm-6">
+                                                                <domain-user-select only-active="true" users-model="orderCfg.pa" pre-selected="orderCfg.sa" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-11 mt10">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-3 control-label">Secondary approvers</label>
+                                                            <div class="col-sm-6">
+                                                                <domain-user-select only-active="true" users-model="orderCfg.sa" disabled="isUndef(orderCfg.pa)" pre-selected="orderCfg.pa" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt18">
+                                    <div class="col-sm-12">
+                                    <div class="bgr" style="margin: 0px;min-height:180px;">
+                                        <div class="title-heading">
+                                            Approval request expiry times
+                                        </div>
+                                        <div class="mt10">
+                                            <div class="row" ng-show="orderType.ps">
+                                                <div class="col-sm-10">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-6 control-label">Expiry time for purchase order approval requests</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control w20 dinline" id="px"
+                                                                   autocomplete="off"
+                                                                   ng-model="orderCfg.px"
+                                                                   placeholder="24"
+                                                                   maxlength="4" only-digits>&nbsp;&nbsp;hours
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" ng-show="orderType.ps">
+                                                <div class="col-sm-10">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-6 control-label">Expiry time for sales order approval requests</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control w20 dinline" id="sx"
+                                                                   autocomplete="off"
+                                                                   ng-model="orderCfg.sx"
+                                                                   placeholder="24"
+                                                                   maxlength="4" only-digits>&nbsp;&nbsp;hours
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" ng-show="orderType.t">
+                                                <div class="col-sm-10">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-6 control-label">Expiry time for transfer/release order approval requests</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control w20 dinline" id="tx"
+                                                                   autocomplete="off"
+                                                                   ng-model="orderCfg.tx"
+                                                                   placeholder="24"
+                                                                   maxlength="4" only-digits>&nbsp;&nbsp;hours
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt10" ng-if="iSU || dp.ce">
+                    <div class="col-sm-12  ml5">
+                        <button type="button" ng-click="setApprovalsConfiguration()" class="btn btn-primary">{{resourceBundle['save']}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

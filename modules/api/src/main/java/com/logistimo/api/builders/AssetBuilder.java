@@ -133,11 +133,7 @@ public class AssetBuilder {
 
     int sno = results.getOffset() + 1;
     UsersService as = null;
-    try {
-      as = Services.getService(UsersServiceImpl.class);
-    } catch (ServiceException e) {
-      xLogger.warn("Error in fetching service", e);
-    }
+    as = Services.getService(UsersServiceImpl.class);
     for (Object asset : results.getResults()) {
       AssetDetailsModel
           assetDetailsModel =
@@ -224,27 +220,22 @@ public class AssetBuilder {
       //do nothing
     }
 
-    try {
-      DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      if (domainName == null) {
-        IDomain domain = null;
-        try {
-          domain = ds.getDomain(asset.getDomainId());
-        } catch (Exception e) {
-          //ignore
-        }
-        if (domain != null) {
-          domainName = domain.getName();
-        } else {
-          domainName = Constants.EMPTY;
-        }
-        if (domainNames != null) {
-          domainNames.put(asset.getDomainId(), domainName);
-        }
+    DomainsService ds = Services.getService(DomainsServiceImpl.class);
+    if (domainName == null) {
+      IDomain domain = null;
+      try {
+        domain = ds.getDomain(asset.getDomainId());
+      } catch (Exception e) {
+        //ignore
       }
-    } catch (ServiceException e) {
-      // ignore
-      //xLogger.warn("Error while fetching Domain {0}", item.getDomainId());
+      if (domain != null) {
+        domainName = domain.getName();
+      } else {
+        domainName = Constants.EMPTY;
+      }
+      if (domainNames != null) {
+        domainNames.put(asset.getDomainId(), domainName);
+      }
     }
     assetDetailsModel.sdname = domainName;
 
@@ -480,27 +471,22 @@ public class AssetBuilder {
       //do nothing
     }
 
-    try {
-      DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      if (domainName == null) {
-        IDomain domain = null;
-        try {
-          domain = ds.getDomain(asset.getDomainId());
-        } catch (Exception e) {
-          //xLogger.warn("Error while fetching Domain {0}", item.getDomainId());
-        }
-        if (domain != null) {
-          domainName = domain.getName();
-        } else {
-          domainName = Constants.EMPTY;
-        }
-        if (domainNames != null) {
-          domainNames.put(asset.getDomainId(), domainName);
-        }
+    DomainsService ds = Services.getService(DomainsServiceImpl.class);
+    if (domainName == null) {
+      IDomain domain = null;
+      try {
+        domain = ds.getDomain(asset.getDomainId());
+      } catch (Exception e) {
+        //xLogger.warn("Error while fetching Domain {0}", item.getDomainId());
       }
-    } catch (ServiceException e) {
-      // ignore
-      //xLogger.warn("Error while fetching Domain {0}", item.getDomainId());
+      if (domain != null) {
+        domainName = domain.getName();
+      } else {
+        domainName = Constants.EMPTY;
+      }
+      if (domainNames != null) {
+        domainNames.put(asset.getDomainId(), domainName);
+      }
     }
     assetDetailsModel.sdname = domainName;
 

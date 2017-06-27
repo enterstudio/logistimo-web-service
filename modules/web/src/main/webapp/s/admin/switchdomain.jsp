@@ -1,18 +1,14 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="com.logistimo.services.Services"%>
-<%@page import="com.logistimo.services.ServiceException"%>
-<%@page import="com.logistimo.entities.entity.IKiosk"%>
-<%@page import="com.logistimo.constants.Constants"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
+<%@page import="com.logistimo.auth.SecurityConstants" %>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
+<%@page import="com.logistimo.pagination.Results" %>
 <%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
+<%@page import="com.logistimo.services.Services" %>
+<%@page import="com.logistimo.users.entity.IUserAccount" %>
+<%@page import="com.logistimo.users.service.UsersService" %>
+<%@page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
 <%@page import="java.util.List"%>
-<%@page import="java.util.ArrayList"%>
-<%@page import="com.logistimo.pagination.Results"%>
-<%@ page import="com.logistimo.users.service.UsersService" %>
-<%@ page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
-<%@ page import="com.logistimo.auth.SecurityConstants" %>
-<%@ page import="com.logistimo.users.entity.IUserAccount" %>
 
 <%--
   ~ Copyright © 2017 Logistimo.

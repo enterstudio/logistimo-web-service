@@ -23,40 +23,40 @@
 
 package com.logistimo.api.controllers;
 
-import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.builders.ShipmentBuilder;
+import com.logistimo.api.models.OrderStatusModel;
 import com.logistimo.api.models.ShipmentResponseModel;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.entities.auth.EntityAuthoriser;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
+import com.logistimo.inventory.exceptions.InventoryAllocationException;
+import com.logistimo.logger.XLog;
 import com.logistimo.models.ResponseModel;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
 import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.shipments.service.impl.ShipmentService;
+import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.LockUtil;
 
 import org.apache.commons.lang.StringUtils;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.inventory.exceptions.InventoryAllocationException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.ShipmentBuilder;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.OrderStatusModel;
-import com.logistimo.api.util.SecurityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,7 +65,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -317,7 +316,7 @@ public class ShipmentController {
       if (order.getServicingKiosk() != null) {
         Integer
             vPermission =
-            Authoriser.authoriseEntityPerm(order.getServicingKiosk(), user.getRole(),
+            EntityAuthoriser.authoriseEntityPerm(order.getServicingKiosk(), user.getRole(),
                 user.getLocale(), user.getUsername(), user.getDomainId());
 
         if (vPermission < 1) {

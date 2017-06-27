@@ -36,14 +36,28 @@
 
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:message-converters>
-            <bean class="com.logistimo.api.util.GsonHttpMessageConverter">
+            <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter">
+                <property name="gson">
+                    <bean class="com.google.gson.Gson" factory-bean="gsonBuilder" factory-method="create"/>
+                </property>
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+
+    <bean id="gsonBuilder" class="com.google.gson.GsonBuilder">
+        <property name="dateFormat" value="yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"/>
+    </bean>
+
+    <bean id="contextHolder" class="com.logistimo.context.StaticApplicationContext"/>
     
     <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
         <!-- Turn off working out content type based on URL file extension, should fall back to looking at the Accept headers -->
         <property name="favorPathExtension" value="false"/>
+    </bean>
+
+    <bean id="localeResolver"
+          class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <property name="defaultLocale" value="en"/>
     </bean>
  
 </beans>

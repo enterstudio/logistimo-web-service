@@ -213,6 +213,12 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         },
         getUniqueTransReasons : function(){
             return this.fetch('/s2/api/config/domain/inventory/transReasons');
+        },
+        setApprovalsConfig : function(data) {
+            return this.fetchP(data, "/s2/api/config/domain/approvals");
+        },
+        getApprovalsConfig : function() {
+            return this.fetch("/s2/api/config/domain/approvals");
         }
     }
 }]);

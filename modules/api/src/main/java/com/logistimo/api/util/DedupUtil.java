@@ -31,20 +31,21 @@ import com.logistimo.services.utils.ConfigUtil;
  */
 public class DedupUtil {
 
-    private static final int
-            CACHE_EXPIRY =
-            ConfigUtil.getInt("cache.expiry.for.transaction.signature", 900);// 15 minutes
+  private static final int
+      CACHE_EXPIRY =
+      ConfigUtil.getInt("cache.expiry.for.transaction.signature", 900);// 15 minutes
 
-    public static final int PENDING = 0;
-    public static final int SUCCESS = 1;
-    public static final int FAILED = 2;
+  public static final int PENDING = 0;
+  public static final int SUCCESS = 1;
+  public static final int FAILED = 2;
 
-    private DedupUtil() {}
+  private DedupUtil() {
+  }
 
-    // Set the signature and status in cache
-    public static void setSignatureAndStatus(MemcacheService cache, String signature, int status) {
-        if (signature != null && cache != null) {
-            cache.put(signature, status, CACHE_EXPIRY);
-        }
+  // Set the signature and status in cache
+  public static void setSignatureAndStatus(MemcacheService cache, String signature, int status) {
+    if (signature != null && cache != null) {
+      cache.put(signature, status, CACHE_EXPIRY);
     }
+  }
 }

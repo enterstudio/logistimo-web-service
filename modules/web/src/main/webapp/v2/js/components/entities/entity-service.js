@@ -230,6 +230,12 @@ entityServices.factory('entityService', ['$http', function ($http) {
                 urlStr += '&parentLoc='+JSON.stringify(parentLocation);
             }
             return this.fetch(urlStr);
+        },
+        setApprovers: function(data, kioskId) {
+            return this.fetchP(data, '/s2/api/entities/approvers?kioskId='+kioskId);
+        },
+        getApprovers: function(kioskId) {
+            return this.fetch('/s2/api/entities/approvers?kioskId='+kioskId);
         }
     }
 }]);

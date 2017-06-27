@@ -27,29 +27,28 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
-import com.logistimo.bulkuploads.BulkUploadMgr;
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.services.BulkImportHandler;
-import com.logistimo.services.blobstore.BlobInfo;
-import com.logistimo.services.blobstore.BlobstoreService;
-import com.logistimo.services.mapred.IMapredService;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import com.logistimo.entity.IUploaded;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.bulkuploads.BulkImportMapperContants;
+import com.logistimo.bulkuploads.BulkUploadMgr;
+import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.entity.IUploaded;
+import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
+import com.logistimo.services.BulkImportHandler;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.UploadService;
+import com.logistimo.services.blobstore.BlobInfo;
+import com.logistimo.services.blobstore.BlobstoreService;
 import com.logistimo.services.impl.UploadServiceImpl;
-import com.logistimo.constants.Constants;
+import com.logistimo.services.mapred.IMapredService;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.utils.HttpUtil;
 import com.logistimo.utils.NumberUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
 
 import java.io.IOException;
 import java.net.URLEncoder;

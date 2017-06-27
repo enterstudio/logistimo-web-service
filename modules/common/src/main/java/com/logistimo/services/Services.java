@@ -24,6 +24,7 @@
 package com.logistimo.services;
 
 import com.logistimo.constants.Constants;
+import com.logistimo.exception.SystemException;
 import com.logistimo.logger.XLog;
 import com.logistimo.services.utils.ConfigUtil;
 
@@ -35,58 +36,56 @@ import java.util.Map;
 public class Services {
   private static final XLog xLogger = XLog.getLog(Services.class);
 
-  private static Map<Class, Object> _factory = new HashMap<>();
+  private static final Map<Class, Object> _factory = new HashMap<>();
 
-  public static <T extends Service> T getService(String beanName) throws ServiceException {
+  public static <T extends Service> T getService(String beanName) {
     return getService(beanName, new Locale(Constants.LANG_DEFAULT, ""));
   }
 
 
-  public static <T extends Service> T getService(Class<T> klass) throws ServiceException {
+  public static <T extends Service> T getService(Class<T> klass) {
     return getService(klass, new Locale(Constants.LANG_DEFAULT, ""));
   }
 
   /**
    * Get service implementation object. This refers the beans.properties to identify the
    * implementation class.
+   *
    * @param beanName - bean name as defined
-   * @param locale - locale of the user
-   * @param <T> - Type of the service class
+   * @param locale   - locale of the user
+   * @param <T>      - Type of the service class
    * @return - Implementation of the service as defined in beans.properties
-   * @throws ServiceException
    */
-  public static <T extends Service> T getService(String beanName, Locale locale)
-      throws ServiceException {
+  public static <T extends Service> T getService(String beanName, Locale locale) {
     String className = ConfigUtil.get(beanName);
-    if(className == null ){
-      throw new ServiceException("Service class not defined in beans.properties for "+ beanName);
+    if (className == null) {
+      throw new SystemException("Service class not defined in beans.properties for " + beanName);
     }
     try {
       Class<T> clazz = (Class<T>) Class.forName(className);
       return getService(clazz, locale);
     } catch (ClassNotFoundException e) {
-      throw new ServiceException("Service class not found in beans.properties for "+ beanName);
+      throw new SystemException("Service class not found in beans.properties for " + beanName);
     }
   }
 
-  public static <T extends Service> T getService(Class<T> clazz, Locale locale)
-      throws ServiceException {
+  public static <T extends Service> T getService(Class<T> clazz, Locale locale) {
     if (locale == null) {
       locale = new Locale(Constants.LANG_DEFAULT, "");
     }
-    T instance = (T) _factory.get(clazz.getName()+locale.getDisplayName());
+    T instance = (T) _factory.get(clazz.getName() + locale.getDisplayName());
     if (instance == null) {
       synchronized (clazz.getName()) {
         try {
           instance = clazz.newInstance();
           instance.loadResources(locale);
-          _factory.put(clazz, clazz.getName()+locale.toString());
+          _factory.put(clazz, clazz.getName() + locale.toString());
         } catch (InstantiationException e) {
           xLogger.severe("Error Instantiating Service class {0}", clazz, e);
-          throw new ServiceException(e);
+          throw new SystemException(e);
         } catch (IllegalAccessException e) {
           xLogger.severe("Error Accessing Service class {0}", clazz, e);
-          throw new ServiceException(e);
+          throw new SystemException(e);
         }
       }
     }
@@ -98,7 +97,7 @@ public class Services {
   public void destroy() throws ServiceException {
     Collection<Object> services = _factory.values();
     for (Object svc : services) {
-      ((Service)svc).destroy();
+      ((Service) svc).destroy();
     }
   }
 

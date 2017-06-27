@@ -24,9 +24,7 @@
 package com.logistimo.api.migrators;
 
 import com.logistimo.AppFactory;
-import com.logistimo.config.entity.Config;
 import com.logistimo.config.entity.IConfig;
-import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventSpec;
 import com.logistimo.config.models.EventsConfig;
@@ -35,23 +33,15 @@ import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.Results;
-import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.users.dao.IUserDao;
-import com.logistimo.users.dao.UserDao;
-import com.logistimo.users.entity.IUserAccount;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.jdo.PersistenceManager;
 
 /**
  * Created by Charan.

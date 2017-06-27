@@ -39,13 +39,20 @@ public class SecureUserDetails implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private String role = null;
-  @SuppressWarnings("unused")
-  private String password = null; // encoded password. DEPRECATED
   private String userId = null;
   private boolean isEnabled = true;
   private Long domainId = null;
   private Locale locale = null;
   private String timezone = null;
+  private Long currentDomainId;
+
+  public Long getCurrentDomainId() {
+    return currentDomainId;
+  }
+
+  public void setCurrentDomainId(Long currentDomainId) {
+    this.currentDomainId = currentDomainId;
+  }
 
   public String getRole() {
     return role;
@@ -94,5 +101,18 @@ public class SecureUserDetails implements Serializable {
 
   public void setTimezone(String timezone) {
     this.timezone = timezone;
+  }
+
+  @Override
+  public String toString() {
+    return "SecureUserDetails{" +
+        "role='" + role + '\'' +
+        ", userId='" + userId + '\'' +
+        ", isEnabled=" + isEnabled +
+        ", domainId=" + domainId +
+        ", locale=" + locale +
+        ", timezone='" + timezone + '\'' +
+        ", currentDomainId=" + currentDomainId +
+        '}';
   }
 }

@@ -33,7 +33,6 @@ import com.logistimo.logger.XLog;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.orders.OrderUtils;
-import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.shipments.entity.IShipment;
@@ -244,8 +243,6 @@ public class ShipmentTemplate implements ITemplate {
       if (shipment.getCancelledDiscrepancyReasons() != null && (excludeVars == null || !excludeVars.contains(EventsConfig.VAR_REASONCANCEL))) {
         varMap.put(EventsConfig.VAR_REASONCANCEL, shipment.getCancelledDiscrepancyReasons());
       }
-    } catch (ServiceException e) {
-      xLogger.warn("Error in getTemplateValues() in Shipment",e);
     } finally {
       pm.close();
     }

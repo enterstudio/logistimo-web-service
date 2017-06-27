@@ -1,9 +1,7 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
 <%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
-<%@page import="java.util.List"%>
-<%@page import="java.util.ArrayList"%>
 <%--
   ~ Copyright © 2017 Logistimo.
   ~

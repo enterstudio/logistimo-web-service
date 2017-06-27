@@ -24,27 +24,27 @@
 /**
  *
  */
-package com.logistimo.api.util;
+package com.logistimo.auth.utils;
 
 import com.logistimo.AppFactory;
-import com.logistimo.api.security.*;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
 import com.logistimo.constants.Constants;
-import com.logistimo.services.cache.MemcacheService;
-
+import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.users.entity.IUserAccount;
 
-import com.logistimo.logger.XLog;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 
@@ -84,26 +84,25 @@ public class SessionMgr {
    * Initialize a user after a Spring security
    */
   public static void initSession(HttpSession session, SecureUserDetails user) {
+    user.setCurrentDomainId(user.getDomainId());
     // Set the user param
     session.setAttribute(Constants.PARAM_USER, user);
+    SecurityUtils.setUserDetails(user);
     // Set the user parameters in the session
     Long domainId = user.getDomainId();
     session.setAttribute(Constants.PARAM_DOMAINID, domainId); // set the current domain
     //Clear existing sessions
-    try {
-      AuthenticationService
-          as =
-          Services.getService(AuthenticationServiceImpl.class, user.getLocale());
-      as.updateUserSession(user.getUsername(), session.getId());
-    } catch (ServiceException e) {
-      xLogger.warn("Unable to clear user existing sessions ", e);
-    }
+    AuthenticationService
+        as =
+        Services.getService(AuthenticationServiceImpl.class, user.getLocale());
+    as.updateUserSession(user.getUsername(), session.getId());
   }
 
   /**
    * Recreating the session
    */
-  public static void recreateSession(HttpServletRequest request, SecureUserDetails user) {
+  public static void recreateSession(HttpServletRequest request, HttpServletResponse response,
+                                     SecureUserDetails user) {
     HttpSession session = request.getSession(false);
     Enumeration sessionAttrEnum = session.getAttributeNames();
     Map<String, Object> sessionAttirbutes = new HashMap<>();
@@ -121,7 +120,7 @@ public class SessionMgr {
     for (String attributeName : sessionAttirbutes.keySet()) {
       session.setAttribute(attributeName, sessionAttirbutes.get(attributeName));
     }
-
+    RequestContextUtils.getLocaleResolver(request).setLocale(request, response, user.getLocale());
     //Initialzing the session
     initSession(session, user);
   }
@@ -148,6 +147,7 @@ public class SessionMgr {
     }
     session.removeAttribute(Constants.PARAM_DOMAINID);
     session.removeAttribute(Constants.PARAM_USER);
+    SecurityUtils.setUserDetails(null);
     // Invalidate session
     session.invalidate();
   }
@@ -172,6 +172,10 @@ public class SessionMgr {
 
   public static void setCurrentDomain(HttpSession session, Long domainId) {
     session.setAttribute(Constants.PARAM_DOMAINID, domainId);
+    SecureUserDetails userDetails = (SecureUserDetails) session.getAttribute(Constants.PARAM_USER);
+    userDetails.setCurrentDomainId(domainId);
+    session.setAttribute(Constants.PARAM_USER, userDetails);
+    SecurityUtils.setUserDetails(userDetails);
   }
 
   // Get and set pagination cursors

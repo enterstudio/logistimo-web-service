@@ -230,6 +230,7 @@ public class ConversationServiceImpl extends ServiceImpl implements Conversation
         iMessage.setMessage(message);
         iMessage.setUserId(updatingUserId);
         localPm.makePersistent(iMessage);
+        iMessage = localPm.detachCopy(iMessage);
       }
       if (tx != null) {
         tx.commit();

@@ -23,10 +23,13 @@
 
 package com.logistimo.services.utils;
 
-import org.apache.commons.lang.StringUtils;
 import com.logistimo.constants.Constants;
+import com.logistimo.exception.SystemException;
 import com.logistimo.logger.XLog;
 
+import org.apache.commons.lang.StringUtils;
+
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -44,19 +47,22 @@ public class ConfigUtil {
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("samaanguru.properties"));
     }catch(Exception e) {
-      throw new RuntimeException("Unable to load samaanguru.properties", e);
+      throw new SystemException("Unable to load samaanguru.properties", e);
     }
 
     try{
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("beans.properties"));
     } catch (Exception e) {
-      throw new RuntimeException("Unable to load beans.properties", e);
+      throw new SystemException("Unable to load beans.properties", e);
     }
 
     try{
-      properties.load(Thread.currentThread().getContextClassLoader()
-          .getResourceAsStream("custom-beans.properties"));
+      InputStream in = Thread.currentThread().getContextClassLoader()
+          .getResourceAsStream("custom-beans.properties");
+      if (in != null) {
+        properties.load(in);
+      }
     }catch(Exception ignored){
       xLogger.info("Unable to load custom-beans.properties", ignored);
     }

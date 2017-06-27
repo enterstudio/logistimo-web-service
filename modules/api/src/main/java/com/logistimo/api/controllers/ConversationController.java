@@ -23,7 +23,23 @@
 
 package com.logistimo.api.controllers;
 
+import com.logistimo.api.builders.ConversationBuilder;
+import com.logistimo.api.models.ConversationModel;
+import com.logistimo.api.request.StringRequestObj;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.constants.Constants;
+import com.logistimo.conversations.builders.MessageBuilder;
+import com.logistimo.conversations.entity.IConversation;
 import com.logistimo.conversations.entity.IMessage;
+import com.logistimo.conversations.models.MessageModel;
+import com.logistimo.conversations.service.ConversationService;
+import com.logistimo.conversations.service.impl.ConversationServiceImpl;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.logger.XLog;
+import com.logistimo.orders.service.OrderManagementService;
+import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
@@ -31,24 +47,8 @@ import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.ConversationBuilder;
-import com.logistimo.conversations.builders.MessageBuilder;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.ConversationModel;
-import com.logistimo.conversations.models.MessageModel;
-import com.logistimo.api.request.StringRequestObj;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.conversations.entity.IConversation;
-import com.logistimo.conversations.service.ConversationService;
-import com.logistimo.conversations.service.impl.ConversationServiceImpl;
-import com.logistimo.orders.service.OrderManagementService;
-import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.shipments.service.impl.ShipmentService;
+import com.logistimo.utils.LocalDateUtil;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +59,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -269,6 +270,21 @@ public class ConversationController {
     } catch (ObjectNotFoundException e) {
       xLogger.warn("Failed to find {1} Id {0}", objId, objType, e);
       throw new InvalidDataException(objType + " : " + objId + " does not exist");
+    } catch (Exception e) {
+      xLogger.severe("Failed to add message to object", e);
+      throw new InvalidServiceException("Failed to add message to object");
+    }
+  }
+
+  @ResponseBody
+  @RequestMapping(value = "/add_message/{objectType}/{objectId}", method = RequestMethod.POST)
+  public MessageModel addMessageWithUserID(@PathVariable String objectType, @PathVariable String objectId,
+      @RequestBody StringRequestObj message, HttpServletRequest request) {
+    try {
+      ConversationService cs = Services.getService(ConversationServiceImpl.class);
+      IMessage iMessage = cs.addMsgToConversation(objectType, objectId, message.data,
+          message.userId, Collections.singleton(objectType + objectId), message.domainId, null);
+      return new MessageBuilder().buildModel(iMessage);
     } catch (Exception e) {
       xLogger.severe("Failed to add message to object", e);
       throw new InvalidServiceException("Failed to add message to object");

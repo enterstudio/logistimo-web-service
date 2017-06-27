@@ -21,31 +21,57 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.util;
+package com.logistimo.approvals.client.models;
 
-import org.apache.commons.lang.StringUtils;
-import com.logistimo.constants.CharacterConstants;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- * @author Smriti
+ * Created by naveensnair on 16/06/17.
  */
-public class CommonUtil {
-  public static String getAddress(String city,String taluk, String district, String state) {
-    StringBuilder address = new StringBuilder();
-    if (StringUtils.isNotBlank(city)) {
-      address.append(city).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
-    }
-    if (StringUtils.isNotBlank(taluk)) {
-      address.append(taluk).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
-    }
-    if (StringUtils.isNotBlank(district)) {
-      address.append(district).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
+public class ApprovalAttributes {
 
+    @JsonProperty("id")
+    private Long id;
+
+    @JsonProperty("approval_id")
+    private String approval_id;
+
+    @JsonProperty("key")
+    private String key;
+
+    @JsonProperty("value")
+    private String value;
+
+    public Long getId() {
+        return id;
     }
-    if (StringUtils.isNotBlank(state)) {
-      address.append(state).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
+
+    public void setId(Long id) {
+        this.id = id;
     }
-    address.setLength(address.length() - 2);
-    return address.toString();
-  }
+
+    public String getApproval_id() {
+        return approval_id;
+    }
+
+    public void setApproval_id(String approval_id) {
+        this.approval_id = approval_id;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
 }

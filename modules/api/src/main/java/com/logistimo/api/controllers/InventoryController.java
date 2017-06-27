@@ -24,18 +24,26 @@
 package com.logistimo.api.controllers;
 
 import com.google.gson.Gson;
-import com.logistimo.api.auth.Authoriser;
+
 import com.logistimo.api.builders.FChartBuilder;
 import com.logistimo.api.builders.InventoryBuilder;
 import com.logistimo.api.builders.MarkerBuilder;
-import com.logistimo.api.models.*;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.api.util.SessionMgr;
+import com.logistimo.api.models.FChartModel;
+import com.logistimo.api.models.InventoryAbnStockModel;
+import com.logistimo.api.models.InventoryBatchMaterialModel;
+import com.logistimo.api.models.InventoryDomainModel;
+import com.logistimo.api.models.InventoryMinMaxLogModel;
+import com.logistimo.api.models.InventoryModel;
+import com.logistimo.api.models.InvntryBatchModel;
+import com.logistimo.api.models.MarkerModel;
 import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
+import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.service.EntitiesService;
@@ -73,18 +81,30 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.LocalDateUtil;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/inventory")
@@ -118,7 +138,7 @@ public class InventoryController {
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     try {
-      if (!Authoriser.authoriseInventoryAccess(request, entityId)) {
+      if (!EntityAuthoriser.authoriseInventoryAccess(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       int numTotalInv = Counter.getMaterialCounter(domainId, entityId, tag).getCount();
@@ -379,18 +399,14 @@ public class InventoryController {
                              @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
                              HttpServletRequest request) {
     PageParams pageParams = new PageParams(null, size);
-    try {
-      SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-      Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-      InventoryManagementService
-          ims =
-          Services.getService(InventoryManagementServiceImpl.class);
-      Results results = ims.getValidBatchesByBatchId(bid, mid, kid, domainId, expired, pageParams);
-      if (results != null && results.getResults().size() > 0) {
-        return true;
-      }
-    } catch (ServiceException e) {
-      xLogger.severe("InventoryController Exception: {0}", e.getMessage(), e);
+    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
+    InventoryManagementService
+        ims =
+        Services.getService(InventoryManagementServiceImpl.class);
+    Results results = ims.getValidBatchesByBatchId(bid, mid, kid, domainId, expired, pageParams);
+    if (results != null && results.getResults().size() > 0) {
+      return true;
     }
 
     return false;
@@ -738,15 +754,10 @@ public class InventoryController {
     if (invId == null) {
       return null;
     }
-    try {
-      InventoryManagementService
-          ims =
-          Services.getService(InventoryManagementServiceImpl.class, sUser.getLocale());
-      List<IInventoryMinMaxLog> logs = ims.fetchMinMaxLog(invId);
-      return builder.buildInventoryMinMaxLogModel(logs, sUser, backendMessages);
-    } catch (ServiceException e) {
-      xLogger.warn("Error while reading min/max log details", e);
-      throw new InvalidServiceException(backendMessages.getString("error.systemerror"));
-    }
+    InventoryManagementService
+        ims =
+        Services.getService(InventoryManagementServiceImpl.class, sUser.getLocale());
+    List<IInventoryMinMaxLog> logs = ims.fetchMinMaxLog(invId);
+    return builder.buildInventoryMinMaxLogModel(logs, sUser, backendMessages);
   }
 }

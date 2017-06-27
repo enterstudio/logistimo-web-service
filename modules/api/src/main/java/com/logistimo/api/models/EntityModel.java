@@ -142,4 +142,7 @@ public class EntityModel {
 
   public String iat; // Inventory activity time
   public String oat; // Order activity time
+  public boolean appr; //approver config should be configured or not
+  public boolean ipa; //purchase approval
+  public boolean isa; //sales approval
 }

@@ -25,22 +25,22 @@ package com.logistimo.exports.handlers;
 
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import org.apache.commons.lang.StringEscapeUtils;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.StringUtil;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -71,8 +71,6 @@ public class UserExportHandler implements IExportHandler {
         IUserAccount ubUser = as.getUserAccount(user.getUpdatedBy());
         ubUserName = ubUser.getFullName();
         ubUserCustomId = ubUser.getCustomId();
-      } catch (ServiceException ignored) {
-        // ignore
       } catch (ObjectNotFoundException e) {
         ubUserName = Constants.UNKNOWN;
       }
@@ -80,8 +78,6 @@ public class UserExportHandler implements IExportHandler {
         IUserAccount cbUser = as.getUserAccount(user.getRegisteredBy());
         cbUserName = cbUser.getFullName();
         cbUserCustomId = cbUser.getCustomId();
-      } catch (ServiceException ignored) {
-        // ignore
       } catch (ObjectNotFoundException e) {
         cbUserName = Constants.UNKNOWN;
       }
@@ -189,7 +185,8 @@ public class UserExportHandler implements IExportHandler {
         .append(CharacterConstants.SPACE)
         .append(SecurityConstants.ROLE_DOMAINOWNER).append(CharacterConstants.SPACE)
         .append(CharacterConstants.F_SLASH).append(CharacterConstants.SPACE)
-        .append(bundle.getString("role.servicemanager")).append(CharacterConstants.SPACE)
+        .append(bundle.getString("role.servicemana"
+            + "ger")).append(CharacterConstants.SPACE)
         .append(CharacterConstants.EQUALS)
         .append(CharacterConstants.SPACE).append(SecurityConstants.ROLE_SERVICEMANAGER)
         .append(CharacterConstants.SPACE).append(CharacterConstants.F_SLASH)

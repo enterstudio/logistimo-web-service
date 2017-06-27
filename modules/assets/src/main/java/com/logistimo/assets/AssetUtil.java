@@ -32,6 +32,10 @@ import com.logistimo.AppFactory;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.entity.IAssetRelation;
 import com.logistimo.assets.entity.IAssetStatus;
+import com.logistimo.assets.models.AssetModel;
+import com.logistimo.assets.models.AssetModels;
+import com.logistimo.assets.models.AssetRelationModel;
+import com.logistimo.assets.models.DeviceConfigPushPullModel;
 import com.logistimo.assets.models.TemperatureResponse;
 import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
@@ -40,30 +44,25 @@ import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventSpec;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomainLink;
-import com.logistimo.assets.models.AssetModel;
-import com.logistimo.assets.models.AssetModels;
-import com.logistimo.assets.models.AssetRelationModel;
-import com.logistimo.assets.models.DeviceConfigPushPullModel;
+import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.events.EventConstants;
+import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.exceptions.EventGenerationException;
 import com.logistimo.events.processor.EventPublisher;
+import com.logistimo.logger.XLog;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.services.http.HttpResponse;
 import com.logistimo.services.http.URLFetchService;
+import com.logistimo.services.impl.PMF;
 import com.logistimo.utils.MsgUtil;
+import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
-import com.logistimo.events.entity.IEvent;
-
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.Constants;
-import com.logistimo.domains.utils.DomainsUtil;
-import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -785,26 +784,6 @@ public class AssetUtil {
 
   public static String getTagSummary(String domainId) {
     return get("v2/tags/" + encodeURLParameters(domainId) + "/device-counts");
-  }
-
-  public static String getSecretKeyFromLogistimo() {
-    // Get the Temperature System Configuration from Logistimo. If this fails, log a severe error message and return null. Otherwise, return the secret key.
-    AssetSystemConfig tsc = null;
-    String secretKey = null;
-    try {
-      tsc = AssetSystemConfig.getInstance();
-      secretKey = tsc.getSecretKey();
-      if (secretKey == null || secretKey.isEmpty()) {
-        xLogger.severe("Secret Key is null or empty while logging status of devices");
-        return null;
-      }
-      return secretKey;
-    } catch (ConfigurationException ce) {
-      xLogger.severe(
-          "{0} when getting temperature system configuration while logging status of devices. Message: {1}",
-          ce.getClass().getName(), ce.getMessage());
-      return null;
-    }
   }
 
   // Private method to generate Asset events, for high excursion, low excursion and incursion

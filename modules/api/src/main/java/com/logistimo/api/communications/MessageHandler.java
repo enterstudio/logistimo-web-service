@@ -26,20 +26,19 @@
  */
 package com.logistimo.api.communications;
 
+import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.MessageService;
+import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.logger.XLog;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 
 import java.io.IOException;
 import java.util.Date;
@@ -94,12 +93,8 @@ public abstract class MessageHandler {
     this.message = message;
     this.address = address;
     this.recdOn = recdOn;
-    try {
-      as = Services.getService(UsersServiceImpl.class);
-      mcs = Services.getService(MaterialCatalogServiceImpl.class);
-    } catch (ServiceException e) {
-      throw new MessageHandlingException(e.getMessage());
-    }
+    as = Services.getService(UsersServiceImpl.class);
+    mcs = Services.getService(MaterialCatalogServiceImpl.class);
     ///delayBetweenCalls = msgservice.getMillisBetweenCalls();
   }
 
@@ -232,7 +227,8 @@ public abstract class MessageHandler {
   }
 
   // Set the user details, given user Id (countryCode required to determine sms g/w; domainId, sendingUserId required for logging)
-  protected void setUserDetails(String userId) throws ServiceException, ObjectNotFoundException {
+  protected void setUserDetails(String userId) throws ServiceException,
+      ObjectNotFoundException {
     user = as.getUserAccount(userId);
     xLogger.fine("setUserDetails: userId = {0}, user = {1}", userId, user);
     countryCode =

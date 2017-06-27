@@ -1,14 +1,13 @@
 ﻿<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="com.logistimo.services.Services"%>
-<%@page import="com.logistimo.services.ServiceException"%>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
 <%@page import="com.logistimo.config.models.DomainConfig"%>
-<%@page import="com.logistimo.logger.XLog"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
+<%@page import="com.logistimo.domains.entity.IDomain" %>
+<%@page import="com.logistimo.domains.service.DomainsService" %>
+<%@page import="com.logistimo.domains.service.impl.DomainsServiceImpl" %>
 <%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
-<%@ page import="com.logistimo.domains.entity.IDomain" %>
-<%@ page import="com.logistimo.domains.service.DomainsService" %>
-<%@ page import="com.logistimo.domains.service.impl.DomainsServiceImpl" %>
+<%@ page import="com.logistimo.services.ServiceException" %>
+<%@ page import="com.logistimo.services.Services" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%--

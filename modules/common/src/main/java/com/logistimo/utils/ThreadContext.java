@@ -23,6 +23,8 @@
 
 package com.logistimo.utils;
 
+import com.logistimo.security.SecureUserDetails;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,4 +34,15 @@ import java.util.Set;
 public class ThreadContext {
 
   public Set<String> locks = new HashSet<>(1);
+
+  private SecureUserDetails secureUserDetails;
+
+  public SecureUserDetails getSecureUserDetails() {
+    return secureUserDetails;
+  }
+
+  public void setSecureUserDetails(SecureUserDetails secureUserDetails) {
+    this.secureUserDetails = secureUserDetails;
+  }
+
 }

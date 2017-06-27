@@ -24,43 +24,44 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
+import com.logistimo.api.builders.DomainBuilder;
+import com.logistimo.api.models.superdomains.DomainModel;
+import com.logistimo.api.request.AddDomainLinksRequestObj;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.CharacterConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.entity.IDomainPermission;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.utils.DomainLinkUpdater;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.SystemException;
+import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.logger.XLog;
+import com.logistimo.models.superdomains.DomainSuggestionModel;
 import com.logistimo.pagination.Navigator;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.QueryUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.DomainBuilder;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.superdomains.DomainModel;
-import com.logistimo.models.superdomains.DomainSuggestionModel;
-import com.logistimo.api.request.AddDomainLinksRequestObj;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.utils.QueryUtil;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -208,7 +209,7 @@ public class LinkedDomainController {
       return domainBuilder
           .buildDomain(domain, userDomainPermission, permission, dc, action, viewPermission,
               assetPermission, iMan);
-    } catch (ServiceException e) {
+    } catch (SystemException e) {
       xLogger.severe("Unable to fetch the domain permission for current domain", e);
       throw new InvalidServiceException("Unable to fetch the domain permission for current domain");
     } catch (ObjectNotFoundException e) {
@@ -356,18 +357,13 @@ public class LinkedDomainController {
     if (model == null) {
       throw new InvalidDataException("No domain data found to update.");
     }
-    try {
-      DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      SecureUserDetails user = SecurityUtils.getUserDetails(request);
-      String username = user.getUsername();
-      Long domainId = model.dId;
-      IDomainPermission permission = domainBuilder.buildDomainPermission(model, domainId);
-      ds.updateDomainPermission(permission, model.dId, username);
-      return MsgUtil.bold(model.name) + " domain permissions updated successfully.";
-    } catch (ServiceException e) {
-      xLogger.severe("Unable to fetch the child domains to the current domain", e);
-      throw new InvalidServiceException("Unable to fetch the child domains to the current domain");
-    }
+    DomainsService ds = Services.getService(DomainsServiceImpl.class);
+    SecureUserDetails user = SecurityUtils.getUserDetails(request);
+    String username = user.getUsername();
+    Long domainId = model.dId;
+    IDomainPermission permission = domainBuilder.buildDomainPermission(model, domainId);
+    ds.updateDomainPermission(permission, model.dId, username);
+    return MsgUtil.bold(model.name) + " domain permissions updated successfully.";
   }
 
   @RequestMapping(value = "/domain", method = RequestMethod.GET)

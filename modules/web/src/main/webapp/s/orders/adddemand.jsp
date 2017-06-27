@@ -1,29 +1,25 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="com.logistimo.entities.service.AccountsServiceImpl"%>
-<%@page import="com.logistimo.services.Services"%>
-<%@page import="com.logistimo.services.ServiceException"%>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
 <%@page import="com.logistimo.config.models.DomainConfig"%>
 <%@page import="com.logistimo.config.models.OptimizerConfig"%>
+<%@page import="com.logistimo.entities.entity.AccountsService" %>
+<%@page import="com.logistimo.entities.service.AccountsServiceImpl" %>
 <%@page import="com.logistimo.inventory.service.InventoryManagementService"%>
 <%@page import="com.logistimo.inventory.service.impl.InventoryManagementServiceImpl"%>
-<%@page import="com.logistimo.entities.entity.AccountsService"%>
 <%@page import="com.logistimo.materials.service.MaterialCatalogService"%>
 <%@page import="com.logistimo.materials.service.impl.MaterialCatalogServiceImpl"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
 <%@page import="com.logistimo.pagination.PageParams"%>
-<%@page import="com.logistimo.inventory.TransactionUtil"%>
+<%@page import="com.logistimo.pagination.Results" %>
+<%@page import="com.logistimo.security.SecureUserDetails" %>
+<%@page import="com.logistimo.services.ServiceException" %>
+<%@page import="com.logistimo.services.Services" %>
 <%@page import="com.logistimo.tags.TagUtil"%>
-<%@page import="com.logistimo.utils.NumberUtil"%>
 <%@page import="com.logistimo.utils.Counter"%>
-<%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
-<%@page import="com.logistimo.pagination.Results"%>
+<%@page import="com.logistimo.utils.NumberUtil" %>
+<%@page import="org.lggi.samaanguru.entity.*" %>
 <%@page import="java.util.List"%>
-<%@page import="java.util.ArrayList"%>
-<%@page import="java.util.HashMap"%>
 <%@page import="java.util.Locale"%>
-<%@page import="java.util.Iterator"%>
-<%@ page import="org.lggi.samaanguru.entity.*" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%--
   ~ Copyright © 2017 Logistimo.

@@ -23,19 +23,16 @@
 
 package com.logistimo.api.filters;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.logger.XLog;
-
-import com.logistimo.api.util.SecurityUtils;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.utils.ConfigUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 
@@ -77,6 +74,11 @@ public class APISecurityFilter implements Filter {
     if (req.getCharacterEncoding() == null) {
       request.setCharacterEncoding(Constants.UTF8);
     }
+
+    if (StringUtils.isNotEmpty(req.getHeader("app-name"))) {
+      filterChain.doFilter(request, response);
+    }
+
     // Allow all GAE Internal tasks
     if (StringUtils.isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME)) && !(
         StringUtils.isNotBlank(servletPath) && (servletPath.startsWith(ASSET_STATUS_URL)
@@ -106,11 +108,16 @@ public class APISecurityFilter implements Filter {
           resp.sendError(HttpServletResponse.SC_CONFLICT, "Invalid session on client");
           return;
         }
+        SecurityUtils.setUserDetails(userDetails);
       }
 
     }
-    if (filterChain != null) {
-      filterChain.doFilter(request, response);
+    try {
+      if (filterChain != null) {
+        filterChain.doFilter(request, response);
+      }
+    } finally {
+      SecurityUtils.setUserDetails(null);
     }
   }
 

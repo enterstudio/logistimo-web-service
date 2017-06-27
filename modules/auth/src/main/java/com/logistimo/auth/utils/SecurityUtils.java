@@ -21,20 +21,23 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.util;
+package com.logistimo.auth.utils;
 
-import com.logistimo.assets.AssetUtil;
+
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.ConfigurationException;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.logger.XLog;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
+import com.logistimo.utils.ThreadLocalUtil;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ServiceException;
-import com.logistimo.constants.CharacterConstants;
-
-import com.logistimo.logger.XLog;
 
 import java.security.GeneralSecurityException;
+import java.util.Locale;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -42,9 +45,12 @@ import javax.servlet.http.HttpServletRequest;
 
 public class SecurityUtils {
 
-  public static final String DOMAIN_HEADER = "d";
-  private final static String HMAC_SHA1_ALGORITHM = "HmacSHA1";
+  private SecurityUtils() {
+  }
+
+  private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
   private static final XLog xLogger = XLog.getLog(SecurityUtils.class);
+  public static final String DOMAIN_HEADER = "d";
 
 
   public static Long getDomainId(HttpServletRequest request) {
@@ -78,7 +84,7 @@ public class SecurityUtils {
 
   public static boolean verifyAssetServiceRequest(String signature, String data)
       throws ServiceException {
-    String secretKey = AssetUtil.getSecretKeyFromLogistimo();
+    String secretKey = getSecretKeyFromLogistimo();
     if (StringUtils.isEmpty(secretKey)) {
       throw new ServiceException("Internal server error");
     }
@@ -94,7 +100,7 @@ public class SecurityUtils {
     return signature.equals(hmac);
   }
 
-  private static String hmac(String secret, String data) throws IllegalArgumentException {
+  private static String hmac(String secret, String data) {
     xLogger.fine("Entering hmac");
     try {
       if (secret == null || secret.isEmpty() || data == null || data.isEmpty()) {
@@ -104,12 +110,60 @@ public class SecurityUtils {
       Mac m = Mac.getInstance(HMAC_SHA1_ALGORITHM);
       m.init(signatureKey);
       byte[] rawHmac = m.doFinal(data.getBytes());
-      String result = new String(Base64.encodeBase64(rawHmac));
-      return result;
+      return new String(Base64.encodeBase64(rawHmac));
     } catch (GeneralSecurityException e) {
       xLogger
           .severe("Unexpected error while creating hash: {0}. Exception: {1}", e.getMessage(), e);
       throw new IllegalArgumentException();
     }
+  }
+
+  public static String getSecretKeyFromLogistimo() {
+    // Get the Temperature System Configuration from Logistimo. If this fails, log a severe error message and return null. Otherwise, return the secret key.
+    AssetSystemConfig tsc = null;
+    String secretKey = null;
+    try {
+      tsc = AssetSystemConfig.getInstance();
+      secretKey = tsc.getSecretKey();
+      if (secretKey == null || secretKey.isEmpty()) {
+        xLogger.severe("Secret Key is null or empty while logging status of devices");
+        return null;
+      }
+      return secretKey;
+    } catch (ConfigurationException ce) {
+      xLogger.severe(
+          "{0} when getting temperature system configuration while logging status of devices. Message: {1}",
+          ce.getClass().getName(), ce.getMessage());
+      return null;
+    }
+  }
+
+  public static Locale getLocale() {
+    return getUserDetails().getLocale();
+  }
+
+  public static Long getUserSourceDomainId() {
+    return getUserDetails().getDomainId();
+  }
+
+  public static SecureUserDetails getUserDetails() {
+    return ThreadLocalUtil.get().getSecureUserDetails();
+  }
+
+  public static void setUserDetails(SecureUserDetails userDetails) {
+    ThreadLocalUtil.get().setSecureUserDetails(userDetails);
+  }
+
+  /**
+   * Provides user's logged in domain id
+   */
+  public static Long getCurrentDomainId() {
+    SecureUserDetails userDetails = getUserDetails();
+    if (userDetails.getCurrentDomainId() != null) {
+      return userDetails.getCurrentDomainId();
+    } else {
+      return userDetails.getDomainId();
+    }
+
   }
 }

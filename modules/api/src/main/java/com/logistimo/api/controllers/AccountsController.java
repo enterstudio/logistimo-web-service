@@ -23,25 +23,24 @@
 
 package com.logistimo.api.controllers;
 
-import com.logistimo.pagination.Navigator;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-
 import com.logistimo.accounting.entity.IAccount;
 import com.logistimo.accounting.service.IAccountingService;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
 import com.logistimo.api.builders.AccountBuilder;
+import com.logistimo.api.models.AccountModel;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.api.models.AccountModel;
-import com.logistimo.api.auth.Authoriser;
+import com.logistimo.logger.XLog;
+import com.logistimo.pagination.Navigator;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,7 +87,7 @@ public class AccountsController {
           oms =
           Services.getService(AccountingServiceImpl.class, locale);
       Results results;
-      if (Authoriser.authoriseEntity(request, Long.valueOf(kioskId))) {
+      if (EntityAuthoriser.authoriseEntity(sUser, Long.valueOf(kioskId))) {
         if (IAccount.RECEIVABLE.equals(type)) {
           results =
               oms.getAccounts(Long.valueOf(kioskId), null, Integer.valueOf(yr), sb, pageParams);

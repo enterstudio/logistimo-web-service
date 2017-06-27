@@ -24,16 +24,14 @@
 package com.logistimo.users;
 
 import com.logistimo.auth.SecurityConstants;
-import com.logistimo.services.ServiceException;
+import com.logistimo.logger.XLog;
+import com.logistimo.services.Resources;
 import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
-
-import com.logistimo.services.Resources;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 
 import org.apache.commons.lang.StringUtils;
-import com.logistimo.logger.XLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,29 +96,23 @@ public class UserUtils {
     List<String> uIds = null;
     List<String> uTIds = null;
     UsersService as;
-    try {
-      as = Services.getService(UsersServiceImpl.class, Locale.ENGLISH);
-      if (StringUtils.isNotEmpty(userIdsCSV)) {
-        uIds = as.getEnabledUserIds(Arrays.asList(userIdsCSV.split(",")));
-      }
-      if (StringUtils.isNotEmpty(userTagsCSV)) {
-        uTIds = as.getEnabledUserIdsWithTags(Arrays.asList(userTagsCSV.split(",")), domainId);
-      }
+    as = Services.getService(UsersServiceImpl.class, Locale.ENGLISH);
+    if (StringUtils.isNotEmpty(userIdsCSV)) {
+      uIds = as.getEnabledUserIds(Arrays.asList(userIdsCSV.split(",")));
+    }
+    if (StringUtils.isNotEmpty(userTagsCSV)) {
+      uTIds = as.getEnabledUserIdsWithTags(Arrays.asList(userTagsCSV.split(",")), domainId);
+    }
 
-      Set<String> eUIds = new HashSet<>();
-      if (uIds != null && uIds.size() > 0) {
-        eUIds.addAll(uIds);
-      }
-      if (uTIds != null && uTIds.size() > 0) {
-        eUIds.addAll(uTIds);
-      }
-      if (eUIds.size() > 0) {
-        userIds = new ArrayList<>(eUIds);
-      }
-
-    } catch (ServiceException e) {
-      xLogger.fine("Error while fetching userIds from userIds : {1} or userTags : {2}", userIdsCSV,
-          userTagsCSV);
+    Set<String> eUIds = new HashSet<>();
+    if (uIds != null && uIds.size() > 0) {
+      eUIds.addAll(uIds);
+    }
+    if (uTIds != null && uTIds.size() > 0) {
+      eUIds.addAll(uTIds);
+    }
+    if (eUIds.size() > 0) {
+      userIds = new ArrayList<>(eUIds);
     }
 
     return userIds;

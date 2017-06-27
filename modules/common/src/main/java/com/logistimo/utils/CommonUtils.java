@@ -25,8 +25,10 @@ package com.logistimo.utils;
 
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
+import com.logistimo.constants.CharacterConstants;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -108,4 +110,22 @@ public class CommonUtils {
   }
 
 
+  public static String getAddress(String city, String taluk, String district, String state) {
+    StringBuilder address = new StringBuilder();
+    if (StringUtils.isNotBlank(city)) {
+      address.append(city).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
+    }
+    if (StringUtils.isNotBlank(taluk)) {
+      address.append(taluk).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
+    }
+    if (StringUtils.isNotBlank(district)) {
+      address.append(district).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
+
+    }
+    if (StringUtils.isNotBlank(state)) {
+      address.append(state).append(CharacterConstants.COMMA).append(CharacterConstants.SPACE);
+    }
+    address.setLength(address.length() - 2);
+    return address.toString();
+  }
 }

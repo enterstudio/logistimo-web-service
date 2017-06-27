@@ -27,12 +27,12 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.models.Temperature;
 import com.logistimo.assets.models.TemperatureResponse;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.bulkuploads.BulkUploadMgr;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.EmailService;

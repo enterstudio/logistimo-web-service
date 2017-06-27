@@ -25,9 +25,12 @@ package com.logistimo.exports.handlers;
 
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.FieldsConfig;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
@@ -35,24 +38,21 @@ import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.entity.DemandItem;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.tags.TagUtil;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import org.apache.commons.lang.StringEscapeUtils;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.tags.TagUtil;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.GeoUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.NumberUtil;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -317,8 +317,6 @@ public class OrderExportHandler implements IExportHandler {
         xLogger.warn("ObjectNotFoundException ({0}) when getting CSV for order: {1}",
             order.getUserId(), order.getIdString());
         cbFullName = Constants.UNKNOWN;
-      } catch (ServiceException se) {
-        // ignore
       }
     }
     String subFullName = null, subCustomId = null;
@@ -331,8 +329,6 @@ public class OrderExportHandler implements IExportHandler {
         xLogger.warn("ObjectNotFoundException ({0}) when getting CSV for order: {1}",
             order.getUserId(), order.getIdString());
         subFullName = Constants.UNKNOWN;
-      } catch (ServiceException se) {
-        // ignore
       }
     }
 

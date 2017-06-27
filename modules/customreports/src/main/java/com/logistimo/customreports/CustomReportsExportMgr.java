@@ -1012,49 +1012,37 @@ public class CustomReportsExportMgr {
 
   private static String getStateFilterQuery(Long domainId) {
     String queryFilter = "";
-    try {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      String states = StringUtil.getCSV(as.getAllStates(domainId));
-      String countries = StringUtil.getCSV(as.getAllCountries(domainId));
-      queryFilter =
-          CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
-              + ReportsConstants.COUNTRY + QueryConstants.IN + CharacterConstants.O_BRACKET + countries
-              + CharacterConstants.C_BRACKET
-              + CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
-              + ReportsConstants.STATE + QueryConstants.IN + CharacterConstants.O_BRACKET + states
-              + CharacterConstants.C_BRACKET;
+    EntitiesService as = Services.getService(EntitiesServiceImpl.class);
+    String states = StringUtil.getCSV(as.getAllStates(domainId));
+    String countries = StringUtil.getCSV(as.getAllCountries(domainId));
+    queryFilter =
+        CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
+            + ReportsConstants.COUNTRY + QueryConstants.IN + CharacterConstants.O_BRACKET + countries
+            + CharacterConstants.C_BRACKET
+            + CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
+            + ReportsConstants.STATE + QueryConstants.IN + CharacterConstants.O_BRACKET + states
+            + CharacterConstants.C_BRACKET;
 
-    } catch (ServiceException e) {
-      xLogger.severe(
-          "Exception while fetching the query filter for states for given domainId: {0} under custom reports",
-          domainId, e);
-    }
     return queryFilter;
   }
 
   private static String getDistrictFilterQuery(Long domainId) {
     String queryFilters = "";
-    try {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      String districts = StringUtil.getCSV(as.getAllDistricts(domainId));
-      String states = StringUtil.getCSV(as.getAllStates(domainId));
-      String countries = StringUtil.getCSV(as.getAllCountries(domainId));
+    EntitiesService as = Services.getService(EntitiesServiceImpl.class);
+    String districts = StringUtil.getCSV(as.getAllDistricts(domainId));
+    String states = StringUtil.getCSV(as.getAllStates(domainId));
+    String countries = StringUtil.getCSV(as.getAllCountries(domainId));
 
-      queryFilters +=
-          CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
-              + ReportsConstants.COUNTRY + CharacterConstants.SPACE + QueryConstants.IN
-              + CharacterConstants.O_BRACKET + countries + CharacterConstants.C_BRACKET
-              + CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
-              + ReportsConstants.STATE + CharacterConstants.SPACE + QueryConstants.IN
-              + CharacterConstants.O_BRACKET + states + CharacterConstants.C_BRACKET
-              + CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
-              + ReportsConstants.DISTRICT + CharacterConstants.SPACE + QueryConstants.IN
-              + CharacterConstants.O_BRACKET + districts + CharacterConstants.C_BRACKET;
-    } catch (ServiceException e) {
-      xLogger.severe(
-          "Exception while fetching the query filter for districts for given domainId: {0} under custom reports",
-          domainId, e);
-    }
+    queryFilters +=
+        CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
+            + ReportsConstants.COUNTRY + CharacterConstants.SPACE + QueryConstants.IN
+            + CharacterConstants.O_BRACKET + countries + CharacterConstants.C_BRACKET
+            + CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
+            + ReportsConstants.STATE + CharacterConstants.SPACE + QueryConstants.IN
+            + CharacterConstants.O_BRACKET + states + CharacterConstants.C_BRACKET
+            + CharacterConstants.SPACE + ReportsConstants.QUERY_LITERAL_AND + CharacterConstants.SPACE
+            + ReportsConstants.DISTRICT + CharacterConstants.SPACE + QueryConstants.IN
+            + CharacterConstants.O_BRACKET + districts + CharacterConstants.C_BRACKET;
     return queryFilters;
   }
 
@@ -1071,20 +1059,14 @@ public class CustomReportsExportMgr {
 
   private static String getAllMaterialIdsCSV(Long domainId) {
     String materialIdCSV = "";
-    try {
-      MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
-      List<Long> matIds = mcs.getAllMaterialIds(domainId);
-      Iterator it = matIds.iterator();
-      if (it.hasNext()) {
-        materialIdCSV = it.next().toString();
-      }
-      while (it.hasNext()) {
-        materialIdCSV += CharacterConstants.COMMA + it.next().toString();
-      }
-    } catch (ServiceException e) {
-      xLogger.severe(
-          "Exception while fetching the query filter for materials for given domainId: {0} under custom reports",
-          domainId, e);
+    MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
+    List<Long> matIds = mcs.getAllMaterialIds(domainId);
+    Iterator it = matIds.iterator();
+    if (it.hasNext()) {
+      materialIdCSV = it.next().toString();
+    }
+    while (it.hasNext()) {
+      materialIdCSV += CharacterConstants.COMMA + it.next().toString();
     }
     return materialIdCSV;
   }
@@ -1102,20 +1084,14 @@ public class CustomReportsExportMgr {
 
   private static String getAllKioskIdsCSV(Long domainId) {
     String kioskIdsCSV = "";
-    try {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      List<Long> kiosks = as.getAllKioskIds(domainId);
-      Iterator it = kiosks.iterator();
-      if (it.hasNext()) {
-        kioskIdsCSV = it.next().toString();
-      }
-      while (it.hasNext()) {
-        kioskIdsCSV += CharacterConstants.COMMA + it.next().toString();
-      }
-    } catch (ServiceException e) {
-      xLogger.severe(
-          "Exception while fetching the query filter for kiosks for given domainId: {0} under custom reports",
-          domainId, e);
+    EntitiesService as = Services.getService(EntitiesServiceImpl.class);
+    List<Long> kiosks = as.getAllKioskIds(domainId);
+    Iterator it = kiosks.iterator();
+    if (it.hasNext()) {
+      kioskIdsCSV = it.next().toString();
+    }
+    while (it.hasNext()) {
+      kioskIdsCSV += CharacterConstants.COMMA + it.next().toString();
     }
     return kioskIdsCSV;
   }

@@ -31,13 +31,13 @@ import com.logistimo.AppFactory;
 import com.logistimo.accounting.entity.IAccount;
 import com.logistimo.accounting.service.IAccountingService;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
-import com.logistimo.api.auth.Authoriser;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.api.servlets.mobile.models.ParsedRequest;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.SecurityUtil;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.service.SMSService;
 import com.logistimo.config.models.ActualTransConfig;
 import com.logistimo.config.models.CapabilityConfig;
@@ -55,6 +55,7 @@ import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
+import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.UserEntitiesModel;
@@ -62,6 +63,7 @@ import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.entity.IJobStatus;
 import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.SystemException;
 import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.exports.BulkExportMgr;
 import com.logistimo.inventory.TransactionUtil;
@@ -396,19 +398,15 @@ public class RESTUtil {
 
   private static Vector<Hashtable<String, String>> getHandlingUnits(Long materialId) {
     Vector<Hashtable<String, String>> hu = new Vector<>(1);
-    try {
-      IHandlingUnitService hus = Services.getService(HandlingUnitServiceImpl.class);
-      Map<String, String> huMap = hus.getHandlingUnitDataByMaterialId(materialId);
-      if (huMap != null) {
-        Hashtable<String, String> h = new Hashtable<>();
-        h.put(JsonTagsZ.HANDLING_UNIT_ID, huMap.get(IHandlingUnit.HUID));
-        h.put(JsonTagsZ.HANDLING_UNIT_NAME, huMap.get(IHandlingUnit.NAME));
-        h.put(JsonTagsZ.QUANTITY, huMap.get(IHandlingUnit.QUANTITY));
-        hu.add(h);
-        return hu;
-      }
-    } catch (ServiceException e) {
-      xLogger.severe("Error while getting handling unit details for material {0}", materialId, e);
+    IHandlingUnitService hus = Services.getService(HandlingUnitServiceImpl.class);
+    Map<String, String> huMap = hus.getHandlingUnitDataByMaterialId(materialId);
+    if (huMap != null) {
+      Hashtable<String, String> h = new Hashtable<>();
+      h.put(JsonTagsZ.HANDLING_UNIT_ID, huMap.get(IHandlingUnit.HUID));
+      h.put(JsonTagsZ.HANDLING_UNIT_NAME, huMap.get(IHandlingUnit.NAME));
+      h.put(JsonTagsZ.QUANTITY, huMap.get(IHandlingUnit.QUANTITY));
+      hu.add(h);
+      return hu;
     }
     return null;
   }
@@ -847,7 +845,7 @@ public class RESTUtil {
           String role = u.getRole();
           if (SecurityUtil.compareRoles(role, SecurityConstants.ROLE_DOMAINOWNER)
               < 0) { // user has a role less than domain owner (say, entity operator or manager)
-            if (!Authoriser.authoriseEntity(kioskId, u.getRole(), u.getLocale(), u.getUserId(),
+            if (!EntityAuthoriser.authoriseEntity(kioskId, u.getRole(), u.getLocale(), u.getUserId(),
                 u.getDomainId())) {
               try {
                 errMsg =
@@ -1654,7 +1652,7 @@ public class RESTUtil {
             supportEmail = ua.getEmail();
             supportPhone = ua.getMobilePhoneNumber();
             supportContactName = ua.getFullName();
-          } catch (ServiceException se) {
+          } catch (SystemException se) {
             xLogger
                 .warn("ServiceException when getting support user with id {0}: {1}", supportUserId,
                     se.getMessage());

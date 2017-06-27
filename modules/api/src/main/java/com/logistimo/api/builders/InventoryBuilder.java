@@ -23,31 +23,21 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.config.models.OptimizerConfig;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.auth.Authoriser;
 import com.logistimo.api.models.InventoryAbnStockModel;
 import com.logistimo.api.models.InventoryBatchMaterialModel;
 import com.logistimo.api.models.InventoryDomainModel;
 import com.logistimo.api.models.InventoryMinMaxLogModel;
 import com.logistimo.api.models.InventoryModel;
 import com.logistimo.api.models.InvntryBatchModel;
-import com.logistimo.api.util.CommonUtil;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.config.models.OptimizerConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -60,6 +50,7 @@ import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IHandlingUnit;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.IHandlingUnitService;
@@ -67,12 +58,21 @@ import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.orders.OrderUtils;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.services.impl.PMF;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.BigUtil;
+import com.logistimo.utils.CommonUtils;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -196,7 +196,7 @@ public class InventoryBuilder {
     if (kiosk != null) {
       model.lt = kiosk.getLatitude();
       model.ln = kiosk.getLongitude();
-      model.add = CommonUtil.getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());
+      model.add = CommonUtils.getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());
     }
     model.mnm = material.getName();
     model.b = material.getType();
@@ -407,7 +407,7 @@ public class InventoryBuilder {
         return null;
       }
       model.enm = k.getName();
-      model.add = CommonUtil.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
+      model.add = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
       model.mnm = m.getName();
       IInvntry invntry = invDao.getInvntry(evntLog);
       model.st = invntry.getStock();
@@ -545,7 +545,7 @@ public class InventoryBuilder {
         mod.mId = thisMaterial.getMaterialId();
         mod.ent = k.getName();
         mod.eid = k.getKioskId();
-        mod.add = CommonUtil.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
+        mod.add = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
         mod.bat = invBatch.getBatchId();
         mod.exp =
             invBatch.getBatchExpiry() != null ? LocalDateUtil
@@ -616,7 +616,7 @@ public class InventoryBuilder {
           } else if (sUser != null) {
             try {
               model.perm =
-                  Authoriser
+                  EntityAuthoriser
                       .authoriseEntityPerm(batch.getKioskId(), sUser.getRole(), sUser.getLocale(),
                           sUser.getUsername(), sUser.getDomainId());
             } catch (ServiceException e) {

@@ -23,15 +23,15 @@
 
 package com.logistimo.api.filters;
 
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.utils.ConfigUtil;
 
 import org.apache.commons.lang.StringUtils;
-import com.logistimo.constants.Constants;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
 
 import java.io.IOException;
 import java.net.URLEncoder;

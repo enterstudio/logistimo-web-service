@@ -23,35 +23,35 @@
 
 package com.logistimo.api.controllers;
 
-import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.builders.DomainBuilder;
+import com.logistimo.api.builders.DomainStatisticsBuilder;
+import com.logistimo.api.builders.FChartBuilder;
+import com.logistimo.api.models.DomainStatisticsModel;
+import com.logistimo.api.models.FChartModel;
+import com.logistimo.api.request.FusionChartRequest;
+import com.logistimo.auth.GenericAuthoriser;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.exception.BadRequestException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.logger.XLog;
 import com.logistimo.reports.ReportsConstants;
-import com.logistimo.reports.service.ReportsService;
-import com.logistimo.services.utils.ConfigUtil;
-
-import org.apache.commons.lang.StringUtils;
-import com.logistimo.config.models.DomainConfig;
 import com.logistimo.reports.entity.slices.IDomainStats;
 import com.logistimo.reports.generators.ReportData;
+import com.logistimo.reports.service.ReportsService;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
+import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.DomainBuilder;
-import com.logistimo.api.builders.DomainStatisticsBuilder;
-import com.logistimo.api.builders.FChartBuilder;
-import com.logistimo.exception.BadRequestException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.api.models.DomainStatisticsModel;
-import com.logistimo.api.models.FChartModel;
-import com.logistimo.api.request.FusionChartRequest;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,7 +73,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static com.logistimo.api.security.SecurityMgr.getUserDetails;
+import static com.logistimo.auth.SecurityMgr.getUserDetails;
 
 /**
  * Created by Mohan Raja on 30/01/15
@@ -203,7 +203,7 @@ public class ReportController {
     String userId = sUser.getUsername();
     DomainStatisticsModel domainStatisticsModel = null;
     try {
-      if (!Authoriser.authoriseUser(request, userId)) {
+      if (!GenericAuthoriser.authoriseUser(request, userId)) {
         throw new UnauthorizedException("Permission denied of the user to access this domain");
       }
       domainId =
@@ -263,7 +263,7 @@ public class ReportController {
     String userId = sUser.getUsername();
     Map<String, String> results;
     try {
-      if (!Authoriser.authoriseUser(request, userId)) {
+      if (!GenericAuthoriser.authoriseUser(request, userId)) {
         throw new UnauthorizedException("Permission denied of the user to access this domain");
       }
       domainId =

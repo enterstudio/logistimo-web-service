@@ -23,28 +23,25 @@
 
 package com.logistimo.api.builders;
 
-import org.apache.commons.lang.StringUtils;
-
+import com.logistimo.api.models.CurrentUserModel;
+import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.domains.service.DomainsService;
+import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.models.UserEntitiesModel;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.api.util.SessionMgr;
-
-import com.logistimo.auth.SecurityConstants;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.CurrentUserModel;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.domains.service.DomainsService;
-import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 import java.util.Locale;

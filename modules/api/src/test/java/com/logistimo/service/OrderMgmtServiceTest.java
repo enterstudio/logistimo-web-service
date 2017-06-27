@@ -26,7 +26,8 @@ package com.logistimo.service;
 import com.logistimo.LgTestCase;
 import com.logistimo.api.builders.ShipmentBuilder;
 import com.logistimo.auth.SecurityConstants;
-import com.logistimo.config.models.OptimizerConfig;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
@@ -40,24 +41,21 @@ import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.DuplicationException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
 import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
 import com.logistimo.shipments.entity.IShipmentItemBatch;
 import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.shipments.service.impl.ShipmentService;
-import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
+
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
@@ -68,7 +66,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static com.logistimo.users.entity.IUserAccount.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -113,7 +110,8 @@ public class OrderMgmtServiceTest extends LgTestCase {
   }
 
   @Test
-  public void createOrder() throws DuplicationException, ServiceException, ObjectNotFoundException {
+  public void createOrder() throws DuplicationException, ServiceException,
+      ObjectNotFoundException {
     createOrderLocal();
   }
 

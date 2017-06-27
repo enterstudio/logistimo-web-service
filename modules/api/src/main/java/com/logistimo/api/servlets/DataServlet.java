@@ -27,32 +27,30 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
+import com.logistimo.api.util.KioskDataSimulator;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.constants.Constants;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.services.taskqueue.ITaskService;
-
+import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.proto.JsonTagsZ;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import com.logistimo.constants.Constants;
-import com.logistimo.api.util.KioskDataSimulator;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
 
 import java.io.IOException;
 import java.util.HashMap;

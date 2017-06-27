@@ -654,6 +654,291 @@ logistimoApp.directive('entityDomainSelect', function () {
         }]
     }
 });
+logistimoApp.directive('domainTagSelect', function ($compile) {
+    var multiple = '<lg-uib-select multiple="multiple" reset="reset" ng-disabled="disabled" query="query(q)" ui-model="tagsModel" place-holder="{{placeHolder}}"> </lg-uib-select>';
+    var single = '<lg-uib-select ng-disabled="disabled" allow-clear="allow-clear" query="query(q)" ui-model="tagsModel" place-holder="{{placeHolder}}"> </lg-uib-select>';
+    return {
+        restrict: 'AE',
+        replace: true,
+        scope: {
+            tagsModel: '=',
+            type: '=',
+            multiple: '=?',
+            placeHolder: '@',
+            disabled: '=',
+            forceNoUdf: '@',
+            callback: '&onSelect',
+            preSelected: '='
+        },
+        controller: ['$scope', '$location', 'domainCfgService', function ($scope, $location, domainCfgService) {
+            if (!$scope.multiple) {
+                $scope.multiple = "true";
+            }
+            $scope.tags = {};
+            $scope.udf = false;
+            if ($scope.type === "entity") {
+                domainCfgService.getEntityTagsCfg().then(function (data) {
+                    $scope.tags = data.data.tags;
+                    $scope.udf = data.data.udf;
+                });
+            } else if ($scope.type === "material") {
+                domainCfgService.getMaterialTagsCfg().then(function (data) {
+                    $scope.tags = data.data.tags;
+                    $scope.udf = data.data.udf;
+                });
+            } else if ($scope.type === "order") {
+                domainCfgService.getOrderTagsCfg().then(function (data) {
+                    $scope.tags = data.data.tags;
+                    $scope.udf = data.data.udf;
+                });
+            } else if ($scope.type === "user") {
+                domainCfgService.getUserTagsCfg().then(function (data) {
+                    $scope.tags = data.data.tags;
+                    $scope.udf = data.data.udf;
+                });
+            }
+            $scope.isSelected = function (i) {
+                for (t in $scope.tagsModel) {
+                    if (i == $scope.tagsModel[t]) {
+                        return true;
+                    }
+                }
+                for(j in $scope.preSelected) {
+                    if(i == $scope.preSelected[j].id) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            $scope.$watch('tagsModel', function(oldval, newval) {
+                if(checkNotNullEmpty($scope.callback)) {
+                    $scope.callback();
+                }
+            });
+            $scope.query = function (query) {
+                if(checkNotNullEmpty(query) && checkNotNullEmpty(query.term)) {
+                    var data = {results: []};
+                    var term = query.term.toLowerCase();
+                    for (var i in $scope.tags) {
+                        var tag = $scope.tags[i].toLowerCase();
+                        if (!$scope.isSelected($scope.tags[i]) && tag.indexOf(term) >= 0) {
+                            data.results.push({'text': $scope.tags[i], 'id': $scope.tags[i]});
+                        }
+                    }
+                    if (!$scope.forceNoUdf && $scope.udf && !$scope.isSelected(term)) {
+                        term = term.replace(/,/g,"");
+                        data.results.push({'text': term, 'id': term})
+                    }
+                    query.callback(data);
+                }
+            }
+        }],
+        link: function (scope, iElement, iAttrs, ctrl) {
+            if (scope.multiple != 'false') {
+                iElement.html(multiple).show();
+            } else {
+                iElement.html(single).show();
+            }
+            $compile(iElement.contents())(scope);
+        }
+    };
+});
+logistimoApp.directive('domainUserSelect', function ($compile) {
+    var multiple = '<div><a ng-blur="bCallback()" href="">' +
+        '<lg-uib-select multiple="multiple" reset="reset" query="query(q)" limit="2" ui-model="dUserModel" place-holder="{{placeHolder}}"> </lg-uib-select>' +
+        '</a></div>';
+    var singleNew = '<div class="form-group has-feedback mgh0 mgb0"><input ng-blur="bCallback()" type="text" typeahead-editable="false" ng-model="dUserModel" class="form-control" placeholder="{{placeHolder}}" uib-typeahead="item as item.text for item in query($viewValue) | limitTo:8"' +
+        'class="form-control" maxlength="50" typeahead-on-select="setUsersModel($item)"  typeahead-loading="loadingUser"/><span ng-show="loadingUser" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span></div>';
+    return {
+        restrict: 'AE',
+        scope: {
+            usersModel: '=usersModel',
+            multiple: '=?',
+            reset: '=?',
+            callback: '&onSelect',
+            placeHolder: "@",
+            blurCallback: "&",
+            onlyActive: "@",
+            role: "@",
+            includeSuperusers: "=",
+            includeChildDomainUsers: "=",
+            preSelected: "="
+        },
+        controller: ['$scope', '$location', 'userService', '$q', function ($scope, $location, userService, $q) {
+            $scope.offset = 0;
+            $scope.size = 10;
+            if(checkNotNullEmpty($scope.usersModel)){
+                $scope.dUserModel = angular.copy($scope.usersModel);
+            }
+
+            $scope.isSelected = function (i) {
+                for (var t in $scope.dUserModel) {
+                    if (i == $scope.dUserModel[t].id) {
+                        return true;
+                    }
+                }
+                if(checkNotNullEmpty($scope.preSelected)) {
+                    for(var j in $scope.preSelected) {
+                        if(i == $scope.preSelected[j].id) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+            $scope.bCallback = function () {
+                if (checkNotNull($scope.blurCallback)) {
+                    $scope.blurCallback();
+                }
+            };
+            $scope.equals = function (m1, m2) {
+                if (checkNotNullEmpty(m1) != checkNotNullEmpty(m2)) {
+                    return false;
+                } else if (angular.isArray(m1) && angular.isArray(m2)) {
+                    if (m1.length != m2.length) {
+                        return false;
+                    } else {
+                        for (i in m1) {
+                            if (!angular.equals(m1[i], m1[i])) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                } else if (angular.isArray(m1) != angular.isArray(m2)) {
+                    return false;
+                } else {
+                    return angular.equals(m1, m2);
+                }
+            };
+            $scope.$watch("usersModel", function (newVal, oldVal) {
+                if (!$scope.equals(newVal, $scope.dUserModel)) {
+                    $scope.dUserModel = angular.copy(newVal);
+                    $scope.checkUsers();
+                }
+            }, true);
+            $scope.$watch("dUserModel", function (newVal, oldVal) {
+                if (!$scope.equals(newVal, $scope.usersModel)) {
+                    $scope.usersModel = angular.copy(newVal);
+                }
+            }, true);
+            $scope.setUsersModel = function (newVal, skipCallback) {
+                $scope.dUserModel = angular.copy(newVal);
+                if (!skipCallback && checkNotNull($scope.callback)) {
+                    //$scope.callback(newVal);
+                    $scope.callback({data: newVal.id});
+                }
+            };
+            $scope.checkModel = function () {
+                if (checkNullEmpty($scope.dUserModel)) {
+                    $scope.usersModel = null;
+                }
+            };
+
+            $scope.checkUsers = function () {
+                if (checkNotNullEmpty($scope.usersModel)) {
+                    $scope.loading = true;
+                    if ($scope.multiple == 'false') {
+                        if (checkNullEmpty($scope.usersModel.text)) {
+                            userService.getUserMeta($scope.usersModel.id).then(function (data) {
+                                $scope.usersModel.text = data.data.fnm + ' [' + data.data.id + ']';
+                            }).catch(function (err) {
+                                $scope.$parent.showErrorMsg($scope.$parent.resourceBundle['user.details.fetch.error'] + ' ' + $scope.usersModel.id);
+                            }).finally(function () {
+                                $scope.loading = false;
+                            });
+                        }
+                    } else {
+                        $scope.loading = true;
+                        var loaded = 0;
+                        for (var i in $scope.usersModel) {
+                            var userModel = $scope.usersModel[i];
+                            if (checkNullEmpty(userModel.text)) {
+                                userService.getUserMeta(userModel.id).then(function (data) {
+                                    for (var i in $scope.usersModel) {
+                                        if ($scope.usersModel[i].id == data.data.id) {
+                                            $scope.usersModel[i].text = data.data.fnm + ' [' + data.data.id + ']';
+                                            $scope.setUsersModel($scope.usersModel, true);
+                                            break;
+                                        }
+                                    }
+                                }).catch(function () {
+                                    $scope.$parent.showErrorMsg($scope.$parent.resourceBundle['user.details.fetch.error'] + ' ' + userModel.id);
+                                }).finally(function () {
+                                    if ($scope.usersModel.length == ++loaded) {
+                                        $scope.loading = false;
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            };
+            $scope.checkUsers();
+
+            $scope.setResults = function (query, results, deferred) {
+                var rdata = {results: []};
+                for (var i in results) {
+                    var user = results[i];
+                    if (!$scope.isSelected(user.id)) {
+                        rdata.results.push({'text': user.fnm + ' [' + user.id + ']', 'id': user.id});
+                    }
+                }
+                if ($scope.multiple != 'false') {
+                    query.callback(rdata);
+                } else {
+                    deferred.resolve(rdata.results);
+                }
+            };
+
+            $scope.query = function (query) {
+                if(checkNotNullEmpty(query.term)) {
+                    var term = query.term.toLowerCase();
+                    var deferred = $q.defer();
+                    if (checkNullEmpty($scope.uRole)) {
+                        var utype = undefined;
+                        if ($scope.onlyActive == 'true') {
+                            utype = "au";
+                        }
+                        userService.getDomainUsers(term, $scope.offset, $scope.size, utype, $scope.includeSuperusers, $scope.includeChildDomainUsers).then(function (data) {
+                            $scope.setResults(query, data.data.results, deferred);
+                        }).catch(function error(msg) {
+                            $scope.$parent.showErrorMsg(msg);
+                            deferred.reject(msg);
+                        });
+                    } else {
+                        userService.getUsersByRole($scope.uRole, term, $scope.offset, $scope.size).then(function (data) {
+                            $scope.setResults(query, data.data.results, deferred);
+                        }).catch(function error(msg) {
+                            $scope.$parent.showErrorMsg(msg);
+                            deferred.reject(msg);
+                        });
+                    }
+                }
+                if ($scope.multiple == 'false') {
+                    return deferred.promise;
+                }
+            }
+        }],
+        link: function (scope, iElement, iAttrs, ctrl) {
+            if (scope.multiple != 'false') {
+                iElement.html(multiple).show();
+            } else {
+                iElement.html(singleNew).show();
+            }
+            if (scope.role == 'admin') {
+                scope.uRole = 'ROLE_do';
+            } else if (scope.role == 'mgr') {
+                scope.uRole = 'ROLE_sm';
+            } else if (scope.role == 'su') {
+                scope.uRole = 'ROLE_su';
+            } else if (scope.role == 'oper') {
+                scope.uRole = 'ROLE_ko';
+            }
+            $compile(iElement.contents())(scope);
+        }
+    }
+});
 logistimoApp.directive('moveDomainSelect', function () {
     return {
         restrict: 'E',
@@ -2718,7 +3003,8 @@ logistimoApp.directive('lgUibSelect', function () {
             ngDisabled: '=',
             allowClear: '@?',
             limit:'@',
-            appendToBody:'@'
+            appendToBody:'@',
+            reset: '@?'
         },
         controller: [ '$scope', function($scope) {
             $scope.model = {selectModel:$scope.uiModel};
@@ -2726,9 +3012,11 @@ logistimoApp.directive('lgUibSelect', function () {
             $scope.filteredData = [];
 
             $scope.filter = function (query) {
-                $scope.queryCallback({q:{term:query, callback:finalData}});
+                $scope.queryCallback({q: {term: query, callback: finalData}});
+                if(checkNullEmpty(query) && $scope.reset) {
+                    $scope.filteredData = [];
+                }
             };
-
             function finalData(data) {
                 $scope.filteredData = data.results;
             }

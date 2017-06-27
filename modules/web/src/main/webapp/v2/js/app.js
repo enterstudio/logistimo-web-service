@@ -93,6 +93,8 @@ logistimoApp.config(function ($routeProvider) {
         action: "orders.all.detail"
     }).when("/orders/demand/", {
         action: "orders.demand.list"
+    }).when("/orders/approvals/", {
+       action: "orders.approvals"
     }).when("/orders/discrepancies/", {
         action: "orders.discrepancies"
     }).when("/orders/addshipment/", {
@@ -195,6 +197,8 @@ logistimoApp.config(function ($routeProvider) {
         action: "configuration.capabilities"
     }).when("/configuration/inventory/", {
         action: "configuration.inventory"
+    }).when("/configuration/approvals/", {
+        action: "configuration.approvals"
     }).when("/configuration/accounting/", {
         action: "configuration.accounting"
     }).when("/configuration/custom", {
@@ -357,6 +361,8 @@ logistimoApp.config(function ($routeProvider) {
         action: "setup.entities.detail.transfers.view"
     }).when("/setup/entities/detail/:entityId/transfers/add/", {
         action: "setup.entities.detail.transfers.add"
+    }).when("/setup/entities/detail/:entityId/approvals", {
+        action: "setup.entities.detail.approvals"
     }).when("/orders/shipment/", {
         action: "orders.shipment.list"
     }).when("/orders/shipment/detail/:sid/", {

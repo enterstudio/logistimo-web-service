@@ -23,8 +23,8 @@
 
 package com.logistimo.api.controllers;
 
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.api.util.SessionMgr;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.logger.XLog;
 import com.logistimo.reports.plugins.models.ReportChartModel;
@@ -32,8 +32,6 @@ import com.logistimo.reports.plugins.models.TableResponseModel;
 import com.logistimo.reports.plugins.service.ReportPluginService;
 import com.logistimo.security.SecureUserDetails;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

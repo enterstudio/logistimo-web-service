@@ -23,19 +23,18 @@
 
 package com.logistimo.api.builders;
 
+import com.logistimo.api.models.WidgetConfigModel;
+import com.logistimo.api.models.WidgetModel;
 import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.logistimo.dashboards.entity.IWidget;
 import com.logistimo.dashboards.service.IDashboardService;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.api.models.WidgetConfigModel;
-import com.logistimo.api.models.WidgetModel;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,7 +75,7 @@ public class WidgetBuilder {
         model.cBy = wid.getCreatedBy();
         model.cOn = wid.getCreatedOn();
         model.desc = wid.getDesc();
-      } catch (ServiceException | ObjectNotFoundException ignored) {
+      } catch (ObjectNotFoundException ignored) {
         // ignore
       }
     }

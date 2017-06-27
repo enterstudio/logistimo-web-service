@@ -22,6 +22,105 @@
  */
 
 var ordControllers = angular.module('ordControllers', []);
+ordControllers.controller('OrdersApprovalCtrl', ['$scope', 'ordService', 'userService', 'entityService','requestContext','$location',
+    function($scope, ordService, userService, entityService, requestContext, $location){
+        $scope.wparams = [["eid","entity.id"], ["oid","ordId"], ["rs","reqStatus"], ["ex","exp"], ["rt","reqType"], ["req","reqId"], ["apr","aprId"],["s","size"],["o","offset"]];
+        ListingController.call(this, $scope, requestContext, $location);
+        $scope.init = function(firstTimeInit) {
+            $scope.ordApr = {entity: "",orderId: "",reqType: "",reqStatus: "",reqId: "",aprId: ""};
+            $scope.today = formatDate2Url(new Date());
+            if(firstTimeInit) {
+                $scope.showMore = false;
+            }
+            $scope.approvals = [];
+            $scope.orderId = $scope.ordId = requestContext.getParam("oid") || "";
+            $scope.reqStatus = requestContext.getParam("rs") || "";
+            $scope.ex = requestContext.getParam("exp") || "";
+            $scope.reqType = requestContext.getParam("rt");
+            $scope.reqId = requestContext.getParam("req");
+            $scope.aprId = requestContext.getParam("apr");
+            var size = requestContext.getParam("s");
+            if(size) {
+                $scope.size = size;
+            }
+            var offset = requestContext.getParam("o");
+            if(offset) {
+                $scope.offset = offset;
+            }
+            if (checkNotNullEmpty(requestContext.getParam("eid"))) {
+                if (checkNullEmpty($scope.entity) || $scope.entity.id != parseInt(requestContext.getParam("eid"))) {
+                    $scope.entity = {id: parseInt(requestContext.getParam("eid")), nm: ""};
+                }
+
+            }
+        };
+        $scope.fetch = function() {
+            $scope.showLoading();
+            ordService.getApprovals($scope.offset, $scope.size, $scope.entity ? $scope.entity.id : undefined, $scope.ordId, $scope.reqStatus,
+                $scope.exp, $scope.reqType, $scope.reqId, $scope.aprId, $scope.domainId).then(function (data) {
+                $scope.filtered = data.data.results;
+                $scope.setResults(data.data);
+            }).catch(function error(msg) {
+                    $scope.showErrorMsg(msg);
+                }).finally(function () {
+                    $scope.hideLoading();
+                    $scope.loading = false;
+                })
+        };
+        $scope.init(true);
+        $scope.fetch();
+        $scope.getSuggestions = function (text, type) {
+            if (checkNotNullEmpty(text)) {
+                return ordService.getIdSuggestions(text, type, $scope.reqType).then(function (data) {
+                    return data.data;
+                }).catch(function (errorMsg) {
+                    $scope.showErrorMsg(errorMsg);
+                });
+            }
+        };
+        $scope.goToRequester = function(requester) {
+            if(checkNotNullEmpty(requester)) {
+                $scope.reqId = requester;
+            }
+        };
+        $scope.goToApprover = function(approver) {
+            if(checkNotNullEmpty(approver)) {
+                $scope.aprId = approver;
+            }
+        };
+        $scope.showOrder = function(orderId) {
+            if(checkNotNullEmpty(orderId)) {
+                $scope.ordId = orderId;
+            }
+        }
+        $scope.getFilteredApprovers = function(userId) {
+            return ordService.fetchApprovers(userId).then(function (data) {
+                return (checkNotNullEmpty(data.data)?data.data:"")
+            }).catch(function error(msg) {
+                $scope.showErrorMsg(msg);
+            });
+        };
+        $scope.getFilteredRequesters = function(userId) {
+            return ordService.fetchRequesters(userId).then(function (data) {
+                return (checkNotNullEmpty(data.data)?data.data:"")
+            }).catch(function error(msg) {
+                $scope.showErrorMsg(msg);
+            });
+        };
+
+        $scope.resetFilters = function() {
+            $scope.entity = undefined;
+            $scope.ordId = $scope.orderId = undefined;
+            $scope.reqStatus = "";
+            $scope.exp = undefined;
+            $scope.reqType = "";
+            $scope.reqId = undefined;
+            $scope.aprId = undefined;
+
+        };
+
+    }]);
+
 ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgService', 'entityService', 'requestContext', '$location', 'exportService',
     function ($scope, ordService, domainCfgService, entityService, requestContext, $location, exportService) {
         $scope.wparams = [["etag", "etag"], ["otag", "otag"], ["status", "status"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["otype", "otype", "sle"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url], ["oid", "orderId"], ["rid", "referenceId"]];
@@ -332,8 +431,8 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
 ]);
 
 ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', 'userService', 'domainCfgService',
-    'invService', '$timeout', 'requestContext','$uibModal' ,'trnService','conversationService','$window','ORDERSTATUSTEXT',
-        function ($scope, ordService, ORDER, userService, domainCfgService, invService, $timeout, requestContext,$uibModal,trnService,conversationService,$window,ORDERSTATUSTEXT) {
+    'invService', 'entityService', '$timeout', 'requestContext','$uibModal' ,'trnService','conversationService','$window','ORDERSTATUSTEXT',
+        function ($scope, ordService, ORDER, userService, domainCfgService, invService, entityService, $timeout, requestContext,$uibModal,trnService,conversationService,$window,ORDERSTATUSTEXT) {
             $scope.ORDER = ORDER;
             $scope.ORDERSTATUSTEXT = ORDERSTATUSTEXT;
             $scope.edit = {mat: false};
@@ -375,6 +474,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 $scope.dispMap = false;
                 $scope.sMTShip = [];
                 $scope.oTags = {};
+                $scope.approval = {orderId: "", msg: ""};
                 if ($scope.lMap) {
                     $timeout(function () {
                         $scope.dispMap = true;
@@ -687,6 +787,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
             };
             $scope.cancel = function () {
                 $scope.enableScroll();
+                $scope.order.aprmsg = "";
                 $scope.modalInstance.dismiss('cancel');
             };
             $scope.cancelShipNow = function () {
@@ -1046,6 +1147,8 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
             $scope.fetchOrder = function () {
                 $scope.loading = true;
                 $scope.admins = false;
+                $scope.aprMsg = false;
+                $scope.aprDetail = "";
                 if ($scope.orderId) {
                     var count = 0;
                     $scope.showLoading();
@@ -1063,6 +1166,9 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                             $scope.dates.edd = parseUrlDate($scope.order.edd);
                             if (checkNotNullEmpty($scope.order.vid) && $scope.order.vid > 0) {
                                 $scope.vendor = {id: $scope.order.vid, nm: $scope.order.vnm};
+                            }
+                            if($scope.order.appr && checkNullEmpty($scope.order.pa)) {
+                                $scope.aprMsg = true;
                             }
                             userService.getUsersByRole('ROLE_do').then(function (data) {
                                 $scope.administrators = data.data.results;
@@ -1108,6 +1214,60 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         }
                     }
                 }
+            };
+
+            $scope.openApproval = function() {
+                $scope.modalInstance = $uibModal.open({
+                    templateUrl: 'views/orders/approval-request.html',
+                    scope: $scope,
+                    keyboard: false,
+                    backdrop: 'static'
+                });
+            };
+
+            $scope.requestApproval = function() {
+                if(checkNotNullEmpty($scope.order)) {
+                    $scope.buildApprovalRequest();
+                    $scope.showLoading();
+                    ordService.createApproval($scope.approval).then(function(data) {
+                        $scope.orderApproval = data.data;
+                        $scope.showSuccess(data.data);
+                    }).catch(function error(msg) {
+                        $scope.showErrorMsg(msg);
+                    }).finally(function() {
+                        $scope.hideLoading();
+                    })
+
+                }
+            };
+
+            $scope.buildApprovalRequest = function() {
+                $scope.approval = {};
+                if(checkNotNullEmpty($scope.order)) {
+                    $scope.approval.order_id = $scope.order.id;
+                    $scope.approval.message = $scope.order.aprmsg;
+                    $scope.approval.requester_id = $scope.curUser;
+                    $scope.approval.order_type = $scope.order.oty;
+                    $scope.findApprovalType();
+                }
+            };
+
+            $scope.findApprovalType = function() {
+                if(checkNotNullEmpty($scope.approval)) {
+                    if($scope.order.oty == 0 && !$scope.order.vtc && !$scope.order.vtv) {
+                        $scope.approval.approval_type =  0;
+                    } else if($scope.order.oty == 1 && $scope.order.vtc && !$scope.order.vtv) {
+                        $scope.approval.approval_type = 1;
+                    } else if($scope.order.oty == 2 && $scope.order.vtc && $scope.order.vtv) {
+                        $scope.approval.approval_type = 2;
+                    }
+                }
+            };
+
+            $scope.proceed = function() {
+                $scope.requestApproval();
+                $scope.enableScroll();
+                $scope.modalInstance.dismiss('cancel');
             };
 
             $scope.getStatusHistory = function () {
@@ -2026,7 +2186,7 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                         });
                     }
                 }).catch(function error(msg) {
-                    if(msg.status == 504 || msg.status == 404) {
+                    if (msg.status == 504 || msg.status == 404) {
                         // Allow resubmit or cancel.
                         handleTimeout();
                     } else {
