@@ -24,22 +24,21 @@
 package com.logistimo.api.builders;
 
 import com.logistimo.accounting.entity.IAccount;
-import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.api.models.AccountModel;
 import com.logistimo.config.models.AccountingConfig;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.entities.entity.IKiosk;
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.service.EntitiesService;
+import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.CommonUtils;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.models.AccountModel;
-import com.logistimo.api.util.CommonUtil;
-import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.entity.IKioskLink;
-import com.logistimo.entities.service.EntitiesService;
-import com.logistimo.entities.service.EntitiesServiceImpl;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -112,7 +111,7 @@ public class AccountBuilder {
     if (as != null) {
       IKiosk k = as.getKiosk(kioskId, false);
       model.cur = k.getCurrency();
-      model.add = CommonUtil.getAddress(k.getCity(),k.getTaluk(), k.getDistrict(), k.getState());
+      model.add = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
       if (StringUtils.isBlank(model.cur)) {
         model.cur = dc.getCurrency();
       }

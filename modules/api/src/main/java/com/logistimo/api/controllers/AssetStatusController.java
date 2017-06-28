@@ -29,21 +29,20 @@ import com.logistimo.api.models.AssetStatusRequest;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.entity.IAssetAttribute;
 import com.logistimo.assets.entity.IAssetStatus;
+import com.logistimo.assets.models.AssetStatusModel;
 import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
-import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.io.IOUtils;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.constants.Constants;
-import com.logistimo.logger.XLog;
-
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.assets.models.AssetStatusModel;
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.logger.XLog;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

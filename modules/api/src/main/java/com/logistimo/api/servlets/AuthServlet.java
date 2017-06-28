@@ -23,22 +23,20 @@
 
 package com.logistimo.api.servlets;
 
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.processor.EventPublisher;
-import com.logistimo.services.utils.ConfigUtil;
-import com.logistimo.users.entity.IUserAccount;
-
-import com.logistimo.users.entity.UserAccount;
-
+import com.logistimo.logger.XLog;
 import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.security.UserDisabledException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
+import com.logistimo.services.utils.ConfigUtil;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.entity.UserAccount;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -146,7 +144,7 @@ public class AuthServlet extends JsonRestServlet {
       // Authenticate this user
       SecureUserDetails userDetails = SecurityMgr.authenticate(userId, password);
       // Initialize session
-      SessionMgr.recreateSession(req, userDetails);
+      SessionMgr.recreateSession(req, resp, userDetails);
       // Get IP address
       String ipAddress = isGAE ? req.getRemoteAddr() : req.getHeader("X-REAL-IP");
       // Update the user's last login time

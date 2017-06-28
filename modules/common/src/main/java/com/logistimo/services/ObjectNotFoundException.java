@@ -26,11 +26,13 @@
  */
 package com.logistimo.services;
 
+import com.logistimo.exception.LogiException;
+
 /**
  * @author arun
  */
 @SuppressWarnings("serial")
-public class ObjectNotFoundException extends Exception {
+public class ObjectNotFoundException extends LogiException {
 
   public ObjectNotFoundException(String message) {
     super(message);
@@ -38,6 +40,10 @@ public class ObjectNotFoundException extends Exception {
 
   public ObjectNotFoundException(String message, Throwable t) {
     super(message, t);
+  }
+
+  public ObjectNotFoundException(String code, Object... arguments) {
+    super(code, arguments);
   }
 
   public ObjectNotFoundException(Exception e) {

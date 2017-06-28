@@ -24,18 +24,25 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
-import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.builders.MaterialBuilder;
+import com.logistimo.api.models.MaterialModel;
+import com.logistimo.api.util.SearchUtil;
+import com.logistimo.auth.GenericAuthoriser;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.models.ICounter;
 import com.logistimo.pagination.Navigator;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -43,21 +50,14 @@ import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.utils.Counter;
-import com.logistimo.models.ICounter;
-import com.logistimo.api.util.SearchUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.MaterialBuilder;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.api.models.MaterialModel;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.Counter;
 import com.logistimo.utils.MsgUtil;
-import com.logistimo.api.util.SecurityUtils;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -91,7 +91,7 @@ public class MaterialsController {
     if (materialIds == null || materialIds.trim().equals("")) {
       throw new InvalidServiceException(backendMessages.getString("materials.delete.none"));
     }
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
@@ -260,7 +260,7 @@ public class MaterialsController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     MaterialCatalogServiceImpl materialCatalogService;
@@ -301,7 +301,7 @@ public class MaterialsController {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     MaterialCatalogServiceImpl materialCatalogService;

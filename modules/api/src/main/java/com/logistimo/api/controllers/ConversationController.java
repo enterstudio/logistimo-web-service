@@ -23,7 +23,23 @@
 
 package com.logistimo.api.controllers;
 
+import com.logistimo.api.builders.ConversationBuilder;
+import com.logistimo.api.models.ConversationModel;
+import com.logistimo.api.request.StringRequestObj;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.constants.Constants;
+import com.logistimo.conversations.builders.MessageBuilder;
+import com.logistimo.conversations.entity.IConversation;
 import com.logistimo.conversations.entity.IMessage;
+import com.logistimo.conversations.models.MessageModel;
+import com.logistimo.conversations.service.ConversationService;
+import com.logistimo.conversations.service.impl.ConversationServiceImpl;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.logger.XLog;
+import com.logistimo.orders.service.OrderManagementService;
+import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
@@ -31,26 +47,9 @@ import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.ConversationBuilder;
-import com.logistimo.conversations.builders.MessageBuilder;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.ConversationModel;
-import com.logistimo.conversations.models.MessageModel;
-import com.logistimo.api.request.StringRequestObj;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.conversations.entity.IConversation;
-import com.logistimo.conversations.service.ConversationService;
-import com.logistimo.conversations.service.impl.ConversationServiceImpl;
-import com.logistimo.orders.service.OrderManagementService;
-import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.shipments.service.impl.ShipmentService;
+import com.logistimo.utils.LocalDateUtil;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -264,8 +263,6 @@ public class ConversationController {
             shipmentService =
             Services.getService(ShipmentService.class, user.getLocale());
         iMessage = shipmentService.addMessage(objId, message.data, user.getUsername());
-      }else if ("APPROVAL".equals(objType)) {
-
       } else {
         throw new InvalidDataException("Unrecognised object type " + objType);
       }
@@ -281,20 +278,8 @@ public class ConversationController {
 
   @ResponseBody
   @RequestMapping(value = "/add_message/{objectType}/{objectId}", method = RequestMethod.POST)
-  public MessageModel addMessageWithUserID(@PathVariable String objectType,
-                                           @PathVariable String objectId, @RequestBody StringRequestObj message,
-                                           HttpServletRequest request) {
-    if (StringUtils.isEmpty(message.userId)) {
-      throw new InvalidServiceException("User id is not present in request.");
-    }
-
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
-    if (user != null) {
-      if (!message.userId.equalsIgnoreCase(user.getUsername())) {
-        throw new InvalidServiceException(
-            "User id in the request not same as the user id in the session.");
-      }
-    }
+  public MessageModel addMessageWithUserID(@PathVariable String objectType, @PathVariable String objectId,
+      @RequestBody StringRequestObj message, HttpServletRequest request) {
     try {
       ConversationService cs = Services.getService(ConversationServiceImpl.class);
       IMessage iMessage = cs.addMsgToConversation(objectType, objectId, message.data,
@@ -305,4 +290,5 @@ public class ConversationController {
       throw new InvalidServiceException("Failed to add message to object");
     }
   }
+
 }

@@ -23,29 +23,29 @@
 
 package com.logistimo.api.controllers;
 
+import com.logistimo.api.builders.PoolGroupBuilder;
+import com.logistimo.api.models.EntityGroupModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.lang.StringUtils;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.PoolGroupBuilder;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IPoolGroup;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.EntityGroupModel;
+import com.logistimo.logger.XLog;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
-import com.logistimo.api.util.SecurityUtils;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -73,11 +73,7 @@ public class AssetTemplate implements ITemplate {
       // Entity
       IKiosk k = null;
       EntitiesService as = null;
-      try {
-        as = Services.getService(EntitiesServiceImpl.class, locale);
-      } catch (ServiceException e) {
-        //ignore
-      }
+      as = Services.getService(EntitiesServiceImpl.class, locale);
 
       if (as != null) {
         try {

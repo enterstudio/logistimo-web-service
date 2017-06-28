@@ -26,40 +26,27 @@ package com.logistimo.orders.entity;
 import com.logistimo.accounting.models.CreditData;
 import com.logistimo.accounting.service.IAccountingService;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
-import com.logistimo.config.models.EventsConfig;
-import com.logistimo.conversations.service.ConversationService;
-import com.logistimo.conversations.service.impl.ConversationServiceImpl;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.entity.Kiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
-import com.logistimo.materials.service.MaterialCatalogService;
-import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.orders.OrderUtils;
+import com.logistimo.inventory.TransactionUtil;
+import com.logistimo.logger.XLog;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.impl.DemandService;
-import com.logistimo.services.ServiceException;
+import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.tags.entity.Tag;
 import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.entity.UserAccount;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.conversations.entity.IMessage;
-
-import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.NumberUtil;
 
-import com.logistimo.inventory.TransactionUtil;
-import com.logistimo.logger.XLog;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -77,7 +64,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.jdo.PersistenceManager;
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.Extension;
@@ -227,6 +213,24 @@ public class Order implements IOrder {
    */
   @Persistent
   private String cdrsn;
+  /**
+   * visible to customer
+   */
+  @Persistent
+  private boolean vtc;
+  /**
+   * visible to vendor
+   */
+  @Persistent
+  private boolean vtv;
+
+  public Order() {
+
+  }
+
+  public Order(Long id) {
+    this.id = id;
+  }
 
   public static String getFormattedPrice(float price) {
     return String.format("%.2f", price);
@@ -1056,17 +1060,13 @@ public class Order implements IOrder {
 //			ht.put( JsonTagsZ.MESSAGE, ms );
     if (includeItems && items != null && !items.isEmpty()) {
       IDemandService ds = null;
-      try {
-        ds = Services.getService(DemandService.class,locale);
-        // Add items
-        List<Map>
-            materials =
-            ds.getDemandItems(items, cr, locale, timezone, forceIntegerQuantity);
-        if (materials != null) {
-          map.put(JsonTagsZ.MATERIALS, materials);
-        }
-      } catch (ServiceException e) {
-        xLogger.warn("Unable to add materials, since demand service initialisation failed",e);
+      ds = Services.getService(DemandService.class, locale);
+      // Add items
+      List<Map>
+          materials =
+          ds.getDemandItems(items, cr, locale, timezone, forceIntegerQuantity);
+      if (materials != null) {
+        map.put(JsonTagsZ.MATERIALS, materials);
       }
     }
     // Include accounting data (credit limit, available credit)
@@ -1282,4 +1282,42 @@ public class Order implements IOrder {
   public String getPaymentHistory(){
     return this.ph;
   }
+
+  @Override
+  public boolean isVisibleToCustomer() {
+    return vtc;
+  }
+
+  @Override
+  public void setVisibleToCustomer(boolean vtc) {
+    this.vtc = vtc;
+  }
+
+  @Override
+  public boolean isVisibleToVendor() {
+    return vtv;
+  }
+
+  @Override
+  public void setVisibleToVendor(boolean vtv) {
+    this.vtv = vtv;
+  }
+
+  @Override
+  public boolean isTransfer() {
+    return TRANSFER_ORDER.equals(oty);
+  }
+
+  @Override
+  public boolean isSales() {
+    return SALES_ORDER.equals(oty);
+  }
+
+  @Override
+  public boolean isPurchase() {
+    return PURCHASE_ORDER.equals(oty);
+  }
+
+
+
 }

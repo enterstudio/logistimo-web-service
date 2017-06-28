@@ -207,12 +207,8 @@ public class EventGenerator {
       return userIds;
     }
     List<String> eUids;
-    try {
-      UsersService as = Services.getService(UsersServiceImpl.class);
-      eUids = as.getEnabledUserIds(userIds);
-    } catch (ServiceException e) {
-      eUids = null;
-    }
+    UsersService as = Services.getService(UsersServiceImpl.class);
+    eUids = as.getEnabledUserIds(userIds);
     return eUids;
   }
 
@@ -222,12 +218,8 @@ public class EventGenerator {
       return userTags;
     }
     List<String> eUids;
-    try {
-      UsersService as = Services.getService(UsersServiceImpl.class);
-      eUids = as.getEnabledUserIdsWithTags(userTags, domainId);
-    } catch (ServiceException e) {
-      eUids = null;
-    }
+    UsersService as = Services.getService(UsersServiceImpl.class);
+    eUids = as.getEnabledUserIdsWithTags(userTags, domainId);
     return eUids;
   }
 

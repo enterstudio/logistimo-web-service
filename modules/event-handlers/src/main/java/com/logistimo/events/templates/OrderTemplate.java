@@ -37,7 +37,6 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.impl.DemandService;
-import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.users.entity.UserAccount;
@@ -245,8 +244,6 @@ public class OrderTemplate implements ITemplate {
           }
         }
       }
-    } catch (ServiceException e) {
-      xLogger.severe("Exception while fetching Last message of conversation ",e);
     } finally {
       pm.close();
     }

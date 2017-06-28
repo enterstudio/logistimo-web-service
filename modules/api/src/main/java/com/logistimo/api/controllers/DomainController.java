@@ -24,42 +24,42 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
-import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.builders.DomainBuilder;
+import com.logistimo.api.models.superdomains.DomainDBModel;
+import com.logistimo.api.models.superdomains.DomainModel;
+import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.entity.IDomainPermission;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import org.apache.commons.lang.StringUtils;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.pagination.Navigator;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
 import com.logistimo.domains.utils.DomainDeleter;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.DomainBuilder;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.api.models.superdomains.DomainModel;
-import com.logistimo.utils.MsgUtil;
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.logger.XLog;
+import com.logistimo.pagination.Navigator;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.MsgUtil;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -126,13 +126,13 @@ public class DomainController {
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public
   @ResponseBody
-  IDomain getDomainById(@RequestParam Long domainId) {
+  DomainDBModel getDomainById(@RequestParam Long domainId) {
     if (domainId == null) {
       throw new InvalidDataException("Invalid domain id");
     }
     try {
       DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      return ds.getDomain(domainId);
+      return builder.buildDomainModel(ds.getDomain(domainId));
     } catch (ServiceException | ObjectNotFoundException e) {
       xLogger.severe("Unable to fetch the details of the switching domain", e);
       throw new InvalidServiceException("Unable to fetch the details of the switching domain");
@@ -259,7 +259,7 @@ public class DomainController {
   @RequestMapping(value = "/current", method = RequestMethod.GET)
   public
   @ResponseBody
-  IDomain getCurrentDomain(HttpServletRequest request) {
+  DomainDBModel getCurrentDomain(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
     return getDomainById(domainId);
@@ -268,7 +268,7 @@ public class DomainController {
   @RequestMapping(value = "/currentUser", method = RequestMethod.GET)
   public
   @ResponseBody
-  IDomain getCurrentUserDomain(HttpServletRequest request) {
+  DomainDBModel getCurrentUserDomain(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     return getDomainById(sUser.getDomainId());
   }
@@ -310,7 +310,7 @@ public class DomainController {
     boolean authorisedUser = false;
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     HttpSession session = request.getSession();

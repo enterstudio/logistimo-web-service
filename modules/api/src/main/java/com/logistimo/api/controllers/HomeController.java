@@ -23,17 +23,17 @@
 
 package com.logistimo.api.controllers;
 
+import com.logistimo.api.builders.FChartBuilder;
+import com.logistimo.api.models.FChartModel;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.logger.XLog;
 import com.logistimo.reports.models.DomainCounts;
+import com.logistimo.reports.service.ReportsService;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.FChartBuilder;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.FChartModel;
-import com.logistimo.reports.service.ReportsService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +51,7 @@ import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static com.logistimo.api.security.SecurityMgr.getUserDetails;
+import static com.logistimo.auth.SecurityMgr.getUserDetails;
 
 /**
  * Created by naveensnair on 27/02/15.

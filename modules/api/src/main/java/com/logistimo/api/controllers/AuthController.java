@@ -24,43 +24,41 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
+import com.logistimo.api.models.AuthLoginModel;
+import com.logistimo.api.models.AuthModel;
+import com.logistimo.api.models.ChangePasswordModel;
+import com.logistimo.api.models.PasswordModel;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.communications.service.MessageService;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.processor.EventPublisher;
-import com.logistimo.services.cache.MemcacheService;
-import com.logistimo.services.utils.ConfigUtil;
-
-import org.apache.commons.lang.StringUtils;
-import com.logistimo.communications.MessageHandlingException;
-
-import com.logistimo.communications.service.MessageService;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.logger.XLog;
 import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.security.UserDisabledException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.constants.SourceConstants;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.api.models.AuthLoginModel;
-import com.logistimo.api.models.AuthModel;
-import com.logistimo.api.models.ChangePasswordModel;
-import com.logistimo.api.models.PasswordModel;
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.MsgUtil;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -139,7 +137,7 @@ public class AuthController {
           userDetails =
           SecurityMgr.authenticate(authLoginModel.userId, authLoginModel.password);
       //Recreates and initialize the session after successful login.
-      SessionMgr.recreateSession(request, userDetails);
+      SessionMgr.recreateSession(request, response, userDetails);
       Long domainId = SecurityUtils.getReqCookieDomain(request);
       UsersService as = Services.getService(UsersServiceImpl.class);
       if (domainId != null) {

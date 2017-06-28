@@ -91,7 +91,11 @@ import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.*;
+import com.logistimo.utils.BigUtil;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.LockUtil;
+import com.logistimo.utils.MsgUtil;
+import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -1107,11 +1111,11 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         oms.updateOrderMetadata(orderId, model.userId, pm);
         generateEvent(shipment.getDomainId(), IEvent.MODIFIED, shipment, null, null);
         tx.commit();
+      } catch (ObjectNotFoundException e) {
+        xLogger.warn("Order not found - ", e);
       } catch (LogiException le) {
         xLogger.warn("Error while updating shipment", le);
         throw le;
-      } catch (ObjectNotFoundException e) {
-        xLogger.warn("Order not found - ", e);
       } finally {
         if (tx.isActive()) {
           tx.rollback();

@@ -612,15 +612,10 @@ public class BulkExportMgr {
     InventoryManagementService ims;
     EntitiesService as;
     IInvntryDao invDao;
-    try {
-      mcs = Services.getService(MaterialCatalogServiceImpl.class);
-      ims = Services.getService(InventoryManagementServiceImpl.class);
-      as = Services.getService(EntitiesServiceImpl.class);
-      invDao = new InvntryDao();
-    } catch (ServiceException e) {
-      xLogger.severe("Exception while creating services during batch export", e);
-      return invWithBatchInfoList;
-    }
+    mcs = Services.getService(MaterialCatalogServiceImpl.class);
+    ims = Services.getService(InventoryManagementServiceImpl.class);
+    as = Services.getService(EntitiesServiceImpl.class);
+    invDao = new InvntryDao();
     while (invListIter.hasNext()) {
       IInvntry inv = invListIter.next();
       Long mId = inv.getMaterialId();

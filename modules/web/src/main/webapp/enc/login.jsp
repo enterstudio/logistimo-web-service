@@ -1,9 +1,9 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="java.util.List"%>
-<%@page import="java.util.Iterator"%>
-<%@page import="com.logistimo.config.models.LanguageConfig"%>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
 <%@page import="com.logistimo.config.models.ConfigurationException"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
+<%@page import="com.logistimo.config.models.LanguageConfig" %>
+<%@page import="java.util.Iterator" %>
+<%@page import="java.util.List" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <jsp:include page="../s/pageheader.jsp">

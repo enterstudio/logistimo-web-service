@@ -2031,6 +2031,92 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
     };
 }]);
 
+entityControllers.controller('EntityApproversController',['$scope','entityService',
+    function($scope,entityService){
+        $scope.init = function(){
+            $scope.eapr = {pap:[], sap:[], pas:[], sas:[]};
+        };
+
+        $scope.getFilteredUsers = function() {
+
+            if(checkNotNullEmpty($scope.eapr.pap)) {
+                var pap = $scope.eapr.pap;
+                $scope.eapr.pap = [];
+                for(var i=0; i< pap.length; i++) {
+                    $scope.eapr.pap.push({"id": pap[i].id, "text": pap[i].fnm+' ['+pap[i].id+']'});
+                }
+            }
+
+            if(checkNotNullEmpty($scope.eapr.sap)) {
+                var sas = $scope.eapr.sap;
+                $scope.eapr.sap = [];
+                for(var i=0; i< sas.length; i++) {
+                    $scope.eapr.sap.push({"id": sas[i].id, "text": sas[i].fnm+' ['+sas[i].id+']'});
+                }
+            }
+
+            if(checkNotNullEmpty($scope.eapr.pas)) {
+                var pap = $scope.eapr.pas;
+                $scope.eapr.pas = [];
+                for(var i=0; i< pap.length; i++) {
+                    $scope.eapr.pas.push({"id": pap[i].id, "text": pap[i].fnm+' ['+pap[i].id+']'});
+                }
+            }
+
+            if(checkNotNullEmpty($scope.eapr.sas)) {
+                var sas = $scope.eapr.sas;
+                $scope.eapr.sas = [];
+                for(var i=0; i< sas.length; i++) {
+                    $scope.eapr.sas.push({"id": sas[i].id, "text": sas[i].fnm+' ['+sas[i].id+']'});
+                }
+            }
+        };
+
+        function validateApprovers() {
+            if($scope.ipa && (checkNullEmpty($scope.eapr.pap) || $scope.eapr.pap.length == 0)){
+                $scope.showWarning("Primary approvers not configured for purchases order.");
+                $scope.continue = false;
+            } else if($scope.isa && (checkNullEmpty($scope.eapr.pas) || $scope.eapr.pas.length == 0)){
+                $scope.showWarning("Primary approvers not configured for sales order.");
+                $scope.continue = false;
+            }
+        }
+
+        $scope.getApprovers = function() {
+            if(checkNotNullEmpty($scope.entityId)) {
+                $scope.showLoading();
+                entityService.getApprovers($scope.entityId).then(function(data) {
+                    $scope.eapr = data.data;
+                    $scope.getFilteredUsers($scope.eapr);
+                }).catch(function error(msg) {
+                    $scope.showError(msg);
+                }).finally(function() {
+                    $scope.hideLoading();
+                })
+            }
+        };
+        $scope.getApprovers();
+
+        $scope.setApprovers = function() {
+            $scope.continue = true;
+            if(checkNotNullEmpty($scope.entityId)) {
+                validateApprovers();
+                $scope.getFilteredUsers();
+                if($scope.continue) {
+                    $scope.showLoading();
+                    entityService.setApprovers($scope.eapr, $scope.entityId).then(function(data) {
+                        $scope.showSuccess(data.data);
+                    }).catch(function error(msg) {
+                        $scope.showErrorMsg(msg);
+                    }).finally(function(){
+                        $scope.hideLoading();
+                        $scope.getApprovers();
+                    });
+                }
+            }
+        };
+    }]);
+
 entityControllers.controller('RelationPermissionController',['$scope','entityService',
     function($scope,entityService){
         $scope.perm = {};

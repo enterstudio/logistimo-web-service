@@ -24,22 +24,23 @@
 /**
  *
  */
-package com.logistimo.api.security;
+package com.logistimo.auth;
 
 import com.logistimo.AppFactory;
-import com.logistimo.auth.SecurityConstants;
-import com.logistimo.security.*;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
+import com.logistimo.logger.XLog;
+import com.logistimo.security.BadCredentialsException;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.security.UserDisabledException;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 
 import org.apache.commons.codec.binary.Base64;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.constants.SourceConstants;
-import com.logistimo.logger.XLog;
 
 import java.io.UnsupportedEncodingException;
 

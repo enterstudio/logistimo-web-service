@@ -24,12 +24,11 @@
 package com.logistimo.api.builders;
 
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
-import com.logistimo.api.auth.Authoriser;
 import com.logistimo.api.models.DemandItemBatchModel;
 import com.logistimo.api.models.DemandModel;
 import com.logistimo.api.models.OrderModel;
 import com.logistimo.api.models.OrderResponseModel;
-import com.logistimo.api.util.CommonUtil;
+import com.logistimo.api.models.UserModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
@@ -39,6 +38,8 @@ import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.domains.utils.DomainsUtil;
+import com.logistimo.entities.auth.EntityAuthoriser;
+import com.logistimo.entities.entity.IApprovers;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -93,6 +94,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class OrderBuilder {
 
@@ -146,7 +148,7 @@ public class OrderBuilder {
       model.status = OrderUtils.getStatusDisplay(o.getStatus(), locale);
       model.st = o.getStatus();
       model.enm = k.getName();
-      model.eadd = CommonUtil.getAddress(k.getCity(),k.getTaluk(), k.getDistrict(), k.getState());
+      model.eadd = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
       model.cdt = LocalDateUtil.format(o.getCreatedOn(), locale, timezone);
       model.ubid = o.getUpdatedBy();
       if (o.getUpdatedBy() != null) {
@@ -184,9 +186,9 @@ public class OrderBuilder {
           model.vid = vendorId.toString();
           model.vnm = vendor.getName();
           model.vadd =
-              CommonUtil.getAddress(vendor.getCity(),vendor.getTaluk(), vendor.getDistrict(), vendor.getState());
+              CommonUtils.getAddress(vendor.getCity(), vendor.getTaluk(), vendor.getDistrict(), vendor.getState());
           model.hva =
-              Authoriser
+              EntityAuthoriser
                   .authoriseEntity(vendorId, user.getRole(), locale, user.getUsername(), domainId);
         } catch (Exception e) {
           xLogger.warn("{0} when getting vendor data for order {1}: {2}",
@@ -199,7 +201,7 @@ public class OrderBuilder {
       Integer vPermission = k.getVendorPerm();
       if (vPermission < 2 && model.vid != null) {
         vPermission =
-            Authoriser
+            EntityAuthoriser
                 .authoriseEntityPerm(Long.valueOf(model.vid), user.getRole(), user.getLocale(),
                     user.getUsername(), user.getDomainId());
       }
@@ -210,7 +212,7 @@ public class OrderBuilder {
         Integer cPermission = vendor.getCustomerPerm();
         if (cPermission < 2 && model.eid != null) {
           cPermission =
-              Authoriser.authoriseEntityPerm(model.eid, user.getRole(), user.getLocale(),
+              EntityAuthoriser.authoriseEntityPerm(model.eid, user.getRole(), user.getLocale(),
                   user.getUsername(), user.getDomainId());
         }
         model.atc = cPermission > 1;
@@ -262,7 +264,6 @@ public class OrderBuilder {
     IKiosk k = null;
     IKiosk vendorKiosk = null;
     Locale locale = user.getLocale();
-    String timezone = user.getTimezone();
     MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class, user.getLocale());
 
     boolean showStocks = IOrder.PENDING.equals(order.getStatus()) || IOrder.CONFIRMED.equals(order.getStatus())
@@ -300,6 +301,8 @@ public class OrderBuilder {
         creditLimitErr = e.getMessage();
       }
     }
+    model.setVtc(order.isVisibleToCustomer());
+    model.setVtv(order.isVisibleToVendor());
     model.avc = availableCredit;
     model.avcerr = creditLimitErr;
 
@@ -620,6 +623,36 @@ public class OrderBuilder {
     return model;
   }
 
+  public List<UserModel> buildUserModels(List<String> approvers, UsersService us, Locale locale, String timezone){
+    List<UserModel> userModels = null;
+    if(approvers != null && !approvers.isEmpty()) {
+      UserBuilder userBuilder = new UserBuilder();
+      userModels = userBuilder.buildUserModels(constructUserAccount(us, approvers), locale, timezone, true, 0);
+    }
+  return userModels;
+  }
+  public OrderModel populateApprovalParams(OrderModel model, List<IApprovers> primaryApprovers,
+                                           List<IApprovers> secondaryApprovers, UsersService as, Locale locale,
+                                           String timeZone) {
+    UserBuilder userBuilder = new UserBuilder();
+    List<String> primaryApvrs = new ArrayList<>();
+    List<String> secondaryApvrs = new ArrayList<>();
+    if(primaryApprovers != null && !primaryApprovers.isEmpty()) {
+      primaryApvrs.addAll(primaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
+      if(!primaryApvrs.isEmpty()) {
+        model.setPa(userBuilder.buildUserModels(constructUserAccount(as, primaryApvrs), locale, timeZone, true, 0));
+      }
+    }
+    if(secondaryApprovers != null && !secondaryApprovers.isEmpty()) {
+      secondaryApvrs.addAll(secondaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
+      if(!secondaryApvrs.isEmpty()) {
+        model.setSa(userBuilder.buildUserModels(constructUserAccount(as, secondaryApvrs), locale, timeZone, true, 0));
+      }
+    }
+    return model;
+
+  }
+
   private ShipmentItemBatchModel getShipmentItemBatchBD(String shipmentID,
                                                         IShipmentItemBatch iShipmentItemBatch) {
     ShipmentItemBatchModel bd = new ShipmentItemBatchModel();
@@ -639,7 +672,7 @@ public class OrderBuilder {
       if (isFullOrder) {
         order = buildFull(updOrder.order, sUser, domainId);
       } else {
-        order = build(updOrder.order, sUser, domainId, new HashMap<Long, String>());
+        order = build(updOrder.order, sUser, domainId, new HashMap<>());
       }
     }
     return new OrderResponseModel(order, updOrder.message, updOrder.inventoryError, null);
@@ -651,7 +684,7 @@ public class OrderBuilder {
     Long kioskId = order.getKioskId();
     String userId = order.getUserId();
     Date now = new Date();
-    List<ITransaction> transactions = new ArrayList<ITransaction>();
+    List<ITransaction> transactions = new ArrayList<>();
     for (DemandModel demandModel : demandItemModels) {
       IDemandItem item = order.getItem(demandModel.id);
       if (item == null) {
@@ -691,6 +724,21 @@ public class OrderBuilder {
       }
     }
     return order;
+  }
+
+  private List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
+    if (userIds != null && !userIds.isEmpty()) {
+      List<IUserAccount> list = new ArrayList<>(userIds.size());
+      for (String userId : userIds) {
+        try {
+          list.add(as.getUserAccount(userId));
+        } catch (Exception ignored) {
+          // do nothing
+        }
+      }
+      return list;
+    }
+    return new ArrayList<>();
   }
 
   private class DemandBatchMeta {

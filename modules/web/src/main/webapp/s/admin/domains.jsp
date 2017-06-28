@@ -1,22 +1,20 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="java.util.List"%>
-<%@page import="java.util.ArrayList"%>
-<%@page import="java.util.Locale"%>
-<%@page import="com.logistimo.services.Services"%>
-<%@page import="com.logistimo.services.ServiceException"%>
-<%@page import="com.logistimo.domains.entity.IDomain"%>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
 <%@page import="com.logistimo.constants.Constants"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
-<%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
-<%@page import="com.logistimo.logger.XLog"%>
-<%@page import="com.logistimo.pagination.PageParams"%>
+<%@page import="com.logistimo.domains.entity.IDomain" %>
+<%@page import="com.logistimo.domains.service.DomainsService" %>
+<%@page import="com.logistimo.domains.service.impl.DomainsServiceImpl" %>
 <%@page import="com.logistimo.pagination.Navigator"%>
+<%@page import="com.logistimo.pagination.PageParams" %>
 <%@page import="com.logistimo.pagination.Results"%>
-<%@ page import="com.logistimo.domains.service.DomainsService" %>
-<%@ page import="com.logistimo.users.service.UsersService" %>
-<%@ page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
-<%@ page import="com.logistimo.domains.service.impl.DomainsServiceImpl" %>
+<%@page import="com.logistimo.security.SecureUserDetails" %>
+<%@page import="com.logistimo.services.ServiceException" %>
+<%@page import="com.logistimo.services.Services" %>
+<%@page import="com.logistimo.users.service.UsersService" %>
+<%@page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Locale" %>
 <%--
   ~ Copyright © 2017 Logistimo.
   ~

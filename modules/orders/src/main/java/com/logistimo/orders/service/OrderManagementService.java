@@ -41,7 +41,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 
 import javax.jdo.PersistenceManager;
 
@@ -244,8 +244,12 @@ public interface OrderManagementService extends Service {
 
   void updateOrderMetadata(Long orderId, String updatedBy, PersistenceManager pm);
 
+  boolean isApprovalRequired(IOrder order, Locale locale, String approvalType);
+
    List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams, String orderType, boolean isTransfer)
        throws ServiceException;
+
+  void updateOrderVisibility(Long orderId) throws ObjectNotFoundException;
 
     /*List<IOrderApprovalMapping> getOrdersApprovalStatus(Set<Long> orderIds,int orderAppprovalType);*/
 }

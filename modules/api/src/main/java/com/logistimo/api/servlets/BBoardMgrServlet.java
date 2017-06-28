@@ -26,16 +26,14 @@
  */
 package com.logistimo.api.servlets;
 
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.dao.JDOUtils;
-
 import com.logistimo.entity.IBBoard;
 import com.logistimo.events.handlers.BBHandler;
-
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ServiceException;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.logger.XLog;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
 
 import java.io.IOException;
 import java.net.URLDecoder;

@@ -32,6 +32,9 @@
                 <a href="#/configuration/inventory/">{{resourceBundle['inventory']}}</a></li>
             <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'orders' }">
                 <a href="#/configuration/orders/">{{resourceBundle['orders']}}</a></li>
+            <li ng-class="{ enable: subview == 'approvals'}">
+                <a href="#/configuration/approvals">Approvals</a>
+            </li>
             <li ng-class="{ enable: subview == 'notifications' }">
                 <a ng-if="!isTempMonOnly" href="#/configuration/notifications/">{{resourceBundle['notifications']}}</a>
                 <a ng-if="isTempMonOnly" href="#/configuration/notifications/event/assets">{{resourceBundle['notifications']}}</a>
@@ -86,6 +89,9 @@
         </div>
         <div ng-switch-when="options">
             <div ng-if="iSU || dp.ce" ng-include="'views/configuration/config.html'"></div>
+        </div>
+        <div ng-switch-when="approvals">
+            <div ng-include="'views/configuration/approvals.html'"></div>
         </div>
     </div>
 </div>

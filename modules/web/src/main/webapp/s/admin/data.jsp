@@ -1,21 +1,11 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="com.logistimo.services.Services"%>
-<%@page import="com.logistimo.services.ServiceException"%>
-<%@page import="com.logistimo.entities.entity.IKiosk"%>
-<%@page import="com.logistimo.constants.Constants"%>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
 <%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
-<%@page import="com.logistimo.api.util.KioskDataSimulator"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
-<%@page import="java.util.List"%>
+<%@page import="com.logistimo.services.Services" %>
+<%@page import="com.logistimo.users.service.UsersService" %>
+<%@page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
 <%@page import="java.util.ArrayList"%>
-<%@page import="java.text.SimpleDateFormat"%>
-<%@page import="java.util.Calendar"%>
-<%@page import="java.util.GregorianCalendar"%>
-<%@page import="java.util.Date"%>
-<%@page import="java.text.DateFormat"%>
-<%@ page import="com.logistimo.users.service.UsersService" %>
-<%@ page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
 
 <%--
   ~ Copyright © 2017 Logistimo.

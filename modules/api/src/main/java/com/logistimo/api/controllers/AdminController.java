@@ -26,18 +26,18 @@ package com.logistimo.api.controllers;
 import com.logistimo.AppFactory;
 import com.logistimo.api.migrators.EventsConfigMigrator;
 import com.logistimo.api.migrators.UserDomainIdsMigrator;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.auth.SecurityConstants;
-import com.logistimo.events.handlers.EventHandler;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.services.cache.MemcacheService;
-
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.impl.PMF;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.events.handlers.EventHandler;
+import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.logger.XLog;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.cache.MemcacheService;
+import com.logistimo.services.impl.PMF;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

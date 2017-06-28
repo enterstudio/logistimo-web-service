@@ -229,6 +229,9 @@
                 <li ng-class="{active: subview == 'summary' }" ><a
                         href="#/setup/entities/detail/{{entityId}}/summary/">{{resourceBundle.profile}}</a>
                 </li>
+                <li ng-show="entity.appr" ng-class="{active: subview == 'approvals' }"><a
+                        href="#/setup/entities/detail/{{entityId}}/approvals">Approvers</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -245,6 +248,9 @@
                 <div ng-switch="subview" >
                     <div  class="tab-pane" ng-switch-when="summary"  >
                         <div ng-init="perm=entity.perm" ng-include="'views/entities/summary.html'"></div>
+                    </div>
+                    <div class="tab-pane" ng-switch-when="approvals" >
+                        <div ng-init="entityId=entity.id; ipa=entity.ipa; isa=entity.isa" ng-include="'views/entities/approvals.html'"></div>
                     </div>
                     <div class="tab-pane" ng-switch-when="inventory"  >
                         <div ng-init="showFilters=true;perm=entity.perm" ng-include="'views/inventory/inventory-list.html'"></div>

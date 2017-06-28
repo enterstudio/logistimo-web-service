@@ -26,20 +26,29 @@
  */
 package com.logistimo.api.controllers;
 
-import com.logistimo.api.auth.Authoriser;
+import com.logistimo.api.builders.DemandBuilder;
+import com.logistimo.api.builders.DemandItemBuilder;
+import com.logistimo.api.builders.DiscrepancyBuilder;
+import com.logistimo.api.models.DBDRequestModel;
+import com.logistimo.api.models.DemandBreakdownModel;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
+import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
-import com.logistimo.models.shipments.ShipmentItemBatchModel;
-
-import com.logistimo.config.models.DomainConfig;
 import com.logistimo.pagination.Navigator;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -49,17 +58,7 @@ import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.DemandBuilder;
-import com.logistimo.api.builders.DemandItemBuilder;
-import com.logistimo.api.builders.DiscrepancyBuilder;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.DBDRequestModel;
-import com.logistimo.api.models.DemandBreakdownModel;
-import com.logistimo.api.util.SecurityUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -165,7 +164,7 @@ public class DemandController {
       HttpServletRequest request) throws ServiceException, ObjectNotFoundException {
     Results rs = null;
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
-    if (Authoriser.authoriseEntity(request, kId)) {
+    if (EntityAuthoriser.authoriseEntity(sUser, kId)) {
       try {
         etrn = etrn == null ? false : etrn;
         bo = bo == null ? false : bo;

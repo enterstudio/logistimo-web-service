@@ -23,7 +23,6 @@
 
 package com.logistimo.api.controllers;
 
-import com.logistimo.api.auth.Authoriser;
 import com.logistimo.api.builders.EntityBuilder;
 import com.logistimo.api.builders.UserBuilder;
 import com.logistimo.api.builders.UserMessageBuilder;
@@ -32,14 +31,15 @@ import com.logistimo.api.models.UserMessageModel;
 import com.logistimo.api.models.UserModel;
 import com.logistimo.api.request.AddAccDomainsRequestObj;
 import com.logistimo.api.request.UserFilterRequestObj;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.api.util.UserMessageUtil;
+import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.SecurityUtil;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.MessageService;
 import com.logistimo.config.entity.IConfig;
@@ -56,6 +56,7 @@ import com.logistimo.entity.IMessageLog;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.SystemException;
 import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.ICounter;
@@ -438,7 +439,7 @@ public class UsersController {
       String[] usersArray = userIds.split(",");
       ArrayList<String> users = new ArrayList<String>(usersArray.length);
       for (String userId : usersArray) {
-        if (Authoriser.authoriseUser(request, userId.trim())) {
+        if (GenericAuthoriser.authoriseUser(request, userId.trim())) {
           try {
             EntitiesService es = Services.getService(EntitiesServiceImpl.class,locale);
             Results results = es.getKioskIdsForUser(userId, null, null);
@@ -503,7 +504,7 @@ public class UsersController {
     UserModel model;
     try {
       UsersService as = Services.getService(UsersServiceImpl.class, locale);
-      if (!Authoriser.authoriseUser(request, userId)) {
+      if (!GenericAuthoriser.authoriseUser(request, userId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       EntitiesService service = Services.getService(EntitiesServiceImpl.class);
@@ -550,7 +551,7 @@ public class UsersController {
       UsersService as = Services.getService(UsersServiceImpl.class, locale);
       IUserAccount ua = as.getUserAccount(userId);
       model = builder.buildUserModel(ua, locale, sUser.getTimezone(), true, null);
-    } catch (ServiceException | ObjectNotFoundException se) {
+    } catch (ObjectNotFoundException se) {
       xLogger.warn("Error fetching User details for " + userId, se);
       throw new InvalidServiceException(
           backendMessages.getString("user.details.fetch.error") + " " + userId);
@@ -576,7 +577,7 @@ public class UsersController {
         EntitiesService es = Services.getService(EntitiesServiceImpl.class, locale);
         for (String id : ids) {
           try {
-            if (Authoriser.authoriseUser(request, id)) {
+            if (GenericAuthoriser.authoriseUser(request, id)) {
               IUserAccount ua = as.getUserAccount(id);
               List<IKiosk> kiosks = null;
               if (!isMessage) {
@@ -636,7 +637,7 @@ public class UsersController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
       UsersService as = Services.getService(UsersServiceImpl.class, locale);
-      if (!Authoriser.authoriseUser(request, userModel.id)) {
+      if (!GenericAuthoriser.authoriseUser(request, userModel.id)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IUserAccount user = as.getUserAccount(userModel.id);
@@ -680,7 +681,7 @@ public class UsersController {
       UsersService as = Services.getService(UsersServiceImpl.class, locale);
       AuthenticationService aus = Services.getService(AuthenticationServiceImpl.class);
       IUserAccount user = as.getUserAccount(userId);
-      if (!Authoriser.authoriseUser(request, userId)) {
+      if (!GenericAuthoriser.authoriseUser(request, userId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       if (as.authenticateUser(userId, opw, null) == null) {
@@ -753,7 +754,7 @@ public class UsersController {
       UsersService as = Services.getService(UsersServiceImpl.class, locale);
       AuthenticationService aus = Services.getService(AuthenticationServiceImpl.class);
       IUserAccount ua = as.getUserAccount(userId);
-      if (Authoriser.authoriseUser(request, userId)) {
+      if (GenericAuthoriser.authoriseUser(request, userId)) {
         if ("e".equals(action)) {
           as.enableAccount(userId);
           xLogger.info("AUDITLOG \t {0} \t {1} \t USER \t " +
@@ -844,12 +845,7 @@ public class UsersController {
 
     String timezone = sUser.getTimezone();
     UsersService as;
-    try {
-      as = Services.getService(UsersServiceImpl.class, locale);
-    } catch (ServiceException e) {
-      xLogger.warn("Error in building message status", e);
-      throw new InvalidServiceException(backendMessages.getString("message.status.build.error"));
-    }
+    as = Services.getService(UsersServiceImpl.class, locale);
 
     int no = offset;
     List<UserMessageModel> userMessageStatus = new ArrayList<UserMessageModel>();
@@ -1043,7 +1039,7 @@ public class UsersController {
                   .bold(userAccount.getFullName()) + " " + backendMessages
                   .getString("user.login.warn");
         }
-      } catch (ServiceException e) {
+      } catch (SystemException e) {
         msg = backendMessages.getString("user.logout.system.error") + " " + userId;
       } catch (ObjectNotFoundException e) {
         xLogger.warn("UserId not found" + userId, e);

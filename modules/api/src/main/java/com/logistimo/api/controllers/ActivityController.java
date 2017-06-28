@@ -23,23 +23,23 @@
 
 package com.logistimo.api.controllers;
 
+import com.logistimo.activity.builders.ActivityBuilder;
+import com.logistimo.activity.entity.IActivity;
+import com.logistimo.activity.models.ActivityModel;
+import com.logistimo.activity.service.ActivityService;
+import com.logistimo.activity.service.impl.ActivityServiceImpl;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.constants.Constants;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
 
-import com.logistimo.activity.entity.IActivity;
-import com.logistimo.activity.service.ActivityService;
-import com.logistimo.activity.service.impl.ActivityServiceImpl;
-import com.logistimo.activity.builders.ActivityBuilder;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.activity.models.ActivityModel;
-import com.logistimo.api.util.SecurityUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

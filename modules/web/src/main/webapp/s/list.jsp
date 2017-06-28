@@ -1,20 +1,20 @@
 <%@page contentType="application/json; charset=UTF-8" language="java" %>
-<%@page import="com.logistimo.config.models.DomainConfig" %>
+<%@page import="com.logistimo.api.util.SearchUtil" %>
+<%@page import="com.logistimo.auth.SecurityConstants" %>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr"%>
+<%@page import="com.logistimo.config.models.DomainConfig"%>
 <%@page import="com.logistimo.config.models.ReportsConfig" %>
-<%@page import="com.logistimo.pagination.PageParams" %>
-<%@page import="com.logistimo.reports.generators.ReportData"%>
-<%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.security.SecurityMgr" %>
-<%@page import="com.logistimo.domains.service.impl.DomainsServiceImpl"%>
-<%@ page import="com.logistimo.inventory.service.impl.InventoryManagementServiceImpl"%>
-<%@ page import="com.logistimo.materials.service.impl.MaterialCatalogServiceImpl"%>
-<%@ page import="com.logistimo.api.util.SearchUtil"%>
-<%@ page import="com.logistimo.api.util.SessionMgr"%>
-<%@ page import="com.logistimo.utils.StringUtil"%>
-<%@ page import="java.util.ArrayList"%>
-<%@ page import="java.util.Iterator"%>
-<%@ page import="java.util.List"%>
-<%@ page import="java.util.Locale"%><%@ page import="com.logistimo.services.Services"%><%@ page import="com.logistimo.users.entity.IUserAccount"%><%@ page import="com.logistimo.users.service.UsersService"%><%@ page import="com.logistimo.users.service.impl.UsersServiceImpl"%><%@ page import="com.logistimo.entities.service.EntitiesService"%><%@ page import="com.logistimo.entities.service.EntitiesServiceImpl"%><%@ page import="com.logistimo.materials.service.MaterialCatalogService"%><%@ page import="com.logistimo.reports.ReportsConstants"%><%@ page import="com.logistimo.auth.SecurityConstants"%><%@ page import="com.logistimo.domains.service.DomainsService"%><%@ page import="com.logistimo.domains.entity.IDomain"%><%@ page import="com.logistimo.domains.entity.IDomainLink"%><%@ page import="com.logistimo.inventory.service.InventoryManagementService"%><%@ page import="com.logistimo.entities.entity.IKiosk"%><%@ page import="com.logistimo.entities.entity.IUserToKiosk"%><%@ page import="com.logistimo.materials.entity.IMaterial"%><%@ page import="com.logistimo.entities.entity.IPoolGroup"%><%@ page import="com.logistimo.entities.entity.IKioskLink"%>
+<%@page import="com.logistimo.domains.entity.IDomain"%>
+<%@ page import="com.logistimo.domains.entity.IDomainLink"%>
+<%@ page import="com.logistimo.domains.service.DomainsService"%>
+<%@ page import="com.logistimo.domains.service.impl.DomainsServiceImpl"%>
+<%@ page import="com.logistimo.entities.entity.IKiosk"%>
+<%@ page import="com.logistimo.entities.entity.IKioskLink"%>
+<%@ page import="com.logistimo.entities.entity.IPoolGroup"%>
+<%@ page import="com.logistimo.entities.entity.IUserToKiosk"%>
+<%@ page import="com.logistimo.entities.service.EntitiesService"%>
+<%@ page import="com.logistimo.entities.service.EntitiesServiceImpl"%><%@ page import="com.logistimo.materials.entity.IMaterial"%><%@ page import="com.logistimo.materials.service.MaterialCatalogService"%><%@ page import="com.logistimo.materials.service.impl.MaterialCatalogServiceImpl"%><%@ page import="com.logistimo.pagination.PageParams"%><%@ page import="com.logistimo.reports.ReportsConstants"%><%@ page import="com.logistimo.security.SecureUserDetails"%><%@ page import="com.logistimo.services.Services"%><%@ page import="com.logistimo.users.entity.IUserAccount"%><%@ page import="com.logistimo.users.service.UsersService"%><%@ page import="com.logistimo.users.service.impl.UsersServiceImpl"%><%@ page import="com.logistimo.utils.StringUtil"%><%@ page import="java.util.ArrayList"%><%@ page import="java.util.Iterator"%><%@ page import="java.util.List"%><%@ page import="java.util.Locale"%>
 <%--
   ~ Copyright © 2017 Logistimo.
   ~

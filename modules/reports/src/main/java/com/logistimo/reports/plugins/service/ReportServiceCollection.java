@@ -24,7 +24,6 @@
 package com.logistimo.reports.plugins.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -45,7 +44,7 @@ public class ReportServiceCollection {
     if (builders.containsKey(reportType)) {
       return builders.get(reportType);
     }
-    throw new UnsupportedOperationException("unsupported report service");
+    throw new UnsupportedOperationException("Unsupported report service:" + reportType);
   }
 
 }

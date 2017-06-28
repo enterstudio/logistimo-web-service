@@ -1,0 +1,11 @@
+<div class="modal-header ws">
+    <h3 class="modal-title">Request approval for {{resourceBundle['order']}}: {{orderId}}</h3>
+    <p class="litetext">Approver(s): {{order.aprdetail}}</p>
+</div>
+<div class="panel-body ws" style="background: #ffffff">
+    <textarea id="aprvmsg" ng-model="order.aprmsg" placeholder ="Comments" maxlength="5000" rows="10" style="height:auto;width:100%"></textarea>
+</div>
+<div class="modal-footer ws">
+    <button class="btn btn-primary" ng-click="proceed()">Request</button>
+    <button class="btn btn-default" ng-click="cancel()">{{resourceBundle['cancel']}}</button>
+</div>

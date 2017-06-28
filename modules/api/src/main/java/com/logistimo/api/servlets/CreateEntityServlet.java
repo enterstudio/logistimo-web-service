@@ -24,10 +24,23 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.communications.service.MessageService;
+import com.logistimo.config.entity.IConfig;
+import com.logistimo.config.models.ConfigValidator;
+import com.logistimo.config.models.ConfigurationException;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.config.models.Permissions;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
@@ -37,6 +50,7 @@ import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.entity.IPoolGroup;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.IInvntryDao;
@@ -47,6 +61,7 @@ import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
@@ -55,38 +70,20 @@ import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.communications.service.MessageService;
-import com.logistimo.config.models.ConfigValidator;
-import com.logistimo.config.models.ConfigurationException;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.config.models.Permissions;
-import com.logistimo.config.entity.IConfig;
-
-import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.constants.SourceConstants;
-import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.MsgUtil;
+import com.logistimo.utils.StringUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -212,16 +209,12 @@ public class CreateEntityServlet extends SgServlet {
     InventoryManagementService ims = null;
     OrderManagementService oms = null;
     MaterialCatalogService mcs = null;
-    try {
-      as = Services.getService(UsersServiceImpl.class, locale);
-      es = Services.getService(EntitiesServiceImpl.class, locale);
-      cms = Services.getService(ConfigurationMgmtServiceImpl.class, locale);
-      ims = Services.getService(InventoryManagementServiceImpl.class, locale);
-      oms = Services.getService(OrderManagementServiceImpl.class, locale);
-      mcs = Services.getService(MaterialCatalogServiceImpl.class, locale);
-    } catch (ServiceException e) {
-      e.printStackTrace();
-    }
+    as = Services.getService(UsersServiceImpl.class, locale);
+    es = Services.getService(EntitiesServiceImpl.class, locale);
+    cms = Services.getService(ConfigurationMgmtServiceImpl.class, locale);
+    ims = Services.getService(InventoryManagementServiceImpl.class, locale);
+    oms = Services.getService(OrderManagementServiceImpl.class, locale);
+    mcs = Services.getService(MaterialCatalogServiceImpl.class, locale);
     try {
       // Process operation
       if (entityAction.equalsIgnoreCase("create")

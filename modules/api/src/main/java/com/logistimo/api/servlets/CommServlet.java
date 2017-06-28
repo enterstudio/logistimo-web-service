@@ -27,23 +27,22 @@
 package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.communications.ServiceResponse;
+import com.logistimo.communications.service.MessageService;
+import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.communications.service.MessageService;
-import com.logistimo.communications.ServiceResponse;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
 
 import java.io.IOException;
 import java.util.ArrayList;

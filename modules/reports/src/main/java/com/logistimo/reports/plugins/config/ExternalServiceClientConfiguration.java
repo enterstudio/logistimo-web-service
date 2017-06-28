@@ -33,4 +33,5 @@ public class ExternalServiceClientConfiguration {
   public String getUrl() {
     return url;
   }
+
 }

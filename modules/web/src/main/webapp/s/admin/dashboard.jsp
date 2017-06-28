@@ -1,21 +1,19 @@
-<%@page import="com.logistimo.pagination.PageParams"%>
-<%@page import="com.logistimo.utils.LocalDateUtil"%>
+<%@page import="com.logistimo.auth.SecurityConstants" %>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.auth.utils.SessionMgr" %>
+<%@page import="com.logistimo.config.models.DomainConfig" %>
 <%@page import="com.logistimo.constants.Constants"%>
-<%@page import="com.logistimo.api.security.SecurityMgr"%>
+<%@page import="com.logistimo.pagination.PageParams" %>
 <%@page import="com.logistimo.security.SecureUserDetails"%>
-<%@page import="com.logistimo.api.util.SessionMgr"%>
 <%@page import="com.logistimo.services.Services"%>
-<%@page import="com.logistimo.services.Service"%>
-<%@page import="com.logistimo.config.models.DomainConfig"%>
-<%@page import="java.util.Date"%>
+<%@page import="com.logistimo.users.entity.IUserAccount" %>
+<%@page import="com.logistimo.users.service.UsersService" %>
+<%@page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
+<%@page import="com.logistimo.utils.LocalDateUtil" %>
 <%@page import="java.util.Calendar"%>
-<%@page import="java.util.GregorianCalendar"%>
-<%@page import="java.util.Locale"%>
-<%@page import="java.text.SimpleDateFormat"%>
-<%@ page import="com.logistimo.users.entity.IUserAccount" %>
-<%@ page import="com.logistimo.users.service.UsersService" %>
-<%@ page import="com.logistimo.users.service.impl.UsersServiceImpl" %>
-<%@ page import="com.logistimo.auth.SecurityConstants" %>
+<%@page import="java.util.Date" %>
+<%@ page import="java.util.GregorianCalendar" %>
+<%@ page import="java.util.Locale" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%--
   ~ Copyright © 2017 Logistimo.

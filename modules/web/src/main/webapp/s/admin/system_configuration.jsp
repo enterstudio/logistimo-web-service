@@ -1,15 +1,14 @@
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
-<%@page import="java.util.Locale"%>
-<%@page import="java.util.Date"%>
-<%@page import="java.text.DateFormat"%>
-<%@ page import="com.logistimo.services.Services" %>
-<%@ page import="com.logistimo.config.service.ConfigurationMgmtService" %>
+<%@page import="com.logistimo.auth.SecurityMgr" %>
+<%@page import="com.logistimo.config.entity.IConfig" %>
+<%@page import="com.logistimo.config.service.ConfigurationMgmtService" %>
 <%@ page import="com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl" %>
-<%@ page import="com.logistimo.config.entity.IConfig" %>
+<%@ page import="com.logistimo.security.SecureUserDetails" %>
 <%@ page import="com.logistimo.services.ObjectNotFoundException" %>
 <%@ page import="com.logistimo.services.ServiceException" %>
-<%@ page import="com.logistimo.security.SecureUserDetails" %>
-<%@ page import="com.logistimo.api.security.SecurityMgr" %>
+<%@ page import="com.logistimo.services.Services" %>
+<%@ page import="java.text.DateFormat" %>
+<%@ page import="java.util.Locale" %>
 
 
 <%--

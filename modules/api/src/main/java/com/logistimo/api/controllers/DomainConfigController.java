@@ -24,68 +24,6 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
-import com.logistimo.api.auth.Authoriser;
-import com.logistimo.api.migrators.CRConfigMigrator;
-import com.logistimo.config.models.LeadTimeAvgConfig;
-import com.logistimo.config.service.ConfigurationMgmtService;
-import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.domains.entity.IDomain;
-import com.logistimo.events.handlers.BBHandler;
-import com.logistimo.inventory.entity.ITransaction;
-import com.logistimo.reports.ReportsConstants;
-import com.logistimo.services.blobstore.BlobstoreService;
-import com.logistimo.services.cache.MemcacheService;
-import com.logistimo.services.taskqueue.ITaskService;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.config.models.AccountingConfig;
-import com.logistimo.config.models.ActualTransConfig;
-import com.logistimo.config.models.AssetConfig;
-import com.logistimo.config.models.AssetSystemConfig;
-import com.logistimo.config.models.BBoardConfig;
-import com.logistimo.config.models.CapabilityConfig;
-import com.logistimo.config.models.ConfigurationException;
-import com.logistimo.config.models.CustomReportsConfig;
-import com.logistimo.config.models.DashboardConfig;
-import com.logistimo.config.models.DemandBoardConfig;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.models.EventsConfig;
-import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.config.models.MatStatusConfig;
-import com.logistimo.config.models.OptimizerConfig;
-import com.logistimo.config.models.OrdersConfig;
-import com.logistimo.config.models.ReportsConfig;
-import com.logistimo.config.models.SupportConfig;
-import com.logistimo.config.models.SyncConfig;
-import com.logistimo.entity.IALog;
-import com.logistimo.entity.IBBoard;
-import com.logistimo.config.entity.IConfig;
-import com.logistimo.entity.IJobStatus;
-import com.logistimo.entity.IMessageLog;
-import com.logistimo.entity.IUploaded;
-import com.logistimo.pagination.Navigator;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.JobUtil;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.MessageUtil;
-import com.logistimo.utils.QueryUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.utils.StringUtil;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
 import com.logistimo.api.builders.BulletinBoardBuilder;
 import com.logistimo.api.builders.ConfigurationModelsBuilder;
 import com.logistimo.api.builders.CurrentUserBuilder;
@@ -95,17 +33,14 @@ import com.logistimo.api.builders.NotificationBuilder;
 import com.logistimo.api.builders.UserBuilder;
 import com.logistimo.api.builders.UserMessageBuilder;
 import com.logistimo.api.constants.ConfigConstants;
-import com.logistimo.exception.BadRequestException;
-import com.logistimo.exception.ConfigurationServiceException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.InvalidTaskException;
-import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.api.migrators.CRConfigMigrator;
 import com.logistimo.api.models.AccessLogModel;
 import com.logistimo.api.models.CurrentUserModel;
 import com.logistimo.api.models.MenuStatsModel;
 import com.logistimo.api.models.TagsModel;
 import com.logistimo.api.models.UserMessageModel;
 import com.logistimo.api.models.configuration.AccountingConfigModel;
+import com.logistimo.api.models.configuration.ApprovalsConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.api.models.configuration.BulletinBoardConfigModel;
 import com.logistimo.api.models.configuration.CapabilitiesConfigModel;
@@ -119,12 +54,78 @@ import com.logistimo.api.models.configuration.OrdersConfigModel;
 import com.logistimo.api.models.configuration.SupportConfigModel;
 import com.logistimo.api.models.configuration.TagsConfigModel;
 import com.logistimo.api.request.AddCustomReportRequestObj;
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.auth.GenericAuthoriser;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.config.entity.IConfig;
+import com.logistimo.config.models.AccountingConfig;
+import com.logistimo.config.models.ActualTransConfig;
+import com.logistimo.config.models.ApprovalsConfig;
+import com.logistimo.config.models.AssetConfig;
+import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.BBoardConfig;
+import com.logistimo.config.models.CapabilityConfig;
+import com.logistimo.config.models.ConfigurationException;
+import com.logistimo.config.models.CustomReportsConfig;
+import com.logistimo.config.models.DashboardConfig;
+import com.logistimo.config.models.DemandBoardConfig;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.EventsConfig;
+import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.config.models.LeadTimeAvgConfig;
+import com.logistimo.config.models.MatStatusConfig;
+import com.logistimo.config.models.OptimizerConfig;
+import com.logistimo.config.models.OrdersConfig;
+import com.logistimo.config.models.ReportsConfig;
+import com.logistimo.config.models.SupportConfig;
+import com.logistimo.config.models.SyncConfig;
+import com.logistimo.config.service.ConfigurationMgmtService;
+import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.domains.entity.IDomain;
+import com.logistimo.entity.IALog;
+import com.logistimo.entity.IBBoard;
+import com.logistimo.entity.IJobStatus;
+import com.logistimo.entity.IMessageLog;
+import com.logistimo.entity.IUploaded;
+import com.logistimo.events.handlers.BBHandler;
+import com.logistimo.exception.BadRequestException;
+import com.logistimo.exception.ConfigurationServiceException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.InvalidTaskException;
+import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.inventory.entity.ITransaction;
+import com.logistimo.logger.XLog;
+import com.logistimo.pagination.Navigator;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.reports.ReportsConstants;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.services.blobstore.BlobstoreService;
+import com.logistimo.services.cache.MemcacheService;
+import com.logistimo.services.impl.PMF;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.JobUtil;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.MessageUtil;
+import com.logistimo.utils.QueryUtil;
+import com.logistimo.utils.StringUtil;
 
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -338,7 +339,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -621,7 +622,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(
           backendMessages.getString(backendMessages.getString("permission.denied")));
     }
@@ -710,7 +711,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     if (model == null) {
@@ -751,7 +752,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -872,7 +873,7 @@ public class DomainConfigController {
     Locale locale = sUser.getLocale();
     String timezone = sUser.getTimezone();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1083,7 +1084,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1426,7 +1427,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1546,7 +1547,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1651,7 +1652,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1742,7 +1743,7 @@ public class DomainConfigController {
     Results results;
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     try {
@@ -1770,12 +1771,7 @@ public class DomainConfigController {
     }
     String timezone = sUser.getTimezone();
     UsersService as;
-    try {
-      as = Services.getService(UsersServiceImpl.class, locale);
-    } catch (ServiceException e) {
-      xLogger.warn("Error in building message status", e);
-      throw new InvalidServiceException(backendMessages.getString("message.status.build.error"));
-    }
+    as = Services.getService(UsersServiceImpl.class, locale);
     int no = offset;
     List<UserMessageModel> userMessageStatus = new ArrayList<UserMessageModel>();
     for (Object res : results.getResults()) {
@@ -1799,7 +1795,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     if (model == null) {
@@ -1863,7 +1859,7 @@ public class DomainConfigController {
       try {
         UsersService as = Services.getService(UsersServiceImpl.class, locale);
         model.fn = String.valueOf(as.getUserAccount(model.createdBy).getFullName());
-      } catch (ServiceException | ObjectNotFoundException e) {
+      } catch (ObjectNotFoundException e) {
         //Ignore.. Users should still be able to edit config
       }
     }
@@ -1877,7 +1873,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1910,7 +1906,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -1971,7 +1967,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     BlobstoreService blobstoreService = AppFactory.get().getBlobstoreService();
@@ -2028,7 +2024,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     if (addCustomReportRequestObj == null || addCustomReportRequestObj.customReport == null
@@ -2110,7 +2106,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
@@ -2239,7 +2235,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     if (model == null) {
@@ -2401,6 +2397,43 @@ public class DomainConfigController {
     return new CurrentUserBuilder().buildCurrentUserModel(request);
   }
 
+  @RequestMapping(value = "/approvals", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  String updateApprovalsConfig(@RequestBody ApprovalsConfigModel model,
+                               HttpServletRequest request) {
+    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    Locale locale = sUser.getLocale();
+    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
+      throw new UnauthorizedException(backendMessages.getString("permission.denied"));
+    }
+    String userId = sUser.getUsername();
+    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    try{
+      if(domainId == null) {
+        xLogger.severe("Error in updating Approvals configuration");
+        throw new InvalidServiceException(
+            "Error in updating Approvals configuration");
+      }
+      ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
+      DomainConfig dc = cc.dc;
+      ApprovalsConfig.OrderConfig orderConfig = builder.buildApprovalsOrderConfig(model, dc);
+      ApprovalsConfig approvalsConfig = new ApprovalsConfig();
+      approvalsConfig.setOrderConfig(orderConfig);
+      cc.dc.setApprovalsConfig(approvalsConfig);
+      cc.dc.addDomainData(ConfigConstants.APPROVALS, generateUpdateList(userId));
+      saveDomainConfig(sUser.getLocale(), domainId, cc, backendMessages);
+      xLogger.info("AUDITLOG \t {0} \t {1} \t CONFIGURATION \t " +
+          "UPDATE APPROVALS", domainId, sUser.getUsername());
+      xLogger.info(cc.dc.toJSONSring());
+    } catch (ServiceException | ConfigurationException e) {
+      xLogger.severe("Error in updating Approvals configuration");
+      throw new InvalidServiceException("Error in updating Approvals configuration");
+    }
+    return "Approvals config updated successfully";
+  }
+
   @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
   public
   @ResponseBody
@@ -2422,6 +2455,27 @@ public class DomainConfigController {
     }
   }
 
+  @RequestMapping(value = "/approvals", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  ApprovalsConfigModel getApprovalsConfig(HttpServletRequest request)
+      throws ServiceException, ConfigurationException {
+    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    Locale locale = sUser.getLocale();
+    String userId = sUser.getUsername();
+    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    DomainConfig dc = DomainConfig.getInstance(domainId);
+    ApprovalsConfig ac = dc.getApprovalsConfig();
+    UsersService as = Services.getService(UsersServiceImpl.class, locale);
+    try{
+      return builder.buildApprovalsConfigModel(ac,as,domainId,locale,sUser.getTimezone());
+    } catch (Exception e) {
+      xLogger.severe("Error in fetching Approval configuration", e);
+      throw new InvalidServiceException("Error in fetching Approvals configuration");
+    }
+
+  }
+
   @RequestMapping(value = "/dashboard", method = RequestMethod.POST)
   public
   @ResponseBody
@@ -2430,7 +2484,7 @@ public class DomainConfigController {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     try {

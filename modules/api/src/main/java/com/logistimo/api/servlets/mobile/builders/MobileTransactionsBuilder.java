@@ -99,14 +99,9 @@ public class MobileTransactionsBuilder {
     EntitiesService as;
     UsersService us;
     MaterialCatalogService mcs;
-    try {
-      as = Services.getService(EntitiesServiceImpl.class);
-      us = Services.getService(UsersServiceImpl.class);
-      mcs = Services.getService(MaterialCatalogServiceImpl.class);
-    } catch (ServiceException e) {
-      xLogger.warn("Exception while getting services", e);
-      return mtsm;
-    }
+    as = Services.getService(EntitiesServiceImpl.class);
+    us = Services.getService(UsersServiceImpl.class);
+    mcs = Services.getService(MaterialCatalogServiceImpl.class);
     for (ITransaction transaction : transactions) {
 
       IMaterial m;
@@ -254,30 +249,24 @@ public class MobileTransactionsBuilder {
      mids.add(mobileMaterialTransModel.mid);
    }
    List<MobileInvModel> mobInvList = new ArrayList<>();
-   try {
-     EntitiesService es = Services.getService(EntitiesServiceImpl.class);
-     InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
-     for (Long mid : mids) {
-       IInvntry inventory;
-       try {
-         inventory = ims.getInventory(kioskId, mid);
-         if (inventory == null) {
-            xLogger.warn("Inventory does not exist for kid {0} and mid {1}", kioskId, mid);
-            continue;
-         }
-       } catch (ServiceException e) {
-          xLogger.warn("Exception while getting inventory for kid: {0}, mid: {1}", kioskId, mid, e);
+   EntitiesService es = Services.getService(EntitiesServiceImpl.class);
+   InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
+   for (Long mid : mids) {
+     IInvntry inventory;
+     try {
+       inventory = ims.getInventory(kioskId, mid);
+       if (inventory == null) {
+          xLogger.warn("Inventory does not exist for kid {0} and mid {1}", kioskId, mid);
           continue;
        }
-       MobileInvModel inv = buildMobileInvModel(inventory, domainId, userId, ims, es);
-       if (inv != null) {
-         mobInvList.add(inv);
-       }
+     } catch (ServiceException e) {
+        xLogger.warn("Exception while getting inventory for kid: {0}, mid: {1}", kioskId, mid, e);
+        continue;
      }
-   } catch (ServiceException e) {
-     xLogger.warn(
-          "Exception while building inventory model list in update inventory transactions response",
-          e);
+     MobileInvModel inv = buildMobileInvModel(inventory, domainId, userId, ims, es);
+     if (inv != null) {
+       mobInvList.add(inv);
+     }
    }
    return mobInvList;
  }

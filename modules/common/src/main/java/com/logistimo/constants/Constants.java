@@ -31,7 +31,7 @@ import java.math.BigDecimal;
 /**
  * @author arun
  */
-public class Constants {
+public final class Constants {
 
   // Country codes - ISO 3166 standard codes
   public static final String COUNTRY_INDIA = "IN";
@@ -56,21 +56,13 @@ public class Constants {
 
   // Session variable names
   public static final String PARAM_USER = "usr";
-  public static final String PARAM_LOCALE = "loc";
   public static final String PARAM_DOMAINID = "dId";
-  public static final String PARAM_TIMEZONE = "tz";
-  public static final String PARAM_DOMAINCONFIG = "dcg";
-  public static final String PARAM_ATTRIBUTES = "atts";
-  // Attribute names (stored within the PARAM_ATTRIBUTES Map)
-  public static final String ATTR_PROVIDERRESPONSE = "prrs";
-  public static final String ATTR_MOBILEUSERMAP = "mbsm";
 
   // Separator in a primary key
   public static final String KEY_SEPARATOR = ".";
 
   // Domain defaults
-  public static final Long DOMAINID_DEFAULT = Long.valueOf(-1);
-  public static final String DOMAINNAME_DEFAULT = "Default";
+  public static final Long DOMAINID_DEFAULT = -1l;
 
   // Admin. account defaults
   public static final String ADMINID_DEFAULT = "__admin__";

@@ -23,22 +23,23 @@
 
 package com.logistimo.api.controllers;
 
+import com.logistimo.api.builders.WidgetBuilder;
+import com.logistimo.api.models.WidgetConfigModel;
+import com.logistimo.api.models.WidgetModel;
+import com.logistimo.api.request.DBWUpdateRequest;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.dashboards.entity.IWidget;
 import com.logistimo.dashboards.service.IDashboardService;
 import com.logistimo.dashboards.service.impl.DashboardService;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.WidgetBuilder;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.WidgetConfigModel;
-import com.logistimo.api.models.WidgetModel;
-import com.logistimo.api.request.DBWUpdateRequest;
 import com.logistimo.utils.MsgUtil;
-import com.logistimo.api.util.SecurityUtils;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -91,14 +92,9 @@ public class WidgetController {
   List<WidgetModel> getAll(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-    try {
-      IDashboardService ds = Services.getService(DashboardService.class);
-      List<IWidget> dbList = ds.getWidgets(domainId);
-      return builder.buildWidgetModelList(dbList);
-    } catch (ServiceException e) {
-      xLogger.warn("Error in getting Widget for " + domainId);
-      throw new InvalidServiceException("Error in getting Widget for " + domainId);
-    }
+    IDashboardService ds = Services.getService(DashboardService.class);
+    List<IWidget> dbList = ds.getWidgets(domainId);
+    return builder.buildWidgetModelList(dbList);
   }
 
   @RequestMapping(value = "/{wId}", method = RequestMethod.GET)

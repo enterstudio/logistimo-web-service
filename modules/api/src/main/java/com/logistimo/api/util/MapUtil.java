@@ -125,72 +125,68 @@ public class MapUtil {
                                                      List<IKiosk> includeKiosks) {
     GeoData geoData = new GeoData();
     if (inventories != null && inventories.size() > 0) {
-      try {
-        // Get the accounts service
-        EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-        // Init. max stock (required for scaling the markers)
-        BigDecimal maxStock = BigDecimal.ZERO;
-        // Init. bounding box coordinates (required for centering the map to this box)
-        double latNorth = 0, lngEast = 0, latSouth = 0, lngWest = 0;
-        boolean justStarted = true;
-        for (IInvntry inv : inventories) {
-          BigDecimal stockOnHand = inv.getStock();
-          // Get the max stock until now
-          if (BigUtil.greaterThan(stockOnHand, maxStock)) {
-            maxStock = stockOnHand;
-          }
-          // Get kiosk
-          try {
-            IKiosk k = as.getKiosk(inv.getKioskId(), false);
-            // Check if this kiosk is to be included or not (say, given permissions or other constraints)
-            if (includeKiosks != null && !includeKiosks.contains(k)) {
-              continue;
-            }
-            // Get coordinates
-            double lat = k.getLatitude();
-            double lng = k.getLongitude();
-
-            // If lat/lng are 0, then do not add
-            if (lat == 0 && lng == 0) {
-              continue;
-            }
-
-            if (justStarted) {
-              latNorth = latSouth = lat;
-              lngEast = lngWest = lng;
-              justStarted = false;
-            } else {
-              // Get the north east, and south west corners of the bounding box of all points
-              if (lat > latNorth) {
-                latNorth = lat;
-              } else if (lat < latSouth) {
-                latSouth = lat;
-              }
-              if (lng > lngEast) {
-                lngEast = lng;
-              } else if (lng < lngWest) {
-                lngWest = lng;
-              }
-            }
-            // Get title
-            String title = k.getName() + ", " + k.getCity();
-            geoData.points.add(
-                new Point(title, lat, lng, k.getGeoAccuracy(), k, inv, inv.getKeyString(), null));
-            geoData.size++;
-          } catch (Exception e) {
-            xLogger
-                .warn("{0} when getting kiosk {1}: {2}", e.getClass().getName(), inv.getKioskId(),
-                    e.getMessage());
-          }
-        } // end for
-        geoData.maxValue = maxStock;
-        // Add the metadata
-        if (geoData.points.size() >= 2) {
-          geoData.latLngBounds =
-              "[" + latNorth + "," + lngEast + "," + latSouth + "," + lngWest + "]";
+      // Get the accounts service
+      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
+      // Init. max stock (required for scaling the markers)
+      BigDecimal maxStock = BigDecimal.ZERO;
+      // Init. bounding box coordinates (required for centering the map to this box)
+      double latNorth = 0, lngEast = 0, latSouth = 0, lngWest = 0;
+      boolean justStarted = true;
+      for (IInvntry inv : inventories) {
+        BigDecimal stockOnHand = inv.getStock();
+        // Get the max stock until now
+        if (BigUtil.greaterThan(stockOnHand, maxStock)) {
+          maxStock = stockOnHand;
         }
-      } catch (ServiceException e) {
-        return geoData;
+        // Get kiosk
+        try {
+          IKiosk k = as.getKiosk(inv.getKioskId(), false);
+          // Check if this kiosk is to be included or not (say, given permissions or other constraints)
+          if (includeKiosks != null && !includeKiosks.contains(k)) {
+            continue;
+          }
+          // Get coordinates
+          double lat = k.getLatitude();
+          double lng = k.getLongitude();
+
+          // If lat/lng are 0, then do not add
+          if (lat == 0 && lng == 0) {
+            continue;
+          }
+
+          if (justStarted) {
+            latNorth = latSouth = lat;
+            lngEast = lngWest = lng;
+            justStarted = false;
+          } else {
+            // Get the north east, and south west corners of the bounding box of all points
+            if (lat > latNorth) {
+              latNorth = lat;
+            } else if (lat < latSouth) {
+              latSouth = lat;
+            }
+            if (lng > lngEast) {
+              lngEast = lng;
+            } else if (lng < lngWest) {
+              lngWest = lng;
+            }
+          }
+          // Get title
+          String title = k.getName() + ", " + k.getCity();
+          geoData.points.add(
+              new Point(title, lat, lng, k.getGeoAccuracy(), k, inv, inv.getKeyString(), null));
+          geoData.size++;
+        } catch (Exception e) {
+          xLogger
+              .warn("{0} when getting kiosk {1}: {2}", e.getClass().getName(), inv.getKioskId(),
+                  e.getMessage());
+        }
+      } // end for
+      geoData.maxValue = maxStock;
+      // Add the metadata
+      if (geoData.points.size() >= 2) {
+        geoData.latLngBounds =
+            "[" + latNorth + "," + lngEast + "," + latSouth + "," + lngWest + "]";
       }
     }
     return geoData;

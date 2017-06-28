@@ -26,9 +26,8 @@
  */
 package com.logistimo.api.controllers;
 
-import com.logistimo.api.util.SecurityUtils;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.entity.IConfig;
-import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;

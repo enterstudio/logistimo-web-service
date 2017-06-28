@@ -23,7 +23,19 @@
 
 package com.logistimo.api.controllers;
 
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.api.builders.HUBuilder;
+import com.logistimo.api.models.HUModel;
+import com.logistimo.api.util.SearchUtil;
+import com.logistimo.auth.GenericAuthoriser;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.logger.XLog;
+import com.logistimo.materials.entity.IHandlingUnit;
+import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
+import com.logistimo.models.ICounter;
 import com.logistimo.pagination.Navigator;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -31,25 +43,13 @@ import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.utils.Counter;
-import com.logistimo.models.ICounter;
-import com.logistimo.api.util.SearchUtil;
-import com.logistimo.api.util.SessionMgr;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.builders.HUBuilder;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.api.models.HUModel;
-import com.logistimo.materials.entity.IHandlingUnit;
-import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.Counter;
 import com.logistimo.utils.MsgUtil;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.api.auth.Authoriser;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,7 +84,7 @@ public class HandlingUnitController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     HandlingUnitServiceImpl handlingUnitService;
@@ -201,7 +201,7 @@ public class HandlingUnitController {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!Authoriser.authoriseAdmin(request)) {
+    if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     IHandlingUnit hu = builder.buildHandlingUnit(huModel);

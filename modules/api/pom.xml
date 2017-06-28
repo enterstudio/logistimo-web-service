@@ -74,6 +74,11 @@
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
+            <artifactId>logistimo-approvals-client</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.logistimo</groupId>
             <artifactId>logistimo-predictions</artifactId>
             <version>2.5.0</version>
         </dependency>
@@ -173,8 +178,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>

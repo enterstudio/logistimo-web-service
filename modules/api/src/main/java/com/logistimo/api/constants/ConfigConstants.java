@@ -38,4 +38,5 @@ public class ConfigConstants {
   public static final String CUSTOM_REPORTS = "Custom Reports";
   public static final String NOTIFICATIONS = "Notifications";
   public static final String BULLETIN_BOARD = "Bulletin Board";
+  public static final String APPROVALS = "Approvals";
 }

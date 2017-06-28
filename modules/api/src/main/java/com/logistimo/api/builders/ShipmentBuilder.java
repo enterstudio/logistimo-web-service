@@ -23,9 +23,12 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.api.util.CommonUtil;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -34,31 +37,25 @@ import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IHandlingUnit;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.IHandlingUnitService;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
+import com.logistimo.models.shipments.ShipmentItemBatchModel;
+import com.logistimo.models.shipments.ShipmentItemModel;
+import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
-import com.logistimo.models.shipments.ShipmentItemBatchModel;
-import com.logistimo.models.shipments.ShipmentItemModel;
-import com.logistimo.models.shipments.ShipmentModel;
-
-import com.logistimo.config.models.DomainConfig;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.auth.Authoriser;
 import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
@@ -66,6 +63,8 @@ import com.logistimo.shipments.entity.IShipmentItemBatch;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.CommonUtils;
+import com.logistimo.utils.LocalDateUtil;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -164,14 +163,14 @@ public class ShipmentBuilder {
       if (model.customerId != null) {
         try {
           IKiosk kiosk = entitiesService.getKiosk(model.customerId, false);
-          model.customerAdd = CommonUtil
+          model.customerAdd = CommonUtils
               .getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());
           model.customerName = kiosk.getName();
           if (deep) {
             Integer vPermission = kiosk.getVendorPerm();
             if (vPermission < 2 && model.vendorId != null) {
               vPermission =
-                  Authoriser.authoriseEntityPerm(model.vendorId, user.getRole(), user.getLocale(),
+                  EntityAuthoriser.authoriseEntityPerm(model.vendorId, user.getRole(), user.getLocale(),
                       user.getUsername(), user.getDomainId());
             }
             model.atv = vPermission > 1;
@@ -185,14 +184,14 @@ public class ShipmentBuilder {
       if (model.vendorId != null) {
         try {
           kiosk = entitiesService.getKiosk(model.vendorId, false);
-          model.vendorAdd = CommonUtil
+          model.vendorAdd = CommonUtils
               .getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());;
           model.vendorName = kiosk.getName();
           if (deep) {
             Integer cPermission = kiosk.getCustomerPerm();
             if (cPermission < 2) {
               cPermission =
-                  Authoriser.authoriseEntityPerm(model.customerId, user.getRole(), user.getLocale(),
+                  EntityAuthoriser.authoriseEntityPerm(model.customerId, user.getRole(), user.getLocale(),
                       user.getUsername(), user.getDomainId());
             }
             model.atc = cPermission > 1;

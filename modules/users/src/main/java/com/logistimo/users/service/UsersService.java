@@ -23,12 +23,12 @@
 
 package com.logistimo.users.service;
 
-import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
+import com.logistimo.users.entity.IUserAccount;
 
 import java.util.Date;
 import java.util.List;
@@ -56,7 +56,7 @@ public interface UsersService extends Service {
   /**
    * Get a user account, given the domain and user ID (also gets kiosks associated with this user); using 'deep=false' in alternate method will only retrieve the user object
    */
-  IUserAccount getUserAccount(String userId) throws ServiceException, ObjectNotFoundException;
+  IUserAccount getUserAccount(String userId) throws ObjectNotFoundException;
 
   /**
    * Get all users visible to a given role only
@@ -163,5 +163,7 @@ public interface UsersService extends Service {
    * Set the UI preference for a user
    */
   void setUiPreferenceForUser(String userId, boolean uiPref) throws ServiceException;
+
+  boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role);
 
 }

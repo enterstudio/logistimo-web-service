@@ -351,6 +351,7 @@
                 $scope.tempOnlyAU = null;
                 $scope.tempEnabled = null;
                 $scope.allocate = null;
+                $scope.approvalConfig = null;
             };
 
             $scope.refreshDomainConfig = function () {
@@ -389,6 +390,10 @@
                     if(checkNotNullEmpty($scope.assetConfig))
                         $scope.generateAssetFilters();
                     $scope.domainName = data.data.dnm;
+                    $scope.approvalConfig = data.data.apc;
+                    $scope.iPoae = data.data.poae;
+                    $scope.iSoae = data.data.soae;
+                    $scope.iToae = data.data.toae;
                     $rootScope.curUser = $scope.curUser = data.data.unm;
                     $scope.i18n.language = {"locale":data.data.lng};
                     $scope.mailId = data.data.em;

@@ -24,6 +24,7 @@
 package com.logistimo.api.models;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -228,4 +229,102 @@ public class OrderModel {
    * Order update time
    */
   public String orderUpdatedAt;
+  /**
+   * Order approval request required
+   */
+  private boolean appr;
+  /**
+   * primary approvers
+   */
+  private List<UserModel> pa = new ArrayList<>(1);
+  /**
+   * secondary approvers
+   */
+  private List<UserModel> sa = new ArrayList<>(1);
+  /**
+   * Order approval message
+   */
+  private String aprmsg;
+  /**
+   * domain ids
+   */
+  private List<Long> dids = new ArrayList<>(1);
+  /**
+   * Order approver detail
+   */
+  private String aprdetail;
+  /**
+   * Order visible to customer
+   * @return
+   */
+  private boolean vtc;
+
+  /**
+   * Order visible to vendor
+   * @return
+   */
+  private boolean vtv;
+
+  public List<UserModel> getPa() {
+    return pa;
+  }
+
+  public void setPa(List<UserModel> pa) {
+    this.pa = pa;
+  }
+
+  public List<UserModel> getSa() {
+    return sa;
+  }
+
+  public void setSa(List<UserModel> sa) {
+    this.sa = sa;
+  }
+
+  public String getAprmsg() {
+    return aprmsg;
+  }
+
+  public void setAprmsg(String aprmsg) {
+    this.aprmsg = aprmsg;
+  }
+
+  public List<Long> getDids() {
+    return dids;
+  }
+
+  public void setDids(List<Long> dids) {
+    this.dids = dids;
+  }
+
+  public String getAprdetail() {
+    return aprdetail;
+  }
+
+  public void setAprdetail(String aprdetail) {
+    this.aprdetail = aprdetail;
+  }
+  public boolean isAppr() {
+    return appr;
+  }
+
+  public void setAppr(boolean appr) {
+    this.appr = appr;
+  }
+
+  public boolean isVtc() {
+    return vtc;
+  }
+
+  public void setVtc(boolean vtc) {
+    this.vtc = vtc;
+  }
+
+  public boolean isVtv() {
+    return vtv;
+  }
+
+  public void setVtv(boolean vtv) {
+    this.vtv = vtv;
+  }
 }

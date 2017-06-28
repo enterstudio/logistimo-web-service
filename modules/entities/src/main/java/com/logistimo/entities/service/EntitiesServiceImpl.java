@@ -24,6 +24,7 @@
 package com.logistimo.entities.service;
 
 import com.google.gson.Gson;
+
 import com.logistimo.AppFactory;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
@@ -46,7 +47,14 @@ import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
 import com.logistimo.entities.dao.EntityDao;
 import com.logistimo.entities.dao.IEntityDao;
-import com.logistimo.entities.entity.*;
+import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IKiosk;
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.entity.IKioskToPoolGroup;
+import com.logistimo.entities.entity.IPoolGroup;
+import com.logistimo.entities.entity.IUserToKiosk;
+import com.logistimo.entities.entity.KioskLink;
+import com.logistimo.entities.entity.UserToKiosk;
 import com.logistimo.entities.models.EntityLinkModel;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.models.UserEntitiesModel;
@@ -63,7 +71,6 @@ import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
@@ -78,14 +85,27 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.QueryUtil;
 import com.logistimo.utils.StringUtil;
+
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.jdo.JDOException;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
-import java.util.*;
 
+@Service
 public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService {
 
   private static final XLog xLogger = XLog.getLog(EntitiesServiceImpl.class);
@@ -193,7 +213,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       List<IUserToKiosk> results = (List<IUserToKiosk>) userToKioskQuery.execute(kioskId);
       if (results != null && !results.isEmpty()) {
         cursor = QueryUtil.getCursor(results);
-        users = new ArrayList<IUserAccount>();
+        users = new ArrayList<>();
         Iterator<IUserToKiosk> it = results.iterator();
         while (it.hasNext()) {
           IUserToKiosk u2k = it.next();
@@ -214,6 +234,389 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return new Results(users, cursor);
   }
 
+  /**
+   * Add approvers for a given kiosk id
+   * @param kioskId
+   * @param approversModel
+   * @param userName
+   * @throws ServiceException
+   */
+  public void addApprovers(Long kioskId, List<IApprovers> approversModel, String userName) throws ServiceException {
+    xLogger.fine("Entering addApprover: kiosk = {0}, approvers = {1}", kioskId);
+    if(kioskId == null) {
+      throw new ServiceException("Invalid parameters for Approvers");
+    }
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    List<IApprovers> primaryApproversList = getApprovers(kioskId, IApprovers.PRIMARY_APPROVER);
+    List<IApprovers> secondaryApproversList = getApprovers(kioskId, IApprovers.SECONDARY_APPROVER);
+    List<IApprovers> primaryApproversModel = getApproversList(kioskId, approversModel, IApprovers.PRIMARY_APPROVER);
+    List<IApprovers> secondaryApproversModel = getApproversList(kioskId, approversModel, IApprovers.SECONDARY_APPROVER);
+    try {
+      deleteApprovers(primaryApproversList, primaryApproversModel, pm);
+      deleteApprovers(secondaryApproversList, secondaryApproversModel, pm);
+      persistApprovers(primaryApproversList, primaryApproversModel, pm, userName);
+      persistApprovers(secondaryApproversList, secondaryApproversModel, pm, userName);
+    } catch (JDOException e) {
+      xLogger.fine("Could not persist approver for entity {0}", kioskId);
+    } finally {
+      pm.close();
+    }
+  }
+
+  /**
+   * Get the list of approvers for a given type PRIMARY OR SECONDARY
+   * @param approversList
+   * @param type
+   * @return
+   */
+  private List<IApprovers> getApproversList(Long kioskId, List<IApprovers> approversList, int type){
+    List<IApprovers> approvers = null;
+    if(approversList != null && approversList.size() > 0) {
+      approvers = new ArrayList<>();
+      for (IApprovers apr : approversList) {
+        if (apr.getType().equals(type)) {
+          apr.setKioskId(kioskId);
+          approvers.add(apr);
+        }
+      }
+    }
+    return approvers;
+  }
+
+  /**
+   * Delete the approvers from db which are not in the model.
+   * @param approvers
+   * @param approversModel
+   * @param pm
+   */
+  public void deleteApprovers(List<IApprovers> approvers, List<IApprovers> approversModel, PersistenceManager pm) {
+    List<IApprovers> deleteList = new ArrayList<>();
+    if(approvers != null && approvers.size() > 0) {
+      if(approversModel != null && approversModel.size() > 0) {
+        for(IApprovers apr : approvers) {
+          boolean found = false;
+          for(IApprovers aprm : approversModel) {
+            if(aprm.getUserId().equals(apr.getUserId())) {
+              found = true;
+              break;
+            }
+          }
+          if(!found) {
+            deleteList.add(apr);
+          }
+        }
+
+      } else {
+        deleteList = approvers;
+      }
+      pm.deletePersistentAll(deleteList);
+    }
+  }
+
+  /**
+   * Persist the approvers which are new and update the one which already exists
+   * @param approvers
+   * @param approversModel
+   * @param pm
+   * @param userName
+   */
+  public void persistApprovers(List<IApprovers> approvers, List<IApprovers> approversModel, PersistenceManager pm, String userName) {
+    List<IApprovers> persistList = new ArrayList<>();
+    if(approversModel != null && approversModel.size() > 0) {
+      if(approvers != null && approvers.size() > 0) {
+        for(IApprovers appr: approversModel) {
+          boolean found = false;
+          for(IApprovers apr : approvers) {
+            if(appr.getUserId().equals(apr.getUserId())) {
+              apr.setType(appr.getType());
+              apr.setUpdatedBy(userName);
+              apr.setUpdatedOn(new Date());
+              apr.setSourceDomainId(appr.getSourceDomainId());
+              persistList.add(apr);
+              found = true;
+              break;
+            }
+          }
+          if(!found) {
+            appr.setCreatedBy(userName);
+            appr.setCreatedOn(new Date());
+            persistList.add(appr);
+          }
+        }
+      } else {
+        for(IApprovers appr: approversModel) {
+          appr.setCreatedBy(userName);
+          appr.setCreatedOn(new Date());
+          persistList.add(appr);
+        }
+      }
+      pm.makePersistentAll(persistList);
+    }
+  }
+
+  /**
+   * Checks whether a given user is an approver for purchase/sales/transfer orders in a given domain
+   * @param userId
+   * @param domainId
+   * @return
+   */
+  public boolean isAnApprover(String userId, Long domainId) {
+    if(StringUtils.isNotEmpty(userId) && domainId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("uid == userIdParam && sdid == domainIdParam");
+        query.declareParameters("String userIdParam, Long domainIdParam");
+        params.put("userIdParam", userId);
+        params.put("domainIdParam", domainId);
+        IApprovers approvers = (IApprovers) query.executeWithMap(params);
+        if(approvers != null) {
+          return true;
+        }
+      } catch (Exception e) {
+        xLogger.fine("Failed to get approvals for user: {0} in domain : {1}", userId, domainId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public void deleteApprovers(Long kioskId, String userId) {
+    if(StringUtils.isNotEmpty(userId) && kioskId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("kid == kioskIdParam && uid == userIdParam");
+        query.declareParameters("Long kioskIdParam, String userIdParam");
+        params.put("kioskIdParam", kioskId);
+        params.put("userIdParam", userId);
+        IApprovers approvers = (IApprovers) query.executeWithMap(params);
+        pm.deletePersistent(approvers);
+      } catch (Exception e) {
+        xLogger.fine("Failed to get approver for kiosk: {0} with userid : {1}", kioskId, userId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+
+    }
+  }
+
+  /*public IApprovers getApproversByKioskAndUser(Long kioskId, String userId) {
+    IApprovers approver = null;
+    if(StringUtils.isNotEmpty(userId) && kioskId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("kid == kioskIdParam && uid == userIdParam");
+        query.declareParameters("Long kioskIdParam, String userIdParam");
+        params.put("kioskIdParam", kioskId);
+        params.put("userIdParam", userId);
+        IApprovers approvers = (IApprovers) query.executeWithMap(params);
+        approver = pm.detachCopy(approvers);
+      } catch (Exception e) {
+        xLogger.fine("Failed to get approver for kiosk: {0} with userid : {1}", kioskId, userId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+
+    }
+    return approver;
+  }*/
+
+  /**
+   * Get the list of approvers for a given kiosk id
+   * @param kioskId
+   * @return
+   */
+  public List<IApprovers> getApprovers(Long kioskId) {
+    List<IApprovers> appList = null;
+    if(kioskId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("kid == kioskIdParam");
+        query.declareParameters("Long kioskIdParam");
+        List<IApprovers> approversList = (List<IApprovers>) query.execute(kioskId);
+        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+      } catch (Exception e) {
+        xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return appList;
+
+  }
+
+  /**
+   * Get all the approvers for a given kioskId and order type
+   * @param kioskId
+   * @param orderType
+   * @return
+   */
+  public List<IApprovers> getApprovers(Long kioskId, String orderType) {
+    List<IApprovers> appList = null;
+    if(kioskId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("kid == kioskIdParam && otype == orderTypeParam");
+        query.declareParameters("Long kioskIdParam, String orderTypeParam");
+        params.put("kioskIdParam", kioskId);
+        params.put("orderTypeParam", orderType);
+        List<IApprovers> approversList = (List<IApprovers>) query.executeWithMap(params);
+        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+      } catch (Exception e) {
+        xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return appList;
+  }
+
+  /**
+   * Get all the approvers for a given kioskId and order type and approver type
+   * @param kioskId
+   * @param type
+   * @param orderType
+   * @return
+   */
+  public List<IApprovers> getApprovers(Long kioskId, int type, String orderType) {
+    List<IApprovers> appList = null;
+    if(kioskId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("kid == kioskIdParam && type == typeParam && otype == orderTypeParam");
+        query.declareParameters("Long kioskIdParam, int typeParam, String orderTypeParam");
+        params.put("kioskIdParam", kioskId);
+        params.put("typeParam", type);
+        params.put("orderTypeParam", orderType);
+        List<IApprovers> approversList = (List<IApprovers>) query.executeWithMap(params);
+        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+      } catch (Exception e) {
+        xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+
+    return appList;
+  }
+
+  /**
+   * Get all the approvers for a given kioskId and approver type
+   * @param kioskId
+   * @return
+   */
+  public List<IApprovers> getApprovers(Long kioskId, int type) {
+    List<IApprovers> appList = null;
+    if(kioskId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query.setFilter("kid == kioskIdParam && type == typeParam");
+        query.declareParameters("Long kioskIdParam, int typeParam");
+        params.put("kioskIdParam", kioskId);
+        params.put("typeParam", type);
+        List<IApprovers> approversList = (List<IApprovers>) query.executeWithMap(params);
+        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+      } catch (Exception e) {
+        xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return appList;
+
+  }
   /**
    * Add a new kiosk in a given domain
    */
@@ -467,8 +870,9 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
   /**
    * Get a kiosk, given a unique kiosk Id (this is unique across domains)
    */
-  public IKiosk getKiosk(Long kioskId) throws ServiceException {
-    return getKiosk(kioskId, true);
+  public IKiosk getKioskIfPresent(Long kioskId) throws ServiceException,
+      ObjectNotFoundException {
+    return getKioskIfPresent(kioskId, true);
   }
 
   @SuppressWarnings("unchecked")
@@ -490,8 +894,23 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return kioskList;
   }
 
-  @SuppressWarnings("unchecked")
   public IKiosk getKiosk(Long kioskId, boolean deep) throws ServiceException {
+    try {
+      return getKioskIfPresent(kioskId, deep);
+    } catch (ObjectNotFoundException e) {
+      xLogger.warn("Kiosk {0} not found", e, kioskId);
+    }
+    return null;
+  }
+
+  @Override
+  public IKiosk getKiosk(Long kioskId) throws ServiceException {
+    return getKiosk(kioskId, true);
+  }
+
+  @SuppressWarnings("unchecked")
+  public IKiosk getKioskIfPresent(Long kioskId, boolean deep)
+      throws ServiceException, ObjectNotFoundException {
     xLogger.fine("Entering getKiosk");
     IKiosk kiosk = null;
     PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -536,7 +955,8 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       }
     } catch (JDOObjectNotFoundException e) {
       xLogger.warn("getKiosk: Kiosk {0} does not exist", kioskId);
-      throw new ServiceException(messages.getString("kiosk") + " " + kioskId + " " + backendMessages
+      throw new ObjectNotFoundException(
+          messages.getString("kiosk") + " " + kioskId + " " + backendMessages
           .getString("error.notfound"), e);
     } catch (Exception e) {
       throw new ServiceException(e.getMessage(), e);
@@ -960,35 +1380,6 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       pm.close();
     }
   }
-
-  @Override
-  public boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role) {
-    Map<String, Object> params = new HashMap<>(2);
-    params.put("domainIdParam", domainId);
-    params.put("userIdParam", userId);
-    String queryStr;
-    if (userId != null && userId.equals(rUserId)) {
-      return true;
-    } else if (SecurityUtil.compareRoles(role, SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
-      //Todo: Need to check user domainId and all its children domains
-      queryStr =
-          "SELECT userId FROM " + JDOUtils.getImplClass(IUserAccount.class).getName()
-              + " WHERE userId == userIdParam && dId.contains(domainIdParam)" +
-              " PARAMETERS String userIdParam, Long domainIdParam";
-    } else {
-      queryStr =
-          "SELECT userId FROM " + JDOUtils.getImplClass(IUserAccount.class).getName()
-              + " WHERE userId == userIdParam && registeredBy == registeredByParam && sdId == domainIdParam"
-              +
-              " PARAMETERS String userIdParam, String registeredByParam, Long domainIdParam";
-      params.put("registeredByParam", rUserId);
-    }
-    return getAccess(params, queryStr);
-  }
-    
-	/* (non-Javadoc)
-         * @see org.lggi.samaanguru.service.AccountsService#addPoolGroup(org.lggi.samaanguru.entity.PoolGroup)
-	 */
 
   private boolean getAccess(Map<String, Object> params, String queryStr) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -1745,12 +2136,6 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     xLogger.fine("Exiting destroy");
   }
 
-  public Class<? extends Service> getInterface() {
-    xLogger.fine("Entering getInterface");
-    xLogger.fine("Exiting getInterface");
-    return EntitiesServiceImpl.class;
-  }
-
   public void init(Services services) throws ServiceException {
     xLogger.fine("Entering init");
     // TODO Auto-generated method stub
@@ -2343,7 +2728,8 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
   }
 
   @Override
-  public List<String> getAssetTagsToRegister(Long kId) throws ServiceException {
+  public List<String> getAssetTagsToRegister(Long kId)
+      throws ServiceException, ObjectNotFoundException {
     IKiosk kiosk = getKiosk(kId, false);
     List<String> tagsForDevices = new ArrayList<String>();
     String state = kiosk.getState();
@@ -2370,7 +2756,8 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return tagsForDevices;
   }
 
-  public void registerOrUpdateDevices(List<IAsset> assetList) throws ServiceException {
+  public void registerOrUpdateDevices(List<IAsset> assetList)
+      throws ServiceException, ObjectNotFoundException {
     if (assetList != null && !assetList.isEmpty()) {
       List<AssetModel> assetModels = new ArrayList<>(assetList.size());
 

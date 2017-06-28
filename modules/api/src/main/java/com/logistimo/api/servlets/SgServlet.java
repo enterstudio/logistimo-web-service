@@ -26,12 +26,12 @@
  */
 package com.logistimo.api.servlets;
 
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.api.security.SecurityMgr;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
+import com.logistimo.auth.SecurityMgr;
 import com.logistimo.constants.Constants;
 import com.logistimo.logger.XLog;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
 
 import java.io.IOException;
 import java.io.PrintWriter;

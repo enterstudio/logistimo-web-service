@@ -39,8 +39,7 @@ fi
 
 if [[ "$ACTIVEMQ_HOST" != "" ]]
 then
-  sed -ri "s~\(tcp:\/\/localhost:61616\)~$ACTIVEMQ_HOST~g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/camel-tasks-activemq-ref.xml
-        cp -Rf $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/camel-tasks-activemq-ref.xml $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/camel-tasks.xml
+  sed -ri "s~\(tcp:\/\/localhost:61616\)~$ACTIVEMQ_HOST~g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/camel-tasks.xml
 fi
 
 JAVA_OPTS="-Xms$JAVA_XMS -Xmx$JAVA_XMX \

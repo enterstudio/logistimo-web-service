@@ -23,42 +23,44 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.api.models.EntityApproversModel;
+import com.logistimo.api.models.EntityDomainModel;
+import com.logistimo.api.models.EntityHierarchyModel;
+import com.logistimo.api.models.EntityModel;
+import com.logistimo.api.models.EntitySummaryModel;
+import com.logistimo.api.models.PermissionModel;
+import com.logistimo.api.models.UserModel;
+import com.logistimo.api.request.NetworkViewResponseObj;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.domains.entity.IDomain;
+import com.logistimo.domains.service.DomainsService;
+import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.domains.utils.DomainsUtil;
+import com.logistimo.entities.auth.EntityAuthoriser;
+import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IKiosk;
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.models.EntityLinkModel;
+import com.logistimo.entities.service.EntitiesService;
+import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.inventory.InventoryUtils;
+import com.logistimo.logger.XLog;
+import com.logistimo.models.superdomains.DomainSuggestionModel;
 import com.logistimo.pagination.Results;
 import com.logistimo.reports.entity.slices.IReportsSlice;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
-import com.logistimo.domains.utils.DomainsUtil;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.auth.Authoriser;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.EntityDomainModel;
-import com.logistimo.api.models.EntityHierarchyModel;
-import com.logistimo.entities.models.EntityLinkModel;
-import com.logistimo.inventory.InventoryUtils;
-import com.logistimo.api.models.EntityModel;
-import com.logistimo.api.models.EntitySummaryModel;
-import com.logistimo.api.models.PermissionModel;
-import com.logistimo.models.superdomains.DomainSuggestionModel;
-import com.logistimo.api.request.NetworkViewResponseObj;
-import com.logistimo.api.util.CommonUtil;
-import com.logistimo.domains.entity.IDomain;
-import com.logistimo.domains.service.DomainsService;
-import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.entity.IKioskLink;
-import com.logistimo.entities.service.EntitiesService;
-import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.BigUtil;
+import com.logistimo.utils.CommonUtils;
+import com.logistimo.utils.LocalDateUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -254,56 +256,48 @@ public class EntityBuilder {
   public Results buildEntityResults(Results kioskResults, Locale locale, String timezone) {
     List entities = kioskResults.getResults();
     List<EntityModel> newEntities = new ArrayList<EntityModel>();
-    try {
-      DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      Map<Long, String> domainNames = new HashMap<>(1);
-      if (entities != null) {
-        UsersService as = null;
-        try {
-          as = Services.getService(UsersServiceImpl.class);
-        } catch (ServiceException e) {
-          xLogger.warn("Error in fetching service", e);
+    DomainsService ds = Services.getService(DomainsServiceImpl.class);
+    Map<Long, String> domainNames = new HashMap<>(1);
+    if (entities != null) {
+      UsersService as = null;
+      as = Services.getService(UsersServiceImpl.class);
+      int sno = kioskResults.getOffset() + 1;
+      for (Object obj : entities) {
+        IKiosk kiosk = (IKiosk) obj;
+        String domainName = domainNames.get(kiosk.getDomainId());
+        if (domainName == null) {
+          IDomain domain = null;
+          try {
+            domain = ds.getDomain(kiosk.getDomainId());
+          } catch (Exception e) {
+            xLogger.warn("Error while fetching Domain {0}", kiosk.getDomainId());
+          }
+          if (domain != null) {
+            domainName = domain.getName();
+          } else {
+            domainName = Constants.EMPTY;
+          }
+          domainNames.put(kiosk.getDomainId(), domainName);
         }
-        int sno = kioskResults.getOffset() + 1;
-        for (Object obj : entities) {
-          IKiosk kiosk = (IKiosk) obj;
-          String domainName = domainNames.get(kiosk.getDomainId());
-          if (domainName == null) {
-            IDomain domain = null;
-            try {
-              domain = ds.getDomain(kiosk.getDomainId());
-            } catch (Exception e) {
-              xLogger.warn("Error while fetching Domain {0}", kiosk.getDomainId());
-            }
-            if (domain != null) {
-              domainName = domain.getName();
+        EntityModel model = buildBaseModel((IKiosk) obj, locale, timezone, domainName);
+        model.sno = sno++;
+        if (as != null) {
+          try {
+            IUserAccount ua;
+            if (StringUtils.isBlank(model.lub)) {
+              ua = as.getUserAccount(model.rus);
+              model.lub = ua.getUserId();
+              model.lubn = ua.getFullName();
             } else {
-              domainName = Constants.EMPTY;
+              ua = as.getUserAccount(model.lub);
+              model.lubn = ua.getFullName();
             }
-            domainNames.put(kiosk.getDomainId(), domainName);
+          } catch (Exception e) {
+            xLogger.warn("Error in fetching user details", e);
           }
-          EntityModel model = buildBaseModel((IKiosk) obj, locale, timezone, domainName);
-          model.sno = sno++;
-          if (as != null) {
-            try {
-              IUserAccount ua;
-              if (StringUtils.isBlank(model.lub)) {
-                ua = as.getUserAccount(model.rus);
-                model.lub = ua.getUserId();
-                model.lubn = ua.getFullName();
-              } else {
-                ua = as.getUserAccount(model.lub);
-                model.lubn = ua.getFullName();
-              }
-            } catch (Exception e) {
-              xLogger.warn("Error in fetching user details", e);
-            }
-          }
-          newEntities.add(model);
         }
+        newEntities.add(model);
       }
-    } catch (ServiceException e) {
-      throw new InvalidServiceException("Unable to fetch domain details" + e, e);
     }
     return new Results(newEntities, kioskResults.getCursor(), kioskResults.getNumFound(),
         kioskResults.getOffset());
@@ -347,7 +341,7 @@ public class EntityBuilder {
     model.oo = k.isOptimizationOn();
     model.rus = k.getRegisteredBy();
     model.lub = k.getUpdatedBy();
-    model.add = CommonUtil.getAddress(k.getCity(),k.getTaluk(), k.getDistrict(), k.getState());
+    model.add = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
     model.be = k.isBatchMgmtEnabled();
     return model;
   }
@@ -433,7 +427,7 @@ public class EntityBuilder {
     model.oo = k.isOptimizationOn();
     model.sdid = k.getDomainId();
     model.sdname = name;
-    model.add = CommonUtil.getAddress(k.getCity(),k.getTaluk(), k.getDistrict(), k.getState());
+    model.add = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
     model.be = k.isBatchMgmtEnabled();
     if (k.getInventoryActiveTime() != null) {
       model.iat = LocalDateUtil.format(k.getInventoryActiveTime(), locale, timezone);
@@ -451,6 +445,113 @@ public class EntityBuilder {
                            boolean isAdd) {
     return buildKiosk(model, locale, timezone, userName, JDOUtils.createInstance(IKiosk.class),
         isAdd);
+  }
+
+  public List<IApprovers> buildApprovers(EntityApproversModel model, String username, Long domainId) {
+    List<IApprovers> approvers = null;
+    if(model != null) {
+      approvers = new ArrayList<>();
+      if(model.pap != null && model.pap.size() > 0) {
+        for(UserModel um : model.pap) {
+          IApprovers primaryApprover = JDOUtils.createInstance(IApprovers.class);
+          primaryApprover.setKioskId(model.entityId);
+          primaryApprover.setUserId(um.id);
+          primaryApprover.setType(IApprovers.PRIMARY_APPROVER);
+          primaryApprover.setOrderType(IApprovers.PURCHASE_ORDER);
+          primaryApprover.setCreatedBy(username);
+          primaryApprover.setCreatedOn(new Date());
+          primaryApprover.setSourceDomainId(domainId);
+          approvers.add(primaryApprover);
+        }
+      }
+      if(model.sap != null && model.sap.size() > 0) {
+        for(UserModel um : model.sap) {
+          IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
+          secondaryApprover.setKioskId(model.entityId);
+          secondaryApprover.setUserId(um.id);
+          secondaryApprover.setType(IApprovers.SECONDARY_APPROVER);
+          secondaryApprover.setOrderType(IApprovers.PURCHASE_ORDER);
+          secondaryApprover.setCreatedBy(username);
+          secondaryApprover.setCreatedOn(new Date());
+          secondaryApprover.setSourceDomainId(domainId);
+          approvers.add(secondaryApprover);
+        }
+      }
+      if(model.pas != null && model.pas.size() > 0) {
+        for(UserModel um : model.pas) {
+          IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
+          secondaryApprover.setKioskId(model.entityId);
+          secondaryApprover.setUserId(um.id);
+          secondaryApprover.setType(IApprovers.PRIMARY_APPROVER);
+          secondaryApprover.setOrderType(IApprovers.SALES_ORDER);
+          secondaryApprover.setCreatedBy(username);
+          secondaryApprover.setCreatedOn(new Date());
+          secondaryApprover.setSourceDomainId(domainId);
+          approvers.add(secondaryApprover);
+        }
+      }
+      if(model.sas != null && model.sas.size() > 0) {
+        for(UserModel um : model.sas) {
+          IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
+          secondaryApprover.setKioskId(model.entityId);
+          secondaryApprover.setUserId(um.id);
+          secondaryApprover.setType(IApprovers.SECONDARY_APPROVER);
+          secondaryApprover.setOrderType(IApprovers.SALES_ORDER);
+          secondaryApprover.setCreatedBy(username);
+          secondaryApprover.setCreatedOn(new Date());
+          secondaryApprover.setSourceDomainId(domainId);
+          approvers.add(secondaryApprover);
+        }
+      }
+
+    }
+    return approvers;
+  }
+
+  public EntityApproversModel buildApprovalsModel(List<IApprovers> approvers, UsersService as, Locale locale,
+                                                  String timezone) {
+    EntityApproversModel model = new EntityApproversModel();
+    if(approvers != null && approvers.size() > 0) {
+      List<String> pap = new ArrayList<>();
+      List<String> sap = new ArrayList<>();
+      List<String> pas = new ArrayList<>();
+      List<String> sas = new ArrayList<>();
+      UserBuilder userBuilder = new UserBuilder();
+      for(IApprovers apr : approvers) {
+        if(StringUtils.isNotEmpty(apr.getUserId())) {
+          if(apr.getType().equals(IApprovers.PRIMARY_APPROVER)) {
+            if(apr.getOrderType().equals(IApprovers.PURCHASE_ORDER)) {
+              pap.add(apr.getUserId());
+            } else {
+              pas.add(apr.getUserId());
+            }
+          } else {
+            if(apr.getOrderType().equals(IApprovers.PURCHASE_ORDER)) {
+              sap.add(apr.getUserId());
+            } else {
+              sas.add(apr.getUserId());
+            }
+          }
+        }
+      }
+      if(pap.size() > 0) {
+        model.pap = userBuilder.buildUserModels(constructUserAccount(as, pap), locale, timezone, true, 0);
+      }
+      if(sap.size() > 0) {
+        model.sap = userBuilder.buildUserModels(constructUserAccount(as, sap), locale, timezone, true, 0);
+      }
+      if(pas.size() > 0) {
+        model.pas = userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true, 0);
+      }
+      if(sap.size() > 0) {
+        model.sas = userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true, 0);
+      }
+      model.createdBy = approvers.get(0).getCreatedBy();
+      model.lastUpdated = approvers.get(0).getUpdatedOn();
+      model.entityId = approvers.get(0).getKioskId();
+    }
+
+    return model;
   }
 
   public IKiosk buildKiosk(EntityModel model, Locale locale, String timezone, String userName,
@@ -525,7 +626,7 @@ public class EntityBuilder {
       m.desc = kl.getDescription();
       m.rt = StringUtils.isBlank(kl.getRouteTag()) ? "--notag--" : kl.getRouteTag();
       m.ri = kl.getRouteIndex();
-      m.perm = Authoriser.authoriseEntityPerm(k.getKioskId(), role, locale, userId, domainId);
+      m.perm = EntityAuthoriser.authoriseEntityPerm(k.getKioskId(), role, locale, userId, domainId);
       if (domainName == null) {
         IDomain domain;
         try {
@@ -556,7 +657,7 @@ public class EntityBuilder {
       m.sdid = k.getDomainId();
       m.id = k.getKioskId();
       m.nm = k.getName();
-      m.loc = CommonUtil.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
+      m.loc = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
       m.rt = StringUtils.isBlank(k.getRouteTag()) ? "--notag--" : k.getRouteTag();
       m.ri = k.getRouteIndex();
       m.lt = k.getLatitude();
@@ -735,6 +836,21 @@ public class EntityBuilder {
       }
     }
     return link;
+  }
+
+  private List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
+    if (userIds != null && userIds.size() > 0) {
+      List<IUserAccount> list = new ArrayList<>(userIds.size());
+      for (String userId : userIds) {
+        try {
+          list.add(as.getUserAccount(userId));
+        } catch (Exception ignored) {
+          // do nothing
+        }
+      }
+      return list;
+    }
+    return new ArrayList<>();
   }
 
   static class Link {

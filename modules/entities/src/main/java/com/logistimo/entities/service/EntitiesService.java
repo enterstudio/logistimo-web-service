@@ -26,20 +26,19 @@ package com.logistimo.entities.service;
 
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.domains.entity.IDomain;
+import com.logistimo.entities.entity.IApprovers;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.entity.IPoolGroup;
 import com.logistimo.entities.models.EntityLinkModel;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.models.UserEntitiesModel;
-import com.logistimo.users.entity.IUserAccount;
-
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
-import org.json.JSONObject;
+import com.logistimo.users.entity.IUserAccount;
 
 import java.util.Date;
 import java.util.List;
@@ -82,7 +81,12 @@ public interface EntitiesService extends Service {
    */
   List<IKiosk> getKiosksByIds(List<Long> kioskIds) throws ServiceException;
 
+  IKiosk getKioskIfPresent(Long kioskId) throws ServiceException, ObjectNotFoundException;
+
   IKiosk getKiosk(Long kioskId, boolean deep) throws ServiceException;
+
+  IKiosk getKioskIfPresent(Long kioskId, boolean deep)
+      throws ServiceException, ObjectNotFoundException;
 
   IKiosk getKioskByName(Long domainId, String kioskName) throws ServiceException;
 
@@ -119,8 +123,6 @@ public interface EntitiesService extends Service {
    * this user has access to which have relationship with the requested kiosk.
    */
   Integer hasAccessToKiosk(String userId, Long kioskId);
-
-  boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role);
 
   /**
    * Get kiosk Ids for a given user Id
@@ -306,9 +308,11 @@ public interface EntitiesService extends Service {
    * @return
    * @throws ServiceException
    */
-  List<String> getAssetTagsToRegister(Long kId) throws ServiceException;
+  List<String> getAssetTagsToRegister(Long kId) throws ServiceException,
+      ObjectNotFoundException;
 
-  void registerOrUpdateDevices(List<IAsset> assetList) throws ServiceException;
+  void registerOrUpdateDevices(List<IAsset> assetList)
+      throws ServiceException, ObjectNotFoundException;
 
   UserEntitiesModel getUserWithKiosks(String userId)
       throws ObjectNotFoundException, ServiceException;
@@ -332,4 +336,50 @@ public interface EntitiesService extends Service {
    */
   List<LocationSuggestionModel> getStateSuggestions(Long domainId, String text);
 
+  /**
+   * Add primary and secondary approvers for a given kiosk id
+   * @param kioskId
+   * @param approvers
+   * @return
+   */
+  void addApprovers(Long kioskId, List<IApprovers> approvers, String userName) throws ServiceException;
+
+  /**
+   * Get the list of approvers for a given kioskId and approver type
+   * @param kioskId
+   * @return
+   */
+  List<IApprovers> getApprovers(Long kioskId, int type);
+
+  /**
+   * Get the list of approvers for a given kioskId
+   * @param kioskId
+   * @return
+   */
+  List<IApprovers> getApprovers(Long kioskId);
+
+  /**
+   * Get the list of approvers for a given kioskId and orderType
+   * @param kioskId
+   * @param orderType
+   * @return
+   */
+  List<IApprovers> getApprovers(Long kioskId, String orderType);
+
+  /**
+   * Get the list of approvers for a given kioskId and orderType and approverType
+   * @param kioskId
+   * @param type
+   * @param orderType
+   * @return
+   */
+  List<IApprovers> getApprovers(Long kioskId, int type, String orderType);
+
+  /**
+   * Checks whether an user is an approver for purchase/sales/transfer order in that domain
+   * @param userId
+   * @param domainId
+   * @return
+   */
+  boolean isAnApprover(String userId, Long domainId);
 }

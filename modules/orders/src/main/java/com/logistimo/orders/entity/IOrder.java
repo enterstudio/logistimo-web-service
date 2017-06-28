@@ -23,10 +23,8 @@
 
 package com.logistimo.orders.entity;
 
-import com.logistimo.tags.entity.ITag;
-
 import com.logistimo.domains.ICrossDomain;
-import com.logistimo.events.IEvents;
+import com.logistimo.tags.entity.ITag;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -64,6 +62,9 @@ public interface IOrder extends ICrossDomain {
   int DISCOUNT_PERCENTAGE = 2;
   int TRANSFER = 0;
   int NONTRANSFER = 1;
+  Integer PURCHASE_ORDER = 1;
+  Integer SALES_ORDER = 2;
+  Integer TRANSFER_ORDER = 0;
 
   Long getOrderId();
 
@@ -276,4 +277,18 @@ public interface IOrder extends ICrossDomain {
   void setCancelledDiscrepancyReason(String cdrsn);
 
   String getPaymentHistory();
+
+  boolean isVisibleToCustomer();
+
+  void setVisibleToCustomer(boolean vtc);
+
+  boolean isVisibleToVendor();
+
+  void setVisibleToVendor(boolean vtv);
+
+  boolean isTransfer();
+
+  boolean isSales();
+
+  boolean isPurchase();
 }

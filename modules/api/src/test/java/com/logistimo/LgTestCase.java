@@ -23,11 +23,10 @@
 
 package com.logistimo;
 
-import com.logistimo.AppFactory;
 import com.logistimo.config.entity.IConfig;
-import com.logistimo.dao.JDOUtils;
-
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.SourceConstants;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.entity.IKiosk;
@@ -41,7 +40,6 @@ import com.logistimo.services.DuplicationException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.SourceConstants;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 
@@ -91,7 +89,8 @@ public class LgTestCase {
     AppFactory.get().getMemcacheService().put(IConfig.CONFIG_PREFIX + domainId, dc);
   }
 
-  protected IUserAccount getUser(String userId) throws ServiceException, ObjectNotFoundException {
+  protected IUserAccount getUser(String userId) throws ServiceException,
+      ObjectNotFoundException {
     return Services.getService(UsersServiceImpl.class).getUserAccount(userId);
   }
 

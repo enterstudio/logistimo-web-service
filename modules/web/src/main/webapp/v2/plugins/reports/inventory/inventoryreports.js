@@ -447,7 +447,7 @@ function InventoryReportController(s, timeout, getData) {
             if(s.hideFilter && s.tempFilters['filter']['from'].getTime() != newValue.getTime()) {
                 s.hideFilter = false;
                 copyFilters();
-                if(s.oldMetric != undefined && s.oldMetric != 'ot' && s.activeMetric == 'ot') {
+                if (s.oldMetric != undefined && s.oldMetric != 'ot' && s.activeMetric == 'ot') {
                     s.tempFilters['filter']['from'] = newValue;
                     s.oldMetric = undefined;
                 } else {

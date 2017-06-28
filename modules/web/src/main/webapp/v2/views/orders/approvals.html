@@ -1,0 +1,189 @@
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+<div class="box topbox">
+    <div ng-controller="OrdersApprovalCtrl">
+        <div class="filter-box form-group">
+            <div ng-include="'views/common/reset-filters.html'"/>
+            <div class="row">
+                <div class="col-sm-3">
+                    <span class="filter-label" ng-class="{'required':mxE}">{{resourceBundle.kiosk}}</span>
+                    <entity-select ent-model="entity" classes="form-control"
+                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}" disable="isDef(ordId) || isDef(reqId) || isDef(aprId)"></entity-select>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle['order']}}</span>
+                    <div class="has-feedback">
+                        <input type="text" class="form-control" ng-model="orderId" autocomplete="off" typeahead-wait-ms="300"
+                               placeholder="{{resourceBundle['ord.num']}}"  uib-typeahead="val for val in getSuggestions($viewValue,'oid')"
+                               typeahead-loading="loadingOrderId" typeahead-on-select="showOrder(orderId)" ng-disabled="isDef(entity) || isDef(reqId) || isDef(aprId)">
+                        <span ng-show="loadingOrderId" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">Request status</span>
+                    <select class="form-control" ng-model="reqStatus">
+                        <option value="">{{resourceBundle.all}}</option>
+                        <option value="pn">Pending</option>
+                        <option value="cn">Cancelled</option>
+                        <option value="rj">Rejected</option>
+                        <option value="ap">Approved</option>
+                        <option value="ex">Expired</option>
+                    </select>
+                </div>
+                <div class="col-sm-3" ng-show="reqStatus == 'pn'">
+                    <span class="filter-label">Expiry</span>
+                    <input type="text" class="form-control" ng-model="exp" autocomplete="off" only-digits>
+                </div>
+            </div>
+            <div class="row" ng-show="showMore" style="margin-bottom: 15px;">
+                <div class="col-sm-3">
+                    <span class="filter-label">Request type</span>
+                    <select class="form-control" ng-model="reqType" disable="isDef(reqId) || isDef(aprId)">
+                        <option value="">{{resourceBundle.all}}</option>
+                        <option value="1">Purchase</option>
+                        <option value="2">Sales</option>
+                        <option value="0">Transfer</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">Requester</span>
+                    <div class="has-feedback">
+                        <input type="text" ng-model="reqId"  name="requesterId"
+                               autocomplete="off"
+                               placeholder="Requester"
+                               typeahead-wait-ms="300"
+                               ng-class="{'c-visited' : submitted}"
+                               typeahead-on-select="goToRequester(reqId)"
+                               uib-typeahead="usr as usr for usr in  getFilteredRequesters($viewValue) | limitTo:8"
+                               class="form-control" typeahead-editable="false" ng-disabled="isDef(entity) || isDef(aprId) || isDef(ordId) || isDef(reqType)"/>
+                        <span ng-show="loadingRequesterId" class="form-control-feedback typehead-loading" aria-hidden="true" >
+                            <span class="glyphicons glyphicons-cogwheel spin"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">Approver</span>
+                    <div class="has-feedback">
+                        <input type="text" ng-model="aprId"  name="approverId"
+                               autocomplete="off"
+                               placeholder="Approver"
+                               typeahead-wait-ms="300"
+                               ng-class="{'c-visited' : submitted}"
+                               typeahead-on-select="goToApprover(aprId)"
+                               uib-typeahead="usr as usr for usr in  getFilteredApprovers($viewValue) | limitTo:8"
+                               class="form-control" typeahead-editable="false" ng-disabled="isDef(entity) || isDef(reqId) || isDef(ordId) || isDef(reqType)"/>
+                        <span ng-show="loadingApproverId" class="form-control-feedback typehead-loading" aria-hidden="true" >
+                            <span class="glyphicons glyphicons-cogwheel spin"></span>
+                        </span>
+                    </div>
+                </div>
+                <!--<div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.from}}</span>
+                    <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
+                </div>
+                <div class="col-sm-3">
+                    <span class="filter-label">{{resourceBundle.to}}</span>
+                    <date-picker date-model="to" place-holder="To" min-date="from"></date-picker>
+                </div>-->
+            </div>
+        </div>
+        <div class="row">
+            <div ng-hide="showMore">
+                <div class="col-sm-12">
+                    <span class="glyphicons glyphicons-chevron-down medium filter-expand" ng-click="showMore = true"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div ng-show="showMore">
+                <div class="col-sm-12">
+                    <span class="glyphicons glyphicons-chevron-up medium filter-expand" ng-click="showMore = false"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+                <div class="pull-right" style="padding-top: 10px;"></div>
+            </div>
+        </div>
+        <!--<div class="row pull-right" style="margin-bottom:5px;">
+            <div class="col-sm-12">
+                <button class="btn btn-primary" ng-click="fetch()">Fetch data</button>
+            </div>
+        </div>-->
+        <div class="row" ng-show="filtered.length > 0">
+            <div class="col-sm-12">
+                <table class="table table-condensed table-hover table-logistimo" id="fixTable">
+                    <thead>
+                        <tr>
+                            <th class="text-center">{{resourceBundle['serialnum']}}</th>
+                            <th class="text-center">Order</th>
+                            <th>Type</th>
+                            <th>Customer</th>
+                            <th>Vendor</th>
+                            <th>Request status</th>
+                            <th>Requester</th>
+                            <th>Approver(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody ng-repeat="item in filtered" ng-controller="NoController">
+                        <tr>
+                            <td class="text-center">{{$index + offset * 1 + 1}}</td>
+                            <td class="text-center"><a href="#/orders/detail/{{item.oid}}/">{{item.oid}}</a></td>
+                            <td>{{item.otype}}</td>
+                            <td><a href="#/setup/entities/detail/{{item.cid}}/" ng-click="$event.stopPropagation();">{{item.cust}}</a><span class="litetext">{{item.cadd}}</span></td>
+                            <td><a href="#/setup/entities/detail/{{item.vid}}/" ng-click="$event.stopPropagation();">{{item.vend}}</a><span class="litetext">{{item.vadd}}</span></td>
+                            <td>{{item.st}}
+                                <span class="litetext" style="display: block;">{{item.ut}}</span>
+                                <span class="litetext">Expiry: <span class="c-red">{{item.exp}}</span></span></td>
+                            <td ng-href="#/setup/users/all/details?userId={{order.uid}}" target="_blank" ng-click="$event.stopPropagation();">{{item.req}}</td>
+                            <td>
+                                <span class="litetext-head" ng-show="pending == {{item.st}}">Sent to:</span>
+                                <span ng-repeat="(key,val) in item.apprv" style="display: block;">
+                                    <a href="#/setup/users/all/details?userId={{val}}" target="_blank" ng-click="$event.stopPropagation();">{{key}}</a>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt5" ng-show="filtered.length == 0">
+            <div class="col-sm-12">
+                <p class=" alert alert-warning">
+                    No approvals found</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right">
+                    <div ng-include="'views/paginator.html'"></div>
+                </div>
+                <div class="pull-right" style="padding-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -36,11 +36,13 @@ import com.logistimo.api.models.OrderResponseModel;
 import com.logistimo.api.models.OrderStatusModel;
 import com.logistimo.api.models.OrderUpdateModel;
 import com.logistimo.api.models.PaymentModel;
-import com.logistimo.api.security.SecurityMgr;
+import com.logistimo.api.models.UserModel;
 import com.logistimo.api.util.DedupUtil;
-import com.logistimo.api.util.SecurityUtils;
-import com.logistimo.api.util.SessionMgr;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventsConfig;
 import com.logistimo.config.models.OrdersConfig;
@@ -48,6 +50,8 @@ import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
+import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.events.generators.EventGeneratorFactory;
@@ -92,6 +96,8 @@ import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.LocalDateUtil;
@@ -132,7 +138,17 @@ public class OrdersController {
   private static final String CACHE_KEY = "order";
 
   OrderBuilder builder = new OrderBuilder();
-  private IOrderDao orderDao = new OrderDao();
+    private IOrderDao orderDao = new OrderDao();
+  private static final String PURCHASE_ORDER_APPROVAL = "poa";
+    private static final String SALES_ORDER_APPROVAL = "soa";
+    private static final String TRANSFER_ORDER_APPROVAL = "toa";
+    private static final String PURCHASE = "p";
+    private static final String SALES = "s";
+    private static final String TRANSFER = "t";
+    private static final Integer PRIMARY_APPROVER = 0;
+    private static final Integer SECONDARY_APPROVER = 1;
+    private static final String SPACE = " ";
+    private static final String COMMA_SPACE = ", ";
 
   @RequestMapping("/order/{orderId}")
   public
@@ -141,11 +157,14 @@ public class OrdersController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     boolean noAccess = false;
+    OrderModel model = null;
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
       Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
       OrderManagementService oms =
-          Services.getService(OrderManagementServiceImpl.class, user.getLocale());
+          Services.getService(OrderManagementServiceImpl.class, locale);
+      EntitiesService es = Services.getService(EntitiesServiceImpl.class, locale);
+      UsersService usersService = Services.getService(UsersServiceImpl.class, locale);
       IOrder order = oms.getOrder(orderId);
       if (order == null || domainId == null) {
         throw new InvalidServiceException(CharacterConstants.EMPTY);
@@ -155,7 +174,90 @@ public class OrdersController {
         noAccess = true;
         throw new ObjectNotFoundException(CharacterConstants.EMPTY);
       }
-      return builder.buildFull(order, user, domainId);
+      model = builder.buildFull(order, user, domainId);
+      if(model != null) {
+          String approvalType = StringUtils.EMPTY;
+          String approverType = StringUtils.EMPTY;
+          if(IOrder.PENDING.equals(order.getStatus())) {
+            if (IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
+                  approvalType = PURCHASE_ORDER_APPROVAL;
+                  approverType = PURCHASE;
+            } else if (IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
+                  approvalType = TRANSFER_ORDER_APPROVAL;
+                  approverType = TRANSFER;
+              }
+          } else if (IOrder.CONFIRMED.equals(order.getStatus()) && IOrder.SALES_ORDER
+              .equals(order.getOrderType())) {
+                  approvalType = SALES_ORDER_APPROVAL;
+                  approverType = SALES;
+          }
+          model.setAppr(oms.isApprovalRequired(order, locale, approvalType));
+        if(model.isAppr()) {
+            List<IApprovers> primaryApprovers = null;
+            List<IApprovers> secondaryApprovers = null;
+          if (IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
+                IKiosk kiosk = es.getKiosk(order.getKioskId()); //get the domain config of source domain of the kiosk of this order
+                DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
+                ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
+                if(approvalsConfig != null) {
+                    ApprovalsConfig.OrderConfig orderConfig = approvalsConfig.getOrderConfig();
+                    if(orderConfig != null) {
+                        model.setPa(builder.buildUserModels(orderConfig.getPrimaryApprovers(), usersService, locale, user.getTimezone()));
+                        model.setSa(builder.buildUserModels(orderConfig.getSecondaryApprovers(), usersService, locale, user.getTimezone()));
+                    }
+                }
+            } else {
+                primaryApprovers = es.getApprovers(model.eid, PRIMARY_APPROVER, approverType);
+                secondaryApprovers = es.getApprovers(model.eid, SECONDARY_APPROVER, approverType);
+            }
+            if(primaryApprovers != null) {
+                model = builder.populateApprovalParams(model, primaryApprovers, secondaryApprovers, usersService, locale, user.getTimezone());
+            }
+        }
+          if(model.getPa() != null) {
+              StringBuilder sb = new StringBuilder();
+              int j=0;
+              for(int i=0; i<model.getPa().size(); i++) {
+                  UserModel userModel = model.getPa().get(i);
+                  if(userModel.fnm != null) {
+                      sb.append(userModel.fnm);
+                      sb.append(SPACE);
+                  }
+                  if(userModel.lnm != null) {
+                      sb.append(userModel.lnm);
+                      sb.append(SPACE);
+                  }
+                  if(StringUtils.isNotEmpty(userModel.phm) || StringUtils.isNotEmpty(userModel.em)) {
+                      sb.append("(");
+                      boolean found = false;
+                      if(userModel.phm != null) {
+                          sb.append(userModel.phm);
+                          found = true;
+                      }
+                      if(userModel.em != null) {
+                          if(found){
+                              sb.append(COMMA_SPACE);
+                          }
+                          sb.append(userModel.em);
+                      }
+                  }
+                  if(i < model.getPa().size()) {
+                      sb.append(")");
+                      j = j+1;
+                  }
+                  if(j < model.getPa().size()) {
+                      sb.append(COMMA_SPACE);
+                  }
+              }
+              if(sb.length() > 0) {
+                  model.setAprdetail(sb.toString());
+              }
+          }
+          if(order.getDomainIds() != null && !order.getDomainIds().isEmpty()) {
+              model.setDids(order.getDomainIds());
+          }
+      }
+      return model;
     } catch (ObjectNotFoundException e) {
       xLogger.severe("Order not found {0}", orderId, e);
       if (noAccess) {
@@ -686,13 +788,14 @@ public class OrdersController {
     OrderMaterialsModel model = new OrderMaterialsModel();
     MemcacheService cache = null;
     String signature = orders.get("signature") != null ?
-            CACHE_KEY + String.valueOf(orders.get("signature")) : null;
+        CACHE_KEY + String.valueOf(orders.get("signature")) : null;
     if (signature != null) {
       cache = AppFactory.get().getMemcacheService();
       if (cache != null) {
         OrderMaterialsModel oModel = validateSignature(model, cache, signature);
-        if (oModel != null)
+        if (oModel != null) {
           return oModel;
+        }
       }
     }
     DomainConfig dc = DomainConfig.getInstance(domainId);
@@ -796,10 +899,6 @@ public class OrdersController {
 
   /**
    * Check if the signature exists in cache
-   * @param model
-   * @param cache
-   * @param signature
-   * @return
    */
   private OrderMaterialsModel validateSignature(OrderMaterialsModel model, MemcacheService cache,
                                                 String signature) {
@@ -899,7 +998,7 @@ public class OrdersController {
   @RequestMapping(value = "/filter", method = RequestMethod.GET)
   public
   @ResponseBody
-  List<String> getIdSuggestions(@RequestParam String id, @RequestParam String type,
+  List<String> getIdSuggestions(@RequestParam String id, @RequestParam(required = false) String type,
                                 @RequestParam(required = false) Integer oty,
                                 HttpServletRequest request) {
     List<String> rid;

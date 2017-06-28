@@ -23,33 +23,33 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.dao.JDOUtils;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.api.models.MaterialModel;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.utils.BigUtil;
 import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.MaterialModel;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.inventory.entity.IInvntry;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IHandlingUnit;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.IHandlingUnitService;
 import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.BigUtil;
+import com.logistimo.utils.LocalDateUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -121,11 +121,7 @@ public class MaterialBuilder {
     int itemCount = results.getOffset() + 1;
     Map<Long, String> domainNames = new HashMap<>(1);
     UsersService as = null;
-    try {
-      as = Services.getService(UsersServiceImpl.class);
-    } catch (ServiceException e) {
-      xLogger.warn("Error in fetching service", e);
-    }
+    as = Services.getService(UsersServiceImpl.class);
     for (Object material : materials) {
       MaterialModel item = buildMaterialModel((IMaterial) material,
           sUser, itemCount, domainNames);
@@ -141,8 +137,8 @@ public class MaterialBuilder {
               item.ludBy = ua.getUserId();
               item.ludByn = ua.getFullName();
             }
-          } catch (Exception e) {
-            xLogger.warn("Error in fetching user details", e);
+          } catch (ObjectNotFoundException e) {
+            xLogger.warn("User {0} not found", item.ludBy);
           }
         }
         newInventory.add(item);
@@ -171,72 +167,68 @@ public class MaterialBuilder {
   public MaterialModel buildMaterialModel(IMaterial material,
                                           SecureUserDetails sUser, int itemCount,
                                           Map<Long, String> domainNames) {
-    try {
-      DomainsService ds = Services.getService(DomainsServiceImpl.class);
-      MaterialModel model = new MaterialModel();
-      model.sno = itemCount;
-      model.mId = material.getMaterialId();
-      model.dId = material.getDomainId();
-      model.mnm = material.getName();
-      model.snm = material.getShortName();
-      model.cId = material.getCustomId();
-      model.dsc = material.getDescription();
-      model.info = material.getInfo();
-      model.dispInfo = material.displayInfo() ? "yes" : "no";
-      model.tgs = material.getTags();
-      model.rp = BigUtil.getFormattedValue(material.getRetailerPrice());
-      model.msrp = BigUtil.getFormattedValue(material.getMSRP());
-      if (material.getLastUpdated() == null) {
-        model.t =
-            LocalDateUtil.format(material.getTimeStamp(), sUser.getLocale(), sUser.getTimezone());
-      } else {
-        model.t =
-            LocalDateUtil.format(material.getLastUpdated(), sUser.getLocale(), sUser.getTimezone());
-      }
-      model.b = material.isBatchEnabled() ? "yes" : "no";
-      model.ib = material.isBinaryValued() ? "yes" : "no";
-      model.dty = material.getType();
-      model.snl = material.isSeasonal() ? "yes" : "no";
-      model.cur = material.getCurrency();
-      model.tm = material.isTemperatureSensitive() ? "yes" : "no";
-      model.tmin = Float.toString(material.getTemperatureMin());
-      model.tmax = Float.toString(material.getTemperatureMax());
-      model.sdid = material.getDomainId();
-      model.creBy = material.getCreatedBy();
-      model.ludBy = material.getLastUpdatedBy();
-      model.creOn =
+    DomainsService ds = Services.getService(DomainsServiceImpl.class);
+    MaterialModel model = new MaterialModel();
+    model.sno = itemCount;
+    model.mId = material.getMaterialId();
+    model.dId = material.getDomainId();
+    model.mnm = material.getName();
+    model.snm = material.getShortName();
+    model.cId = material.getCustomId();
+    model.dsc = material.getDescription();
+    model.info = material.getInfo();
+    model.dispInfo = material.displayInfo() ? "yes" : "no";
+    model.tgs = material.getTags();
+    model.rp = BigUtil.getFormattedValue(material.getRetailerPrice());
+    model.msrp = BigUtil.getFormattedValue(material.getMSRP());
+    if (material.getLastUpdated() == null) {
+      model.t =
           LocalDateUtil.format(material.getTimeStamp(), sUser.getLocale(), sUser.getTimezone());
-      String domainName = domainNames.get(material.getDomainId());
-      if (domainName == null) {
-        IDomain domain = null;
-        try {
-          domain = ds.getDomain(material.getDomainId());
-        } catch (Exception e) {
-          xLogger.warn("Error while fetching Domain {0}", material.getDomainId());
-        }
-        if (domain != null) {
-          domainName = domain.getName();
-        } else {
-          domainName = Constants.EMPTY;
-        }
-        domainNames.put(material.getDomainId(), domainName);
-      }
-      try {
-        IHandlingUnitService hus = Services.getService(HandlingUnitServiceImpl.class);
-        Map<String, String> hu = hus.getHandlingUnitDataByMaterialId(material.getMaterialId());
-        if (hu != null) {
-          model.huId = Long.valueOf(hu.get(IHandlingUnit.HUID));
-          model.huQty = new BigDecimal(hu.get(IHandlingUnit.QUANTITY));
-          model.huName = hu.get(IHandlingUnit.NAME);
-        }
-      } catch (Exception e) {
-        xLogger.warn("Error while fetching handling unit {0}", material.getMaterialId(), e);
-      }
-      model.sdname = domainName;
-      return model;
-    } catch (ServiceException e) {
-      throw new InvalidServiceException("Unable to fetch domain object" + e);
+    } else {
+      model.t =
+          LocalDateUtil.format(material.getLastUpdated(), sUser.getLocale(), sUser.getTimezone());
     }
+    model.b = material.isBatchEnabled() ? "yes" : "no";
+    model.ib = material.isBinaryValued() ? "yes" : "no";
+    model.dty = material.getType();
+    model.snl = material.isSeasonal() ? "yes" : "no";
+    model.cur = material.getCurrency();
+    model.tm = material.isTemperatureSensitive() ? "yes" : "no";
+    model.tmin = Float.toString(material.getTemperatureMin());
+    model.tmax = Float.toString(material.getTemperatureMax());
+    model.sdid = material.getDomainId();
+    model.creBy = material.getCreatedBy();
+    model.ludBy = material.getLastUpdatedBy();
+    model.creOn =
+        LocalDateUtil.format(material.getTimeStamp(), sUser.getLocale(), sUser.getTimezone());
+    String domainName = domainNames.get(material.getDomainId());
+    if (domainName == null) {
+      IDomain domain = null;
+      try {
+        domain = ds.getDomain(material.getDomainId());
+      } catch (Exception e) {
+        xLogger.warn("Error while fetching Domain {0}", material.getDomainId());
+      }
+      if (domain != null) {
+        domainName = domain.getName();
+      } else {
+        domainName = Constants.EMPTY;
+      }
+      domainNames.put(material.getDomainId(), domainName);
+    }
+    try {
+      IHandlingUnitService hus = Services.getService(HandlingUnitServiceImpl.class);
+      Map<String, String> hu = hus.getHandlingUnitDataByMaterialId(material.getMaterialId());
+      if (hu != null) {
+        model.huId = Long.valueOf(hu.get(IHandlingUnit.HUID));
+        model.huQty = new BigDecimal(hu.get(IHandlingUnit.QUANTITY));
+        model.huName = hu.get(IHandlingUnit.NAME);
+      }
+    } catch (Exception e) {
+      xLogger.warn("Error while fetching handling unit {0}", material.getMaterialId(), e);
+    }
+    model.sdname = domainName;
+    return model;
   }
 
   /*
