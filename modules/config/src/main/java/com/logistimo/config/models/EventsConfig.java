@@ -128,7 +128,7 @@ public class EventsConfig implements Serializable {
   public static final String VAR_ASSET_STATUS = "%assetStatus%";
 
   private static final long serialVersionUID = 1L;
-  public static final int VAR_MESSAGE_LIMIT = 50;
+  public static final int VAR_MESSAGE_LIMIT = 200;
   // Logger
   private static final XLog xLogger = XLog.getLog(EventsConfig.class);
 
