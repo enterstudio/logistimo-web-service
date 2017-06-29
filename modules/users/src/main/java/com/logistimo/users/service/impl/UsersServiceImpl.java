@@ -1550,4 +1550,45 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     }
     return hasAccess;
   }
+
+  /**
+   * Method to fetch the user account details for the given userIds
+   * @param userIds User Id list
+   * @return List<IUserAccount>
+   */
+  public List<IUserAccount> getUsersByIds(List<String> userIds){
+
+    if(userIds==null ||userIds.isEmpty()){
+      return null;
+    }
+    List<IUserAccount> results = null;
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    Query query = null;
+    try {
+
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `USERACCOUNT` ");
+        queryBuilder.append("WHERE USERID IN (");
+        for (String userId : userIds) {
+          queryBuilder.append("'").append(userId).append("'").append(CharacterConstants.COMMA);
+        }
+        queryBuilder.setLength(queryBuilder.length() - 1);
+        queryBuilder.append(" )");
+        query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
+        query.setClass(JDOUtils.getImplClass(IUserAccount.class));
+        results = (List<IUserAccount>) query.execute();
+        results= (List<IUserAccount>) pm.detachCopyAll(results);
+    }catch (Exception e) {
+      xLogger.warn("Exception while fetching approval status", e);
+    } finally {
+      if (query != null) {
+        try {
+          query.closeAll();
+        } catch (Exception ignored) {
+          xLogger.warn("Exception while closing query", ignored);
+        }
+      }
+      pm.close();
+    }
+    return results;
+  }
 }

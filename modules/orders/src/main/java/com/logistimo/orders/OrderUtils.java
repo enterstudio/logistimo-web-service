@@ -591,4 +591,21 @@ public class OrderUtils {
         LocalDateUtil.formatCustom(orderUpdatedTime, Constants.DATETIME_FORMAT, null));
   }
 
+
+  /**
+   * Returns the string constants for the order types
+   * @param type 0-TRANSFER, 1- PURCHASE, 2-SALES
+   * @return try-TRANSFER, prc- PURCHASE,sle- SALES
+   */
+  public static String getOrderType(Integer type){
+    if(type==0)
+      return IOrder.TYPE_TRANSFER;
+    else if(type==1){
+      return IOrder.TYPE_PURCHASE;
+    }else if(type==2){
+      return IOrder.TYPE_SALE;
+    }
+    return StringUtils.EMPTY;
+  }
+
 }

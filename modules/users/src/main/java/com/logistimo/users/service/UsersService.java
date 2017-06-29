@@ -166,4 +166,6 @@ public interface UsersService extends Service {
 
   boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role);
 
+  List<IUserAccount> getUsersByIds(List<String> userIds);
+
 }

@@ -40,8 +40,12 @@ import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.logger.XLog;
+import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
+import com.logistimo.orders.service.OrderManagementService;
+import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.Results;
 import com.logistimo.proto.MobileConversationModel;
 import com.logistimo.proto.MobileDemandItemModel;
@@ -49,7 +53,6 @@ import com.logistimo.proto.MobileOrderModel;
 import com.logistimo.proto.MobileOrdersModel;
 import com.logistimo.proto.MobileShipmentModel;
 import com.logistimo.proto.RestConstantsZ;
-import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.tags.TagUtil;
@@ -74,6 +77,7 @@ import java.util.Set;
  * Created by vani on 03/11/16.
  */
 public class MobileOrderBuilder {
+
   private static final XLog xLogger = XLog.getLog(MobileOrderBuilder.class);
 
   public MobileOrderModel build(IOrder o, Locale locale, String timezone, boolean includeItems,
@@ -246,6 +250,21 @@ public class MobileOrderBuilder {
     if (mcm != null && mcm.cnt > 0) {
       mom.cmnts = mcm;
     }
+
+    //Set the status update time
+    if (o.getStatusUpdatedOn() != null) {
+      mom.ostt = o.getStatusUpdatedOn().getTime();
+    }
+
+    //Get the order type
+    mom.oty = OrderUtils.getOrderType(o.getOrderType());
+
+    /* Get approval details for the order */
+    try {
+      mom.apprvl = new MobileApprovalResponseBuilder().buildApprovalResponse(o);
+    } catch (Exception e) {
+      xLogger.warn("Exception fetching approval details", e);
+    }
     return mom;
   }
 
@@ -285,19 +304,23 @@ public class MobileOrderBuilder {
    * @return JsonObject - response
    */
   public JsonObject buildOrdersResponse(List<IOrder> orders, Locale locale, String timezone,
-                                        int orderType) throws Exception {
+                                        int orderType) {
 
     if (orders != null && !orders.isEmpty()) {
-      Map<String, String> userMap = new HashMap<>();
       //Get the kiosk as a map
       Map<Long, Kiosk> kioskMap = getKioskMap(orders);
+      //Get user details userId and full name as a map
+      Map<String, String> userDetailsMap = getUserDetailsMap(orders);
       List<OrderMinimumResponseModel> orderResponseList = new ArrayList<>(orders.size());
-      /*Set<Long> orderIds = getOrderIds(orders);
-      HashMap<Long,IOrderApprovalMapping> orderApprovalMap = getOrderApprovalStatus(orderIds,orderType);*/
+      Set<Long> orderIds = getOrderIds(orders);
+      Map<Long, IOrderApprovalMapping>
+          orderApprovalMap =
+          getOrderApprovalMap(orderIds, orderType);
       for (IOrder order : orders) {
         OrderMinimumResponseModel
             model =
-            buildMinimumOrder(order, userMap, kioskMap, locale, timezone /*orderApprovalMap.get(order.getOrderId())*/);
+            buildMinimumOrder(order, userDetailsMap, kioskMap, locale, timezone,
+                orderApprovalMap.get(order.getOrderId()));
         orderResponseList.add(model);
       }
       return buildOrderJson(orderResponseList);
@@ -320,36 +343,42 @@ public class MobileOrderBuilder {
     return jsonObject;
   }
 
-/*  private Set<Long> getOrderIds(List<IOrder> orderList) {
+  /**
+   * Method to get a set of order ids
+   *
+   * @param orderList List of orders
+   * @return Set of order ids
+   */
+  private Set<Long> getOrderIds(List<IOrder> orderList) {
     Set<Long> orderIdSet = new HashSet<>();
-    if (orderList != null && !orderList.isEmpty()) {
+    if(orderList!=null && !orderList.isEmpty()) {
       for (IOrder order : orderList) {
         orderIdSet.add(order.getOrderId());
       }
     }
     return orderIdSet;
-  }*/
+  }
 
+  /**
+   * Method to populate a map with order Id as key and associated orderApprovalMapping as value
+   *
+   * @param orderIds  List of order Ids
+   * @param orderType Approval type ( 0-TRANSFER, 1- PURCHASE, 2-SALES)
+   * @return Map
+   */
+  private Map<Long, IOrderApprovalMapping> getOrderApprovalMap(Set<Long> orderIds,
+                                                               int orderType) {
 
- /* private HashMap<Long, IOrderApprovalMapping> getOrderApprovalStatus(Set<Long> orderIds,int orderType) {
-    HashMap<Long,IOrderApprovalMapping> orderMap = new HashMap<>();
-    try {
-
-      OrderManagementService
-          orderManagementService =
-          Services.getService(OrderManagementServiceImpl.class);
-      List<IOrderApprovalMapping>
-          orderApprovalMappingList =
-          orderManagementService.getOrdersApprovalStatus(orderIds,orderType);
-      for (IOrderApprovalMapping orderApprovalMapping : orderApprovalMappingList) {
-        orderMap.put(orderApprovalMapping.getOrderId(), orderApprovalMapping);
-      }
-
-    } catch (ServiceException e) {
-
+    OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
+    List<IOrderApprovalMapping>
+        orderApprovalMappingList =
+        oms.getOrdersApprovalMapping(orderIds, orderType);
+    Map<Long, IOrderApprovalMapping> orderMap = new HashMap<>(orderApprovalMappingList.size());
+    for (IOrderApprovalMapping orderApprovalMapping : orderApprovalMappingList) {
+      orderMap.put(orderApprovalMapping.getOrderId(), orderApprovalMapping);
     }
     return orderMap;
-  }*/
+  }
 
   /**
    * Populate field of minimum response model
@@ -362,23 +391,21 @@ public class MobileOrderBuilder {
    */
   private OrderMinimumResponseModel buildMinimumOrder(IOrder order, Map<String, String> userMap,
                                                       Map<Long, Kiosk> kioskMap, Locale locale,
-                                                      String timezone/*,
-                          IOrderApprovalMapping approvalMapping*/) throws Exception {
+                                                      String timezone,
+                                                      IOrderApprovalMapping approvalMapping) {
 
     OrderMinimumResponseModel model = new OrderMinimumResponseModel();
     model.setTid(order.getOrderId());
     model.setOst(order.getStatus());
     model.setQ(order.getNumberOfItems());
     model.setCbid(order.getUserId());
-
     List<String> otgs = order.getTags(TagUtil.TYPE_ORDER);
     if ((otgs != null) && !otgs.isEmpty()) {
       model.setTg(StringUtil.getCSV(otgs));
     }
-
-    model.setCbn(getUserName(userMap, order.getUserId()));
+    model.setCbn(userMap.get(order.getUserId()));
     model.setUbid(order.getUpdatedBy());
-    model.setUbn(getUserName(userMap, order.getUpdatedBy()));
+    model.setUbn(userMap.get(order.getUpdatedBy()));
     String createdTime = LocalDateUtil.format(order.getCreatedOn(), locale, timezone);
     model.setT(createdTime);
     if (order.getUpdatedOn() != null) {
@@ -401,32 +428,36 @@ public class MobileOrderBuilder {
         model.setVcty(vendor.getCity());
       }
     }
-
+    //Add approver details to the response
     JsonObject jsonObject = new JsonObject();
-     /* jsonObject.addProperty(RestConstantsZ.STATUS,approvalMapping.getStatus());
-      jsonObject.addProperty(RestConstantsZ.TIME,new Date().toString());*/
+    if (approvalMapping != null) {
+      jsonObject.addProperty(RestConstantsZ.STATUS, approvalMapping.getStatus());
+      jsonObject.addProperty(RestConstantsZ.TIME, approvalMapping.getUpdatedAt().getTime());
+    }
     model.setApprvl(jsonObject);
     return model;
   }
 
+
   /**
-   * Method gets the user details from map if it is present, else retrieves it from DB and puts it to map
+   * Method to fetch the list of user details and populate it in a map
    *
-   * @param userMap Map details with username as key and user details as value
-   * @param userId  User Id
-   * @return User full name
-   * @throws ServiceException        from service layer
-   * @throws ObjectNotFoundException If user not found
+   * @param orderList List of orders
+   * @return Map with user id as key and user full name as value
    */
-  private String getUserName(Map<String, String> userMap, String userId)
-      throws ObjectNotFoundException, ServiceException {
-    if (userMap.containsKey(userId)) {
-      userMap.get(userId);
+  private Map<String, String> getUserDetailsMap(List<IOrder> orderList) {
+    Set<String> userIdList = new HashSet<>();
+    for (IOrder order : orderList) {
+      userIdList.add(order.getUserId());
+      userIdList.add(order.getUpdatedBy());
     }
     UsersService usersService = Services.getService(UsersServiceImpl.class);
-    IUserAccount userAccount = usersService.getUserAccount(userId);
-    userMap.put(userId, userAccount.getFullName());
-    return userAccount.getFullName();
+    List<IUserAccount> userAccountList = usersService.getUsersByIds(new ArrayList<>(userIdList));
+    Map<String, String> userDetailsMap = new HashMap<>(userAccountList.size());
+    for (IUserAccount userAccount : userAccountList) {
+      userDetailsMap.put(userAccount.getUserId(), userAccount.getFullName());
+    }
+    return userDetailsMap;
   }
 
   /**
@@ -435,20 +466,36 @@ public class MobileOrderBuilder {
    * @param orderList List of orders
    * @return returns a map with kiosk id as key and kiosk object as value
    */
-  private Map<Long, Kiosk> getKioskMap(List<IOrder> orderList) throws ServiceException {
+  private Map<Long, Kiosk> getKioskMap(List<IOrder> orderList) {
     Set<Long> kioskIdList = new HashSet<>();
-    for (IOrder order : orderList) {
-      kioskIdList.add(order.getKioskId());
-      kioskIdList.add(order.getServicingKiosk());
-    }
     EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
-    List<IKiosk> kioskList = entitiesService.getKiosksByIds(new ArrayList<>(kioskIdList));
-    Map<Long, Kiosk> kioskMap = new HashMap<>(kioskIdList.size());
-    for (IKiosk kiosk : kioskList) {
-      //Add the kiosk details to the map
-      kioskMap.put(kiosk.getKioskId(), new Kiosk(kiosk.getName(), kiosk.getCity()));
+    Map<Long, Kiosk> kioskMap = new HashMap<>();
+    for (IOrder order : orderList) {
+      getKioskDetails(kioskIdList, entitiesService, kioskMap, order.getKioskId());
+      getKioskDetails(kioskIdList, entitiesService, kioskMap, order.getServicingKiosk());
     }
     return kioskMap;
+  }
+
+  /**
+   * Get the details of the kiosk
+   *
+   * @param kioskIdList     List of unique kiosk ids
+   * @param entitiesService entity service
+   * @param kioskMap        map with kiosk id and Kiosk details
+   * @param kioskId         kioskId
+   */
+  private void getKioskDetails(Set<Long> kioskIdList, EntitiesService entitiesService,
+                               Map<Long, Kiosk> kioskMap, Long kioskId) {
+    if (!kioskIdList.contains(kioskId)) {
+      try {
+        IKiosk kiosk = entitiesService.getKiosk(kioskId);
+        kioskMap.put(kiosk.getKioskId(), new Kiosk(kiosk.getName(), kiosk.getCity()));
+        kioskIdList.add(kiosk.getKioskId());
+      } catch (ServiceException e) {
+        xLogger.warn("Exception fetching kiosk details", e);
+      }
+    }
   }
 
 
