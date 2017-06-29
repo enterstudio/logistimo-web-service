@@ -31,6 +31,8 @@ import com.logistimo.AppFactory;
 import com.logistimo.accounting.entity.IAccount;
 import com.logistimo.accounting.service.IAccountingService;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
+import com.logistimo.api.servlets.mobile.builders.MobileConfigBuilder;
+import com.logistimo.api.servlets.mobile.builders.MobileEntityBuilder;
 import com.logistimo.api.servlets.mobile.models.ParsedRequest;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityMgr;
@@ -40,6 +42,7 @@ import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.service.SMSService;
 import com.logistimo.config.models.ActualTransConfig;
+import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.CapabilityConfig;
 import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.DomainConfig;
@@ -56,6 +59,7 @@ import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.auth.EntityAuthoriser;
+import com.logistimo.entities.entity.IApprovers;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.UserEntitiesModel;
@@ -87,6 +91,7 @@ import com.logistimo.pagination.Results;
 import com.logistimo.proto.BasicOutput;
 import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.proto.MaterialRequest;
+import com.logistimo.proto.MobileApprovalsConfigModel;
 import com.logistimo.proto.ProtocolException;
 import com.logistimo.proto.RestConstantsZ;
 import com.logistimo.proto.UpdateInventoryInput;
@@ -901,79 +906,6 @@ public class RESTUtil {
     return SessionMgr.getCurrentDomain(session, userId);
   }
 
-  /**
-   * Added by Vani on 5-01-2012
-   * Copied from LoginServlet.java
-   * Changed the methods to static
-   **/
-
-  // Get the JSON output object for authenticate operation
-  // pageParams is used for paginating on kiosks
-  @SuppressWarnings({"unchecked", "rawtypes"})
-        /*public static AuthenticateOutput getJsonOutputAuthenticate( boolean status, IUserAccount user, String message, DomainConfig dc, String localeStr, String minResponseCode, ResourceBundle backendMessages, boolean onlyAuthenticate, boolean forceIntegerForStock,  Date start, PageParams kioskPageParams ) throws ProtocolException, ServiceException {
-            xLogger.fine( "Entered RESTUtil.getJsonOutputAuthenticate" );
-    	xLogger.fine( "start: {0}", start != null ? start.toString() : null );
-    	Hashtable<String,String> userMap = null;
-    	Vector<Hashtable> kiosksData = null;
-    	Hashtable<String,Object> config = null;
-    	String expiryTime = null;
-    	String cursor = null;
-    	boolean hasStartDate = ( start != null );
-    	if ( status && !onlyAuthenticate ) {
-    		// Get the user hash map
-    		userMap = user.getMapZ();
-    		// Get the kiosks
-    		AccountsService as = Services.getService( AccountsServiceImpl.class );
-    		Results results = as.getKiosksForUser( user, null, kioskPageParams ); // get paginated kiosks for a given user
-    		List<IKiosk> kiosks = results.getResults();
-    		cursor = results.getCursor();
-    		// Get the kiosk maps
-    		kiosksData = new Vector();
-    		if ( kiosks != null && !kiosks.isEmpty() ) {
-    			boolean getUsersForKiosk = ( "2".equals( minResponseCode ) );
-    			boolean getMaterials = ( ( kiosks.size() == 1 ) || minResponseCode == null || minResponseCode.isEmpty() );
-    			boolean getLinkedKiosks = ( ( kiosks.size() == 1 ) || !"2".equals( minResponseCode ) ); // not minResponseCode of 2
-    			Iterator<IKiosk> it = kiosks.iterator();
-    			while ( it.hasNext() ) {
-    				IKiosk k = it.next(); // NOTE: kiosk will have NOT its users set
-    		    	if ( getUsersForKiosk ) // set users if minResponseCode is 2 (local editing of kiosks/users is now possible)
-    		    		k.setUsers( as.getUsersForKiosk( k.getKioskId(), null ).getResults() );
-    				// Get user locale
-    				Locale locale = user.getLocale(); // new Locale( user.getLanguage(), user.getCountry()  );
-    				localeStr = locale.toString(); // replace with user's specific locale
-    				// Get kiosk data
-    				Hashtable<String,Object> kioskData = getKioskData( k, locale, user.getTimezone(), dc, getUsersForKiosk, getMaterials, getLinkedKiosks, forceIntegerForStock, user.getUserId(), user.getRole() );
-    				Date kioskCreatedOn = k.getTimeStamp();
-    				Date kioskLastUpdatedOn = k.getLastUpdated();
-    				xLogger.fine( "kiosk name: {0}, start: {1}, hasStartDate: {2}, kioskCreatedOn: {3}, kioskLastUpdatedOn: {4}", k.getName(), start, hasStartDate, k.getTimeStamp(), k.getLastUpdated() );
-    				if ( hasStartDate && ( ( kioskCreatedOn != null && kioskCreatedOn.compareTo( start ) >= 0 ) || ( kioskLastUpdatedOn != null && kioskLastUpdatedOn.compareTo( start ) >= 0 ) ) ) {
-	    				// Add kiosk data
-	    				kiosksData.add( kioskData );
-    				} else if ( !hasStartDate ) {
-    					// Add kiosk data
-	    				kiosksData.add( kioskData );
-    				}
-    			}
-    			// Get the expiry time
-        		expiryTime = String.valueOf( getLoginExpiry( user ) );
-    		}
-    		// Get config. for transaction inclusion and naming
-    		config = getConfig( dc, user.getRole() );
-            if(config!=null) {
-                if (IUserAccount.LR_LOGIN_RECONNECT.equals(user.getLoginReconnect())) {
-                    config.put(JsonTagsZ.LOGIN_AS_RECONNECT, Constants.TRUE);
-                } else if (IUserAccount.LR_LOGIN_DONT_RECONNECT.equals(user.getLoginReconnect())){
-                    config.remove(JsonTagsZ.LOGIN_AS_RECONNECT);
-                }
-            }
-    	}
-    	xLogger.fine( "Exiting RESTUtil.getJsonOutputAuthenticate" );
-		//userMap.
-    	AuthenticateOutput ao = new AuthenticateOutput( status, expiryTime, userMap, kiosksData, config, message, localeStr, RESTUtil.VERSION_01 );
-    	ao.setCursor(cursor);
-    	return ao;
-    }*/
-
   public static String getJsonOutputAuthenticate(boolean status, IUserAccount user, String message,
                                                  DomainConfig dc, String localeStr,
                                                  String minResponseCode,
@@ -984,25 +916,21 @@ public class RESTUtil {
       throws ProtocolException, ServiceException {
     xLogger.fine("Entered RESTUtil.getJsonOutputAuthenticate");
     xLogger.fine("start: {0}", start != null ? start.toString() : null);
-    Hashtable<String, String> userMap = null;
     Vector<Hashtable> kiosksData = null;
     Hashtable<String, Object> config = null;
     String expiryTime = null;
-    String cursor = null;
     boolean hasStartDate = (start != null);
-    String kiosksString = null;
     List<IKiosk> kiosks = null;
     List kioskList = new ArrayList();
 
     UserEntitiesModel fullUser = new UserEntitiesModel(user, null);
     if (status && !onlyAuthenticate) {
-      // Get the user hash map
-      //userMap = user.getMapZ();
       // Get the kiosks
       EntitiesService as = Services.getService(EntitiesServiceImpl.class);
+      // Get paginated kiosks for a given user
       Results
           results =
-          as.getKiosksForUser(user, null, kioskPageParams); // get paginated kiosks for a given user
+          as.getKiosksForUser(user, null, kioskPageParams);
       kiosks = results.getResults();
 
       //cursor = results.getCursor();
@@ -1061,8 +989,6 @@ public class RESTUtil {
       fullUser = new UserEntitiesModel(user, kioskList);
     }
     xLogger.fine("Exiting RESTUtil.getJsonOutputAuthenticate");
-    //AuthenticateOutput ao = new AuthenticateOutput( status, expiryTime, userMap, kiosksData, config, message, localeStr, RESTUtil.VERSION_01 );
-    //ao.setCursor(cursor);
     String
         jsonString =
         GsonUtil.authenticateOutputToJson(status, message, expiryTime, fullUser, config,
@@ -1149,6 +1075,20 @@ public class RESTUtil {
             kioskData.put(JsonTagsZ.CUSTOMERS, customers); // vector of Hashtable(kiosk-metadata)
           }
         }
+      }
+      // Add approvers if configured for the kiosk.
+      EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
+      MobileEntityBuilder mobileEntityBuilder = new MobileEntityBuilder();
+      List<IApprovers> approversList = as.getApprovers(k.getKioskId());
+      if (approversList != null && !approversList.isEmpty()) {
+        kioskData.put(JsonTagsZ.APPROVERS,
+            mobileEntityBuilder.buildApproversModel(approversList));
+      }
+      // Add kiosk tags if any configured for the kiosk
+      // If tags are specified, send that back
+      List<String> tags = k.getTags();
+      if (tags != null && !tags.isEmpty()) {
+        kioskData.put(JsonTagsZ.TAGS, StringUtil.getCSV(tags));
       }
     } catch (ServiceException e) {
       xLogger
@@ -1712,7 +1652,6 @@ public class RESTUtil {
       }
       // Add order reasons to config
       addReasonsConfiguration(config, oc);
-      // TODO: odf - Enable order to be directly fulfilled
       Hashtable<String, Object> oCfg = getOrdersConfiguration(dc);
       if (!oCfg.isEmpty()) {
         config.put(JsonTagsZ.ORDER_CONFIG, oCfg);
@@ -1743,6 +1682,15 @@ public class RESTUtil {
           }
           config.put(JsonTagsZ.SMS, sms);
         }
+        // Approval configuration
+        ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
+        if (approvalsConfig != null) {
+          MobileConfigBuilder mobileConfigBuilder = new MobileConfigBuilder();
+          MobileApprovalsConfigModel mobileApprovalsConfigModel = mobileConfigBuilder.buildApprovalConfiguration(approvalsConfig);
+          if (mobileApprovalsConfigModel != null) {
+            config.put(JsonTagsZ.APPROVALS, mobileApprovalsConfigModel);
+          }
+        }
       } catch (Exception e) {
         xLogger.warn("Error in getting system configuration: {0}", e);
       }
@@ -1757,38 +1705,6 @@ public class RESTUtil {
     return null;
   }
 
-  // Get order vector (of Hashtable)
-  @SuppressWarnings({"unchecked", "rawtypes"})
-        /*public static Results getOrderVector( Long domainId, Long kioskId, String statusStr, String otype, boolean loadAll, Locale locale, String timezone, boolean forceIntegerQuantity, Date startDate, Date endDate, PageParams pageParams, boolean excludeShipItems ) throws ServiceException {
-            // Get the orders
-    	OrderManagementService oms = Services.getService( OrderManagementServiceImpl.class );
-		Results results = oms.getOrders( domainId, kioskId, statusStr, startDate, endDate, otype, null, null, null, pageParams, null, null, true );
-		List<IOrder> orders = null;
-		if ( results != null )
-			orders = (List<IOrder>) results.getResults();
-
-		List<Map> vector = getOrderVector(orders, loadAll, locale, timezone, forceIntegerQuantity, excludeShipItems );
-		return new Results( vector, results.getCursor() );
-    }
-    
-    // Get the vector of orders
- 	@SuppressWarnings({ "rawtypes" })
- 	private static List<Map> getOrderVector( List<IOrder> orders, boolean includeOrderItems, Locale locale, String timezone, boolean forceIntegerQuantity, boolean excludeShipItems ) {
- 		List<Map> orderVector = new ArrayList<>();
- 		Iterator<IOrder> it = orders.iterator();
-		Map<Long,Boolean> accountingMap = new HashMap<>(1);
- 		while ( it.hasNext() ) {
-			IOrder o = it.next();
-			if(accountingMap.get(o.getDomainId()) == null) {
-				DomainConfig dc = DomainConfig.getInstance(o.getDomainId());
-				accountingMap.put(o.getDomainId(),dc.isAccountingEnabled());
-			}
- 			Map<String,Object> oMap = o.toMap(includeOrderItems, locale, timezone, forceIntegerQuantity, accountingMap.get(o.getDomainId()), excludeShipItems);
- 			orderVector.add( oMap );
- 		}
- 		return orderVector;
- 	}
- 	*/
   // Check if the stock value should be sent back as an integer or float - depending on app. version (beyond 1.2.0 it is float)
   public static boolean forceIntegerForStock(String appVersion) {
     if (appVersion == null) {
@@ -1848,25 +1764,6 @@ public class RESTUtil {
     eoRsnsHt.put(JsonTagsZ.MANDATORY, oc.getEditingQuantityReasonsMandatory());
     config.put(JsonTagsZ.REASONS_FOR_EDITING_ORDER_QUANTITY, eoRsnsHt);
   }
-         /*
-         // Get a cloned transaction list; if transType is specified, it is set after cloning and key is reset
- 	private static List<Transaction> getClonedTransactionList( List<Transaction> transactions, String transType ) {
- 		if ( transactions == null || transactions.isEmpty() )
- 			return null;
- 		List<Transaction> localTrans = new ArrayList<Transaction>();
-		// Create issues list
-		Iterator<Transaction> it = transactions.iterator();
-		while ( it.hasNext() ) {
-			Transaction t = it.next().clone(); // clone transaction
-			if ( transType != null ) {
-				t.setType( transType );
-				t.setKey( Transaction.createKey( t.getKioskId(), t.getMaterialId(), transType, t.getTimestamp(), t.getBatchId() ) );
-			}
-			localTrans.add( t );
-		}
-		return localTrans;
- 	}
- 	*/
 
   // Method to switch to new host if configured in the Domain configuration for a user's domain
   public static boolean switchToNewHostIfRequired(IUserAccount u, HttpServletResponse resp) {
@@ -2442,5 +2339,4 @@ public class RESTUtil {
     }
     return parsedRequest;
   }
-
 }
