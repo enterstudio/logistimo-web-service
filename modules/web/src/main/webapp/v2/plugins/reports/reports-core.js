@@ -26,11 +26,13 @@
  */
 
 var reportsPluginCore = angular.module('reportsPluginCore', ['reportsServiceCore']);
-var reportWidgets = {};
-//var reportMenus = [];
+var reportWidgets;
 var assetWidgets = undefined;
 
 function registerWidget(id, widget, report, subReport, helpFilePath) {
+    if(checkNullEmpty(reportWidgets)) {
+        reportWidgets = {};
+    }
     if (checkNullEmpty(reportWidgets[report])) {
         reportWidgets[report] = [];
         //reportMenus.push({id: id, report: report});

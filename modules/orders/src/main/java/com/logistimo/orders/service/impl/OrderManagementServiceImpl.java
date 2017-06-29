@@ -903,7 +903,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     try {
 
       //Set the oty based on transfer or not
-      queryBuilder.append(" WHERE OTY=").append(isTransfer ? "=" : "!=")
+      queryBuilder.append(" WHERE OTY").append(isTransfer ? "=" : "!=")
           .append(CharacterConstants.QUESTION);
       parameters.add(String.valueOf(IOrder.TRANSFER));
 
