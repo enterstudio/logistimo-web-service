@@ -289,7 +289,58 @@ function InventoryReportController(s, timeout, getData) {
         }
         return selectedFilters;
     };
+    function swapHeading(headingArr) {
+        var headingName = "";
+        if (s.compare.type == 'm') {
+            if (s.cards.mc == 'i') {
+                headingName = s.filter.mat.mnm;
+            } else {
+                headingName = s.filter.mtag.text;
+            }
+        } else if (s.compare.type == 'e') {
+            if (s.cards.ec == 'i') {
+                headingName = s.filter.entity.nm;
+            } else {
+                headingName = s.filter.etag.text;
+            }
+        } else if (s.compare.type == 'l') {
+            if (s.cards.lc == undefined) {
+                headingName = s.filter.st.label;
+            } else if (s.cards.lc == 'd') {
+                headingName = s.filter.dis.label;
+            } else if (s.cards.lc == 't') {
+                headingName = s.filter.tlk.label;
+            } else if (s.cards.lc == 'c') {
+                headingName = s.filter.cty.label;
+            }
+        }
+        for (var index = 1; index < headingArr.length; index++) {
+            if (headingArr[index] == headingName) {
+                var temp = headingArr[1];
+                headingArr[1] = headingArr[index];
+                headingArr[index] = temp;
+                return index;
+            }
+        }
+    }
 
+    s.swapData = function (heading, consolidatedData) {
+
+       var index= swapHeading(heading);
+
+        for (var k = 0; k < consolidatedData.length; k++) {
+            var durationData = consolidatedData[k];
+            for (var l = 1; l < durationData.length; l++) {
+                if (l == index) {
+                    var temp = durationData[1];
+                    durationData[1] = durationData[l];
+                    durationData[l] = temp;
+                    consolidatedData[k] = durationData;
+                    break;
+                }
+            }
+        }
+    }
     s.applyFilter = function () {
         if(s.validate) {
             if(!s.validate()) {

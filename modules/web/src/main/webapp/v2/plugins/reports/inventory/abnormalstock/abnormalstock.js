@@ -257,6 +257,7 @@ registerWidget('ias', 'rpt-abnormal-stock', 'Inventory', 'Abnormal stock','inven
                     $scope.dtableHeading.push($scope.cOptions.caption);
                 }
                 $scope.dtableData = getReportTableData(cData, cLabel);
+                $scope.swapData($scope.dtableHeading,$scope.dtableData);
                 $scope.dtableDataLength = Object.keys($scope.dtableData).length;
                 $scope.dcOptions = angular.copy($scope.cOptions);
                 $scope.dcOptions.rotateValues = "1";
@@ -285,6 +286,7 @@ registerWidget('ias', 'rpt-abnormal-stock', 'Inventory', 'Abnormal stock','inven
                     $scope.tableHeading.push($scope.cOptions.caption);
                 }
                 $scope.tableData = getReportTableData(cData, cLabel, $scope.getReportDateFormat());
+                $scope.swapData($scope.tableHeading,$scope.tableData);
                 $scope.tableDataLength = Object.keys($scope.tableData).length;
             }
             if(!localData) {
