@@ -163,8 +163,8 @@ public class MnlTransactionUtil {
         }
         if (order.getServicingKiosk() != null) {
           // Mark order as shipped
-          String shipmentId = oms.shipNow(order, null, null, null, null, userId, null);
-          shipmentService.fulfillShipment(shipmentId, userId);
+          String shipmentId = oms.shipNow(order, null, null, null, null, userId, null,SourceConstants.UPLOAD);
+          shipmentService.fulfillShipment(shipmentId, userId,SourceConstants.UPLOAD);
         }
       } else {
         //Cancel order.. no fulfilled quantities.

@@ -66,7 +66,7 @@ public interface OrderManagementService extends Service {
    */
   String shipNow(IOrder order, String transporter, String trackingId, String reason,
                  Date expectedFulfilmentDate,
-                 String userId, String ps) throws ServiceException;
+                 String userId, String ps,int source) throws ServiceException;
 
   /**
    * Gets the order details for given order. This method does not fetch demand items.

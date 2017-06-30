@@ -143,7 +143,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public String createShipment(ShipmentModel model) throws ServiceException {
+  public String createShipment(ShipmentModel model,int source) throws ServiceException {
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + model.orderId);
     if (!LockUtil.isLocked(lockStatus)) {
       throw new InvalidServiceException(new ServiceException("O002", model.orderId));
@@ -291,7 +291,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       // if both conversation and activity returns success, proceed to commit changes
       if (model.status != null && !model.status.equals(ShipmentStatus.OPEN)) {
         updateShipmentStatus(shipment.getShipmentId(), model.status, null, model.userID, pm, null,
-            shipment);
+            shipment,source);
       }
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
       oms.updateOrderMetadata(model.orderId, model.userID, pm);
@@ -467,17 +467,17 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       String message,
       String userId,
       String reason, boolean updateOrderStatus,
-      PersistenceManager pm) throws LogiException {
+      PersistenceManager pm,int source) throws LogiException {
     return updateShipmentStatus(shipmentId, status, message, userId, pm, reason, null,
-        updateOrderStatus, false);
+        updateOrderStatus, false,source);
   }
 
   @Override
   public ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status,
       String message,
       String userId,
-      String reason) throws LogiException {
-    return updateShipmentStatus(shipmentId, status, message, userId, null, reason, null);
+      String reason,int source) throws LogiException {
+    return updateShipmentStatus(shipmentId, status, message, userId, null, reason, null,source);
   }
 
   /**
@@ -489,19 +489,19 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   private ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status,
       String message,
       String userId,
-      PersistenceManager pm, String reason, IShipment shipment)
+      PersistenceManager pm, String reason, IShipment shipment,int source)
       throws LogiException {
     return updateShipmentStatus(shipmentId, status, message, userId, pm, reason, shipment, true,
-        false);
+        false,source);
   }
 
   private ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status,
       String message,
       String userId,
       PersistenceManager pm, String reason, IShipment shipment,
-      boolean isOrderFulfil) throws LogiException {
+      boolean isOrderFulfil,int source) throws LogiException {
     return updateShipmentStatus(shipmentId, status, message, userId, pm, reason, shipment, true,
-        isOrderFulfil);
+        isOrderFulfil,source);
   }
 
 
@@ -509,7 +509,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       String message,
       String userId,
       PersistenceManager pm, String reason, IShipment shipment,
-      boolean updateOrderStatus, boolean isOrderFulfil)
+      boolean updateOrderStatus, boolean isOrderFulfil,int source)
       throws LogiException {
     Long orderId = extractOrderId(shipmentId);
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + orderId);
@@ -546,7 +546,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         cancelShipment(shipmentId, message, userId, pm, reason);
         if (ShipmentStatus.SHIPPED.equals(prevStatus) ||
             ShipmentStatus.FULFILLED.equals(prevStatus)) {
-          postInventoryTransaction(shipment, userId, pm, prevStatus);
+          postInventoryTransaction(shipment, userId, pm, prevStatus,source);
         } else if (ShipmentStatus.OPEN.equals(prevStatus)) {
           DomainConfig dc = DomainConfig.getInstance(shipment.getDomainId());
           if (dc.autoGI()) {
@@ -615,12 +615,12 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
               .setShippedQuantity(demandItem.getShippedQuantity().add(shipmentItem.getQuantity()));
         }
         pm.makePersistentAll(demandItems.values());
-        postInventoryTransaction(shipment, userId, pm, prevStatus);
+        postInventoryTransaction(shipment, userId, pm, prevStatus,source);
       }
 
       if (status == ShipmentStatus.FULFILLED && prevStatus != ShipmentStatus.FULFILLED) {
         //Only post fulfilled transaction here.
-        postInventoryTransaction(shipment, userId, pm, ShipmentStatus.SHIPPED);
+        postInventoryTransaction(shipment, userId, pm, ShipmentStatus.SHIPPED,source);
       }
 
       generateEvent(shipment.getDomainId(), IEvent.STATUS_CHANGE, shipment, null, null);
@@ -684,7 +684,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   }
 
   private void postInventoryTransaction(IShipment shipment, String userId, PersistenceManager pm,
-                                        ShipmentStatus prevStatus) throws ServiceException {
+                                        ShipmentStatus prevStatus,int src) throws ServiceException {
     DomainConfig dc = DomainConfig.getInstance(shipment.getDomainId());
     if (!dc.autoGI()) {
       return;
@@ -767,7 +767,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         throw new ServiceException(backendMessages.getString("inventory.post"));
       }
       t.setMaterialId(shipmentItem.getMaterialId());
-      t.setSrc(SourceConstants.WEB);
+      t.setSrc(src);
       t.setTrackingId(shipment.getShipmentId());
       t.setTrackingObjectType(ITransaction.TYPE_SHIPMENT);
       t.setSourceUserId(userId);
@@ -1203,7 +1203,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   }
 
   @Override
-  public ResponseModel fulfillShipment(String shipmentId, String userId) throws ServiceException {
+  public ResponseModel fulfillShipment(String shipmentId, String userId,int source) throws ServiceException {
     IShipment shipment = getShipmentById(shipmentId);
     includeShipmentItems(shipment);
     ShipmentMaterialsModel sModel = new ShipmentMaterialsModel();
@@ -1258,12 +1258,12 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       sModel.items.add(siModel);
     }
 
-    return fulfillShipment(sModel, userId);
+    return fulfillShipment(sModel, userId,source);
   }
 
 
   @Override
-  public ResponseModel fulfillShipment(ShipmentMaterialsModel model, String userId) {
+  public ResponseModel fulfillShipment(ShipmentMaterialsModel model, String userId,int source) {
     Long orderId = extractOrderId(model.sId);
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + orderId);
     if (!LockUtil.isLocked(lockStatus)) {
@@ -1390,7 +1390,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         shipment.setActualFulfilmentDate(sdf.parse(model.afd));
         pm.makePersistent(shipment);
         responseModel = updateShipmentStatus(model.sId, ShipmentStatus.FULFILLED, model.msg, model.userId,
-            pm, null, shipment, model.isOrderFulfil);
+            pm, null, shipment, model.isOrderFulfil,source);
         oms.updateOrderMetadata(orderId, userId, pm);
         tx.commit();
       }

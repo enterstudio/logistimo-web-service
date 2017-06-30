@@ -21,9 +21,6 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-/**
- *
- */
 package com.logistimo.orders.service.impl;
 
 import com.ibm.icu.util.Calendar;
@@ -530,7 +527,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
             xLogger
                 .info("Cancelling shipment {0} for order {1}", orderId, shipment.getShipmentId());
             ss.updateShipmentStatus(shipment.getShipmentId(), ShipmentStatus.CANCELLED, message,
-                updatingUserId, crsn, false, pm);
+                updatingUserId, crsn, false, pm,source);
           }
           if (dc.autoGI()) {
             ims.clearAllocationByTag(null, null, tag, pm);
@@ -625,7 +622,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   @Override
   public String shipNow(IOrder order, String transporter, String trackingId, String reason,
-                        Date expectedFulfilmentDate, String userId, String ps)
+                        Date expectedFulfilmentDate, String userId, String ps,int source)
       throws ServiceException {
     try {
       IShipmentService
@@ -666,7 +663,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           model.items.add(shipmentItemModel);
         }
       }
-      return shipmentService.createShipment(model);
+      return shipmentService.createShipment(model,source);
     } catch (LogiException e) {
       throw e;
     } catch (Exception e) {

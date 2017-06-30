@@ -31,6 +31,7 @@ import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
@@ -100,7 +101,7 @@ public class ShipmentController {
       if (model.changeStatus != null) {
         model.status = ShipmentStatus.getStatus(model.changeStatus);
       }
-      String shipId = ss.createShipment(model);
+      String shipId = ss.createShipment(model, SourceConstants.WEB);
       ShipmentMaterialsModel m = new ShipmentMaterialsModel();
       if (StringUtils.isNotBlank(shipId)) {
         m.msg = "Shipment created successfully.";
@@ -206,7 +207,7 @@ public class ShipmentController {
       boolean isSuccess;
       ResponseModel responseModel = new ResponseModel();
       if (model.isFulfil) {
-        responseModel = ss.fulfillShipment(model, model.userId);
+        responseModel = ss.fulfillShipment(model, model.userId,SourceConstants.WEB);
         isSuccess = responseModel.status;
       } else {
         isSuccess = ss.updateShipment(model);
@@ -270,7 +271,7 @@ public class ShipmentController {
       ResponseModel
           responseModel =
           ss.updateShipmentStatus(shipId, shipmentStatus, status.msg, user.getUsername(),
-              status.cdrsn);
+              status.cdrsn,SourceConstants.WEB);
       boolean isSuccess = responseModel.status;
       if (!isSuccess) {
         throw new Exception("Error while updating status for shipment " + shipId);
