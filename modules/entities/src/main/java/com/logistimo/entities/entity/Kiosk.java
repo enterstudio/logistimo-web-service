@@ -28,21 +28,18 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
 import com.logistimo.config.models.ConfigurationException;
-import com.logistimo.config.models.EventsConfig;
 import com.logistimo.config.models.Permissions;
+import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
+import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.reports.ReportsConstants;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.tags.entity.Tag;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.UserAccount;
-
-import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.NumberUtil;
-import com.logistimo.logger.XLog;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -52,7 +49,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
@@ -188,6 +184,16 @@ public class Kiosk implements IKiosk {
   private Date oat; // Time of the first order that happens on the entity
   @Persistent
   private Date at; // iat or oat (whichever is earlier)
+  @Persistent(column = "COUNTRY_ID")
+  private String countryId;
+  @Persistent(column = "STATE_ID")
+  private String stateId;
+  @Persistent(column = "DISTRICT_ID")
+  private String districtId;
+  @Persistent(column = "SUBDISTRICT_ID")
+  private String talukId;
+  @Persistent(column = "CITY_ID")
+  private String cityId;
 
   @Override
   public boolean equals(Object o) {
@@ -534,13 +540,13 @@ public class Kiosk implements IKiosk {
   }
 
   @Override
-  public void setOrderingMode(Date timeStamp) {
-    this.timeStamp = timeStamp;
+  public void setOrderingMode(String orderingMode) {
+    this.orderingMode = orderingMode;
   }
 
   @Override
-  public void setOrderingMode(String orderingMode) {
-    this.orderingMode = orderingMode;
+  public void setOrderingMode(Date timeStamp) {
+    this.timeStamp = timeStamp;
   }
 
   @Override
@@ -945,6 +951,56 @@ public class Kiosk implements IKiosk {
 
   public void setVendorPerm(int vPerm) {
     this.vPerm = vPerm;
+  }
+
+  @Override
+  public String getCountryId() {
+    return countryId;
+  }
+
+  @Override
+  public void setCountryId(String countryId) {
+    this.countryId = countryId;
+  }
+
+  @Override
+  public String getStateId() {
+    return stateId;
+  }
+
+  @Override
+  public void setStateId(String stateId) {
+    this.stateId = stateId;
+  }
+
+  @Override
+  public String getDistrictId() {
+    return districtId;
+  }
+
+  @Override
+  public void setDistrictId(String districtId) {
+    this.districtId = districtId;
+  }
+
+  @Override
+  public String getTalukId() {
+    return talukId;
+  }
+
+  @Override
+  public void setTalukId(String talukId) {
+    this.talukId = talukId;
+  }
+
+  @Override
+  public String getCityId() {
+    return cityId;
+  }
+
+  @Override
+  public void setCityId(String cityId) {
+    this.cityId = cityId;
   }
 
 }

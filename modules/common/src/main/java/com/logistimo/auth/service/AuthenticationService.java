@@ -28,9 +28,11 @@ import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.users.entity.IUserToken;
 
 import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
+import com.logistimo.users.entity.IUserToken;
 
 import java.io.IOException;
 import java.util.InputMismatchException;
@@ -47,6 +49,9 @@ public interface AuthenticationService extends Service {
   IUserToken generateUserToken(String userId) throws ServiceException, ObjectNotFoundException;
 
   String authenticateToken(String token, Integer accessInitiator)
+      throws UnauthorizedException, ServiceException, ObjectNotFoundException;
+
+  String getUserIdByToken(String token)
       throws UnauthorizedException, ServiceException, ObjectNotFoundException;
 
   Boolean clearUserTokens(String userId);
@@ -76,4 +81,6 @@ public interface AuthenticationService extends Service {
       throws Exception;
 
   String generatePassword(String id);
+
+  void validateOtpMMode(String userId, String otp);
 }

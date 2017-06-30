@@ -54,10 +54,5 @@
         <!-- Turn off working out content type based on URL file extension, should fall back to looking at the Accept headers -->
         <property name="favorPathExtension" value="false"/>
     </bean>
-
-    <bean id="localeResolver"
-          class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
-        <property name="defaultLocale" value="en"/>
-    </bean>
  
 </beans>

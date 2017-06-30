@@ -27,5 +27,5 @@ package com.logistimo.reports.generators;
  * Created by chandrakant on 31/05/17.
  */
 public interface IReportDataGeneratorFactory {
-    ReportDataGenerator getInstance(String reportType) throws ReportingDataException;
+  ReportDataGenerator getInstance(String reportType) throws ReportingDataException;
 }

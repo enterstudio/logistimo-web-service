@@ -33,6 +33,10 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         $scope.complete = false;
         $scope.loading = true;
         $scope.continue = true;
+        $scope.pCnt = {};
+        $scope.sCnt = {};
+        $scope.pUser = undefined;
+        $scope.sUser = undefined;
         $scope.defineWatchers = function () {
             $scope.$watch("cnf.cnt", function (newval, oldval) {
                 if (newval != oldval) {
@@ -56,6 +60,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 $scope.setOCEnabled($scope.cnf.sc);
                 $scope.setDefaultCurrency($scope.cnf.cur);
                 $scope.getFilteredUserId($scope.cnf.support);
+                updatePSUser();
             }).catch(function err(msg){
                 $scope.showWarning($scope.resourceBundle['configuration.general.unavailable']);
             }).finally(function (){
@@ -69,6 +74,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         CurrencyController.call(this, $scope, configService);
         LocationController.call(this, $scope, configService);
         $scope.setGeneralConfig = function () {
+            if($scope.pUser)
             $scope.continue = true;
             if($scope.cnf.snh && checkNullEmpty($scope.cnf.nhn)){
                 $scope.showWarning($scope.resourceBundle['enternewhostnamemsg']);
@@ -93,6 +99,63 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 }else{
                     $scope.hideLoading();
                     return false;
+                }
+            }
+        };
+        $scope.getUser = function(data,uType){
+            if(checkNotNullEmpty(data)){
+                userService.getUser(data).then(function(data){
+                    if(uType=='p'){
+                        $scope.pUser = data.data;
+                    }else {
+                        $scope.sUser = data.data;
+                    }
+                    updateAdminContacts();
+                }).catch(function error(msg){
+                    $scope.showErrorMsg(msg);
+                })
+            }
+        }
+        function updateAdminContacts(){
+            if($scope.pUser) {
+                $scope.cnf.adminContact.primary = {};
+                $scope.cnf.adminContact.primary.usrid = $scope.pUser.id;
+                $scope.cnf.adminContact.primary.usrname = $scope.pUser.fnm + ' ' + $scope.pUser.lnm;
+                $scope.cnf.adminContact.primary.em = $scope.pUser.em;
+                $scope.cnf.adminContact.primary.phnm = $scope.pUser.phm;
+                $scope.cnf.adminContact.primary.role = $scope.pUser.ro;
+            }
+            if ($scope.sUser){
+                $scope.cnf.adminContact.secondary = {};
+                $scope.cnf.adminContact.secondary.usrid = $scope.sUser.id;
+                $scope.cnf.adminContact.secondary.usrname = $scope.sUser.fnm + ' ' + $scope.sUser.lnm;
+                $scope.cnf.adminContact.secondary.em = $scope.sUser.em;
+                $scope.cnf.adminContact.secondary.phnm = $scope.sUser.phm;
+                $scope.cnf.adminContact.secondary.role = $scope.sUser.ro;
+            }
+        }
+        function updatePSUser(){
+            if ($scope.cnf.adminContact.primary) {
+                $scope.pUser = {};
+                $scope.pUser.id = $scope.cnf.adminContact.primary.usrid;
+                $scope.pUser.em = $scope.cnf.adminContact.primary.em;
+                $scope.pUser.phm = $scope.cnf.adminContact.primary.phnm;
+                $scope.pUser.ro = $scope.cnf.adminContact.primary.role;
+            }
+            if ($scope.cnf.adminContact.secondary) {
+                $scope.sUser = {};
+                $scope.sUser.id = $scope.cnf.adminContact.secondary.usrid;
+                $scope.sUser.em = $scope.cnf.adminContact.secondary.em;
+                $scope.sUser.phm = $scope.cnf.adminContact.secondary.phnm;
+                $scope.sUser.ro = $scope.cnf.adminContact.secondary.role;
+            }
+        }
+        $scope.checkAdminUser = function(usr,r){
+            if(checkNullEmpty(usr)) {
+                if(r=='p') {
+                    $scope.cnf.adminContact.primary = undefined;
+                }else{
+                    $scope.cnf.adminContact.secondary = undefined;
                 }
             }
         };

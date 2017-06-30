@@ -47,7 +47,12 @@ import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.proto.*;
+import com.logistimo.proto.MobileInvBatchModel;
+import com.logistimo.proto.MobileInvModel;
+import com.logistimo.proto.MobileTransErrModel;
+import com.logistimo.proto.MobileTransErrorDetailModel;
+import com.logistimo.proto.MobileTransModel;
+import com.logistimo.proto.MobileUpdateInvTransResponse;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
@@ -60,7 +65,16 @@ import com.logistimo.utils.LocalDateUtil;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Mohan Raja
@@ -123,9 +137,10 @@ public class SMSBuilder {
 
   /**
    * Method to parse message and create a SMS transaction model
+   *
    * @param message request message
    * @return Transaction Model
-   * @throws ServiceException from service layer
+   * @throws ServiceException        from service layer
    * @throws ObjectNotFoundException when user, kiosk not found
    */
   public SMSTransactionModel buildSMSModel(String message)
@@ -194,7 +209,8 @@ public class SMSBuilder {
   }
 
   /**
-   *  Set the send time
+   * Set the send time
+   *
    * @param model- Transaction model
    * @param value- parsed value
    */
@@ -214,8 +230,9 @@ public class SMSBuilder {
 
   /**
    * Method to parse and process inventory details
+   *
    * @param inventoryDetails Request which has inventory details
-   * @param model Transaction Model
+   * @param model            Transaction Model
    */
   private void processInventoryDetails(String inventoryDetails, SMSTransactionModel model) {
     //Split based on | for materials
@@ -235,8 +252,9 @@ public class SMSBuilder {
 
   /**
    * Method to populate inventory for each material
-   * @param material Material Details string
-   * @param sendTime Send Time
+   *
+   * @param material              Material Details string
+   * @param sendTime              Send Time
    * @param actualTransactionDate Actual Date of transaction
    * @return Inventory Transactions
    */
@@ -274,10 +292,11 @@ public class SMSBuilder {
 
   /**
    * Populate the mobile transaction model quantity, opening stock based on the values in the SMS request
-   * @param transaction Transaction String
-   * @param sendTime Send Time
+   *
+   * @param transaction        Transaction String
+   * @param sendTime           Send Time
    * @param entryTimeInMinutes Entry Time in minutes
-   * @param actualTransDate Actual Transaction Date
+   * @param actualTransDate    Actual Transaction Date
    * @return Mobile Trans Model
    */
   private MobileTransModel populateTransModel(String transaction, Long sendTime,
@@ -375,11 +394,12 @@ public class SMSBuilder {
 
   /**
    * Method to build  SMS response
-   * @param model Transaction model
+   *
+   * @param model          Transaction model
    * @param mobileResponse response populated from service
-   * @param errorMsg Error message
+   * @param errorMsg       Error message
    * @return Response String
-   * @throws ServiceException from service layer
+   * @throws ServiceException        from service layer
    * @throws ObjectNotFoundException when material, kiosk, user not found
    */
   public String buildResponse(SMSTransactionModel model,
@@ -443,8 +463,9 @@ public class SMSBuilder {
 
   /**
    * Method to append the error to response with code and index
+   *
    * @param errorDetailModelList Error Details List
-   * @param matDetails Material Details String
+   * @param matDetails           Material Details String
    */
   private void appendErrorResponse(List<MobileTransErrorDetailModel> errorDetailModelList,
                                    StringBuilder matDetails) {
@@ -458,7 +479,8 @@ public class SMSBuilder {
 
   /**
    * Method to add the material details to response
-   * @param invModel Inventory Model
+   *
+   * @param invModel   Inventory Model
    * @param materialId Material Id
    * @return String Builder
    */
@@ -487,10 +509,11 @@ public class SMSBuilder {
 
   /**
    * Append inventory details
+   *
    * @param materialDetails Material Details
-   * @param openingStk Opening Stock
-   * @param allocationStk Allocated Stock
-   * @param inTransitStk In transit Stock
+   * @param openingStk      Opening Stock
+   * @param allocationStk   Allocated Stock
+   * @param inTransitStk    In transit Stock
    */
   private void appendInventoryDetails(StringBuilder materialDetails, BigDecimal openingStk,
                                       BigDecimal allocationStk, BigDecimal inTransitStk) {
@@ -509,6 +532,7 @@ public class SMSBuilder {
 
   /**
    * Method to populate a map with material short id and error object
+   *
    * @param response from service
    * @return Error Map
    * @throws ServiceException from service layer
@@ -532,6 +556,7 @@ public class SMSBuilder {
 
   /**
    * Populate a hashmap with material short id and inventory details
+   *
    * @param response Resposne from service
    * @return Map with material short id and inventory model
    */
@@ -596,6 +621,7 @@ public class SMSBuilder {
 
   /**
    * Build the transaction map with material id as key and list of associated transactions
+   *
    * @param model Transaction model
    * @return Map with material id and Itransaction object
    * @throws ServiceException when user,kiosk not found
@@ -655,14 +681,15 @@ public class SMSBuilder {
 
   /**
    * Method to set details to the transaction object
-   * @param mobileTransModel Mobile transaction model
-   * @param ua User Account
-   * @param kioskId Kiosk ID
+   *
+   * @param mobileTransModel      Mobile transaction model
+   * @param ua                    User Account
+   * @param kioskId               Kiosk ID
    * @param actualTransactionDate Actual Transaction Date
-   * @param materialId Material ID
+   * @param materialId            Material ID
    * @return ITransaction
-   * @throws ParseException when unable to parse date
-   * @throws ServiceException Exception thrown from Service Layer
+   * @throws ParseException          when unable to parse date
+   * @throws ServiceException        Exception thrown from Service Layer
    * @throws ObjectNotFoundException When kiosk not found
    */
   private ITransaction setTransactionDetails(MobileTransModel mobileTransModel, IUserAccount ua,
@@ -678,7 +705,7 @@ public class SMSBuilder {
     transaction.setKioskId(kioskId);
     transaction.setType(mobileTransModel.ty);
     transaction.setBatchId(mobileTransModel.bid);
-    if(transaction.hasBatch()) {
+    if (transaction.hasBatch()) {
       transaction.setOpeningStockByBatch(mobileTransModel.ostk);
     } else {
       transaction.setOpeningStock(mobileTransModel.ostk);

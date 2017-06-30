@@ -68,6 +68,7 @@ import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.impl.DemandService;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
@@ -627,7 +628,7 @@ public class OrderBuilder {
     List<UserModel> userModels = null;
     if(approvers != null && !approvers.isEmpty()) {
       UserBuilder userBuilder = new UserBuilder();
-      userModels = userBuilder.buildUserModels(constructUserAccount(us, approvers), locale, timezone, true, 0);
+      userModels = userBuilder.buildUserModels(constructUserAccount(us, approvers), locale, timezone, true);
     }
   return userModels;
   }
@@ -640,13 +641,13 @@ public class OrderBuilder {
     if(primaryApprovers != null && !primaryApprovers.isEmpty()) {
       primaryApvrs.addAll(primaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
       if(!primaryApvrs.isEmpty()) {
-        model.setPa(userBuilder.buildUserModels(constructUserAccount(as, primaryApvrs), locale, timeZone, true, 0));
+        model.setPa(userBuilder.buildUserModels(constructUserAccount(as, primaryApvrs), locale, timeZone, true));
       }
     }
     if(secondaryApprovers != null && !secondaryApprovers.isEmpty()) {
       secondaryApvrs.addAll(secondaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
       if(!secondaryApvrs.isEmpty()) {
-        model.setSa(userBuilder.buildUserModels(constructUserAccount(as, secondaryApvrs), locale, timeZone, true, 0));
+        model.setSa(userBuilder.buildUserModels(constructUserAccount(as, secondaryApvrs), locale, timeZone, true));
       }
     }
     return model;
@@ -748,5 +749,39 @@ public class OrderBuilder {
     DemandBatchMeta(BigDecimal quantity) {
       this.quantity = quantity;
     }
+  }
+
+  public List<OrderModel> buildOrderMetaData(List<IOrder> orders, Long domainId)
+      throws ServiceException {
+    List<OrderModel> orderModels = new ArrayList<>();
+    SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_CSV);
+    try {
+      EntitiesService service = Services.getService(EntitiesServiceImpl.class);
+      for (IOrder order : orders) {
+        OrderModel model = new OrderModel();
+        model.id = order.getOrderId();
+        model.eid = order.getKioskId();
+        IKiosk k = service.getKiosk(model.eid);
+        model.enm = k.getName();
+        model.eadd =
+            CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
+        if (order.getServicingKiosk() != null) {
+          model.vid = order.getServicingKiosk().toString();
+          k = service.getKiosk(order.getServicingKiosk());
+          model.vnm = k.getName();
+          model.vadd =
+              CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
+        }
+        model.size = order.getNumberOfItems();
+        if (order.getDueDate() != null) {
+          model.edd = sdf.format(order.getDueDate());
+        }
+        orderModels.add(model);
+      }
+    } catch (Exception e) {
+      xLogger.warn("Error while fetching entity data in domain:{0} ", domainId, e);
+      throw new ServiceException(e);
+    }
+    return orderModels;
   }
 }

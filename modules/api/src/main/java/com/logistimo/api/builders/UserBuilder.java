@@ -23,27 +23,36 @@
 
 package com.logistimo.api.builders;
 
+import com.logistimo.api.models.LocationModel;
+import com.logistimo.api.models.UserConfigModel;
+import com.logistimo.api.models.UserDashboardConfigModel;
+import com.logistimo.api.models.UserDetailModel;
+import com.logistimo.api.models.UserDomainDetail;
+import com.logistimo.api.models.UserModel;
+import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.users.UserUtils;
-import com.logistimo.users.entity.IUserAccount;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.logger.XLog;
+import com.logistimo.models.superdomains.DomainSuggestionModel;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
+import com.logistimo.users.UserUtils;
+import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.api.models.UserModel;
-import com.logistimo.models.superdomains.DomainSuggestionModel;
+import com.logistimo.utils.StringUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +62,10 @@ public class UserBuilder {
   private static final XLog xLogger = XLog.getLog(UserBuilder.class);
 
   public List<UserModel> buildUserModels(List users, Locale locale, String timeZone,
-                                         boolean isPartial, int offset) {
+                                         boolean isPartial) {
     List<UserModel> models = null;
     if (users != null) {
-      models = new ArrayList<UserModel>(users.size());
+      models = new ArrayList<>(users.size());
       for (Object user : users) {
         UserModel model = buildSimpleUserModel((IUserAccount) user, locale, timeZone, isPartial);
         models.add(model);
@@ -65,10 +74,9 @@ public class UserBuilder {
     return models;
   }
 
-  public UserModel buildSimpleUserModel(IUserAccount user, Locale locale, String timeZone,
-                                        boolean isPartial) {
-    UserModel model = new UserModel();
-    String domainName;
+  public UserDetailModel buildSimpleUserModel(IUserAccount user, Locale locale, String timeZone,
+                                              boolean isPartial) {
+    UserDetailModel model = new UserDetailModel();
     model.id = user.getUserId();
     model.phm = user.getMobilePhoneNumber();
     model.fnm = user.getFullName();
@@ -98,21 +106,117 @@ public class UserBuilder {
       domain = ds.getDomain(user.getDomainId());
       if (domain != null) {
         model.sdname = domain.getName();
+        model.dmn = new UserDomainDetail();
+        model.dmn.nm = domain.getName();
+        model.dmn.id = domain.getId();
+        model.dmn.loc = new LocationModel();
+
       } else {
         model.sdname = Constants.EMPTY;
       }
     } catch (Exception e) {
-      xLogger.fine("Unable to fetch the domain details" + e);
+      xLogger.warn("Unable to fetch the domain details", e);
     }
+    return model;
+  }
 
+  public UserDetailModel buildMobileAuthResponseModel(IUserAccount user) {
+    return includeConfiguration(user,
+        buildSimpleUserModel(user, user.getLocale(), user.getTimezone(), false));
+  }
+
+  private UserDetailModel includeConfiguration(IUserAccount user, UserDetailModel model) {
+    model.config = new UserConfigModel();
+    model.config.dboard = new UserDashboardConfigModel();
+    try {
+      DomainConfig dc = DomainConfig.getInstance(user.getDomainId());
+      model.config.dboard.dmtgs = StringUtil.getList(
+          StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().dmtg));
+      model.config.dboard.aper = dc.getDashboardConfig().getDbOverConfig().aper;
+      model.config.dboard.dtt = dc.getDashboardConfig().getDbOverConfig().dtt;
+      model.config.dboard.edm = dc.getDashboardConfig().getDbOverConfig().edm;
+      model.config.dboard.atdd = dc.getDashboardConfig().getDbOverConfig().atdd;
+
+      model.config.dboard.exetgs = StringUtil.getList(
+          StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().exet));
+      model.config.dboard.extstts = StringUtil.getList(
+          StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().exts));
+      model.config.dboard.extstts = StringUtil.getList(
+          StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().dutg));
+      model.config.adboard = dc.getAssetConfig();
+      model.config.adboard.setConfiguration(null);
+
+      //Get asset config
+      AssetConfigModel assetConfigModel = new AssetConfigModel();
+      AssetSystemConfig asc = AssetSystemConfig.getInstance();
+      AssetConfigModel.WorkingStatus workingStatus;
+      for(AssetSystemConfig.WorkingStatus ws : asc.workingStatuses) {
+        workingStatus = new AssetConfigModel.WorkingStatus();
+        workingStatus.status = ws.status;
+        workingStatus.dV = ws.displayValue;
+        assetConfigModel.wses.put(workingStatus.status, workingStatus);
+      }
+      for(Integer key: asc.assets.keySet()) {
+        AssetSystemConfig.Asset asset = asc.assets.get(key);
+        AssetConfigModel.Asset assetData = new AssetConfigModel.Asset();
+        assetData.id = key;
+        assetData.an = asset.getName();
+        assetData.at = asset.type;
+        if(asset.monitoringPositions != null) {
+          for (AssetSystemConfig.MonitoringPosition monitoringPosition : asset.monitoringPositions) {
+            AssetConfigModel.MonitoringPosition mps = new AssetConfigModel.MonitoringPosition();
+            mps.mpId = monitoringPosition.mpId;
+            mps.name = monitoringPosition.name;
+            mps.sId = monitoringPosition.sId;
+            assetData.mps.put(mps.mpId, mps);
+          }
+        }
+        for(String manufacturer : asset.getManufacturers().keySet()) {
+          AssetConfigModel.Mancfacturer manc = new AssetConfigModel.Mancfacturer();
+          AssetSystemConfig.Manufacturer manufacturer1 = asset.getManufacturers().get(manufacturer);
+          manc.id = manufacturer;
+          manc.name = manufacturer1.name;
+          if(manufacturer1.model != null) {
+            for(AssetSystemConfig.Model assetModel: manufacturer1.model) {
+              AssetConfigModel.Model aModel = new AssetConfigModel.Model();
+              aModel.name = assetModel.name;
+              aModel.type = assetModel.type;
+              for(AssetSystemConfig.Sensor sensor : assetModel.sns) {
+                AssetConfigModel.Sensor assetSns = new AssetConfigModel.Sensor();
+                assetSns.name = sensor.name;
+                assetSns.mpId = sensor.mpId;
+                assetSns.cd = sensor.cd;
+                aModel.sns.put(assetSns.name, assetSns);
+              }
+              manc.model.put(aModel.name, aModel);
+            }
+          }
+          assetData.mcs.put(manc.id, manc);
+        }
+        assetConfigModel.assets.put(assetData.id, assetData);
+      }
+      model.config.tempSysConfig = assetConfigModel;
+      model.dmn.loc.cntry = dc.getCountry();
+      model.dmn.loc.state = dc.getState();
+      //adding default etags and mtags
+      if (StringUtils.isNotEmpty(dc.getMaterialTags())) {
+        model.config.mtags = StringUtil.getArray(dc.getMaterialTags());
+      }
+      if (StringUtils.isNotEmpty(dc.getKioskTags())) {
+        model.config.etags = StringUtil.getArray(dc.getKioskTags());
+      }
+
+    } catch (Exception e) {
+      xLogger.warn("Unable to fetch the domain details", e);
+    }
     return model;
   }
 
   public List<IUserAccount> buildUserAccounts(List<UserModel> users, Locale locale, String timezone,
                                               boolean isPartial) {
     List<IUserAccount> accounts = null;
-    if (users.size() != 0) {
-      accounts = new ArrayList<IUserAccount>(users.size());
+    if (!users.isEmpty()) {
+      accounts = new ArrayList<>(users.size());
       for (Object user : users) {
         IUserAccount userAccount = buildUserAccount((UserModel) user, isPartial);
         accounts.add(userAccount);
@@ -140,8 +244,8 @@ public class UserBuilder {
   }
 
   public UserModel buildUserModel(IUserAccount account, IUserAccount rb, IUserAccount lu,
-                                  Locale locale, String timeZone, boolean Messsage) {
-    UserModel model = buildUserModel(account, locale, timeZone, Messsage, null);
+                                  Locale locale, String timeZone, boolean message) {
+    UserModel model = buildUserModel(account, locale, timeZone, message, null);
     if (rb != null) {
       model.regByn = rb.getFullName();
     }
@@ -233,7 +337,7 @@ public class UserBuilder {
         domainName = Constants.EMPTY;
       }
     } catch (Exception e) {
-      xLogger.fine("Unable to fetch the domain details" + e);
+      xLogger.warn("Unable to fetch the domain details", e);
     }
     model.sdname = domainName;
     return model;
@@ -290,8 +394,8 @@ public class UserBuilder {
     List<UserModel> models = null;
     if (results != null && results.getSize() > 0) {
       models =
-          buildUserModels(results.getResults(), user.getLocale(), user.getTimezone(), isPartial,
-              results.getOffset());
+          buildUserModels(results.getResults(), user.getLocale(), user.getTimezone(), isPartial
+          );
     }
     return new Results(models, results.getCursor(), results.getNumFound(), results.getOffset());
   }
@@ -303,7 +407,7 @@ public class UserBuilder {
       try {
         List<DomainSuggestionModel>
             accDmnSuggestionModelList =
-            new ArrayList<DomainSuggestionModel>();
+            new ArrayList<>();
         DomainsService ds = Services.getService(DomainsServiceImpl.class);
 
         for (Long accDid : accDids) {

@@ -42,11 +42,11 @@ public class RestResponsePage<T> {
   @SerializedName(value = "total", alternate = {"total_elements"})
   private long totalElements;
   private List<T> content = new ArrayList<>(1);
-  private Sort sort;
+  private List<Sort.Order> sort;
 
   public RestResponsePage(int offset, int size,
                           long totalElements,
-                          List<T> content, Sort sort) {
+                          List<T> content, List<Sort.Order> sort) {
     this.offset = offset;
     this.size = size;
     this.totalElements = totalElements;
@@ -86,11 +86,11 @@ public class RestResponsePage<T> {
     this.content = content;
   }
 
-  public Sort getSort() {
+  public List<Sort.Order> getSort() {
     return sort;
   }
 
-  public void setSort(Sort sort) {
+  public void setSort(List<Sort.Order> sort) {
     this.sort = sort;
   }
 }

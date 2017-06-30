@@ -371,6 +371,7 @@ public class ConfigurationModelsBuilder {
     model.snh = dc.isEnableSwitchToNewHost();
     model.nhn = dc.getNewHostName();
     model.support = buildAllSupportConfigModels(dc);
+    model.adminContact = dc.getAdminContactConfigMap();
     return model;
   }
 
@@ -1023,12 +1024,12 @@ public class ConfigurationModelsBuilder {
       if(orderConfig.getPrimaryApprovers() != null && orderConfig.getPrimaryApprovers().size() > 0) {
         model.pa =
             userBuilder.buildUserModels(constructUserAccount(as, orderConfig.getPrimaryApprovers()), locale,
-                timezone, true, 0);
+                timezone, true);
       }
       if(orderConfig.getSecondaryApprovers() != null && orderConfig.getSecondaryApprovers().size() > 0) {
         model.sa =
             userBuilder.buildUserModels(constructUserAccount(as, orderConfig.getSecondaryApprovers()), locale,
-                timezone, true, 0);
+                timezone, true);
       }
       model.px = orderConfig.getPurchaseOrderApprovalExpiry();
       model.sx = orderConfig.getSalesOrderApprovalExpiry();

@@ -280,7 +280,11 @@ public class AuthController {
         AuthenticationService as = Services.getService(AuthenticationServiceImpl.class, null);
         UsersService us = Services.getService(UsersServiceImpl.class);
         Long domainId = us.getUserAccount(model.uid).getDomainId();
-        String successMsg = as.generateOTP(model.uid, model.mode, "w", domainId,
+        //web client is not sending this variable
+        if (StringUtils.isEmpty(model.udty)) {
+          model.udty = "w";
+        }
+        String successMsg = as.generateOTP(model.uid, model.mode, model.udty, domainId,
             request.getHeader("host"));
         return new AuthModel(false, successMsg);
       } catch (MessageHandlingException | IOException | ServiceException e) {

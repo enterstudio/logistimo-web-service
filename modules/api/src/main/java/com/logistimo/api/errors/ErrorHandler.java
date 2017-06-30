@@ -35,6 +35,8 @@ import com.logistimo.exception.SystemException;
 import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
+import com.logistimo.security.BadCredentialsException;
+import com.logistimo.security.UserDisabledException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 
@@ -92,7 +94,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     return handleBadRequest(e, request);
   }
 
-  @ExceptionHandler({BadRequestException.class})
+  @ExceptionHandler({BadRequestException.class, BadCredentialsException.class})
   protected ResponseEntity<Object> handleBadRequest(RuntimeException e, WebRequest request) {
     ErrorResource error = new ErrorResource("[Bad Request]", e.getMessage());
     HttpHeaders headers = new HttpHeaders();
@@ -108,39 +110,54 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({ValidationException.class})
   protected ResponseEntity<Object> handleValidationException(ValidationException e,
-                                                             WebRequest request, Locale locale) {
-    return handleBadRequest(e, request, locale);
+                                                             WebRequest request) {
+    return handleBadRequest(e, request);
   }
 
   @ExceptionHandler({ObjectNotFoundException.class})
-  protected ResponseEntity<Object> handleObjectNotFoundException(ValidationException e,
-                                                                 WebRequest request,
-                                                                 Locale locale) {
-    ErrorResource error = new ErrorResource("[Not found]", e.getLocalisedMessage(locale));
+  protected ResponseEntity<Object> handleObjectNotFoundException(ObjectNotFoundException e,
+                                                                 WebRequest request) {
+    ErrorResource
+        error =
+        new ErrorResource("[Not found]", e.getLocalisedMessage(getLocale()));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.NOT_FOUND, request);
   }
 
-  private ResponseEntity<Object> handleBadRequest(ValidationException e, WebRequest request,
-                                                  Locale locale) {
-    ErrorResource error = new ErrorResource("[Bad Request]", e.getLocalisedMessage(locale));
+  @ExceptionHandler({UserDisabledException.class})
+  protected ResponseEntity<Object> handleUserDisabled(RuntimeException e, WebRequest request) {
+    return handleUnauthorizedRequest(e, request);
+  }
+
+  private ResponseEntity<Object> handleBadRequest(ValidationException e, WebRequest request) {
+    ErrorResource
+        error =
+        new ErrorResource("[Bad Request]", e.getLocalisedMessage(getLocale()));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.BAD_REQUEST, request);
   }
 
+  private Locale getLocale() {
+    try {
+      return SecurityUtils.getLocale();
+    } catch (Exception e) {
+      return Locale.ENGLISH;
+    }
+  }
+
   @ExceptionHandler({ServiceException.class, SystemException.class, Exception.class})
   @Order(Ordered.LOWEST_PRECEDENCE)
   protected ResponseEntity<Object> handleServiceException(Exception e,
-                                                          WebRequest request,
-                                                          Locale locale) {
+                                                          WebRequest request) {
 
     XLOGGER.severe("{2}: {0} failed for user {1}", request.getContextPath(),
         SecurityUtils.getUserDetails(), e);
     ErrorResource
         error =
-        new ErrorResource("[System error]", LogiException.constructMessage("G001", locale, null));
+        new ErrorResource("[System error]", LogiException.constructMessage("G001",
+            getLocale(), null));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);

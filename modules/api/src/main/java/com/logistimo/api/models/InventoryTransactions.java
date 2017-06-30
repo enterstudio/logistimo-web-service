@@ -29,31 +29,31 @@ import java.util.List;
 
 public class InventoryTransactions {
 
-    private Long materialId;
-    private Long materialShortId;
-    private List<MobileTransModel> mobileTransModelList;
+  private Long materialId;
+  private Long materialShortId;
+  private List<MobileTransModel> mobileTransModelList;
 
-    public Long getMaterialId() {
-        return materialId;
-    }
+  public Long getMaterialId() {
+    return materialId;
+  }
 
-    public void setMaterialId(Long materialId) {
-        this.materialId = materialId;
-    }
+  public void setMaterialId(Long materialId) {
+    this.materialId = materialId;
+  }
 
-    public Long getMaterialShortId() {
-        return materialShortId;
-    }
+  public Long getMaterialShortId() {
+    return materialShortId;
+  }
 
-    public void setMaterialShortId(Long materialShortId) {
-        this.materialShortId = materialShortId;
-    }
+  public void setMaterialShortId(Long materialShortId) {
+    this.materialShortId = materialShortId;
+  }
 
-    public List<MobileTransModel> getMobileTransModelList() {
-        return mobileTransModelList;
-    }
+  public List<MobileTransModel> getMobileTransModelList() {
+    return mobileTransModelList;
+  }
 
-    public void setMobileTransModelList(List<MobileTransModel> mobileTransModelList) {
-        this.mobileTransModelList = mobileTransModelList;
-    }
+  public void setMobileTransModelList(List<MobileTransModel> mobileTransModelList) {
+    this.mobileTransModelList = mobileTransModelList;
+  }
 }

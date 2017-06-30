@@ -28,6 +28,7 @@ import com.logistimo.auth.SecurityMgr;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.constants.CharacterConstants;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ServiceException;
@@ -45,13 +46,12 @@ import javax.servlet.http.HttpServletRequest;
 
 public class SecurityUtils {
 
-  private SecurityUtils() {
-  }
-
+  public static final String DOMAIN_HEADER = "d";
   private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
   private static final XLog xLogger = XLog.getLog(SecurityUtils.class);
-  public static final String DOMAIN_HEADER = "d";
 
+  private SecurityUtils() {
+  }
 
   public static Long getDomainId(HttpServletRequest request) {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request
@@ -147,7 +147,11 @@ public class SecurityUtils {
   }
 
   public static SecureUserDetails getUserDetails() {
-    return ThreadLocalUtil.get().getSecureUserDetails();
+    SecureUserDetails userDetails = ThreadLocalUtil.get().getSecureUserDetails();
+    if (userDetails == null) {
+      throw new UnauthorizedException("Unauthenticated access to user details");
+    }
+    return userDetails;
   }
 
   public static void setUserDetails(SecureUserDetails userDetails) {

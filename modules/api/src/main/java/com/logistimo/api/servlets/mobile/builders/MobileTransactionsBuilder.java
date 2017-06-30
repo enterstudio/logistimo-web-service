@@ -47,7 +47,18 @@ import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
-import com.logistimo.proto.*;
+import com.logistimo.proto.MobileConsRateModel;
+import com.logistimo.proto.MobileGeoModel;
+import com.logistimo.proto.MobileInvBatchModel;
+import com.logistimo.proto.MobileInvModel;
+import com.logistimo.proto.MobileMaterialTransModel;
+import com.logistimo.proto.MobileTransErrModel;
+import com.logistimo.proto.MobileTransErrorDetailModel;
+import com.logistimo.proto.MobileTransModel;
+import com.logistimo.proto.MobileTransactionModel;
+import com.logistimo.proto.MobileTransactionsModel;
+import com.logistimo.proto.MobileUpdateInvTransRequest;
+import com.logistimo.proto.MobileUpdateInvTransResponse;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.tags.TagUtil;
@@ -57,11 +68,19 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.StringUtil;
+
 import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by vani on 18/01/17.
@@ -274,8 +293,8 @@ public class MobileTransactionsBuilder {
  private MobileInvModel buildMobileInvModel(IInvntry inventory,
                                              Long domainId, String userId,
                                              InventoryManagementService ims, EntitiesService es) {
-   MobileInvModel inv = new MobileInvModel();
-   try {
+    MobileInvModel inv = new MobileInvModel();
+    try {
       DomainConfig dc = DomainConfig.getInstance(domainId);
       UsersService us = Services.getService(UsersServiceImpl.class);
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
@@ -424,30 +443,29 @@ public class MobileTransactionsBuilder {
   /**
    * Builds a map of material to list of server transaction objects from list of mobile transaction objects
    *
-   * @param userId       User ID of the user sending the mobile transactions
-   * @param kid         Kiosk ID of the kiosk for which the transactions are sent
+   * @param userId                    User ID of the user sending the mobile transactions
+   * @param kid                       Kiosk ID of the kiosk for which the transactions are sent
    * @param mobileMaterialTransModels List of mobile transactions grouped by material
    * @return - Map of material id to list of transactions as required by the server
    */
-  public Map<Long,List<ITransaction>> buildMaterialTransactionsMap(String userId, Long kid,
-                                              List<MobileMaterialTransModel> mobileMaterialTransModels) {
+  public Map<Long, List<ITransaction>> buildMaterialTransactionsMap(String userId, Long kid,
+                                                                    List<MobileMaterialTransModel> mobileMaterialTransModels) {
     if (mobileMaterialTransModels == null || mobileMaterialTransModels.isEmpty()) {
       return null;
     }
-    Map<Long,List<ITransaction>> midTransModelMap = new HashMap<>(mobileMaterialTransModels.size());
+    Map<Long, List<ITransaction>>
+        midTransModelMap =
+        new HashMap<>(mobileMaterialTransModels.size());
     for (MobileMaterialTransModel mobileMaterialTransModel : mobileMaterialTransModels) {
       Long mid = mobileMaterialTransModel.mid;
       List<ITransaction> transactionList = buildTransactions(userId, kid, mobileMaterialTransModel);
-      midTransModelMap.put(mid,transactionList);
+      midTransModelMap.put(mid, transactionList);
     }
     return midTransModelMap;
   }
 
   /**
    * Sets the partial id in the mobile update inventory transaction response json string (if not set already)
-   * @param mobUpdateInvTransRespJsonStr
-   * @param pid
-   * @return
    */
   public String buildUpdateInvTransResponseWithPartialID(String mobUpdateInvTransRespJsonStr, String pid) {
     MobileUpdateInvTransResponse mobileUpdateInvTransResponse =  new Gson().fromJson(mobUpdateInvTransRespJsonStr,

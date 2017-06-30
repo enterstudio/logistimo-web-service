@@ -31,4 +31,5 @@ public class ChangePasswordModel {
   public String npd;
   public String cpd;
   public String key;
+  public String otp;
 }

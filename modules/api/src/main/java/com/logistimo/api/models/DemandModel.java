@@ -255,6 +255,10 @@ public class DemandModel implements Comparable<DemandModel> {
    */
   public Boolean tm;
   /**
+   * Consumption rate frequency
+   */
+  public String crFreq;
+  /**
    * Used for displaying tooltip breakdown on Order detail page
    */
   public List<ShipmentItemModel> bd = new ArrayList<>();

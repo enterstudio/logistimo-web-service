@@ -24,6 +24,7 @@
 package com.logistimo.users.service.impl;
 
 import com.logistimo.AppFactory;
+import com.logistimo.api.models.UserDeviceModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
 import com.logistimo.auth.service.AuthenticationService;
@@ -43,6 +44,7 @@ import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.SystemException;
 import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.locations.LocationServiceUtil;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.users.UserLoginHistoryModel;
 import com.logistimo.pagination.PageParams;
@@ -57,9 +59,11 @@ import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
+import com.logistimo.users.builders.UserDeviceBuilder;
 import com.logistimo.users.dao.IUserDao;
 import com.logistimo.users.dao.UserDao;
 import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.entity.IUserDevice;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.utils.Counter;
@@ -205,7 +209,14 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
             account.getUserId());
         // Increment counter
         List<Long> domainIds = account.getDomainIds();
-
+        //add user location ids
+        Map<String, Object> reqMap = new HashMap<>();
+        reqMap.put("userId", account.getUserId());
+        reqMap.put("userName", account.getRegisteredBy());
+        Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
+        if (lidMap.get("status") == "success") {
+          updateUserLocationIds(account, lidMap, pm);
+        }
         account = pm.detachCopy(account);
       }
       // Generate event, if configured
@@ -565,7 +576,14 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       user.setCustomId(account.getCustomId());
 
       user.setTgs(tagDao.getTagsByNames(account.getTags(), ITag.USER_TAG));
-
+      //add user location ids
+      Map<String, Object> reqMap = new HashMap<>();
+      reqMap.put("userId", account.getUserId());
+      reqMap.put("userName", account.getRegisteredBy());
+      Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
+      if (lidMap.get("status") == "success") {
+        updateUserLocationIds(account, lidMap, pm);
+      }
       // Generate event, if configured
       try {
         EventPublisher.generate(account.getDomainId(), IEvent.MODIFIED, null,
@@ -1414,6 +1432,19 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     }
     return false;
   }
+  /**
+   * This method will update applicable location ids for an user
+   */
+  public void updateUserLocationIds(IUserAccount user, Map<String, Object> lidMap,
+                                    PersistenceManager pm) {
+    IUserAccount k = JDOUtils.getObjectById(IUserAccount.class, user.getUserId(), pm);
+    k.setCountryId((String) lidMap.get("countryId"));
+    k.setStateId((String) lidMap.get("stateId"));
+    k.setDistrictId((String) lidMap.get("districtId"));
+    k.setTalukId((String) lidMap.get("talukId"));
+    k.setCityId((String) lidMap.get("placeId"));
+    pm.makePersistent(k);
+  }
 
   /**
    * Set the UI preference for a user. If true, then it means his preference is New UI. Otherwise, preference is Old UI.
@@ -1456,6 +1487,48 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     }
     if (errMsg != null) {
       throw new ServiceException(errMsg, exception);
+    }
+  }
+
+  @Override
+  public void addEditUserDevice(UserDeviceModel ud) throws ServiceException {
+    UserDeviceBuilder builder = new UserDeviceBuilder();
+    IUserDevice userDevice = getUserDevice(ud.userid, ud.appname);
+    userDevice = builder.buildUserDevice(userDevice, ud);
+    xLogger.fine("Entering createUserDevice");
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    try {
+      pm.makePersistent(userDevice);
+    } catch (Exception e){
+      xLogger.warn("Issue with add edit user device {}", e.getMessage());
+      throw new ServiceException(e.getMessage(), e);
+    } finally {
+      pm.close();
+    }
+  }
+
+  @Override
+  public IUserDevice getUserDevice(String userid, String appname) throws ServiceException {
+
+    IUserDevice userDevice = null;
+    PersistenceManager pm = null;
+    try{
+      pm = PMF.get().getPersistenceManager();
+      Query query = pm.newQuery(JDOUtils.getImplClass(IUserDevice.class));
+      query.setFilter("userId == userIdParam && appname == appnameParam");
+      query.declareParameters("String userIdParam, String appnameParam");
+      //Query query = pm.newQuery("javax.jdo.query.SQL",q);
+      query.setUnique(true);
+      userDevice = (IUserDevice) query.execute(userid, appname);
+      userDevice = pm.detachCopy(userDevice);
+      return userDevice;
+    }catch (Exception e){
+      xLogger.severe("{0} while getting user device {1}", e.getMessage(), userid, e);
+      throw new ServiceException("Issue with getting user device for user :" + userid);
+    } finally {
+      if (pm != null) {
+        pm.close();
+      }
     }
   }
 

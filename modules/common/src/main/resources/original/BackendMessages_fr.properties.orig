@@ -476,6 +476,11 @@ ship.reason.update.error=Erreur lors de la mise à jour de la raison de l'expéd
 ship.expected.date.parse.error=Erreur lors de l'analyse de la date de réalisation prévue
 ship.package.size.update.success=La taille de l'emballage est mise à jour avec succès.
 ship.package.size.update.error=Erreur lors de la mise à jour du format du paquet
+userdevice.create.error=Erreur lors de la création du périphérique utilisateur
+userdevice.not.created=Données invalides. Le périphérique utilisateur ne peut pas être créé.
+invalid.req.data=Données de requêtes non valides.
+
+
 transaction.rejected=Transaction rejetée en raison d'une transaction plus récente sur le Web.
 error.invaliduserid=Identifiant invalide
 error.invaliddomainid=ID de domaine non valide

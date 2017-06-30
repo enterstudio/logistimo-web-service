@@ -60,9 +60,8 @@ import javax.jdo.Query;
 @Repository
 public class ApprovalsDao implements IApprovalsDao {
 
-  private static final XLog xLogger = XLog.getLog(ApprovalsDao.class);
   public static final String APPROVAL_ID_PARAM = "approvalIdParam";
-
+  private static final XLog xLogger = XLog.getLog(ApprovalsDao.class);
   private ApprovalsBuilder builder = new ApprovalsBuilder();
 
   public IOrderApprovalMapping updateOrderApprovalMapping(CreateApprovalResponse approvalResponse,
@@ -128,7 +127,7 @@ public class ApprovalsDao implements IApprovalsDao {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
         query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
-        query.setFilter("st == statusParam && aid == approvalIdParam");
+        query.setFilter("status == statusParam && approvalId == approvalIdParam");
         query.declareParameters("String statusParam, String approvalIdParam");
         params.put("statusParam", status);
         params.put(APPROVAL_ID_PARAM, approvalId);
@@ -143,7 +142,7 @@ public class ApprovalsDao implements IApprovalsDao {
           try {
             query.closeAll();
           } catch (Exception ignored) {
-            xLogger.warn("Exception while closing query", ignored);
+            xLogger.warn(ignored.getMessage(), ignored);
           }
         }
         if (pm != null) {
@@ -162,7 +161,7 @@ public class ApprovalsDao implements IApprovalsDao {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
         query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
-        query.setFilter("oid == orderIdParam && aid == approvalIdParam");
+        query.setFilter("orderId == orderIdParam && approvalId == approvalIdParam");
         query.declareParameters("Long orderIdParam, String approvalIdParam");
         params.put("orderIdParam", orderId);
         params.put(APPROVAL_ID_PARAM, approvalId);
@@ -182,7 +181,7 @@ public class ApprovalsDao implements IApprovalsDao {
           try {
             query.closeAll();
           } catch (Exception ignored) {
-            xLogger.warn("Exception while closing query", ignored);
+            xLogger.warn(ignored.getMessage(), ignored);
           }
         }
         if (pm != null) {
@@ -201,7 +200,7 @@ public class ApprovalsDao implements IApprovalsDao {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
         query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
-        query.setFilter("oid == orderIdParam && aid == approvalIdParam");
+        query.setFilter("orderId == orderIdParam && approvalId == approvalIdParam");
         query.declareParameters("Long orderIdParam, String approvalIdParam");
         params.put("orderIdParam", orderId);
         params.put(APPROVAL_ID_PARAM, approvalId);
@@ -221,7 +220,7 @@ public class ApprovalsDao implements IApprovalsDao {
           try {
             query.closeAll();
           } catch (Exception ignored) {
-            xLogger.warn("Exception while closing query", ignored);
+            xLogger.warn(ignored.getMessage(), ignored);
           }
         }
         if (pm != null) {

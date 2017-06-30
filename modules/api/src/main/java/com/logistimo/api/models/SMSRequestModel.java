@@ -25,31 +25,31 @@ package com.logistimo.api.models;
 
 
 public class SMSRequestModel {
-    private String message;
-    private String address;
-    private String receivedOn;
+  private String message;
+  private String address;
+  private String receivedOn;
 
-    public String getMessage() {
-        return message;
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+  public void setMessage(String message) {
+    this.message = message;
+  }
 
-    public String getAddress() {
-        return address;
-    }
+  public String getAddress() {
+    return address;
+  }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-    public String getReceivedOn() {
-        return receivedOn;
-    }
+  public String getReceivedOn() {
+    return receivedOn;
+  }
 
-    public void setReceivedOn(String receivedOn) {
-        this.receivedOn = receivedOn;
-    }
+  public void setReceivedOn(String receivedOn) {
+    this.receivedOn = receivedOn;
+  }
 }

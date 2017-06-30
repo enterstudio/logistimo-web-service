@@ -27,12 +27,16 @@
 package com.logistimo.inventory;
 
 import com.logistimo.AppFactory;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.OptimizerConfig;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.events.entity.IEvent;
 import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.dao.IInvntryDao;
 import com.logistimo.inventory.dao.ITransDao;
@@ -45,34 +49,27 @@ import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.models.MobileTransactionCacheModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
+import com.logistimo.pagination.Results;
+import com.logistimo.services.DuplicationException;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.utils.ConfigUtil;
+import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.events.entity.IEvent;
-import com.logistimo.pagination.Results;
-import com.logistimo.services.DuplicationException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -102,6 +99,9 @@ public class TransactionUtil {
   public static final int
       DEDUPLICATION_DURATION =
       ConfigUtil.getInt("trans.dedup.duration.seconds.old", 1_800);
+  public static final int COMPLETED = 0;
+  public static final int IN_PROGRESS = 1;
+  public static final String SYSTEM = "system";
   // seconds
   // Logger
   private static final XLog xLogger = XLog.getLog(TransactionUtil.class);
@@ -109,12 +109,6 @@ public class TransactionUtil {
   // Cache-key Prefix
   private static final String TRANSACTION_CHECKSUM_KEY_PREFIX = "trnschk.";
   private static final int FULLYEAR_LENGTH = 4;
-
-  public static final int COMPLETED = 0;
-  public static final int IN_PROGRESS = 1;
-
-  public static final String SYSTEM = "system";
-
   private static IInvntryDao invntryDao = new InvntryDao();
   private static ITransDao transDao = new TransDao();
 
@@ -478,7 +472,8 @@ public class TransactionUtil {
       String cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
       if (cache != null) {
         // Get last checksum
-        cache.put(cacheKey, mobileTransactionCacheModel, TransactionUtil.DEDUPLICATION_DURATION_NEW);
+        cache
+            .put(cacheKey, mobileTransactionCacheModel, TransactionUtil.DEDUPLICATION_DURATION_NEW);
       }
     } catch (Exception e) {
       xLogger

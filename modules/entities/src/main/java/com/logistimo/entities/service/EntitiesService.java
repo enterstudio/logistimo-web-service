@@ -42,6 +42,7 @@ import com.logistimo.users.entity.IUserAccount;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 
@@ -382,4 +383,6 @@ public interface EntitiesService extends Service {
    * @return
    */
   boolean isAnApprover(String userId, Long domainId);
+
+  void updateKioskLocationIds(IKiosk kiosk, Map<String, Object> lidMap, PersistenceManager pm) throws ServiceException;
 }

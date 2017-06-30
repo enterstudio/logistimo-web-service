@@ -25,7 +25,6 @@ package com.logistimo.dashboards.service;
 
 import com.logistimo.dashboards.entity.IDashboard;
 import com.logistimo.dashboards.entity.IWidget;
-
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 
@@ -62,8 +61,10 @@ public interface IDashboardService extends Service {
 
   void updateWidgetConfig(IWidget widget) throws ServiceException;
 
-  ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type)
-      throws ClassNotFoundException, SQLException;
+  ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type);
+
+  ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type,
+                                    boolean isCountOnly, String groupby);
 
   Integer getInvTotalCount(Map<String, String> filters) throws SQLException;
 

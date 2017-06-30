@@ -25,41 +25,38 @@ package com.logistimo.auth.service.impl;
 
 import com.logistimo.AppFactory;
 import com.logistimo.auth.service.AuthenticationService;
+import com.logistimo.communications.MessageHandlingException;
+import com.logistimo.communications.service.EmailService;
+import com.logistimo.communications.service.MessageService;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.PropertyConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.logger.XLog;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.Resources;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
+import com.logistimo.services.impl.PMF;
+import com.logistimo.services.impl.ServiceImpl;
 import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.services.utils.ConfigUtil;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.entity.IUserToken;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.PasswordEncoder;
 
 import org.apache.commons.lang.StringUtils;
-
-import com.logistimo.config.models.DomainConfig;
-
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.keys.AesKey;
 import org.jose4j.lang.JoseException;
-
-import com.logistimo.communications.service.EmailService;
-import com.logistimo.communications.MessageHandlingException;
-import com.logistimo.communications.service.MessageService;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.Resources;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.services.impl.ServiceImpl;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.PasswordEncoder;
-import com.logistimo.constants.PropertyConstants;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.entity.IUserToken;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -81,9 +78,7 @@ import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
-/**
- * Created by naveensnair on 03/11/15.
- */
+
 public class AuthenticationServiceImpl extends ServiceImpl implements AuthenticationService {
 
   private static final XLog xLogger = XLog.getLog(AuthenticationServiceImpl.class);
@@ -180,6 +175,20 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
     return null;
   }
 
+  public String getUserIdByToken(String token)
+  {
+    IUserToken iUserToken;
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    try {
+      iUserToken = JDOUtils.getObjectById(IUserToken.class, PasswordEncoder.MD5(token), pm);
+      return iUserToken.getUserId();
+    } catch (Exception e) {
+      xLogger.warn("Exception while getting User ID using token",e);
+    } finally {
+      pm.close();
+    }
+    return null;
+  }
   public Boolean clearUserTokens(String userId) {
     PersistenceManager pm = null;
     Query q = null;
@@ -361,31 +370,20 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
     IUserAccount account = as.getUserAccount(userId);
     Locale locale = account.getLocale();
     backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    MemcacheService cache = AppFactory.get().getMemcacheService();
     String sendType = null;
     String sendMode = null;
     if (mode == 0) {
       boolean checkOtp = true;
       if ("m".equalsIgnoreCase(src)) {
-
         if (StringUtils.isEmpty(au)) {
           checkOtp = false;
           sendType = "sms";
         }
       }
       if (checkOtp) {
-        if (cache.get("OTP_" + userId) == null) {
-          xLogger.warn("OTP expired or already used to generate new password for  " + userId);
-          throw new InputMismatchException("OTP not valid");
-        }
-        if (otp.equals(cache.get("OTP_" + userId))) {
-          sendType = "sms";
-          sendMode = backendMessages.getString("password.ph");
-          cache.delete("OTP_" + userId);
-        } else {
-          xLogger.warn("Wrong OTP entered for  " + userId);
-          throw new InputMismatchException("OTP not valid");
-        }
+        validateOtpMMode(userId, otp);
+        sendType = "sms";
+        sendMode = backendMessages.getString("password.ph");
       }
 
     } else {
@@ -413,6 +411,25 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
     return backendMessages.getString("password.forgot.success") + " " + account.getFirstName()
         + "'s " + sendMode + ". " + backendMessages.getString("password.login");
 
+  }
+
+  /**
+   * Validate otp if chosen mode is mobile
+   */
+  @Override
+  public void validateOtpMMode(String userId, String otp) {
+
+    MemcacheService cache = AppFactory.get().getMemcacheService();
+    if (cache.get("OTP_" + userId) == null) {
+      xLogger.warn("OTP expired or already used to generate new password for  " + userId);
+      throw new InputMismatchException("OTP not valid");
+    }
+    if (otp.equals(cache.get("OTP_" + userId))) {
+      cache.delete("OTP_" + userId);
+    } else {
+      xLogger.warn("Wrong OTP entered for  " + userId);
+      throw new InputMismatchException("OTP not valid");
+    }
   }
 
   private String generateUuid() {

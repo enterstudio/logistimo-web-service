@@ -261,6 +261,70 @@
                         </div>
                     </div>
                 </div>
+                <!-- Administrative Contacts Starts-->
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12 mb10">
+                            <div class="title-heading">
+                                {{resourceBundle['administrative.contacts']}}
+                            </div>
+                        </div>
+                    </div>
+                    <!--<div class="row">
+                        <div class="row col-sm-12">
+                            <div class="col-sm-6">
+                                <p class="col-sm-3 pr0 mt10">{{resourceBundle['primary.contact']}}</p>
+                                <div class="col-sm-8 pl0"><user-select users-model="pUser" on-select="getUser(data, 'p')" blur-callback="checkUserModel(0)" place-holder="Type to get suggestions" multiple="'false'" ng-disabled="item.userpopulate" class="user-select" only-active="true"></user-select></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <p class="col-sm-3 mt10 plr0">{{resourceBundle['secondary.contact']}}</p>
+                                <div class="col-sm-8"><user-select users-model="sUser" on-select="getUser(data, 's')" blur-callback="checkUserModel(0)" place-holder="Type to get suggestions" multiple="'false'" ng-disabled="item.userpopulate" class="user-select" only-active="true"></user-select></div>
+                            </div>
+                        </div>
+                    </div>-->
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <table class="table table-condensed table-logistimo">
+                                <tbody>
+                                <tr>
+                                    <th class="col-sm-2">{{resourceBundle['type']}}</th>
+                                    <th class="col-sm-2 br1">{{resourceBundle['support.user']}}</th>
+                                    <th class="col-sm-2">{{resourceBundle['support.user.name']}}</th>
+                                    <th class="col-sm-2">{{resourceBundle['support.phone']}}</th>
+                                    <th class="col-sm-2">{{resourceBundle['support.email']}}</th>
+                                </tr>
+                                <tr>
+                                    <td class="col-sm-2 vmiddle">{{resourceBundle['primary']}}</td>
+                                    <td class="col-sm-2 br1">
+                                        <div class="col-sm-12" style="top:8px;padding-left: 0;">
+                                            <user-select users-model="pUser" on-select="getUser(data, 'p')" blur-callback="checkAdminUser(pUser,'p')" place-holder="Type to get suggestions" multiple="'false'" ng-disabled="item.userpopulate" class="user-select" only-active="true"></user-select>
+                                        </div>
+                                    </td>
+                                    <td class="col-sm-2 vmiddle">
+                                        {{pUser.text}}
+                                    </td>
+                                    <td class="col-sm-2 vmiddle">{{cnf.adminContact.primary.phnm}}</td>
+                                    <td class="col-sm-2 vmiddle">{{cnf.adminContact.primary.em}}</td>
+                                </tr>
+                                <tr ng-if="cnf.adminContact.primary">
+                                    <td class="col-sm-2 vmiddle">{{resourceBundle['secondary']}}</td>
+                                    <td class="col-sm-2 br1">
+                                        <div class="col-sm-12" style="top:8px;padding-left: 0;">
+                                            <user-select users-model="sUser" on-select="getUser(data, 's')" blur-callback="checkAdminUser(sUser,'s')" place-holder="Type to get suggestions" multiple="'false'" ng-disabled="item.userpopulate" class="user-select" only-active="true"></user-select>
+                                        </div>
+                                    </td>
+                                    <td class="col-sm-2 vmiddle">
+                                        {{sUser.text}}
+                                    </td>
+                                    <td class="col-sm-2 vmiddle">{{cnf.adminContact.secondary.phnm}}</td>
+                                    <td class="col-sm-2 vmiddle">{{cnf.adminContact.secondary.em}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Adminstrative Contacts Ends-->
                 <div class="row mt10" ng-if="iSU || dp.ce">
                     <div class="col-sm-6  ml5">
                         <button type="button" ng-click="setGeneralConfig()" class="btn btn-primary">{{resourceBundle['save']}}</button>

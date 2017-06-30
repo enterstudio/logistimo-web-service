@@ -24,16 +24,15 @@
 package com.logistimo.reports.service;
 
 
-import com.logistimo.inventory.models.InvntrySnapshot;
-import com.logistimo.reports.generators.IReportDataGeneratorFactory;
-import com.logistimo.reports.models.DomainCounts;
-
 import com.logistimo.config.models.DomainConfig;
-import com.logistimo.reports.entity.slices.IDomainStats;
-import com.logistimo.reports.entity.IReportSchedule;
+import com.logistimo.inventory.models.InvntrySnapshot;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
+import com.logistimo.reports.entity.IReportSchedule;
+import com.logistimo.reports.entity.slices.IDomainStats;
+import com.logistimo.reports.generators.IReportDataGeneratorFactory;
 import com.logistimo.reports.generators.ReportData;
+import com.logistimo.reports.models.DomainCounts;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 
@@ -121,7 +120,6 @@ public interface ReportsService extends Service {
 
   /**
    * Gets the respective ReportDataGeneratorFactory implementation
-   * @return
    */
   IReportDataGeneratorFactory getReportDataGeneratorFactory();
 }

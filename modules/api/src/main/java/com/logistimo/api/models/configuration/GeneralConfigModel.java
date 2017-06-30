@@ -23,7 +23,10 @@
 
 package com.logistimo.api.models.configuration;
 
+import com.logistimo.config.models.AdminContactConfig;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mohan raja.
@@ -44,4 +47,5 @@ public class GeneralConfigModel {
   public List<SupportConfigModel> support;
   public boolean snh; // Enable switch to new host
   public String nhn; // New host name
+  public Map<String, AdminContactConfig> adminContact;
 }

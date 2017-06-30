@@ -98,12 +98,11 @@ public final class Constants {
 
   // Date format
   public static final String DATE_FORMAT = "dd/MM/yyyy";
-
   public static final String DATE_FORMAT_CSV = "yyyy-MM-dd";
   public static final String DATE_FORMAT_MONTH ="yyyy-MM";
   public static final String DATETIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
-  public static final String DATETIME_IN_MILLI_FORMAT = "dd/MM/yyyy HH:mm:ss.SSS";
   public static final String DATETIME_CSV_FORMAT = "yyyy-MM-dd HH:mm:ss";
+  public static final String DATETIME_IN_MILLIS_FORMAT = "dd/MM/yyyy HH:mm:ss.SSS";
   public static final String DATETIME_CSV_MILLIS_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
   public static final int MAX_REPORT_DURATION = 365; // days
   public static final String DATE_FORMAT_CUSTOMREPORT = "dd-MMM-yyyy";
@@ -164,7 +163,6 @@ public final class Constants {
   public static final String EMPTYQUOTES = "\"\"";
   public static final String OFFSET = "o";
   public static final String TX = "TX";
-  public static final String _M = "_M";
   public static final String OK = "OK";
   public static final String TX_O = "TX_O_";
   // Freq. values
@@ -181,13 +179,14 @@ public final class Constants {
   public static final String MINUSONE = "-1";
   public static final String ERROR = "ERROR";
   public static final Integer LAST_ACCESSED_BY_SYSTEM = 1;
-  public static final BigDecimal WEEKLY_COMPUTATION = new BigDecimal(7);
-  public static final BigDecimal MONTHLY_COMPUTATION = new BigDecimal(30.4375);
+  public static final BigDecimal WEEKLY_COMPUTATION =  BigDecimal.valueOf(7);
+  public static final BigDecimal MONTHLY_COMPUTATION = BigDecimal.valueOf(30.4375);
   public static final String YES = "yes";
   public static final String NO = "no";
   public static final String UNKNOWN = "Unknown";
   public static final String UPDATE_PREDICTION_TASK = "/s2/api/inventory/task/prediction";
   public static final String DASHBOARD_CACHE_PREFIX = "DB_";
+  public static final String MDASHBOARD_CACHE_PREFIX = "MDB_";
   public static final String NW_HIERARCHY_CACHE_PREFIX = "NH_";
   public static final String PREDICTIVE_DASHBOARD_CACHE_PREFIX = "PDB_";
   public static final String INV_DASHBOARD_CACHE_PREFIX = "IDB_";
@@ -207,6 +206,9 @@ public final class Constants {
   public static final String TYPE_RETURN = "rt";
   public static final String TYPE_SHIPMENT = "s";
   public static final String MATERIAL_TAG = "mTag";
+  public static final int LOCATION_FAILED_JOB_LIMIT=15;
+
+  public static final String REQ_ID = "x-request-id";
 
   public static final int FREQ_TYPE_DAILY = 0;
   public static final int FREQ_TYPE_WEEKLY = 1;

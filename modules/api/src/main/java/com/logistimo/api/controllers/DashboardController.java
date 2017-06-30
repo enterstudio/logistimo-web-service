@@ -31,10 +31,8 @@ import com.logistimo.api.models.SessionDashboardModel;
 import com.logistimo.api.request.DBWUpdateRequest;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
-import com.logistimo.config.entity.IConfig;
+import com.logistimo.api.util.SearchUtil;
 import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.service.ConfigurationMgmtService;
-import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.Constants;
 import com.logistimo.dashboards.entity.IDashboard;
 import com.logistimo.dashboards.service.IDashboardService;
@@ -50,7 +48,6 @@ import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -212,7 +209,7 @@ public class DashboardController {
         filters.put("state", stateFilter);
       } else if (StringUtils.isBlank(filter) && stateFilter != null) {
         filters.put("state", stateFilter);
-        boolean noDistrict = !isDistrictAvailable(dc.getCountry(), stateFilter);
+        boolean noDistrict = !SearchUtil.isDistrictAvailable(dc.getCountry(), stateFilter);
         if (noDistrict) {
           level = "district";
           filters.put("district", "");
@@ -220,7 +217,7 @@ public class DashboardController {
         }
       } else if ("state".equals(level)) {
         filters.put("state", filter);
-        boolean noDistrict = !isDistrictAvailable(dc.getCountry(), filter);
+        boolean noDistrict = !SearchUtil.isDistrictAvailable(dc.getCountry(), filter);
         if (noDistrict) {
           level = "district";
           filters.put("district", "");
@@ -382,7 +379,7 @@ public class DashboardController {
         filters.put("state", stateFilter);
       } else if (StringUtils.isBlank(filter) && stateFilter != null) {
         filters.put("state", stateFilter);
-        boolean noDistrict = !isDistrictAvailable(dc.getCountry(), stateFilter);
+        boolean noDistrict = !SearchUtil.isDistrictAvailable(dc.getCountry(), stateFilter);
         if (noDistrict) {
           level = "district";
           filters.put("district", "");
@@ -390,7 +387,7 @@ public class DashboardController {
         }
       } else if ("state".equals(level)) {
         filters.put("state", filter);
-        boolean noDistrict = !isDistrictAvailable(dc.getCountry(), filter);
+        boolean noDistrict = !SearchUtil.isDistrictAvailable(dc.getCountry(), filter);
         if (noDistrict) {
           level = "district";
           filters.put("district", "");
@@ -522,7 +519,7 @@ public class DashboardController {
         filters.put("state", stateFilter);
       } else if (StringUtils.isBlank(filter) && stateFilter != null) {
         filters.put("state", stateFilter);
-        boolean noDistrict = !isDistrictAvailable(dc.getCountry(), stateFilter);
+        boolean noDistrict = !SearchUtil.isDistrictAvailable(dc.getCountry(), stateFilter);
         if (noDistrict) {
           level = "district";
           filters.put("district", "");
@@ -530,7 +527,7 @@ public class DashboardController {
         }
       } else if ("state".equals(level)) {
         filters.put("state", filter);
-        boolean noDistrict = !isDistrictAvailable(dc.getCountry(), filter);
+        boolean noDistrict = !SearchUtil.isDistrictAvailable(dc.getCountry(), filter);
         if (noDistrict) {
           level = "district";
           filters.put("district", "");
@@ -627,27 +624,6 @@ public class DashboardController {
     }
   }
 
-  private boolean isDistrictAvailable(String country, String stateFilter) {
-    try {
-      ConfigurationMgmtService
-          cms =
-          Services.getService(ConfigurationMgmtServiceImpl.class, null);
-      IConfig c = cms.getConfiguration(IConfig.LOCATIONS);
-      if (c != null && c.getConfig() != null) {
-        String jsonString = c.getConfig();
-        JSONObject jsonObject = new JSONObject(jsonString);
-        int
-            disCnt =
-            ((JSONObject) ((JSONObject) ((JSONObject) ((JSONObject) ((JSONObject) jsonObject
-                .get("data")).get(country)).get("states")).get(stateFilter)).get("districts"))
-                .length();
-        return disCnt > 0;
-      }
-    } catch (Exception ignored) {
-      // do nothing
-    }
-    return true;
-  }
 
   @RequestMapping(value = "/ent/", method = RequestMethod.GET)
   public

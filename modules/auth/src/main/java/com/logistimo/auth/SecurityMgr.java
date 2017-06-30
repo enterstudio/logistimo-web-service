@@ -27,14 +27,15 @@
 package com.logistimo.auth;
 
 import com.logistimo.AppFactory;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.security.UserDisabledException;
 import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
@@ -43,6 +44,7 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -55,26 +57,22 @@ import javax.servlet.http.HttpSession;
  */
 public class SecurityMgr {
 
+  private SecurityMgr() {
+  }
+
   // Logger
   private static final XLog xLogger = XLog.getLog(SecurityMgr.class);
   // Operation identifiers (define more operations here)
-  public static String OP_CONFIGURATION = "configuration";
-  public static String OP_MANAGE = "manage";
-  public static String OP_SENDMESSAGE = "sndmsg";
-  public static String OP_SERVICEMANAGERLOGIN = "sm_login";
-  public static String OP_PUSHAPP = "pshapp";
+  private static final String OP_CONFIGURATION = "configuration";
+  private static final String OP_MANAGE = "manage";
+  private static final String OP_PUSHAPP = "pshapp";
   // HTTP header
-  private static String HEADER_AUTHORIZATION = "Authorization";
+  private static final String HEADER_AUTHORIZATION = "Authorization";
 
   // Is logged in as another user?
   public static boolean isLoggedInAsAnotherUser(HttpSession session, String userId) {
-    SecureUserDetails userDetails = SecurityMgr.getUserDetails(session);
+    SecureUserDetails userDetails = SecurityMgr.getSessionDetails(session);
     return userDetails != null && !userDetails.getUsername().equals(userId);
-  }
-
-  // Is authenticated session
-  public static boolean isSessionAuthenticated(HttpSession session) {
-    return getUserDetails(session) != null;
   }
 
   // Check access for a given operation
@@ -88,34 +86,34 @@ public class SecurityMgr {
       if (SecurityConstants.ROLE_DOMAINOWNER.equals(role) || SecurityConstants.ROLE_SUPERUSER.equals(role)) {
         hasAccess = true;
       }
-    } else if (OP_PUSHAPP.equals(operation)) {
-      if (SecurityConstants.ROLE_SUPERUSER.equals(role) || SecurityConstants.ROLE_DOMAINOWNER.equals(role)) {
-        hasAccess = true;
-      }
+    } else if (OP_PUSHAPP.equals(operation) && (SecurityConstants.ROLE_SUPERUSER.equals(role)
+        || SecurityConstants.ROLE_DOMAINOWNER.equals(role))) {
+      hasAccess = true;
+
     }
 
     return hasAccess;
   }
 
-  // Get the details of an authenticated user
+  /**
+   * Gets the SecureUserDetails from the session.
+   *
+   * @deprecated in 2.5.0 , see SecurityUtils.getUserDetails.
+   */
+  @Deprecated
   public static SecureUserDetails getUserDetails(HttpSession session) {
+    return SecurityUtils.getUserDetails();
+  }
+
+  // Get the details of an authenticated user
+  public static SecureUserDetails getSessionDetails(HttpSession session) {
     return session != null ? (SecureUserDetails) session.getAttribute(Constants.PARAM_USER) : null;
   }
 
   // Authenticate user
   public static SecureUserDetails authenticate(String userId, String password)
-      throws BadCredentialsException, UserDisabledException, ServiceException,
-      ObjectNotFoundException, com.logistimo.security.SecurityException {
+      throws Exception {
     UsersService as = Services.getService(UsersServiceImpl.class);
-                /*
-                UserAccount user = null;
-		if ( Constants.ADMINID_DEFAULT.equals( userId ) ) {
-			if ( Constants.ADMINPASSWORD_DEFAULT.equals( password ) ) 
-				user = getAdminAccountDetails();
-			else
-				throw new BadCredentialsException( "Invalid user name or password" );
-		} else 
-		*/
     // Authenticate user
     IUserAccount user = as.authenticateUser(userId, password, SourceConstants.WEB);
     if (user == null) {
@@ -127,14 +125,16 @@ public class SecurityMgr {
     return getSecureUserDetails(user);
   }
 
-  // Get the logged in user's role
-  public static String getUserRole(HttpSession session) {
-    SecureUserDetails userDetails = getUserDetails(session);
-    if (userDetails != null) {
-      return userDetails.getRole();
+  public static void setSessionDetails(String userId) throws ObjectNotFoundException {
+    UsersService as = Services.getService(UsersServiceImpl.class);
+    IUserAccount user = as.getUserAccount(userId);
+    if (!user.isEnabled()) {
+      throw new UnauthorizedException("You account is disabled");
     }
-    return null;
+    SecureUserDetails secureUserDetails = getSecureUserDetails(user);
+    SecurityUtils.setUserDetails(secureUserDetails);
   }
+
 
   // Get SecureUserDetails from UserAccount
   private static SecureUserDetails getSecureUserDetails(IUserAccount user) {
@@ -147,26 +147,6 @@ public class SecurityMgr {
     userDetails.setTimezone(user.getTimezone());
     return userDetails;
   }
-
-  // Get special Admin account details
-        /*
-        private static UserAccount getAdminAccountDetails() throws SecurityException {
-		UserAccount user = new UserAccount();
-		try {
-			user.setUserId( Constants.ADMINID_DEFAULT );
-			user.setEncodedPassword( PasswordEncoder.MD5( Constants.ADMINPASSWORD_DEFAULT ) );
-			user.setEnabled( true );
-			user.setRole( UserAccount.ROLE_SUPERUSER );
-			user.setDomainId( Constants.DOMAINID_DEFAULT );
-			user.setCountry( Constants.COUNTRY_DEFAULT );
-			user.setLanguage( Constants.LANG_DEFAULT );
-			user.setTimezone( Constants.TIMEZONE_DEFAULT );
-		} catch ( Exception e ) {
-			throw new SecurityException( e.getMessage() );			
-		}
-		return user;
-	}
-	*/
 
   // Check if dev. server
   public static boolean isDevServer() {
@@ -195,9 +175,9 @@ public class SecurityMgr {
     if ("Basic".equals(authTokens[0])) {
       try {
         String credentialsStr = new String(Base64.decodeBase64(authTokens[1]), "ISO-8859-1");
-        String creds[] = credentialsStr.split(":");
+        String[] creds = credentialsStr.split(":");
         if (creds.length != 2) {
-          xLogger.warn("Invalid credentials (!=2) for user:password: {0}", creds.toString());
+          xLogger.warn("Invalid credentials (!=2) for user:password: {0}", Arrays.toString(creds));
           return null;
         }
         return new Credentials(creds[0], creds[1]);
@@ -211,8 +191,8 @@ public class SecurityMgr {
   }
 
   public static class Credentials {
-    public String userId = null;
-    public String password = null;
+    public final String userId;
+    public final String password;
 
     public Credentials(String userId, String password) {
       this.userId = userId;

@@ -64,6 +64,7 @@ import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.exceptions.EventGenerationException;
 import com.logistimo.events.processor.EventPublisher;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.locations.LocationServiceUtil;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.PagedExec;
@@ -696,6 +697,14 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             Counter.getUserToKioskCounter(domainId, userId).increment(1);
           }
         }
+        //add kiosk location ids
+        Map<String, Object> reqMap = new HashMap<>();
+        reqMap.put("kioskId", kiosk.getKioskId());
+        reqMap.put("userName", sUserId);
+        Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(kiosk, reqMap);
+        if(lidMap.get("status")=="success") {
+          updateKioskLocationIds(kiosk, lidMap, pm);
+        }
         try {
           EventPublisher.generate(domainId, IEvent.CREATED, null,
               JDOUtils.getImplClass(IKiosk.class).getName(), entityDao.getKeyString(kiosk), null);
@@ -842,6 +851,14 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             kiosk.getKioskId(), kiosk.getDomainId(), e.getMessage());
       }
       pm.makePersistent(k);
+      //add kiosk location ids
+      Map<String, Object> reqMap = new HashMap<>();
+      reqMap.put("kioskId", kiosk.getKioskId());
+      reqMap.put("userName", sUserId);
+      Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(kiosk, reqMap);
+      if(lidMap.get("status")=="success") {
+        updateKioskLocationIds(kiosk, lidMap, pm);
+      }
     } catch (JDOObjectNotFoundException e) {
       xLogger.warn("updateKiosk: Kiosk {0} does not exist", kiosk.getKioskId());
       exception = e;
@@ -865,6 +882,20 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
         rc.store(); // stores if changes exist
       }
     }
+
+  }
+
+  /**
+   * This method will update applicable location ids for a Kisok
+   */
+  public void updateKioskLocationIds(IKiosk kiosk, Map<String, Object> lidMap, PersistenceManager pm) {
+    IKiosk k = JDOUtils.getObjectById(IKiosk.class, kiosk.getKioskId(), pm);
+    k.setCountryId((String) lidMap.get("countryId"));
+    k.setStateId((String) lidMap.get("stateId"));
+    k.setDistrictId((String) lidMap.get("districtId"));
+    k.setTalukId((String) lidMap.get("talukId"));
+    k.setCityId((String) lidMap.get("placeId"));
+    pm.makePersistent(k);
   }
 
   /**

@@ -26,27 +26,35 @@
  */
 package com.logistimo.api.builders;
 
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.utils.CommonUtils;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
 import com.logistimo.api.models.DemandModel;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.inventory.dao.impl.InvntryDao;
+import com.logistimo.inventory.entity.IInvntry;
+import com.logistimo.inventory.entity.IInvntryEvntLog;
+import com.logistimo.inventory.service.InventoryManagementService;
+import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.orders.entity.IDemandItem;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
+import com.logistimo.utils.CommonUtils;
+import com.logistimo.utils.LocalDateUtil;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -172,5 +180,45 @@ public class DemandItemBuilder {
     itemModel.sdname = domainName;
 
     return itemModel;
+  }
+
+  public List<DemandModel> getDemandItems(List<IDemandItem> demandItems, SecureUserDetails sUser) throws ServiceException {
+    List<DemandModel> demandModelList = new ArrayList<>();
+    try {
+      MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
+      EntitiesService es = Services.getService(EntitiesServiceImpl.class);
+      InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
+      DomainConfig dc = DomainConfig.getInstance(sUser.getDomainId());
+      for(IDemandItem item: demandItems) {
+        DemandModel model = new DemandModel();
+        IMaterial material = mcs.getMaterial(item.getMaterialId());
+        model.id = item.getMaterialId();
+        model.nm = material.getName();
+        IKiosk kiosk = es.getKiosk(item.getKioskId());
+        model.e = entityBuilder.buildBaseModel(kiosk, sUser.getLocale(),
+            sUser.getTimezone(), "");
+        model.oid = item.getOrderId();
+        model.rq = item.getRecommendedOrderQuantity();
+        model.p = item.getFormattedPrice();
+        model.a = CommonUtils.getFormattedPrice(item.computeTotalPrice(false));
+        model.q = item.getQuantity();
+        model.isBa = material.isBatchEnabled();
+        IInvntry inv = ims.getInventory(item.getKioskId(), item.getMaterialId());
+        if(inv != null) {
+          IInvntryEvntLog lastEventLog = new InvntryDao().getInvntryEvntLog(inv);
+          if(lastEventLog != null) {
+            model.event = inv.getStockEvent();
+          }
+          model.csavibper = ims.getStockAvailabilityPeriod(inv, dc).setScale(1, BigDecimal.ROUND_HALF_UP);
+          model.crFreq = InventoryConfig.getFrequencyDisplay(dc.getInventoryConfig().getDisplayCRFreq(), false, sUser.getLocale());
+        }
+        demandModelList.add(model);
+      }
+    } catch (Exception e) {
+      xLogger.warn("Error while fetching demand items in domain: {0}", sUser.getDomainId(), e);
+      throw new ServiceException(e);
+    }
+
+    return demandModelList;
   }
 }

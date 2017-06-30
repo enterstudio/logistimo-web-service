@@ -35,13 +35,8 @@ import java.util.Map;
 /**
  * Created by kaniyarasu on 13/11/15.
  */
-public class AssetDetailsModel {
+public class AssetDetailsModel extends AssetBaseModel {
   public int sno;
-  public Long id;
-  public String dId;
-  public String vId;
-  public EntityModel entity;
-  public Long sdid;
   public String sdname;
   public Date con;
   public List<UserModel> ons;
