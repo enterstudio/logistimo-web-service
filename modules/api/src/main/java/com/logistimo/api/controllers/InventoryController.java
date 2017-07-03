@@ -31,6 +31,7 @@ import com.logistimo.api.builders.MarkerBuilder;
 import com.logistimo.api.models.FChartModel;
 import com.logistimo.api.models.InventoryAbnStockModel;
 import com.logistimo.api.models.InventoryBatchMaterialModel;
+import com.logistimo.api.models.InventoryDetailModel;
 import com.logistimo.api.models.InventoryDomainModel;
 import com.logistimo.api.models.InventoryMinMaxLogModel;
 import com.logistimo.api.models.InventoryModel;
@@ -40,6 +41,7 @@ import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
@@ -69,6 +71,7 @@ import com.logistimo.reports.ReportsConstants;
 import com.logistimo.reports.entity.slices.ISlice;
 import com.logistimo.reports.generators.ReportData;
 import com.logistimo.reports.service.ReportsService;
+import com.logistimo.reports.service.impl.ReportsServiceImpl;
 import com.logistimo.reports.utils.ReportsUtil;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
@@ -126,17 +129,20 @@ public class InventoryController {
   Results getInventory(@PathVariable Long entityId, @RequestParam(required = false) String tag,
                        @RequestParam(defaultValue = PageParams.DEFAULT_OFFSET_STR) int offset,
                        @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
+                       @RequestParam(required = false) Integer abType,
                        @RequestParam(required = false) String startsWith,
                        @RequestParam(required = false) String fetchTemp,
                        @RequestParam(defaultValue = ALL) int matType,
                        @RequestParam(required = false) boolean onlyNZStk,
                        @RequestParam(required = false) String pdos,
                        HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    DomainConfig dc = DomainConfig.getInstance(domainId);
+    String timezone = dc.getTimezone();
     try {
       if (!EntityAuthoriser.authoriseInventoryAccess(sUser, entityId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
@@ -157,9 +163,32 @@ public class InventoryController {
           ims =
           Services.getService(InventoryManagementServiceImpl.class, sUser.getLocale());
 
-      Results results = null;
+      Results results;
       if (startsWith == null) {
-        results = ims.getInventory(domainId, entityId,null, null,null,tag,matType,onlyNZStk,pdos,null,pageParams);
+        if (abType != null) {
+
+          Map<String, Object> filters = new HashMap<>();
+          filters.put(ReportsConstants.FILTER_DOMAIN, domainId);
+          filters.put(ReportsConstants.FILTER_EVENT, abType);
+
+          filters.put(ReportsConstants.FILTER_MATERIALTAG, tag);
+
+          filters.put(ReportsConstants.FILTER_KIOSK, entityId);
+          filters.put(ReportsConstants.FILTER_LATEST, true);
+
+          ReportsService reportsService = Services.getService(ReportsServiceImpl.class);
+          ReportData
+              reportData =
+              reportsService
+                  .getReportData(ReportsConstants.TYPE_STOCKEVENT, null, null,
+                      ReportsConstants.FREQ_DAILY, filters,
+                      locale, timezone, pageParams, dc, userId);
+          results = new Results(reportData.getResults(), null);
+        }else {
+          results =
+              ims.getInventory(domainId, entityId, null, null, null, tag, matType, onlyNZStk, pdos,
+                  null, pageParams);
+        }
       } else {
         results = ims.searchKioskInventory(entityId, tag, startsWith, pageParams);
         results.setNumFound(-1);
@@ -183,7 +212,7 @@ public class InventoryController {
   @ResponseBody
   InventoryDomainModel getEntityInventoryDomainConfig(@PathVariable Long entityId,
                                                       HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     String userId = sUser.getUsername();
     Locale locale = sUser.getLocale();
     try {
@@ -224,13 +253,17 @@ public class InventoryController {
                                  @RequestParam(defaultValue = PageParams.DEFAULT_OFFSET_STR) int offset,
                                  @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
                                  @RequestParam(defaultValue = ALL) int matType,
+                                 @RequestParam(required = false) Integer abType,
                                  @RequestParam(required = false) boolean onlyNZStk,
                                  @RequestParam(required = false) String loc,
                                  @RequestParam(required = false) String pdos,
                                  HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    DomainConfig dc = DomainConfig.getInstance(domainId);
+    String timezone = dc.getTimezone();
+    Locale locale = sUser.getLocale();
     int numTotalInv = -1;
     LocationSuggestionModel location = parseLocation(loc);
     Navigator
@@ -257,7 +290,29 @@ public class InventoryController {
                   Constants.MAX_LIST_SIZE_FOR_CONTAINS_QUERY); // TODO: currently restricting this view to 30 kiosks, given GAE limit on the number within a contains list
         }
       }
-      Results results = ims.getInventory(domainId,null,kioskIds,tag,materialId,null,matType,onlyNZStk,pdos, location, pageParams);
+      Results results;
+      if (abType != null) {
+
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(ReportsConstants.FILTER_DOMAIN, domainId);
+        filters.put(ReportsConstants.FILTER_EVENT, abType);
+        filters.put(ReportsConstants.FILTER_KIOSKTAG, tag);
+        filters.put(ReportsConstants.FILTER_MATERIAL, materialId);
+        filters.put(ReportsConstants.FILTER_LATEST, true);
+
+        ReportsService reportsService = Services.getService(ReportsServiceImpl.class);
+        ReportData
+            reportData =
+            reportsService
+                .getReportData(ReportsConstants.TYPE_STOCKEVENT, null, null,
+                    ReportsConstants.FREQ_DAILY, filters,
+                    locale, timezone, pageParams, dc, userId);
+        results = new Results(reportData.getResults(), null);
+      }else {
+          results =
+            ims.getInventory(domainId, null, kioskIds, tag, materialId, null, matType, onlyNZStk,
+                pdos, location, pageParams);
+      }
       results.setOffset(offset);
       return builder.buildInventoryModelListAsResult(results, sUser, domainId, null);
     } catch (ServiceException e) {
@@ -717,7 +772,7 @@ public class InventoryController {
     } catch (ServiceException e) {
       xLogger.severe("Error in reading destination inventories: {0}", e);
     } catch (ParseException e) {
-      e.printStackTrace();
+      xLogger.severe("Parse Exception in reading destination inventories: {0}", e);
     }
     return null;
   }
@@ -759,5 +814,27 @@ public class InventoryController {
         Services.getService(InventoryManagementServiceImpl.class, sUser.getLocale());
     List<IInventoryMinMaxLog> logs = ims.fetchMinMaxLog(invId);
     return builder.buildInventoryMinMaxLogModel(logs, sUser, backendMessages);
+  }
+
+  @RequestMapping(value = "/entity/{entityId}/{materialId}", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  InventoryDetailModel getInvDetail(
+      @PathVariable Long entityId,
+      @PathVariable Long materialId) throws ServiceException, ObjectNotFoundException {
+
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    InventoryManagementService
+        ims =
+        Services.getService(InventoryManagementServiceImpl.class, null);
+    Results results =
+        ims.getInventory(domainId, entityId, null, null, materialId, null, IInvntry.ALL, false,
+            null, null,
+            new PageParams(0, 1));
+    if (results.getResults().isEmpty()) {
+      throw new ObjectNotFoundException("Inventory not found");
+    }
+    return builder
+        .buildMInventoryDetail((IInvntry) results.getResults().get(0), domainId, entityId);
   }
 }

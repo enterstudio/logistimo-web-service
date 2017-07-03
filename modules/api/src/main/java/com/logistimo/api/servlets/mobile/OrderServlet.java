@@ -219,7 +219,11 @@ public class OrderServlet extends JsonRestServlet {
       if (ordersList == null || ordersList.isEmpty()) {
         message = backendMessages.getString("error.noorders");
       } else {
+
+        //Get the order approval type
         int orderApprovalType = OrderUtils.getOrderApprovalType(otype, isTransfer);
+
+        //Build json response
         jsonObject =
             new MobileOrderBuilder()
                 .buildOrdersResponse(ordersList, u.getLocale(), u.getTimezone(), orderApprovalType);
@@ -492,6 +496,7 @@ public class OrderServlet extends JsonRestServlet {
     xLogger.fine("Exiting getOrders");
   }
 
+
   // Get order given an order Id for a given kiosk
   @SuppressWarnings("rawtypes")
   private void getOrCancelOrder(HttpServletRequest req, HttpServletResponse resp,
@@ -603,6 +608,8 @@ public class OrderServlet extends JsonRestServlet {
             } else {
               order = getOrder(orderId);
             }
+
+
 
           }
         }

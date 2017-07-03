@@ -125,7 +125,7 @@ public class OrderUtils {
         List<IShipment> shipments = ss.getShipmentsByOrderId(orderId);
         if (shipments != null && !shipments.isEmpty()) {
           IShipment s = shipments.get(0);
-          updated = ss.fulfillShipment(s.getShipmentId(), updatingUserId).status;
+          updated = ss.fulfillShipment(s.getShipmentId(), updatingUserId,source).status;
         }
       } catch (Exception e) {
         uo.inventoryError = true;
@@ -138,7 +138,7 @@ public class OrderUtils {
         uo.message = backendMessages.getString("error.unabletofulfilorder");
       }
     } else if (IOrder.COMPLETED.equals(newStatus)) {
-      oms.shipNow(o, null, null, null, null, updatingUserId, null);
+      oms.shipNow(o, null, null, null, null, updatingUserId, null,source);
       if (message != null && !message.isEmpty()) {
         oms.addMessageToOrder(orderId, message, updatingUserId);
       }
@@ -189,7 +189,7 @@ public class OrderUtils {
           return uo;
         }
         ss = Services.getService(ShipmentService.class, dc.getLocale());
-        updated = ss.fulfillShipment(smm, uosReq.uid).status;
+        updated = ss.fulfillShipment(smm, uosReq.uid,source).status;
       } catch (Exception e) {
         uo.inventoryError = true;
         uo.message = backendMessages.getString("error.unabletofulfilorder");
@@ -201,7 +201,7 @@ public class OrderUtils {
         uo.message = backendMessages.getString("error.unabletofulfilorder");
       }
     } else if (IOrder.COMPLETED.equals(uosReq.ost)) {
-      oms.shipNow(o, uosReq.trsp, uosReq.trid, null, uosReq.ead, uosReq.uid, uosReq.pksz);
+      oms.shipNow(o, uosReq.trsp, uosReq.trid, null, uosReq.ead, uosReq.uid, uosReq.pksz,source);
       if (uosReq.ms != null && !uosReq.ms.isEmpty()) {
         oms.addMessageToOrder(uosReq.tid, uosReq.ms, uosReq.uid);
       }
@@ -308,7 +308,7 @@ public class OrderUtils {
           return uo;
         }
         ss = Services.getService(ShipmentService.class, dc.getLocale());
-        updated = ss.fulfillShipment(smm, uosReq.uid).status;
+        updated = ss.fulfillShipment(smm, uosReq.uid,source).status;
       } catch (Exception e) {
         uo.inventoryError = true;
         uo.message = backendMessages.getString("error.unabletofulfilorder");
@@ -330,7 +330,7 @@ public class OrderUtils {
       }
       updated =
           ss.updateShipmentStatus(uosReq.sid, shipmentStatus, uosReq.ms, uosReq.uid,
-              uosReq.rsnco).status;
+              uosReq.rsnco,source).status;
     }
 
     if (updated) {
@@ -589,6 +589,23 @@ public class OrderUtils {
   public static boolean validateOrderUpdatedTime(String lastUpdatedTime, Date orderUpdatedTime) {
     return StringUtils.isBlank(lastUpdatedTime) || lastUpdatedTime.equalsIgnoreCase(
         LocalDateUtil.formatCustom(orderUpdatedTime, Constants.DATETIME_FORMAT, null));
+  }
+
+
+  /**
+   * Returns the string constants for the order types
+   * @param type 0-TRANSFER, 1- PURCHASE, 2-SALES
+   * @return try-TRANSFER, prc- PURCHASE,sle- SALES
+   */
+  public static String getOrderType(Integer type){
+    if(type==0)
+      return IOrder.TYPE_TRANSFER;
+    else if(type==1){
+      return IOrder.TYPE_PURCHASE;
+    }else if(type==2){
+      return IOrder.TYPE_SALE;
+    }
+    return StringUtils.EMPTY;
   }
 
 }

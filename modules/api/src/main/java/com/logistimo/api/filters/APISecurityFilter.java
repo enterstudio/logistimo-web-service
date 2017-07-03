@@ -25,7 +25,6 @@ package com.logistimo.api.filters;
 
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SecurityUtils;
-import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.logger.XLog;
@@ -58,8 +57,10 @@ public class APISecurityFilter implements Filter {
   public static final String SMS_API_URL = "/s2/api/sms";
   public static final String APP_STATUS_URL = "/s2/api/app/status";
   private static final String AUTHENTICATE_URL = "/s2/api/auth";
+  private static final String M_AUTH_URL = "/s2/api/mauth";
   private static final String APP_VERSION = "web.app.ver";
   private static final XLog xLogger = XLog.getLog(APISecurityFilter.class);
+  public static final String X_ACCESS_USER = "x-access-user";
   private String appVersion;
   private boolean appVerAvailable;
 
@@ -79,11 +80,19 @@ public class APISecurityFilter implements Filter {
       filterChain.doFilter(request, response);
     }
 
-    // Allow all GAE Internal tasks
-    if (StringUtils.isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME)) && !(
-        StringUtils.isNotBlank(servletPath) && (servletPath.startsWith(ASSET_STATUS_URL)
-            || servletPath.startsWith(SMS_API_URL)))) {
+    //this is meant for internal api client
+    if (StringUtils.isNotBlank(req.getHeader(X_ACCESS_USER))) {
+      try {
+        SecurityMgr.setSessionDetails(req.getHeader(X_ACCESS_USER));
+      } catch (Exception e) {
+        xLogger.severe("Issue with api client authentication", e);
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        return;
+      }
 
+    } else if (StringUtils.isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME)) && !(
+        StringUtils.isNotBlank(servletPath) && (servletPath.startsWith(ASSET_STATUS_URL)
+            || servletPath.startsWith(SMS_API_URL) || servletPath.startsWith(M_AUTH_URL)))) {
       String recvdCookie = getAppCookie(req);
       if (appVerAvailable && recvdCookie != null && !appVersion.equals(recvdCookie)) {
         resp.setHeader(ERROR_HEADER_NAME, UPGRADE_REQUIRED_RESPONSE_CODE);
@@ -94,21 +103,20 @@ public class APISecurityFilter implements Filter {
           || servletPath.startsWith(AUTHENTICATE_URL))) {
         SecureUserDetails
             userDetails = SecurityMgr
-            .getUserDetails(req.getSession());
+            .getSessionDetails(req.getSession());
         if (userDetails == null) {
           resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Required.");
           return;
         }
-
+        SecurityUtils.setUserDetails(userDetails);
         String reqDomainId = SecurityUtils.getReqCookieUserDomain(req);
         if (reqDomainId != null && !reqDomainId.equals(
-            userDetails.getUsername() + CharacterConstants.COLON + SessionMgr
-                .getCurrentDomain(req.getSession(), userDetails.getUsername()))) {
+            userDetails.getUsername() + CharacterConstants.COLON + SecurityUtils
+                .getCurrentDomainId())) {
           resp.setHeader(ERROR_HEADER_NAME, DOMAIN_CHANGE_RESPONSE_CODE);
           resp.sendError(HttpServletResponse.SC_CONFLICT, "Invalid session on client");
           return;
         }
-        SecurityUtils.setUserDetails(userDetails);
       }
 
     }
@@ -142,6 +150,6 @@ public class APISecurityFilter implements Filter {
 
   @Override
   public void destroy() {
-
+    //nothing to clean
   }
 }

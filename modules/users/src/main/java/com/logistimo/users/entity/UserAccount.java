@@ -26,26 +26,20 @@ package com.logistimo.users.entity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import com.logistimo.config.models.EventsConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.entity.ILocationConfig;
+import com.logistimo.proto.JsonTagsZ;
+import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.tags.entity.Tag;
-import com.logistimo.proto.JsonTagsZ;
-
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-
-import com.logistimo.tags.TagUtil;
-import com.logistimo.users.UserUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.jdo.annotations.Element;
 import javax.jdo.annotations.Extension;
@@ -57,7 +51,7 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
-public class UserAccount implements IUserAccount {
+public class UserAccount implements IUserAccount, ILocationConfig {
 
   // NOTE: All constants are represented as String with 3-5 chars, given that it minimizes GAE storage cost and is readable
 
@@ -246,6 +240,17 @@ public class UserAccount implements IUserAccount {
 
   @Persistent
   private Integer lgSrc;
+
+  @Persistent(column = "COUNTRY_ID")
+  private String countryId;
+  @Persistent(column = "STATE_ID")
+  private String stateId;
+  @Persistent(column = "DISTRICT_ID")
+  private String districtId;
+  @Persistent(column = "SUBDISTRICT_ID")
+  private String talukId;
+  @Persistent(column = "CITY_ID")
+  private String cityId;
 
   // Get the difference of two user lists: a - b
   public static List<IUserAccount> getDifference(List<IUserAccount> a, List<IUserAccount> b) {
@@ -509,6 +514,26 @@ public class UserAccount implements IUserAccount {
   @Override
   public void setAgeType(String ageType) {
     this.ageType = ageType;
+  }
+
+  @Override
+  public double getLatitude() {
+    return 0;
+  }
+
+  @Override
+  public void setLatitude(double latitude) {
+    //todo
+  }
+
+  @Override
+  public double getLongitude() {
+    return 0;
+  }
+
+  @Override
+  public void setLongitude(double longitude) {
+    //todo
   }
 
   @Override
@@ -949,4 +974,57 @@ public class UserAccount implements IUserAccount {
       }
     }
   }
+
+  @Override
+  public String getCountryId() {
+    return countryId;
+  }
+
+  @Override
+  public void setCountryId(String countryId) {
+    this.countryId = countryId;
+  }
+
+  @Override
+  public String getStateId() {
+    return stateId;
+  }
+
+  @Override
+  public void setStateId(String stateId) {
+    this.stateId = stateId;
+  }
+
+  @Override
+  public String getDistrictId() {
+    return districtId;
+  }
+
+  @Override
+  public void setDistrictId(String districtId) {
+    this.districtId = districtId;
+  }
+
+  @Override
+  public String getTalukId() {
+    return talukId;
+  }
+
+  @Override
+  public void setTalukId(String talukId) {
+    this.talukId = talukId;
+  }
+
+
+  @Override
+  public String getCityId() {
+    return cityId;
+  }
+
+  @Override
+  public void setCityId(String cityId) {
+    this.cityId = cityId;
+  }
+
+
 }

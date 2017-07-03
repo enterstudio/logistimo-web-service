@@ -28,6 +28,7 @@ package com.logistimo.api.servlets;
 
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.constants.Constants;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
@@ -83,7 +84,12 @@ public abstract class SgServlet extends HttpServlet {
       throws ServletException, IOException {
     String msg = null;
     // Get the user's locale
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = null;
+    try {
+      sUser = SecurityMgr.getUserDetails(request.getSession());
+    } catch (UnauthorizedException e) {
+      //ignore
+    }
     Locale locale = null;
     if (sUser == null) {
       // Check if locale params. are passed

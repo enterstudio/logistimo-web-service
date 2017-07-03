@@ -825,5 +825,5 @@ function onClickExport( buttonId ){
 	} else if ( buttonId == 'exportrevenue' ) {
 		var revenueSvg = document.getElementById( 'revenuesvg' );
 		saveSvgAsPng( revenueSvg, 'revenue.png', 1 );
-	} 
+    }
 } // End of function onclick exportSVG

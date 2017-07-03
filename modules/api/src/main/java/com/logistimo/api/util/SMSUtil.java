@@ -36,11 +36,16 @@ import com.logistimo.users.entity.IUserAccount;
 
 import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class SMSUtil {
 
@@ -103,9 +108,10 @@ public class SMSUtil {
 
   /**
    * Method to get the domain timezone
+   *
    * @param ua User Account
    * @return Time zone
-   * @throws ServiceException from service layer
+   * @throws ServiceException        from service layer
    * @throws ObjectNotFoundException when domain config not found
    */
   public static TimeZone getUserTimeZone(IUserAccount ua)

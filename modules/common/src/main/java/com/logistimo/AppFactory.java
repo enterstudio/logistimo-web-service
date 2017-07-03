@@ -29,6 +29,7 @@ import com.logistimo.auth.service.AuthorizationService;
 import com.logistimo.dao.DaoException;
 import com.logistimo.dao.IDaoUtil;
 import com.logistimo.logger.ILogger;
+import com.logistimo.models.ICounter;
 import com.logistimo.reports.dao.IReportsDao;
 import com.logistimo.services.IBackendService;
 import com.logistimo.services.blobstore.BlobstoreService;
@@ -38,8 +39,6 @@ import com.logistimo.services.mapred.IMapredService;
 import com.logistimo.services.storage.StorageUtil;
 import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.services.utils.ConfigUtil;
-
-import com.logistimo.models.ICounter;
 
 
 /**
@@ -58,7 +57,7 @@ public abstract class AppFactory {
   protected IBackendService backendService;
 
   public static AppFactory get() {
-    if(_instance == null) {
+    if (_instance == null) {
       return (AppFactory) createInstance(APPFACTORY);
     } else {
       return _instance;

@@ -29,14 +29,14 @@ import com.google.gson.reflect.TypeToken;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.logger.XLog;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.logger.XLog;
 
 import java.util.HashMap;
 import java.util.List;
@@ -248,6 +248,18 @@ public class AssetSystemConfig {
       allWorkingStatus.put(workingStatus.status, workingStatus.displayValue);
     }
     return allWorkingStatus;
+  }
+
+  /**
+   * Returns the config pull for the requested device model.
+   * @param type
+   * @param vendorId
+   * @param model
+   * @return true - if config enabled.
+   */
+  public boolean isConfigPullEnabled(Integer type, String vendorId, String model) {
+    return getAsset(type).getManufacturers().get(vendorId).model.stream()
+        .anyMatch(configModel -> configModel.name.equals(model) && configModel.feature.pullConfig);
   }
 
   public static class Asset {

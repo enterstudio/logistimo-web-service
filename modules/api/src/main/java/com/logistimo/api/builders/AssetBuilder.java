@@ -26,39 +26,41 @@ package com.logistimo.api.builders;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import com.logistimo.api.models.AssetBaseModel;
+import com.logistimo.api.models.AssetDetailsModel;
+import com.logistimo.api.models.EntityModel;
+import com.logistimo.api.models.TemperatureDomainModel;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.entity.IAssetRelation;
-import com.logistimo.assets.models.Temperature;
-import com.logistimo.assets.models.TemperatureResponse;
-import com.logistimo.assets.service.AssetManagementService;
-import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
-import com.logistimo.dao.JDOUtils;
-
-import com.logistimo.pagination.Results;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.models.AssetDetailsModel;
+import com.logistimo.assets.models.AssetDataModel;
+import com.logistimo.assets.models.AssetDeviceModel;
 import com.logistimo.assets.models.AssetModel;
 import com.logistimo.assets.models.AssetModels;
 import com.logistimo.assets.models.AssetRelationModel;
 import com.logistimo.assets.models.DeviceTempModel;
 import com.logistimo.assets.models.DeviceTempsModel;
-import com.logistimo.api.models.EntityModel;
-import com.logistimo.api.models.TemperatureDomainModel;
-import com.logistimo.utils.MsgUtil;
+import com.logistimo.assets.models.Temperature;
+import com.logistimo.assets.models.TemperatureResponse;
+import com.logistimo.assets.service.AssetManagementService;
+import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
+import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.logger.XLog;
+import com.logistimo.pagination.Results;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.MsgUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -158,12 +160,12 @@ public class AssetBuilder {
                                                   String timezone) {
     AssetDetailsModel assetDetailsModel = new AssetDetailsModel();
     String domainName = domainNames != null ? domainNames.get(asset.getDomainId()) : null;
-    assetDetailsModel.id = asset.getId();
-    assetDetailsModel.dId = asset.getSerialId();
-    assetDetailsModel.vId = asset.getVendorId();
+    assetDetailsModel.setId(asset.getId());
+    assetDetailsModel.setdId(asset.getSerialId());
+    assetDetailsModel.setvId(asset.getVendorId());
     assetDetailsModel.con = asset.getCreatedOn();
     assetDetailsModel.typ = asset.getType();
-    assetDetailsModel.sdid = asset.getDomainId();
+    assetDetailsModel.setSdid(asset.getDomainId());
     assetDetailsModel.mdl = asset.getModel();
     assetDetailsModel.ts = LocalDateUtil.format(asset.getCreatedOn(), locale, timezone);
     if (asset.getUpdatedOn() != null) {
@@ -195,7 +197,7 @@ public class AssetBuilder {
           entityModel.ln = ki.getLongitude();
           entityModel.lt = ki.getLatitude();
 
-          assetDetailsModel.entity = entityModel;
+          assetDetailsModel.setEntity(entityModel);
         }
       }
 
@@ -205,7 +207,7 @@ public class AssetBuilder {
           userAccounts.add(usersService.getUserAccount(userId));
         }
         assetDetailsModel.ons =
-            userBuilder.buildUserModels(userAccounts, locale, timezone, true, 0);
+            userBuilder.buildUserModels(userAccounts, locale, timezone, true);
       }
 
       if (asset.getMaintainers() != null) {
@@ -214,7 +216,7 @@ public class AssetBuilder {
           userAccounts.add(usersService.getUserAccount(userId));
         }
         assetDetailsModel.mts =
-            userBuilder.buildUserModels(userAccounts, locale, timezone, true, 0);
+            userBuilder.buildUserModels(userAccounts, locale, timezone, true);
       }
     } catch (Exception e) {
       //do nothing
@@ -261,6 +263,49 @@ public class AssetBuilder {
     return null;
   }
 
+  public List<AssetBaseModel> buildAssets(AssetDataModel results)
+      throws ServiceException {
+    List<AssetBaseModel> detailsModel = new ArrayList<>(1);
+    if (results != null) {
+        for (AssetDeviceModel dModel : results.data) {
+          AssetBaseModel model = buildAssetModel(dModel.vId, dModel.dId);
+          if (model != null) {
+            detailsModel.add(model);
+          }
+        }
+      }
+    return detailsModel;
+  }
+
+  public AssetBaseModel buildAssetModel(String vendorId, String deviceId)
+      throws ServiceException {
+    AssetBaseModel model = new AssetBaseModel();
+    AssetManagementService ams = Services.getService(AssetManagementServiceImpl.class);
+    IAsset asset = ams.getAsset(vendorId, deviceId);
+    if (asset != null) {
+      model.setId(asset.getId());
+      model.setSdid(asset.getDomainId());
+      model.setdId(asset.getSerialId());
+      model.setvId(vendorId);
+      if (asset.getKioskId() != null) {
+        EntitiesService es = Services.getService(EntitiesServiceImpl.class);
+        IKiosk k = es.getKiosk(asset.getKioskId());
+        if (k != null) {
+          EntityModel entityModel = new EntityModel();
+          entityModel.id = k.getKioskId();
+          entityModel.nm = k.getName();
+          entityModel.ct = k.getCity();
+          entityModel.ds = k.getDistrict();
+          entityModel.st = k.getState();
+          entityModel.ctr = k.getCountry();
+          entityModel.tlk = k.getTaluk();
+          model.setEntity(entityModel);
+        }
+      }
+      return model;
+    }
+    return null;
+  }
   public Results buildAssetsFromJson(String results, int size, Locale locale, String timezone,
                                      int offset) {
     List<AssetDetailsModel> assetDetailsModelList = new ArrayList<>(1);
@@ -301,8 +346,8 @@ public class AssetBuilder {
     AssetDetailsModel assetDetailsModel = new AssetDetailsModel();
     IAsset asset;
     String domainName = null;
-    assetDetailsModel.dId = assetModel.dId;
-    assetDetailsModel.vId = assetModel.vId;
+    assetDetailsModel.setdId(assetModel.dId);
+    assetDetailsModel.setvId(assetModel.vId);
     assetDetailsModel.meta = assetModel.meta;
     assetDetailsModel.tags = assetModel.tags;
     assetDetailsModel.lId = assetModel.lId;
@@ -394,8 +439,8 @@ public class AssetBuilder {
           Services.getService(AssetManagementServiceImpl.class);
       asset = assetManagementService.getAsset(assetModel.vId, assetModel.dId);
       if (asset != null) {
-        assetDetailsModel.sdid = asset.getDomainId();
-        assetDetailsModel.id = asset.getId();
+        assetDetailsModel.setSdid(asset.getDomainId());
+        assetDetailsModel.setId(asset.getId());
         assetDetailsModel.ts = LocalDateUtil.format(asset.getCreatedOn(), locale, timezone);
         if (asset.getUpdatedOn() != null) {
           assetDetailsModel.lts = LocalDateUtil.format(asset.getUpdatedOn(), locale, timezone);
@@ -446,7 +491,7 @@ public class AssetBuilder {
           entityModel.ds = ki.getDistrict();
           entityModel.tlk = ki.getTaluk();
 
-          assetDetailsModel.entity = entityModel;
+          assetDetailsModel.setEntity(entityModel);
         }
       }
 
@@ -456,7 +501,7 @@ public class AssetBuilder {
           userAccounts.add(usersService.getUserAccount(userId));
         }
         assetDetailsModel.ons =
-            userBuilder.buildUserModels(userAccounts, locale, timezone, true, 0);
+            userBuilder.buildUserModels(userAccounts, locale, timezone, true);
       }
 
       if (asset.getMaintainers() != null) {
@@ -465,7 +510,7 @@ public class AssetBuilder {
           userAccounts.add(usersService.getUserAccount(userId));
         }
         assetDetailsModel.mts =
-            userBuilder.buildUserModels(userAccounts, locale, timezone, true, 0);
+            userBuilder.buildUserModels(userAccounts, locale, timezone, true);
       }
     } catch (Exception e) {
       //do nothing

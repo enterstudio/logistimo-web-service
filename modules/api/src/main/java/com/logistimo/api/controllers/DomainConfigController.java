@@ -772,7 +772,7 @@ public class DomainConfigController {
       } else {
         cc.dc.setUiPreference(true);
       }
-      if (model.support != null && model.support.size() > 0) {
+      if (model.support != null && !model.support.isEmpty()) {
         for (SupportConfigModel supportConfigModel : model.support) {
           SupportConfig sc = new SupportConfig();
           sc.setSupportUserRole(supportConfigModel.role);
@@ -792,7 +792,7 @@ public class DomainConfigController {
         cc.dc.getAssetConfig().getConfiguration().getLocale()
             .setTz(AssetConfig.getTimezoneOffset(model.tz));
       }
-
+      cc.dc.setAdminContactConfigMap(model.adminContact);
       cc.dc.setEnableSwitchToNewHost(model.snh);
       cc.dc.setNewHostName(model.nhn);
 
@@ -804,7 +804,7 @@ public class DomainConfigController {
       xLogger.severe("Error in updating general configuration", e);
       throw new InvalidServiceException(backendMessages.getString("general.config.update.error"));
     } catch (ConfigurationException e) {
-      e.printStackTrace();
+      xLogger.warn("Error while printing configuration to log", e);
     }
     return backendMessages.getString("general.config.update.success");
   }
@@ -2195,13 +2195,13 @@ public class DomainConfigController {
         CustomReportsConfigModel m = (CustomReportsConfigModel) model.config;
         m.mn =
             userBuilder.buildUserModels(constructUserAccount(as, config.managers), locale,
-                sUser.getTimezone(), true, 0);
+                sUser.getTimezone(), true);
         m.an =
             userBuilder.buildUserModels(constructUserAccount(as, config.users), locale,
-                sUser.getTimezone(), true, 0);
+                sUser.getTimezone(), true);
         m.sn =
             userBuilder.buildUserModels(constructUserAccount(as, config.superUsers), locale,
-                sUser.getTimezone(), true, 0);
+                sUser.getTimezone(), true);
         m.exusrs = config.extUsers;
         m.usrTgs = config.usrTgs;
       }

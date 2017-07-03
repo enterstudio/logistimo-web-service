@@ -27,10 +27,7 @@
 package com.logistimo.utils;
 
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,11 +35,9 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -119,4 +114,9 @@ public class JsonUtil {
     return array;
   }
 
+  public static Map<String, Object> toMap(String json) {
+    Type type = new TypeToken<Map<String, Object>>() {
+      }.getType();
+    return new GsonBuilder().create().fromJson(json, type);
+  }
 }

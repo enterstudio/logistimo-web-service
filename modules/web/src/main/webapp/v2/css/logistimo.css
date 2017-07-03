@@ -2551,7 +2551,7 @@ date-picker[noclear] .btn-group>.btn:first-child:not(:last-child):not(.dropdown-
 }
 
 .vmiddle{
-    vertical-align: middle;
+    vertical-align: middle !important;
 }
 
 td > div > .user-select > .form-group > input{

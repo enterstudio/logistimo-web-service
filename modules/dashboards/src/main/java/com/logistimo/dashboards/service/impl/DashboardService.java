@@ -33,6 +33,7 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.dashboards.entity.IDashboard;
 import com.logistimo.dashboards.entity.IWidget;
 import com.logistimo.dashboards.service.IDashboardService;
+import com.logistimo.exception.SystemException;
 import com.logistimo.logger.XLog;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
@@ -314,8 +315,13 @@ public class DashboardService implements IDashboardService {
   }
 
   @Override
-  public ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type)
-      throws ClassNotFoundException, SQLException {
+  public ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type) {
+    return getMainDashboardResults(domainId, filters, type, false, null);
+  }
+
+  @Override
+  public ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type,
+                                           boolean isCountOnly, String groupby) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     JDOConnection conn = pm.getDataStoreConnection();
     Statement statement = null;
@@ -326,16 +332,36 @@ public class DashboardService implements IDashboardService {
       String query = null;
       switch (type) {
         case "inv":
-          query = getMDInvQuery(domainId, filters);
+          if (isCountOnly) {
+            query = getMDInvQuery(domainId, filters, true, null);
+          } else if (StringUtils.isNotEmpty(groupby)) {
+            query = getMDInvQuery(domainId, filters, false, groupby);
+          } else {
+            query = getMDInvQuery(domainId, filters);
+          }
           break;
         case "all_inv":
-          query = getMDAllInvQuery(domainId, filters);
+          if (isCountOnly) {
+            query = getMDAllInvQuery(domainId, filters, true, null);
+          } else if (StringUtils.isNotEmpty(groupby)) {
+            query = getMDAllInvQuery(domainId, filters, false, groupby);
+          } else {
+            query = getMDAllInvQuery(domainId, filters);
+          }
           break;
         case "activity":
-          query = getMDEntQuery(domainId, filters);
+          if (isCountOnly) {
+            query = getMDEntQuery(domainId, filters, true);
+          } else {
+            query = getMDEntQuery(domainId, filters);
+          }
           break;
         case "all_activity":
-          query = getMDAllEntQuery(domainId, filters);
+          if (isCountOnly) {
+            query = getMDAllEntQuery(domainId, filters, true);
+          } else {
+            query = getMDAllEntQuery(domainId, filters);
+          }
           break;
         case "temperature":
           query = getMDTempQuery(domainId, filters);
@@ -365,9 +391,11 @@ public class DashboardService implements IDashboardService {
           query = getEntityTempDataQuery(filters);
           break;
       }
-      xLogger.fine("Dashboard type: {0} query: {1}", type, query);
+      xLogger.info("Dashboard type: {0} query: {1}", type, query);
       rowSet.populate(statement.executeQuery(query));
       return rowSet;
+    } catch (SQLException e) {
+      throw new SystemException(e);
     } finally {
       try {
         if (statement != null) {
@@ -393,7 +421,7 @@ public class DashboardService implements IDashboardService {
 
   private String getPredictiveStockOutQuery(Long domainId, Map<String, String> filters) {
     StringBuilder query = new StringBuilder();
-    query.append("SELECT 'so' ty, (SELECT NAME from MATERIAL WHERE MATERIALID = MID) MATERIAL, MID,");
+    query.append("SELECT 'so' ty, (SELECT NAME from MATERIAL WHERE MATERIALID = MID) MATERIAL,");
     StringBuilder groupBy = new StringBuilder(" GROUP BY MATERIAL,");
     StringBuilder where = new StringBuilder();
     where.append(" WHERE PDOS <= ").append(PREDICTIVE_PERIOD)
@@ -643,9 +671,13 @@ public class DashboardService implements IDashboardService {
       boolean isDistrict = filters.get("district") != null;
       boolean isState = filters.get("state") != null;
       String colName = isDistrict ? "NAME" : (isState ? "DISTRICT" : "STATE");
+      String idHandle = isDistrict ? null : (isState ? "DISTRICT_ID" : "STATE_ID");
       query.append("SELECT ").append(colName).append(isDistrict ? ",KID" : "")
+          .append((null == idHandle) ? "" : "," + idHandle)
           .append(", STAT, COUNT(1) COUNT FROM (SELECT A.")
-          .append(colName).append(isDistrict ? ",KID" : "").append(", IF(ASF.STAT = 'tu', 'tu',")
+          .append(colName).append(isDistrict ? ",KID" : "")
+          .append((null == idHandle) ? "" : ",A." + idHandle)
+          .append(", IF(ASF.STAT = 'tu', 'tu',")
           .append("(SELECT IF(MAX(ABNSTATUS) = 2, 'th', IF(MAX(ABNSTATUS) = 1, 'tl', 'tn'))")
           .append("FROM ASSETSTATUS AST WHERE ")
           .append("AST.ASSETID = A.ID AND AST.TYPE = 1 AND ")
@@ -655,6 +687,8 @@ public class DashboardService implements IDashboardService {
           .append(isDistrict ? "KID," : "")
           .append("(SELECT ").append(colName).append(" FROM KIOSK WHERE KIOSKID = A.KID)")
           .append(colName)
+          .append((null == idHandle) ? ""
+              : "," + "(SELECT " + idHandle + " FROM KIOSK WHERE KIOSKID = A.KID)" + idHandle)
           .append(" FROM ASSET A, ASSET_DOMAINS AD WHERE A.TYPE IN (").append(csv)
           .append(") AND (SELECT COUNTRY FROM KIOSK WHERE KIOSKID = A.KID) = '")
           .append(filters.get("country")).append("'")
@@ -699,17 +733,39 @@ public class DashboardService implements IDashboardService {
   }
 
   private String getMDInvQuery(Long domainId, Map<String, String> filters) {
+    return getMDInvQuery(domainId, filters, false, null);
+  }
+
+  private String getMDInvQuery(Long domainId, Map<String, String> filters, boolean isCountOnly,
+                               String grpby) {
+
+    boolean isGrpByLoc = false;
+    boolean isGrpByMat = false;
+    if (StringUtils.isEmpty(grpby)) {
+      isGrpByLoc = true;
+      isGrpByMat = true;
+    } else if ("loc".equals(grpby)) {
+      isGrpByLoc = true;
+    } else if ("mat".equals(grpby)) {
+      isGrpByMat = true;
+    }
     StringBuilder query = new StringBuilder();
-    query.append("SELECT ty TYPE,(SELECT NAME from MATERIAL WHERE MATERIALID = MID) MATERIAL, MID,");
-    StringBuilder groupBy = new StringBuilder(" GROUP BY TY, MATERIAL");
+    query.append("SELECT ty TYPE,");
+    StringBuilder groupBy = new StringBuilder(" GROUP BY TY");
+    if (!isCountOnly && isGrpByMat) {
+      query.append("(SELECT NAME from MATERIAL WHERE MATERIALID = MID) MATERIAL, MID,");
+      groupBy.append(", MATERIAL");
+    }
     StringBuilder where = new StringBuilder();
     where.append(" WHERE `KEY` IN (SELECT KEY_OID FROM INVNTRYEVENTLOG_DOMAINS WHERE DOMAIN_ID = ")
         .append(domainId).append(")");
 
     if (filters != null) {
       if (filters.get("district") != null) {
-        query.append("(SELECT NAME FROM KIOSK WHERE KIOSKID = KID) NAME, KID,");
-        groupBy.append(",NAME, KID");
+        if (!isCountOnly && isGrpByLoc) {
+          query.append("(SELECT NAME FROM KIOSK WHERE KIOSKID = KID) NAME, KID,");
+          groupBy.append(",NAME, KID");
+        }
         where.append(" AND KID IN(SELECT KIOSKID FROM KIOSK WHERE STATE = '")
             .append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("'");
@@ -719,14 +775,22 @@ public class DashboardService implements IDashboardService {
           where.append("AND DISTRICT = '").append(filters.get("district")).append("')");
         }
       } else if (filters.get("state") != null) {
-        query.append("(SELECT DISTRICT FROM KIOSK WHERE KIOSKID = KID) DISTRICT,");
-        groupBy.append(",DISTRICT");
+        if (!isCountOnly && isGrpByLoc) {
+          query.append("(SELECT DISTRICT FROM KIOSK WHERE KIOSKID = KID) DISTRICT,");
+          query.append("(SELECT DISTRICT_ID FROM KIOSK WHERE KIOSKID = KID) DISTRICT_ID,");
+          groupBy.append(",DISTRICT");
+          groupBy.append(",DISTRICT_ID");
+        }
         where.append(" AND KID IN(SELECT KIOSKID FROM KIOSK WHERE STATE = '")
             .append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("')");
       } else {
-        query.append("(SELECT STATE FROM KIOSK WHERE KIOSKID = KID) STATE,");
-        groupBy.append(",STATE");
+        if (!isCountOnly && isGrpByLoc) {
+          query.append("(SELECT STATE FROM KIOSK WHERE KIOSKID = KID) STATE,");
+          query.append("(SELECT STATE_ID FROM KIOSK WHERE KIOSKID = KID) STATE_ID,");
+          groupBy.append(",STATE");
+          groupBy.append(",STATE_ID");
+        }
         where.append(" AND KID IN (SELECT KIOSKID FROM KIOSK WHERE COUNTRY = '")
             .append(filters.get("country")).append("')");
       }
@@ -785,16 +849,39 @@ public class DashboardService implements IDashboardService {
   }
 
   private String getMDAllInvQuery(Long domainId, Map<String, String> filters) {
+    return getMDAllInvQuery(domainId, filters, false, null);
+  }
+
+  private String getMDAllInvQuery(Long domainId, Map<String, String> filters, boolean isCountOnly,
+                                  String grpby) {
+    boolean isGrpByLoc = false;
+    boolean isGrpByMat = false;
+    if (StringUtils.isEmpty(grpby)) {
+      isGrpByLoc = true;
+      isGrpByMat = true;
+    } else if ("loc".equals(grpby)) {
+      isGrpByLoc = true;
+    } else if ("mat".equals(grpby)) {
+      isGrpByMat = true;
+    }
     StringBuilder query = new StringBuilder();
-    query.append("SELECT (SELECT NAME from MATERIAL WHERE MATERIALID = MID) MATERIAL, MID,");
-    StringBuilder groupBy = new StringBuilder(" GROUP BY MATERIAL,");
+    query.append("SELECT ");
+    StringBuilder groupBy = new StringBuilder(" GROUP BY ");
+    if (!isCountOnly && isGrpByMat) {
+      query.append("(SELECT NAME from MATERIAL WHERE MATERIALID = MID) MATERIAL, MID,");
+      groupBy.append(" MATERIAL");
+      groupBy.append(",");
+    }
     StringBuilder where = new StringBuilder();
     where.append(" WHERE `KEY` IN (SELECT KEY_OID FROM INVNTRY_DOMAINS WHERE DOMAIN_ID = ")
         .append(domainId).append(")");
     if (filters != null) {
       if (filters.get("district") != null) {
-        query.append("(SELECT NAME FROM KIOSK WHERE KIOSKID = KID) NAME,KID,");
-        groupBy.append("NAME, KID");
+        if (!isCountOnly && isGrpByLoc) {
+          query.append("(SELECT NAME FROM KIOSK WHERE KIOSKID = KID) NAME,KID,");
+          groupBy.append("NAME, KID");
+          groupBy.append(",");
+        }
         where.append(" AND KID IN(SELECT KIOSKID FROM KIOSK WHERE STATE = '")
             .append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("'");
@@ -804,14 +891,22 @@ public class DashboardService implements IDashboardService {
           where.append("AND DISTRICT = '").append(filters.get("district")).append("')");
         }
       } else if (filters.get("state") != null) {
-        query.append("(SELECT DISTRICT FROM KIOSK WHERE KIOSKID = KID) DISTRICT,");
-        groupBy.append("DISTRICT");
+        if (!isCountOnly && isGrpByLoc) {
+          query.append("(SELECT DISTRICT FROM KIOSK WHERE KIOSKID = KID) DISTRICT,");
+          query.append("(SELECT DISTRICT_ID FROM KIOSK WHERE KIOSKID = KID) DISTRICT_ID,");
+          groupBy.append("DISTRICT,");
+          groupBy.append("DISTRICT_ID,");
+        }
         where.append(" AND KID IN(SELECT KIOSKID FROM KIOSK WHERE STATE = '")
             .append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("')");
       } else {
-        query.append("(SELECT STATE FROM KIOSK WHERE KIOSKID = KID) STATE,");
-        groupBy.append("STATE");
+        if (!isCountOnly && isGrpByLoc) {
+          query.append("(SELECT STATE FROM KIOSK WHERE KIOSKID = KID) STATE,");
+          query.append("(SELECT STATE_ID FROM KIOSK WHERE KIOSKID = KID) STATE_ID,");
+          groupBy.append("STATE,");
+          groupBy.append("STATE_ID,");
+        }
         where.append(" AND KID IN (SELECT KIOSKID FROM KIOSK WHERE COUNTRY = '")
             .append(filters.get("country")).append("')");
       }
@@ -837,14 +932,24 @@ public class DashboardService implements IDashboardService {
     }
     query.append("COUNT(1) COUNT FROM INVNTRY");
     query.append(where);
-    query.append(groupBy);
+    if (groupBy.length() > " GROUP BY ".length()) {
+      groupBy.setLength(groupBy.length() - 1);
+      query.append(groupBy);
+    }
     return query.toString();
   }
 
   private String getMDEntQuery(Long domainId, Map<String, String> filters) {
+    return getMDEntQuery(domainId, filters, false);
+  }
+
+  private String getMDEntQuery(Long domainId, Map<String, String> filters, boolean isCountOnly) {
     StringBuilder query = new StringBuilder();
     query.append("SELECT ");
-    StringBuilder groupBy = new StringBuilder(" GROUP BY ");
+    StringBuilder groupBy = new StringBuilder();
+    if (!isCountOnly) {
+      groupBy.append(" GROUP BY ");
+    }
     StringBuilder where = new StringBuilder();
     where.append(" WHERE `KEY` IN (SELECT KEY_OID FROM TRANSACTION_DOMAINS WHERE DOMAIN_ID = ")
         .append(domainId).append(")");
@@ -853,8 +958,10 @@ public class DashboardService implements IDashboardService {
     Calendar cal = new GregorianCalendar();
     if (filters != null) {
       if (filters.get("district") != null) {
-        query.append("(SELECT NAME FROM KIOSK WHERE KIOSKID = KID) NAME,KID,");
-        groupBy.append("NAME,KID");
+        if (!isCountOnly) {
+          query.append("(SELECT NAME FROM KIOSK WHERE KIOSKID = KID) NAME,KID,");
+          groupBy.append("NAME,KID");
+        }
         where.append(" AND KID IN(SELECT KIOSKID FROM KIOSK WHERE STATE = '")
             .append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("'");
@@ -864,14 +971,22 @@ public class DashboardService implements IDashboardService {
           where.append("AND DISTRICT = '").append(filters.get("district")).append("')");
         }
       } else if (filters.get("state") != null) {
-        query.append("(SELECT DISTRICT FROM KIOSK WHERE KIOSKID = KID) DISTRICT,");
-        groupBy.append("DISTRICT");
+        if (!isCountOnly) {
+          query.append("(SELECT DISTRICT FROM KIOSK WHERE KIOSKID = KID) DISTRICT,");
+          query.append("(SELECT DISTRICT_ID FROM KIOSK WHERE KIOSKID = KID) DISTRICT_ID,");
+          groupBy.append("DISTRICT");
+          groupBy.append(",DISTRICT_ID");
+        }
         where.append(" AND KID IN(SELECT KIOSKID FROM KIOSK WHERE STATE = '")
             .append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("')");
       } else {
-        query.append("(SELECT STATE FROM KIOSK WHERE KIOSKID = KID) STATE,");
-        groupBy.append("STATE");
+        if (!isCountOnly) {
+          query.append("(SELECT STATE FROM KIOSK WHERE KIOSKID = KID) STATE,");
+          query.append("(SELECT STATE_ID FROM KIOSK WHERE KIOSKID = KID) STATE_ID,");
+          groupBy.append("STATE");
+          groupBy.append(",STATE_ID");
+        }
         where.append(" AND KID IN (SELECT KIOSKID FROM KIOSK WHERE COUNTRY = '")
             .append(filters.get("country")).append("')");
       }
@@ -930,23 +1045,32 @@ public class DashboardService implements IDashboardService {
           .append(startTime).append("'");
     }
 
-    query.append("COUNT(DISTINCT KID) COUNT FROM TRANSACTION");
+    query.append(" COUNT(DISTINCT KID) COUNT FROM TRANSACTION");
     query.append(where);
     query.append(groupBy);
     return query.toString();
   }
 
   private String getMDAllEntQuery(Long domainId, Map<String, String> filters) {
+    return getMDAllEntQuery(domainId, filters, false);
+  }
+
+  private String getMDAllEntQuery(Long domainId, Map<String, String> filters, boolean isCountOnly) {
     StringBuilder query = new StringBuilder();
     query.append("SELECT ");
-    StringBuilder groupBy = new StringBuilder(" GROUP BY ");
+    StringBuilder groupBy = new StringBuilder();
+    if (!isCountOnly) {
+      groupBy.append(" GROUP BY ");
+    }
     StringBuilder where = new StringBuilder();
     where.append(" WHERE KIOSKID IN (SELECT KIOSKID_OID FROM KIOSK_DOMAINS WHERE DOMAIN_ID = ")
         .append(domainId).append(")");
     if (filters != null) {
       if (filters.get("district") != null) {
-        query.append("NAME,CAST(KIOSKID AS CHAR) AS KID,");
-        groupBy.append("NAME,KID");
+        if (!isCountOnly) {
+          query.append("NAME,CAST(KIOSKID AS CHAR) AS KID,");
+          groupBy.append("NAME,KID");
+        }
         where.append(" AND STATE = '").append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("'");
         if ("".equals(filters.get("district"))) {
@@ -955,13 +1079,21 @@ public class DashboardService implements IDashboardService {
           where.append("AND DISTRICT = '").append(filters.get("district")).append("'");
         }
       } else if (filters.get("state") != null) {
-        query.append("DISTRICT,");
-        groupBy.append("DISTRICT");
+        if (!isCountOnly) {
+          query.append("DISTRICT,");
+          query.append("DISTRICT_ID,");
+          groupBy.append("DISTRICT");
+          groupBy.append(",DISTRICT_ID");
+        }
         where.append(" AND STATE = '").append(filters.get("state")).append("'")
             .append(" AND COUNTRY = '").append(filters.get("country")).append("'");
       } else {
-        query.append("STATE,");
-        groupBy.append("STATE");
+        if (!isCountOnly) {
+          query.append(" STATE,");
+          query.append(" STATE_ID,");
+          groupBy.append(" STATE");
+          groupBy.append(", STATE_ID");
+        }
         where.append(" AND COUNTRY = '").append(filters.get("country")).append("'");
       }
 
@@ -988,7 +1120,7 @@ public class DashboardService implements IDashboardService {
             .append(")");
       }
     }
-    query.append("COUNT(1) COUNT FROM KIOSK");
+    query.append(" COUNT(1) COUNT FROM KIOSK");
     query.append(where);
     query.append(groupBy);
     return query.toString();

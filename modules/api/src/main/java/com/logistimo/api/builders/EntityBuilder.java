@@ -323,7 +323,7 @@ public class EntityBuilder {
    */
   public EntityModel buildModel(IKiosk k, Locale locale, String timezone) {
     EntityModel model = buildBaseModel(k, locale, timezone, getDomainName(k.getDomainId()));
-    model.usrs = new UserBuilder().buildUserModels(k.getUsers(), locale, timezone, true, 0);
+    model.usrs = new UserBuilder().buildUserModels(k.getUsers(), locale, timezone, true);
     model.cid = k.getCustomId();
     model.str = k.getStreet();
     model.ds = k.getDistrict();
@@ -535,16 +535,16 @@ public class EntityBuilder {
         }
       }
       if(pap.size() > 0) {
-        model.pap = userBuilder.buildUserModels(constructUserAccount(as, pap), locale, timezone, true, 0);
+        model.pap = userBuilder.buildUserModels(constructUserAccount(as, pap), locale, timezone, true);
       }
       if(sap.size() > 0) {
-        model.sap = userBuilder.buildUserModels(constructUserAccount(as, sap), locale, timezone, true, 0);
+        model.sap = userBuilder.buildUserModels(constructUserAccount(as, sap), locale, timezone, true);
       }
       if(pas.size() > 0) {
-        model.pas = userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true, 0);
+        model.pas = userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true);
       }
       if(sap.size() > 0) {
-        model.sas = userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true, 0);
+        model.sas = userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true);
       }
       model.createdBy = approvers.get(0).getCreatedBy();
       model.lastUpdated = approvers.get(0).getUpdatedOn();

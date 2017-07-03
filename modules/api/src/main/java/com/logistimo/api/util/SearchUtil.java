@@ -29,24 +29,28 @@ package com.logistimo.api.util;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
+import com.logistimo.config.entity.IConfig;
+import com.logistimo.config.service.ConfigurationMgmtService;
+import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IHandlingUnit;
 import com.logistimo.materials.entity.IMaterial;
-import com.logistimo.services.Services;
-import com.logistimo.users.entity.IUserAccount;
-
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.Constants;
+import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.QueryUtil;
-import com.logistimo.logger.XLog;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -276,4 +280,27 @@ public class SearchUtil {
     xLogger.fine("Exiting find");
     return results;
   }
+
+  public static boolean isDistrictAvailable(String country, String state) {
+    try {
+      ConfigurationMgmtService
+          cms =
+          Services.getService(ConfigurationMgmtServiceImpl.class, null);
+      IConfig c = cms.getConfiguration(IConfig.LOCATIONS);
+      if (c != null && c.getConfig() != null) {
+        String jsonString = c.getConfig();
+        JSONObject jsonObject = new JSONObject(jsonString);
+        int
+            disCnt =
+            ((JSONObject) ((JSONObject) ((JSONObject) ((JSONObject) ((JSONObject) jsonObject
+                .get("data")).get(country)).get("states")).get(state)).get("districts"))
+                .length();
+        return disCnt > 0;
+      }
+    } catch (Exception ignored) {
+      // do nothing
+    }
+    return true;
+  }
+
 }

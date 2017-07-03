@@ -11,7 +11,7 @@ public class RestResponsePageBuilder<T> {
   private int size;
   private long totalElements;
   private List<T> content;
-  private Sort sort;
+  private List<Sort.Order> sort;
 
   public RestResponsePageBuilder<T> withOffset(int offset) {
     this.offset = offset;
@@ -33,7 +33,7 @@ public class RestResponsePageBuilder<T> {
     return this;
   }
 
-  public RestResponsePageBuilder<T> withSort(Sort sort) {
+  public RestResponsePageBuilder<T> withSort(List<Sort.Order> sort) {
     this.sort = sort;
     return this;
   }

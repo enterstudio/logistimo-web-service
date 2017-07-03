@@ -133,7 +133,9 @@ public class BulkExportMgr {
 
   // Get the query parameters for a given type of export
   // NOTE: The keys in params are the same as the request parameter keys in ExportServlet.batchExport()
-  public static QueryParams getQueryParams(String type, Long domainId, IReportDataGeneratorFactory iReportDataGeneratorFactory, HttpServletRequest req)
+  public static QueryParams getQueryParams(String type, Long domainId,
+                                           IReportDataGeneratorFactory iReportDataGeneratorFactory,
+                                           HttpServletRequest req)
       throws Exception {
     if (type == null || type.isEmpty() || domainId == null) {
       throw new IllegalArgumentException(
@@ -516,7 +518,8 @@ public class BulkExportMgr {
 
   // Private method that returns the report query params
   private static QueryParams getReportQueryParams(
-      String type, Long domainId, IReportDataGeneratorFactory iReportDataGeneratorFactory, HttpServletRequest req) {
+      String type, Long domainId, IReportDataGeneratorFactory iReportDataGeneratorFactory,
+      HttpServletRequest req) {
     xLogger.fine("Entering getReportQueryParams");
     // use ReportDataGeneratorFactory, get generator instance based on type, ReportDataGenerator.getQueryParams(...filters...)
     //Read the required parameters for generating report query

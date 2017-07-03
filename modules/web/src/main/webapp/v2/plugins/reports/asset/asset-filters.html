@@ -61,7 +61,7 @@
                     <rpt-monitor-type-filter filter-model="filter.mt" ng-disabled="disableMonitor" ng-if="cards.mc == undefined"></rpt-monitor-type-filter>
                     <rpt-asset-filter filter-model="filter.at" filter-type="{{disableMonitor ? defaultAssetType : 'all'}}" ng-if="cards.mc == 't'"></rpt-asset-filter>
                 </div>
-                <div class="filter-card">
+                <div class="filter-card" ng-if="!disableManufacturer">
                     <div class="filter-heading">Manufacturer</div>
                     <div class="filter-sub-heading">
                         <span ng-class="{'active':cards.mfc == undefined}" ng-click="changeSubHeading('mf')">By manufacturer</span>

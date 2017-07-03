@@ -44,7 +44,6 @@ public class JsonTagsZ {
   public static final String ALLOW_ROUTETAG_EDITING = "arte";
   public static final String ALTITUDE = "galt";
   public static final String APP_UPGRADE = "aupg";
-  public static final String ASSET_ONLY = "asnly";
   public static final String AUTOMATICALLY_POST_ISSUES_ON_SHIPPING_ORDER = "api";
   public static final String AUTOMATICALLY_POST_RECEIPTS_ON_FULFILLING_ORDER = "apr";
   public static final String AVAILABLE_QUANTITY = "avq";
@@ -72,7 +71,6 @@ public class JsonTagsZ {
   // type of entities that can be created (CSV list - either ents,csts,vnds)
   public static final String CONFIRMED_FULFILLMENT_TIMERANGE = "cft";
   public static final String COUNTRY = "cn";
-  public static final String DEFAULT = "df";
   public static final String CURRENCY = "cu";
   public static final String CURSOR = "cs";
   public static final String CUSTOMERS = "csts";
@@ -84,7 +82,6 @@ public class JsonTagsZ {
   public static final String DATA = "dat";
   public static final String DATA_TYPE = "dty";
   public static final String DATE_FORMAT = "df";
-  public static final String DATE_OF_ACTUAL_RECEIPT = "dar";
   public static final String DEMAND_COUNT = "dc";
   public static final String DEMAND_FORECAST = "dfr"; // demand forecast
   public static final String DEMAND_QUANTITY = "dq";
@@ -106,7 +103,6 @@ public class JsonTagsZ {
   public static final String ESTIMATED_FULFILLMENT_TIMERANGES = "efts";
   public static final String EXPECTED_TIME_OF_ARRIVAL = "eta";
   public static final String REQUIRED_BY_DATE = "rbd";
-  public static final String EXTENSION = "xt";
   public static final String FIRST_NAME = "fn";
   public static final String FULFILLED_QUANTITY = "flq";
   public static final String GATEWAY_PHONE_NUMBER = "gwph";
@@ -121,7 +117,6 @@ public class JsonTagsZ {
   public static final String IGNORE_ORDER_RECOMMENDATION_REASONS = "igorrsns";
   public static final String IS_TEMPERATURE_SENSITIVE = "istmp"; // SENSITIVE
   public static final String INFO = "inf";
-  public static final String INVENTORY_ID = "iid";
   public static final String INVENTORY_ITEMS_ABNORMAL = "invitmsabn";
   public static final String INVENTORY_POLICY = "ip";
   public static final String INTERVALS = "intrvls";
@@ -136,7 +131,6 @@ public class JsonTagsZ {
   public static final String ISSUES = "i";
   public static final String ISSUE_COUNT = "ic";
   public static final String ISSUE_QUANTITY = "iq";
-  public static final String HOST_DOMAIN_NAME = "hst";
   public static final String KIOSK = "k";
   public static final String KIOSK_ID = "kid";
   public static final String KIOSKS = "ki";
@@ -171,13 +165,11 @@ public class JsonTagsZ {
   public static final String NEW_NAME = "nn";
   public static final String NO_LOCAL_LOGIN_WITH_VALID_TOKEN = "nll";
   public static final String NUM_RESULTS = "r";
-  public static final String OLD_PASSWORD = "op";
   public static final String OPENING_STOCK = "ostk";
   public static final String
       OPENING_STOCK_IN_BATCH =
       "ostkb";
   // Changed from osb to ostkb for naming consistency
-  public static final String ORDER_CANCELLATION_REASONS = "rsnsco";
   public static final String ORDER_CONFIG = "ords";
   public static final String ORDER_GENERATION = "ogn";
   public static final String ORDER_MARKASFULFILLED = "omaf";
@@ -199,23 +191,18 @@ public class JsonTagsZ {
   public static final String QUANTITY = "q";
   public static final String RECEIPTS = "r";
   public static final String REASONS_BY_TAG = "rsnsbytg";
-  public static final String REASON_FOR_CANCELLING_ORDER = "rsnco";
   public static final String REASONS_FOR_CANCELLING_ORDER = "rsnsco";
   public static final String REASON_FOR_EDITING_ORDER_QUANTITY = "rsneoq";
   public static final String REASONS_FOR_EDITING_ORDER_QUANTITY = "rsnseoq";
   public static final String REASON_FOR_IGNORING_RECOMMENDED_QUANTITY = "rsnirq";
   public static final String REASON_FOR_PARTIAL_FULFILLMENT = "rsnpf";
   public static final String REASONS_FOR_PARTIAL_FULFILLMENT = "rsnspf";
-  public static final String REASON_FOR_PARTIAL_SHIPMENT = "rsnps";
   public static final String REASONS_FOR_PARTIAL_SHIPMENT = "rsnsps";
   public static final String RECOMMENDED_ORDER_QUANTITY = "roq";
   public static final String RETAILER_PRICE = "rp";
   public static final String ROLE = "rle";
   public static final String SENDER_ID = "sndid";
-  public static final String SERIAL_NUMBER = "srno";
   public static final String SERVICE_LEVEL = "sl";
-  public static final String SHIPMENT_ID = "sid";
-  public static final String SHIPMENTS = "shps";
   public static final String SHORT_MATERIAL_ID = "smid";
   public static final String SMS = "sms";
   public static final String STATE = "ste";
@@ -237,12 +224,12 @@ public class JsonTagsZ {
   public static final String TOTAL_PRICE = "tp";
   public static final String TRACKING_ID = "tid";
   public static final String TRANSACTIONS = "trn";
-  public static final String TRANSACTION_LOG = "trl";
   public static final String TRANSACTION_NAMING = "tnm";
   public static final String TRANSACTION_TYPE = "ty";
   public static final String TRANSFER = "t";
   public static final String TRANSFER_RELEASE = "tr";
-  public static final String TRANSPORTER = "trsp"; //transporter for orders
+  //transporter for orders
+  public static final String TRANSPORTER = "trsp";
   public static final String
       TRANSPORTER_MANDATORY =
       "trspm";
@@ -254,7 +241,6 @@ public class JsonTagsZ {
   public static final String USER = "u";
   public static final String USERS = "us";
   public static final String USER_ID = "uid";
-  public static final String VIEW_ONLY = "vnly";
   public static final String VIEW_INVENTORY_ONLY = "vinv";
   public static final String VENDORS = "vnds";
   public static final String VENDORS_MANDATORY = "vndm";
@@ -297,17 +283,11 @@ public class JsonTagsZ {
   public static final String SUPPORT_EMAIL = "seml";
   public static final String SUPPORT_PHONE = "sphn";
   public static final String TEMPERATURE = "tmp";
-  ;
   public static final String TRANSFER_COUNT = "trc";
   public static final String TRANSFER_QUANTITY = "trq";
   public static final String WASTAGE_COUNT = "wc";
   public static final String WASTAGE_QUANTITY = "wq";
   public static final String EXPIRED_NONZERO_BATCHES = "xbt";
-
-  public static final String VIEW_PROFILE = "vprf";
-  public static final String EDIT_PROFIE = "eprf";
-  public static final String PRINT_INVENTORY = "prni";
-  public static final String EXPORT_INVENTORY = "expi";
 
   // Status constants
   public static final String STATUS_TRUE = "0";
@@ -316,4 +296,7 @@ public class JsonTagsZ {
   // Date type values
   public static final String TYPE_BINARY = "bn";
   public static final String INVENTORY_VISIBLE = "invv";
+  // Approvals related keys
+  public static final String APPROVERS = "apprvrs";
+  public static final String APPROVALS = "apprvls";
 }

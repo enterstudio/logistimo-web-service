@@ -32,4 +32,5 @@ public class PasswordModel {
   public String uid; // userId
   public int mode; // mode sms or email
   public String otp; // otp received via sms
+  public String udty;// user device type
 }

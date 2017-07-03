@@ -23,11 +23,10 @@
 
 package com.logistimo.users.entity;
 
-import com.logistimo.auth.SecurityConstants;
+import com.logistimo.entity.ILocationConfig;
 import com.logistimo.tags.entity.ITag;
 
 import com.logistimo.domains.ISuperDomain;
-import com.logistimo.events.IEvents;
 
 import java.util.Date;
 import java.util.Hashtable;
@@ -37,7 +36,7 @@ import java.util.Locale;
 /**
  * Created by charan on 20/05/15.
  */
-public interface IUserAccount extends ISuperDomain {
+public interface IUserAccount extends ISuperDomain, ILocationConfig {
   // Gender
   String GENDER_MALE = "m";
   String GENDER_FEMALE = "f";

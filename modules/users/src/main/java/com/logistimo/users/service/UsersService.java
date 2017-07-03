@@ -23,17 +23,21 @@
 
 package com.logistimo.users.service;
 
+import com.logistimo.api.models.UserDeviceModel;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.entity.IUserDevice;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.jdo.PersistenceManager;
 
 /**
  * Created by charan on 04/03/17.
@@ -165,5 +169,15 @@ public interface UsersService extends Service {
   void setUiPreferenceForUser(String userId, boolean uiPref) throws ServiceException;
 
   boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role);
+
+  /**
+   *
+   */
+  void updateUserLocationIds(IUserAccount userAccount, Map<String, Object> lidMap, PersistenceManager pm) throws ServiceException;
+
+  void addEditUserDevice(UserDeviceModel ud) throws ServiceException;
+
+  IUserDevice getUserDevice(String userid, String appname) throws ServiceException;
+  List<IUserAccount> getUsersByIds(List<String> userIds);
 
 }

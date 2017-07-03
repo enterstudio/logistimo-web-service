@@ -21,9 +21,6 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-/**
- *
- */
 package com.logistimo.orders.service.impl;
 
 import com.ibm.icu.util.Calendar;
@@ -82,6 +79,8 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.Order;
+import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
+import com.logistimo.orders.entity.approvals.OrderApprovalMapping;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
@@ -528,7 +527,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
             xLogger
                 .info("Cancelling shipment {0} for order {1}", orderId, shipment.getShipmentId());
             ss.updateShipmentStatus(shipment.getShipmentId(), ShipmentStatus.CANCELLED, message,
-                updatingUserId, crsn, false, pm);
+                updatingUserId, crsn, false, pm,source);
           }
           if (dc.autoGI()) {
             ims.clearAllocationByTag(null, null, tag, pm);
@@ -623,7 +622,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   @Override
   public String shipNow(IOrder order, String transporter, String trackingId, String reason,
-                        Date expectedFulfilmentDate, String userId, String ps)
+                        Date expectedFulfilmentDate, String userId, String ps,int source)
       throws ServiceException {
     try {
       IShipmentService
@@ -664,7 +663,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           model.items.add(shipmentItemModel);
         }
       }
-      return shipmentService.createShipment(model);
+      return shipmentService.createShipment(model,source);
     } catch (LogiException e) {
       throw e;
     } catch (Exception e) {
@@ -2297,5 +2296,41 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       MaterialUtils.getMaterialNamesString(materialsNotExistingInVendor));
       }
   }
+  public List<IOrderApprovalMapping> getOrdersApprovalMapping(Set<Long> orderIds, int orderAppprovalType) {
 
+    if (orderIds == null || orderIds.isEmpty()) {
+      return null;
+    }
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    Query query = null;
+    List<IOrderApprovalMapping> results = null;
+    try {
+
+      StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER_APPROVAL_MAPPING` ");
+      queryBuilder.append("WHERE ORDER_ID IN (");
+      for (Long orderId : orderIds) {
+        queryBuilder.append(orderId).append(CharacterConstants.COMMA);
+      }
+      queryBuilder.setLength(queryBuilder.length() - 1);
+      queryBuilder.append(" )");
+      queryBuilder.append(" AND APPROVAL_TYPE=").append(orderAppprovalType);
+      queryBuilder.append(" ORDER BY ORDER_ID ASC");
+      query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
+      query.setClass(OrderApprovalMapping.class);
+      results = (List<IOrderApprovalMapping>) query.execute();
+      results=(List<IOrderApprovalMapping>) pm.detachCopyAll(results);
+    } catch (Exception e) {
+      xLogger.warn("Exception while fetching approval status", e);
+    } finally {
+      if (query != null) {
+        try {
+          query.closeAll();
+        } catch (Exception ignored) {
+          xLogger.warn("Exception while closing query", ignored);
+        }
+      }
+      pm.close();
+    }
+    return results;
+  }
 }

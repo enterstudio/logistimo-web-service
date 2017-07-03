@@ -30,6 +30,7 @@ import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -42,6 +43,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.jdo.PersistenceManager;
 
@@ -64,7 +66,7 @@ public interface OrderManagementService extends Service {
    */
   String shipNow(IOrder order, String transporter, String trackingId, String reason,
                  Date expectedFulfilmentDate,
-                 String userId, String ps) throws ServiceException;
+                 String userId, String ps,int source) throws ServiceException;
 
   /**
    * Gets the order details for given order. This method does not fetch demand items.
@@ -251,5 +253,5 @@ public interface OrderManagementService extends Service {
 
   void updateOrderVisibility(Long orderId) throws ObjectNotFoundException;
 
-    /*List<IOrderApprovalMapping> getOrdersApprovalStatus(Set<Long> orderIds,int orderAppprovalType);*/
+  List<IOrderApprovalMapping> getOrdersApprovalMapping(Set<Long> orderIds, int orderAppprovalType);
 }

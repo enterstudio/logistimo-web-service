@@ -31,6 +31,7 @@ public class SMSTransactionModel {
   private String partialId;
   private String token;
   private Long kioskId;
+  private List<InventoryTransactions> inventoryTransactionsList;
 
   public List<InventoryTransactions> getInventoryTransactionsList() {
     return inventoryTransactionsList;
@@ -39,8 +40,6 @@ public class SMSTransactionModel {
   public void setInventoryTransactionsList(List<InventoryTransactions> inventoryTransactionsList) {
     this.inventoryTransactionsList = inventoryTransactionsList;
   }
-
-  private List<InventoryTransactions> inventoryTransactionsList;
 
   public String getUserId() {
     return userId;

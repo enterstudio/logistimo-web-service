@@ -106,15 +106,16 @@ public class DashboardBuilder {
   public MainDashboardModel getMainDashBoardData(ResultSet eventRes, ResultSet invRes,
                                                  ResultSet actRes, ResultSet entRes,
                                                  ResultSet tempRes, ResultSet predRes,
-                                                 String filterCol) throws SQLException {
+                                                 String filterCol)
+      throws SQLException {
     MainDashboardModel model = new MainDashboardModel();
     model.inv = constructData(eventRes, filterCol, "i");
     model.invDomain = addDetailData(invRes, model.inv, filterCol, "n");
     model.ent = constructData(actRes, filterCol, "e");
     model.entDomain = addDetailData(entRes, model.ent, filterCol, "i");
+    model.pred = addPredictiveData(predRes);
     model.temp = constructData(tempRes, filterCol, "t");
     model.tempDomain = addDetailData(null, model.temp, filterCol, null, true);
-    model.pred = addPredictiveData(predRes);
     return model;
   }
 
@@ -159,6 +160,10 @@ public class DashboardBuilder {
                                           Map<String, Map<String, DashboardChartModel>> data,
                                           String filterCol, String addColumn, boolean isSameData)
       throws SQLException {
+    Map<String, Long> overAllData = new HashMap<>();
+    if(data == null || data.size() == 0) {
+      return overAllData;
+    }
     Map<String, Long> subDataCounts = new HashMap<>();
     Map<String, Long> allMatCounts = new HashMap<>();
     Map<String, Long> subDataID = new HashMap<>();
@@ -211,7 +216,6 @@ public class DashboardBuilder {
         }
       }
     }
-    Map<String, Long> overAllData = new HashMap<>();
     Map<String, Long> allTypeSubDataCounts = new HashMap<>();
     long allTypeTotal = 0;
     Map<String, Long> allMatTypeCounts = new HashMap<>();
@@ -403,10 +407,10 @@ public class DashboardBuilder {
                                                                       String filterCol,
                                                                       String resType)
       throws SQLException {
-    if (res == null) {
-      return null;
-    }
     Map<String, Map<String, DashboardChartModel>> inv = new HashMap<>();
+    if (res == null) {
+      return inv;
+    }
     Collection<String> keys = new HashSet<>();
     ResultSetMetaData metaData = res.getMetaData();
     List<String> columns = new ArrayList<>(metaData.getColumnCount());

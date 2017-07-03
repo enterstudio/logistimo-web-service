@@ -54,7 +54,18 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -195,7 +206,7 @@ public class TransDataServlet extends JsonRestServlet {
     }
 
     // Create a vector of hashtables to hold the results.
-    Vector<Hashtable> transDataVector = new Vector<Hashtable>();
+    Vector<Hashtable> transDataVector = new Vector<>();
     int resultsSize = results.size();
     Iterator<? extends ISlice>
         resultsIter =
@@ -255,7 +266,7 @@ public class TransDataServlet extends JsonRestServlet {
         queryStr =
         "SELECT FROM " + JDOUtils.getImplClass(IDaySlice.class).getName()
             + " WHERE dId == dIdParam && oty == otyParam && d > fromParam && d < untilParam PARAMETERS Long dIdParam, String otyParam, Date fromParam, Date untilParam import java.util.Date; ORDER BY d DESC";
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, Object> params = new HashMap<>();
     params.put("dIdParam", domainId);
     params.put("otyParam", ISlice.OTYPE_MATERIAL);
     params.put("fromParam", LocalDateUtil.getOffsetDate(fromDate, -1, Calendar.MILLISECOND));
@@ -276,7 +287,7 @@ public class TransDataServlet extends JsonRestServlet {
       try {
         q.closeAll();
       } catch (Exception ignored) {
-
+        //do nothing
       }
       pm.close();
     }
@@ -291,7 +302,7 @@ public class TransDataServlet extends JsonRestServlet {
       //sendJsonResponse( res, HttpServletResponse.SC_OK,  aggTransDataOutput.toJSONString() );
       String
           aggTransDataOutput =
-          GsonUtil.aggTransDataOutputToJson(false, 0, null, errMsg, locale.toString(),
+          GsonUtil.aggTransDataOutputToJson(false, 0, null, errMsg, locale,
               RESTUtil.VERSION_01);
       sendJsonResponse(res, HttpServletResponse.SC_OK, aggTransDataOutput);
     } catch (Exception e) {
@@ -424,7 +435,6 @@ public class TransDataServlet extends JsonRestServlet {
       sendJsonResponse(resp, statusCode, jsonOutputString);
     } catch (Exception e1) {
       xLogger.severe("TransDataServlet Exception: {0}", e1);
-      e1.printStackTrace();
       resp.setStatus(500);
     }
   }
@@ -565,8 +575,8 @@ public class TransDataServlet extends JsonRestServlet {
     }
 
     parsedRequest.parsedReqMap.put(RestConstantsZ.SIZE, size);
-    List<String> dateFormats=new ArrayList<>(2);
-    dateFormats.add(Constants.DATETIME_IN_MILLI_FORMAT);
+    List<String> dateFormats = new ArrayList<>(2);
+    dateFormats.add(Constants.DATETIME_IN_MILLIS_FORMAT);
     dateFormats.add(Constants.DATE_FORMAT);
     String endDateStr = reqParamsMap.get(RestConstantsZ.ENDDATE);
     Date endDate = new Date();

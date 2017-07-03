@@ -29,11 +29,10 @@ package com.logistimo.utils;
 
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
+import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.reports.ReportsConstants;
 import com.logistimo.services.Resources;
-import com.logistimo.proto.JsonTagsZ;
-
-import com.logistimo.logger.XLog;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -136,22 +135,24 @@ public class LocalDateUtil {
     }
     return sdf.parse(timestampStr);
   }
+
   public static Date parseDate(String timestampStr, List<String> dateFormats, String timezone)
-          throws ParseException {
-    Date date=null;
+      throws ParseException {
+    Date date = null;
     SimpleDateFormat sdf = new SimpleDateFormat();
-    for(String s:dateFormats){
+    for (String s : dateFormats) {
       sdf.applyPattern(s);
       if (timezone != null && !timezone.isEmpty()) {
         sdf.setTimeZone(TimeZone.getTimeZone(timezone));
       }
       try {
         date = sdf.parse(timestampStr);
-      }catch (ParseException ignored){
+      } catch (ParseException ignored) {
+        //do nothing
       }
     }
-    if(date==null){
-      throw new ParseException(timestampStr,0);
+    if (date == null) {
+      throw new ParseException(timestampStr, 0);
     }
     return date;
   }

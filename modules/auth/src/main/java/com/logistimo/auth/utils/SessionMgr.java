@@ -27,7 +27,6 @@
 package com.logistimo.auth.utils;
 
 import com.logistimo.AppFactory;
-import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
 import com.logistimo.constants.Constants;
@@ -36,8 +35,6 @@ import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.users.entity.IUserAccount;
-
-import org.springframework.web.servlet.support.RequestContextUtils;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -104,23 +101,26 @@ public class SessionMgr {
   public static void recreateSession(HttpServletRequest request, HttpServletResponse response,
                                      SecureUserDetails user) {
     HttpSession session = request.getSession(false);
-    Enumeration sessionAttrEnum = session.getAttributeNames();
     Map<String, Object> sessionAttirbutes = new HashMap<>();
-    if (sessionAttrEnum != null) {
-      while (sessionAttrEnum.hasMoreElements()) {
-        Object attribute = sessionAttrEnum.nextElement();
-        sessionAttirbutes.put(attribute.toString(), session.getAttribute(attribute.toString()));
-      }
-    }
-    //Deleteing session directly in Redis before invalidating it.
     MemcacheService cacheService = AppFactory.get().getMemcacheService();
-    cacheService.delete(session.getId());
-    session.invalidate();
+
+    if (session != null) {
+      Enumeration sessionAttrEnum = session.getAttributeNames();
+      if (sessionAttrEnum != null) {
+        while (sessionAttrEnum.hasMoreElements()) {
+          Object attribute = sessionAttrEnum.nextElement();
+          sessionAttirbutes.put(attribute.toString(), session.getAttribute(attribute.toString()));
+        }
+      }
+      //Deleteing session directly in Redis before invalidating it.
+      cacheService.delete(session.getId());
+      session.invalidate();
+    }
+
     session = request.getSession(true);
     for (String attributeName : sessionAttirbutes.keySet()) {
       session.setAttribute(attributeName, sessionAttirbutes.get(attributeName));
     }
-    RequestContextUtils.getLocaleResolver(request).setLocale(request, response, user.getLocale());
     //Initialzing the session
     initSession(session, user);
   }
@@ -153,21 +153,9 @@ public class SessionMgr {
   }
 
   // NOTE: userId can be removed later; it is there for backward compatibility
+  @Deprecated
   public static Long getCurrentDomain(HttpSession session, String userId) {
-    Long domainId = (Long) session.getAttribute(Constants.PARAM_DOMAINID);
-    xLogger.fine("PARAM_DOMAINID: {0}", domainId);
-    if (domainId != null) {
-      return domainId;
-    }
-
-    // Make the user's domain the current domain
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(session);
-    if (sUser != null) {
-      domainId = sUser.getDomainId();
-      setCurrentDomain(session, domainId);
-      xLogger.fine("PARAM_DOMAINID being set from user account: {0}", domainId);
-    }
-    return domainId;
+    return SecurityUtils.getCurrentDomainId();
   }
 
   public static void setCurrentDomain(HttpSession session, Long domainId) {

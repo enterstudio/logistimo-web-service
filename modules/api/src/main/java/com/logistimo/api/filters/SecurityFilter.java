@@ -25,6 +25,7 @@ package com.logistimo.api.filters;
 
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.constants.Constants;
 import com.logistimo.logger.XLog;
@@ -84,7 +85,7 @@ public class SecurityFilter implements Filter {
                 .isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME))))) {
       SecureUserDetails
           userDetails = SecurityMgr
-          .getUserDetails(req.getSession());
+          .getSessionDetails(req.getSession());
       if (userDetails == null) { // session not authenticated yet; direct to login screen
         if (!(servletPath.startsWith(TASK_ADMIN_URL) && ACTION_UPDATESYSCONFIG
             .equals(request.getParameter(ACTION)))) {
@@ -106,7 +107,8 @@ public class SecurityFilter implements Filter {
         }
       } else {
         String role = userDetails.getRole();
-        if (SecurityConstants.ROLE_KIOSKOWNER.equals(role)) { // Kiosk owner cannot access this interface
+        if (SecurityConstants.ROLE_KIOSKOWNER
+            .equals(role)) { // Kiosk owner cannot access this interface
           SessionMgr.cleanupSession(req.getSession());
           resp.sendRedirect(LOGIN_URL + "?status=4");
           return;
@@ -117,18 +119,25 @@ public class SecurityFilter implements Filter {
           resp.sendRedirect(LOGIN_URL + "?status=4"); // access denied
           return;
         }
+        SecurityUtils.setUserDetails(userDetails);
       }
     }
-    if (filterChain != null) {
-      filterChain.doFilter(request, response);
+    try {
+      if (filterChain != null) {
+        filterChain.doFilter(request, response);
+      }
+    } finally {
+      SecurityUtils.setUserDetails(null);
     }
   }
 
   @Override
   public void destroy() {
+    //no cleanup required
   }
 
   @Override
   public void init(FilterConfig arg0) throws ServletException {
+    //nothing to init
   }
 }

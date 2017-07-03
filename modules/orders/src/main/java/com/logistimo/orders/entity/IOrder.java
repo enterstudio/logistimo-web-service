@@ -50,6 +50,7 @@ public interface IOrder extends ICrossDomain {
   // Types
   String TYPE_SALE = "sle";
   String TYPE_PURCHASE = "prc";
+  String TYPE_TRANSFER = "tr";
   // Paid states
   String PAID_FULL = "f";
   String PAID_PARTIAL = "p";

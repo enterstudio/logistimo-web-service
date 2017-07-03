@@ -25,15 +25,20 @@ package com.logistimo.api.builders;
 
 import com.logistimo.api.models.InventoryAbnStockModel;
 import com.logistimo.api.models.InventoryBatchMaterialModel;
+import com.logistimo.api.models.InventoryDetail;
+import com.logistimo.api.models.InventoryDetailModel;
 import com.logistimo.api.models.InventoryDomainModel;
 import com.logistimo.api.models.InventoryMinMaxLogModel;
 import com.logistimo.api.models.InventoryModel;
 import com.logistimo.api.models.InvntryBatchModel;
+import com.logistimo.api.models.MediaModels;
+import com.logistimo.api.models.mobile.CurrentStock;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
 import com.logistimo.config.models.OptimizerConfig;
 import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
@@ -57,6 +62,8 @@ import com.logistimo.materials.service.IHandlingUnitService;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
+import com.logistimo.media.endpoints.IMediaEndPoint;
+import com.logistimo.media.entity.IMedia;
 import com.logistimo.orders.OrderUtils;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
@@ -64,8 +71,6 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.tags.TagUtil;
-import com.logistimo.tags.dao.ITagDao;
-import com.logistimo.tags.dao.TagDao;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
@@ -90,7 +95,6 @@ public class InventoryBuilder {
 
   private static final XLog xLogger = XLog.getLog(InventoryBuilder.class);
   private IInvntryDao invDao = new InvntryDao();
-  private ITagDao tagDao = new TagDao();
 
   public Results buildInventoryModelListAsResult(Results results, SecureUserDetails sUser,
                                                  Long domainId, Long entityId)
@@ -103,9 +107,10 @@ public class InventoryBuilder {
   public List<InventoryModel> getInventoryModelList(Results results, SecureUserDetails sUser,
                                                     Long domainId, Long entityId)
       throws ServiceException {
+    List<InventoryModel> newInventory = null;
     if (results != null) {
       List inventory = results.getResults();
-      List<InventoryModel> newInventory = new ArrayList<InventoryModel>(inventory.size());
+      newInventory = new ArrayList<>(inventory.size());
       Map<Long, String> domainNames = new HashMap<>(1);
       int itemCount = results.getOffset() + 1;
       DomainConfig domainConfig = DomainConfig.getInstance(domainId);
@@ -126,6 +131,9 @@ public class InventoryBuilder {
         ki = accountsService.getKiosk(entityId, false);
       }
       for (Object invntry : inventory) {
+        if (invntry instanceof IInvntryEvntLog) {
+          invntry = invDao.getInvntry((IInvntryEvntLog) invntry);
+        }
         InventoryModel item = buildInventoryModel((IInvntry) invntry,
             domainConfig, accountsService,mCatalogService,usersService, ims, ki, sUser, itemCount, domainNames);
         if (item != null) {
@@ -133,9 +141,150 @@ public class InventoryBuilder {
           itemCount++;
         }
       }
-      return newInventory;
     }
-    return null;
+    return newInventory;
+  }
+
+  public InventoryDetailModel buildMInventoryDetail(IInvntry inventory,
+                                                    Long domainId, Long entityId)
+      throws ServiceException {
+    InventoryDetailModel inventoryDetailModel = new InventoryDetailModel();
+    Map<Long, String> domainNames = new HashMap<>(1);
+    DomainConfig domainConfig = DomainConfig.getInstance(domainId);
+    EntitiesService
+        accountsService =
+        Services.getService(EntitiesServiceImpl.class);
+    UsersService
+        usersService =
+        Services.getService(UsersServiceImpl.class);
+    MaterialCatalogService
+        mCatalogService =
+        Services.getService(MaterialCatalogServiceImpl.class);
+    InventoryManagementService
+        ims =
+        Services.getService(InventoryManagementServiceImpl.class);
+    IKiosk ki = accountsService.getKiosk(entityId, false);
+    return buildMInventoryDetailModel(inventory,
+        domainConfig, accountsService, mCatalogService, ims, ki, 1,
+        domainNames);
+  }
+
+  public InventoryDetailModel buildMInventoryDetailModel(IInvntry invntry,
+                                                          DomainConfig domainConfig,
+                                                          EntitiesService accountsService,
+                                                          MaterialCatalogService mCatalogService,
+                                                          InventoryManagementService ims,
+                                                          IKiosk kiosk,
+                                                          int itemCount,
+                                                          Map<Long, String> domainNames) {
+    InventoryDetailModel model = new InventoryDetailModel();
+    model.mId = invntry.getMaterialId();
+    model.eId = invntry.getKioskId();
+    IMaterial material;
+    MediaModels m;
+    model.imgPath = null;
+    try {
+      material = mCatalogService.getMaterial(model.mId);
+      model.mnm = material.getName();
+      model.mat_tgs = material.getTags();
+      model.description = material.getDescription();
+      IMediaEndPoint endPoint = JDOUtils.createInstance(IMediaEndPoint.class);
+      MediaBuilder mediaBuilder = new MediaBuilder();
+
+      List<IMedia> mediaList = endPoint.getMedias(String.valueOf(model.mId));
+      m = new MediaModels(mediaBuilder.constructMediaModelList(mediaList));
+      if (!m.items.isEmpty()) {
+        model.imgPath = new ArrayList<>(m.items.size());
+      }
+      for (int i = 0; i < m.items.size(); i++) {
+        model.imgPath.add(m.items.get(i).servingUrl);
+      }
+    } catch (Exception e) {
+      // CONTINUE: could not find item material
+      xLogger.warn("Issue with single inventory detail ", e);
+      return null;
+    }
+    if (kiosk == null) {
+      try {
+        kiosk = accountsService.getKiosk(model.eId);
+        model.enm = kiosk != null ? kiosk.getName() : invntry.getKioskName();
+      } catch (ServiceException e) {
+        xLogger.warn("Kiosk associated with material in inventory not found", e);
+        return null;
+      }
+    }
+    model.currentStock = new CurrentStock();
+    model.currentStock.count = invntry.getStock();
+    model.currentStock.date = new Date().getTime();
+    model.min = invntry.getNormalizedSafetyStock();
+    model.max = invntry.getMaxStock();
+    model.it = invntry.getInTransitStock();
+    model.as = invntry.getAllocatedStock();
+    model.ls = invntry.getPredictedDaysOfStock();
+    model.sad = ims.getStockAvailabilityPeriod(invntry, domainConfig);
+
+    IInvntryEvntLog lastEventLog = invDao.getInvntryEvntLog(invntry);
+
+    if (lastEventLog != null) {
+      model.se = lastEventLog.getType();
+      if (invntry.getStockEvent() != -1) {
+        model.ed = new Date().getTime() - lastEventLog.getStartDate().getTime();
+      }
+      model.se = invntry.getStockEvent();
+    }
+    model.se = invntry.getStockEvent();
+    return model;
+  }
+
+  public InventoryDetail buildMInventoryModel(IInvntry invntry,
+                                              DomainConfig domainConfig,
+                                              EntitiesService accountsService,
+                                              MaterialCatalogService mCatalogService,
+                                              UsersService usersService,
+                                              InventoryManagementService ims, IKiosk kiosk,
+                                              int itemCount,
+                                              Map<Long, String> domainNames,
+                                              SecureUserDetails sUser) {
+    InventoryDetail model = new InventoryDetail();
+    model.mId = invntry.getMaterialId();
+    model.eId = invntry.getKioskId();
+    IMaterial material;
+    try {
+      material = mCatalogService.getMaterial(model.mId);
+      model.mnm = material.getName();
+    } catch (Exception e) {
+      // CONTINUE: could not find item material
+      return null;
+    }
+    if (kiosk == null) {
+      try {
+        kiosk = accountsService.getKiosk(model.eId);
+      } catch (ServiceException e) {
+        xLogger.warn("Kiosk associated with material in inventory not found", e);
+        return null;
+      }
+    }
+    model.enm = kiosk != null ? kiosk.getName() : invntry.getKioskName();
+    model.tc = invntry.getStock();
+    model.a = invntry.getAllocatedStock();
+    model.av = invntry.getAvailableStock();
+    model.it = invntry.getInTransitStock();
+    model.min = invntry.getNormalizedSafetyStock();
+    model.max = invntry.getMaxStock();
+    model.lu = LocalDateUtil.format(invntry.getTimestamp(), sUser.getLocale(), sUser.getTimezone());
+
+    IInvntryEvntLog lastEventLog = invDao.getInvntryEvntLog(invntry);
+
+    if (lastEventLog != null) {
+      model.se = lastEventLog.getType();
+      if (invntry.getStockEvent() != -1) {
+        model.ed = new Date().getTime() - lastEventLog.getStartDate().getTime();
+      }
+      model.se = invntry.getStockEvent();
+    }
+    model.se = invntry.getStockEvent();
+
+    return model;
   }
 
   public InventoryModel buildInventoryModel(IInvntry invntry,
@@ -170,7 +319,7 @@ public class InventoryBuilder {
           domain = ds.getDomain(invntry.getDomainId());
 
         } catch (Exception e) {
-          xLogger.warn("Error while fetching Domain {0}", material.getDomainId());
+          xLogger.warn("Error while fetching Domain {0}", invntry.getDomainId(), e);
         }
         if (domain != null) {
           domainName = domain.getName();
@@ -300,7 +449,7 @@ public class InventoryBuilder {
         model.huName = hu.get(IHandlingUnit.NAME);
       }
     } catch (Exception e) {
-      xLogger.warn("Error while fetching Handling Unit {0}", material.getMaterialId(), e);
+      xLogger.warn("Error while fetching Handling Unit {0}", invntry.getMaterialId(), e);
     }
     model.minDur = invntry.getMinDuration();
     model.maxDur = invntry.getMaxDuration();

@@ -27,12 +27,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import com.logistimo.api.builders.AssetBuilder;
+import com.logistimo.api.models.AssetBaseModel;
 import com.logistimo.api.models.AssetDetailsModel;
 import com.logistimo.api.models.TemperatureDomainModel;
 import com.logistimo.api.util.SearchUtil;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.entity.IAssetRelation;
+import com.logistimo.assets.models.AssetDataModel;
 import com.logistimo.assets.models.AssetModel;
 import com.logistimo.assets.models.AssetModels;
 import com.logistimo.assets.models.AssetRelationModel;
@@ -46,6 +48,7 @@ import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.models.AssetConfig;
 import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
@@ -58,10 +61,8 @@ import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
-import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -126,7 +127,6 @@ public class AssetController {
         asset = assetBuilder.buildAsset(asset, assetModel, sUser.getUsername(), false);
         ams.updateAsset(domainId, asset, assetModel);
       }
-
 
       AssetSystemConfig asc = AssetSystemConfig.getInstance();
       String
@@ -225,7 +225,7 @@ public class AssetController {
       AssetModel
           assetModel =
           new Gson()
-              .fromJson(AssetUtil.getAssetDetails(assetDetailsModel.vId, assetDetailsModel.dId),
+              .fromJson(AssetUtil.getAssetDetails(assetDetailsModel.getvId(), assetDetailsModel.getdId()),
                   AssetModel.class);
       assetDetailsModel.meta = assetModel.meta;
 
@@ -474,8 +474,9 @@ public class AssetController {
   public
   @ResponseBody
   void updateAssetConfig(@RequestBody AssetModels.AssetConfigModel assetConfigModel,
-                         @RequestParam(defaultValue = "false") Boolean pushConfig, HttpServletRequest request)
-      throws ServiceException {
+                         @RequestParam(defaultValue = "false") Boolean pushConfig,
+                         HttpServletRequest request)
+      throws ServiceException, ConfigurationException {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     if (assetConfigModel != null) {
       AssetUtil.registerConfig(new Gson().toJson(assetConfigModel));
@@ -487,21 +488,15 @@ public class AssetController {
             assetConfigModel.dId
         );
         deviceConfigPushPullModel.stub = sUser.getUsername();
-        List<String> manufacturers = StringUtil.getList(ConfigUtil.get("assets.manufacturers.noconfigpull"));
-        if (manufacturers != null) {
-          for (String manc : manufacturers) {
-            if (!manc.equalsIgnoreCase(deviceConfigPushPullModel.vId)
-                && assetConfigModel.configuration.getComm().getChnl()
-                == IAsset.COMM_CHANNEL_INTERNET) {
-              deviceConfigPushPullModel.typ = IAsset.COMM_CHANNEL_SMS;
-            }
-          }
+        AssetManagementService ams = Services.getService(AssetManagementServiceImpl.class);
+        IAsset asset = ams.getAsset(assetConfigModel.vId, assetConfigModel.dId);
+        if (AssetSystemConfig.getInstance().isConfigPullEnabled(asset.getType(),
+            asset.getVendorId(), asset.getModel())
+            && assetConfigModel.configuration.getComm().getChnl()
+            == IAsset.COMM_CHANNEL_INTERNET) {
+          deviceConfigPushPullModel.typ = IAsset.COMM_CHANNEL_SMS;
         }
-        try {
-          AssetUtil.pushDeviceConfig(new Gson().toJson(deviceConfigPushPullModel));
-        } catch (ServiceException e) {
-          throw new InvalidServiceException(e.getMessage());
-        }
+        AssetUtil.pushDeviceConfig(new Gson().toJson(deviceConfigPushPullModel));
       }
     }
   }
@@ -673,7 +668,7 @@ public class AssetController {
   @ResponseBody
   List<String> getModelSuggestions(@RequestParam(required = false) String query,
                                    HttpServletRequest request) throws ServiceException {
-    try{
+    try {
       SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
       Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
       AssetManagementService as = Services.getService(AssetManagementServiceImpl.class);
@@ -682,5 +677,13 @@ public class AssetController {
       xLogger.warn("Error while getting model suggestions", e);
     }
     return null;
+  }
+
+  @RequestMapping(value="/get-by-ids", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  List<AssetBaseModel> getAssets(@RequestBody AssetDataModel tempData)
+      throws ServiceException {
+      return assetBuilder.buildAssets(tempData);
   }
 }

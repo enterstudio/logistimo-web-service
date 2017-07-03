@@ -370,7 +370,7 @@ public class OrdersController {
             .isStatus(IOrder.FULFILLED)) {
           shipmentId =
               oms.shipNow(o, status.t, status.tid, status.cdrsn, efd, user.getUsername(),
-                  status.ps);
+                  status.ps,SourceConstants.WEB);
         } else if (o.isStatus(IOrder.COMPLETED)) {
           if (shipments == null || shipments.size() > 1) {
             xLogger.warn("Invalid order {0} ({1}) cannot fulfill, already has more shipments or " +
@@ -385,7 +385,7 @@ public class OrdersController {
 
         if (IOrder.FULFILLED.equals(status.st)) {
           if (shipmentId != null) {
-            shipmentService.fulfillShipment(shipmentId, user.getUsername());
+            shipmentService.fulfillShipment(shipmentId, user.getUsername(),SourceConstants.WEB);
           } else {
             xLogger.warn("Invalid order {0} status ({1}) cannot fulfill ", orderId, o.getStatus());
             throw new BadRequestException(backendMessages.getString("error.unabletofulfilorder"));

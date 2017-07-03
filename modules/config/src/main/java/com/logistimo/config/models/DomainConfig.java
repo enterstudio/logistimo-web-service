@@ -33,16 +33,16 @@ import com.logistimo.AppFactory;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
-import com.logistimo.services.cache.MemcacheService;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.logistimo.constants.Constants;
+import com.logistimo.logger.XLog;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.Constants;
+import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -122,6 +122,9 @@ public class DomainConfig implements Serializable {
   public static final String UIPREFERENCE = "uipref";
   public static final String ONLYNEWUI = "onlynewui";
   public static final String SUPPORT_BY_ROLE = "supbyrole";
+  public static final String ADMIN_CONTACT = "admincontact";
+  public static final String PRIMARY = "primary";
+  public static final String SECONDARY = "secondary";
   public static final String ENABLE_SWITCH_TO_NEW_HOST = "enswtonewhost";
   public static final String NEW_HOST_NAME = "newhostname";
   public static final String ENTITY_TAGS_ORDER = "eto";
@@ -146,6 +149,10 @@ public class DomainConfig implements Serializable {
   // Local login required
   public static final String LOCAL_LOGIN_REQUIRED = "llr";
   public static final String DISABLE_ORDERS_PRICING = "dop";
+  //loc ids
+  public static final String COUNTRY_ID = "cntid";
+  public static final String STATE_ID = "stateid";
+  public static final String DISTRICT_ID = "districtid";
   private static final long serialVersionUID = 4047681117629775550L;
   // Logger
   private static final XLog xLogger = XLog.getLog(DomainConfig.class);
@@ -156,6 +163,9 @@ public class DomainConfig implements Serializable {
   private String country = null;
   private String state = null;
   private String district = null;
+  private String countryId = null;
+  private String stateId = null;
+  private String districtId = null;
   private String language = Constants.LANG_DEFAULT;
   private String timezone = null;
   private String currency = null;
@@ -246,6 +256,8 @@ public class DomainConfig implements Serializable {
   private boolean onlyNewUI = false;
   // Role specific Support configuration
   private Map<String, SupportConfig> supportConfigMap = null;
+  //Admin contact configuration
+  private Map<String, AdminContactConfig> adminContactConfigMap = null;
   // Disable shipping on mobile
   private boolean enableShippingOnMobile = false;
   // Enable switching to new host
@@ -280,6 +292,7 @@ public class DomainConfig implements Serializable {
     assetConfig = new AssetConfig();
     dashboardConfig = new DashboardConfig();
     supportConfigMap = new HashMap<String, SupportConfig>();
+    adminContactConfigMap = new HashMap<>();
     syncConfig = new SyncConfig();
   }
 
@@ -336,12 +349,31 @@ public class DomainConfig implements Serializable {
       } catch (JSONException e) {
         // do nothing
       }
-      // Get the state
+      // Get the district
       try {
         this.district = (String) json.get(DISTRICT);
       } catch (JSONException e) {
         // do nothing
       }
+      // Get the country id
+      try {
+        this.countryId = (String) json.get(COUNTRY_ID);
+      } catch (JSONException e) {
+        // do nothing
+      }
+      // Get the state id
+      try {
+        this.stateId = (String) json.get(STATE_ID);
+      } catch (JSONException e) {
+        // do nothing
+      }
+      // Get the district id
+      try {
+        this.districtId = (String) json.get(DISTRICT_ID);
+      } catch (JSONException e) {
+        // do nothing
+      }
+
       // Get the language
       try {
         this.language = (String) json.get(LANGUAGE);
@@ -648,6 +680,13 @@ public class DomainConfig implements Serializable {
       } catch (JSONException e) {
         this.supportConfigMap = new HashMap<String, SupportConfig>();
       }
+      //administrative contacts
+      try {
+        this.adminContactConfigMap =
+            AdminContactConfig.getAdminContactMap(json.getJSONObject(ADMIN_CONTACT));
+      } catch (JSONException e) {
+        this.adminContactConfigMap = new HashMap<String, AdminContactConfig>();
+      }
 
       try {
         this.enableShippingOnMobile = json.getBoolean(CapabilityConfig.ENABLE_SHIPPING_ON_MOBILE);
@@ -781,6 +820,16 @@ public class DomainConfig implements Serializable {
       }
       if (district != null) {
         json.put(DISTRICT, district);
+      }
+      //loc ids
+      if (countryId != null) {
+        json.put(COUNTRY_ID, countryId);
+      }
+      if (stateId != null) {
+        json.put(STATE_ID, stateId);
+      }
+      if (districtId != null) {
+        json.put(DISTRICT_ID, districtId);
       }
       if (language != null) {
         json.put(LANGUAGE, language);
@@ -920,6 +969,9 @@ public class DomainConfig implements Serializable {
       if (supportConfigMap != null && !supportConfigMap.isEmpty()) {
         json.put(SUPPORT_BY_ROLE, SupportConfig.getSupportJSON(supportConfigMap));
       }
+      if (adminContactConfigMap != null && !adminContactConfigMap.isEmpty()) {
+        json.put(ADMIN_CONTACT, AdminContactConfig.getAdminContactJSON(adminContactConfigMap));
+      }
 
       json.put(CapabilityConfig.ENABLE_SHIPPING_ON_MOBILE, enableShippingOnMobile);
 
@@ -972,16 +1024,16 @@ public class DomainConfig implements Serializable {
     return capabilities;
   }
 
-  public void setCapabilities(List<String> capabilities) {
-    this.capabilities = capabilities;
-  }
-
   public void setCapabilities(String[] capabilitiesArray) {
     if (capabilitiesArray == null || capabilitiesArray.length == 0) {
       this.capabilities = null;
     } else {
       this.capabilities = Arrays.asList(capabilitiesArray);
     }
+  }
+
+  public void setCapabilities(List<String> capabilities) {
+    this.capabilities = capabilities;
   }
 
   public boolean isCapabilityDisabled(String capability) {
@@ -1010,16 +1062,16 @@ public class DomainConfig implements Serializable {
     return transMenu;
   }
 
-  public void setTransactionMenus(List<String> transMenu) {
-    this.transMenu = transMenu;
-  }
-
   public void setTransactionMenus(String[] transMenuArray) {
     if (transMenuArray == null || transMenuArray.length == 0) {
       this.transMenu = null;
     } else {
       this.transMenu = Arrays.asList(transMenuArray);
     }
+  }
+
+  public void setTransactionMenus(List<String> transMenu) {
+    this.transMenu = transMenu;
   }
 
   public String getTransactionMenusString() {
@@ -1576,6 +1628,22 @@ public class DomainConfig implements Serializable {
     supportConfigMap.put(role, sc);
   }
 
+  public void setAdminContactByType(String ty, AdminContactConfig ac) {
+    if (adminContactConfigMap == null) {
+      adminContactConfigMap = new HashMap<>();
+    }
+    adminContactConfigMap.put(ty, ac);
+  }
+
+  public Map<String, AdminContactConfig> getAdminContactConfigMap() {
+    return adminContactConfigMap;
+  }
+
+  public void setAdminContactConfigMap(
+      Map<String, AdminContactConfig> adminContactConfigMap) {
+    this.adminContactConfigMap = adminContactConfigMap;
+  }
+
   public boolean isEnableShippingOnMobile() {
     return enableShippingOnMobile;
   }
@@ -1638,5 +1706,29 @@ public class DomainConfig implements Serializable {
 
   public void setDisableOrdersPricing(boolean disableOrdersPricing) {
     this.disableOrdersPricing = disableOrdersPricing;
+  }
+
+  public String getCountryId() {
+    return countryId;
+  }
+
+  public void setCountryId(String countryId) {
+    this.countryId = countryId;
+  }
+
+  public String getStateId() {
+    return stateId;
+  }
+
+  public void setStateId(String stateId) {
+    this.stateId = stateId;
+  }
+
+  public String getDistrictId() {
+    return districtId;
+  }
+
+  public void setDistrictId(String districtId) {
+    this.districtId = districtId;
   }
 }

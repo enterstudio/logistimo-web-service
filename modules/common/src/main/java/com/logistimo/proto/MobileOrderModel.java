@@ -204,4 +204,13 @@ public class MobileOrderModel {
    * Order updated time in milliseconds
    */
   public String tm;
+
+  //Order approval details
+  public MobileApprovalResponse apprvl;
+
+  //Order type
+  public String oty;
+
+  //Order status update time
+  public Long ostt;
 }

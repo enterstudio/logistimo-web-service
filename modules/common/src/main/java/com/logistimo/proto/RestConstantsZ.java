@@ -75,10 +75,10 @@ public class RestConstantsZ {
   public static final String USER_AGENT = "User-Agent";
   public static final String IP_ADDRESS = "X-REAL-IP";
   public static final String PREVIOUS_UPDATED_TIME="put";
-  public static final String MINIMUM_RESPONSE="mrsp";
-  public static final String TRANSFERS="transfers";
-  public static final String OFFSET="o";
-  public static final String MINIMUM_RESP_VALUE="1";
+  public static final String MINIMUM_RESPONSE = "mrsp";
+  public static final String TRANSFERS = "transfers";
+  public static final String OFFSET = "o";
+  public static final String MINIMUM_RESP_VALUE = "1";
 
 
   // Action values
@@ -152,6 +152,10 @@ public class RestConstantsZ {
   public static final String TYPE_EMAIL = "e";
   public static final String TYPE_SMS = "s";
   public static final String TYPE_EMAILANDSMS = "es";
+  //Response fields
+  public static final String MINI_RESP_ORDER_KEY = "os";
+  public static final int ORDERS_SUC_STATUS_CODE = 0;
+  public static final int ORDERS_FAIL_STATUS_CODE = 1;
 
   // Status display
   public static String getStatusDisplay(String statusCode) {
@@ -171,11 +175,5 @@ public class RestConstantsZ {
       return "unkown";
     }
   }
-
-  //Response fields
-  public static final String MINI_RESP_ORDER_KEY="os";
-
-  public static final int ORDERS_SUC_STATUS_CODE=0;
-  public static final int ORDERS_FAIL_STATUS_CODE=1;
 
 }

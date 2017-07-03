@@ -23,26 +23,29 @@
 
 package com.logistimo.conversations.service.impl;
 
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.conversations.dao.IMessageDao;
 import com.logistimo.conversations.dao.impl.MessageDao;
 import com.logistimo.conversations.entity.IConversation;
 import com.logistimo.conversations.entity.IConversationTag;
 import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.conversations.service.ConversationService;
-import com.logistimo.conversations.dao.IMessageDao;
 import com.logistimo.dao.JDOUtils;
-
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.logger.XLog;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -54,8 +57,8 @@ import javax.jdo.Transaction;
 public class ConversationServiceImpl extends ServiceImpl implements ConversationService {
 
   private static final XLog xLogger = XLog.getLog(ConversationServiceImpl.class);
-  private IMessageDao messageDao = new MessageDao();
   public static String ObjectTypeShipment = "SHIPMENT";
+  private IMessageDao messageDao = new MessageDao();
 
   @Override
   public void init(Services services) throws ServiceException {
@@ -221,7 +224,8 @@ public class ConversationServiceImpl extends ServiceImpl implements Conversation
       conversationId = messageDao.getConversationId(objectType, objectId, localPm);
       if (conversationId == null) {
         conversationId =
-            addEditConversation(objectType, objectId, tags, domainId, cdate, localPm).getId();
+            addEditConversation(objectType, objectId, tags, domainId, cdate, localPm,
+                updatingUserId).getId();
       }
       if (conversationId != null) {
         iMessage = JDOUtils.createInstance(IMessage.class);
@@ -267,6 +271,13 @@ public class ConversationServiceImpl extends ServiceImpl implements Conversation
   private IConversation addEditConversation(String objectType, String objectId, Set<String> tags,
                                             Long domainId, Date date,
                                             PersistenceManager pm) throws ServiceException {
+    return addEditConversation(objectType, objectId, tags, domainId, date, pm, null);
+  }
+
+  private IConversation addEditConversation(String objectType, String objectId, Set<String> tags,
+                                            Long domainId, Date date,
+                                            PersistenceManager pm, String userId)
+      throws ServiceException {
     Date cdate = date;
     if (date == null) {
       date = new Date();
@@ -277,6 +288,7 @@ public class ConversationServiceImpl extends ServiceImpl implements Conversation
     conversation.setDomainId(domainId);
     conversation.setTags(tags);
     conversation.setCreateDate(date);
+    conversation.setUserId(userId);
     return addEditConversation(conversation, true, pm);
   }
 }

@@ -24,6 +24,7 @@
 package com.logistimo.entities.entity;
 
 import com.logistimo.config.models.Permissions;
+import com.logistimo.entity.ILocationConfig;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.users.entity.IUserAccount;
 
@@ -38,7 +39,7 @@ import java.util.Map;
 /**
  * Created by charan on 20/05/15.
  */
-public interface IKiosk extends ISuperDomain {
+public interface IKiosk extends ISuperDomain, ILocationConfig {
   // Kiosk types
   String TYPE_RETAIL = "r";
   String TYPE_DISTRIBUTOR = "d";
@@ -128,9 +129,9 @@ public interface IKiosk extends ISuperDomain {
 
   String getOrderingMode();
 
-  void setOrderingMode(Date timeStamp);
-
   void setOrderingMode(String orderingMode);
+
+  void setOrderingMode(Date timeStamp);
 
   Date getTimeStamp();
 
