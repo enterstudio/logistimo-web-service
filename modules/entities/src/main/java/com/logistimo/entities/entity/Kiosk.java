@@ -39,7 +39,10 @@ import com.logistimo.tags.entity.Tag;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.utils.BigUtil;
+import com.logistimo.constants.Constants;
 import com.logistimo.utils.NumberUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -272,11 +275,11 @@ public class Kiosk implements IKiosk {
     }
     // Add operator data, if any
     if (includeOperators && users != null && !users.isEmpty()) {
-      Vector<Hashtable<String, String>> usersVector = new Vector<Hashtable<String, String>>();
+      Vector<Hashtable<String, String>> usersVector = new Vector<>();
       Iterator<UserAccount> it = users.iterator();
       while (it.hasNext()) {
         IUserAccount u = it.next();
-        Hashtable<String, String> uht = new Hashtable<String, String>();
+        Hashtable<String, String> uht = new Hashtable<>();
         uht.put(JsonTagsZ.USER_ID, u.getUserId());
         uht.put(JsonTagsZ.FIRST_NAME, u.getFirstName());
         String lastName = u.getLastName();
@@ -284,6 +287,9 @@ public class Kiosk implements IKiosk {
           uht.put(JsonTagsZ.LAST_NAME, lastName);
         }
         uht.put(JsonTagsZ.MOBILE, u.getMobilePhoneNumber());
+        if (StringUtils.isNotEmpty(u.getLandPhoneNumber())) {
+          uht.put(JsonTagsZ.LANDLINE, u.getLandPhoneNumber());
+        }
         uht.put(JsonTagsZ.ROLE, u.getRole());
         String state = u.getState();
         if (state != null && !state.isEmpty()) {
@@ -312,7 +318,6 @@ public class Kiosk implements IKiosk {
       if (!usersVector.isEmpty()) {
         kioskMap.put(JsonTagsZ.USERS, usersVector);
       }
-
     }
     return kioskMap;
   }

@@ -158,7 +158,7 @@ public class RESTUtil {
   private static final String INVENTORY = "inventory";
   private static final String ORDERS = "orders";
 
-  private static final int MAX_NUMBER_OF_DEVICES = 10;
+  private static final String MINIMUM_RESPONSE_CODE_TWO = "2";
 
   private static ITaskService taskService = AppFactory.get().getTaskService();
   private static ITransDao transDao = new TransDao();
@@ -932,28 +932,26 @@ public class RESTUtil {
           results =
           as.getKiosksForUser(user, null, kioskPageParams);
       kiosks = results.getResults();
-
-      //cursor = results.getCursor();
+      boolean isSingleKiosk = kiosks.size() == 1;
       // Get the kiosk maps
       kiosksData = new Vector();
       if (kiosks != null && !kiosks.isEmpty()) {
-        boolean getUsersForKiosk = ("2".equals(minResponseCode));
+        boolean getUsersForKiosk = (MINIMUM_RESPONSE_CODE_TWO.equals(minResponseCode));
         boolean
             getMaterials =
-            ((kiosks.size() == 1) || minResponseCode == null || minResponseCode.isEmpty());
+            (isSingleKiosk || StringUtils.isEmpty(minResponseCode));
         boolean
             getLinkedKiosks =
-            ((kiosks.size() == 1) || !"2".equals(minResponseCode)); // not minResponseCode of 2
+            (isSingleKiosk || !getUsersForKiosk);
         Iterator<IKiosk> it = kiosks.iterator();
         while (it.hasNext()) {
           IKiosk k = it.next(); // NOTE: kiosk will have NOT its users set
-          if (getUsersForKiosk) // set users if minResponseCode is 2 (local editing of kiosks/users is now possible)
-          {
+          // set users if minResponseCode is 2 (local editing of kiosks/users is now possible)
+          if (getUsersForKiosk) {
             k.setUsers(as.getUsersForKiosk(k.getKioskId(), null).getResults());
           }
           // Get user locale
-          Locale locale = user.getLocale(); // new Locale( user.getLanguage(), user.getCountry()  );
-          localeStr = locale.toString(); // replace with user's specific locale
+          Locale locale = user.getLocale();
           // Get kiosk data
           Hashtable<String, Object>
               kioskData =
@@ -1045,7 +1043,7 @@ public class RESTUtil {
             .getInventoryData(k.getDomainId(), k.getKioskId(), locale, timezone, currency, false,
                 dc, forceIntegerForStock, null, null).getResults());
       }
-      if (getLinkedKiosks) { /// !("2".equals( minResponseCode )) ) { // "2" implies do NOT get related kiosks info.
+      if (getLinkedKiosks) {
         CapabilityConfig cconf = dc.getCapabilityByRole(role);
         boolean sendVendors = dc.sendVendors();
         boolean sendCustomers = dc.sendCustomers();
