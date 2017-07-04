@@ -177,23 +177,23 @@ public class AssetStatusReportService extends ReportServiceUtil implements IRepo
       }
     } else {
       values.add(addData(
-          getHours(report.getAssetStatusWorkingDuration()) / assetCount,
-          getHours(report.getAssetStatusWorkingDuration()), assetCount));
+          getDays(report.getAssetStatusWorkingDuration()) / assetCount,
+          getDays(report.getAssetStatusWorkingDuration()), assetCount));
       values.add(addData(
-          getHours(report.getAssetStatusUnderRepairDuration()) / assetCount,
-          getHours(report.getAssetStatusUnderRepairDuration()), assetCount));
+          getDays(report.getAssetStatusUnderRepairDuration()) / assetCount,
+          getDays(report.getAssetStatusUnderRepairDuration()), assetCount));
       values.add(addData(
-          getHours(report.getAssetStatusBeyondRepairDuration()) / assetCount,
-          getHours(report.getAssetStatusBeyondRepairDuration()), assetCount));
+          getDays(report.getAssetStatusBeyondRepairDuration()) / assetCount,
+          getDays(report.getAssetStatusBeyondRepairDuration()), assetCount));
       values.add(addData(
-          getHours(report.getAssetStatusCondemnedDuration()) / assetCount,
-          getHours(report.getAssetStatusCondemnedDuration()), assetCount));
+          getDays(report.getAssetStatusCondemnedDuration()) / assetCount,
+          getDays(report.getAssetStatusCondemnedDuration()), assetCount));
       values.add(addData(
-          getHours(report.getAssetStatusStandbyDuration()) / assetCount,
-          getHours(report.getAssetStatusStandbyDuration()), assetCount));
+          getDays(report.getAssetStatusStandbyDuration()) / assetCount,
+          getDays(report.getAssetStatusStandbyDuration()), assetCount));
       values.add(addData(
-          getHours(report.getAssetStatusDefrostDuration()) / assetCount,
-          getHours(report.getAssetStatusDefrostDuration()), assetCount));
+          getDays(report.getAssetStatusDefrostDuration()) / assetCount,
+          getDays(report.getAssetStatusDefrostDuration()), assetCount));
     }
 
     if (assetCount == 0) {

@@ -282,7 +282,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
 
-    public Results getInventoryByKiosk(Long kioskId, PageParams pageParams) throws ServiceException {
+  public Results getInventoryByKiosk(Long kioskId, PageParams pageParams) throws ServiceException {
     return getInventoryByKiosk(kioskId, null, pageParams);
   }
 
@@ -306,7 +306,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     try {
       results =
           invntryDao.getInventory(kioskId, null, null, materialTag, null, params, pm, null,
-              nameStartsWith,IInvntry.ALL,false,null, null);
+              nameStartsWith, IInvntry.ALL, false, null, null);
     } finally {
       pm.close();
     }
@@ -342,7 +342,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
   @SuppressWarnings("unchecked")
   public Results getInventoryByBatchId(Long materialId, String batchId, PageParams pageParams,
-                                       Long domainId, LocationSuggestionModel location) throws ServiceException {
+                                       Long domainId, LocationSuggestionModel location)
+      throws ServiceException {
     xLogger.fine("Entered getInventoryByBatch");
     if (materialId == null || batchId == null || batchId.isEmpty()) {
       throw new IllegalArgumentException(
@@ -353,34 +354,36 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     StringBuilder locSubQuery = new StringBuilder();
     String kioskVariableDeclaration = CharacterConstants.EMPTY;
     StringBuilder locationParamDeclaration = new StringBuilder();
-      if (location != null && location.isNotEmpty()) {
-          kioskVariableDeclaration = " VARIABLES " + JDOUtils.getImplClass(IKiosk.class).getName() + " kiosk";
-          locSubQuery.append(" && kId == kiosk.kioskId");
-          if (StringUtils.isNotEmpty(location.state)) {
-              locSubQuery.append(" && kiosk.state == stateParam");
-              params.put("stateParam", location.state);
-              locationParamDeclaration.append(", String stateParam");
-          }
-          if (StringUtils.isNotEmpty(location.district)) {
-              locSubQuery.append(" && kiosk.district == districtParam");
-              params.put("districtParam", location.district);
-              locationParamDeclaration.append(", String districtParam");
-          }
-          if (StringUtils.isNotEmpty(location.taluk)) {
-              locSubQuery.append(" && kiosk.taluk == talukParam");
-              params.put("talukParam", location.taluk);
-              locationParamDeclaration.append(", String talukParam");
-          }
+    if (location != null && location.isNotEmpty()) {
+      kioskVariableDeclaration =
+          " VARIABLES " + JDOUtils.getImplClass(IKiosk.class).getName() + " kiosk";
+      locSubQuery.append(" && kId == kiosk.kioskId");
+      if (StringUtils.isNotEmpty(location.state)) {
+        locSubQuery.append(" && kiosk.state == stateParam");
+        params.put("stateParam", location.state);
+        locationParamDeclaration.append(", String stateParam");
       }
-      String queryStr =
-              "SELECT FROM "
-                      + JDOUtils.getImplClass(IInvntryBatch.class).getName()
-                      + " WHERE dId.contains(dIdParam) && mId == mIdParam && bid == bidParam && vld == vldParam && bexp >= bexpParam"
-                      + locSubQuery.toString();
-      String declaration =
-              " PARAMETERS Long dIdParam, Long mIdParam, String bidParam, Boolean vldParam, Date bexpParam"
-                      + locationParamDeclaration.toString()
-                      + " import java.util.Date;";
+      if (StringUtils.isNotEmpty(location.district)) {
+        locSubQuery.append(" && kiosk.district == districtParam");
+        params.put("districtParam", location.district);
+        locationParamDeclaration.append(", String districtParam");
+      }
+      if (StringUtils.isNotEmpty(location.taluk)) {
+        locSubQuery.append(" && kiosk.taluk == talukParam");
+        params.put("talukParam", location.taluk);
+        locationParamDeclaration.append(", String talukParam");
+      }
+    }
+    String queryStr =
+        "SELECT FROM "
+            + JDOUtils.getImplClass(IInvntryBatch.class).getName()
+            + " WHERE dId.contains(dIdParam) && mId == mIdParam && bid == bidParam && vld == vldParam && bexp >= bexpParam"
+            + locSubQuery.toString();
+    String
+        declaration =
+        " PARAMETERS Long dIdParam, Long mIdParam, String bidParam, Boolean vldParam, Date bexpParam"
+            + locationParamDeclaration.toString()
+            + " import java.util.Date;";
     String ordering = " ORDER BY bexp ASC";
     params.put("mIdParam", materialId);
     params.put("bidParam", batchId);
@@ -419,7 +422,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   // Get inv. batches that are expiring within a specified time
   @SuppressWarnings("unchecked")
   public Results getInventoryByBatchExpiry(Long domainId, Long materialId, Date start, Date end,
-                                           String kioskTag, String materialTag, LocationSuggestionModel location,
+                                           String kioskTag, String materialTag,
+                                           LocationSuggestionModel location,
                                            PageParams pageParams) throws ServiceException {
     xLogger.fine("Entered getInventoryByBatchExpiry");
     if (domainId == null && materialId == null) {
@@ -493,7 +497,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       params.put("mtgsParam", tagDao.getTagFilter(materialTag, ITag.MATERIAL_TAG));
     }
     declaration += locationParamDeclaration.toString();
-    queryStr += locSubQuery.toString()+kioskVariableDeclaration + " PARAMETERS " + declaration + ordering;
+    queryStr +=
+        locSubQuery.toString() + kioskVariableDeclaration + " PARAMETERS " + declaration + ordering;
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query q = pm.newQuery(queryStr);
     if (pageParams != null) {
@@ -1442,7 +1447,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
           if (!trans.useCustomTimestamp()) {
             trans.setTimestamp(timestamp);
-            if (trans.getEntryTime() != null && trans.getEntryTime().getTime() > timestamp.getTime()) {
+            if (trans.getEntryTime() != null && trans.getEntryTime().getTime() > timestamp
+                .getTime()) {
               trans.setEntryTime(timestamp);
             }
           }
@@ -1630,14 +1636,18 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
   public ITransaction updateInventoryTransaction(Long domainId, ITransaction inventoryTransaction,
-                                                 boolean skipPred, boolean skipVal, PersistenceManager pm) throws ServiceException, DuplicationException {
+                                                 boolean skipPred, boolean skipVal,
+                                                 PersistenceManager pm)
+      throws ServiceException, DuplicationException {
     if (inventoryTransaction == null) {
       throw new ServiceException("Invalid parameter passed");
     }
 
     List<ITransaction> list = new ArrayList<>(1);
     list.add(inventoryTransaction);
-    List<ITransaction> errorList = updateInventoryTransactions(domainId, list, skipVal, skipPred, pm);
+    List<ITransaction>
+        errorList =
+        updateInventoryTransactions(domainId, list, skipVal, skipPred, pm);
     if (errorList != null && !errorList.isEmpty()) {
       // Since the list has only one Transaction, the errorList also cannot have more than one Transaction
       return errorList.get(
@@ -1853,22 +1863,24 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                                     String materialTag, List<Long> kioskIds, PageParams pageParams,
                                     PersistenceManager pm) throws ServiceException {
     return invntryDao.getInventory(kioskId, materialId, kioskTag, materialTag, kioskIds, pageParams,
-        pm, null, null,IInvntry.ALL,false,null, null);
+        pm, null, null, IInvntry.ALL, false, null, null);
   }
 
-  public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location, String kioskTags, String materialTag, String pdos, PageParams params)
-          throws ServiceException {
+  public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location,
+                                      String kioskTags, String materialTag, String pdos,
+                                      PageParams params)
+      throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
-        return invntryDao.getInventory(null, null, kioskTags, materialTag, null, params, pm, domainId,
-                        null,IInvntry.ALL,false,location, pdos);
+      return invntryDao.getInventory(null, null, kioskTags, materialTag, null, params, pm, domainId,
+          null, IInvntry.ALL, false, location, pdos);
     } finally {
-        pm.close();
+      pm.close();
     }
   }
 
 
-    // Check the quantitative errors in a given transaction; return an error message, or null if no errors
+  // Check the quantitative errors in a given transaction; return an error message, or null if no errors
   private void checkTransactionErrors(BigDecimal stockOnHand, ITransaction trans)
       throws LogiException {
     BigDecimal quantity = trans.getQuantity();
@@ -1889,7 +1901,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       }
       // Check of linked kiosk, if transfer
       if (ITransaction.TYPE_TRANSFER.equals(transType) && trans.getLinkedKioskId() == null) {
-        throw new LogiException("M003",(Object[]) null);
+        throw new LogiException("M003", (Object[]) null);
       }
     } else if (ITransaction.TYPE_RECEIPT.equals(transType) || ITransaction.TYPE_ORDER
         .equals(transType) || ITransaction.TYPE_RETURN.equals(transType)) {
@@ -1929,7 +1941,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     IInvntryLog iLog = createInventoryLevelLog(inv, invBatch, timestamp);
     // Create/update the inventory stock event log, if required
     IInvntryEvntLog lastStockEvent = invntryDao.getLastStockEvent(inv, pm);
-    if(inv.getStockEvent() == -1) {
+    if (inv.getStockEvent() == -1) {
       updateLastStockEvent(inv, stockOnHand, lastStockEvent);
     } else {
       createNewStockEvent(inv, IInvntryEvntLog.SOURCE_STOCKUPDATE, lastStockEvent, pm);
@@ -2318,7 +2330,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
     IInvntryEvntLog lastStockEvent = invntryDao.getLastStockEvent(inv, pm);
     // Close the last open stock event, if no event
-    if(inv.getStockEvent() == -1) {
+    if (inv.getStockEvent() == -1) {
       if (updateLastStockEvent(inv, oldStock, lastStockEvent)) {
         try {
           EventPublisher.generate(domainId, IEvent.STOCK_REPLENISHED, null,
@@ -2858,7 +2870,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
     try {
       QueryParams queryParams =
-              constructAllocationQuery(kid, mid, batchId, type, typeId, tag);
+          constructAllocationQuery(kid, mid, batchId, type, typeId, tag);
       return JDOUtils.getMultiple(queryParams, pm, null);
 
     } catch (Exception e) {
@@ -3181,10 +3193,11 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         for (IInvAllocation alc : allAllocations) {
           // Check if inventory exists
           if (getInventory(alc.getKioskId(), alc.getMaterialId(), pm) != null) {
-          incrementInventoryAvailableQuantity(alc.getKioskId(), alc.getMaterialId(),
-            alc.getBatchId(), alc.getQuantity(), pm, inv, invBatch, true);
+            incrementInventoryAvailableQuantity(alc.getKioskId(), alc.getMaterialId(),
+                alc.getBatchId(), alc.getQuantity(), pm, inv, invBatch, true);
           } else {
-          xLogger.warn("Inventory does not exist for kiosk ID {0}, material ID: {1}. Cannot incrementInventoryAvailableQuantity",
+            xLogger.warn(
+                "Inventory does not exist for kiosk ID {0}, material ID: {1}. Cannot incrementInventoryAvailableQuantity",
                 alc.getKioskId(), alc.getMaterialId());
           }
         }
@@ -3315,8 +3328,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
   private QueryParams constructAllocationQuery(Long kid, Long mid, String bid,
-                                                         IInvAllocation.Type type,
-                                                         String typeId, String tag) {
+                                               IInvAllocation.Type type,
+                                               String typeId, String tag) {
     StringBuilder query = new StringBuilder("SELECT * FROM INVALLOCATION WHERE ");
     final String AND = " AND ";
     boolean firstCondition = true;
@@ -3414,9 +3427,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
   public void incrementInventoryAvailableQuantity(Long kioskId, Long materialId, String batchId,
-                                                     BigDecimal quantity,
-                                                     PersistenceManager pm, IInvntry inv,
-                                                     IInvntryBatch invBatch, boolean isClear)
+                                                  BigDecimal quantity,
+                                                  PersistenceManager pm, IInvntry inv,
+                                                  IInvntryBatch invBatch, boolean isClear)
       throws Exception {
     if (BigUtil.equalsZero(quantity)) {
       return;
@@ -3599,13 +3612,15 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
   public Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTag,
                               Long materialId, String materialTag, int matType,
-                              boolean onlyNonZeroStk, String pdos, LocationSuggestionModel location, PageParams params) throws ServiceException {
+                              boolean onlyNonZeroStk, String pdos, LocationSuggestionModel location,
+                              PageParams params) throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(kioskId, materialId, kioskTag, materialTag, kioskIds, params, pm, domainId,
-              null,matType,onlyNonZeroStk,location, pdos);
+          invntryDao.getInventory(kioskId, materialId, kioskTag, materialTag, kioskIds, params, pm,
+              domainId,
+              null, matType, onlyNonZeroStk, location, pdos);
     } finally {
       pm.close();
     }
@@ -3615,7 +3630,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
   public boolean validateEntityBatchManagementUpdate(Long kioskId) throws ServiceException {
     if (kioskId == null) {
-      throw new ServiceException("Invalid or null kioskId {0} while changing batch management on entity", kioskId);
+      throw new ServiceException(
+          "Invalid or null kioskId {0} while changing batch management on entity", kioskId);
     }
     boolean allowUpdate = false;
     PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -3627,29 +3643,34 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return allowUpdate;
   }
 
-  public Map<Long,List<ErrorDetailModel>> updateMultipleInventoryTransactions(Map<Long,List<ITransaction>> materialTransactionsMap, Long domainId, String userId) throws ServiceException {
-    if (materialTransactionsMap == null || materialTransactionsMap.isEmpty() || domainId == null || StringUtils.isEmpty(userId)) {
-      throw new ServiceException("Missing or invalid mandatory attributes while updating multiple inventory transactions");
+  public Map<Long, List<ErrorDetailModel>> updateMultipleInventoryTransactions(
+      Map<Long, List<ITransaction>> materialTransactionsMap, Long domainId, String userId)
+      throws ServiceException {
+    if (materialTransactionsMap == null || materialTransactionsMap.isEmpty() || domainId == null
+        || StringUtils.isEmpty(userId)) {
+      throw new ServiceException(
+          "Missing or invalid mandatory attributes while updating multiple inventory transactions");
     }
     PersistenceManager pm = null;
     javax.jdo.Transaction tx = null;
     Map<Long, LockUtil.LockStatus> locks = null;
-    Map<Long,List<ErrorDetailModel>> materialErrorDetailModelsMap = new HashMap<>(1);
+    Map<Long, List<ErrorDetailModel>> materialErrorDetailModelsMap = new HashMap<>(1);
     try {
       pm = PMF.get().getPersistenceManager();
       tx = pm.currentTransaction();
       tx.begin();
       // Iterate over the map and validate transactions for each material
       Set<Long> mids = materialTransactionsMap.keySet();
-      Map<Long,Integer> midCountMap = new HashMap<>();
+      Map<Long, Integer> midCountMap = new HashMap<>();
       List<ITransaction> validTransactions = null;
-      Map<Long,Integer> midFailedFromPositionMap = new HashMap<>();
+      Map<Long, Integer> midFailedFromPositionMap = new HashMap<>();
       for (Long mid : mids) {
         List<ITransaction> transactions = materialTransactionsMap.get(mid);
         // Pass it through data validation
         int invalidStartPosition = TransactionUtil.filterInvalidTransactions(transactions);
         if (invalidStartPosition != -1) {
-          updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M010", invalidStartPosition);
+          updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M010",
+              invalidStartPosition);
         }
         if (transactions.isEmpty()) {
           // No more transactions to process. Continue to the next material.
@@ -3662,11 +3683,11 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         Long materialId = transaction.getMaterialId();
         String batchId = transaction.getBatchId();
         Set<Long> kiosksToLock = getKioskIdsToLock(transactions);
-        Map<Long,LockUtil.LockStatus> kidLockStatusMap = lockKiosks(kiosksToLock);
+        Map<Long, LockUtil.LockStatus> kidLockStatusMap = lockKiosks(kiosksToLock);
         locks = new HashMap<>(kiosksToLock.size());
-        for(Map.Entry<Long,LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()){
+        for (Map.Entry<Long, LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()) {
           if (!locks.containsKey(entry.getKey())) {
-            locks.put(entry.getKey(),entry.getValue());
+            locks.put(entry.getKey(), entry.getValue());
           }
           if (!LockUtil.isLocked(entry.getValue())) {
             throw new ServiceException(backendMessages.getString("lockinventory.failed"));
@@ -3675,8 +3696,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         ITransaction lastWebTrans = getLastWebTransaction(kioskId, materialId, batchId);
         int rejectUntilPosition = mobTransHandler.applyPolicy(transactions, lastWebTrans);
         if (rejectUntilPosition != -1) {
-          updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M011", rejectUntilPosition);
-          midCountMap.put(mid,rejectUntilPosition);
+          updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M011",
+              rejectUntilPosition);
+          midCountMap.put(mid, rejectUntilPosition);
         }
         if (transactions.isEmpty()) {
           // No more transactions to process. Continue to next material.
@@ -3687,7 +3709,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         } catch (LogiException e) {
           // Reject all transactions
           transactions.clear();
-          updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap, materialErrorDetailModelsMap, transaction.getMaterialId());
+          updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap,
+              materialErrorDetailModelsMap, transaction.getMaterialId());
         }
         if (transactions.isEmpty()) {
           continue;
@@ -3713,14 +3736,18 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         try {
           ITransaction error = updateInventoryTransaction(domainId, transaction, false, true, pm);
           if (error != null) {
-            xLogger.warn("Error while updating inventory, errorCode: {0}, errorMessage: {1}", error.getMsgCode(), error.getMessage());
-            updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap, materialErrorDetailModelsMap, transaction.getMaterialId());
+            xLogger.warn("Error while updating inventory, errorCode: {0}, errorMessage: {1}",
+                error.getMsgCode(), error.getMessage());
+            updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap,
+                materialErrorDetailModelsMap, transaction.getMaterialId());
             continue;
           }
         } catch (DuplicationException | ServiceException e) {
           xLogger.severe(
-              "Exception while updating inventory transaction for kid: {0}, mid: {1}, bid: {2}", transaction.getKioskId(), transaction.getMaterialId(), transaction.getBatchId(), e);
-          updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap, materialErrorDetailModelsMap, transaction.getMaterialId());
+              "Exception while updating inventory transaction for kid: {0}, mid: {1}, bid: {2}",
+              transaction.getKioskId(), transaction.getMaterialId(), transaction.getBatchId(), e);
+          updateFailedFromPositionMap(midFailedFromPositionMap, midCountMap,
+              materialErrorDetailModelsMap, transaction.getMaterialId());
           continue;
         }
         if (!transaction.isSystemCreated()) {
@@ -3747,7 +3774,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return materialErrorDetailModelsMap;
   }
 
-  private void updateMaterialErrorDetailModelsMap(Long mid, Map<Long,List<ErrorDetailModel>> materialErrorDetailModelsMap, String errorCode, int position) {
+  private void updateMaterialErrorDetailModelsMap(Long mid,
+                                                  Map<Long, List<ErrorDetailModel>> materialErrorDetailModelsMap,
+                                                  String errorCode, int position) {
     if (materialErrorDetailModelsMap == null) {
       materialErrorDetailModelsMap = new HashMap<>(1);
     }
@@ -3758,19 +3787,23 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       errorDetailModels = new ArrayList<>(1);
     }
     errorDetailModels.add(new ErrorDetailModel(errorCode, position));
-    materialErrorDetailModelsMap.put(mid,errorDetailModels);
+    materialErrorDetailModelsMap.put(mid, errorDetailModels);
   }
 
-  private void updateFailedFromPositionMap(Map<Long,Integer> midFailedFromPositionMap, Map<Long,Integer> midCountMap, Map<Long,List<ErrorDetailModel>> materialErrorDetailModelsMap, Long mid) {
+  private void updateFailedFromPositionMap(Map<Long, Integer> midFailedFromPositionMap,
+                                           Map<Long, Integer> midCountMap,
+                                           Map<Long, List<ErrorDetailModel>> materialErrorDetailModelsMap,
+                                           Long mid) {
     int failedFromPosition = 0;
     if (midCountMap.containsKey(mid)) {
       failedFromPosition = midCountMap.get(mid) + 1;
     }
     midFailedFromPositionMap.put(mid, failedFromPosition);
-    updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M012", failedFromPosition);
+    updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M012",
+        failedFromPosition);
   }
 
-  private void releaseAllLocks(Map<Long,LockUtil.LockStatus> kidLockStatusMap) {
+  private void releaseAllLocks(Map<Long, LockUtil.LockStatus> kidLockStatusMap) {
     for (Map.Entry<Long, LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()) {
       String key = Constants.TX + entry.getKey();
       if (LockUtil.shouldReleaseLock(entry.getValue())) {
@@ -3779,9 +3812,10 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     }
   }
 
-  public ITransaction getLastWebTransaction(Long kid, Long mid, String bid) throws ServiceException{
+  public ITransaction getLastWebTransaction(Long kid, Long mid, String bid)
+      throws ServiceException {
     // Get the latest transaction
-    PageParams pageParams = new PageParams(0,1);
+    PageParams pageParams = new PageParams(0, 1);
     Results results = getInventoryTransactions(null, null, null, kid, mid,
         null,
         null, null, null, null, pageParams, bid, false, null);
@@ -3815,8 +3849,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   private Set<Long> getKioskIdsToLock(List<ITransaction> transactions) {
     Set<Long> kidsToLock = new HashSet<>(1);
     for (ITransaction trn : transactions) {
-        kidsToLock.add(trn.getKioskId());
-      if (ITransaction.TYPE_TRANSFER.equals(trn.getType()) && !kidsToLock.contains(trn.getLinkedKioskId())) {
+      kidsToLock.add(trn.getKioskId());
+      if (ITransaction.TYPE_TRANSFER.equals(trn.getType()) && !kidsToLock
+          .contains(trn.getLinkedKioskId())) {
         kidsToLock.add(trn.getLinkedKioskId());
       }
     }
@@ -3824,11 +3859,13 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
   // Lock the kiosks and return a map of the kiosk id and the lock status
-  private Map<Long,LockUtil.LockStatus> lockKiosks(Set<Long> kioskIds) {
-    Map<Long,LockUtil.LockStatus> kidLockStatusMap = new HashMap<>(kioskIds.size());
+  private Map<Long, LockUtil.LockStatus> lockKiosks(Set<Long> kioskIds) {
+    Map<Long, LockUtil.LockStatus> kidLockStatusMap = new HashMap<>(kioskIds.size());
     for (Long kioskId : kioskIds) {
       String key = Constants.TX + kioskId;
-      LockUtil.LockStatus lockStatus = LockUtil.lock(key,LOCK_RETRY_COUNT,LOCK_RETRY_DELAY_IN_MILLISECONDS);
+      LockUtil.LockStatus
+          lockStatus =
+          LockUtil.lock(key, LOCK_RETRY_COUNT, LOCK_RETRY_DELAY_IN_MILLISECONDS);
       kidLockStatusMap.put(kioskId, lockStatus);
     }
     return kidLockStatusMap;
@@ -3843,7 +3880,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
   public boolean validateMaterialBatchManagementUpdate(Long materialId) throws ServiceException {
     if (materialId == null) {
-      throw new ServiceException("Invalid or null kioskId {0} while changing batch management on material", materialId);
+      throw new ServiceException(
+          "Invalid or null kioskId {0} while changing batch management on material", materialId);
     }
     PersistenceManager pm = PMF.get().getPersistenceManager();
     boolean allowUpdate = false;
@@ -3860,18 +3898,20 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       xLogger.warn("Either Kiosk ID or material ID is null, kid: {0}, mid: {1}", kId, mId);
       return BigDecimal.ZERO;
     }
-    Map<Date,BigDecimal> expDateBatchQtyMap = getExpDateBatchQtyMap(kId, mId);
+    Map<Date, BigDecimal> expDateBatchQtyMap = getExpDateBatchQtyMap(kId, mId);
     if (expDateBatchQtyMap == null || expDateBatchQtyMap.isEmpty()) {
       return BigDecimal.ZERO;
     }
-    InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class,this.getLocale());
-    IInvntry inv = ims.getInventory(kId,mId);
+    InventoryManagementService
+        ims =
+        Services.getService(InventoryManagementServiceImpl.class, this.getLocale());
+    IInvntry inv = ims.getInventory(kId, mId);
     BigDecimal ucs = calculateUnconsumableStock(expDateBatchQtyMap, inv.getConsumptionRateDaily());
     return ucs;
   }
 
-  private Map<Date,BigDecimal> getExpDateBatchQtyMap(Long kId, Long mId) throws ServiceException {
-    Map<Date,BigDecimal> expDateBatchQtyMap = null;
+  private Map<Date, BigDecimal> getExpDateBatchQtyMap(Long kId, Long mId) throws ServiceException {
+    Map<Date, BigDecimal> expDateBatchQtyMap = null;
     InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
     IInvntry inv = ims.getInventory(kId, mId);
     Long domainId = inv.getDomainId();
@@ -3885,15 +3925,20 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Date nextOrderDate = LocalDateUtil.getOffsetDate(currentDate, orderPeriodicity.intValue());
     String nextOrderDateStr = LocalDateUtil.formatDateForQueryingDatabase(nextOrderDate);
     if (StringUtils.isEmpty(nextOrderDateStr)) {
-      xLogger.warn("Invalid nextOrderDateStr: {0} when trying to calculate unusable stock for kId: {1}, mid: {2}", nextOrderDateStr, kId, mId);
+      xLogger.warn(
+          "Invalid nextOrderDateStr: {0} when trying to calculate unusable stock for kId: {1}, mid: {2}",
+          nextOrderDateStr, kId, mId);
       return expDateBatchQtyMap;
     }
     List<String> parameters = new ArrayList<>(1);
-    StringBuilder sqlQuery = new StringBuilder("SELECT BEXP, SUM(Q) FROM INVNTRYBATCH WHERE KID = ?");
+    StringBuilder
+        sqlQuery =
+        new StringBuilder("SELECT BEXP, SUM(Q) FROM INVNTRYBATCH WHERE KID = ?");
     parameters.add(String.valueOf(kId));
     sqlQuery.append(" AND MID = ?");
     parameters.add(String.valueOf(mId));
-    sqlQuery.append(" AND BEXP <= '" + nextOrderDateStr).append("' GROUP BY BEXP ORDER BY BEXP ASC");
+    sqlQuery.append(" AND BEXP <= '" + nextOrderDateStr)
+        .append("' GROUP BY BEXP ORDER BY BEXP ASC");
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query query = pm.newQuery("javax.jdo.query.SQL", sqlQuery.toString());
     try {
@@ -3905,11 +3950,12 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           Object[] objArray = (Object[]) iterator.next();
           Date expDate = (Date) objArray[0];
           BigDecimal expStockQty = (BigDecimal) objArray[1];
-          expDateBatchQtyMap.put(expDate,expStockQty);
+          expDateBatchQtyMap.put(expDate, expStockQty);
         }
       }
     } catch (Exception e) {
-      xLogger.warn("Error while getting expiry date/batch quantity map for kid: {0}, mid: {1}", kId, mId, e);
+      xLogger.warn("Error while getting expiry date/batch quantity map for kid: {0}, mid: {1}", kId,
+          mId, e);
     } finally {
       query.closeAll();
       pm.close();
@@ -3917,7 +3963,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return expDateBatchQtyMap;
   }
 
-  private BigDecimal calculateUnconsumableStock(Map<Date,BigDecimal> expDateBatchQtyMap,BigDecimal c) {
+  private BigDecimal calculateUnconsumableStock(Map<Date, BigDecimal> expDateBatchQtyMap,
+                                                BigDecimal c) {
     // CD = CONSUMPTION_DAYS (days required to consume the stock)
     // BQ = BATCH QUANTITY
     // C = CONSUMPTION RATE
@@ -3938,8 +3985,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         ucs = ucs.add(bq);
         continue;
       }
-      if (BigUtil.lesserThan(fdrc,c)) {
-        if (BigUtil.lesserThan(bq,fdrc)) {
+      if (BigUtil.lesserThan(fdrc, c)) {
+        if (BigUtil.lesserThan(bq, fdrc)) {
           fdrc = fdrc.subtract(bq);
           continue;
         } else {
@@ -3952,7 +3999,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       float ucd = cd - (Math.abs(LocalDateUtil.daysBetweenDates(ed, csd)) + 1);
       if (ucd > 0) {
         ucs = ucs.add(
-            bq.subtract(c.multiply(new BigDecimal(Math.abs(LocalDateUtil.daysBetweenDates(ed, csd)) + 1))));
+            bq.subtract(
+                c.multiply(new BigDecimal(Math.abs(LocalDateUtil.daysBetweenDates(ed, csd)) + 1))));
         csd = LocalDateUtil.getOffsetDate(ed, 1);
         fdrc = BigDecimal.ZERO;
       } else {
@@ -3962,4 +4010,39 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     }
     return ucs;
   }
+
+  /**
+   * Method to get the count of unique materials for a given domain id
+   *
+   * @param domainId Domain Id
+   * @return Count of unique materials
+   */
+  public Long getInvMaterialCount(Long domainId, Long tagId) throws ServiceException {
+    if (domainId == null) {
+      return 0L;
+    }
+    StringBuilder
+        queryBuilder =
+        new StringBuilder(
+            "SELECT COUNT(DISTINCT(MID)) FROM INVNTRY WHERE KID IN (SELECT KIOSKID_OID FROM KIOSK_DOMAINS WHERE DOMAIN_ID=?)");
+    Long count;
+    try {
+      List<String> parameters = new ArrayList<>(2);
+      PersistenceManager pm = PMF.get().getPersistenceManager();
+      Query query;
+      if (tagId != null) {
+        queryBuilder.append(" AND MID IN (SELECT MATERIALID FROM MATERIAL_TAGS WHERE ID=?)");
+        parameters.add(String.valueOf(tagId));
+      }
+      query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
+      parameters.add(String.valueOf(domainId));
+      query.setUnique(true);
+      count = (Long) query.executeWithArray(parameters.toArray());
+    } catch (Exception e) {
+      xLogger.warn("Exception fetching the count", e);
+      throw new ServiceException("Failed to fetch count");
+    }
+    return count;
+  }
+
 }
