@@ -2327,8 +2327,10 @@ logistimoApp.directive('exportData', function () {
                     }
                 } else if (checkNullEmpty($scope.entityId) && checkNullEmpty($scope.matId) && checkNullEmpty($scope.ebf) && checkNullEmpty($scope.orderId)) {
                     if (checkNotNullEmpty($scope.from) || checkNotNullEmpty($scope.to)) {
-                        if ($scope.exportType == 'notificationStatus' || $scope.exportType == 'manualtransactions') {
+                        if ($scope.exportType == 'notificationStatus') {
                             $scope.msg = $scope.$parent.resourceBundle['export.all.notification.criteria'] + emailDetailsMsg;
+                        } else if ($scope.exportType == 'manualtransactions') {
+                            $scope.msg = $scope.$parent.resourceBundle['export.all.manual.transaction.criteria'] + emailDetailsMsg;
                         }
                     } else {
                         if (!$scope.ibd && $scope.exportType == 'inventory') {

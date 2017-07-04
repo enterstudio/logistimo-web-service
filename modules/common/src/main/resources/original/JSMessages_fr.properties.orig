@@ -674,6 +674,7 @@ pwd.otp.required=S'il vous plaît entrez le mot de passe une fois reçue
 export.all.notification=Vous avez choisi d' exporter tous les messages de notification
 notifications.status=notifications envoyées
 export.all.notification.criteria=Vous avez choisi d'exporter des messages de notification selon les critères sélectionnés . S'il vous plaît continuer que si vous souhaitez exporter des messages de notification selon les critères sélectionnés "
+export.all.manual.transaction.criteria=Vous avez choisi d'exporter toutes les transactions téléchargées selon les critères sélectionnés. Continuez SEULEMENT si vous souhaitez exporter des transactions téléchargées selon les critères sélectionnés
 pwd.generate.otp=générer OTP
 otp.info=Il peut prendre quelques minutes pour recevoir le mot de passe à usage unique ( OTP ) sur SMS . Si vous ne recevez pas le Bureau du Procureur , même après 15 minutes , s'il vous plaît cliquer sur le lien " Régénérer OTP " ci-dessus.
 pwd.generate.otp.new=Regénérer OTP
