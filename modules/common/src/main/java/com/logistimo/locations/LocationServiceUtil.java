@@ -193,14 +193,20 @@ public class LocationServiceUtil {
       boolean getType = plObj.keySet().contains("kioskId");
       Date currentDate = new Date();
       String type = getType ? LocationConstants.KIOSK_TYPE_LITERAL : LocationConstants.USER_TYPE_LITERAL;
-      PersistenceManager pm = PMF.get().getPersistenceManager();
-      ILocationFailedJob locationFailedJob = JDOUtils.createInstance(ILocationFailedJob.class);
-      locationFailedJob.setType(type);
-      locationFailedJob.setPayLoad(payload);
-      locationFailedJob.setProcessFlag(false);
-      locationFailedJob.setCreateDate(currentDate);
-      pm.makePersistent(locationFailedJob);
-      pm.detachCopy(locationFailedJob);
+      PersistenceManager pm = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        ILocationFailedJob locationFailedJob = JDOUtils.createInstance(ILocationFailedJob.class);
+        locationFailedJob.setType(type);
+        locationFailedJob.setPayLoad(payload);
+        locationFailedJob.setProcessFlag(false);
+        locationFailedJob.setCreateDate(currentDate);
+        pm.makePersistent(locationFailedJob);
+      } finally {
+        if (null != pm) {
+          pm.close();
+        }
+      }
       return plObj.toString();
     }
   }
