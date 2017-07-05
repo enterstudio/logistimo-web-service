@@ -25,32 +25,36 @@
     <div class="bizinfo bizinfo-last">
         <div ng-controller="AbnormalStockCtrl">
             <div class="filter-box">
-                <div ng-include="'views/common/reset-filters.html'"></div>
-                <div class="row">
-                    <div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle['events']}}</span>
-                        <select ng-model="aStock.et" class="form-control">
-                            <option value="{{INVENTORY.stock.STOCKOUT}}"
-                                    ng-selected="aStock.et == INVENTORY.stock.STOCKOUT">
-                                {{resourceBundle['inventory.zerostock']}}
-                            </option>
-                            <option value="{{INVENTORY.stock.UNDERSTOCK}}"
-                                    ng-selected="aStock.et == INVENTORY.stock.UNDERSTOCK">
-                                {{resourceBundle['inventory.lessthanmin']}}
-                            </option>
-                            <option value="{{INVENTORY.stock.OVERSTOCK}}"
-                                    ng-selected="aStock.et == INVENTORY.stock.OVERSTOCK">
-                                {{resourceBundle['inventory.morethanmax']}}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-sm-3 pt30 mh40">
-                        <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
-                        <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
-                    </div>
-                    <div class="col-sm-3  pt30 mh40">
-                        <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
-                        <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                <div ng-controller="ResetController">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <span class="filter-label">{{resourceBundle['events']}}</span>
+                            <select ng-model="aStock.et" class="form-control">
+                                <option value="{{INVENTORY.stock.STOCKOUT}}"
+                                        ng-selected="aStock.et == INVENTORY.stock.STOCKOUT">
+                                    {{resourceBundle['inventory.zerostock']}}
+                                </option>
+                                <option value="{{INVENTORY.stock.UNDERSTOCK}}"
+                                        ng-selected="aStock.et == INVENTORY.stock.UNDERSTOCK">
+                                    {{resourceBundle['inventory.lessthanmin']}}
+                                </option>
+                                <option value="{{INVENTORY.stock.OVERSTOCK}}"
+                                        ng-selected="aStock.et == INVENTORY.stock.OVERSTOCK">
+                                    {{resourceBundle['inventory.morethanmax']}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3 pt30 mh40">
+                            <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                            <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                        </div>
+                        <div class="col-sm-3  pt30 mh40">
+                            <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                            <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                        </div>
+                        <div class="col-sm-3 pt20">
+                            <div ng-include="'views/common/reset-filters.html'"></div>
+                        </div>
                     </div>
                 </div>
             </div>

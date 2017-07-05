@@ -24,42 +24,46 @@
 <div class="box topbox">
     <div ng-controller="DemandViewsCtrl">
         <div class="filter-box form-group">
-            <div ng-include="'views/common/reset-filters.html'"/>
-            <div class="row">
-                <div class="col-sm-3" ng-show="showEntityFilter">
-                    <span class="filter-label">{{resourceBundle.kiosk}}</span>
-                    <entity-select ent-model="entity" classes="form-control"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
-                                   disable="!showEntityFilter || isDef(material.mId)"></entity-select>
+            <div ng-controller="ResetController">
+                <div class="row">
+                    <div class="col-sm-3" ng-show="showEntityFilter">
+                        <span class="filter-label">{{resourceBundle.kiosk}}</span>
+                        <entity-select ent-model="entity" classes="form-control"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
+                                       disable="!showEntityFilter || isDef(material.mId)"></entity-select>
 
-                </div>
-                <div class="col-sm-3" ng-show="iAdm && !isEnt">
-                    <span class="filter-label">{{resourceBundle.material}}</span>
-                    <material-select mat-model="material" classes="form-control" place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}"
-                            disable="isDef(entity.id)"></material-select>
-                </div>
-                <div ng-show="iAdm && (entity.id == undefined || entity.id == '')" class="col-sm-3 pt30 mh40">
-                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
-                    <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
-                </div>
-                <div ng-show="isUndef(material.mId) && !((vw == 'm'|| iMan) && isUndef(entity.id))" class="col-sm-3  pt30 mh40">
-                    <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
-                    <tag-filter ng-model="tag" tag-type="material"></tag-filter>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-3">
-                    <span class="filter-label">Order type</span>
-                    <div class="btn-group">
-                        <label class="btn btn-sm btn-default" ng-model="otype" uib-btn-radio="'sle'">{{resourceBundle.salesorders}}</label>
-                        <label class="btn btn-sm btn-default" ng-model="otype" uib-btn-radio="'prc'">{{resourceBundle.purchaseorders}}</label>
+                    </div>
+                    <div class="col-sm-3" ng-show="iAdm && !isEnt">
+                        <span class="filter-label">{{resourceBundle.material}}</span>
+                        <material-select mat-model="material" classes="form-control" place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}"
+                                disable="isDef(entity.id)"></material-select>
+                    </div>
+                    <div ng-show="iAdm && (entity.id == undefined || entity.id == '')" class="col-sm-3 pt30 mh40">
+                        <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                    </div>
+                    <div ng-show="isUndef(material.mId) && !((vw == 'm'|| iMan) && isUndef(entity.id))" class="col-sm-3  pt30 mh40">
+                        <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="tag" tag-type="material"></tag-filter>
                     </div>
                 </div>
-                <div class="col-sm-3 pt20 mh40">
-                    <span class="filter-label"> </span>
-                    <input type="checkbox" ng-model="etrn" ng-select="itrn ='true'">
-                    <span ng-hide="transRelease">{{resourceBundle['exclude.transferdemand']}}</span>
-                    <span ng-show="transRelease">{{resourceBundle['exclude.releasesdemand']}}</span>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <span class="filter-label">Order type</span>
+                        <div class="btn-group">
+                            <label class="btn btn-sm btn-default" ng-model="otype" uib-btn-radio="'sle'">{{resourceBundle.salesorders}}</label>
+                            <label class="btn btn-sm btn-default" ng-model="otype" uib-btn-radio="'prc'">{{resourceBundle.purchaseorders}}</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 pt20 mh40">
+                        <span class="filter-label"> </span>
+                        <input type="checkbox" ng-model="etrn" ng-select="itrn ='true'">
+                        <span ng-hide="transRelease">{{resourceBundle['exclude.transferdemand']}}</span>
+                        <span ng-show="transRelease">{{resourceBundle['exclude.releasesdemand']}}</span>
+                    </div>
+                    <div class="col-sm-3 pull-right pt20">
+                        <div ng-include="'views/common/reset-filters.html'"/>
+                    </div>
                 </div>
             </div>
         </div>

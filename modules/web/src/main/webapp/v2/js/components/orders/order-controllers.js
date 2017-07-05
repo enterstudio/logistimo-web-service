@@ -25,6 +25,7 @@ var ordControllers = angular.module('ordControllers', []);
 ordControllers.controller('OrdersApprovalCtrl', ['$scope', 'ordService', 'userService', 'entityService','requestContext','$location',
     function($scope, ordService, userService, entityService, requestContext, $location){
         $scope.wparams = [["eid","entity.id"], ["oid","ordId"], ["rs","reqStatus"], ["ex","exp"], ["rt","reqType"], ["req","reqId"], ["apr","aprId"],["s","size"],["o","offset"]];
+        $scope.localFilters = ['entity','orderId','reqStatus','reqType','reqId','aprId','exp'];
         ListingController.call(this, $scope, requestContext, $location);
         $scope.init = function(firstTimeInit) {
             $scope.ordApr = {entity: "",orderId: "",reqType: "",reqStatus: "",reqId: "",aprId: ""};
@@ -126,6 +127,7 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
         $scope.wparams = [["etag", "etag"], ["otag", "otag"], ["status", "status"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["otype", "otype", "sle"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url], ["oid", "orderId"], ["rid", "referenceId"]];
         $scope.orders;
         $scope.otype;
+        $scope.localFilters = ['entity','status','dateModel','from','to','ordId','refId','etag','tpdos','etag','otag'];
         $scope.exRow = [];
         $scope.etag;
         $scope.otag;
@@ -2693,6 +2695,8 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
 ordControllers.controller('ShipmentListingController', ['$scope','ordService','requestContext','$location','$window', function ($scope,ordService,requestContext,$location,$window) {
     $scope.wparams = [["o", "offset"], ["s", "size"],["status", "status"], ["cid", "custId.id"], ["vid", "vendId.id"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url],["eftf", "eftFrom", "", formatDate2Url], ["eftt", "eftTo", "", formatDate2Url], ["trans", "trans"], ["trackid", "trackId"]];
     $scope.today = new Date();
+    $scope.localFilters = ['custId','vendId','status','sTrackId','from','to','eftFrom','eftTo','sTrans','trackId'];
+    $scope.filterMethods = ['searchTID'];
     ListingController.call(this, $scope, requestContext, $location);
     $scope.init = function() {
         $scope.status = requestContext.getParam("status") || "";

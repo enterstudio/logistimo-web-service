@@ -650,6 +650,28 @@ function WidgetConfigController($scope) {
 }
 cmnControllers.controller('NoController', ['$scope', function ($scope) {}]);
 
+cmnControllers.controller('ResetController', ['$scope', function ($scope) {
+    $scope.localFilters.forEach(function (filter) {
+        addwatch(filter);
+        $scope[filter] = angular.copy($scope[filter]);
+    });
+    function addwatch(filter) {
+        $scope.$parent.$watch(filter,function(newValue,oldValue){
+            if(newValue!=oldValue){
+                $scope[filter] = angular.copy(newValue);
+            }
+        })
+    }
+    $scope.applyFilters = function () {
+        angular.forEach($scope.localFilters,function (filter) {
+            $scope.$parent[filter] = angular.copy($scope[filter]);
+        });
+        angular.forEach($scope.filterMethods, function(fn) {
+            $scope[fn]();
+        });
+    };
+}]);
+
 cmnControllers.factory('focus', function($timeout, $window) {
     return function(id) {
         // timeout makes sure that it is invoked after any other event has been triggered.

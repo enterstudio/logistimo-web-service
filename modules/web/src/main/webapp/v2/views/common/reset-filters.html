@@ -24,9 +24,8 @@
 <div class="row">
     <div class="col-sm-12">
         <span class="pull-right">
-            <button type="reset" ng-click="resetFilters()" class="btn btn-sm btn-default">
-                {{resourceBundle['reset']}}
-            </button>
+            <span href="#" ng-click="resetFilters()" class="filter-check-box">{{resourceBundle['reset']}}</span>
+            <div class="btn btn-sm btn-primary" ng-click="applyFilters()">{{resourceBundle['filter']}}</div>
         </span>
     </div>
 </div>

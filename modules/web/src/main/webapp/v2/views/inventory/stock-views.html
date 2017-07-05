@@ -24,136 +24,138 @@
 <div class="pane">
     <div ng-controller="StockViewsController">
         <div class="filter-box form-group">
-            <fieldset ng-disabled="loading" ng-include="'views/common/reset-filters.html'"/>
-            <div class="row">
-                <div class="col-sm-3">
-                    <span class="filter-label" ng-class="{'required':mxE}" >{{resourceBundle.kiosk}}</span>
-                    <entity-select ent-model="entity" classes="form-control"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
-                                   disable="isDef(material.mId) || isDef(ebf)"></entity-select>
-                </div>
-                <div class="col-sm-3"
-                     ng-hide="showEntityFilter">
-                    <span class="filter-label">{{resourceBundle.material}}</span>
-                    <material-select mat-model="material" classes="form-control"
-                                     place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}"
-                                     disable="isDef(entity.id) || (isDef(ebf) && material.b !='yes' ) || mxE "></material-select>
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['abnormality.type']}}</span>
-                    <select ng-model="abntype" class="form-control">
-                        <option value=''>-- Select --</option>
-                        <option value="200">
-                            {{resourceBundle['inventory.zerostock']}}
-                        </option>
-                        <option value="201">
-                            {{resourceBundle['inventory.lessthanmin']}}
-                        </option>
-                        <option value="202">
-                            {{resourceBundle['inventory.morethanmax']}}
-                        </option>
-                    </select>
-                </div>
-                <div class="col-sm-2" ng-show="isDef(abntype)">
-                    <span class="filter-label">{{resourceBundle['abnormality.duration']}}</span>
-                    <div class="input-group">
-                        <input type="text" placeholder="> days" class="form-control" ng-model="abndur"
-                               maxlength="5" only-digits ng-enter="onAbnDurationChanged()">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button" ng-click="onAbnDurationChanged()"
-                                            tooltip="{{resourceBundle['search']}}">
-                                        <span class="glyphicons glyphicons-search"></span>
-                                    </button>
-                                </span>
-                        </input>
-                    </div>
-                </div>
-            </div>
-            <div ng-show="showMore">
-                <div class="row mt18">
-                    <div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle['expires.before']}}</span>
-                        <date-picker
-                                mode="'month'" min-mode="day"
-                                disabled="( isDef(material.mId) && material.b != 'yes' ) || isDef(entity.id) || isDef(batchno) || mxE || isDef(abntype)"
-                                date-picker-read-only="(isUndef(entity.id) && ( isUndef(material.mId) || material.b == 'yes' ) && isUndef(batchno) && isUndef(abntype))"
-                                date-model="ebf"></date-picker>
-                    </div>
-                    <div class="col-sm-3" ng-show="material.b == 'yes' && isUndef(abntype)">
-                            <span class="filter-label">{{resourceBundle['batch']}}</span>
-
-                            <div class="input-group">
-                                <input type="text" class="form-control" ng-change="checkBno()" ng-model="bno"
-                                       placeholder=" " ng-disabled="isDef(ebf) || isDef(abntype)" ng-enter="getData()"
-                                       upper-case>
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" ng-click="getData()" type="button" tooltip="{{resourceBundle['search']}}"
-                                                ng-disabled="isDef(ebf) || bno == null || bno == '' || bno.length == 0">
-                                            <span class="glyphicons glyphicons-search"></span>
-                                        </button>
-                                    </span>
-                            </div>
-                    </div>
-                    <div ng-show="(isDef(entity.id)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25"> <!--isDef(material.mId)-->
-                        <span class="filter-label">{{resourceBundle['batchenabled']}}</span>
-                        <select class="form-control" ng-model="matType">
-                            <option value="0">{{resourceBundle['all']}}</option>
-                            <option value="1">{{resourceBundle['onlybatchenabled.materials']}}</option>
-                            <option value="2">{{resourceBundle['onlynonbatch.materials']}}</option>
-                        </select>
-                    </div>
-                </div>
+            <div ng-controller="ResetController">
                 <div class="row">
                     <div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle['state']}}</span>
-                        <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['state']}}"
-                                         filter-model="loc" filter-type="state">
-                        </location-select>
+                        <span class="filter-label" ng-class="{'required':mxE}" >{{resourceBundle.kiosk}}</span>
+                        <entity-select ent-model="entity" classes="form-control"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
+                                       disable="isDef(material.mId) || isDef(ebf)"></entity-select>
+                    </div>
+                    <div class="col-sm-3"
+                         ng-hide="showEntityFilter">
+                        <span class="filter-label">{{resourceBundle.material}}</span>
+                        <material-select mat-model="material" classes="form-control"
+                                         place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}"
+                                         disable="isDef(entity.id) || (isDef(ebf) && material.b !='yes' ) || mxE "></material-select>
                     </div>
                     <div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle['district']}}</span>
-                        <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['district']}}"
-                                         filter-model="loc" filter-type="district">
-                        </location-select>
+                        <span class="filter-label">{{resourceBundle['abnormality.type']}}</span>
+                        <select ng-model="abntype" class="form-control">
+                            <option value=''>-- Select --</option>
+                            <option value="200">
+                                {{resourceBundle['inventory.zerostock']}}
+                            </option>
+                            <option value="201">
+                                {{resourceBundle['inventory.lessthanmin']}}
+                            </option>
+                            <option value="202">
+                                {{resourceBundle['inventory.morethanmax']}}
+                            </option>
+                        </select>
                     </div>
-                    <div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle['taluk']}}</span>
-                        <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['taluk']}}"
-                                         filter-model="loc" filter-type="taluk">
-                        </location-select>
-                    </div>
-                    <div class="col-sm-2"
-                         ng-show="isUndef(abntype) && isUndef(bno) && isUndef(ebf) &&
-                         (isDef(entity) || isDef(material) || isDef(loc.state) || isDef(loc.district) || isDef(loc.taluk))">
-                        <span class="filter-label">Likely to stock out (days)</span>
-                        <div class="input-group">
-                            <input only-digits max-length="5" type="text" class="form-control" ng-model="tpdos">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="getPDOSData()" type="button" tooltip="{{resourceBundle['search']}}">
-                                    <span class="glyphicons glyphicons-search"></span>
-                                </button>
-                            </span>
+                    <div class="col-sm-2" ng-show="isDef(abntype)">
+                        <span class="filter-label">{{resourceBundle['abnormality.duration']}}</span>
+                        <div class="input">
+                            <input type="text" placeholder="> days" class="form-control" ng-model="abndur"
+                                   maxlength="5" only-digits ng-enter="onAbnDurationChanged()">
+                                    <!--<span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" ng-click="onAbnDurationChanged()"
+                                                tooltip="{{resourceBundle['search']}}">
+                                            <span class="glyphicons glyphicons-search"></span>
+                                        </button>
+                                    </span>-->
+                            </input>
                         </div>
                     </div>
                 </div>
-                <div class="row mt18">
-                    <div ng-show="isDef(material.mId) || isDef(ebf) || (vw == 'm' && isUndef(entity.id))
-                        || (isDef(abntype) && isUndef(entity.id)) || (locationSelected && isUndef(entity.id))"
-                         class="col-sm-3 mh25">
-                        <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
-                        <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                <div ng-show="showMore">
+                    <div class="row mt18">
+                        <div class="col-sm-3">
+                            <span class="filter-label">{{resourceBundle['expires.before']}}</span>
+                            <date-picker
+                                    mode="'month'" min-mode="day"
+                                    disabled="( isDef(material.mId) && material.b != 'yes' ) || isDef(entity.id) || isDef(batchno) || mxE || isDef(abntype)"
+                                    date-picker-read-only="(isUndef(entity.id) && ( isUndef(material.mId) || material.b == 'yes' ) && isUndef(batchno) && isUndef(abntype))"
+                                    date-model="ebf"></date-picker>
+                        </div>
+                        <div class="col-sm-3" ng-show="material.b == 'yes' && isUndef(abntype)">
+                                <span class="filter-label">{{resourceBundle['batch']}}</span>
+
+                                <div class="input-group">
+                                    <input type="text" class="form-control" ng-change="checkBno()" ng-model="bno"
+                                           placeholder=" " ng-disabled="isDef(ebf) || isDef(abntype)" ng-enter="getData()"
+                                           upper-case>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" ng-click="getData()" type="button" tooltip="{{resourceBundle['search']}}"
+                                                    ng-disabled="isDef(ebf) || bno == null || bno == '' || bno.length == 0">
+                                                <span class="glyphicons glyphicons-search"></span>
+                                            </button>
+                                        </span>
+                                </div>
+                        </div>
+                        <div ng-show="(isDef(entity.id)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25"> <!--isDef(material.mId)-->
+                            <span class="filter-label">{{resourceBundle['batchenabled']}}</span>
+                            <select class="form-control" ng-model="matType">
+                                <option value="0">{{resourceBundle['all']}}</option>
+                                <option value="1">{{resourceBundle['onlybatchenabled.materials']}}</option>
+                                <option value="2">{{resourceBundle['onlynonbatch.materials']}}</option>
+                            </select>
+                        </div>
                     </div>
-                    <div ng-show="isDef(entity.id) || isDef(ebf) || (isDef(abntype) && isUndef(material.mId))
-                        || (locationSelected && isUndef(material.mId))" class="col-sm-3 mh25">
-                        <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
-                        <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <span class="filter-label">{{resourceBundle['state']}}</span>
+                            <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['state']}}"
+                                             filter-model="loc" filter-type="state">
+                            </location-select>
+                        </div>
+                        <div class="col-sm-3">
+                            <span class="filter-label">{{resourceBundle['district']}}</span>
+                            <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['district']}}"
+                                             filter-model="loc" filter-type="district">
+                            </location-select>
+                        </div>
+                        <div class="col-sm-3">
+                            <span class="filter-label">{{resourceBundle['taluk']}}</span>
+                            <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['taluk']}}"
+                                             filter-model="loc" filter-type="taluk">
+                            </location-select>
+                        </div>
+                        <div class="col-sm-2"
+                             ng-show="isUndef(abntype) && isUndef(bno) && isUndef(ebf) &&
+                             (isDef(entity) || isDef(material) || isDef(loc.state) || isDef(loc.district) || isDef(loc.taluk))">
+                            <span class="filter-label">Likely to stock out (days)</span>
+                            <div class="input">
+                                <input only-digits max-length="5" type="text" class="form-control" ng-model="tpdos">
+                                <!--<span class="input-group-btn">
+                                    <button class="btn btn-default" ng-click="getPDOSData()" type="button" tooltip="{{resourceBundle['search']}}">
+                                        <span class="glyphicons glyphicons-search"></span>
+                                    </button>
+                                </span>-->
+                            </div>
+                        </div>
                     </div>
-                    <div ng-show="(isDef(entity.id) || isDef(material.mId)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25">
-                        <div>
-                            <input type="checkbox" id="nzstk" ng-model="onlyNZStk" ng-checked="{{onlyNZStk}}" name="nzstk"> {{resourceBundle['showonly.nonzerostock']}}
+                    <div class="row mt18">
+                        <div ng-show="isDef(material.mId) || isDef(ebf) || (vw == 'm' && isUndef(entity.id))
+                            || (isDef(abntype) && isUndef(entity.id)) || (locationSelected && isUndef(entity.id))"
+                             class="col-sm-3 mh25">
+                            <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                            <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                        </div>
+                        <div ng-show="isDef(entity.id) || isDef(ebf) || (isDef(abntype) && isUndef(material.mId))
+                            || (locationSelected && isUndef(material.mId))" class="col-sm-3 mh25">
+                            <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                            <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                        </div>
+                        <div ng-show="(isDef(entity.id) || isDef(material.mId)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25">
+                            <div>
+                                <input type="checkbox" id="nzstk" ng-model="onlyNZStk" ng-checked="{{onlyNZStk}}" name="nzstk"> {{resourceBundle['showonly.nonzerostock']}}
+                            </div>
                         </div>
                     </div>
                 </div>
+                <fieldset ng-disabled="loading" ng-include="'views/common/reset-filters.html'"/>
             </div>
         </div>
         <div ng-show="iAdm">
