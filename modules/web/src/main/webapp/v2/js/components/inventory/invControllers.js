@@ -26,6 +26,8 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
     function ($scope, matService, entityService, requestContext, $location, exportService, userService,domainCfgService) {
         $scope.vw = "t";
         $scope.ebf = '';
+        $scope.localFilters = ['entity','material','abntype','abndur','ebf','bno','matType','loc','tpdos','etag','mtag','onlyNZStk','dur','abndurDate','pdos'];
+        $scope.filterMethods = ['onAbnDurationChanged','getPDOSData'];
         $scope.filters = {};
         $scope.mparams = ["eid", "ebf", "mid", "batchno", "etag", "mtag", "vw", "abntype", "dur", "fil",
             "matType","onlyNZStk","state","district","taluk","pdos"];
@@ -1317,6 +1319,7 @@ invControllers.controller('AbnormalStockCtrl', ['$scope', 'invService', 'domainC
     function ($scope, invService, domainCfgService, requestContext, $location, INVENTORY, exportService) {
         $scope.wparams = [["etag","etag"], ["mtag","mtag"],["event","aStock.et","200"]];
         $scope.stopInvFetch = false;
+        $scope.localFilters = ['aStock','etag','mtag'];
         // Read the dashboard configuration from domain config to get the default material tag to show in the Abnormal Stock view.
         domainCfgService.getDashboardCfg().then(function (data) {
             if (checkNotNullEmpty(data.data.dimtg)) {

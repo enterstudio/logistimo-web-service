@@ -488,3 +488,5 @@ error.invaliddata.frommobile=Données invalides
 transactions.processing.inprogress=Transactions en cours, essayez à nouveau après un certain temps
 openingstock.mismatch=Le stock d'ouverture ne s'est pas associé
 lockinventory.failed=Impossible de verrouiller l'inventaire. Veuillez réessayer après un certain temps
+filter=filtre
+

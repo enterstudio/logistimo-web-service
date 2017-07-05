@@ -24,149 +24,135 @@
 <div class="pane">
     <div ng-controller="AssetsDetailsListingController">
         <div class="filter-box form-group">
-            <div class="row">
-                <div class="col-sm-3" ng-show="!filterMin">
-                    <span class="filter-label">{{resourceBundle['kiosk']}}</span>
-                    <entity-select ent-model="entity" classes="form-control"></entity-select>
-                </div>
-                <div class="col-sm-3" ng-show="!filterMin">
-                    <span class="filter-label">{{resourceBundle['asset.serial.number']}}</span>
-                    <input name="assetId" type="text" ng-model="assetId"
-                           typeahead-template-url="assetTemplate"
-                           autocomplete="off"
-                           typeahead-wait-ms="300"
-                           uib-typeahead="item as item.dId for item in getFilteredAssets($viewValue)"
-                           class="form-control" typeahead-editable="false"
-                           typeahead-on-select="assetOnSelect($item)"/>
-                </div>
-                <div class="col-sm-4 pt20">
-                    <span class="lPad5 filter-label">{{resourceBundle['type']}}:</span>
-                    <span style="cursor: pointer" ng-click="toggleFilter()">
-                        <span ng-repeat="t in multiAssetTypeFilterText track by $index" class="label label-default mt5 dinline" style="padding:.2em;">{{t}}</span>
-                        <span class="caret"></span>
-                    </span>
-                    <div class="pop_filter_box col-sm-12 ws" id="filter_a" style="margin-left:3%; background-color: #ffffff">
-                        <div class="row pt10">
-                            <div class="col-sm-12">
-                                <span class="codegray">All monitored assets</span>
-                                <span class="float-right dummyLink" ng-click="selectAll('md')" style="cursor: pointer">Select all</span>
+            <div ng-controller="ResetController">
+                <div class="row">
+                    <div class="col-sm-3" ng-show="!filterMin">
+                        <span class="filter-label">{{resourceBundle['kiosk']}}</span>
+                        <entity-select ent-model="entity" classes="form-control"></entity-select>
+                    </div>
+                    <div class="col-sm-3" ng-show="!filterMin">
+                        <span class="filter-label">{{resourceBundle['asset.serial.number']}}</span>
+                        <input name="assetId" type="text" ng-model="assetId"
+                               typeahead-template-url="assetTemplate"
+                               autocomplete="off"
+                               typeahead-wait-ms="300"
+                               uib-typeahead="item as item.dId for item in getFilteredAssets($viewValue)"
+                               class="form-control" typeahead-editable="false"
+                               typeahead-on-select="assetOnSelect($item)"/>
+                    </div>
+                    <div class="col-sm-4 pt20">
+                        <span class="lPad5 filter-label">{{resourceBundle['type']}}:</span>
+                        <span style="cursor: pointer" ng-click="toggleFilter()">
+                            <span ng-repeat="t in multiAssetTypeFilterText track by $index" class="label label-default mt5 dinline" style="padding:.2em;">{{t}}</span>
+                            <span class="caret"></span>
+                        </span>
+                        <div class="pop_filter_box col-sm-12 ws" id="filter_a" style="margin-left:3%; background-color: #ffffff">
+                            <div class="row pt10">
+                                <div class="col-sm-12">
+                                    <span class="codegray">All monitored assets</span>
+                                    <span class="float-right dummyLink" ng-click="selectAll('md')" style="cursor: pointer">Select all</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row" style="margin-bottom: 0" ng-repeat="(key,value) in mAssetFilters.md">
-                            <div class="col-sm-12">
-                                <input type="checkbox" ng-change="toggleCB('md')" checklist-model="at_md" checklist-value="key"> {{value}}
+                            <div class="row" style="margin-bottom: 0" ng-repeat="(key,value) in mAssetFilters.md">
+                                <div class="col-sm-12">
+                                    <input type="checkbox" ng-change="toggleCB('md')" checklist-model="at_md" checklist-value="key"> {{value}}
+                                </div>
                             </div>
-                        </div>
-                        <div class="separator norow"></div>
-                        <div class="row" style="padding-bottom: 5px; margin-bottom: 0">
-                            <div class="col-sm-12">
-                                <span class="codegray">All monitoring assets</span>
-                                <span class="float-right dummyLink" ng-click="selectAll('mg')" style="cursor: pointer">Select all</span>
+                            <div class="separator norow"></div>
+                            <div class="row" style="padding-bottom: 5px; margin-bottom: 0">
+                                <div class="col-sm-12">
+                                    <span class="codegray">All monitoring assets</span>
+                                    <span class="float-right dummyLink" ng-click="selectAll('mg')" style="cursor: pointer">Select all</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row" style="margin-bottom: 0" ng-repeat="(key,value) in mAssetFilters.mg">
-                            <div class="col-sm-12">
-                                <input type="checkbox" ng-change="toggleCB('mg')" checklist-model="at_mg" checklist-value="key"> {{value}}
+                            <div class="row" style="margin-bottom: 0" ng-repeat="(key,value) in mAssetFilters.mg">
+                                <div class="col-sm-12">
+                                    <input type="checkbox" ng-change="toggleCB('mg')" checklist-model="at_mg" checklist-value="key"> {{value}}
+                                </div>
                             </div>
-                        </div>
-                        <div class="row pb10">
-                            <div class="col-sm-12">
-                                <span class="pull-right">
-                                    <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilters()" value="Filter">
-                                    <input type="button" class="btn btn-sm btn-default" ng-click="toggleFilter()" value="Cancel">
-                                </span>
+                            <div class="row pb10">
+                                <div class="col-sm-12">
+                                    <span class="pull-right">
+                                        <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilter()" value="Filter">
+                                        <input type="button" class="btn btn-sm btn-default" ng-click="toggleFilter()" value="Cancel">
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div ng-class="{'col-sm-8': filterMin, 'col-sm-2': !filterMin}">
-                    <div ng-include="'views/common/reset-filters.html'"/>
-                </div>
-            </div>
-            <div class="row">
-
-            <!--</div>-->
-            <!--<div class="row">-->
-                <div class="col-sm-3 pt20 norightpad" style="width: 26%">
-                    <!--<input name="awr" type="checkbox" ng-model="awr"-->
-                           <!--ng-change="aa()"/>-->
-                    <span class="filter-label">Relationships:</span>
-                    <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isaropen">
-                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
-                            {{awrDisplay}} <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" ng-show="isaropen">
-                            <li ng-repeat="r in assetRelationFilters">
-                                <a ng-click="setAssetRelFilter(r.id)">{{r.data}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-sm-3 pt20 noleftpad" style="width: 24%;">
-                    <span class="lPad5 filter-label">{{resourceBundle['working.status']}}:</span>
-                    <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="iswstypeeopen">
-                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
-                            {{assetWSFilters[assetWSFilter].dV}} <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" ng-show="iswstypeeopen">
-                            <li ng-repeat="ws in assetWSFilters">
-                                <a ng-click="updateWorkingStatusFilter(ws.status)">{{ws.dV}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-sm-2 pt20">
-                    <span class="filter-label lPad5">{{resourceBundle['alarms']}}:</span>
-                    <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isopen">
-                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
-                            {{filters[currentFilter].displayValue}} <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" ng-show="isopen">
-                            <li ng-repeat="filter in filters">
-                                <a ng-click="onAlarmFilterChange(filter.value)"
-                                   ng-if="isUndef(filter.type) || (isDef(currentAsset) && filter.type == currentAsset.at)">{{filter.displayValue}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-sm-4 pt5">
-                <span ng-show="currentFilter != 0 && currentFilter != 4">
-                    <form class="form-inline">
-                        <div class="filter-label cbx">
-                            {{resourceBundle['asset.alarm.duration']}}
-                            <div class="input-group col-sm-4">
-                                <input type="text" class="form-control" ng-model="duration" maxlength="4" maxlength="50"
-                                       ng-enter="onDurationFilterChange()">
-                                <span class="input-group-btn">
-							        <button class="btn btn-default" ng-click="onDurationFilterChange()" type="button"
-                                            uib-tooltip="{{resourceBundle['search']}}">
-                                        <span class="glyphicons glyphicons-search"></span>
-                                    </button>
-                                </span>
-                            </div>
-                            <div class="btn-group btn-group-blk btn-group-top cbx" uib-dropdown>
-                                <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
-                                    {{filterDur[aDurationDisplay].displayValue}} <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li ng-repeat="fil in filterDur">
-                                        <a ng-click="onDurationTypeChange(fil.index)">{{fil.displayValue}}</a>
-                                    </li>
-                                </ul>
-                            </div>
+                <div class="row">
+                    <div class="col-sm-3 pt20 norightpad" style="width: 26%">
+                        <span class="filter-label">Relationships:</span>
+                        <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isaropen">
+                            <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                                {{tempAwrDisplay}} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" ng-show="isaropen">
+                                <li ng-repeat="r in assetRelationFilters">
+                                    <a ng-click="setAssetRelFilter(r.id)">{{r.data}}</a>
+                                </li>
+                            </ul>
                         </div>
-                    </form>
-                </span>
+                    </div>
+                    <div class="col-sm-3 pt20 noleftpad" style="width: 24%;">
+                        <span class="lPad5 filter-label">{{resourceBundle['working.status']}}:</span>
+                        <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="iswstypeeopen">
+                            <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                                {{assetWSFilters[tempAssetWSFilter].dV}} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" ng-show="iswstypeeopen">
+                                <li ng-repeat="ws in assetWSFilters">
+                                    <a ng-click="updateWorkingStatusFilter(ws.status)">{{ws.dV}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 pt20">
+                        <span class="filter-label lPad5">{{resourceBundle['alarms']}}:</span>
+                        <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isopen">
+                            <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                                {{filters[tempCurrentFilter].displayValue}} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" ng-show="isopen">
+                                <li ng-repeat="filter in filters">
+                                    <a ng-click="onAlarmFilterChange(filter.value)"
+                                       ng-if="isUndef(filter.type) || (isDef(currentAsset) && filter.type == currentAsset.at)">{{filter.displayValue}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <span ng-show="tempCurrentFilter != 0 && tempCurrentFilter != 4">
+                            <form class="form-inline">
+                                <div class="filter-label cbx">
+                                    {{resourceBundle['asset.alarm.duration']}}
+                                        <input type="text" class="form-control" ng-model="duration" maxlength="4" maxlength="50"
+                                               ng-enter="onDurationFilterChange()" style="width: 33%;">
+                                    <div class="btn-group btn-group-blk btn-group-top cbx" uib-dropdown>
+                                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                                            {{filterDur[tempADurationDisplay].displayValue}} <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li ng-repeat="fil in filterDur">
+                                                <a ng-click="onDurationTypeChange(fil.index)">{{fil.displayValue}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </form>
+                        </span>
+                    </div>
+                    <div class="col-sm-6">
+                        <div ng-include="'views/common/reset-filters.html'"/>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="box topbox mt5">
             <div class="row mt10">
-                <!--<div class="col-sm-6">
-                    <h5 class="sgHeading" ng-show="location" style="margin-left: 0px; margin-right: 0px;">
-                        {{resourceBundle['assets']}} {{resourceBundle['in']}} {{location}}
-                    </h5>
-                </div>-->
                 <div class="col-sm-12">
                 <span class="pull-right">
                     <div ng-include="'views/paginator.html'"></div>
@@ -181,9 +167,7 @@
                     <th>{{resourceBundle['asset']}}</th>
                     <th ng-if="assetTypeFilterGroup == 0">{{resourceBundle['type']}}</th>
                     <th nowrap="">{{resourceBundle['working.status']}}</th>
-                    <!--<th nowrap>{{resourceBundle['kiosk']}}</th>-->
                     <th ng-if="isDef(currentAsset)">{{resourceBundle['status']}}</th>
-                    <!--<th nowrap ng-if="isDef(currentAsset) && currentAsset.at == 1">{{resourceBundle['devices.alarm']}}</th>-->
                 </tr>
                 </thead>
                 <tbody>
@@ -222,9 +206,6 @@
                                 <span ng-init="relation = asset.rel" ng-include="'views/assets/asset-temp-block.html'"></span>
                             </span>
                             </div>
-                            <!--<div class="col-sm-12" ng-show="asset.tmp.length == 0">
-                                <span class="glyphicons glyphicons-circle-question-mark c-grey"></span>
-                            </div>-->
                         </div>
                     </td>
                     <td ng-if="isDef(currentAsset) && currentAsset.at == 1 && asset.iDa">

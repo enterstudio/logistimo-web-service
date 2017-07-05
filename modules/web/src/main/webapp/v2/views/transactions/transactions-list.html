@@ -25,99 +25,103 @@
     <div ng-controller="TransactionsCtrl">
         <div class="filter-box form-group">
            <!-- <div ng-include="'views/common/reset-filters.html'"/>-->
-            <div class="row">
-                <div class="col-sm-3" ng-hide="!showEntityFilter">
-                    <span ng-class="{'required':mxE}" class="filter-label" >{{resourceBundle.kiosk}}</span>
-                    <entity-select ent-model="entity" classes="form-control"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
-                    </entity-select>
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle.material}}</span>
-                    <material-select mat-model="material" classes="form-control"
-                                     place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}">
-                    </material-select>
-                </div>
-                <div class="col-sm-2">
-                    <span class="filter-label">{{resourceBundle.type}}</span>
-                    <select class="form-control" ng-model="type">
-                        <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions.lowercase']}}</option>
-                        <option value="i">{{resourceBundle['issues']}}</option>
-                        <option value="r">{{resourceBundle['receipts']}}</option>
-                        <option value="p">{{resourceBundle['transactions.stockcount.upper']}}</option>
-                        <option value="w">{{resourceBundle['transactions.wastage.upper']}}</option>
-                        <option value="t">{{resourceBundle['transfers']}}</option>
-                    </select>
-                </div>
-                <div  class="col-sm-3">
-                    <div ng-show="material.b == 'yes'">
-                        <span class="filter-label">{{resourceBundle['batch']}}</span>
-                        <div class="input-group">
-                            <input type="text" ng-model="batchId"  name="batchId" placeholder=" " class="form-control" ng-enter="searchBatch()" upper-case />
-                        <span class="input-group-btn">
-							<button class="btn btn-default" ng-click="searchBatch()" type="button"
-                                    uib-tooltip="{{resourceBundle['search']}}" ng-disabled="batchId == null || batchId == '' || batchId.length == 0">
-                                {{resourceBundle['go']}}
-                            </button>
-                        </span>
+            <div ng-controller="ResetController">
+                <div class="row">
+                    <div class="col-sm-3" ng-hide="!showEntityFilter">
+                        <span ng-class="{'required':mxE}" class="filter-label" >{{resourceBundle.kiosk}}</span>
+                        <entity-select ent-model="entity" classes="form-control"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
+                        </entity-select>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle.material}}</span>
+                        <material-select mat-model="material" classes="form-control"
+                                         place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}">
+                        </material-select>
+                    </div>
+                    <div class="col-sm-2">
+                        <span class="filter-label">{{resourceBundle.type}}</span>
+                        <select class="form-control" ng-model="type">
+                            <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions.lowercase']}}</option>
+                            <option value="i">{{resourceBundle['issues']}}</option>
+                            <option value="r">{{resourceBundle['receipts']}}</option>
+                            <option value="p">{{resourceBundle['transactions.stockcount.upper']}}</option>
+                            <option value="w">{{resourceBundle['transactions.wastage.upper']}}</option>
+                            <option value="t">{{resourceBundle['transfers']}}</option>
+                        </select>
+                    </div>
+                    <div  class="col-sm-3">
+                        <div ng-show="material.b == 'yes'">
+                            <span class="filter-label">{{resourceBundle['batch']}}</span>
+                            <div class="input-group">
+                                <input type="text" ng-model="batchId"  name="batchId" placeholder=" " class="form-control" ng-enter="searchBatch()" upper-case />
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-click="searchBatch()" type="button"
+                                        uib-tooltip="{{resourceBundle['search']}}" ng-disabled="batchId == null || batchId == '' || batchId.length == 0">
+                                    {{resourceBundle['go']}}
+                                </button>
+                            </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-1 mt18 pull-right">
+                <div class="row" ng-show="showMore ">
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['from']}}</span>
+                        <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
+                        <span ng-show="hasAtd" class="filter-check-box" ><input class="pt7" type="checkbox" ng-model="atd"> {{resourceBundle.filterby}}
+                        {{resourceBundle['date.actual.transaction.small']}}</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['to']}}</span>
+                        <date-picker date-model="to" place-holder="To" min-date="from" max-date="today"></date-picker>
+                    </div>
+                    <div class="col-sm-3" ng-show="isDef(entity) && customerCount > 0 && isUndef(vend)">
+                        <span class="filter-label">{{resourceBundle.customer}}</span>
+                        <entity-select ent-model="cust" classes="form-control" ent-type="customers" ent-id="entity.id"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.customer}}" is-filter="true">
+                        </entity-select>
+                    </div>
+                    <div class="col-sm-3" ng-show="isDef(entity) && vendorCount > 0 && isUndef(cust)">
+                        <span class="filter-label">{{resourceBundle.vendor}}</span>
+                        <entity-select ent-model="vend" classes="form-control" ent-type="vendors" ent-id="entity.id"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.vendor}}" is-filter="true">
+                        </entity-select>
+                    </div>
+                </div>
+                <div class="row" ng-show="showMore ">
+                    <div ng-show="(entity.id == null || entity.id == '') && !iMan" class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
+                    </div>
+                    <div class="col-sm-3" ng-show="(material.mId == '' || material.mId == undefined)">
+                        <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="tag" tag-type="material"></tag-filter>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['transaction']}} {{resourceBundle['reason.lowercase']}}:</span>
+                        <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isRsnOpen">
+                            <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                                {{reason || resourceBundle['all']}} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" ng-show="isRsnOpen">
+                                <li><a ng-click="updateReason('')">{{resourceBundle['all']}}</a></li>
+                                <li ng-repeat="rsn in reasons">
+                                    <a ng-click="updateReason(rsn)">{{rsn}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="row mb0">
                     <span class="pull-right">
+                        <div class="btn btn-sm btn-primary" ng-click="applyFilters()">Filter</div>
                          <button type="reset" ng-click="resetFilters()" class="btn btn-sm btn-default">
                               {{resourceBundle['reset']}}
                          </button>
                     </span>
-                </div>
-            </div>
-            <div class="row" ng-show="showMore ">
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['from']}}</span>
-                    <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
-                    <span ng-show="hasAtd" class="filter-check-box" ><input class="pt7" type="checkbox" ng-model="atd"> {{resourceBundle.filterby}}
-                    {{resourceBundle['date.actual.transaction.small']}}</span>
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['to']}}</span>
-                    <date-picker date-model="to" place-holder="To" min-date="from" max-date="today"></date-picker>
-                </div>
-                <div class="col-sm-3" ng-show="isDef(entity) && customerCount > 0 && isUndef(vend)">
-                    <span class="filter-label">{{resourceBundle.customer}}</span>
-                    <entity-select ent-model="cust" classes="form-control" ent-type="customers" ent-id="entity.id"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle.customer}}" is-filter="true">
-                    </entity-select>
-                </div>
-                <div class="col-sm-3" ng-show="isDef(entity) && vendorCount > 0 && isUndef(cust)">
-                    <span class="filter-label">{{resourceBundle.vendor}}</span>
-                    <entity-select ent-model="vend" classes="form-control" ent-type="vendors" ent-id="entity.id"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle.vendor}}" is-filter="true">
-                    </entity-select>
-                </div>
-            </div>
-            <div class="row" ng-show="showMore ">
-                <div ng-show="(entity.id == null || entity.id == '') && !iMan" class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
-                    <tag-filter ng-model="etag" tag-type="entity"></tag-filter>
-                </div>
-                <div class="col-sm-3" ng-show="(material.mId == '' || material.mId == undefined)">
-                    <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
-                    <tag-filter ng-model="tag" tag-type="material"></tag-filter>
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['transaction']}} {{resourceBundle['reason.lowercase']}}:</span>
-                    <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isRsnOpen">
-                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
-                            {{reason || resourceBundle['all']}} <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" ng-show="isRsnOpen">
-                            <li><a ng-click="updateReason('')">{{resourceBundle['all']}}</a></li>
-                            <li ng-repeat="rsn in reasons">
-                                <a ng-click="updateReason(rsn)">{{rsn}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                </div>-->
+                <fieldset ng-disabled="loading" ng-include="'views/common/reset-filters.html'"/>
             </div>
         </div>
         <div class="row" ng-hide="showMore ">

@@ -24,29 +24,33 @@
 <div class="pane">
     <div ng-controller="AccountsListController">
         <div class="filter-box form-group">
-            <div ng-include="'views/common/reset-filters.html'"></div>
-            <div class="row">
-                <div class="col-sm-3">
-                    <span class="filter-label required">{{resourceBundle.kiosk}}</span>
-                    <entity-select ent-model="entity" classes="form-control"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"></entity-select>
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['year']}}</span>
-                    <select id="yr" ng-model="yr" class="form-control">
-                        <option ng-repeat="year in act.years" value="{{year}}">{{year}}</option>
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['sortby']}}</span>
-                    <select ng-show="subview === 'receivable'" ng-model="sb" class="form-control">
-                        <option value="pyb">{{resourceBundle['receivable']}}</option>
-                        <option value="ent">{{resourceBundle['customer']}}</option>
-                    </select>
-                    <select ng-show="subview === 'payable'" ng-model="sb" class="form-control">
-                        <option value="pyb">{{resourceBundle['payable']}}</option>
-                        <option value="ent">{{resourceBundle['vendor']}}</option>
-                    </select>
+            <div ng-controller="ResetController">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <span class="filter-label required">{{resourceBundle.kiosk}}</span>
+                        <entity-select ent-model="entity" classes="form-control"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"></entity-select>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['year']}}</span>
+                        <select id="yr" ng-model="yr" class="form-control">
+                            <option ng-repeat="year in act.years" value="{{year}}">{{year}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['sortby']}}</span>
+                        <select ng-show="subview === 'receivable'" ng-model="sb" class="form-control">
+                            <option value="pyb">{{resourceBundle['receivable']}}</option>
+                            <option value="ent">{{resourceBundle['customer']}}</option>
+                        </select>
+                        <select ng-show="subview === 'payable'" ng-model="sb" class="form-control">
+                            <option value="pyb">{{resourceBundle['payable']}}</option>
+                            <option value="ent">{{resourceBundle['vendor']}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 pt20">
+                        <div ng-include="'views/common/reset-filters.html'"></div>
+                    </div>
                 </div>
             </div>
         </div>

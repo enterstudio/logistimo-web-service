@@ -568,24 +568,32 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
             {"index":"2","factorValue": "1440", "displayValue": "Days"},
             {"index":"3","factorValue": "10080", "displayValue": "Weeks"},
             {"index":"4","factorValue": "43200", "displayValue": "Months"}];
+        $scope.localFilters = ['entity','duration'];
+        $scope.filterMethods = ['filterResults','onDurationFilterChange'];
         $scope.currentFilter = 0;
+        $scope.tempCurrentFilter = 0;
         $scope.assetTypeFilter = ['md'];
         $scope.assetTypeFilterGroup = 0;
         $scope.durSortOrder = true;
         $scope.currentFilterDuration = 0;
+        $scope.tempCurrentFilterDuration = 0;
         $scope.location = "";
         $scope.locType = "";
         $scope.deviceConfig = {};
         $scope.filtered = {};
         $scope.assetWSFilter = 0;
+        $scope.tempAssetWSFilter = 0;
         ListingController.call(this, $scope, requestContext, $location);
         $scope.mparams = ["did", "vid", "alrm", "dur", "dtype", "eid", "o", "s", "at", "ws","awr"];
 
         $scope.assetRelationFilters = [{id:0,data:"All assets"},{id:1,data:"Assets with relationships"},
             {id:2,data:"Assets without relationships"}];
         $scope.awrDisplay = $scope.assetRelationFilters[0].data;
+        $scope.tempAwrDisplay = $scope.assetRelationFilters[0].data;
         $scope.aDurationDisplay = 1;
+        $scope.tempADurationDisplay = 1;
         $scope.awr = 0;
+        $scope.tempAwr = 0;
         $scope.$watch("entity.id", watchfn("eid", "", $location, $scope));
         $scope.$watch("deviceId", watchfn("did", "", $location, $scope));
         $scope.$watch("vendorId", watchfn("vid", "", $location, $scope));
@@ -759,7 +767,7 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
                 $scope.at_md.splice(0,$scope.at_md.length)
             }
         };
-        $scope.applyFilters = function() {
+        $scope.applyFilter = function() {
             if(!checkNullEmptyObject($scope.at_mg)) {
                 $scope.assetTypeFilter = angular.copy($scope.at_mg);
                 $scope.assetTypeFilterGroup = 1;
@@ -774,8 +782,8 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
             $scope.toggleFilter();
         };
         $scope.setAssetRelFilter = function(relType){
-            $scope.awr = relType;
-            $scope.awrDisplay = $scope.assetRelationFilters[relType].data;
+            $scope.tempAwr = relType;
+            $scope.tempAwrDisplay = $scope.assetRelationFilters[relType].data;
         };
         $scope.init = function (firstTimeInit) {
             $scope.loading = true;
@@ -915,18 +923,28 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
         };
 
         $scope.onDurationTypeChange = function (valDurType) {
-            $scope.aDurationDisplay = valDurType;
+            $scope.tempADurationDisplay = valDurType;
         };
 
         $scope.onAlarmFilterChange = function(value){
-            $scope.currentFilter = value;
-            if($scope.currentFilter == 0 || $scope.currentFilter == 4)
-                $scope.currentFilterDuration = 0;
+            $scope.tempCurrentFilter = value;
+            if($scope.tempCurrentFilter == 0 || $scope.tempCurrentFilter == 4)
+                $scope.tempCurrentFilterDuration = 0;
         };
 
         $scope.updateWorkingStatusFilter = function(value){
-            $scope.assetWSFilter = value;
+            $scope.tempAssetWSFilter = value;
         };
+
+        $scope.filterResults = function(){
+            $scope.assetWSFilter = angular.copy($scope.tempAssetWSFilter);
+            $scope.currentFilter = angular.copy($scope.tempCurrentFilter);
+            $scope.currentFilterDuration = angular.copy($scope.tempCurrentFilterDuration);
+            $scope.awr = angular.copy($scope.tempAwr);
+            $scope.awrDisplay = angular.copy($scope.tempAwrDisplay);
+            $scope.aDurationDisplay = angular.copy($scope.tempADurationDisplay);
+            
+        }
 
         $scope.resetFilters = function(){
             $location.$$search = {};
@@ -944,6 +962,7 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
             $scope.awr = 0;
             $scope.multiAssetTypeFilter = undefined;
             $scope.assetWSFilter = 0;
+            $scope.tempAssetWSFilter = 0;
             $scope.assetId = "";
         };
         $scope.init(true);

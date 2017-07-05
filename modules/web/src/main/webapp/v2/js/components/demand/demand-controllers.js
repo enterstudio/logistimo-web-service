@@ -68,7 +68,7 @@ demandControllers.controller('SimpleEntityDemandListingsCtrl', ['$scope', 'deman
 demandControllers.controller('DemandViewsCtrl', ['$scope', 'demandService', 'domainCfgService', 'entityService', 'matService', 'mapService', 'requestContext', '$location',
     function ($scope, demandService, domainCfgService, entityService, matService, mapService, requestContext, $location) {
         $scope.wparams = [["etag","etag"], ["tag","tag"], ["eid","entity.id"], ["mid","material.mId"],["vw","vw"], ["etrn","etrn"], ["otype","otype"]];
-
+        $scope.localFilters = ['entity','material','etag','tag','otype','etrn'];
         ListingController.call(this, $scope, requestContext, $location);
 
         $scope.init = function (firstTimeInit) {
@@ -621,6 +621,7 @@ demandControllers.controller('MatDemandListMapCtrl', ['$scope', 'demandService',
 demandControllers.controller('DiscrepanciesListingCtrl', ['$scope', 'demandService', 'domainCfgService', 'entityService', 'matService', 'exportService', 'ordService', 'requestContext', '$location',
     function ($scope, demandService, domainCfgService, entityService, matService, exportService, ordService , requestContext, $location) {
         $scope.wparams = [["etag", "eTag"], ["mtag", "mTag"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["mid", "material.mId"],["oid", "orderId"],["from", "from", "", formatDate2Url],["to", "to", "", formatDate2Url],["dt", "discType"],["otype","oType","sle"], ["etrn", "etrn"]];
+        $scope.localFilters = ['entity','material','discType','etrn','ordId','from','to','eTag','mTag'];
         $scope.demandWithDisc;
         $scope.eTag;
         $scope.mTag;
