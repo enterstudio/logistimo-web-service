@@ -1020,3 +1020,5 @@ administrative.contacts=Contacts administratifs
 config.device.pull=Dernière configuration de la configuration
 config.device.requested=Demandé pour extraire la configuration
 requested=Traduire
+config.autoassignmaterialstatus=Affectation automatique du statut matériel
+config.autoassignmaterialstatusmsg=Affectez automatiquement le premier état du matériel, si disponible, aux éléments lorsque la commande est confirmée

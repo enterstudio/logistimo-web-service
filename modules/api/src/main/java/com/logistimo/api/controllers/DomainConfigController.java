@@ -1498,6 +1498,7 @@ public class DomainConfigController {
       oc.setCancellingOrderReasons(model.cor);
       oc.setCancellingOrderReasonsMandatory(model.corm);
       //oc.setAllowCreatingShipments(model.acs);
+      oc.setAutoAssignFirstMaterialStatusOnConfirmation(model.aafmsc);
 
       if (model.et != null && !model.et.trim().isEmpty()) {
         List<String> times = StringUtil.getList(model.et.trim());
