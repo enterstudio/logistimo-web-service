@@ -52,6 +52,7 @@ import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.IInvntryDao;
 import com.logistimo.inventory.dao.ITransDao;
@@ -187,9 +188,9 @@ public class CreateEntityServlet extends SgServlet {
               + ", type = " + entityType, Constants.VIEW_HOME);
       return;
     }
+    SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
     // Get the user's locale
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(req.getSession());
-    Locale locale = null;
+    Locale locale;
     if (sUser != null) {
       locale = sUser.getLocale();
     } else {
@@ -369,11 +370,10 @@ public class CreateEntityServlet extends SgServlet {
     // Check if request is coming from a task
     boolean isTask = req.getRequestURI().contains("/task/");
     // Get the domain Id for user
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(req.getSession());
+    SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
     Long domainId = null;
-    if (sUser
-        != null) // NOTE: sUser can be null, when this is accessed via a task during multi-kiosk addition of materials
-    {
+    // NOTE: sUser can be null, when this is accessed via a task during multi-kiosk addition of materials
+    if (sUser != null) {
       domainId = SessionMgr.getCurrentDomain(req.getSession(), sUser.getUsername());
     }
     if (domainId == null) {
