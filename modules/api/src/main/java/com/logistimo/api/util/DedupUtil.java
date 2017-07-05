@@ -48,4 +48,15 @@ public class DedupUtil {
       cache.put(signature, status, CACHE_EXPIRY);
     }
   }
+
+  /**
+   * Removes the specified signature from cache
+   * @param cache
+   * @param signature
+   */
+  public static void removeSignature(MemcacheService cache, String signature) {
+    if (cache != null && signature != null) {
+      cache.delete(signature);
+    }
+  }
 }

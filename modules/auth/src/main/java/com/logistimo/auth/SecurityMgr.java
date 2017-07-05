@@ -190,6 +190,20 @@ public class SecurityMgr {
     return null;
   }
 
+  /**
+   * Gets the user details if present
+   * @return Authenticated user details if present. Otherwise, null.
+   */
+  public static SecureUserDetails getUserDetailsIfPresent() {
+    SecureUserDetails sUser = null;
+    try {
+      sUser = SecurityUtils.getUserDetails();
+    } catch (UnauthorizedException e) {
+      // ignore
+    }
+    return sUser;
+  }
+
   public static class Credentials {
     public final String userId;
     public final String password;
