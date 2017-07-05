@@ -457,4 +457,6 @@ public interface InventoryManagementService extends Service {
    * @throws ServiceException
    */
   BigDecimal getUnusableStock(Long kId, Long mId) throws ServiceException;
+
+   Long getInvMaterialCount(Long domainId,Long tagId) throws ServiceException;
 }
