@@ -842,6 +842,7 @@ public class OrdersController {
                 ITransaction.TYPE_ORDER, userId, now, reason);
         transList.add(trans);
       }
+      boolean removeSignature = false;
       if (!skipCheck && vendorKioskId != null) {
         DemandBuilder b = new DemandBuilder();
         for (ITransaction iTransaction : transList) {
@@ -862,6 +863,9 @@ public class OrdersController {
               }
             }
           }
+        }
+        if(model.items != null) {
+          removeSignature = true;
         }
       }
       if (model.items == null) {
@@ -889,7 +893,11 @@ public class OrdersController {
                 + "</b> " + backendMessages.getString("created.successwith") + " <b>" + order.size()
                 + "</b> " + backendMessages.getString("items.lowercase") + ". ";
       }
-      DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.SUCCESS);
+      if(removeSignature) {
+        DedupUtil.removeSignature(cache, signature);
+      } else {
+        DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.SUCCESS);
+      }
     } catch (Exception e) {
       xLogger.severe("Error in creating Order on domain {0}", domainId, e);
       throw new InvalidServiceException(backendMessages.getString("order.create.error"));
