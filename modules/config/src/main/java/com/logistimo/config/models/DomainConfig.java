@@ -154,6 +154,8 @@ public class DomainConfig implements Serializable {
   public static final String STATE_ID = "stateid";
   public static final String DISTRICT_ID = "districtid";
   private static final long serialVersionUID = 4047681117629775550L;
+  //Mobile GUI Theme
+  public static final String STORE_APP_THEME = "storeAppTheme";
   // Logger
   private static final XLog xLogger = XLog.getLog(DomainConfig.class);
   // Properties
@@ -276,6 +278,8 @@ public class DomainConfig implements Serializable {
   private boolean disableOrdersPricing = false;
 
   private boolean localLoginRequired = true;
+
+  private int storeAppTheme = Constants.GUI_THEME_BLACK;
 
   public DomainConfig() {
     optimizerConfig = new OptimizerConfig();
@@ -736,6 +740,11 @@ public class DomainConfig implements Serializable {
       }
       try {
         this.disableOrdersPricing = json.getBoolean(DISABLE_ORDERS_PRICING);
+      } catch (JSONException e) {
+        //do nothing
+      }
+      try {
+        this.storeAppTheme = json.getInt(STORE_APP_THEME);
       } catch (JSONException e) {
         //do nothing
       }
@@ -1731,4 +1740,9 @@ public class DomainConfig implements Serializable {
   public void setDistrictId(String districtId) {
     this.districtId = districtId;
   }
+
+  public int getStoreAppTheme() { return storeAppTheme; }
+
+  public void setStoreAppTheme(int storeAppTheme) { this.storeAppTheme = storeAppTheme; }
+
 }

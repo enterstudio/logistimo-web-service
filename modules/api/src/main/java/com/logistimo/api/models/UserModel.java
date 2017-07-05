@@ -108,5 +108,13 @@ public class UserModel {
   public Integer lgSrc; // login src
   public Long sdid; //source domain
   public String sdname; //source domain name
+  private int theme; // store app theme
 
+  public int getTheme() {
+    return theme;
+  }
+
+  public void setTheme(int theme) {
+    this.theme = theme;
+  }
 }

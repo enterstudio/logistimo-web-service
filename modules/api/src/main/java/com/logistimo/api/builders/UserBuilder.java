@@ -324,6 +324,7 @@ public class UserBuilder {
       model.per = account.getPermission();
       model.lgr = account.getLoginReconnect();
       model.atexp = account.getAuthenticationTokenExpiry();
+      model.setTheme(account.getStoreAppTheme());
     }
     model.sdid = account.getDomainId();
     IDomain domain;
@@ -382,6 +383,7 @@ public class UserBuilder {
     }
     user.setLoginReconnect(model.lgr);
     user.setAuthenticationTokenExpiry(model.atexp);
+    user.setStoreAppTheme(model.getTheme());
 
     return user;
   }

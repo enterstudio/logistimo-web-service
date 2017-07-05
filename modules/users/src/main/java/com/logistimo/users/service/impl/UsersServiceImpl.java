@@ -556,6 +556,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       //Accessible dids
       user.setAccessibleDomainIds(account.getAccessibleDomainIds());
       user.setLoginReconnect(account.getLoginReconnect());
+      user.setStoreAppTheme(account.getStoreAppTheme());
 
       // Check if custom ID is specified for the user account. If yes, check if the specified custom ID already exists.
       boolean customIdExists = false;

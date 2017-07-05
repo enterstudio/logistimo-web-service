@@ -251,6 +251,8 @@ public class UserAccount implements IUserAccount, ILocationConfig {
   private String talukId;
   @Persistent(column = "CITY_ID")
   private String cityId;
+  @Persistent
+  private Integer theme;
 
   // Get the difference of two user lists: a - b
   public static List<IUserAccount> getDifference(List<IUserAccount> a, List<IUserAccount> b) {
@@ -1025,6 +1027,12 @@ public class UserAccount implements IUserAccount, ILocationConfig {
   public void setCityId(String cityId) {
     this.cityId = cityId;
   }
+
+  @Override
+  public Integer getStoreAppTheme() { return theme; }
+
+  @Override
+  public void setStoreAppTheme(Integer theme) { this.theme = theme; }
 
 
 }

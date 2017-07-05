@@ -715,6 +715,24 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">{{resourceBundle['mob']}} {{resourceBundle['gui.theme']}}</label>
+                <div class="col-sm-8 cbx">
+                    <p><input type="radio" ng-model="theme" ng-value="1" ng-click="user.theme = -1"> {{resourceBundle['config.usedomaindefault']}}</p>
+                    <p class="litetext">{{resourceBundle['config.overridedomaindefault']}}</p>
+                    <p><input type="radio" ng-model="theme" ng-value="2"> {{resourceBundle['select.theme']}}</p>
+                    <div ng-if="theme==2">
+                        <select ng-model="user.theme" ng-init="user.theme == -1 ? user.theme = 0 : user.theme" class="form-control">
+                            <option ng-value="0">{{resourceBundle['theme.black']}}</option>
+                            <option ng-value="1">{{resourceBundle['theme.red']}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row" id="sbt">

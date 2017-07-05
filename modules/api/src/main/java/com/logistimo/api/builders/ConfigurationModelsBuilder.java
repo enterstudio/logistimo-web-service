@@ -719,6 +719,7 @@ public class ConfigurationModelsBuilder {
       model.aplui = sc.getAppLogUploadInterval() / SyncConfig.HOURS_IN_A_DAY;
       model.stwd = sc.getSmsTransmissionWaitDuration() / SyncConfig.HOURS_IN_A_DAY;
     }
+    model.setTheme(dc.getStoreAppTheme());
     return model;
   }
 
@@ -797,6 +798,7 @@ public class ConfigurationModelsBuilder {
         model.stwd =
             dc.getSyncConfig().getSmsTransmissionWaitDuration() / SyncConfig.HOURS_IN_A_DAY;
       }
+      model.setTheme(dc.getStoreAppTheme());
     }
     return model;
   }

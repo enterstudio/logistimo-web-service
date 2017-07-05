@@ -212,7 +212,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
 
 userControllers.controller('AddUserController', ['$scope', 'userService', 'configService', 'entityService','domainCfgService', 'requestContext', '$window',
     function ($scope, userService, configService, entityService, domainCfgService, requestContext, $window) {
-        $scope.user = {lgr:-1};
+        $scope.user = {lgr:-1, theme: -1};
         $scope.user.st = undefined;
         $scope.user.cnt = undefined;
         $scope.uVisited = {};
@@ -222,6 +222,7 @@ userControllers.controller('AddUserController', ['$scope', 'userService', 'confi
         $scope.loading = false;
         $scope.editUserId = requestContext.getParam("userId");
         $scope.uidLengthVerified = false;
+        $scope.theme = 1;
         if (checkNotNullEmpty($scope.editUserId)) {
             $scope.edit = true;
         }
@@ -302,6 +303,11 @@ userControllers.controller('AddUserController', ['$scope', 'userService', 'confi
                 $scope.updateTags("fetch");
                 $scope.user.pw = " ";
                 $scope.user.cpw = $scope.user.pw;
+                if($scope.user.theme == -1) {
+                    $scope.theme = 1;
+                } else {
+                    $scope.theme = 2;
+                }
                 $scope.setCountry($scope.user.cnt);
                 $scope.setState($scope.user.st);
                 $scope.setDistrict($scope.user.ds);
@@ -471,9 +477,10 @@ userControllers.controller('AddUserController', ['$scope', 'userService', 'confi
             $scope.uVisited.em = true;
         };
         $scope.resetForm = function () {
-            $scope.user = {lgr:-1};
+            $scope.user = {lgr:-1, theme: -1};
             $scope.uVisited = {};
             $scope.uidStatus = false;
+            $scope.theme = 1;
             $scope.setDomainDefault();
         };
         $scope.updateTags = function (action) {
@@ -503,6 +510,7 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
         $scope.eRoute = 'false';
         $scope.imageData='';
         $scope.loadimage=true;
+        $scope.theme = [{key: 0, value: $scope.resourceBundle['theme.black']}, {key: 1, value:$scope.resourceBundle['theme.red']}];
 
         var isSupport = false;
         $scope.editRoute = function (value) {

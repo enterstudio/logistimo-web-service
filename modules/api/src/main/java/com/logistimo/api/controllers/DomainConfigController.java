@@ -948,6 +948,7 @@ public class DomainConfigController {
         cc.dc.setAllowRouteTagEditing(model.er);
         cc.dc.setLoginAsReconnect(model.lr);
         cc.dc.setEnableShippingOnMobile(model.eshp);
+        cc.dc.setStoreAppTheme(model.getTheme());
 
         String issueTags = TagUtil.getCleanTags(StringUtils.join(model.hii, ','), true);
         String receiptsTags = TagUtil.getCleanTags(StringUtils.join(model.hir, ','), true);
