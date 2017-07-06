@@ -36,7 +36,6 @@ import com.logistimo.services.ServiceException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;

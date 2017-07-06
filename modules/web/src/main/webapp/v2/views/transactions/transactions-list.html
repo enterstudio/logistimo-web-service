@@ -28,7 +28,7 @@
             <div ng-controller="ResetController">
                 <div class="row">
                     <div class="col-sm-3" ng-hide="!showEntityFilter">
-                        <span ng-class="{'required':mxE}" class="filter-label" >{{resourceBundle.kiosk}}</span>
+                        <span ng-class="{'required':mxE}" class="filter-label">{{resourceBundle.kiosk}}</span>
                         <entity-select ent-model="entity" classes="form-control"
                                        place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
                         </entity-select>
@@ -42,7 +42,8 @@
                     <div class="col-sm-2">
                         <span class="filter-label">{{resourceBundle.type}}</span>
                         <select class="form-control" ng-model="type">
-                            <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions.lowercase']}}</option>
+                            <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions.lowercase']}}
+                            </option>
                             <option value="i">{{resourceBundle['issues']}}</option>
                             <option value="r">{{resourceBundle['receipts']}}</option>
                             <option value="p">{{resourceBundle['transactions.stockcount.upper']}}</option>
@@ -50,14 +51,16 @@
                             <option value="t">{{resourceBundle['transfers']}}</option>
                         </select>
                     </div>
-                    <div  class="col-sm-3">
+                    <div class="col-sm-3">
                         <div ng-show="material.b == 'yes'">
                             <span class="filter-label">{{resourceBundle['batch']}}</span>
                             <div class="input-group">
-                                <input type="text" ng-model="batchId"  name="batchId" placeholder=" " class="form-control" ng-enter="searchBatch()" upper-case />
-                            <span class="input-group-btn">
+                                <input type="text" ng-model="batchId" name="batchId" placeholder=" "
+                                       class="form-control" ng-enter="searchBatch()" upper-case/>
+                                <span class="input-group-btn">
                                 <button class="btn btn-default" ng-click="searchBatch()" type="button"
-                                        uib-tooltip="{{resourceBundle['search']}}" ng-disabled="batchId == null || batchId == '' || batchId.length == 0">
+                                        uib-tooltip="{{resourceBundle['search']}}"
+                                        ng-disabled="batchId == null || batchId == '' || batchId.length == 0">
                                     {{resourceBundle['go']}}
                                 </button>
                             </span>
@@ -69,7 +72,8 @@
                     <div class="col-sm-3">
                         <span class="filter-label">{{resourceBundle['from']}}</span>
                         <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
-                        <span ng-show="hasAtd" class="filter-check-box" ><input class="pt7" type="checkbox" ng-model="atd"> {{resourceBundle.filterby}}
+                        <span ng-show="hasAtd" class="filter-check-box"><input class="pt7" type="checkbox"
+                                                                               ng-model="atd"> {{resourceBundle.filterby}}
                         {{resourceBundle['date.actual.transaction.small']}}</span>
                     </div>
                     <div class="col-sm-3">
@@ -79,13 +83,15 @@
                     <div class="col-sm-3" ng-show="isDef(entity) && customerCount > 0 && isUndef(vend)">
                         <span class="filter-label">{{resourceBundle.customer}}</span>
                         <entity-select ent-model="cust" classes="form-control" ent-type="customers" ent-id="entity.id"
-                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.customer}}" is-filter="true">
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.customer}}"
+                                       is-filter="true">
                         </entity-select>
                     </div>
                     <div class="col-sm-3" ng-show="isDef(entity) && vendorCount > 0 && isUndef(cust)">
                         <span class="filter-label">{{resourceBundle.vendor}}</span>
                         <entity-select ent-model="vend" classes="form-control" ent-type="vendors" ent-id="entity.id"
-                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.vendor}}" is-filter="true">
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.vendor}}"
+                                       is-filter="true">
                         </entity-select>
                     </div>
                 </div>

@@ -52,7 +52,6 @@ import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.LogiException;
-import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.IInvntryDao;
 import com.logistimo.inventory.dao.ITransDao;

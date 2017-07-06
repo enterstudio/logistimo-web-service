@@ -578,7 +578,8 @@ public class TransactionUtil {
           if (ITransaction.TYPE_TRANSFER.equals(ty)) {
             try {
               IKiosk lk = es.getKiosk(trans.getLinkedKioskId(), false);
-              if (!k.isBatchMgmtEnabled() && lk != null && lk.isBatchMgmtEnabled() && m.isBatchEnabled()) {
+              if (!k.isBatchMgmtEnabled() && lk != null && lk.isBatchMgmtEnabled() && m
+                  .isBatchEnabled()) {
                 xLogger.warn(
                     "Cannot transfer batch enabled material from batch disabled entity {0} to batch enabled entity {1} in transaction at index {2}",
                     trans.getKioskId(), trans.getLinkedKioskId(), index);

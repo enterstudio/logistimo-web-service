@@ -35,6 +35,8 @@ import com.logistimo.approvals.client.models.UpdateApprovalRequest;
 import com.logistimo.constants.EmbedConstants;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.StatusModel;
+import com.logistimo.orders.approvals.ApprovalType;
+import com.logistimo.orders.approvals.dao.impl.ApprovalsDao;
 import com.logistimo.orders.approvals.models.ApprovalModel;
 import com.logistimo.orders.approvals.models.ApproverModel;
 import com.logistimo.orders.approvals.models.CreateApprovalResponseModel;
@@ -66,11 +68,10 @@ import java.util.Set;
 @Component
 public class ApprovalsBuilder {
 
-  private static final XLog LOGGER = XLog.getLog(ApprovalsBuilder.class);
   public static final String
       ORDER_0_NOT_FOUND_BUILDING_APPROVAL_1 =
       "Order {0} not found, building approval {1}";
-
+  private static final XLog LOGGER = XLog.getLog(ApprovalsBuilder.class);
   @Autowired
   private UserBuilder userBuilder;
 
@@ -79,6 +80,9 @@ public class ApprovalsBuilder {
 
   @Autowired
   private UsersService usersService;
+
+  @Autowired
+  private ApprovalsDao approvalsDao;
 
   public IOrderApprovalMapping buildOrderApprovalMapping(CreateApprovalResponse approvalResponse,
                                                          Integer approvalType, Long kioskId) {
@@ -137,6 +141,9 @@ public class ApprovalsBuilder {
     model.setOrderId(Long.parseLong(approvalResponse.getTypeId()));
     model.setCreatedAt(approvalResponse.getCreatedAt());
     model.setExpiresAt(approvalResponse.getExpireAt());
+    model.setApprovalType(ApprovalType.get(
+        approvalsDao.getApprovalType(Long.valueOf(approvalResponse.getTypeId()),
+            model.getId())));
     model.setApprovers(buildApproversModel(approvalResponse, usersService));
     model.setConversationId(approvalResponse.getConversationId());
     model.setRequester(buildRequestorModel(approvalResponse.getRequesterId(), approvalResponse.getApprovalId()));

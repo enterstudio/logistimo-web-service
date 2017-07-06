@@ -21,6 +21,7 @@
  * You can be released from the requirements of the license by purchasing a commercial license. To know more about
  * the commercial license, please contact us at opensource@logistimo.com
  */
+
 package com.logistimo.api.models;
 
 

@@ -28,7 +28,7 @@ var actControllers = angular.module('actControllers', []);
 actControllers.controller('AccountsListController', ['$scope', 'actServices', 'entityService', 'requestContext', '$location',
     function ($scope, actServices, entityService, requestContext, $location) {
         $scope.wparams = [["eid", "entity.id"], ["year", "yr"], ["sb", "sb"], ["o", "offset"], ["s", "size"]];
-        $scope.localFilters = ['entity','yr','sb'];
+        $scope.localFilters = ['entity', 'yr', 'sb'];
         ListingController.call(this, $scope, requestContext, $location);
         $scope.init = function (firstTimeInit) {
             if (checkNotNullEmpty(requestContext.getParam("eid"))) {

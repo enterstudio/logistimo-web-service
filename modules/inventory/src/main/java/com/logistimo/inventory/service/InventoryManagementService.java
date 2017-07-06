@@ -25,7 +25,12 @@ package com.logistimo.inventory.service;
 
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.models.LocationSuggestionModel;
-import com.logistimo.inventory.entity.*;
+import com.logistimo.inventory.entity.IInvAllocation;
+import com.logistimo.inventory.entity.IInventoryMinMaxLog;
+import com.logistimo.inventory.entity.IInvntry;
+import com.logistimo.inventory.entity.IInvntryBatch;
+import com.logistimo.inventory.entity.IInvntryEvntLog;
+import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.models.ErrorDetailModel;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.pagination.PageParams;
@@ -34,11 +39,12 @@ import com.logistimo.services.DuplicationException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 
-import javax.jdo.PersistenceManager;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.jdo.PersistenceManager;
 
 public interface InventoryManagementService extends Service {
 
@@ -458,5 +464,5 @@ public interface InventoryManagementService extends Service {
    */
   BigDecimal getUnusableStock(Long kId, Long mId) throws ServiceException;
 
-   Long getInvMaterialCount(Long domainId,Long tagId) throws ServiceException;
+  Long getInvMaterialCount(Long domainId, Long tagId) throws ServiceException;
 }

@@ -34,6 +34,8 @@ public class EntityMinModel {
 
   private String address;
 
+  private Location location;
+
   public Long getId() {
     return id;
   }
@@ -58,4 +60,11 @@ public class EntityMinModel {
     this.address = address;
   }
 
+  public Location getLocation() {
+    return location;
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
+  }
 }

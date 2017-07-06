@@ -27,22 +27,20 @@
 package com.logistimo.materials.service.impl;
 
 import com.logistimo.AppFactory;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.dao.JDOUtils;
+import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
+import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.exceptions.EventGenerationException;
 import com.logistimo.events.processor.EventPublisher;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.dao.IMaterialDao;
 import com.logistimo.materials.dao.impl.MaterialDao;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.entity.Material;
 import com.logistimo.materials.service.MaterialCatalogService;
-import com.logistimo.tags.TagUtil;
-import com.logistimo.tags.dao.ITagDao;
-import com.logistimo.tags.dao.TagDao;
-import com.logistimo.tags.entity.ITag;
-
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.events.entity.IEvent;
+import com.logistimo.models.ICounter;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.Service;
@@ -50,11 +48,12 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
+import com.logistimo.tags.TagUtil;
+import com.logistimo.tags.dao.ITagDao;
+import com.logistimo.tags.dao.TagDao;
+import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.Counter;
-import com.logistimo.domains.utils.DomainsUtil;
-import com.logistimo.models.ICounter;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,6 +69,7 @@ import javax.jdo.Transaction;
 /**
  * @author juhee
  */
+@org.springframework.stereotype.Service
 public class MaterialCatalogServiceImpl extends ServiceImpl implements MaterialCatalogService {
 
   private static final XLog xLogger = XLog.getLog(MaterialCatalogServiceImpl.class);

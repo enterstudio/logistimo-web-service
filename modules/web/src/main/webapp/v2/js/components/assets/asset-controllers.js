@@ -568,8 +568,8 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
             {"index":"2","factorValue": "1440", "displayValue": "Days"},
             {"index":"3","factorValue": "10080", "displayValue": "Weeks"},
             {"index":"4","factorValue": "43200", "displayValue": "Months"}];
-        $scope.localFilters = ['entity','duration'];
-        $scope.filterMethods = ['filterResults','onDurationFilterChange'];
+        $scope.localFilters = ['entity', 'duration'];
+        $scope.filterMethods = ['filterResults', 'onDurationFilterChange'];
         $scope.currentFilter = 0;
         $scope.tempCurrentFilter = 0;
         $scope.assetTypeFilter = ['md'];
@@ -767,7 +767,7 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
                 $scope.at_md.splice(0,$scope.at_md.length)
             }
         };
-        $scope.applyFilter = function() {
+        $scope.applyFilter = function () {
             if(!checkNullEmptyObject($scope.at_mg)) {
                 $scope.assetTypeFilter = angular.copy($scope.at_mg);
                 $scope.assetTypeFilterGroup = 1;
@@ -928,7 +928,7 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
 
         $scope.onAlarmFilterChange = function(value){
             $scope.tempCurrentFilter = value;
-            if($scope.tempCurrentFilter == 0 || $scope.tempCurrentFilter == 4)
+            if ($scope.tempCurrentFilter == 0 || $scope.tempCurrentFilter == 4)
                 $scope.tempCurrentFilterDuration = 0;
         };
 
@@ -936,14 +936,14 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
             $scope.tempAssetWSFilter = value;
         };
 
-        $scope.filterResults = function(){
+        $scope.filterResults = function () {
             $scope.assetWSFilter = angular.copy($scope.tempAssetWSFilter);
             $scope.currentFilter = angular.copy($scope.tempCurrentFilter);
             $scope.currentFilterDuration = angular.copy($scope.tempCurrentFilterDuration);
             $scope.awr = angular.copy($scope.tempAwr);
             $scope.awrDisplay = angular.copy($scope.tempAwrDisplay);
             $scope.aDurationDisplay = angular.copy($scope.tempADurationDisplay);
-            
+
         }
 
         $scope.resetFilters = function(){

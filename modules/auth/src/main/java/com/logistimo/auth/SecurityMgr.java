@@ -57,9 +57,6 @@ import javax.servlet.http.HttpSession;
  */
 public class SecurityMgr {
 
-  private SecurityMgr() {
-  }
-
   // Logger
   private static final XLog xLogger = XLog.getLog(SecurityMgr.class);
   // Operation identifiers (define more operations here)
@@ -68,6 +65,9 @@ public class SecurityMgr {
   private static final String OP_PUSHAPP = "pshapp";
   // HTTP header
   private static final String HEADER_AUTHORIZATION = "Authorization";
+
+  private SecurityMgr() {
+  }
 
   // Is logged in as another user?
   public static boolean isLoggedInAsAnotherUser(HttpSession session, String userId) {
@@ -192,6 +192,7 @@ public class SecurityMgr {
 
   /**
    * Gets the user details if present
+   *
    * @return Authenticated user details if present. Otherwise, null.
    */
   public static SecureUserDetails getUserDetailsIfPresent() {

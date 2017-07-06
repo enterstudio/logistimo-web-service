@@ -56,18 +56,24 @@
                     <div class="col-sm-3">
                         <span class="filter-label">{{resourceBundle['order']}}</span>
                         <div class="has-feedback">
-                        <input type="text" class="form-control" ng-model="ordId" autocomplete="off" typeahead-wait-ms="300"
-                                       placeholder="{{resourceBundle['ord.num']}}"  uib-typeahead="val for val in getSuggestions($viewValue,'oid')"
-                                       typeahead-loading="loadingOrderId" typeahead-on-select="showOrder(ordId)">
-                        <span ng-show="loadingOrderId" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                            <input type="text" class="form-control" ng-model="ordId" autocomplete="off"
+                                   typeahead-wait-ms="300"
+                                   placeholder="{{resourceBundle['ord.num']}}"
+                                   uib-typeahead="val for val in getSuggestions($viewValue,'oid')"
+                                   typeahead-loading="loadingOrderId" typeahead-on-select="showOrder(ordId)">
+                            <span ng-show="loadingOrderId" class="form-control-feedback typehead-loading"
+                                  aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
                         </div>
                     </div>
                     <div class="col-sm-3" ng-show="isUndef(orderId)">
                         <span class="filter-label">{{resourceBundle['referenceid']}}</span>
                         <div class="has-feedback">
-                        <input type="text" class="form-control" ng-model="refId" autocomplete="off" typeahead-wait-ms = "300" placeholder="{{resourceBundle['referenceid']}}"
-                               uib-typeahead="val for val in getSuggestions($viewValue, 'rid')" typeahead-loading="loadingRefID" typeahead-on-select="showOrderByReferenceId(refId)">
-                            <span ng-show="loadingRefID" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                            <input type="text" class="form-control" ng-model="refId" autocomplete="off"
+                                   typeahead-wait-ms="300" placeholder="{{resourceBundle['referenceid']}}"
+                                   uib-typeahead="val for val in getSuggestions($viewValue, 'rid')"
+                                   typeahead-loading="loadingRefID" typeahead-on-select="showOrderByReferenceId(refId)">
+                            <span ng-show="loadingRefID" class="form-control-feedback typehead-loading"
+                                  aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
                         </div>
                     </div>
                 </div>

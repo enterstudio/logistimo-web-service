@@ -38,10 +38,10 @@
                 </div>
                 <div class="row action-bar">
                     <div class="col-sm-12">
-                            <export-data mail-id="mailId" batch-enabled="true"
-                                               entity-id="entityId"
-                                               mat-id="mid" entity-name="entity.nm" m-name="material.mnm"
-                                               ebf="ebf" export-type="inventory" rows="numFound"></export-data>
+                        <export-data mail-id="mailId" batch-enabled="true"
+                                     entity-id="entityId"
+                                     mat-id="mid" entity-name="entity.nm" m-name="material.mnm"
+                                     ebf="ebf" export-type="inventory" rows="numFound"></export-data>
                     </div>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                     <div class="title-heading marginlr0" ng-hide="showFilters || isUndef(entity.nm)">
                         <a ng-href="#/setup/entities/detail/{{entity.id}}/" target="_blank">{{entity.nm}}</a>
                     </div>
-                    </div>
+                </div>
                 <div class="col-sm-4">
                     <div class="pull-right">
                         <div ng-include="'views/paginator.html'"></div>
@@ -67,16 +67,29 @@
                         <tr>
                             <th></th>
                             <th class="text-center">{{resourceBundle['serialnum']}}</th>
-                            <th ng-if="showFullAbnormalStock || (locationSelected && (entity.id == null || entity.id == ''))">{{resourceBundle['kiosk']}}</th>
+                            <th ng-if="showFullAbnormalStock || (locationSelected && (entity.id == null || entity.id == ''))">
+                                {{resourceBundle['kiosk']}}
+                            </th>
                             <th>{{resourceBundle['material']}}</th>
                             <th class="text-center">{{resourceBundle['material.stockonhand']}}</th>
                             <th></th>
-                            <th class="text-center" ng-show="allocate && ordersTabEnabled">{{resourceBundle['allocated']}}</th>
-                            <th class="text-center" ng-show="allocate && ordersTabEnabled">{{resourceBundle['available']}}</th>
-                            <th class="text-center" ng-show="allocate && ordersTabEnabled">{{resourceBundle['intransit']}}</th>
-                            <th class="text-center" ng-show="invCnf.cr"><p class="capbold" style="display: inline;">{{invCnf.cu}}</p> {{resourceBundle['of']}} {{resourceBundle['stock.lowercase']}}</th>
-                            <th class="text-center">{{resourceBundle['inventory.reorderlevel']}}<span ng-if="mmd" class="litetext">{{mmd}}</span></th>
-                            <th class="text-center">{{resourceBundle['max']}}<span ng-if="mmd" class="litetext">{{mmd}}</span></th>
+                            <th class="text-center" ng-show="allocate && ordersTabEnabled">
+                                {{resourceBundle['allocated']}}
+                            </th>
+                            <th class="text-center" ng-show="allocate && ordersTabEnabled">
+                                {{resourceBundle['available']}}
+                            </th>
+                            <th class="text-center" ng-show="allocate && ordersTabEnabled">
+                                {{resourceBundle['intransit']}}
+                            </th>
+                            <th class="text-center" ng-show="invCnf.cr"><p class="capbold" style="display: inline;">
+                                {{invCnf.cu}}</p> {{resourceBundle['of']}} {{resourceBundle['stock.lowercase']}}
+                            </th>
+                            <th class="text-center">{{resourceBundle['inventory.reorderlevel']}}<span ng-if="mmd"
+                                                                                                      class="litetext">{{mmd}}</span>
+                            </th>
+                            <th class="text-center">{{resourceBundle['max']}}<span ng-if="mmd"
+                                                                                   class="litetext">{{mmd}}</span></th>
                             <th>{{resourceBundle['lastupdated']}}</th>
                             <th></th>
                         </tr>
@@ -88,52 +101,77 @@
                         <tr ng-class=" {'alert alert-danger':item.event == 200,
                                                     'alert alert-info alert-info-dark':item.event == 202,
                                                     'alert alert-warning alert-warning-dark':item.event == 201}">
-                            <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
+                            <td><span class="glyphicons glyphicons-bring-to-front tglyph"
+                                      ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)"
+                                      uib-tooltip="{{item.sdname}}"></span></td>
                             <td class="text-center">{{item.sno}}</td>
-                            <td ng-if="showFullAbnormalStock || (locationSelected && (entity.id == null || entity.id == ''))"><a ng-href="#/setup/entities/detail/{{item.kId}}"
-                                                                 target="_blank">{{item.enm}}</a></td>
-                            <td><a href="#/setup/materials/all/detail/{{item.mId}}/" target="_blank">{{item.mnm}}</a></td>
+                            <td ng-if="showFullAbnormalStock || (locationSelected && (entity.id == null || entity.id == ''))">
+                                <a ng-href="#/setup/entities/detail/{{item.kId}}"
+                                   target="_blank">{{item.enm}}</a></td>
+                            <td><a href="#/setup/materials/all/detail/{{item.mId}}/" target="_blank">{{item.mnm}}</a>
+                            </td>
                             <td class="text-center">{{item.stk |roundNoTrailZeros:2}}
                                 <div ng-if="isDef(item.period)" class="small">{{item.period | timeStr:false:true}}</div>
                             </td>
                             <td class="text-center">
                                 <div ng-show="item.be" class="clickable" ng-click="select($index,'batch')"><span
-                                        class="glyphicons glyphicons-list-alt" uib-tooltip="{{resourceBundle['batch']}}"></span></div>
+                                        class="glyphicons glyphicons-list-alt"
+                                        uib-tooltip="{{resourceBundle['batch']}}"></span></div>
                             </td>
-                            <td class="text-center" ng-show="allocate && ordersTabEnabled">{{item.astk |roundNoTrailZeros:2}}
-                                <span ng-show="item.astk > 0" ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index,'allocated')"></span>
+                            <td class="text-center" ng-show="allocate && ordersTabEnabled">{{item.astk
+                                |roundNoTrailZeros:2}}
+                                <span ng-show="item.astk > 0"
+                                      ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}"
+                                      ng-click="select($index,'allocated')"></span>
                             </td>
-                            <td class="text-center" ng-show="allocate && ordersTabEnabled">{{item.atpstk |roundNoTrailZeros:2}}</td>
-                            <td class="text-center" ng-show="allocate && ordersTabEnabled">{{item.tstk |roundNoTrailZeros:2}}
-                                <span ng-show="item.tstk > 0" ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index,'transit')"></span>
+                            <td class="text-center" ng-show="allocate && ordersTabEnabled">{{item.atpstk
+                                |roundNoTrailZeros:2}}
+                            </td>
+                            <td class="text-center" ng-show="allocate && ordersTabEnabled">{{item.tstk
+                                |roundNoTrailZeros:2}}
+                                <span ng-show="item.tstk > 0"
+                                      ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}"
+                                      ng-click="select($index,'transit')"></span>
                             </td>
                             <td class="text-center" ng-show="invCnf.cr">
                                 <div class="inline">
                                     {{item.sap>0?(item.sap | roundNoTrailZeros:2) :"NA"}}
                                     <div class="clickable" ng-click="select($index,'inventory')" ng-show="item.sap>0">
                                         <span ng-show="exRow[$index] === 'inventory'"
-                                          class="glyphicons glyphicons-collapse-top"></span>
-                                        <span ng-show="exRow[$index] !== 'inventory'" class="glyphicons glyphicons-expand"></span>
+                                              class="glyphicons glyphicons-collapse-top"></span>
+                                        <span ng-show="exRow[$index] !== 'inventory'"
+                                              class="glyphicons glyphicons-expand"></span>
                                     </div>
                                 </div>
                             </td>
                             <td class="text-center">
                                 <div style="display: inline-block;">{{item.reord}}
-                                <span ng-show="mmdt && item.minDur > 0" class="litetext">{{item.minDur}} {{mmdt}}</span></div>
-                                <span ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index,'minMaxHistory')"></span>
+                                    <span ng-show="mmdt && item.minDur > 0"
+                                          class="litetext">{{item.minDur}} {{mmdt}}</span></div>
+                                <span ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}"
+                                      ng-click="select($index,'minMaxHistory')"></span>
                             </td>
                             <td class="text-center">
                                 <div style="display: inline-block;"> {{item.max}}
-                                    <span ng-show="mmdt && item.maxDur > 0" class="litetext">{{item.maxDur}} {{mmdt}}</span></div>
-                                <span ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}" ng-click="select($index,'minMaxHistory')"></span>
+                                    <span ng-show="mmdt && item.maxDur > 0"
+                                          class="litetext">{{item.maxDur}} {{mmdt}}</span></div>
+                                <span ng-class="{'glyphicons glyphicons-expand pt2': !expand[$index],'glyphicons glyphicons-collapse-top pt2': expand[$index]}"
+                                      ng-click="select($index,'minMaxHistory')"></span>
                             </td>
                             <td>{{item.t}}</td>
                             <td class="text-center">
-                                <span ng-show="iPredEnabled && item.sap > 0 && item.pdos < 8" ng-click="select($index,'inventory')" class="glyphicon glyphicon-warning-sign rPad5 clickable fc-color-orange" uib-tooltip="Likely to stock out within the next 7 days"></span>
-                                <a ng-show="iPredEnabled && ordersTabEnabled && item.sap > 0 && item.pdos<8" href="#/orders/add/?eid={{item.kId}}&mid={{item.mId}}" target="_blank">
-                                    <span class="glyphicon glyphicon-shopping-cart clickable rPad5" uib-tooltip="Place order"></span>
+                                <span ng-show="iPredEnabled && item.sap > 0 && item.pdos < 8"
+                                      ng-click="select($index,'inventory')"
+                                      class="glyphicon glyphicon-warning-sign rPad5 clickable fc-color-orange"
+                                      uib-tooltip="Likely to stock out within the next 7 days"></span>
+                                <a ng-show="iPredEnabled && ordersTabEnabled && item.sap > 0 && item.pdos<8"
+                                   href="#/orders/add/?eid={{item.kId}}&mid={{item.mId}}" target="_blank">
+                                    <span class="glyphicon glyphicon-shopping-cart clickable rPad5"
+                                          uib-tooltip="Place order"></span>
                                 </a>
-                                <span ng-if="item.eventType !== -1" class="glyphicons glyphicons-history clickable" ng-click="select($index,'history')" uib-tooltip="{{resourceBundle['history']}}"></span>
+                                <span ng-if="item.eventType !== -1" class="glyphicons glyphicons-history clickable"
+                                      ng-click="select($index,'history')"
+                                      uib-tooltip="{{resourceBundle['history']}}"></span>
                             </td>
                         </tr>
                         <tr data-ng-switch-when="batch">

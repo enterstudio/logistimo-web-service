@@ -31,13 +31,12 @@ import com.logistimo.services.utils.ConfigUtil;
  */
 public class DedupUtil {
 
-  private static final int
-      CACHE_EXPIRY =
-      ConfigUtil.getInt("cache.expiry.for.transaction.signature", 900);// 15 minutes
-
   public static final int PENDING = 0;
   public static final int SUCCESS = 1;
   public static final int FAILED = 2;
+  private static final int
+      CACHE_EXPIRY =
+      ConfigUtil.getInt("cache.expiry.for.transaction.signature", 900);// 15 minutes
 
   private DedupUtil() {
   }
@@ -51,8 +50,6 @@ public class DedupUtil {
 
   /**
    * Removes the specified signature from cache
-   * @param cache
-   * @param signature
    */
   public static void removeSignature(MemcacheService cache, String signature) {
     if (cache != null && signature != null) {
