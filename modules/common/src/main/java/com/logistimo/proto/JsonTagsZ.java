@@ -299,4 +299,6 @@ public class JsonTagsZ {
   // Approvals related keys
   public static final String APPROVERS = "apprvrs";
   public static final String APPROVALS = "apprvls";
+  // Store app GUI theme
+  public static final String GUI_THEME = "thm";
 }

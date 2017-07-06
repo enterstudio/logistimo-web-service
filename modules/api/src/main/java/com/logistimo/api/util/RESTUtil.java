@@ -159,6 +159,7 @@ public class RESTUtil {
   private static final String ORDERS = "orders";
 
   private static final String MINIMUM_RESPONSE_CODE_TWO = "2";
+  private static final short GUI_THEME_FROM_DOMAIN_CONFIGURATION = -1;
 
   private static ITaskService taskService = AppFactory.get().getTaskService();
   private static ITransDao transDao = new TransDao();
@@ -983,6 +984,11 @@ public class RESTUtil {
         } else if (IUserAccount.LR_LOGIN_DONT_RECONNECT.equals(user.getLoginReconnect())) {
           config.remove(JsonTagsZ.LOGIN_AS_RECONNECT);
         }
+        // Get user specific gui theme configuration and add it to config
+        int storeAppTheme = user.getStoreAppTheme();
+        if (storeAppTheme != GUI_THEME_FROM_DOMAIN_CONFIGURATION) {
+          config.put(JsonTagsZ.GUI_THEME, storeAppTheme);
+        }
       }
       fullUser = new UserEntitiesModel(user, kioskList);
     }
@@ -1689,6 +1695,8 @@ public class RESTUtil {
             config.put(JsonTagsZ.APPROVALS, mobileApprovalsConfigModel);
           }
         }
+        // Add the domain specific Store app theme configuration
+        config.put(JsonTagsZ.GUI_THEME, dc.getStoreAppTheme());
       } catch (Exception e) {
         xLogger.warn("Error in getting system configuration: {0}", e);
       }
