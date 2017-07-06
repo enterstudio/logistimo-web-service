@@ -68,6 +68,8 @@ ENV MYSQL_HOST_URL="jdbc:mariadb://localhost/logistimo?useUnicode=true&amp;chara
         LOCAL_ENV=true \
         JAVA_XMS=1024m \
         JAVA_XMX=1024m \
+        LOC_URL=http://localhost:9090 \
+        APPROVAL_URL=http://localhost:6400 \
         JMX_AGENT_PORT=8088
 
 ENV JAVA_OPTS $JAVA_OPTS
