@@ -214,6 +214,10 @@ public final class Constants {
   public static final int FREQ_TYPE_WEEKLY = 1;
   public static final int FREQ_TYPE_MONTHLY = 2;
 
+  // Attributes for store app theme
+  public static final int GUI_THEME_BLACK = 0;
+  public static final int GUI_THEME_RED = 1;
+
 
   public static String getVerticalDisplay(String vertical) {
     String verticalDisplay = "Default";

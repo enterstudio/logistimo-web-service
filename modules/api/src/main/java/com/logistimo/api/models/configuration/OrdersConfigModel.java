@@ -70,4 +70,5 @@ public class OrdersConfigModel {
   public String cor; // Cancelling order Reasons
   public boolean corm; // Mark cancelling order reasons mandatory
   public boolean acs; // Allow creating shipments
+  public boolean aafmsc; // Auto assign first material status to items, when order is confirmed
 }

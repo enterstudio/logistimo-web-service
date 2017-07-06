@@ -498,6 +498,7 @@ domainCfgControllers.controller('CapabilitiesConfigurationController', ['$scope'
                 $scope.uiCnf.aplui = $scope.cnf.aplui;
                 $scope.uiCnf.stwd = $scope.cnf.stwd;
                 $scope.uiCnf.llr = $scope.cnf.llr;
+                $scope.uiCnf.theme = $scope.cnf.theme;
             }
         };
         $scope.setCapabilitiesByRole = function (role, lu) {
@@ -522,6 +523,7 @@ domainCfgControllers.controller('CapabilitiesConfigurationController', ['$scope'
                 $scope.cnf.aplui = $scope.uiCnf.aplui;
                 $scope.cnf.stwd = $scope.uiCnf.stwd;
                 $scope.cnf.llr = $scope.uiCnf.llr;
+                $scope.cnf.theme = $scope.uiCnf.theme;
             }
         }
     }

@@ -312,6 +312,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['mob']}} {{resourceBundle['gui.theme']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['store.app.theme']}}</label>
+                                <div class="col-sm-8">
+                                    <select ng-model="uiCnf.theme" class="form-control w20" id="mtheme">
+                                        <option ng-value="0">{{resourceBundle['theme.black']}}</option>
+                                        <option ng-value="1">{{resourceBundle['theme.red']}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt10" ng-if="iSU || dp.ce">
                     <div class="col-sm-12  ml5">
                         <button type="button" ng-click="setCapabilitiesConfiguration()" class="btn btn-primary">{{resourceBundle['save']}}</button>

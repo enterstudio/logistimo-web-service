@@ -268,4 +268,8 @@ public interface IUserAccount extends ISuperDomain, ILocationConfig {
   Integer getLoginSource();
 
   void setLoginSource(Integer lgSrc);
+
+  Integer getStoreAppTheme();
+
+  void setStoreAppTheme(Integer theme);
 }

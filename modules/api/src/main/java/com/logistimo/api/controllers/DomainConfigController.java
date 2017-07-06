@@ -948,6 +948,7 @@ public class DomainConfigController {
         cc.dc.setAllowRouteTagEditing(model.er);
         cc.dc.setLoginAsReconnect(model.lr);
         cc.dc.setEnableShippingOnMobile(model.eshp);
+        cc.dc.setStoreAppTheme(model.getTheme());
 
         String issueTags = TagUtil.getCleanTags(StringUtils.join(model.hii, ','), true);
         String receiptsTags = TagUtil.getCleanTags(StringUtils.join(model.hir, ','), true);
@@ -1497,6 +1498,7 @@ public class DomainConfigController {
       oc.setCancellingOrderReasons(model.cor);
       oc.setCancellingOrderReasonsMandatory(model.corm);
       //oc.setAllowCreatingShipments(model.acs);
+      oc.setAutoAssignFirstMaterialStatusOnConfirmation(model.aafmsc);
 
       if (model.et != null && !model.et.trim().isEmpty()) {
         List<String> times = StringUtil.getList(model.et.trim());

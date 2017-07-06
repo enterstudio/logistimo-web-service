@@ -65,6 +65,8 @@ public class OrdersConfig implements Serializable {
   private static final String CANCELLING_ORDER_REASONS = "cor";
   private static final String CANCELLING_ORDER_REASONS_MANDATORY = "corm";
   private static final String ALLOW_CREATING_SHIPMENTS = "asc";
+  private static final String AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION = "aafmsc";
+
   String sourceUserId = null; // user who last created the export specification
   private boolean exportEnabled = false;
   private String exportUserIdCSV = null;
@@ -87,6 +89,7 @@ public class OrdersConfig implements Serializable {
   private String coReasons;
   private boolean coReasonsMandatory;
   private boolean allowCreatingShipments;
+  private boolean autoAssignFirstMatStOnConfirmation;
 
   public OrdersConfig() {
   }
@@ -202,6 +205,11 @@ public class OrdersConfig implements Serializable {
     } catch (JSONException e) {
       //ignore
     }
+    try {
+      autoAssignFirstMatStOnConfirmation = json.getBoolean(AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION);
+    } catch (JSONException e) {
+      // ignore
+    }
   }
 
   public JSONObject toJSONObject() throws ConfigurationException {
@@ -250,6 +258,7 @@ public class OrdersConfig implements Serializable {
       json.put(ALLOCATE_STOCK_ON_CONFIRMATION, allocateStockOnConfirmation);
       json.put(TRANSFER_RELEASE, transferRelease);
       json.put(ALLOW_CREATING_SHIPMENTS, allowCreatingShipments);
+      json.put(AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION, autoAssignFirstMatStOnConfirmation);
       return json;
     } catch (JSONException e) {
       throw new ConfigurationException(e.getMessage());
@@ -430,5 +439,13 @@ public class OrdersConfig implements Serializable {
 
   public void setAllowCreatingShipments(boolean allowCreatingShipments) {
     this.allowCreatingShipments = allowCreatingShipments;
+  }
+
+  public boolean autoAssignFirstMatStOnConfirmation() {
+    return autoAssignFirstMatStOnConfirmation;
+  }
+
+  public void setAutoAssignFirstMaterialStatusOnConfirmation(boolean assignMatStatus) {
+    autoAssignFirstMatStOnConfirmation = assignMatStatus;
   }
 }

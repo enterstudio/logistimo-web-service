@@ -1021,3 +1021,5 @@ administrative.contacts=Administrative Contacts
 config.device.pull=Configuration last pulled
 config.device.requested=Requested to pull configuration
 requested=requested
+config.autoassignmaterialstatus=Auto-assign material status
+config.autoassignmaterialstatusmsg=Automatically assign the first material status, if available, to items when the order is confirmed

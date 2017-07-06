@@ -60,4 +60,14 @@ public class CapabilitiesConfigModel {
   public int iri = 0; // Inventory refresh interval
   public int aplui = 0; // Application log upload interval
   public int stwd = 0; // SMS transmission wait duration
+
+  private int theme; // Store App theme
+
+  public int getTheme() {
+    return theme;
+  }
+
+  public void setTheme(int theme) {
+    this.theme = theme;
+  }
 }

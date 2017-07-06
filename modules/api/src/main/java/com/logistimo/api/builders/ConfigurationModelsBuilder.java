@@ -719,6 +719,7 @@ public class ConfigurationModelsBuilder {
       model.aplui = sc.getAppLogUploadInterval() / SyncConfig.HOURS_IN_A_DAY;
       model.stwd = sc.getSmsTransmissionWaitDuration() / SyncConfig.HOURS_IN_A_DAY;
     }
+    model.setTheme(dc.getStoreAppTheme());
     return model;
   }
 
@@ -797,6 +798,7 @@ public class ConfigurationModelsBuilder {
         model.stwd =
             dc.getSyncConfig().getSmsTransmissionWaitDuration() / SyncConfig.HOURS_IN_A_DAY;
       }
+      model.setTheme(dc.getStoreAppTheme());
     }
     return model;
   }
@@ -1173,6 +1175,7 @@ public class ConfigurationModelsBuilder {
            /* if (oc.getExportUserIds() != null) {
                 model.an = oc.getExportUserIds();
             }*/
+      model.aafmsc = oc.autoAssignFirstMatStOnConfirmation();
     }
     if (dbc != null) {
       if (dbc.isPublic()) {
@@ -1342,7 +1345,7 @@ public class ConfigurationModelsBuilder {
   }
 
   private List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
-    if (userIds != null && userIds.size() > 0) {
+    if (userIds != null && !userIds.isEmpty()) {
       List<IUserAccount> list = new ArrayList<>(userIds.size());
       for (String userId : userIds) {
         try {
