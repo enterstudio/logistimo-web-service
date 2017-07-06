@@ -3591,6 +3591,7 @@ ordControllers.controller('ShipmentDetailCtrl', ['$scope', 'ordService','request
                     $scope.newStatus.cdrsn = $scope.newStatus.ncdrsn;
                 }
             }
+            $scope.newStatus.orderUpdatedAt = $scope.shipment.orderUpdatedAt;
             $scope.statusLoading = true;
             $scope.showLoading();
             ordService.updateShipmentStatus($scope.sid, $scope.newStatus).then(function (data) {
