@@ -36,6 +36,7 @@ import com.logistimo.entities.auth.EntityAuthoriser;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.ResponseModel;
@@ -47,6 +48,7 @@ import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
@@ -249,7 +251,8 @@ public class ShipmentController {
   public
   @ResponseBody
   String updateShipmentStatus(@PathVariable String shipId, @RequestBody OrderStatusModel status,
-                              HttpServletRequest request, HttpServletResponse response) {
+                              HttpServletRequest request, HttpServletResponse response)
+      throws ValidationException, ServiceException, ObjectNotFoundException {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
@@ -265,6 +268,11 @@ public class ShipmentController {
       shipmentStatus = ShipmentStatus.CANCELLED;
     } else {
       throw new InvalidServiceException("Invalid status to update");
+    }
+    OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
+    IOrder o = oms.getOrder(orderId,true);
+    if(!status.orderUpdatedAt.equals(LocalDateUtil.formatCustom(o.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
+      throw new ValidationException("O004", user.getUsername(), LocalDateUtil.format(o.getUpdatedOn(), user.getLocale(), user.getTimezone()));
     }
     try {
       IShipmentService ss = Services.getService(ShipmentService.class, user.getLocale());

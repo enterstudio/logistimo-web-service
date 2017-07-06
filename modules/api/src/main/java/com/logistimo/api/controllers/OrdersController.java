@@ -337,7 +337,7 @@ public class OrdersController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     try {
-      UpdatedOrder updOrder = null;
+      UpdatedOrder updOrder;
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
       IOrder o = oms.getOrder(orderId,true);
       if(!status.orderUpdatedAt.equals(LocalDateUtil.formatCustom(o.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
