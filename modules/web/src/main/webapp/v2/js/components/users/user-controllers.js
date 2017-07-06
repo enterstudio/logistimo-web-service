@@ -1193,9 +1193,8 @@ userControllers.controller('ManagedListTableController', ['$scope', 'entityServi
         });
     }
 ]);
-userControllers.controller('ManagedEntityRouteMapCtrl', ['$scope', 'mapService', 'entityService','domainCfgService','invService','trnService',
-    function ($scope, mapService, entityService,domainCfgService,invService,trnService) {
-        $scope.mrData = angular.copy($scope.orData);
+userControllers.controller('ManagedEntityRouteMapCtrl', ['$scope', 'mapService', 'entityService', 'domainCfgService', 'invService', 'trnService', 'uiGmapGoogleMapApi',
+    function ($scope, mapService, entityService, domainCfgService, invService, trnService, uiGmapGoogleMapApi) {
         function trimData(data) {
             var d = {};
             d.lt = data.lt;
@@ -1209,6 +1208,11 @@ userControllers.controller('ManagedEntityRouteMapCtrl', ['$scope', 'mapService',
             d.rt = data.rt;
             return d;
         }
+
+        uiGmapGoogleMapApi.then(function () {
+            initMap();
+        });
+
         function trimNoGeoEntity() {
             $scope.noGeoData = [];
             var noGeoCnt = [];
@@ -1231,14 +1235,19 @@ userControllers.controller('ManagedEntityRouteMapCtrl', ['$scope', 'mapService',
             });
             $scope.mrData = lmrData;
         }
-        trimNoGeoEntity();
-        $scope.lmap = angular.copy($scope.map);
-        $scope.lmap.options = {scrollwheel: false};
-        $scope.lmap.control = {};
-        var lineCoordinates = [];
-        var lineCoordinatesIndex = [];
-        var lineSymbol = undefined;
-        $scope.today = new Date();
+
+        function initMap() {
+            $scope.mrData = angular.copy($scope.orData);
+            $scope.lmap = angular.copy($scope.map);
+            $scope.lmap.options = {scrollwheel: false};
+            $scope.lmap.control = {};
+            var lineCoordinates = [];
+            var lineCoordinatesIndex = [];
+            var lineSymbol = undefined;
+            $scope.today = new Date();
+            trimNoGeoEntity();
+        }
+
         $scope.addLineCoord = function (marker,action) {
             if(!$scope.showActual && (checkNullEmpty($scope.allRTags) || $scope.tag != '--notag--')) {
                 var markerCoord = marker.model.osno - 1;
