@@ -1436,6 +1436,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         opoq = material.max - material.stk - material.tstk;
                     }
                 }
+                opoq = Math.ceil(opoq/material.huQty)*material.huQty;
                 return opoq;
             }
 
@@ -2395,6 +2396,7 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                     $scope.hideLoading();
                 });
             }
+            $scope.timestamp = undefined;
         }
         resetNoConfirm(true);
         $scope.getFilteredEntity = function (text) {
@@ -2488,6 +2490,7 @@ ordControllers.controller('order.MaterialController', ['$scope',
                     opoq.toFixed(1);
                 }
             }
+            opoq = Math.ceil(opoq/name.huQty)*name.huQty;
             return opoq.toFixed(0);
         };
         $scope.$watch('material.name', function (name, oldVal) {
