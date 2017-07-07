@@ -1380,7 +1380,7 @@ public class RESTUtil {
     if (dc != null) {
       Hashtable<String, Object>
           config =
-          new Hashtable<String, Object>(); // Changed to Hashtable<String,Object> to accomodate mst, rsnsbytg and tgiov which are JSON objects
+          new Hashtable<>(); // Changed to Hashtable<String,Object> to accomodate mst, rsnsbytg and tgiov which are JSON objects
       String transNaming = dc.getTransactionNaming();
       if (transNaming != null) {
         config.put(JsonTagsZ.TRANSACTION_NAMING, transNaming);
@@ -2184,8 +2184,10 @@ public class RESTUtil {
     OrdersConfig oc = dc.getOrdersConfig();
     if (oc != null) {
       ordCfg.put(JsonTagsZ.TRANSFER_RELEASE, oc.isTransferRelease());
+      // Configuration for automatic allocation and material status assignment to order
+      ordCfg.put(JsonTagsZ.AUTO_ALLOCATE_INVENTORY_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
+      ordCfg.put(JsonTagsZ.AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
     }
-
     if (dc.isTransporterMandatory()) {
       ordCfg.put(JsonTagsZ.TRANSPORTER_MANDATORY, dc.isTransporterMandatory());
     }
