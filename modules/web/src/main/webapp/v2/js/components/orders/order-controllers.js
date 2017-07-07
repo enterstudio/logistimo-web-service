@@ -3207,7 +3207,7 @@ ordControllers.controller('FulfilShipmentController', ['$scope','ordService','tr
             msg : msg,
             isFulfil : true,
             isOrderFulfil: $scope.isOrderFulfil,
-            orderUpdatedAt: $scope.shipment.orderUpdatedAt
+            orderUpdatedAt: $scope.order ? $scope.order.orderUpdatedAt : $scope.shipment.orderUpdatedAt
         };
         $scope.showLoading();
         ordService.updateShipment(shipData).then(function (data) {
