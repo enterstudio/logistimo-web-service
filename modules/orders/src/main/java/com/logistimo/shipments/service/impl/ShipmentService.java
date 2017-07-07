@@ -789,7 +789,6 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
             batchTrans.setBatchManufacturedDate(ib.getBatchManufacturedDate());
           }
           batchTrans.setBatchManufacturer(ib.getBatchManufacturer());
-          batchTrans.setSrc(SourceConstants.WEB);
           if (ShipmentStatus.FULFILLED.equals(shipment.getStatus())) {
             batchTrans.setQuantity(ib.getFulfilledQuantity());
             batchTrans.setReason(ib.getFulfilledDiscrepancyReason());
