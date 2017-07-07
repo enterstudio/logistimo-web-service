@@ -117,6 +117,7 @@ public class ShipmentBuilder {
       model.ps = s.getPackageSize();
       model.reason = s.getReason();
       model.cdrsn = s.getCancelledDiscrepancyReasons();
+      model.src=s.getSrc();
       if (order.getUpdatedOn() != null) {
         model.orderUpdatedAt =
             LocalDateUtil.formatCustom(order.getUpdatedOn(), Constants.DATETIME_FORMAT, null);

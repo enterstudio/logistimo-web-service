@@ -127,6 +127,7 @@
                         <th>{{resourceBundle['vendor']}}</th>
                         <th>{{resourceBundle['status']}}</th>
                         <th>{{resourceBundle['created']}}</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody ng-repeat="item in filtered" ng-controller="NoController">
@@ -148,6 +149,12 @@
                         <td>
                             <a ng-href="#/setup/users/all/details?userId={{item.userID}}" ng-click="$event.stopPropagation();" target="_blank">{{item.createdBy}}</a>
                             <span class="litetext">{{item.cOn}}</span>
+                        </td>
+                        <td>
+                            <span ng-if="item.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
                         </td>
                     </tr>
                     </tbody>

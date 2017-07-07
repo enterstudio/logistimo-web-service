@@ -292,4 +292,8 @@ public interface IOrder extends ICrossDomain {
   boolean isSales();
 
   boolean isPurchase();
+
+  int getSrc();
+
+  void setSrc(int source);
 }

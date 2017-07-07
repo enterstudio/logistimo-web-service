@@ -3372,7 +3372,7 @@ public class CreateEntityServlet extends SgServlet {
           oms.updateOrderTransactions(domainId, userId, ITransaction.TYPE_ORDER, transactions,
               kioskId, null, orderMsg, createOrder, servicingKioskId, null, null, null, null, null,
               null, BigDecimal.ZERO, null, null,
-              allowEmptyOrders); // no latitude/longitude passed here
+              allowEmptyOrders,SourceConstants.MOBILE); // no latitude/longitude passed here
       IOrder order = or.getOrder();
       // If an initial status is specified, update order status
       if (status != null && !status.isEmpty()) {

@@ -78,11 +78,19 @@
                            uib-tooltip="{{resourceBundle['help']}}" tooltip-append-to-body="true"><span
                                 class="glyphicons glyphicons-info-sign tglyph"></span></a>
                         <div class="col-sm-12 paddinglr5 mt5">
+
                             <span class="pull-right" ng-hide="order.lt == undefined || order.ln == undefined || (order.lt == 0 && order.ln == 0)">
                                 <a ng-click="toggleMap()">
-                                    <span class="glyphicons glyphicons-globe" uib-tooltip="{{resourceBundle['map.view']}}" tooltip-append-to-body="true"></span>
+                                    <span class="glyphicons glyphicons-globe lPad5" uib-tooltip="{{resourceBundle['map.view']}}" tooltip-append-to-body="true"></span>
                                 </a>
                             </span>
+
+                            <div class="pull-right" >
+                            <span ng-if="order.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" ></span>
+                            <span ng-if="order.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" ></span>
+                            <span ng-if="order.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}"></span>
+                            <span ng-if="order.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}"></span>
+                            </div>
                         </div>
                     </div>
                     </div>

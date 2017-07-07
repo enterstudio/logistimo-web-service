@@ -178,6 +178,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       shipment.setLongitude(model.longitude);
       shipment.setGeoAccuracy(model.geoAccuracy);
       shipment.setGeoErrorCode(model.geoError);
+      shipment.setSrc(source);
       try {
         validateBeforeCreateShipment(model, pm);
       } catch (ServiceException e) {

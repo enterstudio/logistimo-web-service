@@ -51,10 +51,17 @@ public class OrderModel {
   public String vid;
   public String vnm = "";
   public String enm = "";
+
+  /**
+   *   Source of order creation
+   */
+  private int src;
   /**
    * Available Credit
    */
   public BigDecimal avc;
+
+
   /**
    * Available Credit Error
    */
@@ -326,5 +333,13 @@ public class OrderModel {
 
   public void setVtv(boolean vtv) {
     this.vtv = vtv;
+  }
+
+  public int getSrc() {
+    return src;
+  }
+
+  public void setSrc(int src) {
+    this.src = src;
   }
 }

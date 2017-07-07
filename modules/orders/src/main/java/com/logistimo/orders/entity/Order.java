@@ -224,6 +224,9 @@ public class Order implements IOrder {
   @Persistent
   private boolean vtv;
 
+  @Persistent
+  private Integer src;
+
   public Order() {
 
   }
@@ -1279,7 +1282,7 @@ public class Order implements IOrder {
   }
 
   @Override
-  public String getPaymentHistory(){
+  public String getPaymentHistory() {
     return this.ph;
   }
 
@@ -1318,6 +1321,9 @@ public class Order implements IOrder {
     return PURCHASE_ORDER.equals(oty);
   }
 
+  @Override
+  public int getSrc() { return src; }
 
-
+  @Override
+  public void setSrc(int source) { this.src = source;}
 }
