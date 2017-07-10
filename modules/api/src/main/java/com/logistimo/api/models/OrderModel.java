@@ -55,7 +55,7 @@ public class OrderModel {
   /**
    *   Source of order creation
    */
-  private int src;
+  public Integer src;
   /**
    * Available Credit
    */
@@ -333,13 +333,5 @@ public class OrderModel {
 
   public void setVtv(boolean vtv) {
     this.vtv = vtv;
-  }
-
-  public int getSrc() {
-    return src;
-  }
-
-  public void setSrc(int src) {
-    this.src = src;
   }
 }

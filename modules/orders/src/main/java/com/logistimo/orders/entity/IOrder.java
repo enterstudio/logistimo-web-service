@@ -293,7 +293,7 @@ public interface IOrder extends ICrossDomain {
 
   boolean isPurchase();
 
-  int getSrc();
+  Integer getSrc();
 
-  void setSrc(int source);
+  void setSrc(Integer source);
 }

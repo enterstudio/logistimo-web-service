@@ -228,10 +228,10 @@
                                 <td><a ng-href="#/setup/users/all/details?userId={{item.uid}}" target="_blank">{{item.unm}}</a>
                                 </td>
                                 <td>
-                                    <span ng-if="item.trnSrc === 1" class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
-                                    <span ng-if="item.trnSrc === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
-                                    <span ng-if="item.trnSrc === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
-                                    <span ng-if="item.trnSrc === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc == 1" class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc == 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc== 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
+                                    <span ng-if="item.trnSrc == 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
                                 </td>
                                 <td>
                             <span ng-show="item.lt !== 0 || item.ln !== 0" ng-click="select($index,'map')"
