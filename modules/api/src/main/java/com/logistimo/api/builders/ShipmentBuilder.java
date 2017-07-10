@@ -164,18 +164,22 @@ public class ShipmentBuilder {
       if (model.customerId != null) {
         try {
           IKiosk kiosk = entitiesService.getKiosk(model.customerId, false);
-          model.customerAdd = CommonUtils
-              .getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());
-          model.customerName = kiosk.getName();
-          if (deep) {
-            Integer vPermission = kiosk.getVendorPerm();
-            if (vPermission < 2 && model.vendorId != null) {
-              vPermission =
-                  EntityAuthoriser.authoriseEntityPerm(model.vendorId, user.getRole(), user.getLocale(),
-                      user.getUsername(), user.getDomainId());
+          if(kiosk != null) {
+            model.customerAdd = CommonUtils
+                .getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(),
+                    kiosk.getState());
+            model.customerName = kiosk.getName();
+            if (deep) {
+              Integer vPermission = kiosk.getVendorPerm();
+              if (vPermission < 2 && model.vendorId != null) {
+                vPermission =
+                    EntityAuthoriser
+                        .authoriseEntityPerm(model.vendorId, user.getRole(), user.getLocale(),
+                            user.getUsername(), user.getDomainId());
+              }
+              model.atv = vPermission > 1;
+              model.atvv = vPermission > 0;
             }
-            model.atv = vPermission > 1;
-            model.atvv = vPermission > 0;
           }
         } catch (ServiceException e) {
           xLogger.warn("Kiosk is not available {0}", model.customerId, e);
@@ -185,18 +189,22 @@ public class ShipmentBuilder {
       if (model.vendorId != null) {
         try {
           kiosk = entitiesService.getKiosk(model.vendorId, false);
-          model.vendorAdd = CommonUtils
-              .getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());;
-          model.vendorName = kiosk.getName();
-          if (deep) {
-            Integer cPermission = kiosk.getCustomerPerm();
-            if (cPermission < 2) {
-              cPermission =
-                  EntityAuthoriser.authoriseEntityPerm(model.customerId, user.getRole(), user.getLocale(),
-                      user.getUsername(), user.getDomainId());
+          if(kiosk != null) {
+            model.vendorAdd = CommonUtils
+                .getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(),
+                    kiosk.getState());
+            model.vendorName = kiosk.getName();
+            if (deep) {
+              Integer cPermission = kiosk.getCustomerPerm();
+              if (cPermission < 2) {
+                cPermission =
+                    EntityAuthoriser
+                        .authoriseEntityPerm(model.customerId, user.getRole(), user.getLocale(),
+                            user.getUsername(), user.getDomainId());
+              }
+              model.atc = cPermission > 1;
+              model.atvc = cPermission > 0;
             }
-            model.atc = cPermission > 1;
-            model.atvc = cPermission > 0;
           }
         } catch (ServiceException e) {
           xLogger.warn("Kiosk is not available {0}", model.vendorId, e);
