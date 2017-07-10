@@ -1023,3 +1023,11 @@ config.device.requested=Requested to pull configuration
 requested=requested
 config.autoassignmaterialstatus=Auto-assign material status
 config.autoassignmaterialstatusmsg=Automatically assign the first material status, if available, to items when the order is confirmed
+invalid.age.message=Please enter a valid number between 1 and 99
+invalid.latitude.message=Latitude should be between -90 and 90 rounded to eight decimal places maximum
+invalid.longitude.message=Longitude should be between -180 and 180 rounded to eight decimal places maximum
+invalid.tax.message=Tax (%) should be between 0 and 100 rounded to two decimal places maximum
+invalid.msrp.message=MSRP should be less than 1 billion rounded to two decimal places maximum
+invalid.retailerprice.message=Retailer's price should be less than 1 billion rounded to two decimal places maximum
+invalid.temperature.message=Temperature range should be -99.99 to 99.99 rounded to two decimal places maximum
+

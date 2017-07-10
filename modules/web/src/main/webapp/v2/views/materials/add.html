@@ -154,7 +154,10 @@
                     <label for="msrp" class="col-sm-4 control-label">{{resourceBundle['material.msrp']}}</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control" id="msrp" name="msrp" ng-model="material.msrp"
-                               placeholder="{{resourceBundle['material.msrpexpanded']}}" only-digits allow-decimal maxlength="12">
+                               placeholder="{{resourceBundle['material.msrpexpanded']}}" only-digits allow-decimal ng-pattern="pricePattern">
+                        <div class="has-error" ng-show="!addMatForm.msrp.$valid">
+                            <span class="help-block ent-title">{{resourceBundle['invalid.msrp.message']}}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -165,7 +168,10 @@
                     <label for="rp" class="col-sm-4 control-label">{{resourceBundle['material.retailerprice']}}</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control" id="rp" name="rp" ng-model="material.rp"
-                               placeholder="{{resourceBundle['material.retailerprice']}}" only-digits allow-decimal maxlength="12">
+                               placeholder="{{resourceBundle['material.retailerprice']}}" only-digits allow-decimal ng-pattern="pricePattern">
+                        <div class="has-error" ng-show="!addMatForm.rp.$valid">
+                            <span class="help-block ent-title">{{resourceBundle['invalid.retailerprice.message']}}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -207,16 +213,20 @@
                                 </div>
                                 <div class="form-group col-sm-4">
                                     <input type="text" class="form-control" ng-model="material.tmin" name="tmin"
-                                           placeholder="Min &deg;C" only-digits temperature allow-decimal
-                                           maxlength="6">
+                                           placeholder="Min &deg;C" only-digits allow-negative allow-decimal ng-pattern="temperaturePattern">
+                                    <div class="has-error" ng-show="!addMatForm.tmin.$valid">
+                                        <span class="help-block ent-title">{{resourceBundle['invalid.temperature.message']}}</span>
+                                    </div>
                                 </div>
                                 <div class="col-sm-2 temp">
                                     {{resourceBundle['max']}}:
                                 </div>
                                 <div class="form-group col-sm-4">
                                     <input type="text" class="form-control" ng-model="material.tmax" name="tmax"
-                                           placeholder="Max &deg;C" only-digits temperature allow-decimal
-                                           maxlength="6">
+                                           placeholder="Max &deg;C" only-digits allow-negative allow-decimal ng-pattern="temperaturePattern">
+                                    <div class="has-error" ng-show="!addMatForm.tmax.$valid">
+                                        <span class="help-block ent-title">{{resourceBundle['invalid.temperature.message']}}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

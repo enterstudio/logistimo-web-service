@@ -880,8 +880,8 @@ entityControllers.controller('EntityMapListController', ['$scope', 'entityServic
     }
 ]);
 
-entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route', 'entityService', 'domainCfgService', 'configService', 'mapService', 'requestContext', 'OPTIMIZER', 'INVENTORY','$window','$location',
-    function ($scope, $uibModal, $route, entityService, domainCfgService, configService, mapService, requestContext, OPTIMIZER, INVENTORY, $window, $location) {
+entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route', 'entityService', 'domainCfgService', 'configService', 'mapService', 'requestContext', 'OPTIMIZER', 'INVENTORY','$window','$location','PATTERNS',
+    function ($scope, $uibModal, $route, entityService, domainCfgService, configService, mapService, requestContext, OPTIMIZER, INVENTORY, $window, $location, PATTERNS) {
         $scope.lmap = angular.copy($scope.map);
         $scope.lmap.zoom = 1;
         $scope.edit = false;
@@ -889,6 +889,9 @@ entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route'
         $scope.editEntityId = requestContext.getParam("eid");
         $scope.entity = {tx: 0.0, be: true};
         $scope.uVisited = {usrs:false};
+        $scope.latitudePattern = new RegExp(PATTERNS.LATITUDE);
+        $scope.longitudePattern = new RegExp(PATTERNS.LONGITUDE);
+        $scope.taxPattern = new RegExp(PATTERNS.TAX);
         $scope.setUserVisited = function() {
             $scope.uVisited.usrs = true;
         };

@@ -51,4 +51,5 @@ public class CharacterConstants {
   public static final String DOUBLE_QUOTES = "\"";
   public static final String HYPHEN = "-";
   public static final String ASTERISK = "*";
+  public static final String PLUS = "+";
 }

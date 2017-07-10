@@ -72,6 +72,7 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -87,7 +88,9 @@ import com.logistimo.services.impl.UploadServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.utils.FieldLimits;
 import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.PatternConstants;
 import com.logistimo.utils.StringUtil;
 import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.logger.XLog;
@@ -97,6 +100,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -145,6 +149,16 @@ public class BulkUploadMgr {
   public static String TEMP_MAX = "tmax";
   private static ITaskService taskService = AppFactory.get().getTaskService();
   private static IInvntryDao invDao = new InvntryDao();
+
+  private static final String MAX_LENGTH_MSG = " cannot be greater than ";
+  private static final String CHARACTERS = " characters";
+  private static final String TEXT_FIELD_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.TEXT_FIELD_MAX_LENGTH + CHARACTERS;
+  private static final String MOBILE_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MOBILE_PHONE_MAX_LENGTH + CHARACTERS;
+  private static final String EMAIL_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.EMAIL_MAX_LENGTH + CHARACTERS;
+  private static final String MATERIAL_SHORT_NAME_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_SHORTNAME_MAX_LENGTH + CHARACTERS;
+  private static final String MATERIAL_DESC_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH + CHARACTERS;
+  private static final String MATERIAL_ADD_INFO_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH + CHARACTERS;
+  private static final String STREET_ADDRESS_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.STREET_ADDRESS_MAX_LENGTH + CHARACTERS;
 
   // Get the display name of a given type
   public static String getDisplayName(String type, Locale locale) {
@@ -307,17 +321,6 @@ public class BulkUploadMgr {
       return null;
     }
     EntityContainer entityContainer = null;
-    // First escape any commas within field values (which are quoted)
-                /*
-                String newCsvLine = StringUtil.escapeCommasWithinQuotedSubstrings( csvLine, COMMA_ESCAPER );
-		// Tokenize
-		String[] tokens = newCsvLine.split( "," );
-		// Fixed escaped commas, if any
-		for ( int i = 0; i < tokens.length; i++ ) {
-			if ( tokens[i].indexOf( COMMA_ESCAPER ) != -1 )
-				tokens[i] = tokens[i].replaceAll( COMMA_ESCAPER, "," );
-		}
-		*/
     String[] tokens = StringUtil.getCSVTokens(csvLine);
     if (TYPE_USERS.equals(type)) {
       entityContainer = processUserEntity(tokens, domainId, sourceUserId);
@@ -1038,11 +1041,13 @@ public class BulkUploadMgr {
       jsonLanguageObject = jsonLocationObject = intermediateJsonObject = null;
       Set<String> countryKey, languageKey;
       countryKey = languageKey = null;
-      String uname = ""; //for auditlog
+      // for auditlog
+      String uname = CharacterConstants.EMPTY;
 
       int i = 0;
       int size = tokens.length;
-      String op = tokens[i].trim(); // operation
+      // operation
+      String op = tokens[i].trim();
       if (!op.isEmpty()) {
         ec.operation = op;
       }
@@ -1057,10 +1062,14 @@ public class BulkUploadMgr {
       }
       // User ID
       String userId = tokens[i].trim();
-      if (userId.length() < 4 || userId.length() > 20) {
+      if (userId.length() < FieldLimits.USERID_MIN_LENGTH || userId.length() > FieldLimits.USERID_MAX_LENGTH) {
         ec.messages.add("User ID: '" + userId
-            + "'  is empty, or not between 4-20 characters. None of these are allowed.");
+            + "'  is empty, or not between " + FieldLimits.USERID_MIN_LENGTH + "-" + FieldLimits.USERID_MAX_LENGTH + " characters. None of these are allowed.");
         return ec;
+      }
+      boolean isUserIdValid = userId.matches(PatternConstants.USERID);
+      if (!isUserIdValid) {
+        ec.messages.add("User ID: '" + userId + "is invalid. It can have only alphabets, numbers, dot, hyphen, underscore, @ and space.");
       }
       boolean isAdd = (OP_ADD.equals(ec.operation));
       boolean isEdit = (OP_EDIT.equals(ec.operation));
@@ -1111,7 +1120,7 @@ public class BulkUploadMgr {
           ec.messages.add("Cannot delete user '" + userId + "'. Permission denied.");
           return ec;
         }
-        List<String> userIds = new ArrayList<String>(1);
+        List<String> userIds = new ArrayList<>(1);
         userIds.add(userId.toLowerCase());
         as.deleteAccounts(domainId, userIds, sourceUserId);
         return ec;
@@ -1152,9 +1161,9 @@ public class BulkUploadMgr {
       // Password - get the password fields now, and process them later depending on add/edit
       String password = tokens[i].trim();
       if ((isAdd || isEdit && !password.isEmpty())) {
-        if (password.length() < 6 || password.length() > 18) {
+        if (password.length() < FieldLimits.PASSWORD_MIN_LENGTH || password.length() > FieldLimits.PASSWORD_MAX_LENGTH) {
           ec.messages.add("Password: '" + password
-              + "'  is empty, or not between 6-18 characters. None of these are allowed.");
+              + "'  is empty, or not between " + FieldLimits.PASSWORD_MIN_LENGTH + "-" + FieldLimits.PASSWORD_MAX_LENGTH + " characters. None of these are allowed.");
         }
       }
       if (++i == size) {
@@ -1199,19 +1208,17 @@ public class BulkUploadMgr {
       if (!done) {
         // First name
         String firstName = tokens[i].trim();
-        if (firstName.length() < 1) {
-          ec.messages.add("First name: '" + firstName + "' should be at least 1 character long");
+        if (firstName.length() < FieldLimits.FIRSTNAME_MIN_LENGTH || firstName.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("First name: '" + firstName + "' should be between " + FieldLimits.FIRSTNAME_MIN_LENGTH + "-" + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters");
         } else {
-          if (firstName.length() > 20) {
-            firstName = firstName.substring(0, 20); // truncate
-          }
-          boolean isAlpha = firstName.matches("[A-Za-z ]+");
+          boolean isAlpha = firstName.matches(PatternConstants.FIRSTNAME);
           if (isAlpha) {
             u.setFirstName(firstName);
           } else {
             ec.messages.add("First name can have only alphabets and space : " + firstName);
           }
-          uname = firstName;//for auditlog
+          //for auditlog
+          uname = firstName;
         }
         if (++i == size) {
           ec.messages.add("No fields specified after First Name");
@@ -1221,15 +1228,16 @@ public class BulkUploadMgr {
       if (!done) {
         // Last name (optional)
         String lastName = tokens[i].trim();
-        if (lastName.length() > 20) {
-          lastName = lastName.substring(0, 20);
-        }
-        boolean isAlpha = lastName.matches("[A-Za-z ]*");
-        uname += " " + lastName;
-        if (isAlpha) {
-          u.setLastName(lastName);
+        if (lastName.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Last name: '" + lastName + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
         } else {
-          ec.messages.add("Last name can have only alphabets and space : " + lastName);
+          boolean isAlpha = lastName.matches(PatternConstants.LASTNAME);
+          uname += CharacterConstants.SPACE + lastName;
+          if (isAlpha) {
+            u.setLastName(lastName);
+          } else {
+            ec.messages.add("Last name can have only alphabets and space : " + lastName);
+          }
         }
         if (++i == size) {
           ec.messages.add("No fields specified after Last Name");
@@ -1239,8 +1247,12 @@ public class BulkUploadMgr {
       if (!done) {
         // Mobile phone
         String mobilePhone = tokens[i].trim();
-        if ((mobilePhone = validPhone(mobilePhone)) != null) {
-          u.setMobilePhoneNumber(mobilePhone);
+        if (StringUtils.isNotEmpty(mobilePhone) && mobilePhone.length() > FieldLimits.MOBILE_PHONE_MAX_LENGTH) {
+          ec.messages.add("Mobile phone: '" + mobilePhone + CharacterConstants.S_QUOTE + MOBILE_PHONE_MAX_LENGTH_MSG);
+        }
+        String validatedMobilePhone = validPhone(mobilePhone);
+        if (validatedMobilePhone != null) {
+          u.setMobilePhoneNumber(validatedMobilePhone);
         } else {
           ec.messages.add("Mobile phone: Number (" + mobilePhone
               + ") format is invalid. It should be +[country-code][space][phone-number-without-spacesORdashes]; ensure space between country code and number.");
@@ -1253,18 +1265,18 @@ public class BulkUploadMgr {
       if (!done) {
         // Email
         String email = tokens[i].trim();
-        if (SecurityConstants.ROLE_SERVICEMANAGER.equals(role) && email.isEmpty()) {
+        if (!SecurityConstants.ROLE_KIOSKOWNER.equals(role) && email.isEmpty()) {
           ec.messages.add(
-              "Email: Email is not specified for this " + backendMessages.getString("kiosk")
-                  + " Manager. It is mandatory for an " + backendMessages.getString("kiosk")
-                  + " Manager");
+              "Email: Email is mandatory for all roles other than Operator");
         }
         if (!email.isEmpty()) {
-          if (emailValid(email)) {
-            u.setEmail(email);
-          } else {
+          if (email.length() > FieldLimits.EMAIL_MAX_LENGTH) {
+            ec.messages.add("Email: '" + email + CharacterConstants.S_QUOTE + EMAIL_MAX_LENGTH_MSG);
+          } else if (!emailValid(email)){
             ec.messages.add("Email: Email (" + email
-                + ") format is invalid. It should include an '@' and a '.'");
+                + ") format is invalid. It should be in the format 'testuser@email.com'");
+          } else {
+            u.setEmail(email);
           }
         }
         if (++i == size) {
@@ -1297,7 +1309,7 @@ public class BulkUploadMgr {
           }
         } else {
           ec.messages.add(
-              "Country code is mandatory. Please specify proper country code.It should be a valid 2-letter ISO-3166 code");
+              "Country code is mandatory. Please specify proper country code. It should be a valid 2-letter ISO-3166 code");
         }
         if (++i == size) {
           ec.messages.add("No fields specified after Country");
@@ -1326,7 +1338,7 @@ public class BulkUploadMgr {
           }
         } else {
           ec.messages.add(
-              "Language code is mandatory. Please specify proper language code.It should be a valid 2-letter ISO-630-1 code.");
+              "Language code is mandatory. Please specify proper language code. It should be a valid 2-letter ISO-630-1 code.");
         }
 
         if (++i == size) {
@@ -1358,13 +1370,13 @@ public class BulkUploadMgr {
             ec.messages.add("Timezone:Timezone " + timezone
                 + " is not available in the given configuration. Please enter the proper timezone code."
                 +
-                "It should be an entry from the URL given in the header");
+                " It should be an entry from the URL given in the header");
           }
         }
 
       }
       // Gender
-      String gender = "";
+      String gender;
       if (++i < size && (!(gender = tokens[i]).isEmpty())) {
         gender = gender.trim();
         if (!gender.isEmpty() && !IUserAccount.GENDER_MALE.equals(gender)
@@ -1377,25 +1389,36 @@ public class BulkUploadMgr {
         }
       }
       // Age
-      String age = "";
+      String age;
       if (++i < size && !(age = tokens[i].trim()).isEmpty()) {
         try {
           int iAge = Integer.parseInt(age);
-          if (iAge > 0 && iAge < 100) {
+          if (iAge >= FieldLimits.AGE_MIN && iAge <= FieldLimits.AGE_MAX) {
             u.setAge(iAge);
           } else {
-            ec.messages.add("Age: " + age + " is not a valid number. Max age limit is 99.");
+            ec.messages.add("Age: " + age + " is not a valid number. Age should be between " + FieldLimits.AGE_MIN + " and " + FieldLimits.AGE_MAX + " without decimals.");
           }
         } catch (NumberFormatException e) {
           ec.messages
-              .add("Age: " + age + " is not a valid number. A valid number should be specified");
+              .add("Age: " + age + " is not a valid number. A valid whole number should be specified");
         }
       }
       // Land phone
-      String landPhone = "";
+      String landPhone;
       if (++i < size) {
         landPhone = tokens[i].trim();
-        u.setLandPhoneNumber(landPhone);
+        if (!landPhone.isEmpty()) {
+          if (landPhone.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+            ec.messages.add("Land line number: '" + landPhone + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+          }
+          String validatedLandPhone = validPhone(landPhone);
+          if (validatedLandPhone != null) {
+            u.setLandPhoneNumber(validatedLandPhone);
+          } else {
+            ec.messages.add("Land line number: Number (" + landPhone
+                + ") format is invalid. It should be +[country-code][space][phone-number-without-spacesORdashes]; ensure space between country code and number.");
+          }
+        }
       }
       // State (made mandatory since gae 1.2.9 - April 29, 2013)
       String state = "";
@@ -1419,9 +1442,7 @@ public class BulkUploadMgr {
                 ec.messages.add("State: " + state
                     + " is not available in the configuration.Please enter the proper state name");
               }
-
             }
-
           }
         }
       }
@@ -1444,11 +1465,8 @@ public class BulkUploadMgr {
               ec.messages.add("District: " + district
                   + " is not available in the configuration. Please enter the proper district name");
             }
-
           }
-
         }
-
       }
       // Taluk
       String taluk = "";
@@ -1477,32 +1495,39 @@ public class BulkUploadMgr {
               ec.messages.add("Taluks for the district " + district
                   + " are not available in the configuration");
             }
-
           }
         }
       }
       // Village/city
-      String city = "";
+      String city;
       if (++i < size) {
         city = tokens[i].trim();
-        u.setCity(city);
+        if (city.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Village/City: '" + city + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        } else {
+          u.setCity(city);
+        }
       }
       // Street
-      String street = "";
+      String street;
       if (++i < size) {
         street = tokens[i].trim();
-        u.setStreet(street);
+        if (street.length() > FieldLimits.STREET_ADDRESS_MAX_LENGTH) {
+          ec.messages.add("Street Address: '" + street + CharacterConstants.S_QUOTE + STREET_ADDRESS_MAX_LENGTH_MSG);
+        } else {
+          u.setStreet(street);
+        }
       }
       // Pin code
-      String pinCode = "";
+      String pinCode;
       if (++i < size) {
         pinCode = tokens[i].trim();
         if (StringUtils.isNotEmpty(pinCode)) {
-          if (pinCode.matches("[A-Za-z0-9- ]{1,10}")) {
+          if (pinCode.matches(PatternConstants.ZIPCODE)) {
             u.setPinCode(pinCode);
           } else {
-            ec.messages.add("Invalid format: Zip code '" + pinCode
-                + "' should be less than 10 characters and contain only uppercase, lowercase, digits, hypen and spaces.");
+            ec.messages.add("Invalid format: Zip/PIN code '" + pinCode
+                + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG + " and can contain only uppercase, lowercase, digits, hypen and spaces.");
           }
         }
       }
@@ -1515,9 +1540,9 @@ public class BulkUploadMgr {
       boolean processPassword = (isAdd || (isEdit && !oldPassword.isEmpty()));
       boolean isPasswordValid = true;
       if (processPassword) {
-        if (password.length() < 6 || password.length() > 18) {
+        if (password.length() < FieldLimits.PASSWORD_MIN_LENGTH || password.length() > FieldLimits.PASSWORD_MAX_LENGTH) {
           ec.messages.add("Password: Password is " + password.length()
-              + " characters. It should be between 6-18 characters");
+              + " characters. It should be between " + FieldLimits.PASSWORD_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.PASSWORD_MAX_LENGTH + CHARACTERS);
           isPasswordValid = false;
         }
         if (password.equals(confirmPassword)) {
@@ -1539,11 +1564,11 @@ public class BulkUploadMgr {
       }
 
       // Custom ID
-      String customId = "";
+      String customId;
       if (++i < size) {
         customId = tokens[i].trim();
-        if (customId.length() > 300) {
-          ec.messages.add("Custom ID '" + customId + "' should be < 300 characters");
+        if (customId.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Custom ID '" + customId + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
         } else {
           u.setCustomId(customId);
         }
@@ -1552,34 +1577,52 @@ public class BulkUploadMgr {
       String phoneBrand;
       if (++i < size) {
         phoneBrand = tokens[i].trim();
-        u.setPhoneBrand(phoneBrand);
+        if (phoneBrand.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Mobile Phone Brand '" + phoneBrand + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        } else {
+          u.setPhoneBrand(phoneBrand);
+        }
       }
       //Phone Model
       String phoneModel;
       if (++i < size) {
         phoneModel = tokens[i].trim();
-        u.setPhoneModelNumber(phoneModel);
+        if (phoneModel.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Mobile Phone Model '" + phoneModel + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        } else {
+          u.setPhoneModelNumber(phoneModel);
+        }
       }
       //IMEI
       String imei;
       if (++i < size) {
         imei = tokens[i].trim();
+        if (imei.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("IMEI number '" + imei + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        }
         u.setImei(imei);
       }
       //Service Provider
       String serviceProvider;
       if (++i < size) {
         serviceProvider = tokens[i].trim();
-        u.setPhoneServiceProvider(serviceProvider);
+        if (serviceProvider.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("SIM Provider '" + serviceProvider + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        } else {
+          u.setPhoneServiceProvider(serviceProvider);
+        }
       }
       //Sim Id
       String simId;
       if (++i < size) {
         simId = tokens[i].trim();
-        u.setSimId(simId);
+        if (simId.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("SIM ID '" + simId + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        } else {
+          u.setSimId(simId);
+        }
       }
       // Tags
-      String tags;
       if (++i < size) {
         processTags(tokens[i], domainId, ec, TagUtil.TYPE_USER, u);
       } else if (u.getTags()
@@ -1628,7 +1671,7 @@ public class BulkUploadMgr {
               su.getRole().equalsIgnoreCase(SecurityConstants.ROLE_DOMAINOWNER) ? su.getDomainId()
                   : domainId);
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
-      IMaterial m = null;
+      IMaterial m;
       ConfigurationMgmtService
           cms =
           Services.getService(ConfigurationMgmtServiceImpl.class, null);
@@ -1659,6 +1702,10 @@ public class BulkUploadMgr {
             .add("Material name: Name is not specified. Please specify a valid material name.");
         return ec;
       }
+      if (name.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+        ec.messages
+            .add("Material name: '" + name + "' is invalid. It should be between " + FieldLimits.MATERIAL_NAME_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.TEXT_FIELD_MAX_LENGTH + CHARACTERS);
+      }
       // Get the material ID, if present
       Long materialId = getMaterialId(domainId, name, null);
       xLogger.fine("MATERIAL ID: {0}, operation: {1}", materialId, ec.operation);
@@ -1686,7 +1733,7 @@ public class BulkUploadMgr {
           ec.messages.add("Cannot delete. Material '" + name + "' could not be found.");
           return ec;
         }
-        List<Long> materialIds = new ArrayList<Long>();
+        List<Long> materialIds = new ArrayList<>();
         materialIds.add(materialId);
         mcs.deleteMaterials(domainId, materialIds);
         xLogger.info("AUDITLOG\t{0}\t{1}\tMATERIAL\t " +
@@ -1711,31 +1758,34 @@ public class BulkUploadMgr {
       }
       // Set other material parameters, if any
       // Short-name
-      String sname = "";
+      String sname;
       if (++i < size) {
         sname = tokens[i].trim();
-        if (sname.length() > 6) {
-          sname = sname.substring(0, 6);
+        if (sname.length() > FieldLimits.MATERIAL_SHORTNAME_MAX_LENGTH) {
+          ec.messages.add("Short name '" + sname + CharacterConstants.S_QUOTE + MATERIAL_SHORT_NAME_MAX_LENGTH_MSG);
+        } else {
+          m.setShortName(sname);
         }
-        m.setShortName(sname);
       }
       // Description
-      String description = "";
+      String description;
       if (++i < size) {
         description = tokens[i].trim();
-        if (description.length() > 80) {
-          description = description.substring(0, 80);
-        }
+        if (description.length() > FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH) {
+          ec.messages.add("Description '" + description + CharacterConstants.S_QUOTE + MATERIAL_DESC_MAX_LENGTH_MSG);
+        } else {
         m.setDescription(description);
+        }
       }
       // Additional Info.
-      String info = "";
+      String info;
       if (++i < size) {
         info = tokens[i].trim();
-        if (info.length() > 400) {
-          info = info.substring(0, 400);
+        if (info.length() > FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH) {
+          ec.messages.add("Additional info '" + info + CharacterConstants.S_QUOTE + MATERIAL_ADD_INFO_MAX_LENGTH_MSG);
+        } else {
+          m.setInfo(info);
         }
-        m.setInfo(info);
       }
       // Show on mobile
       boolean dispInfo = true;
@@ -1763,38 +1813,42 @@ public class BulkUploadMgr {
       }
       m.setSeasonal(seasonal);
       // MSRP
-      String msrp = "";
+      String msrp;
       if (++i < size && (!(msrp = tokens[i].trim()).isEmpty())) {
-        try {
-          m.setMSRP(new BigDecimal(msrp));
-          if (BigUtil.lesserThanZero(m.getMSRP()) || BigUtil.gtMax(m.getMSRP())) {
-            ec.messages
-                .add("Invalid value " + msrp + " for MSRP. It should be between 0 and 1 trillion");
+        if(msrp.matches(PatternConstants.PRICE)) {
+          try {
+            m.setMSRP(new BigDecimal(msrp));
+          } catch (Exception e) {
+            ec.messages.add("MSRP: Price " + msrp + " is invalid. It should be a valid number");
             return ec;
           }
-        } catch (Exception e) {
-          ec.messages.add("MSRP: Price " + msrp + " is invalid. It should be a valid number");
+        } else {
+          ec.messages
+              .add(
+                  "MSRP: Price " + msrp  + " is invalid. It should be between 0 and 1 billion, rounded to two decimal places maximum");
           return ec;
         }
       }
       // Retailer price
-      String retailerPrice = "";
+      String retailerPrice;
       if (++i < size && (!(retailerPrice = tokens[i].trim()).isEmpty())) {
-        try {
-          m.setRetailerPrice(new BigDecimal(retailerPrice));
-          if (BigUtil.lesserThanZero(m.getRetailerPrice()) || BigUtil.gtMax(m.getRetailerPrice())) {
-            ec.messages.add("Invalid value " + retailerPrice
-                + " for Retailer price. It should be between 0 and 1 trillion");
+        if (retailerPrice.matches(PatternConstants.PRICE)) {
+          try {
+            m.setRetailerPrice(new BigDecimal(retailerPrice));
+          } catch (Exception e) {
+            ec.messages.add("Retailer price: Price " + retailerPrice
+                + " is invalid. It should be a valid number");
             return ec;
           }
-        } catch (Exception e) {
-          ec.messages.add("Retailer price: Price " + retailerPrice
-              + " is invalid. It should be a valid number");
+        } else {
+          ec.messages
+              .add(
+                  "Retailer: Price " + retailerPrice  + " is invalid. It should be between 0 and 1 billion, rounded to two decimal places maximum");
           return ec;
         }
       }
       // Currency
-      String currency = "";
+      String currency;
       if (++i < size) {
         //Currency Validation
         currency = tokens[i].trim();
@@ -1817,19 +1871,24 @@ public class BulkUploadMgr {
         }
       }
       // New material name
-      String newName = "";
+      String newName;
       if (++i < size) {
         newName = tokens[i].trim();
         if (isEdit && !newName.isEmpty()) {
-          m.setName(newName);
+          if (newName.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+            ec.messages
+                .add("Material name [new]: '" + name + "' is invalid. It should be between " + FieldLimits.MATERIAL_NAME_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters");
+          } else {
+            m.setName(newName);
+          }
         }
       }
       // Custom ID
-      String customId = "";
+      String customId;
       if (++i < size) {
         customId = tokens[i].trim();
-        if (customId.length() > 300) {
-          ec.messages.add("Custom ID '" + customId + "' should be < 300 characters");
+        if (customId.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Custom ID '" + customId + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
         } else {
           m.setCustomId(customId);
         }
@@ -1860,7 +1919,7 @@ public class BulkUploadMgr {
       }
       m.setTemperatureSensitive(tempMonitoringEnabled);
       // Temperature Min. if temperature monitoring is enabled.
-      String temperatureMin = "";
+      String temperatureMin;
       if (++i < size && tempMonitoringEnabled) {
         temperatureMin = tokens[i].trim();
         float tempMin = 0;
@@ -1868,17 +1927,23 @@ public class BulkUploadMgr {
           // Get the tempMin from Config
           tempMin = (float) getTempFromConfig(domainId, TEMP_MIN, ec);
         } else {
-          try {
-            tempMin = Float.parseFloat(temperatureMin);
-          } catch (Exception e) {
+          if (!temperatureMin.matches(PatternConstants.TEMPERATURE)) {
             ec.messages.add(
-                "Temperature Min.: " + temperatureMin + " is invalid. It should be a valid number");
+                "Temperature Min.: " + temperatureMin + " is invalid. It should be between " + FieldLimits.TEMP_MIN_VALUE + " and " + FieldLimits.TEMP_MAX_VALUE + " rounded to two decimal places maximum.");
+          } else {
+            try {
+              tempMin = Float.parseFloat(temperatureMin);
+            } catch (Exception e) {
+              ec.messages.add(
+                  "Temperature Min.: " + temperatureMin
+                      + " is invalid. It should be a valid number");
+            }
           }
         }
         m.setTemperatureMin(tempMin);
       }
       // Temperature Max. if temperature monitoring is enabled.
-      String temperatureMax = "";
+      String temperatureMax;
       if (++i < size && tempMonitoringEnabled) {
         temperatureMax = tokens[i].trim();
         float tempMax = 0;
@@ -1886,14 +1951,26 @@ public class BulkUploadMgr {
           // Get the tempMax from Config
           tempMax = (float) getTempFromConfig(domainId, TEMP_MAX, ec);
         } else {
-          try {
-            tempMax = Float.parseFloat(temperatureMax);
-          } catch (Exception e) {
+          if (!temperatureMax.matches(PatternConstants.TEMPERATURE)) {
             ec.messages.add(
-                "Temperature Max.: " + temperatureMax + " is invalid. It should be a valid number");
+                "Temperature Max.: " + temperatureMax + " is invalid. It should be between "
+                    + FieldLimits.TEMP_MIN_VALUE + " and " + FieldLimits.TEMP_MAX_VALUE
+                    + " rounded to two decimal places maximum.");
+          } else {
+            try {
+              tempMax = Float.parseFloat(temperatureMax);
+            } catch (Exception e) {
+              ec.messages.add(
+                  "Temperature Max.: " + temperatureMax
+                      + " is invalid. It should be a valid number");
+            }
           }
         }
         m.setTemperatureMax(tempMax);
+      }
+      if (m.getTemperatureMin() > m.getTemperatureMax()) {
+        ec.messages.add(
+            "Temperature Min. cannot be greater than Temperature Max.");
       }
       // If there are errors, return
       if (ec.hasErrors()) {
@@ -1924,7 +2001,7 @@ public class BulkUploadMgr {
   private static EntityContainer processKioskEntity(String[] tokens, Long domainId,
                                                     String sourceUserId) {
     xLogger.fine("Entered processKioskEntity");
-    ResourceBundle backendMessages = null;
+    ResourceBundle backendMessages;
     EntityContainer ec = new EntityContainer();
     if (tokens == null || tokens.length == 0) {
       ec.messages.add("No fields specified");
@@ -1973,9 +2050,9 @@ public class BulkUploadMgr {
       }
       // Kiosk Name
       String name = tokens[i].trim();
-      if (name == null || name.isEmpty() || name.length() > 200) {
+      if (name == null || name.isEmpty() || name.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
         ec.messages.add(backendMessages.getString("kiosk")
-            + " name: Name is not specified or is greater than 50 characters. Please specify a valid "
+            + " name: Name is not specified or is greater than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters. Please specify a valid "
             + backendMessages.getString("kiosk.lowercase") + " name.");
         return ec;
       }
@@ -2033,7 +2110,7 @@ public class BulkUploadMgr {
                   + "' could not be found.");
           return ec;
         }
-        List<Long> kioskIds = new ArrayList<Long>();
+        List<Long> kioskIds = new ArrayList<>();
         kioskIds.add(kioskId);
         es.deleteKiosks(domainId, kioskIds, sourceUserId);
         xLogger.info("AUDITLOG\t{0}\t{1}\tENTITY\t " +
@@ -2069,34 +2146,38 @@ public class BulkUploadMgr {
         return ec;
       }
       // Entity manager(s) and operators
-      List<IUserAccount> users = new ArrayList<IUserAccount>();
       String usersStr = tokens[i].trim();
       if (usersStr.isEmpty()) {
         ec.messages.add("User IDs not specified. At least one user ID has to be specified");
       } else {
-        String[] userIds = usersStr.split(";");
-        for (int j = 0; j < userIds.length; j++) {
-          try {
-            IUserAccount u = as.getUserAccount(userIds[j]);
-            if (u.getDomainId().compareTo(domainId) != 0) {
-              ec.messages.add("User with ID " + userIds[j] + " does not belong to this domain");
-              continue;
+        Set<String> userIdsSet = getUniqueUserIds(usersStr,CharacterConstants.SEMICOLON);
+        if (userIdsSet == null) {
+          ec.messages.add("User IDs not specified. At least one user ID has to be specified");
+        } else {
+          List<IUserAccount> users = new ArrayList<>();
+          for (String userId : userIdsSet) {
+            try {
+              IUserAccount u = as.getUserAccount(userId);
+              if (u.getDomainId().compareTo(domainId) != 0) {
+                ec.messages.add("User with ID " + userId + " does not belong to this domain");
+                continue;
+              }
+              users.add(u);
+            } catch (ObjectNotFoundException e) {
+              ec.messages.add("User with ID '" + userId + "' not found.");
+            } catch (Exception e) {
+              ec.messages
+                  .add("Error when fetching user with ID '" + userId + "': " + e.getMessage());
             }
-            users.add(u);
-          } catch (ObjectNotFoundException e) {
-            ec.messages.add("User with ID '" + userIds[j] + "' not found.");
-          } catch (Exception e) {
-            ec.messages
-                .add("Error when fetching user with ID '" + userIds[j] + "': " + e.getMessage());
+          }
+          // Set users for this kiosk
+          if (users.isEmpty()) {
+            ec.messages.add("No valid users to associate with this " + backendMessages
+                .getString("kiosk.lowercase"));
+          } else {
+            k.setUsers(users);
           }
         }
-      }
-      // Set users for this kiosk
-      if (users.isEmpty()) {
-        ec.messages.add("No valid users to associated with this " + backendMessages
-            .getString("kiosk.lowercase"));
-      } else {
-        k.setUsers(users);
       }
       if (++i == size) {
         ec.messages.add("No fields specified beyond users");
@@ -2171,44 +2252,57 @@ public class BulkUploadMgr {
       if (city.isEmpty()) {
         ec.messages
             .add("Village/City: Village/City not specified. Please specify a valid village/city");
+      } else if (city.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Village/City: '" + city + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
       } else {
-        k.setCity(city);
+          k.setCity(city);
       }
       // Optional fields
       // Latitude
-
       if (++i < size) {
         String latitude = tokens[i].trim();
         if (!latitude.isEmpty()) {
           try {
-            Double d = Double.valueOf(latitude);
-            if (d >= -90 && d <= 90) {
-              k.setLatitude(d);
+            Double.parseDouble(latitude);
+            String trimmedLat = getTruncatedLatLong(latitude);
+            if (!trimmedLat.matches(PatternConstants.LATITUDE)) {
+              ec.messages.add("Latitude: " + latitude
+                  + " is out of range. Please specify between " + FieldLimits.LATITUDE_MIN + " and "
+                  + FieldLimits.LATITUDE_MAX + " rounded to eight decimal places maximum" + CharacterConstants.DOT);
             } else {
-              throw new NumberFormatException(
-                  "Latitude: " + latitude + " is out of range. Please specify within -90 to 90.");
+              Double d = Double.valueOf(trimmedLat);
+              k.setLatitude(d);
             }
           } catch (NumberFormatException e) {
             ec.messages
-                .add("Latitude: Invalid number " + latitude + ". Please specify a valid number.");
+                .add("Latitude: Invalid number " + latitude
+                    + ". Please specify a valid number between " + FieldLimits.LATITUDE_MIN + " and "
+                    + FieldLimits.LATITUDE_MAX + " rounded to eight decimal places maximum" + CharacterConstants.DOT);
           }
         }
       }
+
       // Longitude
       if (++i < size) {
         String longitude = tokens[i].trim();
         if (!longitude.isEmpty()) {
+          // Check if it is a valid number
           try {
-            Double d = Double.valueOf(longitude);
-            if (d >= -180 && d <= 180) {
-              k.setLongitude(d);
+            Double.parseDouble(longitude);
+            String trimmedLng = getTruncatedLatLong(longitude);
+            if (!trimmedLng.matches(PatternConstants.LONGITUDE)) {
+              ec.messages.add("Longitude: " + longitude
+                  + " is out of range. Please specify between " + FieldLimits.LAT_LONG_MAX_DIGITS_AFTER_DECIMAL + " and "
+                  + FieldLimits.LONGITUDE_MAX + " rounded to eight decimal places maximum" + CharacterConstants.DOT);
             } else {
-              throw new NumberFormatException("Latitude: " + longitude
-                  + " is out of range. Please specify within -180 to 180.");
+              Double d = Double.valueOf(trimmedLng);
+              k.setLongitude(d);
             }
           } catch (NumberFormatException e) {
             ec.messages
-                .add("Longitude: Invalid number " + longitude + ". Please specify a valid number.");
+                .add("Longitude: Invalid number " + longitude
+                    + ". Please specify a valid number between " + FieldLimits.LONGITUDE_MIN + " and "
+                    + FieldLimits.LONGITUDE_MAX + " rounded to eight decimal places maximum" + CharacterConstants.DOT);
           }
         }
       }
@@ -2264,26 +2358,26 @@ public class BulkUploadMgr {
       // Street address
       if (++i < size) {
         String street = tokens[i].trim();
-        if (street.isEmpty()) {
-          street = null;
+        if (street.length() > FieldLimits.STREET_ADDRESS_MAX_LENGTH) {
+          ec.messages.add("Street address: '" + street + CharacterConstants.S_QUOTE + STREET_ADDRESS_MAX_LENGTH_MSG);
+        } else {
+          k.setStreet(street);
         }
-        k.setStreet(street);
       }
       // Zip code
       if (++i < size) {
         String zipcode = tokens[i].trim();
         if (StringUtils.isNotEmpty(zipcode)) {
-          if (zipcode.matches("[A-Za-z0-9- ]{1,10}")) {
+          if (zipcode.matches(PatternConstants.ZIPCODE)) {
             k.setPinCode(zipcode);
           } else {
-            ec.messages.add("Invalid format: Zip code '" + zipcode
-                + "' should be less than 10 characters and contain only uppercase, lowercase, digits, hypen and spaces.");
+            ec.messages.add("Invalid format: Zip/PIN code '" + zipcode
+                + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG + " and can contain only uppercase, lowercase, digits, hyphen and spaces.");
           }
         }
       }
-
       // Currency
-      String currency = "";
+      String currency;
       if (++i < size) {
         currency = tokens[i].trim();
         if (!currency.isEmpty()) {
@@ -2310,37 +2404,50 @@ public class BulkUploadMgr {
         String tax = tokens[i].trim();
         if (!tax.isEmpty()) {
           try {
-            k.setTax(new BigDecimal(tax));
-            if (BigUtil.gtMax(k.getTax())) {
-              ec.messages
-                  .add("Invalid value " + tax + " for Tax. It should be less than 1 trillion");
-              return ec;
+            if (tax.matches(PatternConstants.TAX)) {
+              BigDecimal tx = new BigDecimal(tax);
+              k.setTax(tx);
+            } else {
+              ec.messages.add(
+                  "Tax: Not a valid number (" + tax + "). It should be between " + FieldLimits.TAX_MIN_VALUE
+                      + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum");
             }
           } catch (NumberFormatException e) {
             ec.messages.add("Tax: Not a valid number (" + tax + "). Please specify a valid number");
-            return ec;
           }
         }
       }
       // Tax ID
       if (++i < size) {
         String taxId = tokens[i].trim();
-        if (taxId.isEmpty()) {
-          taxId = null;
+        if (taxId.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Tax ID: '" + taxId + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+        } else {
+          k.setTaxId(taxId);
         }
-        k.setTaxId(taxId);
       }
       // Inventory model
       if (++i < size) {
         String invModel = tokens[i].trim();
-        k.setInventoryModel(invModel);
+        if (!invModel.isEmpty() && (FieldLimits.SYSTEM_DETERMINED_REPLENISHMENT.compareTo(invModel) != 0)) {
+          ec.messages
+              .add("Invalid value " + invModel + " for Inventory model. It should be '" + FieldLimits.SYSTEM_DETERMINED_REPLENISHMENT + "' or blank.");
+        } else {
+          k.setInventoryModel(invModel);
+        }
       }
       // Service level
       if (++i < size) {
         String serviceLevel = tokens[i].trim();
         if (!serviceLevel.isEmpty()) {
           try {
-            k.setServiceLevel(Integer.parseInt(serviceLevel));
+            int svcLevel = Integer.parseInt(serviceLevel);
+            if (svcLevel < FieldLimits.MIN_SERVICE_LEVEL || svcLevel > FieldLimits.MAX_SERVICE_LEVEL) {
+              ec.messages.add(
+                  "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL);
+            } else {
+            k.setServiceLevel(svcLevel);
+            }
           } catch (NumberFormatException e) {
             ec.messages.add(
                 "Service Level: " + serviceLevel + " is not valid. Please specify a valid level.");
@@ -2351,30 +2458,14 @@ public class BulkUploadMgr {
       if (++i < size) {
         String newName = tokens[i].trim();
         if (isEdit && !newName.isEmpty()) {
-          if (newName.length() < 200) {
+          if (newName.length() < FieldLimits.TEXT_FIELD_MAX_LENGTH) {
             k.setName(newName);
           } else {
             ec.messages.add(backendMessages.getString("kiosk") + "'s new name '" + newName
-                + "' cannot be greater than 50 characters");
+                + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
           }
         }
       }
-                        /*
-                        // Check if errors exist
-			if (ec.hasErrors())
-				return ec;
-			// Add/edit
-			if (isAdd)
-				kioskId = as.addKiosk(domainId, k);
-			else
-				as.updateKiosk(k, domainId);
-			// Set object id
-			ec.entityId = kioskId;*/
-
-      // Continue to add materials/relationships only for 'add'; otherwise return
-      //if ( !isAdd )
-      //	return ec;
-
       // Add all materials?
       boolean addAllMaterials = false, addSomeMaterials;
       String stockStr = null, materialNamesStr = null, vendorNamesStr = null,
@@ -2391,12 +2482,11 @@ public class BulkUploadMgr {
           materialNamesStr = tokens[i].trim();
         }
         addSomeMaterials = (materialNamesStr != null && !materialNamesStr.isEmpty());
-        // Get inital stock count, if any
+        // Get initial stock count, if any
         if (++i < size && permission.isInventoryAdd()) {
           stockStr = tokens[i].trim();
         }
         // Add the materials to kiosk
-
         if (addAllMaterials || addSomeMaterials) {
           try {
             if (iSU || permission.isInventoryAdd()) {
@@ -2466,8 +2556,8 @@ public class BulkUploadMgr {
       String customId;
       if (++i < size) {
         customId = tokens[i].trim();
-        if (customId.length() > 300) {
-          ec.messages.add("Custom ID '" + customId + "' should be < 300 characters");
+        if (customId.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          ec.messages.add("Custom ID '" + customId + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
         } else {
           k.setCustomId(customId);
         }
@@ -2559,18 +2649,18 @@ public class BulkUploadMgr {
     AppFactory.get().getDaoUtil().deleteUploadedMessage(uploadedKey);
   }
 
-  // Phone validator
+  // Phone validator - Validate the phone number and adds a '+' in the beginning of the phone number, if it is not present
   private static String validPhone(String phone) {
     // Format: +<country-code><space><phone-number>
     if (phone == null || phone.isEmpty()) {
       return null;
     }
-    String[] tokens = phone.split(" ");
+    String[] tokens = phone.split(CharacterConstants.SPACE);
     if (tokens.length != 2) {
       return null;
     }
-    if (!tokens[0].startsWith("+")) {
-      tokens[0] = "+" + tokens[0];
+    if (!tokens[0].startsWith(CharacterConstants.PLUS)) {
+      tokens[0] = CharacterConstants.PLUS + tokens[0];
     }
     try {
       String countryCode = tokens[0].substring(1, tokens[0].length());
@@ -2601,10 +2691,11 @@ public class BulkUploadMgr {
 
   // Email validator
   private static boolean emailValid(String email) {
-    return (email != null && email.indexOf("@") != -1 && email.indexOf(".") != -1);
+    // Email validation Regex as done in the UI by Angular JS
+    return (email != null && email.matches(PatternConstants.EMAIL));
   }
 
-  // Add mutlile materials to a kiosk
+  // Add multiple materials to a kiosk
   @SuppressWarnings("unchecked")
   private static void addMaterialsToKiosk(Long domainId, Long kioskId, String kioskName,
                                           String materialNamesStr, String stockStr,
@@ -2865,6 +2956,27 @@ public class BulkUploadMgr {
       update = true;
     }
     return update;
+  }
+
+  private static Set<String> getUniqueUserIds(String userIdsStr, String separator) {
+    if (StringUtils.isEmpty(userIdsStr)) {
+      return null;
+    }
+    String[] userIds = userIdsStr.split(separator);
+    if (userIds == null || userIds.length == 0) {
+      return null;
+    }
+    return (new HashSet<>(Arrays.asList(userIds)));
+  }
+
+  private static String getTruncatedLatLong(String latLngToBeTrimmed) {
+    int indexOfDot = latLngToBeTrimmed.indexOf(CharacterConstants.DOT);
+    if (indexOfDot != -1 && (indexOfDot + FieldLimits.LAT_LONG_MAX_DIGITS_AFTER_DECIMAL + 1 <= latLngToBeTrimmed.length())) {
+      latLngToBeTrimmed =
+          latLngToBeTrimmed
+              .substring(0, indexOfDot + FieldLimits.LAT_LONG_MAX_DIGITS_AFTER_DECIMAL + 1);
+    }
+    return latLngToBeTrimmed;
   }
 
   private static void setUploadableObjTags(String tagType, Object up, List<String> tags) {
