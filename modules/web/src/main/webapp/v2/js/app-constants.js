@@ -577,3 +577,10 @@ logistimoApp.constant('ASSET', {
 	'EXTERNAL_SENSOR_ALARM_TYPE' : 1,
 	'ACTIVITY_ALARM_TYPE' : 4
 });
+logistimoApp.constant('PATTERNS', {
+	'LATITUDE':'^-?(([0-8])?((([0-9])(\\.\\d{1,8})?)|(90(\\.[0]{0,8})?)))$',
+	'LONGITUDE':'^-?(((1[0-7][0-9])|(\\d{1,2})|180)(\\.\\d{1,8})?)$',
+	'TAX' : '^(\\d{0,2}(\\.\\d{1,2})?|100(\\.00?)?)$',
+	'PRICE': '^(\\d{0,9}(\\.\\d{1,2})?|1000000000(\\.00?)?)$',
+	'TEMPERATURE' : '^-?(\\d{0,2})(\\.\\d{1,2})?$'
+});

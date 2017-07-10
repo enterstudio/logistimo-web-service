@@ -23,7 +23,10 @@
 
 package com.logistimo.bulkuploads.headers;
 
+import com.logistimo.bulkuploads.BulkUploadMgr;
+import com.logistimo.constants.CharacterConstants;
 import com.logistimo.services.Resources;
+import com.logistimo.utils.FieldLimits;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -41,17 +44,17 @@ public class UsersHeader implements IHeader {
         "Operation* (a = add / e = edit / d = delete; if empty it is defaulted to add; all operations MUST include User ID),"
             +
             bundle.getString("user.id")
-            + "* (a unique username without any spaces; 6-18 characters; Tip: prefix it with [say] your organization code or suffix it with [say] a number for uniqueness),"
-            + bundle.getString("login.password") + "* (6-18 characters)," + bundle
+            + "* (a unique username without any spaces; " + FieldLimits.USERID_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.USERID_MAX_LENGTH + " characters; Tip: prefix it with [say] your organization code or suffix it with [say] a number for uniqueness),"
+            + bundle.getString("login.password") + "* (" + FieldLimits.PASSWORD_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.PASSWORD_MAX_LENGTH + " characters)" + "," + bundle
             .getString("user.confirmpassword") + "* (same as password)," +
             bundle.getString("user.role") + "* (" + bundle.getString("role.domainowner")
             + " = ROLE_do / " + bundle.getString("role.kioskowner") + " = ROLE_ko / " + bundle
             .getString("role.servicemanager") + " = ROLE_sm)," +
-            bundle.getString("user.firstname") + "* (1-20 charaters)," + bundle
-            .getString("user.lastname") + " (1-20 characters)," +
+            bundle.getString("user.firstname") + "* (" + FieldLimits.FIRSTNAME_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" +"," + bundle
+            .getString("user.lastname") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
             bundle.getString("user.mobile")
-            + "* (format: [country-code][space][number-without-spacesORdashes])," +
-            bundle.getString("user.email") + " (* mandatory if user role is " + bundle
+            + "* " + "(not more than " + FieldLimits.MOBILE_PHONE_MAX_LENGTH + " characters; format: [country-code][space][number-without-spacesORdashes])," +
+            bundle.getString("user.email") + " (* not more than " + FieldLimits.EMAIL_MAX_LENGTH + " characters; mandatory if user role is " + bundle
             .getString("kiosk") + " Manager or higher)," +
             bundle.getString("country")
             + "* (ISO-3166 2-letter codes as at http://userpage.chemie.fu-berlin.de/diverse/doc/ISO_3166.html),"
@@ -61,24 +64,25 @@ public class UsersHeader implements IHeader {
             bundle.getString("preferredtimezone")
             + "* (Timezones can be downloaded from the bulk upload page of LogiWeb)," +
             bundle.getString("user.gender") + " (Male = m / Female = f)," + bundle
-            .getString("user.age") + " (in years)," +
-            bundle.getString("user.landline") + "* (format: [country-code][space][number-without-spacesORdashes])," +
+            .getString("user.age") + " (in years between " + FieldLimits.AGE_MIN + " and " + FieldLimits.AGE_MAX + " without decimals)," +
+            bundle.getString("user.landline") + "* " + "(not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters; format: [country-code][space][number-without-spacesORdashes])," +
             bundle.getString("state")
             + "* (should be the same as in the corresponding LogiWeb drop-downs)," + bundle
             .getString("district")
             + " (should be the same as in the corresponding LogiWeb drop-downs)," + bundle
             .getString("taluk")
             + " (should be the same as in the corresponding LogiWeb drop-downs)," +
-            bundle.getString("village") + "," + bundle.getString("streetaddress") + "," + bundle
-            .getString("zipcode") + "," +
+            bundle.getString("village") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + ","
+            + bundle.getString("streetaddress") + " (not more than " + FieldLimits.STREET_ADDRESS_MAX_LENGTH + " characters)" + "," + bundle
+            .getString("zipcode") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
             bundle.getString("user.oldpassword")
             + " (specify ONLY IF you wish to change the password AND operation is edit)" + "," +
-            bundle.getString("customid.user") + " (Not more than 300 characters)" + "," +
-            bundle.getString("user.mobilebrand") + "," + bundle.getString("user.mobilemodel") + ","
-            +
-            bundle.getString("user.imei") + "," +
-            bundle.getString("user.mobileoperator") + "," +
-            bundle.getString("user.simId") + "," +
+            bundle.getString("customid.user") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+            bundle.getString("user.mobilebrand") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+            bundle.getString("user.mobilemodel") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+            bundle.getString("user.imei") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+            bundle.getString("user.mobileoperator") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+            bundle.getString("user.simId") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
             bundle.getString("tags") + " (semi-colon separate tags; e.g. tag1;tag2;tag3)";
     return format;
   }

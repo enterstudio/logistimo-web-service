@@ -243,8 +243,8 @@ matControllers.controller('MaterialListController', ['$scope', 'matService', 'do
         };
     }
 ]);
-matControllers.controller('AddMatController', ['$scope', '$route', 'matService', 'domainCfgService', 'configService', 'requestContext','$uibModal',
-    function ($scope, $route, matService, domainCfgService, configService, requestContext,$uibModal) {
+matControllers.controller('AddMatController', ['$scope', '$route', 'matService', 'domainCfgService', 'configService', 'requestContext','$uibModal', 'PATTERNS',
+    function ($scope, $route, matService, domainCfgService, configService, requestContext,$uibModal,PATTERNS) {
         $scope.material = {};
         $scope.material.dispInfo = "yes";
         $scope.vErrors = {};
@@ -259,7 +259,8 @@ matControllers.controller('AddMatController', ['$scope', '$route', 'matService',
             {'title': 'Retailer\'s price', 'field': 'rp'}, {'title': "MSRP", 'field': 'msrp'},
             {'title': 'Batch', 'field': 'b'}, {'title': 'Actions'},
             {'title': 'Status'}];
-
+        $scope.temperaturePattern = PATTERNS.TEMPERATURE;
+        $scope.pricePattern = PATTERNS.PRICE;
         $scope.updateTags = function (action) {
             if ($scope.material != null) {
                 if(action == 'add' || action == 'update'){

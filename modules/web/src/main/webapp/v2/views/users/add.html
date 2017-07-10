@@ -296,8 +296,9 @@
                            autocomplete="off"
                            ng-model="user.age"
                            name="age"
-                           maxlength="2"
                            only-digits
+                           min-value="1"
+                           maxlength="2"
                            placeholder="{{resourceBundle['user.age']}}">
                 </div>
             </div>
@@ -504,7 +505,7 @@
                            autocomplete="off"
                            ng-model="user.stn"
                            name="stn"
-                           maxlength="50"
+                           maxlength="200"
                            placeholder="{{resourceBundle['streetaddress']}}"
                            ng-class="{'c-visited' : uVisited.stn}"
                            ng-blur="uVisited.stn = true">
