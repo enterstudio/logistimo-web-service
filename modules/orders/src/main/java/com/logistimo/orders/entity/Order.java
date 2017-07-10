@@ -1322,8 +1322,8 @@ public class Order implements IOrder {
   }
 
   @Override
-  public int getSrc() { return src; }
+  public Integer getSrc() { return src; }
 
   @Override
-  public void setSrc(int source) { this.src = source;}
+  public void setSrc(Integer source) { this.src = source;}
 }

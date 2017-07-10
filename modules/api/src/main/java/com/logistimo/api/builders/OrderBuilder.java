@@ -152,7 +152,7 @@ public class OrderBuilder {
       model.eadd = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
       model.cdt = LocalDateUtil.format(o.getCreatedOn(), locale, timezone);
       model.ubid = o.getUpdatedBy();
-      model.setSrc(o.getSrc());
+      model.src= o.getSrc();
       if (o.getUpdatedBy() != null) {
         try {
           model.uby = as.getUserAccount(o.getUpdatedBy()).getFullName();
