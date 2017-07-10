@@ -27,7 +27,7 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
         $scope.vw = "t";
         $scope.ebf = '';
         $scope.localFilters = ['entity', 'material', 'abntype', 'abndur', 'ebf', 'bno', 'matType', 'loc', 'tpdos', 'etag', 'mtag', 'onlyNZStk', 'dur', 'abndurDate', 'pdos'];
-        $scope.filterMethods = ['onAbnDurationChanged', 'getPDOSData'];
+        $scope.filterMethods = ['onAbnDurationChanged', 'getPDOSData', 'checkBno', 'getData'];
         $scope.filters = {};
         $scope.mparams = ["eid", "ebf", "mid", "batchno", "etag", "mtag", "vw", "abntype", "dur", "fil",
             "matType","onlyNZStk","state","district","taluk","pdos"];
