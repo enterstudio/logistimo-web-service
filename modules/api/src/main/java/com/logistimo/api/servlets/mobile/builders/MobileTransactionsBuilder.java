@@ -390,8 +390,8 @@ public class MobileTransactionsBuilder {
     if (!validBatchesOnly && !invBatch.isExpired()) {
       return null;
     }
-    // For an expired batch if q is not > 0, return null
-    if (!validBatchesOnly && !BigUtil.greaterThanZero(invBatch.getQuantity())) {
+    // For any batch whether valid or expired, if q is not > 0, return null
+    if (!BigUtil.greaterThanZero(invBatch.getQuantity())) {
       return null;
     }
     MobileInvBatchModel mobileInvBatchModel = new MobileInvBatchModel();
@@ -427,10 +427,13 @@ public class MobileTransactionsBuilder {
         switch (displayFreq) {
           case Constants.FREQ_DAILY:
             mobConRateModel.ty = Constants.FREQ_TYPE_DAILY;
+            break;
           case Constants.FREQ_WEEKLY:
             mobConRateModel.ty = Constants.FREQ_TYPE_WEEKLY;
+            break;
           case Constants.FREQ_MONTHLY:
             mobConRateModel.ty = Constants.FREQ_TYPE_MONTHLY;
+            break;
         }
         return mobConRateModel;
       }

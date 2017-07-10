@@ -309,26 +309,40 @@ logistimoApp.directive('tagSelect', function ($compile) {
             }
             $scope.tags = {};
             $scope.udf = false;
-            if ($scope.type === "entity") {
-                domainCfgService.getEntityTagsCfg().then(function (data) {
-                    $scope.tags = data.data.tags;
-                    $scope.udf = data.data.udf;
-                });
-            } else if ($scope.type === "material") {
-                domainCfgService.getMaterialTagsCfg().then(function (data) {
-                    $scope.tags = data.data.tags;
-                    $scope.udf = data.data.udf;
-                });
-            } else if ($scope.type === "order") {
-                domainCfgService.getOrderTagsCfg().then(function (data) {
-                    $scope.tags = data.data.tags;
-                    $scope.udf = data.data.udf;
-                });
-            } else if ($scope.type === "user") {
-                domainCfgService.getUserTagsCfg().then(function (data) {
-                    $scope.tags = data.data.tags;
-                    $scope.udf = data.data.udf;
-                });
+            function fetchTagData(callback, query) {
+                if ($scope.type === "entity") {
+                    domainCfgService.getEntityTagsCfg().then(function (data) {
+                        $scope.tags = data.data.tags;
+                        $scope.udf = data.data.udf;
+                        if(callback) {
+                            callback(query);
+                        }
+                    });
+                } else if ($scope.type === "material") {
+                    domainCfgService.getMaterialTagsCfg().then(function (data) {
+                        $scope.tags = data.data.tags;
+                        $scope.udf = data.data.udf;
+                        if(callback) {
+                            callback(query);
+                        }
+                    });
+                } else if ($scope.type === "order") {
+                    domainCfgService.getOrderTagsCfg().then(function (data) {
+                        $scope.tags = data.data.tags;
+                        $scope.udf = data.data.udf;
+                        if(callback) {
+                            callback(query);
+                        }
+                    });
+                } else if ($scope.type === "user") {
+                    domainCfgService.getUserTagsCfg().then(function (data) {
+                        $scope.tags = data.data.tags;
+                        $scope.udf = data.data.udf;
+                        if(callback) {
+                            callback(query);
+                        }
+                    });
+                }
             }
             $scope.isSelected = function (i) {
                 for (t in $scope.tagsModel) {
@@ -338,9 +352,8 @@ logistimoApp.directive('tagSelect', function ($compile) {
                 }
                 return false;
             };
-            $scope.query = function (query) {
+            function filterData(term) {
                 var data = {results: []};
-                var term = query.term.toLowerCase();
                 for (var i in $scope.tags) {
                     var tag = $scope.tags[i].toLowerCase();
                     if (!$scope.isSelected($scope.tags[i]) && tag.indexOf(term) >= 0) {
@@ -351,7 +364,18 @@ logistimoApp.directive('tagSelect', function ($compile) {
                     term = term.replace(/,/g,"");
                     data.results.push({'text': term, 'id': term})
                 }
+                return data;
+            }
+            function filterTags (query) {
+                var data = filterData(query.term.toLowerCase());
                 query.callback(data);
+            }
+            $scope.query = function (query) {
+                if(checkNullEmptyObject($scope.tags)) {
+                    fetchTagData(filterTags,query)
+                } else {
+                    filterTags(query);
+                }
             }
         }],
         link: function (scope, iElement, iAttrs, ctrl) {
