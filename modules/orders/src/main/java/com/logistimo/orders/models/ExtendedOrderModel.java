@@ -21,23 +21,43 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.models;
+package com.logistimo.orders.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import com.logistimo.entities.models.DemandItemModel;
+import com.logistimo.models.StatusModel;
+
+import java.util.List;
+
 /**
- * Created by charan on 22/06/17.
+ * Created by kumargaurav on 29/06/17.
  */
-public class ApproverContactModel extends UserContactModel {
+public class ExtendedOrderModel extends OrderModel {
 
-  @SerializedName("approver_type")
-  private String approverType;
+  @SerializedName("status")
+  @Expose
+  private StatusModel status;
 
-  public String getApproverType() {
-    return approverType;
+  @SerializedName("items")
+  @Expose
+  private List<DemandItemModel> items = null;
+
+
+  public List<DemandItemModel> getItems() {
+    return items;
   }
 
-  public void setApproverType(String approverType) {
-    this.approverType = approverType;
+  public void setItems(List<DemandItemModel> items) {
+    this.items = items;
+  }
+
+  public StatusModel getStatus() {
+    return status;
+  }
+
+  public void setStatus(StatusModel status) {
+    this.status = status;
   }
 }

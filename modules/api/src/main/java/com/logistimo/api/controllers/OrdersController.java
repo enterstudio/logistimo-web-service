@@ -136,9 +136,6 @@ public class OrdersController {
   public static final String WARN_PREFIX = "w:";
   private static final XLog xLogger = XLog.getLog(OrdersController.class);
   private static final String CACHE_KEY = "order";
-
-  OrderBuilder builder = new OrderBuilder();
-    private IOrderDao orderDao = new OrderDao();
   private static final String PURCHASE_ORDER_APPROVAL = "poa";
     private static final String SALES_ORDER_APPROVAL = "soa";
     private static final String TRANSFER_ORDER_APPROVAL = "toa";
@@ -149,6 +146,8 @@ public class OrdersController {
     private static final Integer SECONDARY_APPROVER = 1;
     private static final String SPACE = " ";
     private static final String COMMA_SPACE = ", ";
+  OrderBuilder builder = new OrderBuilder();
+  private IOrderDao orderDao = new OrderDao();
 
   @RequestMapping("/order/{orderId}")
   public
@@ -864,7 +863,7 @@ public class OrdersController {
             }
           }
         }
-        if(model.items != null) {
+        if (model.items != null) {
           removeSignature = true;
         }
       }
@@ -875,7 +874,7 @@ public class OrdersController {
                 null, null,
                 null, null, null, BigDecimal.ZERO, null, null, dc.allowEmptyOrders(), oTag, oType,
                 oType == 2,
-                referenceId, edd, efd);
+                referenceId, edd, efd,SourceConstants.WEB);
         IOrder order = orderResults.getOrder();
 //            String strPrice = null; // get price statement
 //            if ( order != null && BigUtil.greaterThanZero(order.getTotalPrice()))
@@ -893,7 +892,7 @@ public class OrdersController {
                 + "</b> " + backendMessages.getString("created.successwith") + " <b>" + order.size()
                 + "</b> " + backendMessages.getString("items.lowercase") + ". ";
       }
-      if(removeSignature) {
+      if (removeSignature) {
         DedupUtil.removeSignature(cache, signature);
       } else {
         DedupUtil.setSignatureAndStatus(cache, signature, DedupUtil.SUCCESS);

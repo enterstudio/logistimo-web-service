@@ -136,4 +136,9 @@ public class ShipmentModel {
    */
   public String orderUpdatedAt;
 
+  /**
+   * Source of shipment creation
+   */
+  public Integer src;
+
 }

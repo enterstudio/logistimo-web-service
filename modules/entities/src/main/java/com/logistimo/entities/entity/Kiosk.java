@@ -39,7 +39,6 @@ import com.logistimo.tags.entity.Tag;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.NumberUtil;
 
 import org.apache.commons.lang.StringUtils;

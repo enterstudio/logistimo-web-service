@@ -25,7 +25,7 @@ var ordControllers = angular.module('ordControllers', []);
 ordControllers.controller('OrdersApprovalCtrl', ['$scope', 'ordService', 'userService', 'entityService','requestContext','$location',
     function($scope, ordService, userService, entityService, requestContext, $location){
         $scope.wparams = [["eid","entity.id"], ["oid","ordId"], ["rs","reqStatus"], ["ex","exp"], ["rt","reqType"], ["req","reqId"], ["apr","aprId"],["s","size"],["o","offset"]];
-        $scope.localFilters = ['entity','orderId','reqStatus','reqType','reqId','aprId','exp'];
+        $scope.localFilters = ['entity', 'orderId', 'reqStatus', 'reqType', 'reqId', 'aprId', 'exp'];
         ListingController.call(this, $scope, requestContext, $location);
         $scope.init = function(firstTimeInit) {
             $scope.ordApr = {entity: "",orderId: "",reqType: "",reqStatus: "",reqId: "",aprId: ""};
@@ -127,7 +127,7 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
         $scope.wparams = [["etag", "etag"], ["otag", "otag"], ["status", "status"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["otype", "otype", "sle"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url], ["oid", "orderId"], ["rid", "referenceId"]];
         $scope.orders;
         $scope.otype;
-        $scope.localFilters = ['entity','status','dateModel','from','to','ordId','refId','etag','tpdos','etag','otag'];
+        $scope.localFilters = ['entity', 'status', 'dateModel', 'from', 'to', 'ordId', 'refId', 'etag', 'tpdos', 'etag', 'otag'];
         $scope.exRow = [];
         $scope.etag;
         $scope.otag;
@@ -1436,6 +1436,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         opoq = material.max - material.stk - material.tstk;
                     }
                 }
+                opoq = Math.ceil(opoq/material.huQty)*material.huQty;
                 return opoq;
             }
 
@@ -2395,6 +2396,7 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                     $scope.hideLoading();
                 });
             }
+            $scope.timestamp = undefined;
         }
         resetNoConfirm(true);
         $scope.getFilteredEntity = function (text) {
@@ -2488,6 +2490,7 @@ ordControllers.controller('order.MaterialController', ['$scope',
                     opoq.toFixed(1);
                 }
             }
+            opoq = Math.ceil(opoq/name.huQty)*name.huQty;
             return opoq.toFixed(0);
         };
         $scope.$watch('material.name', function (name, oldVal) {
@@ -2695,7 +2698,7 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
 ordControllers.controller('ShipmentListingController', ['$scope','ordService','requestContext','$location','$window', function ($scope,ordService,requestContext,$location,$window) {
     $scope.wparams = [["o", "offset"], ["s", "size"],["status", "status"], ["cid", "custId.id"], ["vid", "vendId.id"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url],["eftf", "eftFrom", "", formatDate2Url], ["eftt", "eftTo", "", formatDate2Url], ["trans", "trans"], ["trackid", "trackId"]];
     $scope.today = new Date();
-    $scope.localFilters = ['custId','vendId','status','sTrackId','from','to','eftFrom','eftTo','sTrans','trackId'];
+    $scope.localFilters = ['custId', 'vendId', 'status', 'sTrackId', 'from', 'to', 'eftFrom', 'eftTo', 'sTrans', 'trackId'];
     $scope.filterMethods = ['searchTID'];
     ListingController.call(this, $scope, requestContext, $location);
     $scope.init = function() {
@@ -3204,7 +3207,7 @@ ordControllers.controller('FulfilShipmentController', ['$scope','ordService','tr
             msg : msg,
             isFulfil : true,
             isOrderFulfil: $scope.isOrderFulfil,
-            orderUpdatedAt: $scope.shipment.orderUpdatedAt
+            orderUpdatedAt: $scope.order ? $scope.order.orderUpdatedAt : $scope.shipment.orderUpdatedAt
         };
         $scope.showLoading();
         ordService.updateShipment(shipData).then(function (data) {

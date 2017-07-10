@@ -125,4 +125,8 @@ public interface IShipment extends ICrossDomain {
 
   void setPackageSize(String ps);
 
+  Integer getSrc();
+
+  void setSrc(Integer src);
+
 }

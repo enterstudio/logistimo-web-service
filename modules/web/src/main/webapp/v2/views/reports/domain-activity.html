@@ -41,8 +41,14 @@
             <th class="text-center">{{resourceBundle['da.live']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.live']}}"></span></th>
             <th class="text-center">{{resourceBundle['da.active']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.active']}}"></span></th>
             <th class="text-center" ng-show="tempEnabled">{{resourceBundle['assets']}}</th>
-            <th class="text-center" ng-show="tempEnabled">{{resourceBundle['da.live']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['da.monitored.assets']}} {{resourceBundle['da.monitored.assets.live']}}"></span></th>
-            <th class="text-center" ng-show="tempEnabled">{{resourceBundle['da.active']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['da.monitored.assets']}} {{resourceBundle['da.monitored.assets.active']}}"></span></th>
+            <th class="text-center" ng-show="tempEnabled">{{resourceBundle['da.live']}}&nbsp;<span
+                    class="glyphicons glyphicons-info-sign click-element expand-collapse-btn"
+                    uib-tooltip="{{resourceBundle['da.monitored.assets']}} {{resourceBundle['da.monitored.assets.live']}}"></span>
+            </th>
+            <th class="text-center" ng-show="tempEnabled">{{resourceBundle['da.active']}}&nbsp;<span
+                    class="glyphicons glyphicons-info-sign click-element expand-collapse-btn"
+                    uib-tooltip="{{resourceBundle['da.monitored.assets']}} {{resourceBundle['da.monitored.assets.active']}}"></span>
+            </th>
         </tr>
         </thead>
         <tbody ng-repeat="item in hierarchyData track by $index">
@@ -70,7 +76,12 @@
                 </span>
                 <div class="litetext">{{item.akcp}}%</div>
             </td>
-            <td class="text-center" ng-show="tempEnabled"><span id="e{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('e',$index)" uib-tooltip-html="item.toolText['mac']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.mac, 'atype', 'mac', 'e', $index)">{{item.mac}}</span></td>
+            <td class="text-center" ng-show="tempEnabled"><span id="e{{$index}}" tooltip-trigger='hclick'
+                                                                tooltip-append-to-body="true"
+                                                                ng-mouseleave="isDisplaying && closeTooltip('e',$index)"
+                                                                uib-tooltip-html="item.toolText['mac']"
+                                                                ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.mac, 'atype', 'mac', 'e', $index)">{{item.mac}}</span>
+            </td>
             <td class="text-center" ng-show="tempEnabled">
                 <span id="f{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('f',$index)" uib-tooltip-html="item.toolText['mlwa']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.mlwa, 'atype', 'mlwa', 'f', $index)">
                 {{item.mlwa}}

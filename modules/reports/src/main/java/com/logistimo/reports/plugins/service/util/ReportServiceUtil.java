@@ -51,6 +51,7 @@ import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 import org.joda.time.format.DateTimeFormat;
@@ -478,40 +479,26 @@ public class ReportServiceUtil {
   protected Long getMillisInPeriod(String time, String periodicity) {
     Long totalMillis = 0L;
     DateTime currentDateTime = new DateTime();
+    DateTime from;
     switch (periodicity) {
       case QueryHelper.MONTH:
-        if (currentDateTime.isBefore(
-            DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH)
-                .parseDateTime(time)
-                .plusMonths(1)) && currentDateTime.isAfter(
-            DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH)
-                .parseDateTime(time))) {
-          Period p =
-              new Period(
-                  DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH).parseDateTime(time),
-                  currentDateTime,
+        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH).parseDateTime(time);
+        if (currentDateTime.isAfter(from) && currentDateTime.isBefore(from.plusMonths(1))) {
+          Period p = new Period(
+                  from, from.plusDays(Days.daysBetween(from,currentDateTime).getDays() + 1),
                   PeriodType.seconds());
           totalMillis = (long) p.getSeconds() * 1000;
         } else {
           totalMillis =
               LocalDateUtil.MILLISECS_PER_DAY
-                  * DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH)
-                  .parseDateTime(time)
-                  .dayOfMonth()
-                  .getMaximumValue();
+                  * from.dayOfMonth().getMaximumValue();
         }
         break;
       case QueryHelper.WEEK:
-        if (currentDateTime.isBefore(
-            DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY)
-                .parseDateTime(time)
-                .plusWeeks(1)) && currentDateTime.isAfter(
-            DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY)
-                .parseDateTime(time))) {
-          Period p =
-              new Period(
-                  DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).parseDateTime(time),
-                  currentDateTime,
+        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).parseDateTime(time);
+        if (currentDateTime.isAfter(from) && currentDateTime.isBefore(from.plusWeeks(1))) {
+          Period p = new Period(
+                  from, from.plusDays(Days.daysBetween(from, currentDateTime).getDays() + 1),
                   PeriodType.seconds());
           totalMillis = (long) p.getSeconds() * 1000;
         } else {
@@ -519,22 +506,18 @@ public class ReportServiceUtil {
         }
         break;
       case QueryHelper.DAY:
-        if(currentDateTime.isBefore(
-            DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY)
-                .parseDateTime(time)
-                .plusDays(1)) && currentDateTime.isAfter(
-            DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY)
-                .parseDateTime(time))){
+        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).parseDateTime(time);
+        if(currentDateTime.isAfter(from) && currentDateTime.isBefore(from.plusDays(1))){
           Period p =
-              new Period(
-                  DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).parseDateTime(time),
-                  currentDateTime,
+              new Period(from, from.plusDays(Days.daysBetween(from, currentDateTime).getDays() + 1),
                   PeriodType.seconds());
           totalMillis = (long) p.getSeconds() * 1000;
         }else{
           totalMillis = LocalDateUtil.MILLISECS_PER_DAY;
         }
         break;
+      default:
+        totalMillis = LocalDateUtil.MILLISECS_PER_DAY;
     }
     return totalMillis;
   }

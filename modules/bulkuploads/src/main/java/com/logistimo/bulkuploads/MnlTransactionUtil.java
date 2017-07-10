@@ -132,7 +132,7 @@ public class MnlTransactionUtil {
           oms.updateOrderTransactions(domainId, userId, ITransaction.TYPE_ORDER, transList, kioskId,
               null, null, true, linkedKioskId, null, null, null, null, null, null, BigDecimal.ZERO,
               null, null,
-              false, orderTags, 1, false, null, null, null);
+              false, orderTags, 1, false, null, null, null,SourceConstants.UPLOAD);
       IOrder order = or.getOrder();
       // Reset order quantities to fulfilled quantities
       transList.clear();

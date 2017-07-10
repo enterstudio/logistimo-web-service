@@ -299,4 +299,10 @@ public class JsonTagsZ {
   // Approvals related keys
   public static final String APPROVERS = "apprvrs";
   public static final String APPROVALS = "apprvls";
+  // Store app GUI theme
+  public static final String GUI_THEME = "thm";
+  // Automatic allocation and automatic assignment of material status to order related keys
+  public static final String AUTO_ALLOCATE_INVENTORY_TO_ORDERS = "atallc";
+  public static final String AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS = "atasgnmst";
+
 }

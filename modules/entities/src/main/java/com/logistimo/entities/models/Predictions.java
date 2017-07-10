@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2017 Logistimo.
  *
@@ -21,23 +22,47 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.models;
+package com.logistimo.entities.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by charan on 22/06/17.
- */
-public class ApproverContactModel extends UserContactModel {
+import java.math.BigDecimal;
 
-  @SerializedName("approver_type")
-  private String approverType;
+public class Predictions {
 
-  public String getApproverType() {
-    return approverType;
+  @SerializedName("duration_unit")
+  @Expose
+  private String durationUnit;
+  @SerializedName("consumption_rate")
+  @Expose
+  private BigDecimal consumptionRate;
+  @SerializedName("stock_out_duration")
+  @Expose
+  private Integer stockOutDuration;
+
+  public String getDurationUnit() {
+    return durationUnit;
   }
 
-  public void setApproverType(String approverType) {
-    this.approverType = approverType;
+  public void setDurationUnit(String durationUnit) {
+    this.durationUnit = durationUnit;
   }
+
+  public BigDecimal getConsumptionRate() {
+    return consumptionRate;
+  }
+
+  public void setConsumptionRate(BigDecimal consumptionRate) {
+    this.consumptionRate = consumptionRate;
+  }
+
+  public Integer getStockOutDuration() {
+    return stockOutDuration;
+  }
+
+  public void setStockOutDuration(Integer stockOutDuration) {
+    this.stockOutDuration = stockOutDuration;
+  }
+
 }

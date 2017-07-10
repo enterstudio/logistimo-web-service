@@ -27,7 +27,7 @@
             <div ng-controller="ResetController">
                 <div class="row">
                     <div class="col-sm-3">
-                        <span class="filter-label" ng-class="{'required':mxE}" >{{resourceBundle.kiosk}}</span>
+                        <span class="filter-label" ng-class="{'required':mxE}">{{resourceBundle.kiosk}}</span>
                         <entity-select ent-model="entity" classes="form-control"
                                        place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
                                        disable="isDef(material.mId) || isDef(ebf)"></entity-select>
@@ -59,12 +59,12 @@
                         <div class="input">
                             <input type="text" placeholder="> days" class="form-control" ng-model="abndur"
                                    maxlength="5" only-digits ng-enter="onAbnDurationChanged()">
-                                    <!--<span class="input-group-btn">
-                                        <button class="btn btn-default" type="button" ng-click="onAbnDurationChanged()"
-                                                tooltip="{{resourceBundle['search']}}">
-                                            <span class="glyphicons glyphicons-search"></span>
-                                        </button>
-                                    </span>-->
+                            <!--<span class="input-group-btn">
+                                <button class="btn btn-default" type="button" ng-click="onAbnDurationChanged()"
+                                        tooltip="{{resourceBundle['search']}}">
+                                    <span class="glyphicons glyphicons-search"></span>
+                                </button>
+                            </span>-->
                             </input>
                         </div>
                     </div>
@@ -80,21 +80,23 @@
                                     date-model="ebf"></date-picker>
                         </div>
                         <div class="col-sm-3" ng-show="material.b == 'yes' && isUndef(abntype)">
-                                <span class="filter-label">{{resourceBundle['batch']}}</span>
+                            <span class="filter-label">{{resourceBundle['batch']}}</span>
 
-                                <div class="input-group">
-                                    <input type="text" class="form-control" ng-change="checkBno()" ng-model="bno"
-                                           placeholder=" " ng-disabled="isDef(ebf) || isDef(abntype)" ng-enter="getData()"
-                                           upper-case>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" ng-click="getData()" type="button" tooltip="{{resourceBundle['search']}}"
+                            <div class="input-group">
+                                <input type="text" class="form-control" ng-change="checkBno()" ng-model="bno"
+                                       placeholder=" " ng-disabled="isDef(ebf) || isDef(abntype)" ng-enter="getData()"
+                                       upper-case>
+                                <span class="input-group-btn">
+                                            <button class="btn btn-default" ng-click="getData()" type="button"
+                                                    tooltip="{{resourceBundle['search']}}"
                                                     ng-disabled="isDef(ebf) || bno == null || bno == '' || bno.length == 0">
                                                 <span class="glyphicons glyphicons-search"></span>
                                             </button>
                                         </span>
-                                </div>
+                            </div>
                         </div>
-                        <div ng-show="(isDef(entity.id)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25"> <!--isDef(material.mId)-->
+                        <div ng-show="(isDef(entity.id)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)"
+                             class="col-sm-3 mh25"> <!--isDef(material.mId)-->
                             <span class="filter-label">{{resourceBundle['batchenabled']}}</span>
                             <select class="form-control" ng-model="matType">
                                 <option value="0">{{resourceBundle['all']}}</option>
@@ -112,8 +114,9 @@
                         </div>
                         <div class="col-sm-3">
                             <span class="filter-label">{{resourceBundle['district']}}</span>
-                            <location-select place-holder="{{resourceBundle['filterby']}} {{resourceBundle['district']}}"
-                                             filter-model="loc" filter-type="district">
+                            <location-select
+                                    place-holder="{{resourceBundle['filterby']}} {{resourceBundle['district']}}"
+                                    filter-model="loc" filter-type="district">
                             </location-select>
                         </div>
                         <div class="col-sm-3">
@@ -148,9 +151,11 @@
                             <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
                             <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
                         </div>
-                        <div ng-show="(isDef(entity.id) || isDef(material.mId)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25">
+                        <div ng-show="(isDef(entity.id) || isDef(material.mId)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)"
+                             class="col-sm-3 mh25">
                             <div>
-                                <input type="checkbox" id="nzstk" ng-model="onlyNZStk" ng-checked="{{onlyNZStk}}" name="nzstk"> {{resourceBundle['showonly.nonzerostock']}}
+                                <input type="checkbox" id="nzstk" ng-model="onlyNZStk" ng-checked="{{onlyNZStk}}"
+                                       name="nzstk"> {{resourceBundle['showonly.nonzerostock']}}
                             </div>
                         </div>
                     </div>

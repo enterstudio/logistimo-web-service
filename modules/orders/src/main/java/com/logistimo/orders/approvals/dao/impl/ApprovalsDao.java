@@ -205,8 +205,10 @@ public class ApprovalsDao implements IApprovalsDao {
         params.put("orderIdParam", orderId);
         params.put(APPROVAL_ID_PARAM, approvalId);
         query.setUnique(true);
-        IOrderApprovalMapping orderApprovalMapping = (IOrderApprovalMapping) query
-            .executeWithMap(params);
+        IOrderApprovalMapping
+            orderApprovalMapping =
+            (IOrderApprovalMapping) query.executeWithMap(params);
+        orderApprovalMapping = pm.detachCopy(orderApprovalMapping);
         if (orderApprovalMapping != null) {
           type = orderApprovalMapping.getApprovalType();
         }

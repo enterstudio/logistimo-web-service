@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2017 Logistimo.
  *
@@ -21,23 +22,45 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.models;
+package com.logistimo.orders.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by charan on 22/06/17.
- */
-public class ApproverContactModel extends UserContactModel {
+public class OrderStatus {
 
-  @SerializedName("approver_type")
-  private String approverType;
+  @SerializedName("status")
+  @Expose
+  private String status;
+  @SerializedName("updated_at")
+  @Expose
+  private String updatedAt;
+  @SerializedName("updated_by")
+  @Expose
+  private String updatedBy;
 
-  public String getApproverType() {
-    return approverType;
+  public String getStatus() {
+    return status;
   }
 
-  public void setApproverType(String approverType) {
-    this.approverType = approverType;
+  public void setStatus(String status) {
+    this.status = status;
   }
+
+  public String getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(String updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
+
+  public void setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
+  }
+
 }

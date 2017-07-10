@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2017 Logistimo.
  *
@@ -21,23 +22,34 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.models;
+package com.logistimo.entities.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by charan on 22/06/17.
- */
-public class ApproverContactModel extends UserContactModel {
+public class CustomerVendor {
 
-  @SerializedName("approver_type")
-  private String approverType;
+  @SerializedName("customer")
+  @Expose
+  private Inventory customer;
 
-  public String getApproverType() {
-    return approverType;
+  @SerializedName("vendor")
+  @Expose
+  private Inventory vendor;
+
+  public Inventory getCustomer() {
+    return customer;
   }
 
-  public void setApproverType(String approverType) {
-    this.approverType = approverType;
+  public void setCustomer(Inventory customer) {
+    this.customer = customer;
+  }
+
+  public Inventory getVendor() {
+    return vendor;
+  }
+
+  public void setVendor(Inventory vendor) {
+    this.vendor = vendor;
   }
 }

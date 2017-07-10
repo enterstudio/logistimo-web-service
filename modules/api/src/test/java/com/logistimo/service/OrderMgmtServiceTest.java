@@ -108,7 +108,7 @@ public class OrderMgmtServiceTest extends LgTestCase {
             "Hi creating new order", true, vendorId, 1d, 1d, 1d, null, null, null, BigDecimal.TEN,
             "Cash", "100",
             false, Collections.singletonList("TEST"), IOrder.NONTRANSFER, true, "Funny", null,
-            null);
+            null,SourceConstants.WEB);
     IOrder order = or.getOrder();
     this.orderId = order.getOrderId();
     assertNotNull(order, "Order created successfully");
@@ -155,7 +155,7 @@ public class OrderMgmtServiceTest extends LgTestCase {
               1234l, "Hi createing new order", true, vendorId, 1d, 1d, 1d, null, null, null,
               BigDecimal.TEN, "Cash", "100",
               false, Collections.singletonList("TEST"), IOrder.NONTRANSFER, true, "Funny", null,
-              null);
+              null,SourceConstants.WEB);
       IOrder order = or.getOrder();
       this.orderId = order.getOrderId();
       assertNotNull(order, "Order created successfully");

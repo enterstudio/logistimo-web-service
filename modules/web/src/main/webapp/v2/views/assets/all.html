@@ -43,38 +43,46 @@
                     <div class="col-sm-4 pt20">
                         <span class="lPad5 filter-label">{{resourceBundle['type']}}:</span>
                         <span style="cursor: pointer" ng-click="toggleFilter()">
-                            <span ng-repeat="t in multiAssetTypeFilterText track by $index" class="label label-default mt5 dinline" style="padding:.2em;">{{t}}</span>
+                            <span ng-repeat="t in multiAssetTypeFilterText track by $index"
+                                  class="label label-default mt5 dinline" style="padding:.2em;">{{t}}</span>
                             <span class="caret"></span>
                         </span>
-                        <div class="pop_filter_box col-sm-12 ws" id="filter_a" style="margin-left:3%; background-color: #ffffff">
+                        <div class="pop_filter_box col-sm-12 ws" id="filter_a"
+                             style="margin-left:3%; background-color: #ffffff">
                             <div class="row pt10">
                                 <div class="col-sm-12">
                                     <span class="codegray">All monitored assets</span>
-                                    <span class="float-right dummyLink" ng-click="selectAll('md')" style="cursor: pointer">Select all</span>
+                                    <span class="float-right dummyLink" ng-click="selectAll('md')"
+                                          style="cursor: pointer">Select all</span>
                                 </div>
                             </div>
                             <div class="row" style="margin-bottom: 0" ng-repeat="(key,value) in mAssetFilters.md">
                                 <div class="col-sm-12">
-                                    <input type="checkbox" ng-change="toggleCB('md')" checklist-model="at_md" checklist-value="key"> {{value}}
+                                    <input type="checkbox" ng-change="toggleCB('md')" checklist-model="at_md"
+                                           checklist-value="key"> {{value}}
                                 </div>
                             </div>
                             <div class="separator norow"></div>
                             <div class="row" style="padding-bottom: 5px; margin-bottom: 0">
                                 <div class="col-sm-12">
                                     <span class="codegray">All monitoring assets</span>
-                                    <span class="float-right dummyLink" ng-click="selectAll('mg')" style="cursor: pointer">Select all</span>
+                                    <span class="float-right dummyLink" ng-click="selectAll('mg')"
+                                          style="cursor: pointer">Select all</span>
                                 </div>
                             </div>
                             <div class="row" style="margin-bottom: 0" ng-repeat="(key,value) in mAssetFilters.mg">
                                 <div class="col-sm-12">
-                                    <input type="checkbox" ng-change="toggleCB('mg')" checklist-model="at_mg" checklist-value="key"> {{value}}
+                                    <input type="checkbox" ng-change="toggleCB('mg')" checklist-model="at_mg"
+                                           checklist-value="key"> {{value}}
                                 </div>
                             </div>
                             <div class="row pb10">
                                 <div class="col-sm-12">
                                     <span class="pull-right">
-                                        <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilter()" value="Filter">
-                                        <input type="button" class="btn btn-sm btn-default" ng-click="toggleFilter()" value="Cancel">
+                                        <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilter()"
+                                               value="Filter">
+                                        <input type="button" class="btn btn-sm btn-default" ng-click="toggleFilter()"
+                                               value="Cancel">
                                     </span>
                                 </div>
                             </div>
@@ -129,10 +137,12 @@
                             <form class="form-inline">
                                 <div class="filter-label cbx">
                                     {{resourceBundle['asset.alarm.duration']}}
-                                        <input type="text" class="form-control" ng-model="duration" maxlength="4" maxlength="50"
+                                        <input type="text" class="form-control" ng-model="duration" maxlength="4"
+                                               maxlength="50"
                                                ng-enter="onDurationFilterChange()" style="width: 33%;">
                                     <div class="btn-group btn-group-blk btn-group-top cbx" uib-dropdown>
-                                        <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
+                                        <button type="button" class="btn btn-outline dropdown-toggle"
+                                                uib-dropdown-toggle>
                                             {{filterDur[tempADurationDisplay].displayValue}} <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu">

@@ -20,6 +20,7 @@
  * You can be released from the requirements of the license by purchasing a commercial license. To know more about
  * the commercial license, please contact us at opensource@logistimo.com
  */
+
 package com.logistimo.orders.entity.approvals;
 
 import com.logistimo.logger.XLog;
@@ -27,7 +28,12 @@ import com.logistimo.orders.entity.Order;
 
 import java.util.Date;
 
-import javax.jdo.annotations.*;
+import javax.jdo.annotations.Column;
+import javax.jdo.annotations.IdGeneratorStrategy;
+import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
 /**
  * Created by naveensnair on 08/06/17.

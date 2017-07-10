@@ -656,17 +656,18 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
         $scope[filter] = angular.copy($scope[filter]);
     });
     function addwatch(filter) {
-        $scope.$parent.$watch(filter,function(newValue,oldValue){
-            if(newValue!=oldValue){
+        $scope.$parent.$watch(filter, function (newValue, oldValue) {
+            if (newValue != oldValue) {
                 $scope[filter] = angular.copy(newValue);
             }
         })
     }
+
     $scope.applyFilters = function () {
-        angular.forEach($scope.localFilters,function (filter) {
+        angular.forEach($scope.localFilters, function (filter) {
             $scope.$parent[filter] = angular.copy($scope[filter]);
         });
-        angular.forEach($scope.filterMethods, function(fn) {
+        angular.forEach($scope.filterMethods, function (fn) {
             $scope[fn]();
         });
     };

@@ -114,10 +114,13 @@ public class TransactionBuilder {
     if (model.lkId != null) {
       try {
         IKiosk k1 = accountsService.getKiosk(model.lkId, false);
-        model.lknm = k1.getName();
-        model.lklt = k1.getLatitude();
-        model.lkln = k1.getLongitude();
-        model.lkadd = CommonUtils.getAddress(k1.getCity(), k1.getTaluk(), k1.getDistrict(), k1.getState());
+        if (k1 != null) {
+          model.lknm = k1.getName();
+          model.lklt = k1.getLatitude();
+          model.lkln = k1.getLongitude();
+          model.lkadd =
+              CommonUtils.getAddress(k1.getCity(), k1.getTaluk(), k1.getDistrict(), k1.getState());
+        }
       } catch (ServiceException e) {
         // Ignore .. Linked KioskId might have been deleted.
       }

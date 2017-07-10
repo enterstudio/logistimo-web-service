@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2017 Logistimo.
  *
@@ -21,23 +22,45 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.api.models;
+package com.logistimo.entities.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by charan on 22/06/17.
- */
-public class ApproverContactModel extends UserContactModel {
+public class Location {
 
-  @SerializedName("approver_type")
-  private String approverType;
+  @SerializedName("city")
+  @Expose
+  private String city;
+  @SerializedName("district")
+  @Expose
+  private String district;
+  @SerializedName("state")
+  @Expose
+  private String state;
 
-  public String getApproverType() {
-    return approverType;
+  public String getCity() {
+    return city;
   }
 
-  public void setApproverType(String approverType) {
-    this.approverType = approverType;
+  public void setCity(String city) {
+    this.city = city;
   }
+
+  public String getDistrict() {
+    return district;
+  }
+
+  public void setDistrict(String district) {
+    this.district = district;
+  }
+
+  public String getState() {
+    return state;
+  }
+
+  public void setState(String state) {
+    this.state = state;
+  }
+
 }

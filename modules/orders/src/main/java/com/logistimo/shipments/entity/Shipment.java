@@ -110,7 +110,21 @@ public class Shipment implements IShipment {
   @Persistent
   private Date ead;
 
+  @Persistent
+  private Integer src;
+
+  @Override
+  public Integer getSrc() {
+    return src;
+  }
+
+  @Override
+  public void setSrc(Integer src) {
+    this.src = src;
+  }
+
   /**
+
    * Actual date of fulfilment
    */
   @Persistent

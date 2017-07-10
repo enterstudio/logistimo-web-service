@@ -27,12 +27,14 @@
             <div ng-controller="ResetController">
                 <div class="row">
                     <div class="col-sm-3">
-                        <span class="filter-label" ng-class="{'required':mxE || iMan}">{{resourceBundle['customer']}}</span>
+                        <span class="filter-label"
+                              ng-class="{'required':mxE || iMan}">{{resourceBundle['customer']}}</span>
                         <entity-select ent-model="custId" classes="form-control"
                                        place-holder="{{resourceBundle.filterby}} {{resourceBundle['customer.lower']}}"></entity-select>
                     </div>
                     <div class="col-sm-3">
-                        <span class="filter-label" ng-class="{'required':mxE || iMan}">{{resourceBundle['vendor']}}</span>
+                        <span class="filter-label"
+                              ng-class="{'required':mxE || iMan}">{{resourceBundle['vendor']}}</span>
                         <entity-select ent-model="vendId" classes="form-control"
                                        place-holder="{{resourceBundle.filterby}} {{resourceBundle['vendor.lower']}}"></entity-select>
                     </div>
@@ -49,7 +51,8 @@
                     <div class="col-sm-3">
                         <span class="filter-label">Tracking id</span>
                         <div class="input">
-                            <input type="text" class="form-control" ng-model="sTrackId" autocomplete="off" typeahead-wait-ms = "300" placeholder="Tracking id">
+                            <input type="text" class="form-control" ng-model="sTrackId" autocomplete="off"
+                                   typeahead-wait-ms="300" placeholder="Tracking id">
                         </div>
                     </div>
                 </div>
@@ -75,10 +78,13 @@
                     <div class="col-sm-3">
                         <span class="filter-label">Transporter</span>
                         <div class="has-feedback">
-                            <input type="text" class="form-control" ng-model="sTrans" autocomplete="off" typeahead-wait-ms="300"
-                                   placeholder="Transporter"  uib-typeahead="val for val in getSuggestions($viewValue,'trans')"
+                            <input type="text" class="form-control" ng-model="sTrans" autocomplete="off"
+                                   typeahead-wait-ms="300"
+                                   placeholder="Transporter"
+                                   uib-typeahead="val for val in getSuggestions($viewValue,'trans')"
                                    typeahead-loading="loadingTransporter" typeahead-on-select="fetchData()">
-                            <span ng-show="loadingTransporter" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                            <span ng-show="loadingTransporter" class="form-control-feedback typehead-loading"
+                                  aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
                         </div>
                     </div>
                 </div>
@@ -121,6 +127,7 @@
                         <th>{{resourceBundle['vendor']}}</th>
                         <th>{{resourceBundle['status']}}</th>
                         <th>{{resourceBundle['created']}}</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody ng-repeat="item in filtered" ng-controller="NoController">
@@ -142,6 +149,12 @@
                         <td>
                             <a ng-href="#/setup/users/all/details?userId={{item.userID}}" ng-click="$event.stopPropagation();" target="_blank">{{item.createdBy}}</a>
                             <span class="litetext">{{item.cOn}}</span>
+                        </td>
+                        <td>
+                            <span ng-if="item.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
                         </td>
                     </tr>
                     </tbody>

@@ -28,15 +28,20 @@
                     <div class="col-sm-3">
                         <span class="filter-label" ng-class="{'required':mxE}">{{resourceBundle.kiosk}}</span>
                         <entity-select ent-model="entity" classes="form-control"
-                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}" disable="isDef(ordId) || isDef(reqId) || isDef(aprId)"></entity-select>
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}"
+                                       disable="isDef(ordId) || isDef(reqId) || isDef(aprId)"></entity-select>
                     </div>
                     <div class="col-sm-3">
                         <span class="filter-label">{{resourceBundle['order']}}</span>
                         <div class="has-feedback">
-                            <input type="text" class="form-control" ng-model="orderId" autocomplete="off" typeahead-wait-ms="300"
-                                   placeholder="{{resourceBundle['ord.num']}}"  uib-typeahead="val for val in getSuggestions($viewValue,'oid')"
-                                   typeahead-loading="loadingOrderId" typeahead-on-select="showOrder(orderId)" ng-disabled="isDef(entity) || isDef(reqId) || isDef(aprId)">
-                            <span ng-show="loadingOrderId" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
+                            <input type="text" class="form-control" ng-model="orderId" autocomplete="off"
+                                   typeahead-wait-ms="300"
+                                   placeholder="{{resourceBundle['ord.num']}}"
+                                   uib-typeahead="val for val in getSuggestions($viewValue,'oid')"
+                                   typeahead-loading="loadingOrderId" typeahead-on-select="showOrder(orderId)"
+                                   ng-disabled="isDef(entity) || isDef(reqId) || isDef(aprId)">
+                            <span ng-show="loadingOrderId" class="form-control-feedback typehead-loading"
+                                  aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
                         </div>
                     </div>
                     <div class="col-sm-3">
@@ -68,15 +73,17 @@
                     <div class="col-sm-3">
                         <span class="filter-label">Requester</span>
                         <div class="has-feedback">
-                            <input type="text" ng-model="reqId"  name="requesterId"
+                            <input type="text" ng-model="reqId" name="requesterId"
                                    autocomplete="off"
                                    placeholder="Requester"
                                    typeahead-wait-ms="300"
                                    ng-class="{'c-visited' : submitted}"
                                    typeahead-on-select="goToRequester(reqId)"
                                    uib-typeahead="usr as usr for usr in  getFilteredRequesters($viewValue) | limitTo:8"
-                                   class="form-control" typeahead-editable="false" ng-disabled="isDef(entity) || isDef(aprId) || isDef(ordId) || isDef(reqType)"/>
-                            <span ng-show="loadingRequesterId" class="form-control-feedback typehead-loading" aria-hidden="true" >
+                                   class="form-control" typeahead-editable="false"
+                                   ng-disabled="isDef(entity) || isDef(aprId) || isDef(ordId) || isDef(reqType)"/>
+                            <span ng-show="loadingRequesterId" class="form-control-feedback typehead-loading"
+                                  aria-hidden="true">
                                 <span class="glyphicons glyphicons-cogwheel spin"></span>
                             </span>
                         </div>
@@ -84,15 +91,17 @@
                     <div class="col-sm-3">
                         <span class="filter-label">Approver</span>
                         <div class="has-feedback">
-                            <input type="text" ng-model="aprId"  name="approverId"
+                            <input type="text" ng-model="aprId" name="approverId"
                                    autocomplete="off"
                                    placeholder="Approver"
                                    typeahead-wait-ms="300"
                                    ng-class="{'c-visited' : submitted}"
                                    typeahead-on-select="goToApprover(aprId)"
                                    uib-typeahead="usr as usr for usr in  getFilteredApprovers($viewValue) | limitTo:8"
-                                   class="form-control" typeahead-editable="false" ng-disabled="isDef(entity) || isDef(reqId) || isDef(ordId) || isDef(reqType)"/>
-                            <span ng-show="loadingApproverId" class="form-control-feedback typehead-loading" aria-hidden="true" >
+                                   class="form-control" typeahead-editable="false"
+                                   ng-disabled="isDef(entity) || isDef(reqId) || isDef(ordId) || isDef(reqType)"/>
+                            <span ng-show="loadingApproverId" class="form-control-feedback typehead-loading"
+                                  aria-hidden="true">
                                 <span class="glyphicons glyphicons-cogwheel spin"></span>
                             </span>
                         </div>

@@ -47,9 +47,9 @@
                             <tr ng-repeat="item in batchDet">
                                 <td>{{$index+1}}</td>
                                 <td>{{item.bid}}</td>
-                                <td>{{item.bmfdt| asDate | date:'dd/MM/yyyy'}}</td>
+                                <td>{{item.bmfdt | date:'dd/MM/yyyy'}}</td>
                                 <td>{{item.bmfnm}}</td>
-                                <td>{{item.bexp | asDate | date:'dd/MM/yyyy'}}</td>
+                                <td>{{item.bexp | date:'dd/MM/yyyy'}}</td>
                                 <td class="text-center">{{item.q | number}}</td>
                                 <td class="text-center" ng-show="ordersTabEnabled && allocate">{{item.astk | number}}</td>
                                 <td class="text-center" ng-show="ordersTabEnabled && allocate">{{item.atpstk | number}}</td>
@@ -79,9 +79,9 @@
                         <tr ng-repeat="item in expBatchDet" class="alert alert-warning">
                             <td>{{$index+1}}</td>
                             <td>{{item.bid}}</td>
-                            <td>{{item.bmfdt| asDate | date:'dd/MM/yyyy'}}</td>
+                            <td>{{item.bmfdt | date:'dd/MM/yyyy'}}</td>
                             <td>{{item.bmfnm}}</td>
-                            <td>{{item.bexp | asDate | date:'dd/MM/yyyy'}}</td>
+                            <td>{{item.bexp | date:'dd/MM/yyyy'}}</td>
                             <td class="text-center">{{item.q}}</td>
                             <td class="text-center" ng-show="ordersTabEnabled && allocate">{{item.astk | number}}</td>
                             <td ng-show="batchPerm > 1 && !dp.vp"><span ng-show="!item.showReason" class="glyphicons glyphicons-disk-remove" uib-tooltip="Discard" ng-click="openReason('w', $index, item.mtgs)"></span>
