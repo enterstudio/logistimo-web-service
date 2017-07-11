@@ -42,12 +42,13 @@
                     </span>
 
                 </div>
-                <div class="pull-right">
-
-                    <span ng-if="shipment.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" ></span>
-                    <span ng-if="shipment.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" ></span>
-                    <span ng-if="shipment.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}"></span>
-                    <span ng-if="shipment.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}"></span>
+                <div class="col-sm-4">
+                    <div class="pull-right">
+                        <span ng-if="shipment.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" ></span>
+                        <span ng-if="shipment.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" ></span>
+                        <span ng-if="shipment.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}"></span>
+                        <span ng-if="shipment.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}"></span>
+                    </div>
                 </div>
             </div>
             <hr/>

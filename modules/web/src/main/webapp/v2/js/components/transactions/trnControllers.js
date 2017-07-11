@@ -29,7 +29,8 @@ trnControllers.controller('TransactionsCtrl', ['$scope', 'trnService', 'domainCf
             ["to", "to", "", formatDate2Url], ["o", "offset"], ["s", "size"],["batchnm","bid"],
             ["lceid","cust.id"],["lveid","vend.id"],["mid", "material.mId"],["atd","atd"],["rsn","reason"]];
         $scope.today = formatDate2Url(new Date());
-        $scope.localFilters = ['entity', 'material', 'type', 'batchId', 'from', 'to', 'cust', 'vend', 'etag', 'tag', 'rsn'];
+        $scope.localFilters = ['entity', 'material', 'type', 'batchId', 'from', 'to', 'cust', 'vend', 'etag', 'tag','atd'];
+        $scope.filterMethods = ['updateFilters','searchBatch'];
         $scope.atd = false;
         $scope.init = function (firstTimeInit) {
             if (typeof  $scope.showEntityFilter === 'undefined') {
@@ -210,8 +211,12 @@ trnControllers.controller('TransactionsCtrl', ['$scope', 'trnService', 'domainCf
         };
 
         $scope.updateReason = function(reason){
-            $scope.reason = reason;
+            $scope.tempReason = reason;
         };
+
+        $scope.updateFilters = function(){
+            $scope.reason = angular.copy($scope.tempReason);
+        }
 
         $scope.resetFilters = function() {
             if($scope.showEntityFilter) {
@@ -229,6 +234,7 @@ trnControllers.controller('TransactionsCtrl', ['$scope', 'trnService', 'domainCf
             $scope.batchId=$scope.bid;
             $scope.atd=false;
             $scope.reason = undefined;
+            $scope.tempReason = undefined;
         }
     }
 ]);
