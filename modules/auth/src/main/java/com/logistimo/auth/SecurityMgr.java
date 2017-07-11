@@ -60,9 +60,9 @@ public class SecurityMgr {
   // Logger
   private static final XLog xLogger = XLog.getLog(SecurityMgr.class);
   // Operation identifiers (define more operations here)
-  private static final String OP_CONFIGURATION = "configuration";
-  private static final String OP_MANAGE = "manage";
-  private static final String OP_PUSHAPP = "pshapp";
+  public static final String OP_CONFIGURATION = "configuration";
+  public static final String OP_MANAGE = "manage";
+  public static final String OP_PUSHAPP = "pshapp";
   // HTTP header
   private static final String HEADER_AUTHORIZATION = "Authorization";
 
