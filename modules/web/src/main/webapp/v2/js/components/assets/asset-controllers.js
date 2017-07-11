@@ -819,12 +819,15 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
 
             if (checkNotNullEmpty(requestContext.getParam("alrm"))) {
                 $scope.currentFilter = parseInt(requestContext.getParam("alrm"));
+                $scope.tempCurrentFilter = parseInt(requestContext.getParam("alrm"));
             } else {
                 $scope.currentFilter = 0;
+                $scope.tempCurrentFilter = 0;
             }
 
             if (checkNotNullEmpty(requestContext.getParam("dur"))) {
                 $scope.currentFilterDuration = parseInt(requestContext.getParam("dur"));
+                $scope.tempCurrentFilterDuration = parseInt(requestContext.getParam("dur"));
                 $scope.duration = $scope.currentFilterDuration;
             } else{
                 $scope.currentFilterDuration = 0;
@@ -833,8 +836,10 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
 
             if(checkNotNullEmpty(requestContext.getParam("dtype"))) {
                 $scope.aDurationDisplay = parseInt(requestContext.getParam("dtype"));
+                $scope.tempADurationDisplay = parseInt(requestContext.getParam("dtype"));
             } else{
                 $scope.aDurationDisplay = 1;
+                $scope.tempADurationDisplay = 1;
             }
 
             if (checkNotNullEmpty(requestContext.getParam("loc"))) {
@@ -853,10 +858,13 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
 
             if(checkNotNullEmpty(requestContext.getParam("ws"))){
                 $scope.assetWSFilter = parseInt(requestContext.getParam("ws"));
+                $scope.tempAssetWSFilter = parseInt(requestContext.getParam("ws"));
             }
             if(checkNotNullEmpty(requestContext.getParam("awr"))){
                 $scope.awr = parseInt(requestContext.getParam("awr"));
+                $scope.tempAwr = parseInt(requestContext.getParam("awr"));
                 $scope.awrDisplay = $scope.assetRelationFilters[parseInt(requestContext.getParam("awr"))].data;
+                $scope.tempAwrDisplay = $scope.assetRelationFilters[parseInt(requestContext.getParam("awr"))].data;
             }
 
             $scope.getAssets(true);
@@ -958,12 +966,17 @@ assetControllers.controller('AssetsDetailsListingController', ['$scope', '$locat
             $scope.assetTypeFilter = ['md'];
             $scope.assetTypeFilterGroup = 0;
             $scope.awrDisplay = $scope.assetRelationFilters[0].data;
+            $scope.tempAwrDisplay = $scope.assetRelationFilters[0].data;
             $scope.aDurationDisplay = 1;
+            $scope.tempADurationDisplay = 1;
             $scope.awr = 0;
+            $scope.tempAwr = 0;
             $scope.multiAssetTypeFilter = undefined;
             $scope.assetWSFilter = 0;
             $scope.tempAssetWSFilter = 0;
             $scope.assetId = "";
+            $scope.tempCurrentFilter = 0;
+            $scope.tempCurrentFilterDuration = 0;
         };
         $scope.init(true);
     }]);

@@ -39,7 +39,7 @@
                                          place-holder="{{resourceBundle.filterby}} {{resourceBundle['materials.lowercase']}}">
                         </material-select>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <span class="filter-label">{{resourceBundle.type}}</span>
                         <select class="form-control" ng-model="type">
                             <option value="">{{resourceBundle['all']}} {{resourceBundle['transactions.lowercase']}}
@@ -54,15 +54,10 @@
                     <div class="col-sm-3">
                         <div ng-show="material.b == 'yes'">
                             <span class="filter-label">{{resourceBundle['batch']}}</span>
-                            <div class="input-group">
+                            <div class="input">
                                 <input type="text" ng-model="batchId" name="batchId" placeholder=" "
-                                       class="form-control" ng-enter="searchBatch()" upper-case/>
+                                       class="form-control" upper-case/>
                                 <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="searchBatch()" type="button"
-                                        uib-tooltip="{{resourceBundle['search']}}"
-                                        ng-disabled="batchId == null || batchId == '' || batchId.length == 0">
-                                    {{resourceBundle['go']}}
-                                </button>
                             </span>
                             </div>
                         </div>
@@ -80,14 +75,14 @@
                         <span class="filter-label">{{resourceBundle['to']}}</span>
                         <date-picker date-model="to" place-holder="To" min-date="from" max-date="today"></date-picker>
                     </div>
-                    <div class="col-sm-3" ng-show="isDef(entity) && customerCount > 0 && isUndef(vend)">
+                    <div class="col-sm-3" ng-show="isDef(entity) && isUndef(vend)">
                         <span class="filter-label">{{resourceBundle.customer}}</span>
                         <entity-select ent-model="cust" classes="form-control" ent-type="customers" ent-id="entity.id"
                                        place-holder="{{resourceBundle.filterby}} {{resourceBundle.customer}}"
                                        is-filter="true">
                         </entity-select>
                     </div>
-                    <div class="col-sm-3" ng-show="isDef(entity) && vendorCount > 0 && isUndef(cust)">
+                    <div class="col-sm-3" ng-show="isDef(entity) && isUndef(cust)">
                         <span class="filter-label">{{resourceBundle.vendor}}</span>
                         <entity-select ent-model="vend" classes="form-control" ent-type="vendors" ent-id="entity.id"
                                        place-holder="{{resourceBundle.filterby}} {{resourceBundle.vendor}}"
@@ -108,7 +103,7 @@
                         <span class="filter-label">{{resourceBundle['transaction']}} {{resourceBundle['reason.lowercase']}}:</span>
                         <div class="btn-group btn-group-blk btn-group-top" uib-dropdown is-open="isRsnOpen">
                             <button type="button" class="btn btn-outline dropdown-toggle" uib-dropdown-toggle>
-                                {{reason || resourceBundle['all']}} <span class="caret"></span>
+                                {{tempReason || resourceBundle['all']}} <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu" ng-show="isRsnOpen">
                                 <li><a ng-click="updateReason('')">{{resourceBundle['all']}}</a></li>

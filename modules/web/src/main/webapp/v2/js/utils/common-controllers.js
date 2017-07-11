@@ -671,6 +671,13 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
             $scope[fn]();
         });
     };
+
+    $scope.resetLocalFilters = function(){
+        $scope.localFilters.forEach(function (filter) {
+            $scope[filter] = undefined;
+        });
+        $scope.resetFilters();
+    }
 }]);
 
 cmnControllers.factory('focus', function($timeout, $window) {
