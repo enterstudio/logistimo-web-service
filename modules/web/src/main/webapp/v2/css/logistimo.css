@@ -3921,3 +3921,10 @@ lg-uib-select .ui-select-multiple input.ui-select-search {
     display:none;
     text-align: center;
 }
+
+.resetlbl{
+    padding-right: 10px;
+    font-size: 12px;
+    color: #888;
+    vertical-align: bottom;
+}
