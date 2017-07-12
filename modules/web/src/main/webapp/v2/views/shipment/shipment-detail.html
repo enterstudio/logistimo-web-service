@@ -44,10 +44,10 @@
                 </div>
                 <div class="col-sm-4">
                     <div class="pull-right">
-                        <span ng-if="shipment.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" ></span>
-                        <span ng-if="shipment.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" ></span>
-                        <span ng-if="shipment.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}"></span>
-                        <span ng-if="shipment.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}"></span>
+                        <span ng-if="shipment.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-append-to-body="true" ></span>
+                        <span ng-if="shipment.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-append-to-body="true"></span>
+                        <span ng-if="shipment.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-append-to-body="true"></span>
+                        <span ng-if="shipment.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-append-to-body="true"></span>
                     </div>
                 </div>
             </div>
@@ -61,6 +61,9 @@
                         <div class="panel-body">
                             <div class="col-sm-9">
                                 <div ng-include="'views/orders/status-indicator.html'"></div>
+                                <span class="glyphicons glyphicons-history codegray large"  uib-tooltip="Show status history" ng-if="!dispStatusHistory" tooltip-append-to-body="true" ng-click="toggleStatusHistory()"></span>
+                                <span class="glyphicons glyphicons-history codegray large"  uib-tooltip="Hide status history" ng-if="dispStatusHistory" tooltip-append-to-body="true" ng-click="toggleStatusHistory()"></span>
+
                             </div>
                             <div class="col-sm-3 btn-group">
                                 <div class="pull-right">
@@ -72,16 +75,17 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-right">
                                                 <li ng-repeat="status in statusList">
-                                                    <a ng-click="changeStatus(status)"> {{ORDERSTATUSTEXT.statusTxt[status]}}</a>
+                                                    <a ng-hide="checkHideStatus(status)"  ng-click="changeStatus(status)"> {{ORDERSTATUSTEXT.statusTxt[status]}}</a>
                                                 </li>
                                             </ul>
                                         </li>
                                     </ul>
                                     <span class="lPad5">
-                                        <button type="button" class="btn btn-sm btn-primary" ng-click="toggleStatusHistory()">
-                                            <span class="glyphicons glyphicons-history" style="font-size: 15px;" uib-tooltip="Show status history" ng-if="!dispStatusHistory" tooltip-append-to-body="true"></span>
-                                            <span class="glyphicons glyphicons-history" style="font-size: 15px;" uib-tooltip="Hide status history" ng-if="dispStatusHistory" tooltip-append-to-body="true"></span>
-                                        </button>
+                                        <button type="button" ng-show="hasStatus('sp')" class="btn btn-sm btn-primary" ng-click="changeStatus('sp')">{{resourceBundle['ship']}}
+                                             </button>
+                                         <button type="button" ng-show="hasStatus('fl')" class="btn btn-sm btn-primary" ng-click="changeStatus('fl')">{{resourceBundle['fulfill']}}
+                                             </button>
+                                    </span>
                                     </span>
                                 </div>
                             </div>
@@ -285,7 +289,7 @@
                                             <div class="col-sm-12"
                                                  ng-show="allocate && !edit.ship && shipment.statusCode == 'op' && !dp.vp && shipment.atv">
                                                 <button type="button" class="btn btn-sm btn-primary"
-                                                        ng-click="startEditShipment()">{{resourceBundle['edit']}}
+                                                        ng-click="startEditShipment()">{{resourceBundle['allocate']}}
                                                 </button>
                                             </div>
                                         </div>

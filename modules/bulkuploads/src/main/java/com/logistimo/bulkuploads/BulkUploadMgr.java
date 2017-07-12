@@ -1408,7 +1408,7 @@ public class BulkUploadMgr {
       if (++i < size) {
         landPhone = tokens[i].trim();
         if (!landPhone.isEmpty()) {
-          if (landPhone.length() > FieldLimits.TEXT_FIELD_MAX_LENGTH) {
+          if (landPhone.length() > FieldLimits.LAND_PHONE_MAX_LENGTH) {
             ec.messages.add("Land line number: '" + landPhone + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
           }
           String validatedLandPhone = validPhone(landPhone);

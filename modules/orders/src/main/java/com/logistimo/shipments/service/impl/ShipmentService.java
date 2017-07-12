@@ -287,7 +287,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       }
       pm.makePersistentAll(dItems.values());
       // ShipmentStatus is sent as OPEN , since status changes are managed subsequently below.
-      updateMessageAndHistory(shipment.getShipmentId(), null, model.userID, model.orderId,
+      updateMessageAndHistory(shipment.getShipmentId(), model.comment, model.userID, model.orderId,
           model.sdid, null, ShipmentStatus.OPEN, pm);
       // if both conversation and activity returns success, proceed to commit changes
       if (model.status != null && !model.status.equals(ShipmentStatus.OPEN)) {

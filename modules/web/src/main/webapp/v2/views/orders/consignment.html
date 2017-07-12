@@ -36,6 +36,11 @@
                         ((order.st == ORDER.BACKORDERED || order.st == ORDER.CONFIRMED) && order.atv)"
                         ng-click="startEditMats()">{{resourceBundle['edit']}}
                 </button>
+                <button type="button" class="btn btn-sm btn-primary ml10"
+                        ng-show="!dp.vp && order.atv &&
+                        (order.st == ORDER.PENDING || order.st == ORDER.BACKORDERED || order.st == ORDER.CONFIRMED)"
+                        ng-click="startEditMats(true)">{{resourceBundle['allocate']}}
+                </button>
             </div>
         </div>
         <div class="row">
@@ -79,16 +84,16 @@
                             <a href="#/setup/materials/all/detail/{{item.id}}" target="_blank" class="alignBaseLine">{{item.nm}}</a>
                         </td>
                         <td class="text-center col-sm-2 pr30">
-                            <span ng-hide="edit.mat && order.alc"
+                            <span ng-hide="edit.mat && order.alc && !isAllocating"
                                   ng-class="{'fc-color-red':(item.oq > 0 && item.q != item.oq && showStock) || (item.rq >=0 && item.oq != item.rq)}" class="col-sm-8 pr0 text-right">
                                 {{item.q}}
                             </span>
-                            <span ng-if="!edit.mat && isDef(item.drsn)"
+                            <span ng-if="(!edit.mat || isAllocating) && isDef(item.drsn)"
                                   uib-tooltip-html="item.drsn"
                                   class="col-sm-3 litetext glyphicons glyphicons-info-sign lnk"
                                   tooltip-append-to-body="true">
                             </span>
-                            <div ng-show="edit.mat && order.alc">
+                            <div ng-show="edit.mat && order.alc && !isAllocating">
                                 <input ng-if="!item.isBn" class="form-control" type="text" only-digits ng-model="item.q"
                                        ng-change="item.nrsn = isDef(item.nrsn)?item.nrsn:reasons[0]"
                                        id="{{item.id}}{{$index}}"
@@ -123,12 +128,12 @@
                             </div>
                         </td>
                         <td class="text-center col-sm-2" ng-hide="!allocate || isUndef(vendor) || !showStock || !order.atvv">
-                            <div ng-hide="edit.mat" class="col-sm-12 pr30">
+                            <div ng-hide="edit.mat && isAllocating" class="col-sm-12 pr30">
                                 <span class="col-sm-9 ng-binding text-right">{{item.astk}}</span>
                                 <span ng-show="item.isBa && item.astk > 0" class="col-sm-3 pl0 pr30 glyphicons glyphicons-list-alt" style="vertical-align:middle;" ng-click="toggleBatch('sBDetail',$index)"></span>
                                 <span ng-show="!edit.mat && isDef(item.mst) && item.astk > 0 && !item.isBa" class="litetext col-sm-9 text-right">{{item.mst}}</span>
                             </div>
-                            <div ng-show="item.sBDetail || edit.mat">
+                            <div ng-show="item.sBDetail || (edit.mat && isAllocating)">
                                 <div ng-switch on="item.isBa">
                                     <div ng-switch-when="true">
                                         <table class="table table-bordered table-order-batch" ng-show="item.bts" style="margin-left: auto; margin-right: auto;">
@@ -152,7 +157,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div ng-show="edit.mat && order.atv">
+                            <div ng-show="edit.mat && order.atv && isAllocating">
                                 <a ng-disabled="(item.atpstk == 0 && item.astk == 0) || item.q == item.sq" ng-show="item.isBa" ng-click="select($index,'show');hidePop(item,$index,true,true)" class="btn btn-sm btn-primary">{{resourceBundle['allocate.batch']}}</a>
                                 <input ng-if="!item.isBa" class="form-control" type="text" only-digits ng-model="item.nastk"
                                        id="a{{item.id}}{{$index}}"
@@ -204,7 +209,7 @@
                                 </span>
                             </span>
                             <span ng-if="allocate && (order.st == ORDER.COMPLETED || order.st == ORDER.FULFILLED)">
-                                <div ng-show="item.sBDetail || edit.mat">
+                                <div ng-show="item.sBDetail">
                                     <div ng-switch on="item.isBa">
                                         <div ng-switch-when="true">
                                             <table class="table table-bordered table-order-batch" ng-show="item.bts" style="margin-left: auto; margin-right: auto;">
@@ -243,7 +248,7 @@
                                   style="vertical-align:middle;"
                                   ng-click="toggleBatch('fBDetail',$index)">
                             </span>
-                            <div ng-if="allocate && (item.fBDetail || edit.mat)">
+                            <div ng-if="allocate && item.fBDetail">
                                 <div ng-switch on="item.isBa">
                                     <div ng-switch-when="true">
                                         <table class="table table-bordered table-order-batch" ng-show="item.bts" style="margin-left: auto; margin-right: auto;">

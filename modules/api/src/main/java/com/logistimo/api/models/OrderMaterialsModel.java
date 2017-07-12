@@ -35,4 +35,6 @@ public class OrderMaterialsModel {
   public String msg;
 
   public String orderUpdatedAt;
+
+  public Long orderId;
 }

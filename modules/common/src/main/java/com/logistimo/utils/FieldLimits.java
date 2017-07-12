@@ -34,6 +34,7 @@ public class FieldLimits {
   public static final int USERID_MAX_LENGTH = 20;
   public static final int FIRSTNAME_MIN_LENGTH = 1;
   public static final int MOBILE_PHONE_MAX_LENGTH = 20;
+  public static final int LAND_PHONE_MAX_LENGTH = 20;
   public static final int AGE_MIN = 1;
   public static final int AGE_MAX = 99;
   public static final int STREET_ADDRESS_MAX_LENGTH = 200;

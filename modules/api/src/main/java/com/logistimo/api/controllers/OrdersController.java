@@ -887,6 +887,7 @@ public class OrdersController {
             prefix = messages.getString("transactions.transfer.upper") + CharacterConstants.SPACE;
           }
         }
+        model.orderId=order.getOrderId();
         model.msg =
             prefix + backendMessages.getString("order.lowercase") + " <b>" + order.getOrderId()
                 + "</b> " + backendMessages.getString("created.successwith") + " <b>" + order.size()
