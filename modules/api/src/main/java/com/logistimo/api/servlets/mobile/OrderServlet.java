@@ -133,12 +133,14 @@ public class OrderServlet extends JsonRestServlet {
     } else if (RestConstantsZ.ACTION_CANCELORDER.equals(action)) {
       getOrCancelOrder(req, resp, true, backendMessages,
           messages); // TODO: NOTE: CancelOrder is retrained here for backward compatibility
-    } else if (RestConstantsZ.ACTION_UPDATEORDER.equals(action)) {
-      createOrUpdateOrder(req, resp, backendMessages, messages);
+    } else if (RestConstantsZ.ACTION_UPDATEORDER_OLD.equals(action)) {
+      createOrUpdateOrder(req, resp, backendMessages, messages, true);
     } else if (RestConstantsZ.ACTION_UPDATEORDERSTATUS.equals(action)) {
       updateOrderStatusOld(req, resp, backendMessages, messages);
     } else if (RestConstantsZ.ACTION_EXPORT.equals(action)) {
       scheduleExport(req, resp, backendMessages, messages);
+    } else if (RestConstantsZ.ACTION_UPDATEORDER.equals(action)) {
+      createOrUpdateOrder(req, resp, backendMessages, messages, false);
     } else {
       throw new ServiceException("Invalid action: " + action);
     }
@@ -672,7 +674,7 @@ public class OrderServlet extends JsonRestServlet {
   // Create or update a given order
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void createOrUpdateOrder(HttpServletRequest req, HttpServletResponse resp,
-                                   ResourceBundle backendMessages, ResourceBundle messages)
+                                   ResourceBundle backendMessages, ResourceBundle messages, boolean disableCreateTransfer)
       throws IOException {
     xLogger.fine("Entered createOrUpdateOrder");
     // Get the type
@@ -746,7 +748,8 @@ public class OrderServlet extends JsonRestServlet {
             isSalesOrder = true;
           }
           int tOrNt = IOrder.NONTRANSFER;
-          if (uoReq.trf != null && uoReq.trf.equals(IOrder.TRANSFER)) {
+          if (!(disableCreateTransfer && RestConstantsZ.TYPE_ORDER.equals(type)) && uoReq.trf != null
+              && uoReq.trf.equals(IOrder.TRANSFER)) {
             tOrNt = uoReq.trf;
           }
           // Determine if orders are to be created automatically, or whether to allow empty orders, etc.
