@@ -675,6 +675,9 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
     $scope.resetLocalFilters = function(){
         $scope.localFilters.forEach(function (filter) {
             $scope[filter] = undefined;
+            if(filter == 'otype'){
+                $scope[filter] = 'sle';
+            }
         });
         $scope.resetFilters();
     }
