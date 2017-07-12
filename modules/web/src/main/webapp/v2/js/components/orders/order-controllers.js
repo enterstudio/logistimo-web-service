@@ -724,9 +724,12 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         break;
                     default:
                         $scope.statusList = [];
+
                 }
+
+
                 if(($scope.order.st == ORDER.PENDING || $scope.order.st == ORDER.CONFIRMED) && checkNotNullEmpty($scope.order.its) && $scope.order.its.length > 0) {
-                    if(shipmentSize == 0 && checkNotNullEmpty($scope.order.vid) && $scope.order.atv) {
+                   if(shipmentSize == 0 && checkNotNullEmpty($scope.order.vid) && $scope.order.atv) {
                         $scope.statusList.push(ORDER.COMPLETED);
                     }
                     if(shipmentSize == 0 && checkNotNullEmpty($scope.order.vid) && checkNotNullEmpty($scope.oCfg) && $scope.oCfg.aof && $scope.order.atc) {
@@ -737,6 +740,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     $scope.statusList.push(ORDER.CANCELLED);
                 }
                 $scope.showStock = $scope.order.st == $scope.ORDER.PENDING || $scope.order.st == $scope.ORDER.CONFIRMED || $scope.order.st == $scope.ORDER.BACKORDERED;
+
             };
             $scope.resetMsgUsers = function () {
                 $scope.newStatus.users = [];
@@ -1335,6 +1339,15 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
             if (checkNullEmpty($scope.order) || $scope.order.id != $scope.orderId) {
                 $scope.fetchOrder();
             }
+
+            $scope.checkHideStatus = function (status) {
+              return (checkNotNullEmpty(status) && (status == 'cm' || status == 'fl'));
+            }
+            $scope.hasStatus = function (status) {
+              return (checkNotNullEmpty($scope.statusList) && $scope.statusList.indexOf(status) > -1) ;
+            }
+
+
             $scope.getInventory = function (mIds) {
                 if (checkNotNullEmpty($scope.order.eid) && checkNotNullEmpty(mIds)) {
                     $scope.showLoading();
@@ -1444,7 +1457,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 $scope.exRow.splice(index, 1);
                 $scope.order.its.splice(index, 1);
             };
-            $scope.startEditMats = function () {
+            $scope.startEditMats = function (isAllocation) {
                 angular.copy($scope.order.its, $scope.masterIts);
                 if (checkNotNullEmpty($scope.order.its)) {
                     $scope.order.its.forEach(function (its) {
@@ -1485,6 +1498,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 }
                 $scope.toggleEdit('mat');
                 $scope.invalidPopup = 0;
+                $scope.isAllocating = isAllocation;
             };
             $scope.cancelEditMats = function () {
                 $scope.saveCounter = 0;
@@ -1875,8 +1889,8 @@ ordControllers.controller('orders.MaterialController', ['$scope',
         });
     }
 ]);
-ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService', 'domainCfgService', 'entityService', 'requestContext','$timeout','$uibModal',
-    function ($scope, ordService, invService, domainCfgService, entityService, requestContext,$timeout, $uibModal) {
+ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService', 'domainCfgService', 'entityService', 'requestContext','$timeout','$uibModal','$location',
+    function ($scope, ordService, invService, domainCfgService, entityService, requestContext,$timeout, $uibModal,$location) {
         $scope.offset = 0;
         $scope.coffset = 0;
         $scope.size = 50;
@@ -2179,6 +2193,11 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                     if(data.data.msg) {
                         resetNoConfirm(true);
                         $scope.showSuccess(data.data.msg);
+
+                        if(checkNotNullEmpty(data.data.orderId)) {
+                            $location.path('/orders/detail/' + data.data.orderId);
+                        }
+
                     } else {
                         $scope.orderTable = data.data.items;
                         $scope.modalInstance = $uibModal.open({
@@ -2573,8 +2592,8 @@ ordControllers.controller('DemandItemController', ['$scope', function ($scope) {
         $scope.item.nastk = $scope.item.naq= $scope.item.nfq = allocated;
     }
 }]);
-ordControllers.controller('NewShipmentController', ['$scope','ordService','$location','trnService','$timeout','domainCfgService',
-    function ($scope,ordService,$location,trnService,$timeout,domainCfgService) {
+ordControllers.controller('NewShipmentController', ['$scope','ordService','$location','trnService','$timeout','domainCfgService','$uibModal',
+    function ($scope,ordService,$location,trnService,$timeout,domainCfgService,$uibModal) {
         windowScrollTop();
         $scope.today = new Date();
         $scope.rsn = '';
@@ -2627,7 +2646,7 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
             if(isInvalid) {
                 return;
             }
-            var shipment = {};
+             $scope.shipment = {};
 
             if ($scope.oCfg.psrm || (checkNotNullEmpty($scope.rsn) && $scope.rsn.toLowerCase() == 'others')) {
                 if((checkNullEmpty($scope.oCfg.psr) || checkNullEmpty($scope.rsn) || $scope.rsn.toLowerCase() == 'others')
@@ -2637,17 +2656,19 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
                 }
             }
             if(checkNullEmpty($scope.oCfg.psr) || $scope.rsn.toLowerCase() == 'others') {
-                shipment.reason = $scope.mrsn;
+                $scope.shipment.reason = $scope.mrsn;
             } else {
-                shipment.reason = $scope.rsn;
+                $scope.shipment.reason = $scope.rsn;
             }
-            shipment.orderId = $scope.order.id;
-            shipment.customerId = $scope.order.eid;
-            shipment.vendorId = $scope.order.vid;
-            shipment.items = [];
+            $scope.shipment.orderId = $scope.order.id;
+            $scope.shipment.customerId = $scope.order.eid;
+            $scope.shipment.vendorId = $scope.order.vid;
+            $scope.shipment.items = [];
             if (shipNow) {
-                shipment.changeStatus = 'sp';
+                $scope.shipment.changeStatus = 'sp';
             }
+            var hasBatchEnabledMaterials=false;
+            var showDialog=true;
             $scope.sMTShip.forEach(function (data) {
                 var i1 = {};
                 i1.mId = data.id;
@@ -2655,13 +2676,58 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
                 i1.oq = data.nq;
                 i1.afo = data.ta;
                 i1.isBa = data.isBa;
+                if (showDialog) {
+                if (i1.isBa) {
+                    hasBatchEnabledMaterials = true;
+                    if (data.astk < data.nq) {
+                        showDialog = false;
+                    }
+                } else if(!hasBatchEnabledMaterials){
+                    if (data.atpstk < data.nq) {
+                        showDialog = false;
+                    }
+                }
+            }
                 i1.smst = data.smst;
-                shipment.items.push(i1);
+
+                i1.astk=data.astk;
+                $scope.shipment.items.push(i1);
             });
-            shipment.transporter = $scope.transporter;
-            shipment.trackingId = $scope.trackingId;
-            shipment.ps = $scope.ps;
-            shipment.ead = formatDate($scope.ead);
+            $scope.shipment.transporter = $scope.transporter;
+            $scope.shipment.trackingId = $scope.trackingId;
+            $scope.shipment.ps = $scope.ps;
+            $scope.shipment.ead = formatDate($scope.ead);
+            if(showDialog){
+                $scope.shipment.ship=0;
+                $scope.modalInstance = $uibModal.open({
+                    templateUrl: 'views/orders/ship-shipment.html',
+                    scope: $scope,
+                    keyboard: false,
+                    backdrop: 'static'
+                });
+            }else {
+                createShipment($scope.shipment);
+            }
+
+        };
+
+
+        $scope.shipNewShipment = function () {
+            if ($scope.shipment.ship == 0) {
+                $scope.shipment.changeStatus = 'sp';
+            } else {
+                $scope.shipment.changeStatus = '';
+            }
+            $scope.dismissModel();
+            createShipment($scope.shipment);
+        }
+
+        $scope.dismissModel=function () {
+            $scope.modalInstance.dismiss('cancel');
+
+        }
+
+       function createShipment(shipment){
             $scope.showLoading();
             ordService.createShipment(shipment).then(function (data) {
                 $scope.showSuccess(data.data.msg);
@@ -3446,6 +3512,7 @@ ordControllers.controller('ShipmentDetailCtrl', ['$scope', 'ordService','request
                         $scope.hideLoading();
                     });
                 }
+
             });
         };
         $scope.getShipment();
@@ -3844,6 +3911,16 @@ ordControllers.controller('ShipmentDetailCtrl', ['$scope', 'ordService','request
             }
             return true;
         };
+
+        $scope.checkHideStatus=function (status){
+           return (checkNotNullEmpty(status) && status=='sp' || status=='fl');
+        }
+
+        $scope.hasStatus=function (status){
+             return (checkNotNullEmpty($scope.statusList) &&  $scope.statusList.indexOf(status)>-1);
+        }
+
+
         $scope.validateStatus = function(material, index, source) {
             if(material.naq > 0 && checkNullEmpty(material.smst) && material.isVisitedStatus) {
                 var status = material.tm ? $scope.tempmatstatus : $scope.matstatus;

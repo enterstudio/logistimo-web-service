@@ -315,10 +315,10 @@ function InventoryReportController(s, timeout, getData) {
                 headingName = s.filter.cty.label;
             }
         }
-        for ( var index = 0; index < headingArr.length; index++) {
+        for (var index = 0; index < headingArr.length; index++) {
             var headingObj = headingArr[index];
             if (headingObj.name == headingName) {
-                headingArr.splice(index,1);
+                headingArr.splice(index, 1);
                 headingArr.unshift(headingObj);
                 break;
             }
@@ -332,26 +332,26 @@ function InventoryReportController(s, timeout, getData) {
             headingsArray.push({name: headings[i], index: i});
         }
         headingsArray = sortByKey(headingsArray, 'name');
-        headingsArray=reorderHeading(headingsArray);
-        var indexArray=[];
+        headingsArray = reorderHeading(headingsArray);
+        var indexArray = [];
         for (var j = 0; j < headingsArray.length; j++) {
             var headingObj = headingsArray[j];
-            headings[j+1]=headingObj.name;
+            headings[j + 1] = headingObj.name;
             indexArray.push(headingObj.index);
         }
-        reorderData(consolidatedData,indexArray);
+        reorderData(consolidatedData, indexArray);
     }
 
-    function reorderData(consolidatedData,indexArr){
-        var dataCopy=angular.copy(consolidatedData);
+    function reorderData(consolidatedData, indexArr) {
+        var dataCopy = angular.copy(consolidatedData);
         for (var k = 0; k < dataCopy.length; k++) {
             var rowData = dataCopy[k];
-            var reorderedData=[];
-            reorderedData[0]=rowData[0];
-            for(var i=0;i<indexArr.length;i++){
-                reorderedData[i+1]=rowData[indexArr[i]];
+            var reorderedData = [];
+            reorderedData[0] = rowData[0];
+            for (var i = 0; i < indexArr.length; i++) {
+                reorderedData[i + 1] = rowData[indexArr[i]];
             }
-            consolidatedData[k]=reorderedData;
+            consolidatedData[k] = reorderedData;
         }
     }
 

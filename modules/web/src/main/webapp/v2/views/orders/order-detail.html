@@ -138,6 +138,8 @@
                         <div class="panel-body">
                             <div class="col-sm-9 mt10 noLRpad">
                                 <div ng-if="isDef(order)" ng-include="'views/orders/status-indicator.html'"></div>
+                                <span ng-click="toggleStatusHistory()" class="glyphicons glyphicons-history codegray large"  uib-tooltip="Show status history" ng-if="!dispStatusHistory" tooltip-append-to-body="true"></span>
+                                <span ng-click="toggleStatusHistory()" class="glyphicons glyphicons-history codegray large" uib-tooltip="Hide status history" ng-if="dispStatusHistory" tooltip-append-to-body="true"></span>
                             </div>
                             <div class="col-sm-3 btn-group">
                                 <div class="pull-right">
@@ -149,16 +151,16 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-right">
                                                 <li ng-repeat="status in statusList" ng-hide="dp.vp">
-                                                    <a ng-click="changeStatus(status)"> {{ORDERSTATUSTEXT.statusTxt[status]}}</a>
+                                                    <a ng-hide="checkHideStatus(status)" ng-click="changeStatus(status)"> {{ORDERSTATUSTEXT.statusTxt[status]}}</a>
                                                 </li>
                                             </ul>
                                         </li>
                                     </ul>
                                     <span class="lPad5">
-                                        <button type="button" class="btn btn-sm btn-primary" ng-click="toggleStatusHistory()">
-                                            <span class="glyphicons glyphicons-history" style="font-size: 15px;" uib-tooltip="Show status history" ng-if="!dispStatusHistory" tooltip-append-to-body="true"></span>
-                                            <span class="glyphicons glyphicons-history" style="font-size: 15px;" uib-tooltip="Hide status history" ng-if="dispStatusHistory" tooltip-append-to-body="true"></span>
-                                        </button>
+                                        <button type="button" ng-show="hasStatus('cm')" class="btn btn-sm btn-primary" ng-click="changeStatus('cm')">{{resourceBundle['ship']}}
+                                             </button>
+                                          <button type="button" ng-show="hasStatus('fl')" class="btn btn-sm btn-primary" ng-click="changeStatus('fl')">{{resourceBundle['fulfill']}}
+                                             </button>
                                     </span>
                                 </div>
                             </div>

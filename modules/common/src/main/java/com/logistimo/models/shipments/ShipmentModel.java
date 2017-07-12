@@ -141,4 +141,9 @@ public class ShipmentModel {
    */
   public Integer src;
 
+  /**
+   * Comment for shipment
+   */
+  public String comment;
+
 }

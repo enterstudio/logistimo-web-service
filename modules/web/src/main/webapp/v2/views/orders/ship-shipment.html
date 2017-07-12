@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="modal-header ws">
+    <h3 class="modal-title">{{resourceBundle['confirm']}}</h3>
+</div>
+    <div class="modal-body bg-white">
+        <form class="form-horizontal" role="form" name="addEntityForm">
+            <div class="row mt10">
+            <div class="ml25">
+                <p>{{resourceBundle['shipment.msg']}}</p>
+            </div>
+            <div class="ml25">
+                <input type="radio" ng-model="shipment.ship" ng-value="0" > {{resourceBundle['shipment.yes']}}
+                <input type="radio" ng-model="shipment.ship" ng-value="1" style="margin-left: 25px"> {{resourceBundle['shipment.no']}}
+            </div>
+            <div class="row pd15" ng-hide="shipment.ship!=0">
+                <label class="col-sm-2 control-label cbx"> {{resourceBundle['comment']}} </label>
+                <div class="col-sm-7">
+                    <textarea class="form-control" maxlength="2048" rows="4" ng-model="shipment.comment"></textarea>
+                </div>
+            </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer ws">
+    <button class="btn btn-primary" ng-hide="shipment.ship!=0" ng-click="shipNewShipment()">{{resourceBundle['ship']}}</button>
+    <button class="btn btn-primary" ng-hide="shipment.ship!=1" ng-click="shipNewShipment()">{{resourceBundle['submit']}}</button>
+    <button class="btn btn-default" ng-click="dismissModel()">Cancel</button>
+</div>
