@@ -2879,8 +2879,6 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
 
     $scope.saveBatchTrans = function () {
 
-        var tempBatchDet = angular.copy($scope.batchDet);
-
         var isBatchIdRepeated = false;
         var isInvalid = $scope.newBatchDet.some(function (newBItem) {
 
@@ -2907,7 +2905,7 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
                 newBItem.bmfdt = newBItem.uibmfdt ? formatDate(newBItem.uibmfdt) : "";
                 newBItem.e = formatDate(newBItem.uie);
                 newBItem.added = true;
-                tempBatchDet.push(newBItem);
+                $scope.batchDet.push(newBItem);
             }
         });
 
@@ -2917,7 +2915,7 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
 
         if($scope.type !== 'p') {
             var index = 0;
-            var invalidQuantity = tempBatchDet.some(function (det) {
+            var invalidQuantity = $scope.batchDet.some(function (det) {
                 if(checkNotNullEmpty(det.q)) {
                     if ($scope.huQty && det.q % $scope.huQty != 0) {
                         return true;
@@ -2940,7 +2938,7 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
         }
         var newBatches = [];
         var allocated = 0;
-        tempBatchDet.forEach(function (bItem) {
+        $scope.batchDet.forEach(function (bItem) {
             var batchData = {};
             batchData.e = bItem.e;
             batchData.bmfdt = bItem.bmfdt;
