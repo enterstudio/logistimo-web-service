@@ -394,11 +394,16 @@ public class ReportsUtil {
       // Tags, if any
       String materialTag = (StringUtils.isNotEmpty(request.getParameter("mtag"))) ?
           URLDecoder.decode(request.getParameter("mtag"), Constants.UTF8) : null;
-      String kioskTag = (StringUtils.isNotEmpty(request.getParameter("ktag"))) ?
+      String kioskTags = (StringUtils.isNotEmpty(request.getParameter("ktag"))) ?
           URLDecoder.decode(request.getParameter("ktag"), Constants.UTF8) : null;
-      if (StringUtils.isEmpty(kioskTag)) {
-        kioskTag = (StringUtils.isNotEmpty(request.getParameter("etag"))) ?
+      if (StringUtils.isEmpty(kioskTags)) {
+        kioskTags = (StringUtils.isNotEmpty(request.getParameter("etag"))) ?
             URLDecoder.decode(request.getParameter("etag"), Constants.UTF8) : null;
+      }
+      String excludedKioskTags = null;
+      if(StringUtils.isEmpty(kioskTags)){
+        excludedKioskTags = (StringUtils.isNotEmpty(request.getParameter("eetag"))) ?
+            URLDecoder.decode(request.getParameter("eetag"), Constants.UTF8) : null;
       }
       String orderTag = (StringUtils.isNotEmpty(request.getParameter("otag"))) ?
           URLDecoder.decode(request.getParameter("otag"), Constants.UTF8) : null;
@@ -476,8 +481,10 @@ public class ReportsUtil {
       if (StringUtils.isNotEmpty(materialTag)) {
         filters.put(ReportsConstants.FILTER_MATERIALTAG, materialTag);
       }
-      if (StringUtils.isNotEmpty(kioskTag)) {
-        filters.put(ReportsConstants.FILTER_KIOSKTAG, kioskTag);
+      if (StringUtils.isNotEmpty(kioskTags)) {
+        filters.put(ReportsConstants.FILTER_KIOSKTAG, kioskTags);
+      } else if(StringUtils.isNotEmpty(excludedKioskTags)){
+        filters.put(ReportsConstants.FILTER_EXCLUDED_KIOSKTAG, excludedKioskTags);
       } else if (StringUtils.isNotEmpty(orderTag)) {
         filters.put(ReportsConstants.FILTER_ORDERTAG, orderTag);
       }

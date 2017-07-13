@@ -35,9 +35,9 @@ import com.logistimo.pagination.Results;
 public interface IEntityDao {
 
 
-  Results getAllKiosks(Long domainId, String tag, PageParams pageParams);
+  Results getAllKiosks(Long domainId, String tag, String excludedTag, PageParams pageParams);
 
-  Results getAllDomainKiosks(Long domainId, String tag, PageParams pageParams);
+  Results getAllDomainKiosks(Long domainId, String tag, String excludedTag, PageParams pageParams);
 
   String getKeyString(IKiosk kiosk);
 

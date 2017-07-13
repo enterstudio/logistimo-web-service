@@ -210,45 +210,45 @@ logistimoApp.directive('locationSelect', function(){
         controller: ['$scope', 'entityService', function ($scope, entityService) {
             $scope.$watch('model', function (newValue, oldValue) {
                 if ((oldValue == undefined && newValue != undefined) ||
-                        (oldValue != undefined && newValue == undefined) ||
-                        (newValue != undefined && oldValue != undefined && newValue.label != oldValue.label)) {
-                        if($scope.filterType == 'state'){
-                            $scope.filterModel.state = newValue;
-                            if(oldValue != undefined && !oldValue.autofilled){
-                                $scope.filterModel.district = undefined;
-                                $scope.filterModel.taluk = undefined;
-                            }
-                        } else if($scope.filterType == 'district'){
-                            if(checkNullEmpty(newValue)){
-                                $scope.filterModel.district = undefined;
-                            } else if(checkNotNullEmpty($scope.model.state)){
-                                $scope.filterModel.district = newValue;
-                                $scope.filterModel.state = {};
-                                $scope.filterModel.state.label = $scope.model.state;
-                                $scope.filterModel.state.autofilled = true;
-                            }
-                            if(oldValue != undefined && !oldValue.autofilled){
-                                $scope.filterModel.taluk = undefined;
-                            }
-                        } else if($scope.filterType == 'taluk'){
-                            if(checkNullEmpty(newValue)){
-                                $scope.filterModel.taluk = undefined;
-                            } else if(checkNotNullEmpty($scope.model.state) && checkNotNullEmpty($scope.model.district)){
-                                $scope.filterModel.taluk = newValue;
-                                $scope.filterModel.state = {};
-                                $scope.filterModel.state.label = $scope.model.state;
-                                $scope.filterModel.state.autofilled = true;
-                                $scope.filterModel.district = {};
-                                $scope.filterModel.district.label = $scope.model.district;
-                                $scope.filterModel.district.state = $scope.model.state;
-                                $scope.filterModel.district.autofilled = true;
-                            }
+                    (oldValue != undefined && newValue == undefined) ||
+                    (newValue != undefined && oldValue != undefined && newValue.label != oldValue.label)) {
+                    if($scope.filterType == 'state'){
+                        $scope.filterModel.state = newValue;
+                        if(oldValue != undefined && !oldValue.autofilled){
+                            $scope.filterModel.district = undefined;
+                            $scope.filterModel.taluk = undefined;
+                        }
+                    } else if($scope.filterType == 'district'){
+                        if(checkNullEmpty(newValue)){
+                            $scope.filterModel.district = undefined;
+                        } else if(checkNotNullEmpty($scope.model.state)){
+                            $scope.filterModel.district = newValue;
+                            $scope.filterModel.state = {};
+                            $scope.filterModel.state.label = $scope.model.state;
+                            $scope.filterModel.state.autofilled = true;
+                        }
+                        if(oldValue != undefined && !oldValue.autofilled){
+                            $scope.filterModel.taluk = undefined;
+                        }
+                    } else if($scope.filterType == 'taluk'){
+                        if(checkNullEmpty(newValue)){
+                            $scope.filterModel.taluk = undefined;
+                        } else if(checkNotNullEmpty($scope.model.state) && checkNotNullEmpty($scope.model.district)){
+                            $scope.filterModel.taluk = newValue;
+                            $scope.filterModel.state = {};
+                            $scope.filterModel.state.label = $scope.model.state;
+                            $scope.filterModel.state.autofilled = true;
+                            $scope.filterModel.district = {};
+                            $scope.filterModel.district.label = $scope.model.district;
+                            $scope.filterModel.district.state = $scope.model.state;
+                            $scope.filterModel.district.autofilled = true;
                         }
                     }
+                }
             });
-            $scope.$watch('filterModel', function(newValue, oldValue) {
+            $scope.$watch('filterModel'+ "." + $scope.filterType, function(newValue, oldValue) {
                 if(newValue != oldValue) {
-                    setModel(newValue);
+                    $scope.model = newValue ? {label:newValue.label} : undefined;
                 }
             });
 
@@ -288,6 +288,90 @@ logistimoApp.directive('locationSelect', function(){
         }],
         templateUrl: 'views/location-select.html'
     };
+});
+logistimoApp.directive('multipleTagsFilter', function() {
+    return{
+        restrict: 'AE',
+        templateUrl: 'views/tag-filters.html',
+        scope: {
+            includedTags: '=',
+            showExcluded: '=',
+            excludedTags: '=',
+            disabled: '=',
+            type: '=',
+            name: '@'
+        },
+        controller: ['$scope', function($scope) {
+            function setTags(){
+                $scope.inTags = (checkNotNullEmpty($scope.includedTags))
+                    ? $scope.includedTags.split(',').map(function(val){
+                    return {id: val, text: val};
+                    })
+                    : null;
+                $scope.exTags = ($scope.showExcluded && checkNotNullEmpty($scope.excludedTags))
+                    ? $scope.excludedTags.split(',').map(function(val){
+                        return {id: val, text: val};
+                    })
+                    : null;
+            }
+            setTags();
+            $scope.$watch('inTags', function(newVal, oldVal){
+                if(newVal != oldVal){
+                    if(checkNotNullEmpty(newVal) && newVal.length > 0){
+                        $scope.exTags = null;
+                    }
+                }
+            });
+            $scope.$watch('exTags', function(newVal, oldVal){
+                if(newVal != oldVal){
+                    if(checkNotNullEmpty(newVal) && newVal.length > 0){
+                        $scope.inTags = null;
+                    }
+                }
+            });
+
+            $scope.toggleFilter = function (cancel) {
+                var d = document.getElementById($scope.type+'-filter');
+                if (cancel != undefined) {
+                    $scope.showFilter = false;
+                    setTags();
+                } else {
+                    $scope.showFilter = !$scope.showFilter;
+                }
+                if ($scope.showFilter) {
+                    d.style.opacity = '100';
+                    d.style.zIndex = '2';
+                } else {
+                    d.style.opacity = '0';
+                    d.style.zIndex = '-1';
+                }
+            };
+
+            $scope.applyTagFilters = function(){
+                if(checkNotNullEmpty($scope.inTags) && $scope.inTags.length > 0){
+                    $scope.includedTags = $scope.inTags.map(function(val){
+                        return val.text;
+                    }).join(',');
+                }else{
+                    $scope.includedTags = null;
+                }
+                if(checkNotNullEmpty($scope.exTags) && $scope.exTags.length > 0){
+                    $scope.excludedTags = $scope.exTags.map(function(val){
+                        return val.text;
+                    }).join(',');
+                }else if($scope.showExcluded){
+                    $scope.excludedTags = null;
+                }
+                $scope.toggleFilter();
+            };
+
+            $scope.resetFilters = function(){
+                $scope.inTags = null;
+                $scope.exTags = null;
+            }
+        }]
+
+    }
 });
 logistimoApp.directive('tagSelect', function ($compile) {
     var multiple = '<lg-uib-select multiple="multiple" ng-disabled="disabled" query="query(q)" ui-model="tagsModel" place-holder="{{placeHolder}}"> </lg-uib-select>';
@@ -345,7 +429,7 @@ logistimoApp.directive('tagSelect', function ($compile) {
                 }
             }
             $scope.isSelected = function (i) {
-                for (t in $scope.tagsModel) {
+                for (var t in $scope.tagsModel) {
                     if (i == $scope.tagsModel[t]) {
                         return true;
                     }
@@ -434,7 +518,7 @@ logistimoApp.directive('userSelect', function ($compile) {
                     if (m1.length != m2.length) {
                         return false;
                     } else {
-                        for (i in m1) {
+                        for (var i in m1) {
                             if (!angular.equals(m1[i], m1[i])) {
                                 return false;
                             }
@@ -727,7 +811,7 @@ logistimoApp.directive('domainTagSelect', function ($compile) {
                         return true;
                     }
                 }
-                for(j in $scope.preSelected) {
+                for(var j in $scope.preSelected) {
                     if(i == $scope.preSelected[j].id) {
                         return true;
                     }
@@ -2164,18 +2248,18 @@ logistimoApp.directive('popoverTemplate', ['$tooltip', function ($tooltip) {
 logistimoApp.directive('noteData', function () {
     var noteTemplate ='<div class="box topbox">' +
         '<div>' +
-            '<div class="modal-header">'+
-                '<h3 class="modal-title">Note</h3>'+
-            '</div>'+
-            '<div class="modal-body">'+
-                '<p>{{msg}}</p>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-                '<button class="btn btn-primary" ng-click="confirm()">OK</button>'+
-                '<button class="btn btn-default" ng-click="close()">Cancel</button>'
-            '</div>'+
+        '<div class="modal-header">'+
+        '<h3 class="modal-title">Note</h3>'+
         '</div>'+
-        '</div>';
+        '<div class="modal-body">'+
+        '<p>{{msg}}</p>'+
+        '</div>'+
+        '<div class="modal-footer">'+
+        '<button class="btn btn-primary" ng-click="confirm()">OK</button>'+
+        '<button class="btn btn-default" ng-click="close()">Cancel</button>'
+    '</div>'+
+    '</div>'+
+    '</div>';
     return {
         restrict: 'AE',
         controller:['$scope','$uibModal','demandService', function ($scope, $uibModal, demandService) {
@@ -2205,7 +2289,7 @@ logistimoApp.directive('noteData', function () {
                     $scope.type = data;
                     $scope.msg = "Are you sure you want to clear allocations?";
                     $scope.modalInstance = $uibModal.open({
-                       template: noteTemplate,
+                        template: noteTemplate,
                         scope: $scope
                     });
                 }
@@ -2289,6 +2373,7 @@ logistimoApp.directive('exportData', function () {
             reason: '=',
             discType: '=',
             eTag: '=',
+            eeTag: '=',
             mTag: '=',
             etrn: '=',
             rows: '=',
@@ -2307,7 +2392,7 @@ logistimoApp.directive('exportData', function () {
                     }
                 }
                 if($scope.exportType == 'assets') {
-                        $scope.msg = $scope.$parent.resourceBundle['assets.export.all'] + emailDetailsMsg;
+                    $scope.msg = $scope.$parent.resourceBundle['assets.export.all'] + emailDetailsMsg;
                 } else if ($scope.exportType == 'powerdata') {
                     $scope.msg = $scope.$parent.resourceBundle['export.powerdata'] + " \"" + FormatDate_DD_MM_YYYY($scope.to?$scope.to:new Date()) + "\" of this asset's sensor \"" + $scope.sensorName + "\"" + emailDetailsMsg;
                 } else if ($scope.exportType == 'orders') {
@@ -2335,7 +2420,7 @@ logistimoApp.directive('exportData', function () {
                         checkNotNullEmpty($scope.mTag) || checkNotNullEmpty($scope.eTag) ||
                         checkNotNullEmpty($scope.reason);
                     if (filtersAvailable) {
-                            $scope.msg = $scope.$parent.resourceBundle['export.transactions.criteria'] + emailDetailsMsg;
+                        $scope.msg = $scope.$parent.resourceBundle['export.transactions.criteria'] + emailDetailsMsg;
                     } else {
                         $scope.msg = $scope.$parent.resourceBundle['export.all.transactions'] + emailDetailsMsg;
                     }
@@ -2595,6 +2680,8 @@ logistimoApp.directive('exportData', function () {
                 }
                 if (checkNotNullEmpty($scope.eTag)) {
                     extraParams += '&etag=' + $scope.eTag;
+                } else if (checkNotNullEmpty($scope.eeTag)) {
+                    extraParams += '&eetag=' + $scope.eeTag;
                 }
                 if (checkNotNullEmpty($scope.mTag)) {
                     extraParams += '&mtag=' + $scope.mTag;

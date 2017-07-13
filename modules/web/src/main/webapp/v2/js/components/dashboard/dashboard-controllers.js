@@ -1513,6 +1513,11 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
             "caption": ' ',
             "yAxisMaxValue": 100
         };
+
+        function checkDateNullOrCurrent(date){
+            return checkNullEmpty(date) || (date.toDateString() == (new Date()).toDateString());
+        }
+
         function constructBarData(data, allData, event, addLink, level) {
             var bData = [];
             for (var f in allData) {
@@ -1556,17 +1561,18 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                                     filter = $scope.dashboardView.mTyNm + "_" + bd.label;
                                 }
                                 bd.link = "JavaScript: angular.element(document.getElementById('cid')).scope().addFilter('" + filter + "','" + level + "')";
-                            } else if(event == '200' || event == '201' || event == '202' || event == 'n') {
-                                bd.link = "N-#/inventory/?eid="+kid;
-                                if(checkNotNullEmpty($scope.mtag) && $scope.mtag.length == 1) {
-                                    bd.link += "&mtag=" + $scope.mtag[0].text;
+                            } else if((event == '200' || event == '201' || event == '202' || event == 'n')) {
+                                var search = "?eid="+kid;
+                                if(checkNotNullEmpty($scope.mtag) && $scope.mtag instanceof Array) {
+                                    search += "&mtag="+ $scope.mtag.map(function(val){return val.text;}).join(',');
                                 }
                                 if(event != 'n'){
-                                    bd.link += "&abntype="+event;
+                                    search += "&abntype="+event;
                                     if(checkNotNullEmpty($scope.period) && $scope.period != '0'){
-                                        bd.link += "&dur="+$scope.period;
+                                        search += "&dur="+$scope.period;
                                     }
                                 }
+                                bd.link = "JavaScript: angular.element(document.getElementById('cid')).scope().drillDownInventory('" + search + "')";
                             } else if(event == 'a' || event == 'i') {
                                 var fromDate = angular.copy($scope.date || $scope.today);
                                 fromDate.setDate(fromDate.getDate() - ($scope.period || $scope.aper) + ($scope.date ? 1 : 0));
@@ -1618,6 +1624,19 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                         value = data[n].value;
                         den = data[n].den;
                     }
+                    function getLocationParams(links){
+                        var params = '';
+                        if(checkNotNullEmpty(links) && links.length > 0){
+                            for(var l = 0; l<links.length; l++){
+                                if(links[l].level == 'state' && checkNotNullEmpty(links[l].text)){
+                                    params += '&state='+ links[l].text;
+                                } else if(links[l].level == 'district' && checkNotNullEmpty(links[l].text)){
+                                    params += '&district='+ links[l].text;
+                                }
+                            }
+                        }
+                        return params;
+                    }
                     for (var i = 0; i < bData.length; i++) {
                         var bd = bData[i];
                         if (n == bd.label) {
@@ -1631,34 +1650,29 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                                 }
                             }
                             // generate link to stock views page
+                            var search;
                             if(checkNotNullEmpty(data[n].mid) && (event == INVENTORY.stock.STOCKOUT ||
                                 event == INVENTORY.stock.UNDERSTOCK || event == INVENTORY.stock.OVERSTOCK)
                                 && data[n].value != 0) {
-                                bd.link = "N-#/inventory/?abntype="+event + "&mid="+data[n].mid;
+                                search = "?abntype="+event + "&mid="+data[n].mid;
                                 if(checkNotNullEmpty($scope.period) && $scope.period != '0'){
-                                    bd.link += "&dur="+$scope.period;
+                                    search += "&dur="+$scope.period;
                                 }
-                                addLocationLink();
-                            }else if(event == 'n' && checkNotNullEmpty(data[n].mid) && data[n].value != 0){
-                                bd.link = "N-#/inventory/?mid="+data[n].mid;
-                                addLocationLink();
+                                search += getLocationParams($scope.links);
+                            } else if(event == 'n' && checkNotNullEmpty(data[n].mid) && data[n].value != 0){
+                                search = "?mid="+data[n].mid;
+                                search += getLocationParams($scope.links);
                             }
-                            if(checkNotNullEmpty(bd.link) && checkNotNullEmpty($scope.eTag) && $scope.eTag.length == 1){
-                                bd.link += "&etag="+$scope.eTag[0].text;
+                            if(checkNotNullEmpty(search) && checkNotNullEmpty($scope.eTag) && $scope.eTag instanceof Array){
+                                search += "&etag="+$scope.eTag.map(function(val){
+                                        return val.text;}).join(',');
+                            }else if(checkNotNullEmpty(search) && checkNotNullEmpty($scope.excludeTag) && $scope.excludeTag instanceof Array){
+                                search += "&eetag="+$scope.excludeTag.map(function(val){
+                                        return val.text;}).join(',');
                             }
-
-                            function addLocationLink(){
-                                if(checkNotNullEmpty($scope.links) && $scope.links.length > 0){
-                                    for(var l = 0; l<$scope.links.length; l++){
-                                        if($scope.links[l].level == 'state' && checkNotNullEmpty($scope.links[l].text)){
-                                            bd.link += '&state='+ $scope.links[l].text;
-                                        } else if($scope.links[l].level == 'district' && checkNotNullEmpty($scope.links[l].text)){
-                                            bd.link += '&district='+ $scope.links[l].text;
-                                        }
-                                    }
-                                }
+                            if(checkNotNullEmpty(search)){
+                                bd.link = "JavaScript: angular.element(document.getElementById('cid')).scope().drillDownInventory('" + search + "')";
                             }
-
                             var found = false;
                             //Arrange data in descending order
                             for (var j = 0; j < bData.length; j++) {
@@ -1951,6 +1965,15 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                 });
             } else {
                 $scope.setURLParams();
+            }
+        };
+
+        $scope.drillDownInventory = function(search){
+            if(checkDateNullOrCurrent($scope.date)){
+                $window.open("#/inventory/"+search);
+            }else{
+                $scope.showWarning($scope.resourceBundle['past.date.selected']);
+                console.log("message");
             }
         };
 
@@ -2981,9 +3004,9 @@ domainControllers.controller('PredictiveController', ['$scope', '$timeout', '$sc
                                 }
                                 bd.link = "JavaScript: angular.element(document.getElementById('cid')).scope().addFilter('" + filter + "','" + level + "')";
                             } else if(event == 'so' || event == 'n') {
-                                bd.link = "N-#/inventory/?eid="+kid;
+                                var search = {eid: kid};
                                 if(checkNotNullEmpty($scope.mtag) && $scope.mtag.length == 1) {
-                                    bd.link += "&mtag=" + $scope.mtag[0].text;
+                                    search['mtag'] = $scope.mtag[0].text;
                                 }
                             }
                             var found = false;
@@ -3036,7 +3059,7 @@ domainControllers.controller('PredictiveController', ['$scope', '$timeout', '$sc
                             }
                             if(event == 'so' && checkNotNullEmpty(data[n].mid) && data[n].value != 0){
                                 bd.link = "N-#/inventory/?mid="+data[n].mid+"&pdos=7";
-                                addLocationLink();
+                                bd.link += getLocationParams($scope.links);
                             }
                             var found = false;
                             //Arrange data in descending order
@@ -3058,16 +3081,18 @@ domainControllers.controller('PredictiveController', ['$scope', '$timeout', '$sc
             $scope.matBarHeight = bData.length * 20 + 80;
             $scope.matBarData = bData;
 
-            function addLocationLink() {
-                if (checkNotNullEmpty($scope.links) && $scope.links.length > 0) {
-                    for (var l = 0; l < $scope.links.length; l++) {
-                        if ($scope.links[l].level == 'state' && checkNotNullEmpty($scope.links[l].text)) {
-                            bd.link += '&state=' + $scope.links[l].text;
-                        } else if ($scope.links[l].level == 'district' && checkNotNullEmpty($scope.links[l].text)) {
-                            bd.link += '&district=' + $scope.links[l].text;
+            function getLocationParams(links) {
+                var params = '';
+                if (checkNotNullEmpty(links) && links.length > 0) {
+                    for (var l = 0; l < links.length; l++) {
+                        if (links[l].level == 'state' && checkNotNullEmpty(links[l].text)) {
+                            params += '&state=' + links[l].text;
+                        } else if (links[l].level == 'district' && checkNotNullEmpty(links[l].text)) {
+                            params += '&district=' + links[l].text;
                         }
                     }
                 }
+                return params;
             }
         }
 

@@ -92,7 +92,7 @@ public class InventoryManagementServiceTest {
     List<Long> kioskIds = new ArrayList<Long>(1);
     kioskIds.add(119l);
     Results results1 = ims.getInventoryByMaterialDomain(materialId, null, kioskIds, null, domainId);
-    Results results2 = ims.getInventory(domainId, null, kioskIds, null, materialId, null, 0,
+    Results results2 = ims.getInventory(domainId, null, kioskIds, null, null, materialId, null, 0,
         false, null, null,null);
     assertEquals("Results match", results1.getResults().size(), results2.getResults().size());
   }

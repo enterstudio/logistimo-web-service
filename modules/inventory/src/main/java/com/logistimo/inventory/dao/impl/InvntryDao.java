@@ -29,7 +29,12 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.inventory.dao.IInvntryDao;
-import com.logistimo.inventory.entity.*;
+import com.logistimo.inventory.entity.IInvntry;
+import com.logistimo.inventory.entity.IInvntryBatch;
+import com.logistimo.inventory.entity.IInvntryEvntLog;
+import com.logistimo.inventory.entity.IInvntryLog;
+import com.logistimo.inventory.entity.Invntry;
+import com.logistimo.inventory.entity.InvntryEvntLog;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.QueryParams;
@@ -40,12 +45,20 @@ import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.LocalDateUtil;
+
 import org.apache.commons.lang.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
-import java.util.*;
 
 /**
  * Created by charan on 03/03/15.
@@ -89,7 +102,7 @@ public class InvntryDao implements IInvntryDao {
   public IInvntry findId(Long kioskId, Long materialId, PersistenceManager pm) {
     Query q = pm.newQuery(Invntry.class);
     try {
-      q.setFilter("kId == " + kioskId + " && mId == " + materialId);
+      q.setFilter("kId == " + kioskId.toString() + " && mId == " + materialId.toString());
       Object results = q.execute();
       if (results instanceof IInvntry) {
         results = pm.detachCopy(results);
@@ -112,7 +125,7 @@ public class InvntryDao implements IInvntryDao {
   public IInvntry findShortId(Long kioskId, Long shortId, PersistenceManager pm) {
     Query q = pm.newQuery(Invntry.class);
     try {
-      q.setFilter("kId == " + kioskId + " && sId == " + shortId);
+      q.setFilter("kId == " + kioskId.toString() + " && sId == " + shortId.toString());
       Object results = q.execute();
       if (results instanceof IInvntry) {
         results = pm.detachCopy(results);
@@ -348,7 +361,8 @@ public class InvntryDao implements IInvntryDao {
 
   @Override
   public QueryParams buildInventoryQuery(Long kioskId, Long materialId, List<String> kioskTags,
-                                         String kioskTag, String materialTag, List<Long> kioskIds,
+                                         List<String> excludedKioskTags,
+                                         String materialTags, List<Long> kioskIds,
                                          PageParams pageParams, Long domainId,
                                          String materialNameStartsWith, int matType,
                                          boolean onlyNonZeroStock, LocationSuggestionModel location,
@@ -361,16 +375,21 @@ public class InvntryDao implements IInvntryDao {
     if (kioskId != null) {
       queryBuilder.append(" AND I.KID = ?");
       params.add(String.valueOf(kioskId));
-    } else if (StringUtils.isNotEmpty(kioskTag)) {
-      queryBuilder.append(" AND I.KID in (SELECT KIOSKID from KIOSK_TAGS where ID = ? )");
-      params.add(String.valueOf(tagDao.getTagFilter(kioskTag, ITag.KIOSK_TAG)));
     } else if (kioskTags != null && !kioskTags.isEmpty()) {
       queryBuilder.append(" AND I.KID in (SELECT KIOSKID from KIOSK_TAGS where ID in (");
       for(String tag:kioskTags){
         queryBuilder.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
         params.add(String.valueOf(tagDao.getTagFilter(tag, ITag.KIOSK_TAG)));
       }
-      queryBuilder.setLength(queryBuilder.length()-1);
+      queryBuilder.setLength(queryBuilder.length() - 1);
+      queryBuilder.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET);
+    } else if (excludedKioskTags != null && !excludedKioskTags.isEmpty()) {
+      queryBuilder.append(" AND I.KID NOT in (SELECT KIOSKID from KIOSK_TAGS where ID in (");
+      for(String tag:excludedKioskTags){
+        queryBuilder.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
+        params.add(String.valueOf(tagDao.getTagFilter(tag, ITag.KIOSK_TAG)));
+      }
+      queryBuilder.setLength(queryBuilder.length() - 1);
       queryBuilder.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET);
     } else if (kioskIds !=null && !kioskIds.isEmpty()){
       queryBuilder.append(" AND I.KID in (");
@@ -395,17 +414,24 @@ public class InvntryDao implements IInvntryDao {
       queryBuilder.append(" AND I.MID = ?");
       params.add(String.valueOf(materialId));
     } else {
-      if (materialTag != null && !materialTag.isEmpty()) {
-        queryBuilder.append(" AND I.MID in (SELECT MATERIALID from MATERIAL_TAGS where ID = ? )");
-        params.add(String.valueOf(tagDao.getTagFilter(materialTag, ITag.MATERIAL_TAG)));
+      if (StringUtils.isNotEmpty(materialTags)) {
+        String[] mTags = StringUtils.split(materialTags,CharacterConstants.COMMA);
+        queryBuilder.append(" AND I.MID in (SELECT MATERIALID from MATERIAL_TAGS where (");
+        for (int i = 0; i < mTags.length; i++) {
+          String tag = mTags[i];
+          if(i>0){
+            queryBuilder.append(" OR ");
+          }
+          queryBuilder.append("ID = ?");
+          params.add(String.valueOf(tagDao.getTagFilter(tag, ITag.MATERIAL_TAG)));
+        }
+        queryBuilder.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET);
       }
-
       if (! StringUtils.isEmpty(materialNameStartsWith)) {
         queryBuilder.append(" AND M.UNAME LIKE ?");
         params.add(materialNameStartsWith+CharacterConstants.PERCENT);
       }
     }
-
 
     if (domainId != null) {
       queryBuilder.append(" AND KID IN (SELECT KIOSKID_OID FROM KIOSK_DOMAINS WHERE DOMAIN_ID= ? )");
@@ -464,8 +490,8 @@ public class InvntryDao implements IInvntryDao {
 
 
   @Override
-  public Results getInventory(Long kioskId, Long materialId, String kioskTag,
-                              String materialTag, List<Long> kioskIds,
+  public Results getInventory(Long kioskId, Long materialId, String kioskTags,
+                              String excludedKioskTags, String materialTag, List<Long> kioskIds,
                               PageParams pageParams, PersistenceManager pm, Long domainId,
                               String materialNameStartsWith, int matType, boolean onlyNonZeroStock,
                               LocationSuggestionModel location, String pdos)
@@ -474,14 +500,16 @@ public class InvntryDao implements IInvntryDao {
     Query cntQuery = null;
     List<Invntry> inventoryList = null;
     int count = 0;
-    List<String> kioskTags = null;
-    if (StringUtils.contains(kioskTag, ',')) {
-      kioskTags = Arrays.asList(kioskTag.split(","));
-      kioskTag = null;
+    List<String> kTags = null;
+    List<String> excludedKTags = null;
+    if(StringUtils.isNotEmpty(excludedKioskTags)){
+      excludedKTags = Arrays.asList(excludedKioskTags.split(CharacterConstants.COMMA));
+    }else if (StringUtils.isNotEmpty(kioskTags)) {
+      kTags = Arrays.asList(kioskTags.split(CharacterConstants.COMMA));
     }
     try {
       QueryParams
-          sqlQueryModel = buildInventoryQuery(kioskId, materialId, kioskTags, kioskTag, materialTag, kioskIds,
+          sqlQueryModel = buildInventoryQuery(kioskId, materialId, kTags,excludedKTags, materialTag, kioskIds,
           pageParams, domainId, materialNameStartsWith, matType, onlyNonZeroStock,location,false,
           pdos);
       query = pm.newQuery("javax.jdo.query.SQL", sqlQueryModel.query);
@@ -489,8 +517,7 @@ public class InvntryDao implements IInvntryDao {
       inventoryList = (List<Invntry>) query.executeWithArray(
           sqlQueryModel.listParams.toArray());
       inventoryList = (List<Invntry>) pm.detachCopyAll(inventoryList);
-      QueryParams cntSqlQueryModel = buildInventoryQuery(kioskId, materialId, kioskTags,
-          kioskTag, materialTag, kioskIds,
+      QueryParams cntSqlQueryModel = buildInventoryQuery(kioskId, materialId, kTags, excludedKTags, materialTag, kioskIds,
           pageParams, domainId, materialNameStartsWith, matType, onlyNonZeroStock, location, true, pdos);
       cntQuery = pm.newQuery("javax.jdo.query.SQL", cntSqlQueryModel.query);
       count =

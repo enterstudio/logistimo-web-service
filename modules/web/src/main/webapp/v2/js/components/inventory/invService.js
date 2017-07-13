@@ -52,17 +52,18 @@ invServices.factory('invService', ['$http', function ($http) {
             }
             return this.fetch(urlStr);
         },
-        getInventoryByLocation: function (kioskTags, materialTag, offset, size, loc, pdos) {
+        getInventoryByLocation: function (kioskTags, excludedKioskTags, materialTag, offset, size, loc, pdos) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
-            matType = typeof matType !== 'undefined' ? matType : 0;
             var urlStr = '/s2/api/inventory/location/'
                 + "?offset=" + offset + "&size=" + size;
             if (checkNotNullEmpty(kioskTags)) {
                 urlStr = urlStr + "&kioskTags=" + kioskTags;
+            }else if(checkNotNullEmpty(excludedKioskTags)){
+                urlStr = urlStr + "&excludedKioskTags=" + excludedKioskTags;
             }
             if (checkNotNullEmpty(materialTag)) {
-                urlStr = urlStr + "&materialTag=" + materialTag;
+                urlStr = urlStr + "&materialTags=" + materialTag;
             }
             if (checkNotNullEmpty(pdos)) {
                 urlStr = urlStr + "&pdos=" + pdos;
@@ -89,13 +90,15 @@ invServices.factory('invService', ['$http', function ($http) {
             }
             return this.fetch('/s2/api/inventory/domain/' + entityId);
         },
-        getMaterialInventory: function (materialId, tag, offset, size, matType, onlyNZStk, loc, pdos) {
+        getMaterialInventory: function (materialId, etag, eetag, offset, size, matType, onlyNZStk, loc, pdos) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
             var urlStr = '/s2/api/inventory/material/' + materialId
                 + "?offset=" + offset + "&size=" + size;
-            if (checkNotNullEmpty(tag)) {
-                urlStr = urlStr + "&tag=" + tag;
+            if (checkNotNullEmpty(etag)) {
+                urlStr = urlStr + "&etag=" + etag;
+            }else if (checkNotNullEmpty(eetag)) {
+                urlStr = urlStr + "&eetag=" + eetag;
             }
             if (checkNotNullEmpty(matType)) {
                 urlStr = urlStr + "&matType=" + matType;
@@ -122,11 +125,13 @@ invServices.factory('invService', ['$http', function ($http) {
             if (checkNotNullEmpty(data.mid)) {
                 url = url + "&mid=" + data.mid;
             }
-            if (checkNotNullEmpty(data.tt)) {
-                url = url + "&ttype=" + data.tt;
+            if (checkNotNullEmpty(data.etag)) {
+                url = url + "&etag=" + data.etag;
+            }else if (checkNotNullEmpty(data.eetag)) {
+                url = url + "&eetag=" + data.eetag;
             }
-            if (checkNotNullEmpty(data.t)) {
-                url = url + "&tag=" + data.t;
+            if (checkNotNullEmpty(data.mtag)) {
+                url = url + "&mtag=" + data.mtag;
             }
             url = url + this.getParsedLocation(loc);
             return this.fetch(url);
@@ -180,14 +185,16 @@ invServices.factory('invService', ['$http', function ($http) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
             var url = "/s2/api/inventory/abnormalstock/?offset=" + offset + "&size=" + size;
-            if (checkNotNullEmpty(data.tt)) {
-                url = url + "&ttype=" + data.tt;
-            }
             if (checkNotNullEmpty(data.et)) {
                 url = url + "&eventType=" + data.et;
             }
-            if (checkNotNullEmpty(data.t)) {
-                url = url + "&tag=" + data.t;
+            if (checkNotNullEmpty(data.etag)) {
+                url = url + "&etag=" + data.etag;
+            }else if (checkNotNullEmpty(data.eetag)) {
+                url = url + "&eetag=" + data.eetag;
+            }
+            if (checkNotNullEmpty(data.mtag)) {
+                url = url + "&mtag=" + data.mtag;
             }
             if (checkNotNullEmpty(data.entityId)) {
                 url = url + "&entityId=" + data.entityId;

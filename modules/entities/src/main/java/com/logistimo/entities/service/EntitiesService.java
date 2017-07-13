@@ -104,7 +104,7 @@ public interface EntitiesService extends Service {
   /**
    * Get kiosks accessible/visible to a given user
    */
-  Results getKiosks(IUserAccount user, Long domainId, String tag, PageParams pageParams)
+  Results getKiosks(IUserAccount user, Long domainId, String tags, String excludedTags, PageParams pageParams)
       throws ServiceException;
 
   /**
@@ -147,7 +147,7 @@ public interface EntitiesService extends Service {
   /**
    * Get all kioks with pagination in a given domain
    */
-  Results getAllKiosks(Long domainId, String tag, PageParams params);
+  Results getAllKiosks(Long domainId, String tag, String excludedTag, PageParams params);
 
   //PoolGroup methods
 
@@ -274,7 +274,7 @@ public interface EntitiesService extends Service {
    */
   Results getAllDomains(PageParams pageParams) throws ServiceException;
 
-  Results getAllDomainKiosks(Long domainId, String tag, PageParams pageParams);
+  Results getAllDomainKiosks(Long domainId, String tags, String excludedTags, PageParams pageParams);
 
   List<Long> getAllDomainKioskIds(Long domainId);
 

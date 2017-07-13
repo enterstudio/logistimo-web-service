@@ -1029,3 +1029,4 @@ invalid.tax.message=La taxe (%) doit être comprise entre 0 et 100 arrondis à d
 invalid.msrp.message=Le PDSF devrait être inférieur à 1 milliard arrondi à deux décimales maximum
 invalid.retailerprice.message=Le prix du détaillant devrait être inférieur à 1 milliard arrondi à deux décimales maximum
 invalid.temperature.message=La plage de température devrait être de -99,99 à 99,99 arrondie à deux décimales maximum
+past.date.selected=Vous avez sélectionné une date passée dans le filtre Inventaire de ce tableau de bord. Vous ne pourrez pas cliquer et afficher la vue stockée sur une date antérieure. Modifiez la «date» à la date actuelle pour décrire la page des vues de stock.

@@ -24,16 +24,7 @@
 <div ng-controller="FullInventoryCtrl">
     <div class="row">
         <div class="col-sm-12">
-            <span class="col-sm-4" ng-show="!loading">
-                <span class="filter-label pull-left lPad5">{{resourceBundle['kiosk']}} {{resourceBundle['multiple.tags']}} : </span>
-                <span ng-show="entityTags.length" class="lPad5"><span ng-repeat="tag in entityTags track by $index" class="label label-default dinline">{{tag}}</span><span class="caret" ng-click="toggleFilter()"></span></span>
-                <span ng-show="!entityTags.length" class="lPad5"><span class="dinline">{{resourceBundle['all']}}</span><span class="caret" ng-click="toggleFilter()"></span></span>
-                <span ng-show="eLoading"><span class="glyphicons glyphicons-cogwheel spin"></span></span>
-            </span>
-            <span class="col-sm-4" ng-show="!loading">
-                <span class="filter-label pull-left">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
-                <tag-filter ng-model="fvmtag" tag-type="material" class="pull-left"></tag-filter>
-            </span>
+
             <span class="pull-right ml5" ng-show="filtered.length == maxSize || maxDataReached"><b>{{count}}</b>
                 <span class="pull-right ml5 mt5 litetext glyphicons glyphicons-info-sign" ng-show="(filtered.length == maxSize || maxDataReached) && count > filtered.length" uib-tooltip="{{resourceBundle['limit.data']}}" tooltip-placement="left"></span>
             </span>
@@ -44,20 +35,12 @@
         </div>
         <div class="col-sm-6 pt5">
             <div class="pop_filter_box col-sm-8 ws" id="filter" ng-show="showFilter">
-                <div class="row pb10 pt10">
-                    <div class="col-sm-12">
-                        <label class="col-sm-4 noLRpad control-label cbx">{{resourceBundle['kiosk']}} {{resourceBundle['multiple.tags']}}</label>
-                        <span class="col-sm-8 noLRpad lPad5">
-                                <tag-select tags-model="eTgs" type="'entity'" force-no-udf="'true'"></tag-select>
-                            </span>
-                    </div>
-                </div>
                 <div class="row pb10">
                     <div class="col-sm-12">
-                                    <span class="pull-right">
-                                        <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilters()" value="Filter">
-                                        <input type="button" class="btn btn-sm btn-default" ng-click="cancelFilter()" value="Cancel">
-                                    </span>
+                        <span class="pull-right">
+                            <input type="button" class="btn btn-sm btn-primary" ng-click="applyFilters()" value="Filter">
+                            <input type="button" class="btn btn-sm btn-default" ng-click="cancelFilter()" value="Cancel">
+                        </span>
                     </div>
                 </div>
             </div>

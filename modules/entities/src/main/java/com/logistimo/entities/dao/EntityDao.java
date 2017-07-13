@@ -23,20 +23,22 @@
 
 package com.logistimo.entities.dao;
 
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.QueryConstants;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IPoolGroup;
 import com.logistimo.entities.entity.Kiosk;
-import com.logistimo.tags.dao.ITagDao;
-import com.logistimo.tags.dao.TagDao;
-import com.logistimo.tags.entity.ITag;
-
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.CharacterConstants;
+import com.logistimo.tags.dao.ITagDao;
+import com.logistimo.tags.dao.TagDao;
+import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.QueryUtil;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,53 +57,51 @@ public class EntityDao implements IEntityDao {
 
   ITagDao tagDao = new TagDao();
 
-  public Results getAllKiosks(Long domainId, String tag, PageParams pageParams) {
-    return getKiosks(domainId, tag, pageParams, false);
+  public Results getAllKiosks(Long domainId, String tag, String excludedTags,PageParams pageParams) {
+    return getKiosks(domainId, tag, excludedTags, pageParams, false);
   }
 
-  public Results getAllDomainKiosks(Long domainId, String tag, PageParams pageParams) {
-    return getKiosks(domainId, tag, pageParams, true);
+  public Results getAllDomainKiosks(Long domainId, String tags, String excludedTags, PageParams pageParams) {
+    return getKiosks(domainId, tags, excludedTags, pageParams, true);
   }
 
-  private Results getKiosks(Long domainId, String tag, PageParams pageParams, boolean isDomain) {
+  private Results getKiosks(Long domainId, String tags, String excludedTags, PageParams pageParams, boolean isDomain) {
     xLogger.fine("Entering getKiosks");
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    List<IKiosk> kiosks = new ArrayList<IKiosk>();
+    List<IKiosk> kiosks = new ArrayList<>();
     String cursor = null;
     try {
-      String filter;
+      StringBuilder filter = new StringBuilder();
       if (isDomain) {
-        filter = "sdId == domainIdParam";
+        filter.append("sdId == domainIdParam");
       } else {
-        filter = "dId.contains(domainIdParam)";
+        filter.append("dId.contains(domainIdParam)");
       }
       String declaration = "Long domainIdParam";
-      Map<String, Object> params = new HashMap<String, Object>();
+      Map<String, Object> params = new HashMap<>();
       params.put("domainIdParam", domainId);
-      if (tag != null && !tag.isEmpty()) {
-        if (tag.contains(CharacterConstants.COMMA)) {
-          List<String> tags = StringUtil.getList(tag, true);
-          List<ITag> tagIdList = tagDao.getTagsByNames(tags, ITag.KIOSK_TAG);
-          int i = 0;
-          filter += " && ( ";
-          for (ITag localTag : tagIdList) {
-            String tgsParam = "tgsParam" + (++i);
-            if (i != 1) {
-              filter += " || ";
-            }
-            filter += " tgs.contains(" + tgsParam + ")";
-            declaration += ", Long " + tgsParam;
-            params.put(tgsParam, localTag.getId());
+      if (StringUtils.isNotEmpty(tags) || StringUtils.isNotEmpty(excludedTags)) {
+        boolean isExcluded = StringUtils.isNotEmpty(excludedTags);
+        String value = isExcluded ? excludedTags : tags;
+        List<String> kTags = StringUtil.getList(value, true);
+        List<ITag> tagIdList = tagDao.getTagsByNames(kTags, ITag.KIOSK_TAG);
+        int i = 0;
+        filter.append(" && ( ");
+        for (ITag localTag : tagIdList) {
+          String tgsParam = "tgsParam" + (++i);
+          if (i != 1) {
+            filter.append(isExcluded ? " && " : " || ");
           }
-          filter += " ) ";
-        } else {
-          filter += " && tgs.contains(tgsParam)";
-          declaration += ", Long tgsParam";
-          params.put("tgsParam", tagDao.getTagFilter(tag, ITag.KIOSK_TAG));
+          filter.append(" ")
+              .append(isExcluded ? QueryConstants.NEGATION : CharacterConstants.EMPTY);
+          filter.append("tgs.contains(").append(tgsParam).append(")");
+          declaration += ", Long " + tgsParam;
+          params.put(tgsParam, localTag.getId());
         }
+        filter.append(" ) ");
       }
       Query query = pm.newQuery(Kiosk.class);
-      query.setFilter(filter);
+      query.setFilter(filter.toString());
       query.declareParameters(declaration);
       query.setOrdering("nName asc");
       if (pageParams != null) {

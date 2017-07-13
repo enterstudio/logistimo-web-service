@@ -35,6 +35,7 @@ public class QueryConstants {
   public static final String LONG = "Long";
   public static final String AND = " && ";
   public static final String OR = " || ";
+  public static final String NEGATION = "!";
   public static final String DOT_CONTAINS = ".contains(";
 
   //Param constants
@@ -57,7 +58,7 @@ public class QueryConstants {
   public static final String ORDERBY = " ORDER BY";
 
   public static final String IN = " IN ";
-  public static final String EQUALS = " = ";
+  public static final String EQUALS_SIGN = " = ";
   public static final String SELECT = " SELECT ";
   public static final String FROM = " FROM ";
   public static final String LIMIT_1 = " LIMIT 1 ";

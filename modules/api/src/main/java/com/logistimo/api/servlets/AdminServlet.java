@@ -34,6 +34,7 @@ import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.QueryConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.IMultiDomain;
 import com.logistimo.domains.entity.IDomain;
@@ -78,6 +79,8 @@ import com.logistimo.utils.Counter;
 import com.logistimo.utils.HttpUtil;
 import com.logistimo.utils.LocalDateUtil;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -111,10 +114,12 @@ public class AdminServlet extends HttpServlet {
 
   private static final XLog xLogger = XLog.getLog(AdminServlet.class);
 
+  // Request parameters
+  private static final String DOMAIN_PARAM = "domainid";
+
   // Actions
   private static final String ACTION_RESETCACHECOUNT = "resetcachecount";
   private static final String ACTION_RESETCOUNT = "resetcount";
-  private static final String ACTION_DELETETRANSSLICES = "deletetransslices";
   private static final String ACTION_ADDCOUNT = "addcount";
   private static final String ACTION_RESETTRANSACTIONS = "resettransactions";
   private static final String ACTION_DELETEENTITIES = "deleteentities";
@@ -123,8 +128,6 @@ public class AdminServlet extends HttpServlet {
   private static final String ACTION_GETSYSCONFIG = "getsysconfig";
   private static final String ACTION_UPDATESYSCONFIG = "updatesysconfig";
   private static final String ACTION_BACKUPDATA = "backupdata";
-
-  private static final String ACTION_CLOSINGSTOCKINTRANS = "closingstockintrans";
 
   // URLs
   private static final String URL_PROD = "https://logistimo-web.appspot.com";
@@ -150,19 +153,17 @@ public class AdminServlet extends HttpServlet {
     xLogger.fine("Entered resetCacheCount");
     String key = req.getParameter("key");
     String value = req.getParameter("value");
-    if (key != null && !key.isEmpty()) {
+    if (StringUtils.isNotEmpty(key)) {
       MemcacheService memcache = AppFactory.get().getMemcacheService();
       if (memcache != null) {
-        if (value != null && !value.isEmpty()) {
+        if (StringUtils.isNotEmpty(value)) {
           try {
             memcache.put(key, new Integer(value));
           } catch (NumberFormatException e) {
             xLogger.severe("Invalid number " + value);
           }
-        } else {
-          if (!memcache.delete(key)) {
-            xLogger.warn("Unable to delete key {0} from memcache", key);
-          }
+        } else if (!memcache.delete(key)) {
+          xLogger.warn("Unable to delete key {0} from memcache", key);
         }
       }
     } else {
@@ -174,7 +175,7 @@ public class AdminServlet extends HttpServlet {
   // Reset a counter, both in cache and persistent database
   private static void resetCount(HttpServletRequest req) {
     xLogger.fine("Entered resetCount");
-    String domainIdStr = req.getParameter("domainid");
+    String domainIdStr = req.getParameter(DOMAIN_PARAM);
     String key = req.getParameter("key");
     String kind = req.getParameter("kind");
     Long domainId = null;
@@ -213,7 +214,7 @@ public class AdminServlet extends HttpServlet {
           e.getClass().getName(), domainId, kind, e.getMessage());
       return;
     }
-    List<IKiosk> kiosks = as.getAllKiosks(domainId, null, null).getResults();
+    List<IKiosk> kiosks = as.getAllKiosks(domainId, null, null, null).getResults();
     // Material counters
     if (JDOUtils.getImplClass(IMaterial.class).getSimpleName().equals(kind)) {
       // Reset the material counter
@@ -285,7 +286,7 @@ public class AdminServlet extends HttpServlet {
   // Add a given count to the counter
   private static void addCount(HttpServletRequest req) {
     xLogger.fine("Entered addCount");
-    String domainIdStr = req.getParameter("domainid");
+    String domainIdStr = req.getParameter(DOMAIN_PARAM);
     String key = req.getParameter("key");
     String valueStr = req.getParameter("value");
     Long domainId = null;
@@ -308,18 +309,18 @@ public class AdminServlet extends HttpServlet {
   // Add a given count to the counter
   private static void resetDomainTransactions(HttpServletRequest req) {
     xLogger.fine("Entered resetDomainTransactions");
-    String domainIdStr = req.getParameter("domainid");
+    String domainIdStr = req.getParameter(DOMAIN_PARAM);
     boolean execute = req.getParameter("execute") != null;
     if (!execute) { // schedule...
       // Schedule task to delete
       Map<String, String> params = new HashMap<String, String>();
       params.put("action", ACTION_RESETTRANSACTIONS);
-      params.put("domainid", domainIdStr);
+      params.put(DOMAIN_PARAM, domainIdStr);
       params.put("execute", "true");
       // Schedule delete transactions job for this domain
       try {
         taskService
-            .schedule(taskService.QUEUE_DEFAULT, "/task/admin", params, taskService.METHOD_POST);
+            .schedule(ITaskService.QUEUE_DEFAULT, "/task/admin", params, ITaskService.METHOD_POST);
       } catch (Exception e) {
         xLogger.severe("{0} when scheduling task: {1}", e.getClass().getName(), e.getMessage());
       }
@@ -360,9 +361,9 @@ public class AdminServlet extends HttpServlet {
             JDOUtils.getImplClass(IMnlTransaction.class).getName());
     // Delete raw data models
     for (String kind : kinds) {
-      String query = "SELECT FROM " + kind + " WHERE sdId == dIdParam PARAMETERS Long dIdParam";
+      String query = QueryConstants.SELECT_FROM + kind + " WHERE sdId == dIdParam PARAMETERS Long dIdParam";
       if (kind.equals(JDOUtils.getImplClass(IOptimizerLog.class).getName())) {
-        query = "SELECT FROM " + kind + " WHERE dId == dIdParam PARAMETERS Long dIdParam";
+        query = QueryConstants.SELECT_FROM + kind + " WHERE dId == dIdParam PARAMETERS Long dIdParam";
       }
       try {
         xLogger.info("Deleting {0}...", kind);
@@ -377,7 +378,7 @@ public class AdminServlet extends HttpServlet {
     // Reset inventory
     String
         query =
-        "SELECT FROM " + JDOUtils.getImplClass(IInvntry.class).getName()
+        QueryConstants.SELECT_FROM + JDOUtils.getImplClass(IInvntry.class).getName()
             + " WHERE sdId == dIdParam PARAMETERS Long dIdParam";
     try {
       xLogger.info("Resetting inventory...");
@@ -393,7 +394,7 @@ public class AdminServlet extends HttpServlet {
   // Reset bulletin board
   private static void deleteEntitiesByDate(HttpServletRequest req) {
     xLogger.fine("Entered deleteEntitiesByDate");
-    String domainIdStr = req.getParameter("domainid");
+    String domainIdStr = req.getParameter(DOMAIN_PARAM);
     String entityClass = req.getParameter("entity");
     String startDateField = req.getParameter("startfield");
     String startDateStr = req.getParameter("start"); // format dd/MM/yyyy
@@ -409,7 +410,7 @@ public class AdminServlet extends HttpServlet {
   // Delete entities based on query and its params.
   private static void deleteEntitiesByQuery(HttpServletRequest req) {
     xLogger.fine("Entered deleteEntitiesByQuery");
-    String domainIdStr = req.getParameter("domainid");
+    String domainIdStr = req.getParameter(DOMAIN_PARAM);
     String queryStr = req.getParameter("q");
     String paramsCSV = req.getParameter("params"); // name|type|value,name|type|value,...
     if (domainIdStr == null || domainIdStr.isEmpty() || queryStr == null || queryStr.isEmpty()) {
@@ -425,9 +426,9 @@ public class AdminServlet extends HttpServlet {
     }
     xLogger.info("queryStr: {0}, paramsCSV: {1}", queryStr, paramsCSV);
     // Get the params., if specified
-    HashMap<String, Object> params = null;
+    HashMap<String, Object> params;
     if (paramsCSV != null && !paramsCSV.isEmpty()) {
-      params = new HashMap<String, Object>();
+      params = new HashMap<>();
       String[] paramsArray = paramsCSV.split(",");
       for (int i = 0; i < paramsArray.length; i++) {
         String[] paramValue = paramsArray[i].split(":");
@@ -491,7 +492,7 @@ public class AdminServlet extends HttpServlet {
       xLogger.severe("Invalid entity class");
       return;
     }
-    String queryStr = "SELECT FROM " + entityClass;
+    String queryStr = QueryConstants.SELECT_FROM + entityClass;
     try {
       Class clazz = Class.forName(entityClass);
       if (IMultiDomain.class.isAssignableFrom(clazz)) {
@@ -597,7 +598,7 @@ public class AdminServlet extends HttpServlet {
       return; // DO not perform the actual backup
     }
     try {
-      taskService.schedule(taskService.QUEUE_DEFAULT, backupUrl, null, taskService.METHOD_GET);
+      taskService.schedule(ITaskService.QUEUE_DEFAULT, backupUrl, null, ITaskService.METHOD_GET);
                         /*
                         URL url = new URL( backupUrl );
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -616,6 +617,7 @@ public class AdminServlet extends HttpServlet {
 		 */
   }
 
+  @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
     xLogger.fine("Entered doGet");
@@ -644,6 +646,7 @@ public class AdminServlet extends HttpServlet {
     xLogger.fine("Existing doGet");
   }
 
+  @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
     doGet(req, resp);
@@ -743,11 +746,11 @@ public class AdminServlet extends HttpServlet {
         // Check if the default domain exists
         Long dId = -1l;
         try {
-          pm.getObjectById(JDOUtils.getImplClass(IDomain.class), new Long(-1));
+          pm.getObjectById(JDOUtils.getImplClass(IDomain.class), (long) -1);
         } catch (JDOObjectNotFoundException e1) {
           IDomain d = JDOUtils.createInstance(IDomain.class);
           d.setCreatedOn(new Date());
-          d.setId(new Long(-1));
+          d.setId((long) -1);
           d.setIsActive(true);
           d.setName("Default");
           d.setOwnerId(userId);
