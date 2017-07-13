@@ -142,6 +142,7 @@ blkUpControllers.controller('ViewBulkUploadController', ['$scope','requestContex
             ["o", "offset"],
             ["s", "size"]
         ];
+        $scope.localFilters = ['entity', 'from', 'to'];
         $scope.init = function () {
             $scope.from = parseUrlDate(requestContext.getParam("from")) || "";
             $scope.to = parseUrlDate(requestContext.getParam("to")) || "";
