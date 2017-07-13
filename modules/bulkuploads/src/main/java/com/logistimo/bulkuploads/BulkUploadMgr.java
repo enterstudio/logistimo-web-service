@@ -1541,8 +1541,6 @@ public class BulkUploadMgr {
       boolean isPasswordValid = true;
       if (processPassword) {
         if (password.length() < FieldLimits.PASSWORD_MIN_LENGTH || password.length() > FieldLimits.PASSWORD_MAX_LENGTH) {
-          ec.messages.add("Password: Password is " + password.length()
-              + " characters. It should be between " + FieldLimits.PASSWORD_MIN_LENGTH + CharacterConstants.HYPHEN + FieldLimits.PASSWORD_MAX_LENGTH + CHARACTERS);
           isPasswordValid = false;
         }
         if (password.equals(confirmPassword)) {
