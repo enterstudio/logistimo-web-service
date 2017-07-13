@@ -64,6 +64,7 @@ public interface ReportsConstants {
   String FILTER_VENDOR = "vnd";
   String FILTER_EVENT = "evt"; // event type filter
   String FILTER_KIOSKTAG = "ktag";
+  String FILTER_EXCLUDED_KIOSKTAG = "exktag";
   String FILTER_MATERIALTAG = "mtag";
   String FILTER_ABNORMALDURATION =
       "abndur"; //abnormality duration filter in stock views

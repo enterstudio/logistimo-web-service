@@ -548,6 +548,7 @@ public class EntityController {
   @ResponseBody
   Results getAll(
       @RequestParam(required = false) String tag,
+      @RequestParam(required = false) String extag,
       @RequestParam(defaultValue = PageParams.DEFAULT_OFFSET_STR) int offset,
       @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
       @RequestParam(required = false) String q,
@@ -573,11 +574,11 @@ public class EntityController {
       if (StringUtils.isNotBlank(q)) {
         kioskResults = SearchUtil.findKiosks(domainId, q, pageParams, user);
       } else {
-        kioskResults = as.getKiosks(user, domainId, tag, pageParams);
+        kioskResults = as.getKiosks(user, domainId, tag, extag, pageParams);
       }
       if (StringUtils.isBlank(q)
           && SecurityUtil.compareRoles(user.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
-        ICounter counter = Counter.getKioskCounter(domainId, tag);
+        ICounter counter = Counter.getKioskCounter(domainId, tag, extag);
         kioskResults.setNumFound(counter.getCount());
       } else {
         kioskResults.setNumFound(-1);
@@ -600,6 +601,7 @@ public class EntityController {
   @ResponseBody
   Results getDomainEntities(
       @RequestParam(required = false) String tag,
+      @RequestParam(required = false) String extag,
       @RequestParam(defaultValue = PageParams.DEFAULT_OFFSET_STR) int offset,
       @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
       @RequestParam(required = false) String q,
@@ -624,7 +626,7 @@ public class EntityController {
         kioskResults.setNumFound(-1);
       } else {
         if (SecurityUtil.compareRoles(user.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
-          kioskResults = es.getAllDomainKiosks(domainId, tag, pageParams);
+          kioskResults = es.getAllDomainKiosks(domainId, tag, extag, pageParams);
           kioskResults.setNumFound(Counter.getDomainKioskCounter(domainId).getCount());
         } else {
           UserEntitiesModel
@@ -1046,9 +1048,9 @@ public class EntityController {
           Results kioskResults;
 
           if (SecurityUtil.compareRoles(srcUser.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
-            kioskResults = es.getAllDomainKiosks(addMaterialsRequestObj.domainId, null, null);
+            kioskResults = es.getAllDomainKiosks(addMaterialsRequestObj.domainId, null, null, null);
           } else {
-            kioskResults = es.getKiosks(srcUser, addMaterialsRequestObj.domainId, null, null);
+            kioskResults = es.getKiosks(srcUser, addMaterialsRequestObj.domainId, null, null, null);
           }
           if (kioskResults.getResults().size() > 0) {
             for (Object o : kioskResults.getResults()) {
@@ -1099,7 +1101,7 @@ public class EntityController {
     if (removeMaterialsRequestObj.entityIds == null || removeMaterialsRequestObj.entityIds
         .isEmpty()) {
       as = Services.getService(EntitiesServiceImpl.class, locale);
-      kioskResults = as.getAllKiosks(domainId, null, null);
+      kioskResults = as.getAllKiosks(domainId, null, null, null);
       if (kioskResults.getResults().size() > 0) {
         List entities = kioskResults.getResults();
         for (Object o : entities) {

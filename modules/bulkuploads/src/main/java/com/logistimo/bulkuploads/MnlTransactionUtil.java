@@ -1678,7 +1678,7 @@ public class MnlTransactionUtil {
         filter += " && ";
         params += ", ";
       }
-      filter += "rp < untilDateParam";
+      filter += "rp <= untilDateParam";
       params += "Date untilDateParam";
       query.declareImports("import java.util.Date");
       paramsMap.put("untilDateParam", untilDate);

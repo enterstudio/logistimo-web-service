@@ -22,15 +22,15 @@
  */
 
 var invControllers = angular.module('invControllers', []);
-invControllers.controller('StockViewsController', ['$scope', 'matService', 'entityService', 'requestContext', '$location', 'exportService','userService','domainCfgService',
-    function ($scope, matService, entityService, requestContext, $location, exportService, userService,domainCfgService) {
+invControllers.controller('StockViewsController', ['$scope', '$timeout', 'matService', 'entityService', 'requestContext', '$location', 'exportService','userService','domainCfgService',
+    function ($scope, $timeout, matService, entityService, requestContext, $location, exportService, userService,domainCfgService) {
         $scope.vw = "t";
         $scope.ebf = '';
-        $scope.localFilters = ['entity', 'material', 'abntype', 'abndur', 'ebf', 'bno', 'matType', 'loc', 'tpdos', 'etag', 'mtag', 'onlyNZStk', 'dur', 'abndurDate', 'pdos'];
-        $scope.filterMethods = ['onAbnDurationChanged', 'getPDOSData', 'checkBno', 'getData'];
-        $scope.filters = {};
-        $scope.mparams = ["eid", "ebf", "mid", "batchno", "etag", "mtag", "vw", "abntype", "dur", "fil",
-            "matType","onlyNZStk","state","district","taluk","pdos"];
+        $scope.localFilters = ['entity', 'material','abntype','abndur','ebf','bno','matType','loc','tpdos', 'etag', 'eetag','mTgs', 'mtag','onlyNZStk','dur','abndurDate','pdos'];
+        $scope.filterMethods = ['onAbnDurationChanged','getPDOSData'];
+        $scope.filters = {changed: false};
+        $scope.mparams = ["eid", "ebf", "mid", "batchno", "etag", "eetag", "mtag", "vw", "abntype", "dur", "fil",
+            "matType", "onlyNZStk", "state", "district", "taluk", "pdos"];
         $scope.entity = null;
         $scope.material = null;
         $scope.abntype = null;
@@ -38,13 +38,25 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
         $scope.matType = "0";
         $scope.onlyNZStk = false;
         $scope.showMore = false;
+        $scope.updateETags = function(etgs, eetgs){
+            $scope.etag = etgs;
+            $scope.eetag = eetgs;
+        };
+        $scope.updateMTags = function(mtgs){
+            $scope.mtag = mtgs;
+        };
+        $scope.resetFilters = function () {
+            $location.$$search = {};
+            $location.$$compose();
+            $scope.$broadcast("resetRequest");
+        };
         $scope.init = function (firstTimeInit) {
             $scope.loading=false;
             $scope.mtag = requestContext.getParam("mtag");
-            $scope.etag = requestContext.getParam("etag");
             $scope.vw = requestContext.getParam("vw") || 't';
             $scope.locationSelected = false;
             $scope.loc = {};
+
             if(checkNotNullEmpty(requestContext.getParam("state"))){
                 $scope.loc.state = {};
                 $scope.loc.state.label = requestContext.getParam("state") || $scope.loc.state.label;
@@ -63,6 +75,9 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
                 $scope.loc.taluk.district = ($scope.loc.district!=undefined) ? $scope.loc.district.label : undefined;
                 $scope.locationSelected=true;
             }
+            $scope.etag = requestContext.getParam("etag");
+            $scope.eetag = requestContext.getParam("eetag");
+            $scope.mtag = requestContext.getParam("mtag");
             if (checkNotNullEmpty(requestContext.getParam("eid"))) {
                 if (checkNullEmpty($scope.entity) || $scope.entity.id != requestContext.getParam("eid")) {
                     $scope.entity = {id: parseInt(requestContext.getParam("eid")), nm: ""};
@@ -89,7 +104,7 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
                 $scope.onlyNZStk = requestContext.getParam("onlyNZStk") || false;
                 $scope.pdos = requestContext.getParam("pdos");
                 $scope.tpdos = $scope.pdos;
-            }else{
+            }else {
                 $scope.material = null;
             }
             $scope.ebf = null;
@@ -119,14 +134,7 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
             domainCfgService.getInventoryCfg().then(function(data){
                 $scope.dashBoardEnabled = data.data.eidb;
             });
-            $scope.batchno = $scope.bno;
-            if(firstTimeInit && checkNotNullEmpty($scope.etag) &&
-                (checkNotNullEmpty($scope.material) || checkNotNullEmpty($scope.ebf) ||
-                    ($scope.vw == 'm' && checkNullEmpty($scope.entity)) || checkNotNullEmpty($scope.abntype))){
-                $scope.showMore = true;
-            }
-            if(firstTimeInit && checkNotNullEmpty($scope.mtag) && (checkNotNullEmpty($scope.entity)
-                || checkNotNullEmpty($scope.ebf) || checkNotNullEmpty($scope.abntype))){
+            if(checkNotNullEmpty($scope.etag) || checkNotNullEmpty($scope.eetag) || checkNotNullEmpty($scope.mtag)){
                 $scope.showMore = true;
             }
             if(firstTimeInit && ((checkNotNullEmpty($scope.matType) && $scope.matType != "0")
@@ -140,9 +148,6 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
             if(firstTimeInit && checkNotNullEmpty($scope.pdos)){
                 $scope.showMore = true;
             }
-            if(Object.keys($location.$$search).length == 0 && !firstTimeInit){
-                $scope.$broadcast("resetRequest");
-            }
         };
         $scope.onAbnDurationChanged = function () {
             if (checkNotNullEmpty($scope.abndur) && checkNotNullEmpty($scope.abntype)) {
@@ -152,58 +157,43 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
             }
             $scope.dur = $scope.abndur;
         };
-        $scope.init(true);
+
         $scope.$watch("entity.id", watchfn("eid", null, $location, $scope, null, null, true, ["abntype", "mtag","pdos"]));
         $scope.$watch("material.mId", watchfn("mid", null, $location, $scope, null, null, true, ["vw", "abntype", "etag", "state", "district", "taluk","pdos"]));
         $scope.$watch("vw", watchfn("vw", 't', $location, $scope, null, null, true,["mid"]));
-        $scope.$watch("filters.d", watchfn("fil", null, $location, $scope, null, null, true)); // if no filter is selected
-        $scope.$watch("loc.state.label", watchfn("state", null, $location, $scope, null, null, true, ["mid", "etag", "mtag", "dur","batchno","abntype","ebf","district","taluk","pdos"]));
-        $scope.$watch("loc.district.label", watchfn("district", null, $location, $scope, null, null, true, ["mid", "etag", "mtag", "dur","batchno","abntype","ebf","state","taluk","pdos"]));
-        $scope.$watch("loc.taluk.label", watchfn("taluk", null, $location, $scope, null, null, true, ["mid", "etag", "mtag", "dur","batchno","abntype","ebf","state","district","pdos"]));
-        $scope.$watch("batchno", watchfn("batchno", "", $location, $scope, null, null, true, ["mid", "state", "district", "taluk"]));
-        $scope.$watch("abntype", watchfn("abntype", "", $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag", "dur", "state", "district", "taluk"]));
-        $scope.$watch("dur", watchfn("dur", null, $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag", "abntype", "state", "district", "taluk"]));
-        $scope.$watch("etag", watchfn("etag", null, $location, $scope, null, null, true, ["abntype", "mid", "dur","mtag","ebf", "state", "district", "taluk","pdos"]));
-        $scope.$watch("mtag", watchfn("mtag", "", $location, $scope, null, null, true, ["abntype", "eid", "dur","etag","ebf", "state", "district", "taluk","pdos"]));
+        $scope.$watch("loc.state.label", watchfn("state", null, $location, $scope, null, null, true, ["mid", "etag", "eetag", "mtag", "dur","batchno","abntype","ebf","district","taluk","pdos"]));
+        $scope.$watch("loc.district.label", watchfn("district", null, $location, $scope, null, null, true, ["mid", "etag", "eetag", "mtag", "dur","batchno","abntype","ebf","state","taluk","pdos"]));
+        $scope.$watch("loc.taluk.label", watchfn("taluk", null, $location, $scope, null, null, true, ["mid", "etag", "eetag", "mtag", "dur","batchno","abntype","ebf","state","district","pdos"]));
+        $scope.$watch("bno", watchfn("batchno", "", $location, $scope, null, null, true, ["mid", "etag", "eetag", "state", "district", "taluk"]));
+        $scope.$watch("abntype", watchfn("abntype", "", $location, $scope, null, null, true, ["eid", "mid", "etag", "eetag", "mtag", "dur", "state", "district", "taluk"]));
+        $scope.$watch("dur", watchfn("dur", null, $location, $scope, null, null, true, ["eid", "mid", "etag", "eetag", "mtag", "abntype", "state", "district", "taluk"]));
+        $scope.$watch("etag", watchfn("etag", null, $location, $scope, null, null, true, ["abntype", "mid", "dur","mtag","ebf", "state", "district", "taluk","pdos", "batchno"]));
+        $scope.$watch("eetag", watchfn("eetag", null, $location, $scope, null, null, true, ["abntype", "mid", "dur","mtag","ebf", "state", "district", "taluk","pdos", "batchno"]));
+        $scope.$watch("mtag", watchfn("mtag", null, $location, $scope, null, null, true, ["abntype", "eid", "eetag", "dur","etag","ebf", "state", "district", "taluk","pdos"]));
         $scope.$watch("ebf", watchfn("ebf", "", $location, $scope, function () {
         }, function (newVal) {
             return newVal.getFullYear() + "-" + (newVal.getMonth() + 1) + "-" + newVal.getDate()
         }));
-        $scope.$watch("etag",function(newval, oldval){
-            if(newval+""!=oldval+""){
-                if (checkNotNullEmpty($scope.etag) && (checkNotNullEmpty($scope.ebf) || checkNotNullEmpty($scope.abntype))) {
-                    $scope.mtag = null;
-                }
-                if (checkNotNullEmpty($scope.etag) && checkNotNullEmpty($scope.entity)) {
-                    $scope.entity = null;
-                }
-            }
-        });
-        $scope.$watch("mtag",function(newval, oldval){
-            if(newval!=oldval){
-                if (checkNotNullEmpty($scope.mtag) && (checkNotNullEmpty($scope.ebf) || checkNotNullEmpty($scope.abntype))) {
-                    $scope.etag = null;
-                }
-                if (checkNotNullEmpty($scope.mtag) && checkNotNullEmpty($scope.material)) {
-                    $scope.material = null;
-                }
-            }
-        });
+        $scope.init(true);
         $scope.$watch("entity.id",function(newval,oldval){
             if(newval!=oldval){
                 $scope.matType = "0";
                 $scope.onlyNZStk = false;
             }
         });
+
+        $scope.setShowMore = function(flag) {
+            $scope.showMore = flag;
+            if(!flag){
+                if($scope.showEFilter){
+                    $scope.toggleFilter('e', false);
+                }
+            }
+        };
         $scope.$watch("matType", watchfn("matType", null, $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag", "abntype","onlyNZStk"]));
         $scope.$watch("onlyNZStk", watchfn("onlyNZStk", null, $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag", "abntype","matType","state","district","taluk"]));
         $scope.$watch("pdos", watchfn("pdos", null, $location, $scope, null, null, true, ["eid", "mid", "etag", "mtag","matType","state","district","taluk"]));
-        $scope.updateETags = function(etgs){
-            $scope.etag = etgs;
-        };
-        $scope.updateMTags = function(mtgs){
-            $scope.mtag = mtgs;
-        };
+
         $scope.updateLoading = function(ld){
             $scope.loading = ld;
         };
@@ -212,16 +202,8 @@ invControllers.controller('StockViewsController', ['$scope', 'matService', 'enti
             $event.stopPropagation();
             $scope.opened = true;
         };
-        $scope.getData = function(){
-            $scope.batchno = $scope.bno;
-        };
         $scope.getPDOSData = function(){
             $scope.pdos = $scope.tpdos;
-        };
-        $scope.checkBno = function(){
-            if(checkNullEmpty($scope.bno)){
-                $scope.batchno = undefined;
-            }
         };
         var renderContext = requestContext.getRenderContext(requestContext.getAction(), $scope.mparams);
         $scope.$on("requestContextChanged", function () {
@@ -237,7 +219,7 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
         //$scope.map = {};
         $scope.wparams = [['alert', 'searchAlert'], ["o", "offset"], ["s", "size"], ["eid", "entityId"],
             ["abntype", "abntype"], ["dur", "dur"], ["mid", "mid"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
-        $scope.reqparams = ["mtag", "etag", "state", "district", "taluk"];
+        $scope.reqparams = ["mtag", "etag", "eetag", "state", "district", "taluk"];
         $scope.init = function () {
             $scope.showFullAbnormalStock = false;
             $scope.tag = requestContext.getParam("mtag") || "";
@@ -256,8 +238,6 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
             if (checkNotNullEmpty($scope.abntype)) {
                 $scope.showFullAbnormalStock = true;
             }
-            $scope.mtag = requestContext.getParam("mtag") || "";
-            $scope.etag = requestContext.getParam("etag");
             $scope.matType = requestContext.getParam("matType") || "0";
             $scope.onlyNZStk = requestContext.getParam("onlyNZStk") || false;
             $scope.pdos = requestContext.getParam("pdos");
@@ -304,7 +284,7 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
         $scope.fetchInvByLocation = function () {
             if($scope.locationSelected && checkNullEmpty($scope.entityId)){
                 $scope.loading = true;
-                invService.getInventoryByLocation($scope.etag, $scope.mtag, $scope.offset, $scope.size, $scope.loc, $scope.pdos).then(function (data) {
+                invService.getInventoryByLocation($scope.etag, $scope.eetag, $scope.mtag, $scope.offset, $scope.size, $scope.loc, $scope.pdos).then(function (data) {
                     $scope.inventory = data.data;
                     setConstants();
                     $scope.setResults($scope.inventory);
@@ -336,11 +316,12 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
                     }
                 }
                 if (checkNotNullEmpty($scope.mtag) && checkNullEmpty($scope.mid)) {
-                    filters.tt = "mt";
-                    filters.t = $scope.mtag;
-                } else if (checkNotNullEmpty($scope.etag) && checkNullEmpty($scope.entityId)) {
-                    filters.tt = "en";
-                    filters.t = $scope.etag;
+                    filters.mtag = $scope.mtag;
+                }
+                if (checkNotNullEmpty($scope.etag) && checkNullEmpty($scope.entityId)) {
+                    filters.etag = $scope.etag;
+                } else if (checkNotNullEmpty($scope.eetag) && checkNullEmpty($scope.entityId)) {
+                    filters.eetag = $scope.eetag;
                 }
                 if (checkNotNullEmpty($scope.ebf)) {
                     filters.ebf = $scope.ebf;
@@ -382,17 +363,9 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
                     });
                 }
             } else if ($scope.showFullAbnormalStock) {
-                if($scope.etag instanceof Array){
-                    $scope.updateETags(null);
-                    return;
-                }
                 $scope.fetchAbnormalInv();
             } else if($scope.locationSelected && checkNullEmpty($scope.entityId) &&
                     checkNullEmpty($scope.mid) && checkNullEmpty($scope.abntype) && checkNullEmpty($scope.ebf)){
-                if($scope.etag instanceof Array){
-                    $scope.updateETags(null);
-                    return;
-                }
                 $scope.fetchInvByLocation();
             }
         };
@@ -416,14 +389,11 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
         $scope.toggle = function (index) {
             $scope.select(index);
         };
-        if($scope.showFilters){
-            $scope.$watch("mtag", watchfn("mtag", "", $location, $scope));
-        }
     }
 ]);
 invControllers.controller('MatInventoryCtrl', ['$scope', 'invService', 'domainCfgService', 'mapService', 'requestContext', '$location','INVENTORY',
     function ($scope, invService, domainCfgService, mapService, requestContext, $location,INVENTORY) {
-        $scope.wparams = [["etag", "etag"], ["o", "offset"], ["s", "size"], ["mid", "mid"],["vw","vw"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
+        $scope.wparams = [["etag", "etag"], ["eetag", "eetag"], ["o", "offset"], ["s", "size"], ["mid", "mid"],["vw","vw"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
         $scope.reqparams = ["state","district","taluk"];
         $scope.filtered = {};
         $scope.expand = [];
@@ -489,7 +459,7 @@ invControllers.controller('MatInventoryCtrl', ['$scope', 'invService', 'domainCf
             if (checkNotNullEmpty($scope.mid)) {
                 $scope.loading = true;
                 $scope.showLoading();
-                invService.getMaterialInventory($scope.mid, $scope.etag, $scope.offset, $scope.size,$scope.matType,$scope.onlyNZStk,$scope.loc, $scope.pdos).then(function (data) {
+                invService.getMaterialInventory($scope.mid, $scope.etag, $scope.eetag, $scope.offset, $scope.size,$scope.matType,$scope.onlyNZStk,$scope.loc, $scope.pdos).then(function (data) {
                     if($scope.vw == 't') {
                         $scope.inventory = data.data.results;
                     } else {
@@ -531,10 +501,6 @@ invControllers.controller('MatInventoryCtrl', ['$scope', 'invService', 'domainCf
         $scope.fetch = function () {
             $scope.exRow = [];
             if (checkNotNullEmpty($scope.mid)) {
-                if($scope.etag instanceof Array){
-                    $scope.updateETags(null);
-                    return;
-                }
                 $scope.showLoading();
                 invService.getInventoryDomainConfig().then(function (data) {
                     $scope.invCnf = data.data;
@@ -617,21 +583,15 @@ invControllers.controller('MatInventoryCtrl', ['$scope', 'invService', 'domainCf
         };
     }
 ]);
-invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matService', 'entityService', 'domainCfgService', 'mapService', 'requestContext', '$location','$timeout',
-    function ($scope, invService, matService, entityService, domainCfgService, mapService, requestContext, $location,$timeout) {
-        //$scope.map = {};
+invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matService', 'entityService', 'domainCfgService', 'mapService', 'requestContext', '$location', '$timeout',
+    function ($scope, invService, matService, entityService, domainCfgService, mapService, requestContext, $location, $timeout) {
         $scope.inventory = {};
         $scope.entities = $scope.curData =  {results: []};
         $scope.curItem = 0;
+        $scope.filters.changed = false;
         $scope.stopInvFetch = false;
-        $scope.fvmtag = null;
-        $scope.fvmtag = requestContext.getParam("mtag") || "";
-        if(requestContext.getParam("etag") instanceof Array){
-            $scope.entityTags = requestContext.getParam("etag") || [];
-        }else{
-            $location.search('etag',null);
-            $scope.updateETags(null);
-        }
+        $scope.wparams = [["etag","etag"],["eetag","eetag"]];
+
         $scope.pieOpts = {
             "showLabels": 0,
             "showPercentValues": 1,
@@ -693,49 +653,7 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
                 $scope.entities = {results: []};
             }
         });
-        $scope.fetchControl = true;
-        domainCfgService.getInventoryCfg().then( function(data) {
-            $scope.inv = data.data;
-            $scope.eTgs = [];
-            if(checkNotNullEmpty($scope.inv.enTgs) && checkNullEmpty($scope.entityTags)) {
-                $scope.entityTags = [];
-                $scope.inv.enTgs.forEach(function(data){
-                    $scope.eTgs.push({"id" : data, "text" : data});
-                });
-                $scope.entityTags = angular.copy($scope.inv.enTgs);
-            } else if(checkNotNullEmpty($scope.entityTags)){
-                $scope.entityTags.forEach(function(data){
-                    $scope.eTgs.push({"id" : data, "text" : data});
-                });
-            }
-            $scope.updateETags($scope.entityTags);
-            $scope.fetchControl = false;
-            $scope.fetch();
-        }).catch( function error(msg) {
-        });
-        $scope.applyFilters = function() {
-            $scope.entityTags = [];
-            $scope.filtered = [];
-            $scope.curData = $scope.entities = {results: []};
-            $scope.inventory = {};
-            $scope.eLoading = true;
-            if($scope.eTgs != null && $scope.eTgs.length > 0) {
-                $scope.eTgs.forEach(function(data){
-                    $scope.entityTags.push(data.text);
-                });
-            }
-            $scope.$parent.filters.d = undefined;
-            if($scope.eTgs.length==0){
-                $scope.$parent.filters.d = "n";
-                $scope.entityTags = null;
-            }
-            $scope.updateETags($scope.entityTags);
-            $scope.offset = 0;
-            $scope.toggleFilter();
-            $timeout(function () {
-                $scope.fetch();
-            }, 500);
-        };
+
         matService.getDomainMaterials(null,null, 0, 300).then(function (data) {
             $scope.materials = data.data;
             $scope.getFilteredMaterials();
@@ -804,25 +722,11 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
                 $scope.setResults($scope.curData);
             }
         };
-        $scope.showFilter = false;
 
         $scope.cancelFilter = function() {
             $scope.toggleFilter();
         };
 
-        $scope.toggleFilter = function() {
-            $scope.showFilter = !$scope.showFilter;
-            var d = document.getElementById('filter');
-            if ($scope.showFilter) {
-                d.style.top = '150%';
-                d.style.opacity = '100';
-                d.style.zIndex = '2';
-            } else {
-                d.style.top = '0';
-                d.style.opacity = '0';
-                d.style.zIndex = '-1';
-            }
-        };
         function getTempPieData(dimData, skipShow) {
             return [{
                 value: dimData.tn,
@@ -854,11 +758,24 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
                 link: 'JavaScript:'
             }];
         }
+
+        function resetDataForFetch(){
+            $scope.inventory = {};
+            $scope.filtered = [];
+            $scope.curData = $scope.entities = {results: []};
+            $scope.offset = 0;
+        }
+
         $scope.fetch = function () {
+            if($scope.filters.changed){
+                resetDataForFetch();
+                $scope.filters.changed = false;
+            }
             if (!$scope.fetchControl) {
+                $scope.eLoading = true;
                 $scope.loading = true;
                 $scope.fetchControl = true;
-                    entityService.getAll($scope.offset, $scope.size, $scope.entityTags, null, true).then(function (data) {
+                    entityService.getAll($scope.offset, $scope.size, $scope.etag, null, true, $scope.eetag).then(function (data) {
                         $scope.entities.results = $scope.entities.results.concat(data.data.results);
                         $scope.count = data.data.numFound;
                         if (!$scope.stopInvFetch) {
@@ -873,7 +790,20 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
                     });
                 }
         };
-        $scope.fetch();
+        domainCfgService.getInventoryCfg().then( function(data) {
+            $scope.inv = data.data;
+            if(checkNullEmpty($scope.$parent.etag) && checkNullEmpty($scope.$parent.eetag) &&
+                checkNotNullEmpty($scope.inv) && $scope.inv.enTgs instanceof Array){
+                $scope.updateETags($scope.inv.enTgs.join(','), null);
+            }
+        }).catch( function error(msg) {
+
+        }).finally(function(){
+            $scope.fetchControl = false;
+            resetDataForFetch();
+            $scope.fetch();
+        });
+
         $scope.metadata = [{'title': 'serialnum', 'field': 'sno'}, { 'title': 'material', 'field': 'mnm'}, {'title': 'inventory.currentstock', 'field': 'stk'},
             {'title': 'availability', 'field': 'crMnl'}, {'title': 'min', 'field': 'reord'}, {'title': 'max', 'field': 'max'},
             {'title': 'demandforecast', 'field': 'rvpdmd'}, {'title': 'lastupdated', 'field': 't'}];
@@ -897,14 +827,16 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
         $scope.getFilteredMaterials = function () {
             var list = [];
             if (checkNotNullEmpty($scope.materials) && checkNotNullEmpty($scope.materials.results)) {
-                if(checkNullEmpty($scope.fvmtag)){
+                if(checkNullEmpty($scope.mtag)){
                     list = $scope.materials.results;
                 } else {
+                    var materialTags = $scope.mtag.split(',');
                     for (var item in $scope.materials.results) {
                         var mat = $scope.materials.results[item];
                         for (var i in mat.tgs) {
-                            if (mat.tgs[i] == $scope.fvmtag) {
+                            if (materialTags.indexOf(mat.tgs[i]) != -1) {
                                 list.push(mat);
+                                break;
                             }
                         }
                     }
@@ -914,10 +846,10 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
             $('#runGrid').scrollLeft(0);
             return list;
         };
-        $scope.$watch("fvmtag",function(newVal, oldVal){
+        $scope.$watch("mtag",function(newVal, oldVal){
             if(newVal != oldVal){
                 $scope.getFilteredMaterials();
-                $scope.$parent.updateMTags(newVal);
+                $scope.updateMTags(newVal);
             }
         });
         $scope.isEmptyMatEntFilters = function () {
@@ -929,15 +861,12 @@ invControllers.controller('FullInventoryCtrl', ['$scope', 'invService', 'matServ
             }
         });
         $scope.$on("resetRequest", function () {
-            $scope.eTgs = [];
-            if(checkNotNullEmpty($scope.inv) && checkNotNullEmpty($scope.inv.enTgs)){
-                $scope.inv.enTgs.forEach(function(data){
-                    $scope.eTgs.push({"id" : data, "text" : data});
-                });
-            }
-            $scope.fvmtag = null;
-            $scope.applyFilters();
-            $scope.showFilter = false;
+            resetDataForFetch();
+            $timeout(function(){
+                    if(checkNotNullEmpty($scope.inv) && checkNotNullEmpty($scope.inv.enTgs) && $scope.inv.enTgs instanceof Array){
+                        $scope.filters.changed = true;
+                        $scope.updateETags($scope.inv.enTgs.join(','), null);
+                }},500);
         });
         $scope.$watch("loading", function(){
             $scope.$parent.updateLoading($scope.loading);
@@ -1000,24 +929,20 @@ invControllers.controller('SimpleInventoryCtrl', ['$scope', 'invService', 'domai
 ]);
 invControllers.controller('BatchMaterialCtrl', ['$scope', 'invService', 'domainCfgService', 'requestContext', '$location',
     function ($scope, invService, domainCfgService, requestContext, $location) {
-        $scope.wparams = [["mtag"], ["etag"], ["ebf"],["batchno"]];
+        $scope.wparams = [["mtag"], ["etag"], ["eetag"], ["ebf"],["batchno"]];
         $scope.reqparams = ["state","district","taluk"];
         ListingController.call(this, $scope, requestContext, $location);
         $scope.ebf = undefined;
         $scope.loading = false;
         $scope.init = function () {
             $scope.bMaterial = {};
-            if(requestContext.getParam("mtag")){
-                $scope.bMaterial.t = requestContext.getParam("mtag");
-                $scope.bMaterial.tt = "mt";
+            if(checkNotNullEmpty($scope.etag)){
+                $scope.bMaterial.etag = $scope.etag;
+            } else if(checkNotNullEmpty($scope.eetag)){
+                $scope.bMaterial.eetag = $scope.eetag;
             }
-            if(requestContext.getParam("etag")){
-                if(requestContext.getParam("etag") instanceof Array){
-                    $location.search("etag",null);
-                }else{
-                    $scope.bMaterial.t = requestContext.getParam("etag");
-                    $scope.bMaterial.tt = "en";
-                }
+            if(checkNotNullEmpty($scope.mtag)){
+                $scope.bMaterial.mtag = $scope.mtag;
             }
             if (checkNotNullEmpty(requestContext.getParam("ebf"))) {
 

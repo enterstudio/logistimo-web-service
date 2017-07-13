@@ -61,6 +61,7 @@ public class LogiCounter implements ICounter {
   private static final XLog xLogger = XLog.getLog(LogiCounter.class);
   private static final String TABLE_NAME = "TN";
   private static final String TAGS = "tgs";
+  private static final String EXCLUDED_TAGS = "extgs";
   private static final String K_ID = "kId";
   private static final String TK_ID = "tkId";
   private static final String K_TAGS = "ktgs";
@@ -143,8 +144,14 @@ public class LogiCounter implements ICounter {
       params.put(DOMAIN_ID_PARAM, domainId);
       declaration.append(LONG).append(DOMAIN_ID_PARAM);
 
-      if (keys.containsKey(TAGS)) {
-        String value = (String) keys.get(TAGS);
+      if (keys.containsKey(TAGS) || keys.containsKey(EXCLUDED_TAGS)) {
+        boolean isExcluded = StringUtils.isNotEmpty((String) keys.get(EXCLUDED_TAGS));
+        String value;
+        if (isExcluded) {
+          value = (String) keys.get(EXCLUDED_TAGS);
+        } else {
+          value = (String) keys.get(TAGS);
+        }
         if (isValueValid(value)) {
           if (value.contains(CharacterConstants.COMMA)) {
             List<String> tags = StringUtil.getList(value, true);
@@ -154,24 +161,35 @@ public class LogiCounter implements ICounter {
             for (ITag iTag : tagIdList) {
               String tagParam = TAGS + PARAM + (++i);
               if (i != 1) {
-                filter.append(QueryConstants.OR).append(CharacterConstants.SPACE);
+                filter.append(isExcluded ? QueryConstants.AND : QueryConstants.OR).append(CharacterConstants.SPACE);
               }
-              filter.append(TAGS + QueryConstants.DOT_CONTAINS).append(tagParam)
-                  .append(CharacterConstants.C_BRACKET);
-              params.put(tagParam, iTag.getId());
-              declaration.append(CharacterConstants.COMMA).append(LONG).append(tagParam);
+              filter.append(CharacterConstants.O_BRACKET)
+                  .append(isExcluded ? QueryConstants.NEGATION
+                      : CharacterConstants.EMPTY).append(TAGS).append(QueryConstants.DOT_CONTAINS)
+                  .append(tagParam)
+                  .append(CharacterConstants.C_BRACKET).append(CharacterConstants.SPACE)
+                  .append(QueryConstants.AND).append(tagParam).append(CharacterConstants.DOT)
+                  .append(NAME).append(QueryConstants.D_EQUAL)
+                  .append(CharacterConstants.S_QUOTE).append(iTag.getName())
+                  .append(CharacterConstants.S_QUOTE).append(CharacterConstants.C_BRACKET);
+              if(variables.length()>0){
+                variables.append(CharacterConstants.SEMICOLON);
+              }
+              variables.append(TAG_OBJECT).append(tagParam);
             }
             filter.append(CharacterConstants.C_BRACKET);
           } else {
-            filter.append(QueryConstants.AND).append(
-                TAGS + QueryConstants.DOT_CONTAINS + TAGS + PARAM + CharacterConstants.C_BRACKET);
+            filter.append(QueryConstants.AND)
+                .append(isExcluded ? QueryConstants.NEGATION : CharacterConstants.EMPTY)
+                .append(TAGS).append(QueryConstants.DOT_CONTAINS).append(TAGS).append(PARAM)
+                .append(CharacterConstants.C_BRACKET);
             filter.append(QueryConstants.AND).append(TAGS + PARAM).append(CharacterConstants.DOT)
                 .append(NAME).append(QueryConstants.D_EQUAL)
-                .append(CharacterConstants.S_QUOTE).append(keys.get(TAGS))
+                .append(CharacterConstants.S_QUOTE).append(value)
                 .append(CharacterConstants.S_QUOTE);
             variables.append(TAG_OBJECT).append(TAGS + PARAM);
-            imports.append("import com.logistimo.tags.entity.Tag;");
           }
+          imports.append("import com.logistimo.tags.entity.Tag;");
         }
       } else if (keys.containsKey(K_TAGS)) {
         if (isValueValid(keys.get(K_TAGS))) {
@@ -206,7 +224,7 @@ public class LogiCounter implements ICounter {
 
       for (String s : keys.keySet()) {
         Object value = keys.get(s);
-        if (!isValueValid(value) || TABLE_NAME.equals(s) || TAGS.equals(s) || K_TAGS.equals(s)
+        if (!isValueValid(value) || TABLE_NAME.equals(s) || TAGS.equals(s) || EXCLUDED_TAGS.equals(s) || K_TAGS.equals(s)
             || ORDER_TYPE.equals(s) || O_TAGS.equals(s)) {
           continue;
         }

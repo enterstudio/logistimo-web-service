@@ -61,6 +61,10 @@ registerWidget('aas', 'rpt-asset-status', 'Assets', 'Asset status','asset/assets
 
         $scope.secondaryMetric.push({name: 'Number of times assets changed to this state', value: '0'});
 
+        if (typeof addSecondaryMetricOptions === "function") {
+            addSecondaryMetricOptions($scope.secondaryMetric,reportType);
+        }
+
         $scope.metricHeadings.push({name: $scope.resourceBundle['overview'], code: "ot"});
         $scope.metricHeadings.push({name: $scope.resourceBundle['by.upper']+" "+$scope.resourceBundle['locations.lower'], code: "rt"});
         $scope.metricHeadings.push({name: $scope.resourceBundle['by.upper']+" "+$scope.resourceBundle['manufacturer.lower'], code: "mnt"});

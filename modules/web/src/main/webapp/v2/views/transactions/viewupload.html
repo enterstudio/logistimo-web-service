@@ -24,23 +24,26 @@
 <div class="box topbox">
     <div ng-controller="ViewBulkUploadController">
         <div class="filter-box form-group">
-            <div ng-include="'views/common/reset-filters.html'"/>
-            <div class="row">
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle['kiosk']}}</span>
-                    <entity-select ent-model="entity" classes="form-control"
-                                   place-holder="{{resourceBundle.filterby}} {{resourceBundle.kiosks}}">
-                    </entity-select>
-                </div>
+            <div ng-controller="ResetController">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle['kiosk']}}</span>
+                        <entity-select ent-model="entity" classes="form-control"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle.kiosks}}">
+                        </entity-select>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle.from}}</span>
+                        <date-picker date-model="from" place-holder="From"></date-picker>
 
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle.from}}</span>
-                    <date-picker date-model="from" place-holder="From"></date-picker>
-
-                </div>
-                <div class="col-sm-3">
-                    <span class="filter-label">{{resourceBundle.to}}</span>
-                    <date-picker date-model="to" place-holder="To"></date-picker>
+                    </div>
+                    <div class="col-sm-3">
+                        <span class="filter-label">{{resourceBundle.to}}</span>
+                        <date-picker date-model="to" place-holder="To"></date-picker>
+                    </div>
+                    <div class="col-sm-3 pt20">
+                        <div ng-include="'views/common/reset-filters.html'"/>
+                    </div>
                 </div>
             </div>
         </div>

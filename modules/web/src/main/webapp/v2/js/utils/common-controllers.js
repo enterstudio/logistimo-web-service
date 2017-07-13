@@ -662,7 +662,6 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
             }
         })
     }
-
     $scope.applyFilters = function () {
         angular.forEach($scope.localFilters, function (filter) {
             $scope.$parent[filter] = angular.copy($scope[filter]);
@@ -670,6 +669,7 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
         angular.forEach($scope.filterMethods, function (fn) {
             $scope[fn]();
         });
+        $scope.$parent.filters.changed = true;
     };
 
     $scope.resetLocalFilters = function(){

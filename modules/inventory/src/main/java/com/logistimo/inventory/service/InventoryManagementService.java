@@ -67,6 +67,7 @@ public interface InventoryManagementService extends Service {
       Long domainId,
       LocationSuggestionModel location,
       String kioskTags,
+      String excludedKioskTags,
       String materialTags,
       String pdos,
       PageParams pageParams)
@@ -115,7 +116,7 @@ public interface InventoryManagementService extends Service {
    * Get inventory by batch number for a given material
    */
   Results getInventoryByBatchId(Long materialId, String batchId, PageParams pageParams,
-                                Long domainId, LocationSuggestionModel location) throws ServiceException;
+                                Long domainId, String kioskTags, String excludedKioskTags, LocationSuggestionModel location) throws ServiceException;
 
   /**
    * Get the valid and as well expired or active batches for a given batchid based on excludeExpired param
@@ -127,7 +128,7 @@ public interface InventoryManagementService extends Service {
    * Get inventory by batch expiry
    */
   Results getInventoryByBatchExpiry(Long domainId, Long materialId, Date start, Date end,
-                                    String kioskTag, String materialTag, LocationSuggestionModel location, PageParams pageParams)
+                                    String kioskTag, String excludedKioskTag, String materialTag, LocationSuggestionModel location, PageParams pageParams)
       throws ServiceException;
 
   /**
@@ -438,7 +439,7 @@ public interface InventoryManagementService extends Service {
    */
   IInvntryEvntLog adjustInventoryEvents(IInvntryEvntLog invntryEvntLog) throws ServiceException;
 
-  Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTag,
+  Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTags, String excludedKioskTags,
                               Long materialId, String materialTag, int batchEnabled,
                               boolean onlyNZInv, String pdos, LocationSuggestionModel location, PageParams pageParams) throws ServiceException;
 

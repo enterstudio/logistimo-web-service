@@ -148,7 +148,7 @@ public class InventoryController {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       int numTotalInv = Counter.getMaterialCounter(domainId, entityId, tag).getCount();
-      Navigator navigator = null;
+      Navigator navigator;
       if (startsWith == null) {
         navigator =
             new Navigator(request.getSession(), "InventoryController.getInventory", offset, size,
@@ -186,7 +186,7 @@ public class InventoryController {
           results = new Results(reportData.getResults(), null);
         }else {
           results =
-              ims.getInventory(domainId, entityId, null, null, null, tag, matType, onlyNZStk, pdos,
+              ims.getInventory(domainId, entityId, null, null, null, null, tag, matType, onlyNZStk, pdos,
                   null, pageParams);
         }
       } else {
@@ -249,7 +249,8 @@ public class InventoryController {
   public
   @ResponseBody
   Results getInventoryByMaterial(@PathVariable Long materialId,
-                                 @RequestParam(required = false) String tag,
+                                 @RequestParam(required = false) String etag,
+                                 @RequestParam(required = false) String eetag,
                                  @RequestParam(defaultValue = PageParams.DEFAULT_OFFSET_STR) int offset,
                                  @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
                                  @RequestParam(defaultValue = ALL) int matType,
@@ -296,7 +297,8 @@ public class InventoryController {
         Map<String, Object> filters = new HashMap<>();
         filters.put(ReportsConstants.FILTER_DOMAIN, domainId);
         filters.put(ReportsConstants.FILTER_EVENT, abType);
-        filters.put(ReportsConstants.FILTER_KIOSKTAG, tag);
+        filters.put(ReportsConstants.FILTER_KIOSKTAG, etag);
+        filters.put(ReportsConstants.FILTER_EXCLUDED_KIOSKTAG, eetag);
         filters.put(ReportsConstants.FILTER_MATERIAL, materialId);
         filters.put(ReportsConstants.FILTER_LATEST, true);
 
@@ -310,7 +312,7 @@ public class InventoryController {
         results = new Results(reportData.getResults(), null);
       }else {
           results =
-            ims.getInventory(domainId, null, kioskIds, tag, materialId, null, matType, onlyNZStk,
+            ims.getInventory(domainId, null, kioskIds, etag, eetag, materialId, null, matType, onlyNZStk,
                 pdos, location, pageParams);
       }
       results.setOffset(offset);
@@ -324,29 +326,18 @@ public class InventoryController {
   public
   @ResponseBody
   Results getBatchMaterial(
-      @RequestParam(required = false) String tag, @RequestParam(required = false) String ttype,
-      @RequestParam(required = false) String ebf, @RequestParam(required = false) String bno,
+      @RequestParam(required = false) String etag,
+      @RequestParam(required = false) String eetag,
+      @RequestParam(required = false) String mtag,
+      @RequestParam(required = false) String ebf,
+      @RequestParam(required = false) String bno,
       @RequestParam(required = false) String mid,
       @RequestParam(required = false) String loc,
       @RequestParam(defaultValue = PageParams.DEFAULT_OFFSET_STR) int offset,
       @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
       HttpServletRequest request) {
     boolean hasExpiresBefore = (ebf != null && !ebf.isEmpty());
-    boolean hasBatchId = (bno != null && !bno.isEmpty());
-    String kioskTag = null, materialTag = null;
-    boolean hasTag = (tag != null && !tag.isEmpty());
-    if (hasTag) {
-      try {
-        tag = URLDecoder.decode(tag, "UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        tag = null;
-      }
-      if (TagUtil.TYPE_MATERIAL.equals(ttype)) {
-        materialTag = tag;
-      } else {
-        kioskTag = tag;
-      }
-    }
+    boolean hasBatchId = StringUtils.isNotEmpty(bno);
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     String userId = sUser.getUsername();
     Locale locale = sUser.getLocale();
@@ -370,7 +361,7 @@ public class InventoryController {
       Long matId = StringUtils.isNotBlank(mid) ? Long.parseLong(mid) : null;
       Results
           results =
-          getResults(ebf, hasExpiresBefore, bno, hasBatchId, matId, kioskTag, materialTag, domainId,
+          getResults(ebf, hasExpiresBefore, bno, hasBatchId, matId, etag, eetag, mtag, domainId,
               pageParams, ims, location);
       if (results != null) {
         navigator.setResultParams(results);
@@ -378,7 +369,7 @@ public class InventoryController {
         IUserAccount user = Services.getService(UsersServiceImpl.class,locale).getUserAccount(userId);
         List<IKiosk> myKiosks = null;
         if (SecurityConstants.ROLE_SERVICEMANAGER.equals(user.getRole())) {
-          myKiosks = as.getKiosks(user, domainId, null, null).getResults();
+          myKiosks = as.getKiosks(user, domainId, null, null, null).getResults();
           if (myKiosks == null || myKiosks.isEmpty()) {
             return new Results(null, null, 0, offset);
           }
@@ -399,19 +390,19 @@ public class InventoryController {
   }
 
   private Results getResults(String ebf, boolean hasExpiresBefore, String bno, boolean hasBatchId,
-                             Long mid, String kioskTag, String materialTag, Long domainId,
+                             Long mid, String kioskTags, String excludedKioskTags, String materialTags, Long domainId,
                              PageParams pageParams, InventoryManagementService ims, LocationSuggestionModel location)
       throws ServiceException {
     Date end;
     Results results = null;
     DomainConfig dc = DomainConfig.getInstance(domainId);
     if (mid != null && hasBatchId) {
-      results = ims.getInventoryByBatchId(mid, bno, pageParams, domainId, location);
+      results = ims.getInventoryByBatchId(mid, bno, pageParams, domainId, kioskTags, excludedKioskTags, location);
     } else if (hasExpiresBefore) {
       try {
         end = LocalDateUtil.parseCustom(ebf, Constants.DATE_FORMAT, dc.getTimezone());
         results =
-            ims.getInventoryByBatchExpiry(domainId, mid, null, end, kioskTag, materialTag, location,
+            ims.getInventoryByBatchExpiry(domainId, mid, null, end, kioskTags, excludedKioskTags, materialTags, location,
                 pageParams);
       } catch (Exception e) {
         xLogger.warn("Exception when trying to parse expiry date: {0}", e);
@@ -523,7 +514,8 @@ public class InventoryController {
 
   @RequestMapping(value = "/location", method = RequestMethod.GET)
   public @ResponseBody Results getInventoryByLocation(@RequestParam(required = false) String kioskTags,
-                                                      @RequestParam(required = false) String materialTag,
+                                                      @RequestParam(required = false) String excludedKioskTags,
+                                                      @RequestParam(required = false) String materialTags,
                                                       @RequestParam(required = false, defaultValue = "0") int offset,
                                                       @RequestParam(required = false, defaultValue = "50") int size,
                                                       @RequestParam(required = false) String loc,
@@ -542,7 +534,7 @@ public class InventoryController {
       InventoryManagementService ims =
           Services.getService(InventoryManagementServiceImpl.class, sUser.getLocale());
       List results =
-          ims.getInvntryByLocation(domainId, location, kioskTags, materialTag,pdos, pageParams)
+          ims.getInvntryByLocation(domainId, location, kioskTags, excludedKioskTags, materialTags, pdos, pageParams)
               .getResults();
       if (results != null) {
         EntitiesService accountsService =
@@ -570,8 +562,9 @@ public class InventoryController {
   public
   @ResponseBody
   Results getAbnormalStockDetails(@RequestParam int eventType,
-                                  @RequestParam(required = false) String tag,
-                                  @RequestParam(required = false) String ttype,
+                                  @RequestParam(required = false) String etag,
+                                  @RequestParam(required = false) String eetag,
+                                  @RequestParam(required = false) String mtag,
                                   @RequestParam(required = false) Long entityId,
                                   @RequestParam(required = false) Long mid,
                                   @RequestParam(required = false) Boolean inDetail,
@@ -606,18 +599,13 @@ public class InventoryController {
     filters.put(ReportsConstants.FILTER_EVENT, eventType);
     filters.put(ReportsConstants.FILTER_LATEST, true);
 
-    boolean hasTag = (tag != null && !tag.isEmpty());
-    if (hasTag) {
-      try {
-        tag = URLDecoder.decode(tag, "UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        tag = null;
-      }
-      if (tag != null && TagUtil.TYPE_MATERIAL.equals(ttype)) {
-        filters.put(ReportsConstants.FILTER_MATERIALTAG, tag);
-      } else {
-        filters.put(ReportsConstants.FILTER_KIOSKTAG, tag);
-      }
+    if (StringUtils.isNotEmpty(mtag)) {
+      filters.put(ReportsConstants.FILTER_MATERIALTAG, mtag);
+    }
+    if (StringUtils.isNotEmpty(etag)){
+      filters.put(ReportsConstants.FILTER_KIOSKTAG, etag);
+    }else if(StringUtils.isNotEmpty(eetag)){
+      filters.put(ReportsConstants.FILTER_EXCLUDED_KIOSKTAG, eetag);
     }
     if (entityId != null) {
       filters.put(ReportsConstants.FILTER_KIOSK, entityId);
@@ -635,16 +623,16 @@ public class InventoryController {
     PageParams pageParams = new PageParams(cursor, offset, size);
     try {
         if(BooleanUtils.isTrue(inDetail)){
-            filters.put(ReportsConstants.FILTER_ABNORMALSTOCKVIEW, true);
+          filters.put(ReportsConstants.FILTER_ABNORMALSTOCKVIEW, true);
         }
         ReportsService reportsService = Services.getService("reports");
-      ReportData
+        ReportData
           reportData =
           reportsService
               .getReportData(ReportsConstants.TYPE_STOCKEVENT, null, null, ReportsConstants.FREQ_DAILY, filters,
                       locale, timezone, pageParams, dc, userId);
-      List results = reportData.getResults();
-        List modelList = null;
+        List results = reportData.getResults();
+        List modelList;
         if(BooleanUtils.isTrue(inDetail)){
             InventoryManagementService
                     ims =
@@ -828,7 +816,7 @@ public class InventoryController {
         ims =
         Services.getService(InventoryManagementServiceImpl.class, null);
     Results results =
-        ims.getInventory(domainId, entityId, null, null, materialId, null, IInvntry.ALL, false,
+        ims.getInventory(domainId, entityId, null, null, null, materialId, null, IInvntry.ALL, false,
             null, null,
             new PageParams(0, 1));
     if (results.getResults().isEmpty()) {

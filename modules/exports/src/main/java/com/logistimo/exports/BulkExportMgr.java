@@ -29,6 +29,7 @@ import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.QueryConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.models.LocationSuggestionModel;
@@ -80,6 +81,7 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
@@ -130,6 +132,10 @@ public class BulkExportMgr {
   private static String EXPORT_BACKEND = "backend1";
   private static IUserDao accountDao = new UserDao();
   private static ITagDao tagDao = new TagDao();
+
+  private BulkExportMgr(){
+
+  }
 
   // Get the query parameters for a given type of export
   // NOTE: The keys in params are the same as the request parameter keys in ExportServlet.batchExport()
@@ -183,6 +189,8 @@ public class BulkExportMgr {
     String discType = req.getParameter("disctype"); // Type of discrepancy
     String eTags =
         req.getParameter("etag"); // Entity tags, multiple possible in case of Inventory export
+    String eeTags =
+        req.getParameter("eetag"); // Entity tags, multiple possible in case of Inventory export
     String mTag = req.getParameter("mtag"); // Material tag
     String orderIdStr = req.getParameter("orderid"); // Order ID
     boolean etrn = req.getParameter("etrn") != null ? true : false; // Exclude transfer orders
@@ -194,7 +202,7 @@ public class BulkExportMgr {
     Date from = null, to = null;
     if (fromDateStr != null && !fromDateStr.isEmpty()) {
       try {
-        fromDateStr = URLDecoder.decode(fromDateStr, "UTF-8");
+        fromDateStr = URLDecoder.decode(fromDateStr, Constants.UTF8);
         from = df.parse(fromDateStr);
         from =
             LocalDateUtil.getOffsetDate(
@@ -207,7 +215,7 @@ public class BulkExportMgr {
     }
     if (toDateStr != null && !toDateStr.isEmpty()) {
       try {
-        toDateStr = URLDecoder.decode(toDateStr, "UTF-8");
+        toDateStr = URLDecoder.decode(toDateStr, Constants.UTF8);
         to = df.parse(toDateStr);
       } catch (Exception e) {
         xLogger.warn(
@@ -254,11 +262,11 @@ public class BulkExportMgr {
     LocationSuggestionModel location =
         ReportsUtil.parseLocation(
             req.getParameter("loc") != null
-                ? URLDecoder.decode(req.getParameter("loc"), "UTF-8")
+                ? URLDecoder.decode(req.getParameter("loc"), Constants.UTF8)
                 : null);
     if (expiresBeforeStr != null && !expiresBeforeStr.isEmpty()) {
       try {
-        expiresBeforeStr = URLDecoder.decode(expiresBeforeStr, "UTF-8");
+        expiresBeforeStr = URLDecoder.decode(expiresBeforeStr, Constants.UTF8);
         expiresBefore = df.parse(expiresBeforeStr);
       } catch (Exception e) {
         xLogger.warn(
@@ -267,15 +275,17 @@ public class BulkExportMgr {
       }
     }
     if (StringUtils.isNotEmpty(eTags)) {
-      eTags = URLDecoder.decode(eTags, "UTF-8");
+      eTags = URLDecoder.decode(eTags, Constants.UTF8);
+    }else if (StringUtils.isNotEmpty(eeTags)) {
+      eeTags = URLDecoder.decode(eeTags, Constants.UTF8);
     }
 
     if (StringUtils.isNotEmpty(mTag)) {
-      mTag = URLDecoder.decode(mTag, "UTF-8");
+      mTag = URLDecoder.decode(mTag, Constants.UTF8);
     }
 
     if (StringUtils.isNotEmpty(reason)) {
-      reason = URLDecoder.decode(reason, "UTF-8");
+      reason = URLDecoder.decode(reason, Constants.UTF8);
     }
 
     if (isReportType) {
@@ -313,7 +323,7 @@ public class BulkExportMgr {
           kioskId,
           materialId,
           eTags != null ? Arrays.asList(eTags.split(CharacterConstants.COMMA)) : null,
-          null,
+          eeTags != null ? Arrays.asList(eeTags.split(CharacterConstants.COMMA)) : null,
           mTag,
           null,
           null,
@@ -326,7 +336,7 @@ public class BulkExportMgr {
           kioskIds, batchIdStr, hasAtd, reason, null);
     }
     // Form query params.
-    String queryStr = "";
+    StringBuilder queryStr = new StringBuilder();
     String paramsStr = " PARAMETERS ";
     String variablesStr = "";
     String orderingStr = null;
@@ -336,108 +346,133 @@ public class BulkExportMgr {
     // kioskId or domainId
     if (kioskId != null) {
       if (StringUtils.isNotEmpty(oType) && oType.equalsIgnoreCase("sle")) {
-        queryStr += "skId == kIdParam";
+        queryStr.append("skId == kIdParam");
       } else {
-        queryStr += "kId == kIdParam";
+        queryStr.append("kId == kIdParam");
       }
       paramsStr += "Long kIdParam";
       params.put("kIdParam", kioskId);
     } else if (materialId != null) {
-      queryStr += "mId == mIdParam && dId.contains(dIdParam)";
+      queryStr.append("mId == mIdParam && dId.contains(dIdParam)");
       paramsStr += "Long mIdParam, Long dIdParam";
       params.put("mIdParam", materialId);
       params.put("dIdParam", domainId);
     } else {
       if (TYPE_USAGESTATISTICS.equals(type)) {
-        queryStr += "dId == dIdParam";
+        queryStr.append("dId == dIdParam");
       } else {
-        queryStr += "dId.contains(dIdParam)";
+        queryStr.append("dId.contains(dIdParam)");
       }
       paramsStr += "Long dIdParam";
       params.put("dIdParam", domainId);
     }
     // Object-specific query
     if (TYPE_ORDERS.equals(type)) {
-      queryStr =
-          "SELECT FROM " + JDOUtils.getImplClass(IOrder.class).getName() + " WHERE " + queryStr;
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM + JDOUtils.getImplClass(IOrder.class).getName() + QueryConstants.WHERE + queryStr.toString());
       // Order status, if any
       if (orderStatus != null && !orderStatus.isEmpty()) {
-        queryStr += " && st == stParam";
+        queryStr.append(" && st == stParam");
         paramsStr += ",String stParam";
         params.put("stParam", orderStatus);
       }
 
-      queryStr += " && oty == otParam";
+      queryStr.append(" && oty == otParam");
       paramsStr += ",Long otParam";
       params.put("otParam", Integer.parseInt(spTransfer));
 
       dateField = "cOn";
       orderingStr = "ORDER BY cOn DESC";
     } else if (TYPE_MATERIALS.equals(type)) {
-      queryStr =
-          "SELECT FROM " + JDOUtils.getImplClass(IMaterial.class).getName() + " WHERE " + queryStr;
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM  + JDOUtils.getImplClass(IMaterial.class).getName() + QueryConstants.WHERE
+              + queryStr.toString());
       orderingStr = "ORDER BY uName ASC";
     } else if (TYPE_KIOSKS.equals(type)) {
-      queryStr =
-          "SELECT FROM " + JDOUtils.getImplClass(IKiosk.class).getName() + " WHERE " + queryStr;
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM  + JDOUtils.getImplClass(IKiosk.class).getName() + QueryConstants.WHERE
+              + queryStr.toString());
       orderingStr = "ORDER BY nName ASC";
     } else if (TYPE_EVENTS.equals(type)) {
-      queryStr =
-          "SELECT FROM "
-              + JDOUtils.getImplClass(IEvent.class).getName()
-              + " WHERE "
-              + queryStr; // Typically, domainId is the param. present
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM  + JDOUtils.getImplClass(IEvent.class).getName() + QueryConstants.WHERE
+              + queryStr.toString()); // Typically, domainId is the param. present
       dateField = "t";
       orderingStr = "ORDER BY t DESC";
     } else if (TYPE_ASSETS.equals(type)) {
-      queryStr =
-          "SELECT FROM " + JDOUtils.getImplClass(IKiosk.class).getName() + " WHERE " + queryStr;
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM  + JDOUtils.getImplClass(IKiosk.class).getName() + QueryConstants.WHERE + queryStr.toString());
     } else if (TYPE_BATCHEXPIRY.equals(type)) {
       if (hasBatchId || hasExpiresBefore) {
         if (hasBatchId) {
-          queryStr += " && bid == bidParam";
+          queryStr.append(" && bid == bidParam");
           paramsStr += ",String bidParam";
           params.put("bidParam", batchIdStr);
         }
-        if (materialId == null && mTag != null && !mTag.isEmpty()) {
-          queryStr += " && mtgs.contains(mtgsParam)";
-          paramsStr += ",Long mtgsParam";
-          params.put("mtgsParam", tagDao.getTagFilter(mTag, ITag.MATERIAL_TAG));
+        if (materialId == null && StringUtils.isNotEmpty(mTag)) {
+          List<String> tags = StringUtil.getList(mTag, true);
+          queryStr.append(QueryConstants.AND).append(CharacterConstants.O_BRACKET);
+          int i = 0;
+          for (String iTag : tags) {
+            String tagParam = "mTgsParam" + (++i);
+            if (i != 1) {
+              queryStr.append(QueryConstants.OR).append(CharacterConstants.SPACE);
+            }
+            queryStr.append("mtgs").append(QueryConstants.DOT_CONTAINS)
+                .append(tagParam).append(CharacterConstants.C_BRACKET).append(CharacterConstants.SPACE);
+            paramsStr += ", Long " + tagParam;
+            params.put(tagParam, tagDao.getTagFilter(iTag, ITag.MATERIAL_TAG));
+          }
+          queryStr.append(CharacterConstants.C_BRACKET);
         }
-        if (kioskId == null && eTags != null && !eTags.isEmpty()) {
-          queryStr += " && ktgs.contains(etgsParam)";
-          paramsStr += ",Long etgsParam";
-          params.put("etgsParam", tagDao.getTagFilter(eTags, ITag.KIOSK_TAG));
+        if (kioskId == null && (StringUtils.isNotEmpty(eTags) || StringUtils.isNotEmpty(eeTags))) {
+          boolean isExcluded = StringUtils.isNotEmpty(eeTags);
+          String value = isExcluded ? eeTags : eTags;
+          List<String> tags = StringUtil.getList(value, true);
+          queryStr.append(QueryConstants.AND).append(CharacterConstants.O_BRACKET);
+          int i = 0;
+          for (String iTag : tags) {
+            String tagParam = "kTgsParam" + (++i);
+            if (i != 1) {
+              queryStr.append(isExcluded ? QueryConstants.AND : QueryConstants.OR)
+                  .append(CharacterConstants.SPACE);
+            }
+            queryStr.append(isExcluded ? QueryConstants.NEGATION
+                    : CharacterConstants.EMPTY).append("ktgs").append(QueryConstants.DOT_CONTAINS)
+                .append(tagParam).append(CharacterConstants.C_BRACKET).append(CharacterConstants.SPACE);
+            paramsStr += ", Long " + tagParam;
+            params.put(tagParam, tagDao.getTagFilter(iTag, ITag.KIOSK_TAG));
+          }
+          queryStr.append(CharacterConstants.C_BRACKET);
         }
+
         if (location != null && location.isNotEmpty()) {
           variablesStr += " VARIABLES " + JDOUtils.getImplClass(IKiosk.class).getName() + " kiosk";
-          queryStr += " && kId == kiosk.kioskId";
+          queryStr.append(" && kId == kiosk.kioskId");
           if (StringUtils.isNotEmpty(location.state)) {
-            queryStr += " && kiosk.state == stateParam";
+            queryStr.append(" && kiosk.state == stateParam");
             params.put("stateParam", location.state);
             paramsStr += ", String stateParam";
           }
           if (StringUtils.isNotEmpty(location.district)) {
-            queryStr += " && kiosk.district == districtParam";
+            queryStr.append(" && kiosk.district == districtParam");
             params.put("districtParam", location.district);
             paramsStr += ", String districtParam";
           }
           if (StringUtils.isNotEmpty(location.taluk)) {
-            queryStr += " && kiosk.taluk == talukParam";
+            queryStr.append(" && kiosk.taluk == talukParam");
             params.put("talukParam", location.taluk);
             paramsStr += ", String talukParam";
           }
         }
         // Hard code the vld field to true
-        queryStr += " && vld == vldParam";
+        queryStr.append(" && vld == vldParam");
         paramsStr += ",Boolean vldParam";
         params.put("vldParam", Boolean.TRUE);
         // Add the expiryDate param to the orderingStr.
-        queryStr =
-            "SELECT FROM "
-                + JDOUtils.getImplClass(IInvntryBatch.class).getName()
-                + " WHERE "
-                + queryStr;
+        queryStr = new StringBuilder(QueryConstants.SELECT + QueryConstants.FROM
+            + JDOUtils.getImplClass(IInvntryBatch.class).getName()
+                + QueryConstants.WHERE + queryStr.toString());
         dateField = "bexp";
         orderingStr = "ORDER BY bexp ASC";
       } else {
@@ -447,10 +482,9 @@ public class BulkExportMgr {
         return null;
       }
     } else if (TYPE_USAGESTATISTICS.equals(type)) {
-      queryStr =
-          "SELECT FROM "
-              + JDOUtils.getImplClass(IMonthSlice.class).getName()
-              + " WHERE oty == otyParam && dt == dtParam";
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM  + JDOUtils.getImplClass(IMonthSlice.class).getName()
+              + QueryConstants.WHERE + "oty == otyParam && dt == dtParam");
       paramsStr = " PARAMETERS Long otyParam, String dtParam";
       params.put("otyParam", ISlice.OTYPE_DOMAIN);
       params.put("dtParam", ReportsConstants.FILTER_DOMAIN);
@@ -458,19 +492,17 @@ public class BulkExportMgr {
       orderingStr = "ORDER BY d DESC, tc DESC";
     } else if (TYPE_MANUALTRANSACTIONS.equals(
         type)) { // manual transactions uploaded into MnlTransactions
-      queryStr =
-          "SELECT FROM "
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM
               + JDOUtils.getImplClass(IMnlTransaction.class).getName()
-              + " WHERE "
-              + queryStr;
+              + QueryConstants.WHERE
+              + queryStr.toString());
       dateField = "rp";
       orderingStr = "ORDER BY rp DESC";
     } else if (TYPE_NOTIFICATIONS_STATUS.equals(type)) {
-      queryStr =
-          "SELECT FROM "
-              + JDOUtils.getImplClass(IMessageLog.class).getName()
-              + " WHERE "
-              + "dId == dIdParam && notif == notifParam ";
+      queryStr = new StringBuilder(
+          QueryConstants.SELECT + QueryConstants.FROM + JDOUtils.getImplClass(IMessageLog.class).getName()
+              + QueryConstants.WHERE + "dId == dIdParam && notif == notifParam ");
       paramsStr += ",Integer notifParam ";
       params.put("notifParam", 1);
       dateField = "t";
@@ -481,39 +513,35 @@ public class BulkExportMgr {
     }
 
     if (from != null && dateField != null) {
-      //if ( type.equals( TYPE_USAGESTATISTICS ) ) {
-      //queryStr += " && " + dateField + " == fromParam"; // d == fromParam for usagestatistics
-      //} else {
-      queryStr += " && " + dateField + " > fromParam";
-      //}
+      queryStr.append(" && ").append(dateField).append(" > fromParam");
       paramsStr += ",Date fromParam";
       params.put("fromParam", from);
     }
     // To date, if any
     if (to != null && dateField != null) {
-      queryStr += " && " + dateField + " < toParam";
+      queryStr.append(" && ").append(dateField).append(" < toParam");
       paramsStr += ",Date toParam";
       params.put("toParam", to);
     }
     // Expiry date, if any
     if (expiresBefore != null && dateField != null) {
-      queryStr += " && " + dateField + " < bexpParam";
+      queryStr.append(" && ").append(dateField).append(" < bexpParam");
       paramsStr += ",Date bexpParam";
       params.put("bexpParam", expiresBefore);
     }
     // Add parameters
-    queryStr += variablesStr + paramsStr;
+    queryStr.append(variablesStr).append(paramsStr);
     // Add date import, if needed
     if (from != null || to != null || expiresBefore != null) {
-      queryStr += " import java.util.Date;";
+      queryStr.append(" import java.util.Date;");
     }
     // Add ordering, if needed
     if (orderingStr != null) {
-      queryStr += " " + orderingStr;
+      queryStr.append(" ").append(orderingStr);
     }
-    xLogger.info("Export query: {0}, params: {1}", queryStr, params);
+    xLogger.info("Export query: {0}, params: {1}", queryStr.toString(), params);
 
-    return new QueryParams(queryStr, params);
+    return new QueryParams(queryStr.toString(), params);
   }
 
   // Private method that returns the report query params
@@ -684,7 +712,7 @@ public class BulkExportMgr {
     Map<String, Object> filterParams = new HashMap<>();
     String nNameStr = req.getParameter("nname");
     try {
-      nNameStr = URLDecoder.decode(nNameStr, "UTF-8");
+      nNameStr = URLDecoder.decode(nNameStr, Constants.UTF8);
     } catch (Exception e) {
       xLogger.warn("Exception when parsing from nname {0}", nNameStr, e);
     }
@@ -694,7 +722,7 @@ public class BulkExportMgr {
     String mobilePhoneNumberStr = req.getParameter("mobilephonenumber");
     if (StringUtils.isNotEmpty(mobilePhoneNumberStr)) {
       try {
-        mobilePhoneNumberStr = URLDecoder.decode(mobilePhoneNumberStr, "UTF-8");
+        mobilePhoneNumberStr = URLDecoder.decode(mobilePhoneNumberStr, Constants.UTF8);
       } catch (Exception e) {
         xLogger.warn(
             "Exception when parsing from mobile phone number {0}", mobilePhoneNumberStr, e);
@@ -707,7 +735,7 @@ public class BulkExportMgr {
     String roleStr = req.getParameter("role");
     if (StringUtils.isNotEmpty(roleStr)) {
       try {
-        roleStr = URLDecoder.decode(roleStr, "UTF-8");
+        roleStr = URLDecoder.decode(roleStr, Constants.UTF8);
       } catch (Exception e) {
         xLogger.warn("Exception when parsing from role {0}", roleStr, e);
       }
@@ -720,7 +748,7 @@ public class BulkExportMgr {
     String versionStr = req.getParameter("v");
     if (StringUtils.isNotEmpty(versionStr)) {
       try {
-        versionStr = URLDecoder.decode(roleStr, "UTF-8");
+        versionStr = URLDecoder.decode(roleStr, Constants.UTF8);
       } catch (Exception e) {
         xLogger.warn("Exception when parsing from version {0}", versionStr, e);
       }
@@ -729,7 +757,7 @@ public class BulkExportMgr {
     String fromDateStr = req.getParameter("from");
     if (StringUtils.isNotEmpty(fromDateStr)) {
       try {
-        fromDateStr = URLDecoder.decode(fromDateStr, "UTF-8");
+        fromDateStr = URLDecoder.decode(fromDateStr, Constants.UTF8);
         Date fromDate =
             LocalDateUtil.parseCustom(fromDateStr, Constants.DATETIME_FORMAT, dc.getTimezone());
         filterParams.put("from", fromDate);
@@ -740,7 +768,7 @@ public class BulkExportMgr {
     String toDateStr = req.getParameter("to");
     if (StringUtils.isNotEmpty(toDateStr)) {
       try {
-        toDateStr = URLDecoder.decode(toDateStr, "UTF-8");
+        toDateStr = URLDecoder.decode(toDateStr, Constants.UTF8);
         Date toDate =
             LocalDateUtil.parseCustom(toDateStr, Constants.DATETIME_FORMAT, dc.getTimezone());
         filterParams.put("to", toDate);
@@ -755,7 +783,7 @@ public class BulkExportMgr {
     String utagStr = req.getParameter("utag");
     try {
       if (StringUtils.isNotEmpty(utagStr)) {
-        utagStr = URLDecoder.decode(utagStr, "UTF-8");
+        utagStr = URLDecoder.decode(utagStr, Constants.UTF8);
         filterParams.put("utag", utagStr);
       }
     } catch (Exception e) {
@@ -822,30 +850,30 @@ public class BulkExportMgr {
 
   public static class ExportParams {
 
-    private static final String TYPE = "ty";
-    private static final String COUNTRY = "cn";
-    private static final String CURRENCY = "cu";
-    private static final String DOMAINID = "dm";
-    private static final String FILENAME = "fn";
-    private static final String FROM = "from";
-    private static final String TO = "to";
-    private static final String KIOSKID = "kid";
-    private static final String LANGUAGE = "ln";
-    private static final String MATERIALID = "mid";
-    private static final String TIMEZONE = "tz";
-    private static final String GCSFILENAME = "gcsfn";
-    private static final String SIZE = "sz";
-    private static final String USERIDS = "uids";
-    private static final String SOURCEUSERID = "suid";
-    private static final String TRANSACTIONTYPE = "type";
-    private static final String LKIOSKID = "lkId";
-    private static final String JOBID = "jid";
-    private static final String SUBTYPE = "sty";
-    private static final String USERTAGS = "utgs";
-    private static final String ASSETID = "aid";
-    private static final String ASSETYPENAME = "atynm";
-    private static final String SENSORNAME = "snnm";
-    private static final String EMAILID = "emailid";
+    private static final String TYPE_KEY = "ty";
+    private static final String COUNTRY_KEY = "cn";
+    private static final String CURRENCY_KEY = "cu";
+    private static final String DOMAINID_KEY = "dm";
+    private static final String FILENAME_KEY = "fn";
+    private static final String FROM_KEY = "from";
+    private static final String TO_KEY = "to";
+    private static final String KIOSKID_KEY = "kid";
+    private static final String LANGUAGE_KEY = "ln";
+    private static final String MATERIALID_KEY = "mid";
+    private static final String TIMEZONE_KEY = "tz";
+    private static final String GCSFILENAME_KEY = "gcsfn";
+    private static final String SIZE_KEY = "sz";
+    private static final String USERIDS_KEY = "uids";
+    private static final String SOURCEUSERID_KEY = "suid";
+    private static final String TRANSACTIONTYPE_KEY = "type";
+    private static final String LKIOSKID_KEY = "lkId";
+    private static final String JOBID_KEY = "jid";
+    private static final String SUBTYPE_TYPE = "sty";
+    private static final String USERTAGS_KEY = "utgs";
+    private static final String ASSETID_KEY = "aid";
+    private static final String ASSETYPENAME_KEY = "atynm";
+    private static final String SENSORNAME_KEY = "snnm";
+    private static final String EMAILID_KEY = "emailid";
 
     public String type = null;
     public String subType = null;
@@ -877,77 +905,77 @@ public class BulkExportMgr {
 
     public ExportParams(String exportParamsJSON) throws JSONException {
       JSONObject json = new JSONObject(exportParamsJSON);
-      type = json.getString(TYPE);
+      type = json.getString(TYPE_KEY);
       try {
-        subType = json.getString(SUBTYPE);
+        subType = json.getString(SUBTYPE_TYPE);
       } catch (Exception e) {
         //ignore
       }
-      domainId = new Long(json.getLong(DOMAINID));
+      domainId = json.getLong(DOMAINID_KEY);
       try {
-        kioskId = json.getLong(KIOSKID);
+        kioskId = json.getLong(KIOSKID_KEY);
       } catch (Exception e) {
         // ignore
       }
       try {
-        materialId = json.getLong(MATERIALID);
+        materialId = json.getLong(MATERIALID_KEY);
       } catch (Exception e) {
         // ignore
       }
-      locale = new Locale(json.getString(LANGUAGE), json.getString(COUNTRY));
-      timezone = json.getString(TIMEZONE);
-      userIds = json.getString(USERIDS);
+      locale = new Locale(json.getString(LANGUAGE_KEY), json.getString(COUNTRY_KEY));
+      timezone = json.getString(TIMEZONE_KEY);
+      userIds = json.getString(USERIDS_KEY);
       try {
-        userTags = json.getString(USERTAGS);
+        userTags = json.getString(USERTAGS_KEY);
       } catch (Exception e) {
         //ignore
       }
 
-      sourceUserId = json.getString(SOURCEUSERID);
+      sourceUserId = json.getString(SOURCEUSERID_KEY);
       try {
-        currency = json.getString(CURRENCY);
+        currency = json.getString(CURRENCY_KEY);
       } catch (Exception e) {
         // ignore
       }
       try {
-        gcsFilename = json.getString(GCSFILENAME);
+        gcsFilename = json.getString(GCSFILENAME_KEY);
       } catch (Exception e) {
         // ignore
       }
       try {
-        filename = json.getString(FILENAME);
+        filename = json.getString(FILENAME_KEY);
       } catch (Exception e) {
         // ignore
       }
       try {
-        from = new Date(json.getLong(FROM));
+        from = new Date(json.getLong(FROM_KEY));
       } catch (Exception e) {
         // ignore
       }
       try {
-        to = new Date(json.getLong(TO));
+        to = new Date(json.getLong(TO_KEY));
       } catch (Exception e) {
         // ignore
       }
-      jobId = json.getLong(JOBID);
-      size = json.getInt(SIZE);
+      jobId = json.getLong(JOBID_KEY);
+      size = json.getInt(SIZE_KEY);
       try {
-        assetId = json.getString(ASSETID);
+        assetId = json.getString(ASSETID_KEY);
       } catch (Exception e) {
 
       }
       try {
-        asseTyNm = json.getString(ASSETYPENAME);
+        asseTyNm = json.getString(ASSETYPENAME_KEY);
       } catch (Exception e) {
 
       }
       try {
-        sensorName = json.getString(SENSORNAME);
+        sensorName = json.getString(SENSORNAME_KEY);
       } catch (Exception e) {
 
       }
       try {
-        emailId = json.getString(EMAILID);
+        emailId = json.getString(EMAILID_KEY);
       } catch (Exception e) {
         // ignore
       }
@@ -955,69 +983,69 @@ public class BulkExportMgr {
 
     public String toJSONString() throws JSONException {
       JSONObject json = new JSONObject();
-      json.put(TYPE, type);
+      json.put(TYPE_KEY, type);
       if (subType != null) {
-        json.put(SUBTYPE, subType);
+        json.put(SUBTYPE_TYPE, subType);
       }
       if (domainId != null) {
-        json.put(DOMAINID, domainId);
+        json.put(DOMAINID_KEY, domainId);
       }
       if (kioskId != null) {
-        json.put(KIOSKID, kioskId);
+        json.put(KIOSKID_KEY, kioskId);
       }
       if (materialId != null) {
-        json.put(MATERIALID, materialId);
+        json.put(MATERIALID_KEY, materialId);
       }
       if (locale != null) {
-        json.put(LANGUAGE, locale.getLanguage());
-        json.put(COUNTRY, locale.getCountry());
+        json.put(LANGUAGE_KEY, locale.getLanguage());
+        json.put(COUNTRY_KEY, locale.getCountry());
       }
       if (transactionType != null) {
-        json.put(TRANSACTIONTYPE, transactionType);
+        json.put(TRANSACTIONTYPE_KEY, transactionType);
       }
       if (lkioskId != null) {
-        json.put(LKIOSKID, lkioskId);
+        json.put(LKIOSKID_KEY, lkioskId);
       }
       if (timezone != null) {
-        json.put(TIMEZONE, timezone);
+        json.put(TIMEZONE_KEY, timezone);
       }
       if (userIds != null) {
-        json.put(USERIDS, userIds);
+        json.put(USERIDS_KEY, userIds);
       }
       if (userTags != null) {
-        json.put(USERTAGS, userTags);
+        json.put(USERTAGS_KEY, userTags);
       }
       if (sourceUserId != null) {
-        json.put(SOURCEUSERID, sourceUserId);
+        json.put(SOURCEUSERID_KEY, sourceUserId);
       }
       if (currency != null) {
-        json.put(CURRENCY, currency);
+        json.put(CURRENCY_KEY, currency);
       }
       if (gcsFilename != null) {
-        json.put(GCSFILENAME, gcsFilename);
+        json.put(GCSFILENAME_KEY, gcsFilename);
       }
       if (filename != null) {
-        json.put(FILENAME, filename);
+        json.put(FILENAME_KEY, filename);
       }
       if (from != null) {
-        json.put(FROM, from.getTime());
+        json.put(FROM_KEY, from.getTime());
       }
       if (to != null) {
-        json.put(TO, to.getTime());
+        json.put(TO_KEY, to.getTime());
       }
-      json.put(SIZE, size);
-      json.put(JOBID, jobId);
+      json.put(SIZE_KEY, size);
+      json.put(JOBID_KEY, jobId);
       if (assetId != null) {
-        json.put(ASSETID, assetId);
+        json.put(ASSETID_KEY, assetId);
       }
       if (asseTyNm != null) {
-        json.put(ASSETYPENAME, asseTyNm);
+        json.put(ASSETYPENAME_KEY, asseTyNm);
       }
       if (sensorName != null) {
-        json.put(SENSORNAME, sensorName);
+        json.put(SENSORNAME_KEY, sensorName);
       }
       if (emailId != null) {
-        json.put(EMAILID, emailId);
+        json.put(EMAILID_KEY, emailId);
       }
       return json.toString();
     }

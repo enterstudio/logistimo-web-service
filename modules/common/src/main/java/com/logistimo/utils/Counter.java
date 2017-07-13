@@ -42,6 +42,7 @@ public class Counter {
 
   private static final String TABLE_NAME = "TN";
   private static final String TAGS = "tgs";
+  private static final String EXCLUDED_TAGS = "extgs";
   private static final String K_ID = "kId";
   private static final String TK_ID = "tkId";
   private static final String USER_ID = "userId";
@@ -84,10 +85,14 @@ public class Counter {
     return getInstance(domainId, map);
   }
 
-  public static ICounter getKioskCounter(Long domainId, String tag) {
+  public static ICounter getKioskCounter(Long domainId, String tag, String exTag) {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put(OBJECT_TYPE, "kiosks");
-    map.put(TAGS, tag);
+    if(StringUtils.isNotEmpty(tag)){
+      map.put(TAGS, tag);
+    }else if(StringUtils.isNotEmpty(exTag)){
+      map.put(EXCLUDED_TAGS, exTag);
+    }
     return getInstance(domainId, map);
   }
 

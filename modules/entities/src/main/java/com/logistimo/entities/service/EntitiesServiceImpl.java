@@ -1188,16 +1188,16 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    * Find all kiosks with pagination
    */
   @SuppressWarnings("unchecked")
-  public Results getAllKiosks(Long domainId, String tag, PageParams pageParams) {
-    return entityDao.getAllKiosks(domainId, tag, pageParams);
+  public Results getAllKiosks(Long domainId, String tag, String excludedTag, PageParams pageParams) {
+    return entityDao.getAllKiosks(domainId, tag, excludedTag, pageParams);
   }
 
-  public Results getAllDomainKiosks(Long domainId, String tag, PageParams pageParams) {
-    return entityDao.getAllDomainKiosks(domainId, tag, pageParams);
+  public Results getAllDomainKiosks(Long domainId, String tags, String excludedTags, PageParams pageParams) {
+    return entityDao.getAllDomainKiosks(domainId, tags, excludedTags, pageParams);
   }
 
   public List<Long> getAllDomainKioskIds(Long domainId) {
-    Results res = entityDao.getAllDomainKiosks(domainId, null, null);
+    Results res = entityDao.getAllDomainKiosks(domainId, null, null, null);
     List<IKiosk> kiosks = res.getResults();
     if (kiosks == null) {
       return null;
@@ -1242,13 +1242,13 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
   /**
    * Get kiosks accessible/visible to a given user
    */
-  public Results getKiosks(IUserAccount user, Long domainId, String tag, PageParams pageParams)
+  public Results getKiosks(IUserAccount user, Long domainId, String tags, String excludedTags, PageParams pageParams)
       throws ServiceException { // TODO: pagination?
     xLogger.fine("Entered getKiosks");
-    Results results = null;
+    Results results;
     String role = user.getRole();
     if (SecurityUtil.compareRoles(role, SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
-      results = getAllKiosks(domainId, tag, pageParams);
+      results = getAllKiosks(domainId, tags, excludedTags, pageParams);
     } else {
       List<IKiosk> kiosks = (List<IKiosk>) getKiosksForUser(user,null,null).getResults();
       // When user object is not fetched as deep, fetch all users kiosk here
@@ -1259,24 +1259,28 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
         }
         kiosks = kiosksForUser.getResults();
       }
-      if (StringUtils.isNotBlank(tag)) {
-        List<String> tags;
-        if (tag.contains(CharacterConstants.COMMA)) {
-          tags = StringUtil.getList(tag, true);
+      if (StringUtils.isNotBlank(tags) || StringUtils.isNotBlank(excludedTags)) {
+        boolean isExcluded = StringUtils.isNotBlank(excludedTags);
+        String value = isExcluded ? excludedTags : tags;
+        List<String> tagsList;
+        if (value.contains(CharacterConstants.COMMA)) {
+          tagsList = StringUtil.getList(value, true);
         } else {
-          tags = Collections.singletonList(tag);
+          tagsList = Collections.singletonList(value);
         }
         Iterator<IKiosk> iter = kiosks.iterator();
         while (iter.hasNext()) {
           IKiosk k = iter.next();
           boolean found = false;
-          for (String t : tags) {
+          for (String t : tagsList) {
             if (k.getTags().contains(t)) {
               found = true;
               break;
             }
           }
-          if (!found) {
+          if (!isExcluded && !found) {
+            iter.remove();
+          }else if(isExcluded && found){
             iter.remove();
           }
         }
@@ -1436,7 +1440,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return hasAccess;
   }
 
-  // Get the kiosk IDs for a given user (and/or route tag)
+  // Get the kiosk IDs for a given user (and/or route tags)
   @SuppressWarnings("unchecked")
   public Results getKioskIdsForUser(String userId, String routeTag, PageParams pageParams)
       throws ServiceException {

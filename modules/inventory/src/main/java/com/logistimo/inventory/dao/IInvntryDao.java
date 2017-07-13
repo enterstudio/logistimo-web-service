@@ -153,7 +153,7 @@ public interface IInvntryDao {
                                            PersistenceManager pm);
 
   QueryParams buildInventoryQuery(Long kioskId, Long materialId, List<String> kioskTags,
-                                  String kioskTag,
+                                  List<String> excludedKioskTags,
                                   String materialTag, List<Long> kioskIds,
                                   PageParams pageParams, Long domainId,
                                   String materialNameStartsWith, int matType,
@@ -166,7 +166,8 @@ public interface IInvntryDao {
    * Get Inventory using the filters
    * @param kioskId - Entity Id
    * @param materialId - Material Id
-   * @param kioskTag - Entity tag
+   * @param kioskTag - Entity tags
+   * @param excludedKioskTag - Excluded Entity tags, Mutually exclusive with kioskTag
    * @param materialTag - Material tag
    * @param kioskIds - List of Entity ids
    * @param pageParams - Page params to limit offset
@@ -180,7 +181,7 @@ public interface IInvntryDao {
    * @return Inventory objects
    * @throws ServiceException
    */
-  Results getInventory(Long kioskId, Long materialId, String kioskTag,
+  Results getInventory(Long kioskId, Long materialId, String kioskTag, String excludedKioskTag,
                        String materialTag, List<Long> kioskIds,
                        PageParams pageParams, PersistenceManager pm, Long domainId,
                        String materialNameStartsWith, int matType, boolean onlyNonZeroStk,

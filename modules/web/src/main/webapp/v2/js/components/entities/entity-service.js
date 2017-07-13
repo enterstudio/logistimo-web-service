@@ -88,12 +88,14 @@ entityServices.factory('entityService', ['$http', function ($http) {
             }
             return this.fetch('/s2/api/entities/entity/' + entityId + '/vendors'+oParams);
         },
-        getAll: function (offset, size,tag, q, mt) {
+        getAll: function (offset, size,tag, q, mt, excludedTag) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
             var urlStr = "/s2/api/entities/?offset=" + offset + "&size=" + size;
             if (checkNotNullEmpty(tag)) {
                 urlStr = urlStr + "&tag=" + tag;
+            }else if(checkNotNullEmpty(excludedTag)){
+                urlStr = urlStr + "&extag=" + excludedTag;
             }
             if (checkNotNullEmpty(q)) {
                 urlStr = urlStr + "&q=" + q;

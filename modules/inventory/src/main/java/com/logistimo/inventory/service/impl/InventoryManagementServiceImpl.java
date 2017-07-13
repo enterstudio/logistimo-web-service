@@ -31,6 +31,7 @@ import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.QueryConstants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.utils.DomainsUtil;
@@ -93,6 +94,7 @@ import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.LockUtil;
 import com.logistimo.utils.QueryUtil;
+import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -305,7 +307,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(kioskId, null, null, materialTag, null, params, pm, null,
+          invntryDao.getInventory(kioskId, null, null, null, materialTag, null, params, pm, null,
               nameStartsWith,IInvntry.ALL,false,null, null);
     } finally {
       pm.close();
@@ -332,7 +334,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(null, materialId, kioskTag, null, kioskIds, params, pm,
+          invntryDao.getInventory(null, materialId, kioskTag, null, null, kioskIds, params, pm,
               domainId, null, IInvntry.ALL, false, null, null);
     } finally {
       pm.close();
@@ -342,7 +344,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
   @SuppressWarnings("unchecked")
   public Results getInventoryByBatchId(Long materialId, String batchId, PageParams pageParams,
-                                       Long domainId, LocationSuggestionModel location) throws ServiceException {
+       Long domainId, String kioskTags, String excludedKioskTags, LocationSuggestionModel location)
+      throws ServiceException {
     xLogger.fine("Entered getInventoryByBatch");
     if (materialId == null || batchId == null || batchId.isEmpty()) {
       throw new IllegalArgumentException(
@@ -353,44 +356,66 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     StringBuilder locSubQuery = new StringBuilder();
     String kioskVariableDeclaration = CharacterConstants.EMPTY;
     StringBuilder locationParamDeclaration = new StringBuilder();
-      if (location != null && location.isNotEmpty()) {
-          kioskVariableDeclaration = " VARIABLES " + JDOUtils.getImplClass(IKiosk.class).getName() + " kiosk";
-          locSubQuery.append(" && kId == kiosk.kioskId");
-          if (StringUtils.isNotEmpty(location.state)) {
-              locSubQuery.append(" && kiosk.state == stateParam");
-              params.put("stateParam", location.state);
-              locationParamDeclaration.append(", String stateParam");
-          }
-          if (StringUtils.isNotEmpty(location.district)) {
-              locSubQuery.append(" && kiosk.district == districtParam");
-              params.put("districtParam", location.district);
-              locationParamDeclaration.append(", String districtParam");
-          }
-          if (StringUtils.isNotEmpty(location.taluk)) {
-              locSubQuery.append(" && kiosk.taluk == talukParam");
-              params.put("talukParam", location.taluk);
-              locationParamDeclaration.append(", String talukParam");
-          }
+    if (location != null && location.isNotEmpty()) {
+      kioskVariableDeclaration =
+          " VARIABLES " + JDOUtils.getImplClass(IKiosk.class).getName() + " kiosk";
+      locSubQuery.append(" && kId == kiosk.kioskId");
+      if (StringUtils.isNotEmpty(location.state)) {
+        locSubQuery.append(" && kiosk.state == stateParam");
+        params.put("stateParam", location.state);
+        locationParamDeclaration.append(", String stateParam");
       }
-      String queryStr =
-              "SELECT FROM "
-                      + JDOUtils.getImplClass(IInvntryBatch.class).getName()
-                      + " WHERE dId.contains(dIdParam) && mId == mIdParam && bid == bidParam && vld == vldParam && bexp >= bexpParam"
-                      + locSubQuery.toString();
-      String declaration =
-              " PARAMETERS Long dIdParam, Long mIdParam, String bidParam, Boolean vldParam, Date bexpParam"
-                      + locationParamDeclaration.toString()
-                      + " import java.util.Date;";
+      if (StringUtils.isNotEmpty(location.district)) {
+        locSubQuery.append(" && kiosk.district == districtParam");
+        params.put("districtParam", location.district);
+        locationParamDeclaration.append(", String districtParam");
+      }
+      if (StringUtils.isNotEmpty(location.taluk)) {
+        locSubQuery.append(" && kiosk.taluk == talukParam");
+        params.put("talukParam", location.taluk);
+        locationParamDeclaration.append(", String talukParam");
+      }
+    }
+    StringBuilder queryStr = new StringBuilder(
+        "SELECT FROM "
+            + JDOUtils.getImplClass(IInvntryBatch.class).getName()
+            + " WHERE dId.contains(dIdParam) && mId == mIdParam && bid == bidParam && vld == vldParam && bexp >= bexpParam"
+            + locSubQuery.toString());
+    String
+        declaration =
+        " PARAMETERS Long dIdParam, Long mIdParam, String bidParam, Boolean vldParam, Date bexpParam"
+            + locationParamDeclaration.toString();
     String ordering = " ORDER BY bexp ASC";
     params.put("mIdParam", materialId);
     params.put("bidParam", batchId);
     params.put("vldParam", Boolean.TRUE);
     params.put("dIdParam", domainId);
+    if (StringUtils.isNotEmpty(kioskTags) || StringUtils.isNotEmpty(excludedKioskTags)) {
+      boolean isExcluded = StringUtils.isNotEmpty(excludedKioskTags);
+      String value = isExcluded ? excludedKioskTags : kioskTags;
+      List<String> tags = StringUtil.getList(value, true);
+      queryStr.append(QueryConstants.AND).append(CharacterConstants.O_BRACKET);
+      int i = 0;
+      for (String iTag : tags) {
+        String tagParam = "kTgsParam" + (++i);
+        if (i != 1) {
+          queryStr.append(isExcluded ? QueryConstants.AND : QueryConstants.OR)
+              .append(CharacterConstants.SPACE);
+        }
+        queryStr.append(isExcluded ? QueryConstants.NEGATION
+            : CharacterConstants.EMPTY).append("ktgs").append(QueryConstants.DOT_CONTAINS)
+            .append(tagParam).append(CharacterConstants.C_BRACKET).append(CharacterConstants.SPACE);
+        declaration += ", Long " + tagParam;
+        params.put(tagParam, tagDao.getTagFilter(iTag, ITag.KIOSK_TAG));
+      }
+      queryStr.append(CharacterConstants.C_BRACKET);
+    }
+    declaration += " import java.util.Date;";
     Calendar cal = LocalDateUtil.getZeroTime(DomainConfig.getInstance(domainId).getTimezone());
     params.put("bexpParam", cal.getTime());
-    queryStr += (kioskVariableDeclaration + declaration + ordering);
+    queryStr.append(kioskVariableDeclaration).append(declaration).append(ordering);
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    Query q = pm.newQuery(queryStr);
+    Query q = pm.newQuery(queryStr.toString());
     if (pageParams != null) {
       QueryUtil.setPageParams(q, pageParams);
     }
@@ -419,7 +444,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   // Get inv. batches that are expiring within a specified time
   @SuppressWarnings("unchecked")
   public Results getInventoryByBatchExpiry(Long domainId, Long materialId, Date start, Date end,
-                                           String kioskTag, String materialTag, LocationSuggestionModel location,
+                                           String kioskTags, String excludedKioskTags, String materialTag,
+                                           LocationSuggestionModel location,
                                            PageParams pageParams) throws ServiceException {
     xLogger.fine("Entered getInventoryByBatchExpiry");
     if (domainId == null && materialId == null) {
@@ -455,47 +481,74 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         locationParamDeclaration.append(", String talukParam");
       }
     }
-    String queryStr =
-        "SELECT FROM "
+    StringBuilder queryStr =
+        new StringBuilder("SELECT FROM "
             + JDOUtils.getImplClass(IInvntryBatch.class).getName()
-            + " WHERE vld == vldParam";
+            + " WHERE vld == vldParam");
     String declaration = "Boolean vldParam";
     String ordering = " import java.util.Date; ORDER BY bexp ASC";
     params.put("vldParam", Boolean.TRUE);
     if (materialId != null) {
-      queryStr += " && mId == mIdParam";
+      queryStr.append(" && mId == mIdParam");
       declaration += ", Long mIdParam";
       params.put("mIdParam", materialId);
     }
     if (domainId != null) {
-      queryStr += " && dId.contains(dIdParam)";
+      queryStr.append(" && dId.contains(dIdParam)");
       declaration += ", Long dIdParam";
       params.put("dIdParam", domainId);
     }
     if (start != null) {
-      queryStr += " && bexp > startParam";
+      queryStr.append(" && bexp > startParam");
       declaration += ", Date startParam";
       params.put("startParam", LocalDateUtil.getOffsetDate(start, -1, Calendar.MILLISECOND));
     }
     if (end != null) {
-      queryStr += " && bexp < endParam";
+      queryStr.append(" && bexp < endParam");
       declaration += ", Date endParam";
       params.put("endParam", end);
     }
-    if (kioskTag != null && !kioskTag.isEmpty()) {
-      queryStr += " && ktgs.contains(ktgsParam)";
-      declaration += ", Long ktgsParam";
-      params.put("ktgsParam", tagDao.getTagFilter(kioskTag, ITag.KIOSK_TAG));
+    if (StringUtils.isNotEmpty(kioskTags) || StringUtils.isNotEmpty(excludedKioskTags)) {
+      boolean isExcluded = StringUtils.isNotEmpty(excludedKioskTags);
+      String value = isExcluded ? excludedKioskTags : kioskTags;
+      List<String> tags = StringUtil.getList(value, true);
+      queryStr.append(QueryConstants.AND).append(CharacterConstants.O_BRACKET);
+      int i = 0;
+      for (String iTag : tags) {
+        String tagParam = "kTgsParam" + (++i);
+        if (i != 1) {
+          queryStr.append(isExcluded ? QueryConstants.AND : QueryConstants.OR)
+              .append(CharacterConstants.SPACE);
+        }
+        queryStr
+            .append(isExcluded ? QueryConstants.NEGATION
+                : CharacterConstants.EMPTY).append("ktgs").append(QueryConstants.DOT_CONTAINS)
+            .append(tagParam).append(CharacterConstants.C_BRACKET).append(CharacterConstants.SPACE);
+        declaration += ", Long " + tagParam;
+        params.put(tagParam, tagDao.getTagFilter(iTag, ITag.KIOSK_TAG));
+      }
+      queryStr.append(CharacterConstants.C_BRACKET);
     }
-    if (materialTag != null && !materialTag.isEmpty()) {
-      queryStr += " && mtgs.contains(mtgsParam)";
-      declaration += ", Long mtgsParam";
-      params.put("mtgsParam", tagDao.getTagFilter(materialTag, ITag.MATERIAL_TAG));
+    if (StringUtils.isNotEmpty(materialTag)) {
+      List<String> tags = StringUtil.getList(materialTag, true);
+      queryStr.append(QueryConstants.AND).append(CharacterConstants.O_BRACKET);
+      int i = 0;
+      for (String iTag : tags) {
+        String tagParam = "mTgsParam" + (++i);
+        if (i != 1) {
+          queryStr.append(QueryConstants.OR).append(CharacterConstants.SPACE);
+        }
+        queryStr.append("mtgs").append(QueryConstants.DOT_CONTAINS)
+            .append(tagParam).append(CharacterConstants.C_BRACKET).append(CharacterConstants.SPACE);
+        declaration += ", Long " + tagParam;
+        params.put(tagParam, tagDao.getTagFilter(iTag, ITag.MATERIAL_TAG));
+      }
+      queryStr.append(CharacterConstants.C_BRACKET);
     }
     declaration += locationParamDeclaration.toString();
-    queryStr += locSubQuery.toString()+kioskVariableDeclaration + " PARAMETERS " + declaration + ordering;
+    queryStr.append(locSubQuery.toString()+kioskVariableDeclaration + " PARAMETERS " + declaration + ordering);
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    Query q = pm.newQuery(queryStr);
+    Query q = pm.newQuery(queryStr.toString());
     if (pageParams != null) {
       QueryUtil.setPageParams(q, pageParams);
     }
@@ -1852,18 +1905,18 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   private Results getInventoryByIds(Long kioskId, Long materialId, String kioskTag,
                                     String materialTag, List<Long> kioskIds, PageParams pageParams,
                                     PersistenceManager pm) throws ServiceException {
-    return invntryDao.getInventory(kioskId, materialId, kioskTag, materialTag, kioskIds, pageParams,
+    return invntryDao.getInventory(kioskId, materialId, kioskTag, null, materialTag, kioskIds, pageParams,
         pm, null, null,IInvntry.ALL,false,null, null);
   }
 
-  public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location, String kioskTags, String materialTag, String pdos, PageParams params)
+  public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location, String kioskTags, String excludedKioskTags, String materialTags, String pdos, PageParams params)
           throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
-        return invntryDao.getInventory(null, null, kioskTags, materialTag, null, params, pm, domainId,
+        return invntryDao.getInventory(null, null, kioskTags, excludedKioskTags, materialTags, null, params, pm, domainId,
                         null,IInvntry.ALL,false,location, pdos);
     } finally {
-        pm.close();
+      pm.close();
     }
   }
 
@@ -3597,14 +3650,15 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return true;
   }
 
-  public Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTag,
+  public Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTags, String excludedKioskTags,
                               Long materialId, String materialTag, int matType,
-                              boolean onlyNonZeroStk, String pdos, LocationSuggestionModel location, PageParams params) throws ServiceException {
+                              boolean onlyNonZeroStk, String pdos, LocationSuggestionModel location,
+                              PageParams params) throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(kioskId, materialId, kioskTag, materialTag, kioskIds, params, pm, domainId,
+          invntryDao.getInventory(kioskId, materialId, kioskTags, excludedKioskTags, materialTag, kioskIds, params, pm, domainId,
               null,matType,onlyNonZeroStk,location, pdos);
     } finally {
       pm.close();

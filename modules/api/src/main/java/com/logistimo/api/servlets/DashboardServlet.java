@@ -295,7 +295,7 @@ public class DashboardServlet extends JsonRestServlet {
       Results results = null;
       EntitiesService as = Services.getService(EntitiesServiceImpl.class);
       if (SecurityUtil.compareRoles(u.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
-        results = as.getAllKiosks(domainId, null, pageParams);
+        results = as.getAllKiosks(domainId, null, null, pageParams);
       } else {
         results = as.getKiosksForUser(u, null, pageParams);
       }

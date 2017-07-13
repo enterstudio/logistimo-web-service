@@ -50,13 +50,19 @@ import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.QueryUtil;
+
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * @author Arun
@@ -261,8 +267,9 @@ public class StockEventDataGenerator implements ReportDataGenerator {
     Long domainId = (Long) filters.get(ReportsConstants.FILTER_DOMAIN);
     Long kioskId = (Long) filters.get(ReportsConstants.FILTER_KIOSK);
     Long materialId = (Long) filters.get(ReportsConstants.FILTER_MATERIAL);
-    String kioskTag = (String) filters.get(ReportsConstants.FILTER_KIOSKTAG);
-    String materialTag = (String) filters.get(ReportsConstants.FILTER_MATERIALTAG);
+    String kioskTags = (String) filters.get(ReportsConstants.FILTER_KIOSKTAG);
+    String excludedKioskTags = (String) filters.get(ReportsConstants.FILTER_EXCLUDED_KIOSKTAG);
+    String materialTags = (String) filters.get(ReportsConstants.FILTER_MATERIALTAG);
     LocationSuggestionModel location = (LocationSuggestionModel) filters.get(ReportsConstants.FILTER_LOCATION);
     boolean outstandingEvents = filters.get(ReportsConstants.FILTER_LATEST) != null;
     boolean ascendingOrder =
@@ -309,19 +316,40 @@ public class StockEventDataGenerator implements ReportDataGenerator {
           .append(domainId)
           .append(" IN (SELECT DOMAIN_ID FROM INVNTRY_DOMAINS ID WHERE ID.KEY_OID = INV.KEY)");
     }
-    // Tags, if any
-    if (materialId == null && materialTag != null && !materialTag.isEmpty()) {
-      filterStr
-          .append(" AND '")
-          .append(materialTag)
-          .append(
-                  "' IN (SELECT T.NAME FROM MATERIAL_TAGS MT INNER JOIN TAG T WHERE MT.MATERIALID = INV.MID AND T.ID = MT.ID)");
-    } else if (kioskId == null && kioskTag != null && !kioskTag.isEmpty()) {
-      filterStr
-          .append(" AND '")
-          .append(kioskTag)
-          .append(
-                  "' IN (SELECT T.NAME FROM KIOSK_TAGS KT INNER JOIN TAG T WHERE KT.KIOSKID = INV.KID AND T.ID = KT.ID)");
+    // Material tags, if any
+    if (materialId == null && StringUtils.isNotEmpty(materialTags)) {
+      String[] mTags = StringUtils.split(materialTags,CharacterConstants.COMMA);
+      if(mTags.length>0){
+        filterStr.append(" AND INV.MID IN (SELECT MATERIALID FROM MATERIAL_TAGS WHERE ID IN (")
+            .append("SELECT ID FROM TAG WHERE NAME IN (");
+        for (int i = 0; i < mTags.length; i++) {
+          String mTag = mTags[i];
+          filterStr.append(i > 0 ? CharacterConstants.COMMA : CharacterConstants.EMPTY)
+              .append(CharacterConstants.S_QUOTE).append(mTag).append(CharacterConstants.S_QUOTE);
+        }
+        filterStr.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET).append(
+            CharacterConstants.C_BRACKET);
+      }
+    }
+    // Kiosk tags, if any
+    if (kioskId == null && (StringUtils.isNotEmpty(kioskTags) || StringUtils
+        .isNotEmpty(excludedKioskTags))) {
+      boolean isExcluded = StringUtils.isNotEmpty(excludedKioskTags);
+      String tags = isExcluded ? excludedKioskTags : kioskTags;
+      String[] kTags = StringUtils.split(tags,CharacterConstants.COMMA);
+      if(kTags != null && kTags.length>0){
+        filterStr.append(" AND INV.KID ")
+            .append(isExcluded ? " NOT " : CharacterConstants.EMPTY)
+            .append(" IN (SELECT KIOSKID FROM KIOSK_TAGS WHERE ID IN (")
+            .append("SELECT ID FROM TAG WHERE NAME IN (");
+        for (int i = 0; i < kTags.length; i++) {
+          String kTag = kTags[i];
+          filterStr.append(i > 0 ? CharacterConstants.COMMA : CharacterConstants.EMPTY)
+              .append(CharacterConstants.S_QUOTE).append(kTag).append(CharacterConstants.S_QUOTE);
+        }
+        filterStr.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET).append(
+            CharacterConstants.C_BRACKET);
+      }
     }
     // Add from date
     if (from != null) {

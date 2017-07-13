@@ -315,7 +315,7 @@ public class TransactionsController {
       model.isMan = SecurityConstants.ROLE_SERVICEMANAGER.equals(role);
 //            if (!model.isMan) {
       IUserAccount u = us.getUserAccount(userId);
-      List dest = as.getKiosks(u, domainId, null, null).getResults();
+      List dest = as.getKiosks(u, domainId, null, null, null).getResults();
       model.dest = constructKioskMap(as, dest);
 //            }
       ActualTransConfig atci = ic.getActualTransConfigByType(ITransaction.TYPE_ISSUE);

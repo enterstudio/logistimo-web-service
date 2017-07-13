@@ -56,6 +56,7 @@ public class LocationConstants {
   public static final String LAT_LITERAL = "latitude";
   public static final String LONG_LITERAL = "longitude";
   public static final String ZIP_LITERAL = "pincode";
+  public static final String STREET_LITERAL = "street";
   public static final String KIOSKID_LITERAL = "kioskId";
   public static final String USERID_LITERAL = "userId";
   public static final String USER_TYPE_LITERAL = "user";
