@@ -2414,7 +2414,7 @@ public class CreateEntityServlet extends SgServlet {
                            ResourceBundle messages) throws ServiceException, IOException {
     Map<String, String[]> kioskDetails = req.getParameterMap();
     kioskDetails = cleanMap(kioskDetails);
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(req.getSession());
+    SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
 
     // Get the domain Id
     String domainIdStr = req.getParameter("domainid");
