@@ -1526,11 +1526,11 @@ public class RESTUtil {
       //Min Max Frequency
       String minMaxFreq = ic.getMinMaxDur();
       if (minMaxFreq != null && !minMaxFreq.isEmpty()) {
-        if (ic.FREQ_DAILY.equals(minMaxFreq)) {
+        if (InventoryConfig.FREQ_DAILY.equals(minMaxFreq)) {
           config.put(JsonTagsZ.MINMAX_FREQUENCY, 'd');
-        } else if (ic.FREQ_WEEKLY.equals(minMaxFreq)) {
+        } else if (InventoryConfig.FREQ_WEEKLY.equals(minMaxFreq)) {
           config.put(JsonTagsZ.MINMAX_FREQUENCY, 'w');
-        } else if (ic.FREQ_MONTHLY.equals(minMaxFreq)) {
+        } else if (InventoryConfig.FREQ_MONTHLY.equals(minMaxFreq)) {
           config.put(JsonTagsZ.MINMAX_FREQUENCY, 'm');
         }
       }
@@ -2185,7 +2185,7 @@ public class RESTUtil {
     if (oc != null) {
       ordCfg.put(JsonTagsZ.TRANSFER_RELEASE, oc.isTransferRelease());
       // Configuration for automatic allocation and material status assignment to order
-      ordCfg.put(JsonTagsZ.AUTO_ALLOCATE_INVENTORY_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
+      ordCfg.put(JsonTagsZ.AUTO_ALLOCATE_INVENTORY_TO_ORDERS, oc.allocateStockOnConfirmation());
       ordCfg.put(JsonTagsZ.AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
     }
     if (dc.isTransporterMandatory()) {
