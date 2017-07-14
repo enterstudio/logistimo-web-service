@@ -60,6 +60,7 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.utils.ConfigUtil;
+import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.codec.binary.Hex;
@@ -612,7 +613,7 @@ public class TransactionUtil {
                 trans.getType(), index);
             throw new LogiException("M010", (Object[]) null);
           }
-          if (trans.getQuantity(true) == null) {
+          if (BigUtil.equals(trans.getQuantity(),BigDecimal.ZERO)) {
             xLogger.warn("Missing or invalid quantity at index {0}", index);
             throw new LogiException("M010", (Object[]) null);
           }
