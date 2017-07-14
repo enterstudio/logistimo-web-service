@@ -35,60 +35,59 @@ entityServices.factory('entityService', ['$http', function ($http) {
         get: function (entityId) {
             return this.fetch('/s2/api/entities/entity/' + entityId);
         },
-        getLinksCount: function (entityId,searchkey) {
+        getLinksCount: function (entityId,searchkey,linkedEntityId,entityTag) {
             var oParams = "";
             if(typeof searchkey !== 'undefined') {
                 oParams += "?q=" + searchkey;
             }
+            if(typeof linkedEntityId !== 'undefined') {
+                oParams += (oParams == '' ? "?" : "&") + "linkedEntityId=" + linkedEntityId;
+            }
+            if(typeof entityTag !== 'undefined') {
+                oParams += (oParams == '' ? "?" : "&") + "entityTag=" + entityTag;
+            }
             return this.fetch('/s2/api/entities/entity/linkscount/' + entityId + oParams);
         },
-        getCustomers: function (entityId,size,offset,searchkey) {
+        getCustomers: function (entityId,size,offset,searchkey,linkedEntityId,entityTag) {
             var oParams = "";
             if(typeof offset !== 'undefined'){
                 oParams += "?offset=" + offset.toString();
             }
             if(typeof size !== 'undefined'){
-                if(oParams == ''){
-                    oParams +="?";
-                }else{
-                    oParams +="&";
-                }
-                oParams += "size=" + size.toString();
+                oParams += (oParams == '' ? "?" : "&") + "size=" + size.toString();
             }
             if(typeof searchkey !== 'undefined') {
-                if(oParams == ''){
-                    oParams += "?";
-                }else{
-                    oParams += "&";
-                }
-                oParams += "q=" + searchkey;
+                oParams += (oParams == '' ? "?" : "&") + "q=" + searchkey;
+            }
+            if(typeof linkedEntityId !== 'undefined') {
+                oParams += (oParams == '' ? "?" : "&") + "linkedEntityId=" + linkedEntityId;
+            }
+            if(typeof entityTag !== 'undefined') {
+                oParams += (oParams == '' ? "?" : "&") + "entityTag=" + entityTag;
             }
             return this.fetch('/s2/api/entities/entity/' + entityId + '/customers' + oParams);
         },
-        getVendors: function (entityId,size,offset,searchKey) {
+        getVendors: function (entityId,size,offset,searchKey,linkedEntityId,entityTag) {
             var oParams = "";
             if(typeof offset !== 'undefined'){
                 oParams += "?offset=" + offset.toString();
             }
             if(typeof size !== 'undefined'){
-                if(oParams == ''){
-                    oParams +="?";
-                }else{
-                    oParams +="&";
-                }
-                oParams += "size=" + size.toString();
+                oParams += (oParams == '' ? "?" : "&") + "size=" + size.toString();
             }
             if(typeof searchKey !== 'undefined') {
-                if(oParams == ''){
-                    oParams += "?";
-                }else{
-                    oParams += "&";
-                }
-                oParams += "q=" + searchKey;
+                oParams += (oParams == '' ? "?" : "&") + "q=" + searchKey;
             }
+            if(typeof linkedEntityId !== 'undefined') {
+                oParams += (oParams == '' ? "?" : "&") + "linkedEntityId=" + linkedEntityId;
+            }
+            if(typeof entityTag !== 'undefined') {
+                oParams += (oParams == '' ? "?" : "&") + "entityTag=" + entityTag;
+            }
+
             return this.fetch('/s2/api/entities/entity/' + entityId + '/vendors'+oParams);
         },
-        getAll: function (offset, size,tag, q, mt, excludedTag) {
+        getAll: function (offset, size,tag, q, mt, excludedTag, linkedEntityId) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
             var urlStr = "/s2/api/entities/?offset=" + offset + "&size=" + size;
@@ -102,6 +101,9 @@ entityServices.factory('entityService', ['$http', function ($http) {
             }
             if(checkNotNullEmpty(mt)) {
                 urlStr = urlStr + "&mt=" + mt;
+            }
+            if(checkNotNullEmpty(linkedEntityId)) {
+                urlStr = urlStr + "&linkedEntityId=" + linkedEntityId;
             }
             return this.fetch(urlStr);
         },
@@ -172,12 +174,7 @@ entityServices.factory('entityService', ['$http', function ($http) {
                 oParams += "?offset=" + offset.toString();
             }
             if(typeof size !== 'undefined'){
-                if(oParams == ''){
-                    oParams +="?";
-                }else{
-                    oParams +="&";
-                }
-                oParams += "size=" + size.toString();
+                oParams += (oParams == '' ? "?" : "&") + "size=" + size.toString();
             }
             return this.fetch('/s2/api/entities/user/' + userId + oParams);
         },

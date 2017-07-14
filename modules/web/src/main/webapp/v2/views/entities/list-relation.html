@@ -24,26 +24,6 @@
 <div class="box topbox">
 <div class="bizinfo bizinfo-last">
 <div ng-controller="RelationListController">
-    <div class="filter-box form-group">
-        <div class="row">
-            <div class="col-sm-3">
-                <span class="filter-label">{{resourceBundle['kiosks']}}</span>
-                <div class="input-group">
-                    <input type="text" class="form-control" ng-model="searchkey" name="searchkey" maxlength="50"
-                           ng-disabled="vw == 'm'"
-                           placeholder="{{resourceBundle['filterby']}} {{resourceBundle['kiosks.lower']}}"
-                           ng-enter="searchEntity()">
-							<span class="input-group-btn">
-							<button class="btn btn-default" ng-click="searchEntity()" type="button"
-                                    ng-disabled="(searchkey == null && searchkey == '')"
-                                    uib-tooltip="{{resourceBundle['search']}}">
-                                <span class="glyphicons glyphicons-search"></span>
-                            </button>
-							</span>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row action-bar">
             <div class=" bizinfo-last" ng-hide="hideAllRelActions">
                 <a href="#/setup/entities/detail/{{entityId}}/relationships/add" class="btn btn-sm btn-primary" ng-show="iSU || (dp.era && perm > 1)">{{resourceBundle['add']}}</a>
@@ -67,7 +47,26 @@
             </div>
         </div>
     </div>
-    <div class="noLRpad tab-pane nb">
+    <div class="filter-box form-group">
+        <div class="row">
+            <div class="col-sm-1 cbx">
+                <span class="filter-label">{{resourceBundle.kiosk}}</span>
+            </div>
+            <div class="col-sm-3">
+                <entity-select ent-model="ent" classes="form-control"
+                               place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
+                </entity-select>
+            </div>
+            <div class="col-sm-3 cbx">
+                <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                <tag-filter ng-model="eTag" tag-type="entity"></tag-filter>
+            </div>
+            <div class="pull-right">
+                <button type="button" class="btn btn-sm btn-default" ng-click="resetFetch()">{{resourceBundle['reset']}}</button>
+            </div>
+        </div>
+    </div>
+    <div class="noLRpad tab-pane nb pt10">
         <div class="row">
             <div class="col-sm-12">
                 <div ng-show="isDef(allRTags)" class="col-sm-2">

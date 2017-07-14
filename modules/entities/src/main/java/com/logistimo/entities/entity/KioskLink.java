@@ -30,6 +30,8 @@ import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.utils.NumberUtil;
 import com.logistimo.logger.XLog;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -198,7 +200,9 @@ public class KioskLink implements IKioskLink {
 
   @Override
   public void setLinkedKioskName(String linkedKioskName) {
-    lknm = linkedKioskName.toLowerCase();
+    if(StringUtils.isNotEmpty(linkedKioskName)) {
+      lknm = linkedKioskName.toLowerCase();
+    }
   }
 
   @Override

@@ -1921,6 +1921,12 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return linkIds;
   }
 
+  public Results getKioskLinks(Long kioskId, String linkType, String routeTag, String startsWith,
+                               PageParams pageParams)
+      throws ServiceException {
+    return getKioskLinks(kioskId, linkType, routeTag, startsWith, pageParams, false, null, null);
+  }
+
   /**
    * Get the kiosk links for a given kiosk and specific type of link (e.g. VENDOR, CUSTOMER)
    *
@@ -1930,10 +1936,9 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    */
   @SuppressWarnings("unchecked")
   public Results getKioskLinks(Long kioskId, String linkType, String routeTag,
-                               String startsWith, PageParams pageParams) throws ServiceException {
+                               String startsWith, PageParams pageParams, Boolean isCountOnly, Long linkedKioskId, String entityTag) throws ServiceException {
     xLogger.fine("Entering getKioskLinks");
     List<IKioskLink> links = null;
-    String cursor = null;
     if (kioskId == null) {
       throw new ServiceException("Invalid kiosk Id");
     }
@@ -1945,36 +1950,13 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       // Get the Kiosk object for the specified kiosk id
       IKiosk k = JDOUtils.getObjectById(IKiosk.class, kioskId, pm);
       isRteEnabled = k.isRouteEnabled(linkType);
-      String sqlQuery;
-      String orderBy;
+      String orderBy = Constants.EMPTY;
       String limitStr = null;
-      List<String> parameters = new ArrayList<>(2);
-      parameters.add(String.valueOf(kioskId));
-      parameters.add(linkType);
-      if (isRteEnabled || hasRouteTag) {
-        sqlQuery = "select KL.*,KL.`KEY` as `KEY` from KIOSKLINK KL where KL.KIOSKID = ? and "
-            + "KL.LINKTYPE = ?";
-        if (hasRouteTag) {
-          sqlQuery += " AND KL.RTG = ?";
-          parameters.add(routeTag);
-        }
-        if (StringUtils.isNotEmpty(startsWith)) {
-          sqlQuery += " AND K.NNAME like ?";
-          parameters.add(startsWith.toLowerCase() + "%");
-        }
-        orderBy = " ORDER BY KL.RI";
-      } else {
-        sqlQuery =
-            "select KL.*,KL.`KEY` as `KEY` from KIOSKLINK KL, KIOSK K where KL.KIOSKID = ? AND "
-                + "KL.LINKTYPE = ? and KL.LINKEDKIOSKID = K.KIOSKID";
-        if (StringUtils.isNotEmpty(startsWith)) {
-          sqlQuery += " AND K.NNAME like ?";
-          parameters.add(startsWith.toLowerCase() + "%");
-        }
-        orderBy = " ORDER BY K.NAME";
-      }
-      sqlQuery += orderBy;
-      if (pageParams != null) {
+      QueryParamsMetaData
+          queryParams = getKioskLinkQuery(isRteEnabled, hasRouteTag, routeTag, startsWith, linkedKioskId, entityTag, kioskId, linkType);
+      String sqlQuery = queryParams.query;
+      List<String> parameters = queryParams.parameters;
+      if (pageParams != null && linkedKioskId == null) {
         limitStr =
             " LIMIT " + pageParams.getOffset() + CharacterConstants.COMMA + pageParams.getSize();
         sqlQuery += limitStr;
@@ -1982,14 +1964,16 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       Query query = null;
       Query cntQuery = null;
       try {
-        query = pm.newQuery("javax.jdo.query.SQL", sqlQuery);
-        query.setClass(KioskLink.class);
-        links = (List<IKioskLink>) query.executeWithArray(parameters.toArray());
-        links.size();
-        links = (List<IKioskLink>) pm.detachCopyAll(links);
+        if(!isCountOnly) {
+          query = pm.newQuery("javax.jdo.query.SQL", sqlQuery);
+          query.setClass(KioskLink.class);
+          links = (List<IKioskLink>) query.executeWithArray(parameters.toArray());
+          links.size();
+          links = (List<IKioskLink>) pm.detachCopyAll(links);
+        }
         String
             cntQueryStr =
-            sqlQuery.replace("KL.*,KL.`KEY` as `KEY`", QueryConstants.ROW_COUNT)
+            sqlQuery.replace("KL.`KEY` AS `KEY`, KL.*", QueryConstants.ROW_COUNT)
                 .replace(orderBy, CharacterConstants.EMPTY);
         if (StringUtils.isNotEmpty(limitStr)) {
           cntQueryStr = cntQueryStr.replace(limitStr, CharacterConstants.EMPTY);
@@ -2015,6 +1999,46 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     }
     xLogger.fine("Exiting getKioskLinks");
     return new Results(links, null, count, pageParams!=null?pageParams.getOffset():0);
+  }
+
+  private QueryParamsMetaData getKioskLinkQuery(Boolean isRouteEnabled, Boolean hasRouteTag, String routeTag,
+                                      String startsWith, Long linkedKioskId, String entityTag,
+                                      Long kioskId, String linkType) {
+    String orderBy;
+    String
+        sqlQuery =
+        "SELECT KL.`KEY` AS `KEY`, KL.* FROM KIOSKLINK KL,KIOSK K WHERE KL.KIOSKID = ? AND "
+            + "KL.LINKTYPE = ? AND KL.LINKEDKIOSKID = K.KIOSKID";
+    List<String> parameters = new ArrayList<>();
+    parameters.add(String.valueOf(kioskId));
+    parameters.add(linkType);
+
+    if (isRouteEnabled || hasRouteTag) {
+      if (hasRouteTag) {
+        sqlQuery += " AND KL.RTG = ?";
+        parameters.add(routeTag);
+      }
+      orderBy = " ORDER BY KL.RI";
+    } else {
+      orderBy = " ORDER BY K.NAME";
+    }
+    if (StringUtils.isNotEmpty(startsWith)) {
+      sqlQuery += " AND K.NNAME like ?";
+      parameters.add(startsWith.toLowerCase() + "%");
+    } else if (linkedKioskId != null) {
+      sqlQuery += " AND KL.LINKEDKIOSKID = ?";
+      parameters.add(String.valueOf(linkedKioskId));
+    } else if (StringUtils.isNotEmpty(entityTag)) {
+      sqlQuery +=
+          " AND KL.LINKEDKIOSKID IN (SELECT KIOSKID FROM KIOSK_TAGS WHERE ID IN (SELECT ID FROM TAG WHERE NAME = ? AND TYPE = "
+              + ITag.KIOSK_TAG + "))";
+      parameters.add(entityTag);
+    }
+    sqlQuery += orderBy;
+    QueryParamsMetaData queryParams = new QueryParamsMetaData();
+    queryParams.query = sqlQuery;
+    queryParams.parameters = parameters;
+    return queryParams;
   }
 
   /**
@@ -3058,6 +3082,10 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       pm.close();
     }
     return null;
+  }
+  private class QueryParamsMetaData {
+    private String query;
+    private List<String> parameters;
   }
 
 }
