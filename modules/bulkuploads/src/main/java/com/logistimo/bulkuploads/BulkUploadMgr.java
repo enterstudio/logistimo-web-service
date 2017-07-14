@@ -152,13 +152,14 @@ public class BulkUploadMgr {
 
   private static final String MAX_LENGTH_MSG = " cannot be greater than ";
   private static final String CHARACTERS = " characters";
-  private static final String TEXT_FIELD_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.TEXT_FIELD_MAX_LENGTH + CHARACTERS;
-  private static final String MOBILE_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MOBILE_PHONE_MAX_LENGTH + CHARACTERS;
-  private static final String EMAIL_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.EMAIL_MAX_LENGTH + CHARACTERS;
+  private static final String TEXT_FIELD_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.TEXT_FIELD_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String MOBILE_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MOBILE_PHONE_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String LAND_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.LAND_PHONE_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String EMAIL_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.EMAIL_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
   private static final String MATERIAL_SHORT_NAME_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_SHORTNAME_MAX_LENGTH + CHARACTERS;
-  private static final String MATERIAL_DESC_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH + CHARACTERS;
-  private static final String MATERIAL_ADD_INFO_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH + CHARACTERS;
-  private static final String STREET_ADDRESS_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.STREET_ADDRESS_MAX_LENGTH + CHARACTERS;
+  private static final String MATERIAL_DESC_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String MATERIAL_ADD_INFO_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String STREET_ADDRESS_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.STREET_ADDRESS_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
 
   // Get the display name of a given type
   public static String getDisplayName(String type, Locale locale) {
@@ -1333,7 +1334,7 @@ public class BulkUploadMgr {
           if (languageKey.contains(language) && language.length() == 2) {
             u.setLanguage(language);
           } else {
-            ec.messages.add("Language: Language code '" + language
+            ec.messages.add("Language: Language code '" + language + CharacterConstants.S_QUOTE
                 + " is not available in the configuration. Please enter the proper language code.");
           }
         } else {
@@ -1409,7 +1410,7 @@ public class BulkUploadMgr {
         landPhone = tokens[i].trim();
         if (!landPhone.isEmpty()) {
           if (landPhone.length() > FieldLimits.LAND_PHONE_MAX_LENGTH) {
-            ec.messages.add("Land line number: '" + landPhone + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+            ec.messages.add("Land line number: '" + landPhone + CharacterConstants.S_QUOTE + LAND_PHONE_MAX_LENGTH_MSG);
           }
           String validatedLandPhone = validPhone(landPhone);
           if (validatedLandPhone != null) {
@@ -2408,10 +2409,12 @@ public class BulkUploadMgr {
             } else {
               ec.messages.add(
                   "Tax: Not a valid number (" + tax + "). It should be between " + FieldLimits.TAX_MIN_VALUE
-                      + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum");
+                      + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum.");
             }
           } catch (NumberFormatException e) {
-            ec.messages.add("Tax: Not a valid number (" + tax + "). Please specify a valid number");
+            ec.messages.add(
+                "Tax: Not a valid number (" + tax + "). It should be between " + FieldLimits.TAX_MIN_VALUE
+                    + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum.");
           }
         }
       }
@@ -2442,13 +2445,13 @@ public class BulkUploadMgr {
             int svcLevel = Integer.parseInt(serviceLevel);
             if (svcLevel < FieldLimits.MIN_SERVICE_LEVEL || svcLevel > FieldLimits.MAX_SERVICE_LEVEL) {
               ec.messages.add(
-                  "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL);
+                  "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL + CharacterConstants.DOT);
             } else {
             k.setServiceLevel(svcLevel);
             }
           } catch (NumberFormatException e) {
             ec.messages.add(
-                "Service Level: " + serviceLevel + " is not valid. Please specify a valid level.");
+                "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL + CharacterConstants.DOT);
           }
         }
       }
