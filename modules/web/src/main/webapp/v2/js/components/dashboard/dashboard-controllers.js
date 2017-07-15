@@ -1164,10 +1164,15 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                 }*/
 
                 dashboardService.get(filter, level, $scope.exFilter, $scope.exType, $scope.period,$scope.tperiod,asset,$scope.includeETag, $scope.fdate, $scope.excludeETag, skipCache).then(function (data) {
-                    $scope.showMap = false;
+                    if (typeof loadDashboardFusionMaps === "function") {
+                        $scope.showMap = true;
+                        $scope.showSwitch = true;
+                    } else {
+                        $scope.showMap = false;
+                        $scope.showSwitch = false;
+                    }
                     $scope.dashboardView = data.data;
                     var linkText;
-                    $scope.showSwitch = true;
                     if ($scope.dashboardView.mLev == "country") {
                         linkText = $scope.locationMapping.data[$scope.dashboardView.mTy].name;
                         $scope.mapType = "maps/" + linkText;
@@ -1182,7 +1187,9 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                     }
                     $scope.links.push({filter: filter, text: linkText, level: level});
                     constructPieData($scope.dashboardView);
-                    constructStackData($scope.dashboardView.entDomain);
+                    if(typeof loadDashboardFusionMaps === "function") {
+                        constructStackData($scope.dashboardView.entDomain);
+                    }
                     constructPredWarning($scope.dashboardView.pred);
                     $scope.constructMapData($scope.mapEvent, true);
                 }).catch(function error(msg) {
@@ -2063,6 +2070,10 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                 d.style.zIndex = '-1';
             }
         };
+
+
+
+
         $scope.setShowMap = function(value) {
             $scope.showMap = value;
         }
@@ -2728,10 +2739,15 @@ domainControllers.controller('PredictiveController', ['$scope', '$timeout', '$sc
                 }
 
                 dashboardService.getPredictive(filter, level, $scope.exFilter, $scope.exType, $scope.includeETag, $scope.excludeETag, skipCache).then(function (data) {
-                    $scope.showMap = false;
+                    if (typeof loadDashboardFusionMaps === "function") {
+                        $scope.showMap = true;
+                        $scope.showSwitch = true;
+                    } else {
+                        $scope.showMap = false;
+                        $scope.showSwitch = false;
+                    }
                     $scope.dashboardView = data.data;
                     var linkText;
-                    $scope.showSwitch = true;
                     if ($scope.dashboardView.mLev == "country") {
                         linkText = $scope.locationMapping.data[$scope.dashboardView.mTy].name;
                         $scope.mapType = "maps/" + linkText;
