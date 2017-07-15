@@ -664,7 +664,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
           xLogger.warn("addKiosk: FAILED!! Cannot add kiosk {0}. Custom ID {1} already exists.",
               kiosk.getName(), kiosk.getCustomId());
           throw new ServiceException(
-              backendMessages.getString("error.cannotadd") + "'" + kiosk.getName() + "'. "
+              backendMessages.getString("error.cannotadd") + " '" + kiosk.getName() + "'. "
                   + messages.getString("customid") + " " + kiosk.getCustomId() + " "
                   + backendMessages.getString("error.alreadyexists") + ".");
         }

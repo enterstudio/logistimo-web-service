@@ -145,10 +145,9 @@ public class BulkUploadMgr {
   public static final String ASSET_YOM = "yom";
   public static final String DEV_YOM = "dev.yom";
   public static final int LOWER_BOUND_FOR_YOM = 1980;
-  public static String TEMP_MIN = "tmin.";
-  public static String TEMP_MAX = "tmax";
+  public static final String TEMP_MIN = "tmin.";
+  public static final String TEMP_MAX = "tmax";
   private static ITaskService taskService = AppFactory.get().getTaskService();
-  private static IInvntryDao invDao = new InvntryDao();
 
   private static final String MAX_LENGTH_MSG = " cannot be greater than ";
   private static final String CHARACTERS = " characters";
@@ -1533,7 +1532,7 @@ public class BulkUploadMgr {
         }
       }
       // Old password, in case of edit (and password has to be edited)
-      String oldPassword = "";
+      String oldPassword = CharacterConstants.EMPTY;
       if (++i < size) {
         oldPassword = tokens[i].trim();
       }
@@ -2665,12 +2664,13 @@ public class BulkUploadMgr {
     }
     try {
       String countryCode = tokens[0].substring(1, tokens[0].length());
-      Long.valueOf(countryCode);
-      Double.valueOf(tokens[1]);
+      if (Long.parseLong(countryCode) < 0 || Double.parseDouble(tokens[1]) < 0) {
+        return null;
+      }
     } catch (Exception e) {
       return null;
     }
-    return tokens[0] + " " + tokens[1];
+    return tokens[0] + CharacterConstants.SPACE + tokens[1];
   }
 
   private static String getAssetValidPhone(String phone) {
@@ -3020,15 +3020,16 @@ public class BulkUploadMgr {
     }
 
     public String getMessages() {
-      Iterator<String> it = messages.iterator();
-      String txt = "";
-      while (it.hasNext()) {
-        if (!txt.isEmpty()) {
-          txt += MESSAGE_DELIMITER;
-        }
-        txt += it.next();
+      StringBuilder messageSb = new StringBuilder();
+      for (String message : messages) {
+        messageSb.append(message);
+        messageSb.append(MESSAGE_DELIMITER);
       }
-      return txt;
+      // Remove the last MESSAGE_DELIMITER
+      if (messageSb.length() >= MESSAGE_DELIMITER.length()) {
+        messageSb.setLength(messageSb.length() - MESSAGE_DELIMITER.length());
+      }
+      return messageSb.toString();
     }
   }
 
