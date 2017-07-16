@@ -30,6 +30,7 @@ import com.logistimo.assets.entity.AssetAttribute;
 import com.logistimo.assets.entity.AssetRelation;
 import com.logistimo.assets.entity.AssetStatus;
 import com.logistimo.config.entity.Config;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.entity.Domain;
 import com.logistimo.domains.entity.DomainLink;
 import com.logistimo.entities.entity.Kiosk;
@@ -37,31 +38,6 @@ import com.logistimo.entities.entity.KioskLink;
 import com.logistimo.entities.entity.KioskToPoolGroup;
 import com.logistimo.entities.entity.PoolGroup;
 import com.logistimo.entities.entity.UserToKiosk;
-import com.logistimo.events.entity.Event;
-import com.logistimo.inventory.entity.Invntry;
-import com.logistimo.inventory.entity.InvntryBatch;
-import com.logistimo.inventory.entity.InvntryEvntLog;
-import com.logistimo.inventory.entity.InvntryLog;
-import com.logistimo.inventory.entity.Transaction;
-import com.logistimo.inventory.optimization.entity.OptimizerLog;
-import com.logistimo.materials.entity.Material;
-import com.logistimo.mnltransactions.entity.MnlTransaction;
-import com.logistimo.orders.entity.DemandItem;
-import com.logistimo.orders.entity.DemandItemBatch;
-import com.logistimo.orders.entity.Order;
-import com.logistimo.reports.entity.slices.DaySlice;
-import com.logistimo.reports.entity.slices.MonthSlice;
-import com.logistimo.services.blobstore.HDFSBlobStoreService;
-import com.logistimo.services.cache.MemcacheService;
-import com.logistimo.services.cron.CronJobScheduler;
-import com.logistimo.services.cron.CronLeaderElection;
-import com.logistimo.services.storage.HDFSStorageUtil;
-import com.logistimo.services.taskqueue.TaskServer;
-import com.logistimo.services.utils.ConfigUtil;
-import com.logistimo.tags.entity.Tag;
-import com.logistimo.users.entity.UserAccount;
-import com.logistimo.utils.MetricsUtil;
-
 import com.logistimo.entity.ALog;
 import com.logistimo.entity.BBoard;
 import com.logistimo.entity.Downloaded;
@@ -70,10 +46,32 @@ import com.logistimo.entity.MultipartMsg;
 import com.logistimo.entity.Task;
 import com.logistimo.entity.Uploaded;
 import com.logistimo.entity.UploadedMsgLog;
-import com.logistimo.pagination.StreamingExecutor;
-import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.Constants;
+import com.logistimo.events.entity.Event;
+import com.logistimo.hystrix.SecurityHystrixConcurrencyStrategy;
+import com.logistimo.inventory.entity.Invntry;
+import com.logistimo.inventory.entity.InvntryBatch;
+import com.logistimo.inventory.entity.InvntryEvntLog;
+import com.logistimo.inventory.entity.InvntryLog;
+import com.logistimo.inventory.entity.Transaction;
+import com.logistimo.inventory.optimization.entity.OptimizerLog;
 import com.logistimo.logger.XLog;
+import com.logistimo.materials.entity.Material;
+import com.logistimo.mnltransactions.entity.MnlTransaction;
+import com.logistimo.orders.entity.DemandItem;
+import com.logistimo.orders.entity.DemandItemBatch;
+import com.logistimo.orders.entity.Order;
+import com.logistimo.pagination.StreamingExecutor;
+import com.logistimo.services.blobstore.HDFSBlobStoreService;
+import com.logistimo.services.cron.CronJobScheduler;
+import com.logistimo.services.cron.CronLeaderElection;
+import com.logistimo.services.impl.PMF;
+import com.logistimo.services.storage.HDFSStorageUtil;
+import com.logistimo.services.taskqueue.TaskServer;
+import com.logistimo.services.utils.ConfigUtil;
+import com.logistimo.tags.entity.Tag;
+import com.logistimo.users.entity.UserAccount;
+import com.logistimo.utils.MetricsUtil;
+import com.netflix.hystrix.strategy.HystrixPlugins;
 
 import javax.jdo.PersistenceManager;
 import javax.servlet.ServletContextEvent;
@@ -138,6 +136,10 @@ public class LogistimoServicesListener implements ServletContextListener {
       }
       //Initialising camel context
       AppFactory.get().getTaskService().initContext();
+      //Set HystrixStrategy
+      HystrixPlugins.getInstance()
+          .registerConcurrencyStrategy(new SecurityHystrixConcurrencyStrategy());
+
       //start the task server
       if (ConfigUtil.getBoolean("task.server", false)) {
         TaskServer.getInstance(Constants.DEFAULT);

@@ -315,7 +315,8 @@ public class DashboardService implements IDashboardService {
   }
 
   @Override
-  public ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters, String type) {
+  public ResultSet getMainDashboardResults(Long domainId, Map<String, String> filters,
+                                           String type) {
     return getMainDashboardResults(domainId, filters, type, false, null);
   }
 

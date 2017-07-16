@@ -38,6 +38,7 @@ import java.util.List;
  */
 public class ApprovalModel {
 
+  @SerializedName("approval_id")
   private String id;
 
   @SerializedName("order_id")
@@ -63,6 +64,12 @@ public class ApprovalModel {
 
   @SerializedName("approval_type")
   private ApprovalType approvalType;
+
+  @SerializedName("status_updated_by")
+  private UserContactModel statusUpdatedBy;
+
+  @SerializedName("active_approver_type")
+  private String activeApproverType;
 
   public String getId() {
     return id;
@@ -143,5 +150,21 @@ public class ApprovalModel {
 
   public void setApprovalType(ApprovalType approvalType) {
     this.approvalType = approvalType;
+  }
+
+  public UserContactModel getStatusUpdatedBy() {
+    return statusUpdatedBy;
+  }
+
+  public void setStatusUpdatedBy(UserContactModel statusUpdatedBy) {
+    this.statusUpdatedBy = statusUpdatedBy;
+  }
+
+  public String getActiveApproverType() {
+    return activeApproverType;
+  }
+
+  public void setActiveApproverType(String activeApproverType) {
+    this.activeApproverType = activeApproverType;
   }
 }

@@ -77,7 +77,7 @@ import java.util.Map;
  * Created by yuvaraj on 11/10/16.
  */
 public class ShipmentBuilder {
-  private static final XLog xLogger = XLog.getLog(OrderBuilder.class);
+  private static final XLog xLogger = XLog.getLog(ShipmentBuilder.class);
 
   public List<ShipmentModel> buildShipmentModels(List<IShipment> shipmentList,
                                                  SecureUserDetails user) {

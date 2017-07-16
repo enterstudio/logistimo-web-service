@@ -30,7 +30,7 @@ var reportWidgets;
 var assetWidgets = undefined;
 
 function registerWidget(id, widget, report, subReport, helpFilePath) {
-    if(checkNullEmpty(reportWidgets)) {
+    if (checkNullEmpty(reportWidgets)) {
         reportWidgets = {};
     }
     if (checkNullEmpty(reportWidgets[report])) {

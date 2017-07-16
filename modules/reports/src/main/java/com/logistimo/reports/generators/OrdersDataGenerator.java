@@ -98,7 +98,7 @@ public class OrdersDataGenerator implements ReportDataGenerator {
       Results
           or =
           oms.getOrders(domainId, kioskId, status, from, until, otype, tagType, tag, kioskIds,
-              pageParams, null, null);
+              pageParams, null, null, null);
       od = new OrdersData(from, null, filters, locale, timezone, or.getResults(), or.getCursor());
     } catch (Exception e) {
       throw new ReportingDataException(e.getMessage());

@@ -26,13 +26,20 @@ package com.logistimo.api.builders;
 import com.logistimo.accounting.service.impl.AccountingServiceImpl;
 import com.logistimo.api.models.DemandItemBatchModel;
 import com.logistimo.api.models.DemandModel;
+import com.logistimo.api.models.OrderApprovalTypesModel;
+import com.logistimo.api.models.OrderApproverModel;
 import com.logistimo.api.models.OrderModel;
 import com.logistimo.api.models.OrderResponseModel;
+import com.logistimo.api.models.Permissions;
+import com.logistimo.api.models.UserContactModel;
 import com.logistimo.api.models.UserModel;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.PermissionConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
@@ -61,13 +68,19 @@ import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.models.shipments.ShipmentItemModel;
 import com.logistimo.orders.OrderUtils;
+import com.logistimo.orders.approvals.constants.ApprovalConstants;
+import com.logistimo.orders.approvals.dao.impl.ApprovalsDao;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
+import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
+import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.shipments.ShipmentStatus;
@@ -84,6 +97,9 @@ import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.CommonUtils;
 import com.logistimo.utils.LocalDateUtil;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -95,11 +111,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
-public class OrderBuilder {
+@Component
+public class OrdersAPIBuilder {
 
-  private static final XLog xLogger = XLog.getLog(OrderBuilder.class);
+  private static final String SPACE = " ";
+  private static final String COMMA_SPACE = ", ";
+
+  private static final XLog xLogger = XLog.getLog(OrdersAPIBuilder.class);
+
+  @Autowired
+  private IOrderApprovalsService orderApprovalsService;
 
   public Results buildOrders(Results results, SecureUserDetails user, Long domainId) {
     List orders = results.getResults();
@@ -152,7 +174,7 @@ public class OrderBuilder {
       model.eadd = CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
       model.cdt = LocalDateUtil.format(o.getCreatedOn(), locale, timezone);
       model.ubid = o.getUpdatedBy();
-      model.src= o.getSrc();
+      model.src = o.getSrc();
       if (o.getUpdatedBy() != null) {
         try {
           model.uby = as.getUserAccount(o.getUpdatedBy()).getFullName();
@@ -188,7 +210,8 @@ public class OrderBuilder {
           model.vid = vendorId.toString();
           model.vnm = vendor.getName();
           model.vadd =
-              CommonUtils.getAddress(vendor.getCity(), vendor.getTaluk(), vendor.getDistrict(), vendor.getState());
+              CommonUtils.getAddress(vendor.getCity(), vendor.getTaluk(), vendor.getDistrict(),
+                  vendor.getState());
           model.hva =
               EntityAuthoriser
                   .authoriseEntity(vendorId, user.getRole(), locale, user.getUsername(), domainId);
@@ -256,19 +279,362 @@ public class OrderBuilder {
     return model;
   }
 
-  public OrderModel buildFull(IOrder order, SecureUserDetails user,
-                              Long domainId) throws Exception {
+  /*public OrderModel buildApprovalModel(OrderModel model, CreateApprovalResponse response, int approvalsSize) {
+    OrderApprovalModel approvalModel = new OrderApprovalModel();
+    if(response.getActiveApproverType().equals(Approver.PRIMARY)) {
+      approvalModel.setAprvs(model.getPrimaryApprovers());
+    } else {
+      approvalModel.setAprvs(model.getSecondaryApprovers());
+    }
+    approvalModel.setArs(approvalsSize);
+    approvalModel.setCt(response.getCreatedAt());
+    approvalModel.setUt(response.getUpdatedAt());
+    Long hours = (new Date().getTime() - response.getExpireAt().getTime()) / (60 * 60 * 1000);
+    approvalModel.setExpiryTime(hours);
+    approvalModel.setStatus(response.getStatus());
+
+
+    return model;
+  }*/
+
+  /*public OrderModel buildApproverDetails(OrderModel model) {
+    if(model.getPrimaryApprovers() != null) {
+      StringBuilder sb = new StringBuilder();
+      int j=0;
+      for(int i=0; i<model.getPrimaryApprovers().size(); i++) {
+        UserModel userModel = model.getPrimaryApprovers().get(i);
+        if(userModel.fnm != null) {
+          sb.append(userModel.fnm);
+          sb.append(SPACE);
+        }
+        if(userModel.lnm != null) {
+          sb.append(userModel.lnm);
+          sb.append(SPACE);
+        }
+        if(StringUtils.isNotEmpty(userModel.phm) || StringUtils.isNotEmpty(userModel.em)) {
+          sb.append("(");
+          boolean found = false;
+          if(userModel.phm != null) {
+            sb.append(userModel.phm);
+            found = true;
+          }
+          if(userModel.em != null) {
+            if(found){
+              sb.append(COMMA_SPACE);
+            }
+            sb.append(userModel.em);
+          }
+        }
+        if(i < model.getPrimaryApprovers().size()) {
+          sb.append(")");
+          j = j+1;
+        }
+        if(j < model.getPrimaryApprovers().size()) {
+          sb.append(COMMA_SPACE);
+        }
+      }
+      if(sb.length() > 0) {
+        model.setApproversDetail(sb.toString());
+      }
+    }
+    return model;
+  }*/
+
+  /**
+   * Returns the primary approvers for a particular order and approval type
+   */
+  public List<UserContactModel> buildPrimaryApprovers(IOrder order, Locale locale,
+                                                      Integer approvalType)
+      throws ServiceException, ObjectNotFoundException {
+    List<String> prApprovers = new ArrayList<>(1);
+    EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class, locale);
+    if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
+      IKiosk kiosk = entitiesService.getKiosk(order.getKioskId());
+      DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
+      ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
+      if (approvalsConfig != null) {
+        ApprovalsConfig.OrderConfig orderConfig = approvalsConfig.getOrderConfig();
+        if (orderConfig != null) {
+          prApprovers = orderConfig.getPrimaryApprovers();
+        }
+      }
+    } else {
+      List<IApprovers> primaryApprovers;
+      if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
+        primaryApprovers =
+            entitiesService.getApprovers(order.getKioskId(), IApprovers.PRIMARY_APPROVER,
+                IApprovers.PURCHASE_ORDER);
+      } else {
+        primaryApprovers =
+            entitiesService.getApprovers(order.getServicingKiosk(), IApprovers.PRIMARY_APPROVER,
+                IApprovers.SALES_ORDER);
+      }
+      if (primaryApprovers != null) {
+        for (IApprovers apr : primaryApprovers) {
+          prApprovers.add(apr.getUserId());
+        }
+      }
+    }
+    return buildUserContactModels(prApprovers);
+  }
+
+  public List<UserContactModel> buildUserContactModels(List<String> approvers)
+      throws ObjectNotFoundException {
+    List<UserContactModel> models = new ArrayList<>(1);
+    if (approvers != null && !approvers.isEmpty()) {
+      UsersService
+          usersService =
+          Services.getService(UsersServiceImpl.class, SecurityUtils.getLocale());
+      for (String s : approvers) {
+        IUserAccount userAccount = usersService.getUserAccount(s);
+        UserContactModel model = new UserContactModel();
+        model.setEmail(userAccount.getEmail());
+        model.setName(userAccount.getFullName());
+        model.setPhone(userAccount.getMobilePhoneNumber());
+        model.setUserId(userAccount.getUserId());
+        models.add(model);
+      }
+    }
+    return models;
+  }
+
+  /*public OrderModel buildApprovalType(OrderModel model, IOrder order, Locale locale)
+      throws ServiceException {
+    OrderManagementService orderManagementService =
+        Services.getService(OrderManagementServiceImpl.class, locale);
+    if(IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
+      if(order.isVisibleToCustomer() && !order.isVisibleToVendor()) {
+        if(orderManagementService.isApprovalRequired(order, locale, IOrder.PURCHASE_ORDER)) {
+          model.setApprovalType(IOrder.PURCHASE_ORDER);
+        }
+      } else if(orderManagementService.isApprovalRequired(order, locale, IOrder.SALES_ORDER)) {
+        model.setApprovalType(IOrder.SALES_ORDER);
+      }
+    } else if(IOrder.SALES_ORDER.equals(order.getOrderType())) {
+      if(orderManagementService.isApprovalRequired(order, locale, IOrder.SALES_ORDER)) {
+        model.setApprovalType(IOrder.SALES_ORDER);
+      }
+    }else if(IOrder.TRANSFER_ORDER.equals(order.getOrderType())
+        && !order.isVisibleToCustomer() && !order.isVisibleToVendor()) {
+      if(orderManagementService.isApprovalRequired(order, locale)) {
+        model.setApprovalType(IOrder.TRANSFER);
+      }
+    }
+    return model;
+  }*/
+
+  /**
+   * Returns the permission to be restricted
+   */
+  public Permissions buildPermissionModel(IOrder order, OrderModel orderModel, Integer approvalType,
+                                          boolean isApprovalRequired)
+      throws ServiceException {
+    Permissions model = new Permissions();
+    List<String> permissions = new ArrayList<>(1);
+    ApprovalsDao approvalsDao = new ApprovalsDao();
+    if(isApprovalRequired) {
+      IOrderApprovalMapping
+          approvalMapping =
+          approvalsDao.getOrderApprovalMapping(order.getOrderId(), approvalType);
+      if (approvalMapping != null) {
+        if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
+          if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
+            if (orderModel.atc) {
+              permissions.add(PermissionConstants.CANCEL);
+            }
+          } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
+              ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
+              ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
+            if (orderModel.atc) {
+              permissions.add(PermissionConstants.CANCEL);
+              permissions.add(PermissionConstants.EDIT);
+            }
+          } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
+            if (orderModel.atv) {
+              permissions.add(PermissionConstants.ALLOCATE);
+              permissions.add(PermissionConstants.EDIT);
+              permissions.add(PermissionConstants.CONFIRM);
+              permissions.add(PermissionConstants.CANCEL);
+            }
+          }
+        } else if (IOrder.SALES_ORDER.equals(approvalType)) {
+          if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
+            if(orderModel.atv) {
+              permissions.add(PermissionConstants.CANCEL);
+            }
+          } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
+              ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
+              ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
+            if(orderModel.atv) {
+              permissions.add(PermissionConstants.ALLOCATE);
+              permissions.add(PermissionConstants.CANCEL);
+              permissions.add(PermissionConstants.CONFIRM);
+              permissions.add(PermissionConstants.EDIT);
+            }
+          } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
+            if(orderModel.atv) {
+              permissions.add(PermissionConstants.SHIP);
+              permissions.add(PermissionConstants.CREATE_SHIPMENT);
+              permissions.add(PermissionConstants.CONFIRM);
+            }
+          }
+        } else if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
+          if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
+            permissions.add(PermissionConstants.CANCEL);
+
+          } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus())
+              || ApprovalConstants.REJECTED.equals(approvalMapping.getStatus())
+              || ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
+            permissions.add(PermissionConstants.EDIT);
+            permissions.add(PermissionConstants.CANCEL);
+
+          } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
+            permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.CONFIRM);
+            permissions.add(PermissionConstants.ALLOCATE);
+            permissions.add(PermissionConstants.EDIT);
+            permissions.add(PermissionConstants.SHIP);
+            permissions.add(PermissionConstants.CREATE_SHIPMENT);
+          }
+        }
+      }
+    } else {
+      permissions.add(PermissionConstants.CANCEL);
+      permissions.add(PermissionConstants.CONFIRM);
+      permissions.add(PermissionConstants.ALLOCATE);
+      permissions.add(PermissionConstants.EDIT);
+      permissions.add(PermissionConstants.SHIP);
+      permissions.add(PermissionConstants.CREATE_SHIPMENT);
+    }
+    model.setPermissions(permissions);
+    return model;
+  }
+
+  /**
+   * Get the approval type for a given order
+   */
+  public Integer getApprovalType(IOrder order) {
+    Integer approvalType = null;
+    if (IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
+      if (!order.isVisibleToVendor()) {
+        approvalType = IOrder.PURCHASE_ORDER;
+      } else {
+        approvalType = IOrder.SALES_ORDER;
+      }
+    } else if (IOrder.SALES_ORDER.equals(order.getOrderType())) {
+      approvalType = IOrder.SALES_ORDER;
+    } else if(IOrder.TRANSFER_ORDER.equals(order.getOrderType())){
+      approvalType = IOrder.TRANSFER_ORDER;
+    }
+    return approvalType;
+  }
+
+  /**
+   * Gives the types of approval to be shown to the user
+   */
+  public List<OrderApprovalTypesModel> buildOrderApprovalTypesModel(OrderModel orderModel,
+                                                                    OrderManagementService oms,
+                                                                    Locale locale)
+      throws ServiceException, ObjectNotFoundException {
+    List<OrderApprovalTypesModel> models = new ArrayList<>(1);
+    boolean isPurchaseApprovalRequired = false;
+    boolean isSalesApprovalRequired = false;
+    boolean isTransferApprovalRequired = false;
+    ApprovalsDao approvalsDao = new ApprovalsDao();
+    IOrder order = oms.getOrder(orderModel.id);
+    if (!orderModel.isVisibleToCustomer() && !orderModel.isVisibleToVendor()) {
+      isTransferApprovalRequired = orderApprovalsService.isApprovalRequired(order,
+          IOrder.TRANSFER_ORDER);
+    } else {
+      if (orderModel.isVisibleToCustomer() && orderModel.atc) {
+        isPurchaseApprovalRequired =
+            orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER);
+      }
+      if (orderModel.isVisibleToVendor() && orderModel.atv) {
+        isSalesApprovalRequired =
+            orderApprovalsService.isApprovalRequired(order, IOrder.SALES_ORDER);
+      }
+    }
+    if (isTransferApprovalRequired) {
+      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+      model.setType(ApprovalConstants.TRANSFER);
+      IOrderApprovalMapping
+          orderApprovalMapping =
+          approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.TRANSFER_ORDER);
+      if (orderApprovalMapping != null) {
+        model.setId(orderApprovalMapping.getApprovalId());
+        List<IOrderApprovalMapping>
+            approvalMappings =
+            approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
+        if (approvalMappings != null && !approvalMappings.isEmpty()) {
+          model.setCount(approvalMappings.size());
+        }
+      }
+      models.add(model);
+    } else {
+      if (isPurchaseApprovalRequired) {
+        OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+        model.setType(ApprovalConstants.PURCHASE);
+        IOrderApprovalMapping
+            orderApprovalMapping =
+            approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.PURCHASE_ORDER);
+        if (orderApprovalMapping != null) {
+          model.setId(orderApprovalMapping.getApprovalId());
+          List<IOrderApprovalMapping>
+              approvalMappings =
+              approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
+          if (approvalMappings != null && !approvalMappings.isEmpty()) {
+            model.setCount(approvalMappings.size());
+          }
+        }
+        models.add(model);
+      }
+      if (isSalesApprovalRequired) {
+        OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+        model.setType(ApprovalConstants.SALES);
+        IOrderApprovalMapping
+            orderApprovalMapping =
+            approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.SALES_ORDER);
+        if (orderApprovalMapping != null) {
+          model.setId(orderApprovalMapping.getApprovalId());
+          List<IOrderApprovalMapping>
+              approvalMappings =
+              approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
+          if (approvalMappings != null && !approvalMappings.isEmpty()) {
+            model.setCount(approvalMappings.size());
+          }
+        }
+        models.add(model);
+      }
+    }
+    return models;
+  }
+
+  public OrderModel buildFullOrderModel(IOrder order, SecureUserDetails user,
+                                        Long domainId) throws Exception {
+    return buildOrderModel(order, user, domainId);
+
+  }
+
+  public OrderModel buildOrderModel(IOrder order, SecureUserDetails user,
+                                    Long domainId) throws Exception {
     Map<Long, String> domainNames = new HashMap<>(1);
     OrderModel model = build(order, user, domainId, domainNames);
     DomainConfig dc = DomainConfig.getInstance(domainId);
     EntitiesService as = Services.getService(EntitiesServiceImpl.class, user.getLocale());
-    InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class, user.getLocale());
+    InventoryManagementService
+        ims =
+        Services.getService(InventoryManagementServiceImpl.class, user.getLocale());
     IKiosk k = null;
     IKiosk vendorKiosk = null;
     Locale locale = user.getLocale();
-    MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class, user.getLocale());
+    MaterialCatalogService
+        mcs =
+        Services.getService(MaterialCatalogServiceImpl.class, user.getLocale());
 
-    boolean showStocks = IOrder.PENDING.equals(order.getStatus()) || IOrder.CONFIRMED.equals(order.getStatus())
+    boolean
+        showStocks =
+        IOrder.PENDING.equals(order.getStatus()) || IOrder.CONFIRMED.equals(order.getStatus())
             || IOrder.BACKORDERED.equals(order.getStatus());
     // to the logged in user
     boolean showVendorStock = dc.autoGI() && order.getServicingKiosk() != null;
@@ -295,7 +661,7 @@ public class OrderBuilder {
         Long customerId = order.getKioskId();
         // Get the credit limit
         if (customerId != null && model.vid != null) {
-          availableCredit = Services.getService(AccountingServiceImpl.class,locale)
+          availableCredit = Services.getService(AccountingServiceImpl.class, locale)
               .getCreditData(customerId,
                   order.getServicingKiosk(), dc).availabeCredit;
         }
@@ -303,8 +669,8 @@ public class OrderBuilder {
         creditLimitErr = e.getMessage();
       }
     }
-    model.setVtc(order.isVisibleToCustomer());
-    model.setVtv(order.isVisibleToVendor());
+    model.setVisibleToCustomer(order.isVisibleToCustomer());
+    model.setVisibleToVendor(order.isVisibleToVendor());
     model.avc = availableCredit;
     model.avcerr = creditLimitErr;
 
@@ -392,7 +758,7 @@ public class OrderBuilder {
               for (IShipmentItemBatch iShipmentItemBatch : iShipmentItem.getShipmentItemBatch()) {
                 if (!quantityByBatches.containsKey(iShipmentItem.getMaterialId())) {
                   quantityByBatches
-                      .put(iShipmentItem.getMaterialId(), new HashMap<String, BigDecimal>());
+                      .put(iShipmentItem.getMaterialId(), new HashMap<>());
                 }
                 Map<String, BigDecimal>
                     batches =
@@ -407,7 +773,7 @@ public class OrderBuilder {
                 if (isFulfilled) {
                   if (!fQuantityByBatches.containsKey(iShipmentItem.getMaterialId())) {
                     fQuantityByBatches
-                        .put(iShipmentItem.getMaterialId(), new HashMap<String, DemandBatchMeta>());
+                        .put(iShipmentItem.getMaterialId(), new HashMap<>());
                   }
                   Map<String, DemandBatchMeta>
                       fBatches =
@@ -419,8 +785,11 @@ public class OrderBuilder {
                     fBatches.get(iShipmentItemBatch.getBatchId()).bd
                         .add(getShipmentItemBatchBD(shipment.getShipmentId(), iShipmentItemBatch));
                   } else {
-                    DemandBatchMeta dMeta = new DemandBatchMeta(iShipmentItemBatch.getFulfilledQuantity());
-                    dMeta.bd.add(getShipmentItemBatchBD(shipment.getShipmentId(), iShipmentItemBatch));
+                    DemandBatchMeta
+                        dMeta =
+                        new DemandBatchMeta(iShipmentItemBatch.getFulfilledQuantity());
+                    dMeta.bd
+                        .add(getShipmentItemBatchBD(shipment.getShipmentId(), iShipmentItemBatch));
                     fBatches.put(iShipmentItemBatch.getBatchId(), dMeta);
                   }
                 }
@@ -463,7 +832,8 @@ public class OrderBuilder {
         itemModel.d = item.getDiscount();
         itemModel.a = CommonUtils.getFormattedPrice(item.computeTotalPrice(false));
         itemModel.isBn = m.isBinaryValued();
-        itemModel.isBa = (vendorKiosk == null || vendorKiosk.isBatchMgmtEnabled()) && m.isBatchEnabled();
+        itemModel.isBa =
+            (vendorKiosk == null || vendorKiosk.isBatchMgmtEnabled()) && m.isBatchEnabled();
         itemModel.oq = item.getOriginalQuantity();
         itemModel.tx = item.getTax();
         itemModel.rsn = item.getReason();
@@ -505,10 +875,10 @@ public class OrderBuilder {
                   continue;
                 }
                 batchModel.e = b.getBatchExpiry() != null ? LocalDateUtil
-                        .formatCustom(b.getBatchExpiry(), "dd/MM/yyyy", null) : "";
+                    .formatCustom(b.getBatchExpiry(), "dd/MM/yyyy", null) : "";
                 batchModel.m = b.getBatchManufacturer();
                 batchModel.mdt = b.getBatchManufacturedDate() != null ? LocalDateUtil
-                        .formatCustom(b.getBatchManufacturedDate(), "dd/MM/yyyy", null) : "";
+                    .formatCustom(b.getBatchManufacturedDate(), "dd/MM/yyyy", null) : "";
                 itemModel.astk = itemModel.astk.add(batchModel.q);
                 if (itemModel.bts == null) {
                   itemModel.bts = new HashSet<>();
@@ -538,7 +908,9 @@ public class OrderBuilder {
                   batchModel.bd = fBatchMap.get(batchId).bd;
                 }
                 batchModel.id = batchId;
-                IInvntryBatch b = ims.getInventoryBatch(order.getServicingKiosk(), item.getMaterialId(),
+                IInvntryBatch
+                    b =
+                    ims.getInventoryBatch(order.getServicingKiosk(), item.getMaterialId(),
                         batchModel.id, null);
                 if (b == null) {
                   b = ims.getInventoryBatch(order.getKioskId(), item.getMaterialId(), batchModel.id,
@@ -551,10 +923,10 @@ public class OrderBuilder {
                   continue;
                 }
                 batchModel.e = b.getBatchExpiry() != null ? LocalDateUtil
-                        .formatCustom(b.getBatchExpiry(), "dd/MM/yyyy", null) : "";
+                    .formatCustom(b.getBatchExpiry(), "dd/MM/yyyy", null) : "";
                 batchModel.m = b.getBatchManufacturer();
                 batchModel.mdt = b.getBatchManufacturedDate() != null ? LocalDateUtil
-                        .formatCustom(b.getBatchManufacturedDate(), "dd/MM/yyyy", null) : "";
+                    .formatCustom(b.getBatchManufacturedDate(), "dd/MM/yyyy", null) : "";
                 itemModel.astk = itemModel.astk.add(batchModel.q);
                 if (itemModel.bts == null) {
                   itemModel.bts = new HashSet<>();
@@ -574,7 +946,8 @@ public class OrderBuilder {
             if (inv != null) {
               itemModel.vs = inv.getStock();
               itemModel.vsavibper = ims.getStockAvailabilityPeriod(inv, dc);
-              itemModel.atpstk = inv.getAvailableStock(); //todo: Check Available to promise stock is right??????
+              itemModel.atpstk =
+                  inv.getAvailableStock(); //todo: Check Available to promise stock is right??????
               itemModel.itstk = inv.getInTransitStock();
               itemModel.vmax = inv.getMaxStock();
               itemModel.vmin = inv.getReorderLevel();
@@ -625,15 +998,17 @@ public class OrderBuilder {
     return model;
   }
 
-  public List<UserModel> buildUserModels(List<String> approvers, UsersService us, Locale locale, String timezone){
+  public List<UserModel> buildUserModels(List<String> approvers, UsersService us, Locale locale,
+                                         String timezone) {
     List<UserModel> userModels = null;
-    if(approvers != null && !approvers.isEmpty()) {
+    if (approvers != null && !approvers.isEmpty()) {
       UserBuilder userBuilder = new UserBuilder();
-      userModels = userBuilder.buildUserModels(constructUserAccount(us, approvers), locale, timezone, true);
+      userModels =
+          userBuilder.buildUserModels(constructUserAccount(us, approvers), locale, timezone, true);
     }
-  return userModels;
+    return userModels;
   }
-  public OrderModel populateApprovalParams(OrderModel model, List<IApprovers> primaryApprovers,
+  /*public OrderModel populateApprovalParams(OrderModel model, List<IApprovers> primaryApprovers,
                                            List<IApprovers> secondaryApprovers, UsersService as, Locale locale,
                                            String timeZone) {
     UserBuilder userBuilder = new UserBuilder();
@@ -642,18 +1017,20 @@ public class OrderBuilder {
     if(primaryApprovers != null && !primaryApprovers.isEmpty()) {
       primaryApvrs.addAll(primaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
       if(!primaryApvrs.isEmpty()) {
-        model.setPa(userBuilder.buildUserModels(constructUserAccount(as, primaryApvrs), locale, timeZone, true));
+        model.setPrimaryApprovers(userBuilder
+            .buildUserModels(constructUserAccount(as, primaryApvrs), locale, timeZone, true));
       }
     }
     if(secondaryApprovers != null && !secondaryApprovers.isEmpty()) {
       secondaryApvrs.addAll(secondaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
       if(!secondaryApvrs.isEmpty()) {
-        model.setSa(userBuilder.buildUserModels(constructUserAccount(as, secondaryApvrs), locale, timeZone, true));
+        model.setSecondaryApprovers(userBuilder
+            .buildUserModels(constructUserAccount(as, secondaryApvrs), locale, timeZone, true));
       }
     }
     return model;
 
-  }
+  }*/
 
   private ShipmentItemBatchModel getShipmentItemBatchBD(String shipmentID,
                                                         IShipmentItemBatch iShipmentItemBatch) {
@@ -672,7 +1049,7 @@ public class OrderBuilder {
     OrderModel order = null;
     if (includeOrder) {
       if (isFullOrder) {
-        order = buildFull(updOrder.order, sUser, domainId);
+        order = buildOrderModel(updOrder.order, sUser, domainId);
       } else {
         order = build(updOrder.order, sUser, domainId, new HashMap<>());
       }
@@ -784,5 +1161,69 @@ public class OrderBuilder {
       throw new ServiceException(e);
     }
     return orderModels;
+  }
+
+  public OrderApproverModel buildOrderApproverModel(String userId, Integer approvalType,
+                                                    Long domainId, IOrder order) {
+    OrderApproverModel orderApproverModel = null;
+
+    EntitiesService
+        entitiesService =
+        Services.getService(EntitiesServiceImpl.class, SecurityUtils.getLocale());
+    if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
+      DomainConfig dc = DomainConfig.getInstance(domainId);
+      ApprovalsConfig ac = dc.getApprovalsConfig();
+      ApprovalsConfig.OrderConfig orderConfig = ac.getOrderConfig();
+      if (orderConfig != null) {
+        if (orderConfig.getPrimaryApprovers() != null && !orderConfig.getPrimaryApprovers()
+            .isEmpty()) {
+          for (String s : orderConfig.getPrimaryApprovers()) {
+            if (s.equals(userId)) {
+              orderApproverModel = new OrderApproverModel();
+              orderApproverModel.setApproverType(IApprovers.PRIMARY_APPROVER);
+              orderApproverModel.setOrderType("t");
+
+            }
+          }
+        }
+        if (orderConfig.getSecondaryApprovers() != null && !orderConfig.getSecondaryApprovers()
+            .isEmpty()) {
+          for (String s : orderConfig.getSecondaryApprovers()) {
+            if (s.equals(userId)) {
+              orderApproverModel = new OrderApproverModel();
+              orderApproverModel.setApproverType(IApprovers.SECONDARY_APPROVER);
+              orderApproverModel.setOrderType("t");
+            }
+          }
+        }
+      }
+    } else {
+      Long kioskId = null;
+      String oty = "";
+      if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
+        kioskId = order.getKioskId();
+        oty = "p";
+      } else if (IOrder.SALES_ORDER.equals(approvalType)) {
+        kioskId = order.getServicingKiosk();
+        oty = "s";
+      }
+      if (kioskId != null) {
+        List<IApprovers> approvers = entitiesService.getApprovers(kioskId);
+        if (approvers != null && !approvers.isEmpty()) {
+          for (IApprovers apr : approvers) {
+            if (userId.equals(apr.getUserId()) && apr.getOrderType().equals(oty)) {
+              orderApproverModel = new OrderApproverModel();
+              orderApproverModel.setApproverType(apr.getType());
+              if (IApprovers.PURCHASE_ORDER.equals(apr.getOrderType())) {
+                orderApproverModel.setOrderType(apr.getOrderType());
+              } else if (IApprovers.SALES_ORDER.equals(apr.getOrderType())) {
+                orderApproverModel.setOrderType(apr.getOrderType());
+              }
+            }
+          }
+        }
+      }
+    }
+    return orderApproverModel;
   }
 }

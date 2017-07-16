@@ -28,8 +28,7 @@ import java.util.Date;
 /**
  * Created by yuvaraj on 22/03/17.
  */
-public interface ILocationFailedJob
-{
+public interface ILocationFailedJob {
   String getId();
 
   void setId(String id);

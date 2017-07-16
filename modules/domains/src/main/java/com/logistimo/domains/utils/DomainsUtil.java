@@ -172,6 +172,14 @@ public class DomainsUtil {
     return domainIds;
   }
 
+  public static List<Long> getVisibleDomains(Long domainId, int linkType) throws ServiceException {
+    List<Long> domainIds =  getLinkedDomains(domainId, linkType);
+    if(!domainIds.isEmpty() && !domainIds.contains(domainId)) {
+      domainIds.add(domainId);
+    }
+    return domainIds;
+  }
+
   // Add or remove domains Ids belonging to the entity
         /*
         private static void addOrRemoveEntityDomains( boolean add, MultiDomainTransaction object ) throws ServiceException {

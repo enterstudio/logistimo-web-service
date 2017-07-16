@@ -173,11 +173,13 @@ public interface UsersService extends Service {
   /**
    *
    */
-  void updateUserLocationIds(IUserAccount userAccount, Map<String, Object> lidMap, PersistenceManager pm) throws ServiceException;
+  void updateUserLocationIds(IUserAccount userAccount, Map<String, Object> lidMap,
+                             PersistenceManager pm) throws ServiceException;
 
   void addEditUserDevice(UserDeviceModel ud) throws ServiceException;
 
   IUserDevice getUserDevice(String userid, String appname) throws ServiceException;
+
   List<IUserAccount> getUsersByIds(List<String> userIds);
 
 }

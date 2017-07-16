@@ -89,7 +89,15 @@ logistimoApp.constant('ORDER', {
 	'PENDING' : 'pn',
 	'BACKORDERED': 'bo',
 	'OPEN': 'op',
-	'SHIPPED': 'sp'
+	'SHIPPED': 'sp',
+	'EDIT' :  'edit',
+    'ALLOCATE' : 'allocate',
+    'SHIP' : 'ship',
+	'FULFILL' : 'fulfill',
+	'CANCEL' : 'cancel',
+	'CREATE_SHIPMENT' : 'create_shipment',
+	'CONFIRM' : 'confirm',
+	'APPROVAL_REQUIRED' : 'required'
 });
 logistimoApp.constant('ORDERSTATUSTEXT', {
 	statusTxt : {
@@ -576,6 +584,13 @@ logistimoApp.constant('ASSET', {
 	'TEMPERATURE_LOGGER' : 1,
 	'EXTERNAL_SENSOR_ALARM_TYPE' : 1,
 	'ACTIVITY_ALARM_TYPE' : 4
+});
+logistimoApp.constant('APPROVAL', {
+	'REQUEST_APPROVAL' : 'request',
+	'SHOW_HISTORY': 'history',
+	'APPROVE' : 'approve',
+	'REJECT' : 'reject',
+	'CANCEL' : 'cancel'
 });
 logistimoApp.constant('PATTERNS', {
 	'LATITUDE':'^-?(([0-8])?((([0-9])(\\.\\d{1,8})?)|(90(\\.[0]{0,8})?)))$',

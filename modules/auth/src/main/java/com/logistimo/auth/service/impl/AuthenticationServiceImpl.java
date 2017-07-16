@@ -175,15 +175,14 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
     return null;
   }
 
-  public String getUserIdByToken(String token)
-  {
+  public String getUserIdByToken(String token) {
     IUserToken iUserToken;
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
       iUserToken = JDOUtils.getObjectById(IUserToken.class, PasswordEncoder.MD5(token), pm);
       return iUserToken.getUserId();
     } catch (Exception e) {
-      xLogger.warn("Exception while getting User ID using token",e);
+      xLogger.warn("Exception while getting User ID using token", e);
     } finally {
       pm.close();
     }

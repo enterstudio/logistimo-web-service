@@ -419,7 +419,7 @@
                     <b>{{order.size}}</b> {{resourceBundle['order.items']}}
                     <span class="pull-right">
                         <input type="checkbox" ng-model="showCurStk"><span class="pr30"> {{resourceBundle['show.current.stock']}}</span>
-                        <a ng-hide="edit.mat || !(order.st == 'pn' || order.st == 'cf') || dp.vp" ng-click="startEditMats()" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true"><span
+                        <a ng-hide="!editPermission && (edit.mat || !(order.st == 'pn' || order.st == 'cf') || dp.vp)" ng-click="startEditMats()" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true"><span
                             class="glyphicons glyphicons-edit" ></span></a>
                         <span ng-show="edit.mat">
                                 <button class="btn btn-sm btn-primary"

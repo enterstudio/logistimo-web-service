@@ -22,112 +22,12 @@
  */
 
 var ordControllers = angular.module('ordControllers', []);
-ordControllers.controller('OrdersApprovalCtrl', ['$scope', 'ordService', 'userService', 'entityService','requestContext','$location',
-    function($scope, ordService, userService, entityService, requestContext, $location){
-        $scope.wparams = [["eid","entity.id"], ["oid","ordId"], ["rs","reqStatus"], ["ex","exp"], ["rt","reqType"], ["req","reqId"], ["apr","aprId"],["s","size"],["o","offset"]];
-        $scope.localFilters = ['entity', 'orderId', 'reqStatus', 'reqType', 'reqId', 'aprId', 'exp'];
-        ListingController.call(this, $scope, requestContext, $location);
-        $scope.init = function(firstTimeInit) {
-            $scope.ordApr = {entity: "",orderId: "",reqType: "",reqStatus: "",reqId: "",aprId: ""};
-            $scope.today = formatDate2Url(new Date());
-            if(firstTimeInit) {
-                $scope.showMore = false;
-            }
-            $scope.approvals = [];
-            $scope.orderId = $scope.ordId = requestContext.getParam("oid") || "";
-            $scope.reqStatus = requestContext.getParam("rs") || "";
-            $scope.ex = requestContext.getParam("exp") || "";
-            $scope.reqType = requestContext.getParam("rt");
-            $scope.reqId = requestContext.getParam("req");
-            $scope.aprId = requestContext.getParam("apr");
-            var size = requestContext.getParam("s");
-            if(size) {
-                $scope.size = size;
-            }
-            var offset = requestContext.getParam("o");
-            if(offset) {
-                $scope.offset = offset;
-            }
-            if (checkNotNullEmpty(requestContext.getParam("eid"))) {
-                if (checkNullEmpty($scope.entity) || $scope.entity.id != parseInt(requestContext.getParam("eid"))) {
-                    $scope.entity = {id: parseInt(requestContext.getParam("eid")), nm: ""};
-                }
-
-            }
-        };
-        $scope.fetch = function() {
-            $scope.showLoading();
-            ordService.getApprovals($scope.offset, $scope.size, $scope.entity ? $scope.entity.id : undefined, $scope.ordId, $scope.reqStatus,
-                $scope.exp, $scope.reqType, $scope.reqId, $scope.aprId, $scope.domainId).then(function (data) {
-                $scope.filtered = data.data.results;
-                $scope.setResults(data.data);
-            }).catch(function error(msg) {
-                    $scope.showErrorMsg(msg);
-                }).finally(function () {
-                    $scope.hideLoading();
-                    $scope.loading = false;
-                })
-        };
-        $scope.init(true);
-        $scope.fetch();
-        $scope.getSuggestions = function (text, type) {
-            if (checkNotNullEmpty(text)) {
-                return ordService.getIdSuggestions(text, type, $scope.reqType).then(function (data) {
-                    return data.data;
-                }).catch(function (errorMsg) {
-                    $scope.showErrorMsg(errorMsg);
-                });
-            }
-        };
-        $scope.goToRequester = function(requester) {
-            if(checkNotNullEmpty(requester)) {
-                $scope.reqId = requester;
-            }
-        };
-        $scope.goToApprover = function(approver) {
-            if(checkNotNullEmpty(approver)) {
-                $scope.aprId = approver;
-            }
-        };
-        $scope.showOrder = function(orderId) {
-            if(checkNotNullEmpty(orderId)) {
-                $scope.ordId = orderId;
-            }
-        }
-        $scope.getFilteredApprovers = function(userId) {
-            return ordService.fetchApprovers(userId).then(function (data) {
-                return (checkNotNullEmpty(data.data)?data.data:"")
-            }).catch(function error(msg) {
-                $scope.showErrorMsg(msg);
-            });
-        };
-        $scope.getFilteredRequesters = function(userId) {
-            return ordService.fetchRequesters(userId).then(function (data) {
-                return (checkNotNullEmpty(data.data)?data.data:"")
-            }).catch(function error(msg) {
-                $scope.showErrorMsg(msg);
-            });
-        };
-
-        $scope.resetFilters = function() {
-            $scope.entity = undefined;
-            $scope.ordId = $scope.orderId = undefined;
-            $scope.reqStatus = "";
-            $scope.exp = undefined;
-            $scope.reqType = "";
-            $scope.reqId = undefined;
-            $scope.aprId = undefined;
-
-        };
-
-    }]);
-
 ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgService', 'entityService', 'requestContext', '$location', 'exportService',
     function ($scope, ordService, domainCfgService, entityService, requestContext, $location, exportService) {
-        $scope.wparams = [["etag", "etag"], ["otag", "otag"], ["status", "status"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["otype", "otype", "sle"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url], ["oid", "orderId"], ["rid", "referenceId"]];
+        $scope.wparams = [["etag", "etag"], ["otag", "otag"], ["status", "status"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["otype", "otype", "sle"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url], ["oid", "orderId"], ["rid", "referenceId"], ["approval_status","approval_status"]];
         $scope.orders;
         $scope.otype;
-        $scope.localFilters = ['entity', 'status', 'dateModel', 'from', 'to', 'ordId', 'refId', 'etag', 'tpdos', 'etag', 'otag'];
+        $scope.localFilters = ['entity', 'status', 'dateModel', 'from', 'to', 'ordId', 'refId', 'etag', 'tpdos', 'etag', 'otag', 'approval_status'];
         $scope.exRow = [];
         $scope.etag;
         $scope.otag;
@@ -186,7 +86,8 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
             $scope.selectedOrderIds = [];
             $scope.etag = requestContext.getParam("etag") || "";
             $scope.otag = requestContext.getParam("otag") || "";
-            $scope.status = requestContext.getParam("status") || "";
+            $scope.approval_status = requestContext.getParam("approval_status") || "";
+            $scope.astatus = requestContext.getParam("astatus") || "";
             $scope.search.vnm = requestContext.getParam("vendor") || "";
             $scope.from = parseUrlDate(requestContext.getParam("from"));
             $scope.to = parseUrlDate(requestContext.getParam("to"));
@@ -287,7 +188,7 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
             var oty = $scope.type == '2' ? '0' : '1';
             if (checkNotNullEmpty($scope.entity)) {
                 $scope.ft = undefined;
-                ordService.getEntityOrders($scope.entity.id, $scope.otype, $scope.status,$scope.tType, $scope.ft, formatDate($scope.from), formatDate($scope.to), $scope.offset, $scope.size, oty, $scope.referenceId).then(function (data) {
+                ordService.getEntityOrders($scope.entity.id, $scope.otype, $scope.status,$scope.tType, $scope.ft, formatDate($scope.from), formatDate($scope.to), $scope.offset, $scope.size, oty, $scope.referenceId, $scope.approval_status).then(function (data) {
                     if(checkNotNullEmpty(data.data)) {
                         $scope.setData(data.data);
                         if(checkNotNullEmpty(data.data.results) && data.data.results.length == 1 && checkNotNullEmpty($scope.referenceId)) {
@@ -299,7 +200,7 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
                     $scope.setData(null);
                 });
             } else {
-                ordService.getOrders($scope.otype, $scope.status, $scope.tType, $scope.ft, formatDate($scope.from), formatDate($scope.to), $scope.offset, $scope.size, oty, $scope.referenceId).then(function (data) {
+                ordService.getOrders($scope.otype, $scope.status, $scope.tType, $scope.ft, formatDate($scope.from), formatDate($scope.to), $scope.offset, $scope.size, oty, $scope.referenceId, $scope.approval_status).then(function (data) {
                     if(checkNotNullEmpty(data.data)){
                         $scope.setData(data.data);
                         if(checkNotNullEmpty(data.data.results) && data.data.results.length == 1 && checkNotNullEmpty($scope.referenceId)) {
@@ -394,6 +295,11 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
                $scope.referenceId = null;
            }
         });
+        $scope.$watch("apStatus", function(newVal) {
+            if(checkNullEmpty(newVal)) {
+                $scope.approvalStatus = null;
+            }
+        });
 
         $scope.resetFilters = function(){
             if($scope.showEntityFilter) {
@@ -412,6 +318,8 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
             $scope.hideOrder = false;
             $scope.refId = null;
             $scope.referenceId = null;
+            $scope.approvalStatus = null;
+            $scope.apStatus = null;
             $scope.type = undefined;
             $scope.showMore = undefined;
         };
@@ -422,7 +330,7 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
                 $scope.hideOrder = true;
                 $scope.openOrder(orderId);
             }
-        }
+        };
 
         $scope.showOrderByReferenceId = function(referenceId) {
             if(checkNotNullEmpty(referenceId)) {
@@ -433,8 +341,8 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
 ]);
 
 ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', 'userService', 'domainCfgService',
-    'invService', 'entityService', '$timeout', 'requestContext','$uibModal' ,'trnService','conversationService','$window','ORDERSTATUSTEXT',
-        function ($scope, ordService, ORDER, userService, domainCfgService, invService, entityService, $timeout, requestContext,$uibModal,trnService,conversationService,$window,ORDERSTATUSTEXT) {
+    'invService', 'entityService', '$timeout', 'requestContext', '$uibModal', 'trnService', 'conversationService', '$window', 'ORDERSTATUSTEXT', 'approvalService',
+    function ($scope, ordService, ORDER, userService, domainCfgService, invService, entityService, $timeout, requestContext, $uibModal, trnService, conversationService, $window, ORDERSTATUSTEXT, approvalService) {
             $scope.ORDER = ORDER;
             $scope.ORDERSTATUSTEXT = ORDERSTATUSTEXT;
             $scope.edit = {mat: false};
@@ -477,6 +385,12 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 $scope.sMTShip = [];
                 $scope.oTags = {};
                 $scope.approval = {orderId: "", msg: ""};
+                $scope.cancelPermission = false;
+                $scope.shipPermission = false;
+                $scope.createShipmentPermission = false;
+                $scope.editPermission = false;
+                $scope.confirmPermission = false;
+                $scope.allocatePermission = false;
                 if ($scope.lMap) {
                     $timeout(function () {
                         $scope.dispMap = true;
@@ -710,6 +624,19 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 }
                 $scope.edit.ds[index] = 1;
             };
+            $scope.updateStatusList = function() {
+                if(checkNotNullEmpty($scope.statusList)) {
+                    for(var i=0; i<$scope.statusList.length; i++) {
+                        if($scope.statusList[i] == ORDER.CANCELLED && !$scope.cancelPermission) {
+                            $scope.statusList.splice(i, 1);
+                        }
+                        if($scope.statusList[i] == ORDER.CONFIRMED && !$scope.confirmPermission) {
+                            $scope.statusList.splice(i, 1);
+                        }
+
+                    }
+                }
+            };
             $scope.checkStatusList = function () {
                 var shipmentSize = $scope.shipmentList.length;
                 switch ($scope.order.st) {
@@ -729,7 +656,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
 
 
                 if(($scope.order.st == ORDER.PENDING || $scope.order.st == ORDER.CONFIRMED) && checkNotNullEmpty($scope.order.its) && $scope.order.its.length > 0) {
-                   if(shipmentSize == 0 && checkNotNullEmpty($scope.order.vid) && $scope.order.atv) {
+                    if (shipmentSize == 0 && checkNotNullEmpty($scope.order.vid) && $scope.order.atv) {
                         $scope.statusList.push(ORDER.COMPLETED);
                     }
                     if(shipmentSize == 0 && checkNotNullEmpty($scope.order.vid) && checkNotNullEmpty($scope.oCfg) && $scope.oCfg.aof && $scope.order.atc) {
@@ -740,6 +667,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     $scope.statusList.push(ORDER.CANCELLED);
                 }
                 $scope.showStock = $scope.order.st == $scope.ORDER.PENDING || $scope.order.st == $scope.ORDER.CONFIRMED || $scope.order.st == $scope.ORDER.BACKORDERED;
+                $scope.updateStatusList();
 
             };
             $scope.resetMsgUsers = function () {
@@ -790,11 +718,6 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     });
                     $scope.disableScroll();
                 }
-            };
-            $scope.cancel = function () {
-                $scope.enableScroll();
-                $scope.order.aprmsg = "";
-                $scope.modalInstance.dismiss('cancel');
             };
             $scope.cancelShipNow = function () {
                 $scope.enableScroll();
@@ -1150,6 +1073,36 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 });
             };
 
+            $scope.updatePermissions = function() {
+                if(checkNotNullEmpty($scope.order.permissions) && checkNotNullEmpty($scope.order.permissions.permissions)) {
+                    $scope.order.permissions.permissions.forEach(function(data) {
+                        if(data == 'cancel') {
+                            $scope.cancelPermission = true;
+                        }
+                        if(data == 'confirm') {
+                            $scope.confirmPermission = true;
+                        }
+                        if(data == 'allocate') {
+                            $scope.allocatePermission = true;
+                        }
+                        if(data == 'ship') {
+                            $scope.shipPermission = true;
+                            $scope.createShipmentPermission = true;
+                        }
+                        if(data == 'edit') {
+                            $scope.editPermission = true;
+                        }
+                    });
+                } else {
+                    $scope.cancelPermission = false;
+                    $scope.shipPermission = false;
+                    $scope.createShipmentPermission = false;
+                    $scope.editPermission = false;
+                    $scope.confirmPermission = false;
+                    $scope.allocatePermission = false;
+                }
+            };
+
             $scope.fetchOrder = function () {
                 $scope.loading = true;
                 $scope.admins = false;
@@ -1165,6 +1118,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                                 return;
                             }
                             updateOrderObj(data.data, true);
+                            $scope.updatePermissions();
                             count += 1;
                             callCheckStatus(count);
                             $scope.order.sno = $scope.sno;
@@ -1220,60 +1174,6 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         }
                     }
                 }
-            };
-
-            $scope.openApproval = function() {
-                $scope.modalInstance = $uibModal.open({
-                    templateUrl: 'views/orders/approval-request.html',
-                    scope: $scope,
-                    keyboard: false,
-                    backdrop: 'static'
-                });
-            };
-
-            $scope.requestApproval = function() {
-                if(checkNotNullEmpty($scope.order)) {
-                    $scope.buildApprovalRequest();
-                    $scope.showLoading();
-                    ordService.createApproval($scope.approval).then(function(data) {
-                        $scope.orderApproval = data.data;
-                        $scope.showSuccess(data.data);
-                    }).catch(function error(msg) {
-                        $scope.showErrorMsg(msg);
-                    }).finally(function() {
-                        $scope.hideLoading();
-                    })
-
-                }
-            };
-
-            $scope.buildApprovalRequest = function() {
-                $scope.approval = {};
-                if(checkNotNullEmpty($scope.order)) {
-                    $scope.approval.order_id = $scope.order.id;
-                    $scope.approval.message = $scope.order.aprmsg;
-                    $scope.approval.requester_id = $scope.curUser;
-                    $scope.approval.order_type = $scope.order.oty;
-                    $scope.findApprovalType();
-                }
-            };
-
-            $scope.findApprovalType = function() {
-                if(checkNotNullEmpty($scope.approval)) {
-                    if($scope.order.oty == 0 && !$scope.order.vtc && !$scope.order.vtv) {
-                        $scope.approval.approval_type =  0;
-                    } else if($scope.order.oty == 1 && $scope.order.vtc && !$scope.order.vtv) {
-                        $scope.approval.approval_type = 1;
-                    } else if($scope.order.oty == 2 && $scope.order.vtc && $scope.order.vtv) {
-                        $scope.approval.approval_type = 2;
-                    }
-                }
-            };
-
-            $scope.proceed = function() {
-                $scope.requestApproval();
-                $scope.enableScroll();
-                $scope.modalInstance.dismiss('cancel');
             };
 
             $scope.getStatusHistory = function () {
@@ -1341,10 +1241,10 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
             }
 
             $scope.checkHideStatus = function (status) {
-              return (checkNotNullEmpty(status) && (status == 'cm' || status == 'fl'));
+                return (checkNotNullEmpty(status) && (status == 'cm' || status == 'fl'));
             }
             $scope.hasStatus = function (status) {
-              return (checkNotNullEmpty($scope.statusList) && $scope.statusList.indexOf(status) > -1) ;
+                return (checkNotNullEmpty($scope.statusList) && $scope.statusList.indexOf(status) > -1);
             }
 
 
@@ -1889,8 +1789,8 @@ ordControllers.controller('orders.MaterialController', ['$scope',
         });
     }
 ]);
-ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService', 'domainCfgService', 'entityService', 'requestContext','$timeout','$uibModal','$location',
-    function ($scope, ordService, invService, domainCfgService, entityService, requestContext,$timeout, $uibModal,$location) {
+ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService', 'domainCfgService', 'entityService', 'requestContext', '$timeout', '$uibModal', '$location',
+    function ($scope, ordService, invService, domainCfgService, entityService, requestContext, $timeout, $uibModal, $location) {
         $scope.offset = 0;
         $scope.coffset = 0;
         $scope.size = 50;
@@ -2194,7 +2094,7 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                         resetNoConfirm(true);
                         $scope.showSuccess(data.data.msg);
 
-                        if(checkNotNullEmpty(data.data.orderId)) {
+                        if (checkNotNullEmpty(data.data.orderId)) {
                             $location.path('/orders/detail/' + data.data.orderId);
                         }
 
@@ -2592,8 +2492,8 @@ ordControllers.controller('DemandItemController', ['$scope', function ($scope) {
         $scope.item.nastk = $scope.item.naq= $scope.item.nfq = allocated;
     }
 }]);
-ordControllers.controller('NewShipmentController', ['$scope','ordService','$location','trnService','$timeout','domainCfgService','$uibModal',
-    function ($scope,ordService,$location,trnService,$timeout,domainCfgService,$uibModal) {
+ordControllers.controller('NewShipmentController', ['$scope', 'ordService', '$location', 'trnService', '$timeout', 'domainCfgService', '$uibModal',
+    function ($scope, ordService, $location, trnService, $timeout, domainCfgService, $uibModal) {
         windowScrollTop();
         $scope.today = new Date();
         $scope.rsn = '';
@@ -2646,7 +2546,7 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
             if(isInvalid) {
                 return;
             }
-             $scope.shipment = {};
+            $scope.shipment = {};
 
             if ($scope.oCfg.psrm || (checkNotNullEmpty($scope.rsn) && $scope.rsn.toLowerCase() == 'others')) {
                 if((checkNullEmpty($scope.oCfg.psr) || checkNullEmpty($scope.rsn) || $scope.rsn.toLowerCase() == 'others')
@@ -2667,8 +2567,8 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
             if (shipNow) {
                 $scope.shipment.changeStatus = 'sp';
             }
-            var hasBatchEnabledMaterials=false;
-            var showDialog=true;
+            var hasBatchEnabledMaterials = false;
+            var showDialog = true;
             $scope.sMTShip.forEach(function (data) {
                 var i1 = {};
                 i1.mId = data.id;
@@ -2677,35 +2577,35 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
                 i1.afo = data.ta;
                 i1.isBa = data.isBa;
                 if (showDialog) {
-                if (i1.isBa) {
-                    hasBatchEnabledMaterials = true;
-                    if (data.astk < data.nq) {
-                        showDialog = false;
-                    }
-                } else if(!hasBatchEnabledMaterials){
-                    if (data.atpstk < data.nq) {
-                        showDialog = false;
+                    if (i1.isBa) {
+                        hasBatchEnabledMaterials = true;
+                        if (data.astk < data.nq) {
+                            showDialog = false;
+                        }
+                    } else if (!hasBatchEnabledMaterials) {
+                        if (data.atpstk < data.nq) {
+                            showDialog = false;
+                        }
                     }
                 }
-            }
                 i1.smst = data.smst;
 
-                i1.astk=data.astk;
+                i1.astk = data.astk;
                 $scope.shipment.items.push(i1);
             });
             $scope.shipment.transporter = $scope.transporter;
             $scope.shipment.trackingId = $scope.trackingId;
             $scope.shipment.ps = $scope.ps;
             $scope.shipment.ead = formatDate($scope.ead);
-            if(showDialog){
-                $scope.shipment.ship=0;
+            if (showDialog) {
+                $scope.shipment.ship = 0;
                 $scope.modalInstance = $uibModal.open({
                     templateUrl: 'views/orders/ship-shipment.html',
                     scope: $scope,
                     keyboard: false,
                     backdrop: 'static'
                 });
-            }else {
+            } else {
                 createShipment($scope.shipment);
             }
 
@@ -2722,12 +2622,12 @@ ordControllers.controller('NewShipmentController', ['$scope','ordService','$loca
             createShipment($scope.shipment);
         }
 
-        $scope.dismissModel=function () {
+        $scope.dismissModel = function () {
             $scope.modalInstance.dismiss('cancel');
 
         }
 
-       function createShipment(shipment){
+        function createShipment(shipment) {
             $scope.showLoading();
             ordService.createShipment(shipment).then(function (data) {
                 $scope.showSuccess(data.data.msg);
@@ -3910,12 +3810,12 @@ ordControllers.controller('ShipmentDetailCtrl', ['$scope', 'ordService','request
             return true;
         };
 
-        $scope.checkHideStatus=function (status){
-           return (checkNotNullEmpty(status) && status=='sp' || status=='fl');
+        $scope.checkHideStatus = function (status) {
+            return (checkNotNullEmpty(status) && status == 'sp' || status == 'fl');
         }
 
-        $scope.hasStatus=function (status){
-             return (checkNotNullEmpty($scope.statusList) &&  $scope.statusList.indexOf(status)>-1);
+        $scope.hasStatus = function (status) {
+            return (checkNotNullEmpty($scope.statusList) && $scope.statusList.indexOf(status) > -1);
         }
 
 

@@ -27,17 +27,17 @@
             <div class="col-sm-12 pull-left mb10" ng-show="!edit.mat">
                 <button type="button" class="btn btn-sm btn-primary"
                         ng-click="createShipment()"
-                        ng-if="order.its.length > 0"
+                        ng-if="order.its.length > 0 || createShipmentPermission"
                         ng-hide="generalconfig.dcs || dp.vp || isUndef(vendor) || !order.atv || !showStock"
                         ng-disabled="sel.selectedRows.length<=0">{{resourceBundle['create.shipment']}}
                 </button>
                 <button type="button" class="btn btn-sm btn-primary ml10"
-                        ng-show="!dp.vp && ( (order.st == ORDER.PENDING && ( order.oty!=0  || order.atv ))) ||
+                        ng-show="editPermission && !dp.vp && ( (order.st == ORDER.PENDING && ( order.oty!=0  || order.atv ))) ||
                         ((order.st == ORDER.BACKORDERED || order.st == ORDER.CONFIRMED) && order.atv)"
                         ng-click="startEditMats()">{{resourceBundle['edit']}}
                 </button>
                 <button type="button" class="btn btn-sm btn-primary ml10"
-                        ng-show="!dp.vp && order.atv &&
+                        ng-show="allocatePermission && !dp.vp && order.atv &&
                         (order.st == ORDER.PENDING || order.st == ORDER.BACKORDERED || order.st == ORDER.CONFIRMED)"
                         ng-click="startEditMats(true)">{{resourceBundle['allocate']}}
                 </button>

@@ -28,17 +28,19 @@ import com.logistimo.AppFactory;
 import com.logistimo.activity.entity.IActivity;
 import com.logistimo.activity.service.ActivityService;
 import com.logistimo.activity.service.impl.ActivityServiceImpl;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventSpec;
 import com.logistimo.config.models.LeadTimeAvgConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
-import com.logistimo.constants.SourceConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.conversations.service.ConversationService;
 import com.logistimo.conversations.service.impl.ConversationServiceImpl;
 import com.logistimo.dao.JDOUtils;
+import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
@@ -50,6 +52,7 @@ import com.logistimo.events.models.CustomOptions;
 import com.logistimo.events.processor.EventPublisher;
 import com.logistimo.exception.LogiException;
 import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.dao.ITransDao;
 import com.logistimo.inventory.dao.impl.TransDao;
@@ -64,14 +67,13 @@ import com.logistimo.materials.entity.IHandlingUnit;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.IHandlingUnitService;
 import com.logistimo.materials.service.MaterialCatalogService;
-import com.logistimo.materials.service.MaterialUtils;
 import com.logistimo.materials.service.impl.HandlingUnitServiceImpl;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.models.ResponseModel;
 import com.logistimo.models.shipments.ShipmentItemModel;
 import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.dao.IOrderDao;
 import com.logistimo.orders.dao.OrderUpdateStatus;
 import com.logistimo.orders.dao.impl.OrderDao;
@@ -79,14 +81,12 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.Order;
-import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
-import com.logistimo.orders.entity.approvals.OrderApprovalMapping;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
+import com.logistimo.orders.validators.UpdateOrderStatusValidator;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
-import com.logistimo.services.DuplicationException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
@@ -105,7 +105,6 @@ import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.LockUtil;
-import com.logistimo.utils.MsgUtil;
 import com.logistimo.utils.QueryUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -123,7 +122,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -147,6 +145,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   private IOrderDao orderDao = new OrderDao();
   private ITransDao transDao = new TransDao();
 
+
   // Get a demand item with same material ID
   private static IDemandItem getDemandItemByMaterial(List<IDemandItem> demandList,
                                                      Long materialId) {
@@ -159,82 +158,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       }
     }
     return null;
-  }
-
-    /**
-     * Checks if any of the entity tags of the entity associated with this order is configured for approval in domain approval config
-     * @param order
-     * @param locale
-     * @return
-     */
-    public boolean isApprovalRequired(IOrder order, Locale locale, String approvalType) {
-    boolean required = false;
-    if(order != null) {
-      IKiosk kiosk = null;
-      List<String> entityTags;
-        List<String> configTags;
-      try {
-        EntitiesService es = Services.getService(EntitiesServiceImpl.class, locale);
-        kiosk = es.getKiosk(order.getKioskId());
-      } catch (ServiceException e) {
-        xLogger.fine("Error while fetching entity details: {0}", order.getKioskId(), e);
-      }
-
-      if(kiosk != null) {
-          entityTags = kiosk.getTags();
-          if(entityTags != null && entityTags.size() > 0) {
-              DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
-              ApprovalsConfig ac = dc.getApprovalsConfig();
-              ApprovalsConfig.OrderConfig orderConfig = ac.getOrderConfig();
-              if(orderConfig != null) {
-                if (ApprovalsConfig.TRANSFER_ORDER_APPROVAL.equals(approvalType)) {
-                      if(orderConfig.getPrimaryApprovers() != null && orderConfig.getPrimaryApprovers().size() > 0) {
-                          required = true;
-
-                      }
-                  } else {
-                      List<ApprovalsConfig.PurchaseSalesOrderConfig> psoa = orderConfig.getPurchaseSalesOrderApproval();
-                      for(ApprovalsConfig.PurchaseSalesOrderConfig ps : psoa) {
-                          configTags = ps.getEntityTags();
-                          if(configTags != null && configTags.size() > 0) {
-                              required = isTagConfigured(entityTags, configTags, approvalType, ps);
-                          }
-                          if(required) {
-                              break;
-                          }
-                      }
-                  }
-              }
-          }
-        }
-      }
-      return required;
-  }
-
-    /** Checks whether purchase or sales order approval is configured
-     * @param entityTags
-     * @param configTags
-     * @param approvalType
-     * @param ps
-     * @return
-     */
-  public boolean isTagConfigured(List<String> entityTags, List<String> configTags, String approvalType, ApprovalsConfig.PurchaseSalesOrderConfig ps) {
-    boolean found = false;
-    for(String entityTag : entityTags) {
-        for(String configTag : configTags) {
-            if(entityTag.equals(configTag)) {
-              if (ApprovalsConfig.PURCHASE_ORDER_APPROVAL.equals(approvalType)) {
-                    found = ps.isPurchaseOrderApproval();
-              } else if (ApprovalsConfig.SALES_ORDER_APPROVAL.equals(approvalType)) {
-                    found = ps.isSalesOrderApproval();
-                }
-                if(found) {
-                    break;
-                }
-            }
-        }
-    }
-    return found;
   }
 
   public IOrder getOrder(Long orderId) throws ObjectNotFoundException, ServiceException {
@@ -274,12 +197,17 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   @Override
-  public void updateOrderVisibility(Long orderId) throws ObjectNotFoundException {
+  public void updateOrderVisibility(Long orderId, Integer orderType) throws ObjectNotFoundException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     IOrder o;
     try {
       o = JDOUtils.getObjectById(IOrder.class, orderDao.createKey(orderId), pm);
-      o.setVisibleToVendor(true);
+      if(IOrder.PURCHASE_ORDER.equals(orderType)) {
+        o.setVisibleToVendor(true);
+      } else if(IOrder.TRANSFER_ORDER.equals(orderType)) {
+        o.setVisibleToCustomer(true);
+        o.setVisibleToVendor(true);
+      }
       pm.makePersistent(o);
     } catch (JDOObjectNotFoundException e) {
       throw new ObjectNotFoundException(e.getMessage());
@@ -311,51 +239,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     xLogger.fine("Exiting addOrder");
     return oid;
   }
-
-    /*@Override
-    public UpdatedOrder updateOrderWithAllocations(IOrder order, int source, boolean isLocked,
-                                                   boolean validateHU, String userId) throws LogiException {
-        InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
-        String oIdStr = String.valueOf(order.getOrderId());
-        String tag = IInvAllocation.Type.ORDER.toString() + CharacterConstants.COLON + oIdStr;
-        PersistenceManager pm = null;
-        Transaction tx = null;
-        UpdatedOrder updatedOrder;
-        try {
-            pm = PMF.get().getPersistenceManager();
-            tx = pm.currentTransaction();
-            tx.begin();
-            DomainConfig dc = DomainConfig.getInstance(order.getDomainId());
-            if (dc.autoGI() && order.getServicingKiosk() != null) {
-                List<IDemandItem> demandItems = (List<IDemandItem>) order.getItems();
-                for (IDemandItem item : demandItems) {
-                    List<ShipmentItemBatchModel> batchDetails = null;
-                    if (item.getItemBatches() != null) {
-                        batchDetails = new ArrayList<>(item.getItemBatches().size());
-                        for (IDemandItemBatch bt : item.getItemBatches()) {
-                            ShipmentItemBatchModel details = new ShipmentItemBatchModel();
-                            details.id = bt.getBatchId();
-                            details.q = bt.getQuantity();
-                            batchDetails.add(details);
-                        }
-                        item.setAllocatedStock(null);
-                    }
-                    if (item.getAllocatedStock() != null || batchDetails != null) {
-                        ims.allocate(order.getServicingKiosk(), item.getMaterialId(), IInvAllocation.Type.ORDER, oIdStr,
-                                tag, item.getAllocatedStock(), batchDetails, userId, pm);
-                    }
-                }
-            }
-            updatedOrder = updateOrder(order, source, isLocked, validateHU);
-            tx.commit();
-        } finally {
-            if (tx != null && tx.isActive()) {
-                tx.rollback();
-            }
-            pm.close();
-        }
-        return updatedOrder;
-    }*/
 
   public UpdatedOrder updateOrder(IOrder order, int source) throws LogiException {
     return updateOrder(order, source, false, false);
@@ -507,6 +390,10 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         return new UpdatedOrder(o);
       }
 
+      StaticApplicationContext.getBean(UpdateOrderStatusValidator.class)
+          .validateOrderStatusChange(o,
+              newStatus);
+
       IDemandService ds = Services.getService(DemandService.class);
       List<IDemandItem> demandList = ds.getDemandItems(orderId, pm);
       o.setItems(demandList);
@@ -517,7 +404,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           ims =
           Services.getService(InventoryManagementServiceImpl.class,
               this.getLocale());
-      ResponseModel responseModel = new ResponseModel();
 
       switch (newStatus) {
         case IOrder.CANCELLED:
@@ -528,14 +414,13 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
             xLogger
                 .info("Cancelling shipment {0} for order {1}", orderId, shipment.getShipmentId());
             ss.updateShipmentStatus(shipment.getShipmentId(), ShipmentStatus.CANCELLED, message,
-                updatingUserId, crsn, false, pm,source);
+                updatingUserId, crsn, false, pm, source);
           }
           if (dc.autoGI()) {
             ims.clearAllocationByTag(null, null, tag, pm);
           }
           break;
         case IOrder.CONFIRMED:
-          validateOrderStatusChange(o, IOrder.CONFIRMED);
           if (dc.autoGI()) {
             if (dc.getOrdersConfig().allocateStockOnConfirmation()) {
               for (IDemandItem d : demandList) {
@@ -623,55 +508,46 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   @Override
   public String shipNow(IOrder order, String transporter, String trackingId, String reason,
-                        Date expectedFulfilmentDate, String userId, String ps,int source)
-      throws ServiceException {
-    try {
-      IShipmentService
-          shipmentService =
-          Services.getService(ShipmentService.class, this.getLocale());
-      MaterialCatalogService
-          mcs =
-          Services.getService(MaterialCatalogServiceImpl.class, this.getLocale());
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class, this.getLocale());
-      ShipmentModel model = new ShipmentModel();
-      if (expectedFulfilmentDate != null) {
-        model.ead = new SimpleDateFormat(Constants.DATE_FORMAT).format(expectedFulfilmentDate);
-      }
-      model.trackingId = trackingId;
-      model.transporter = transporter;
-      model.ps = ps;
-      model.orderId = order.getOrderId();
-      model.customerId = order.getKioskId();
-      model.vendorId = order.getServicingKiosk();
-      IKiosk vendor = as.getKiosk(model.vendorId, false);
-      model.reason = reason;
-      model.status = ShipmentStatus.SHIPPED;
-      model.tags = order.getTags(TagUtil.TYPE_ORDER);
-      model.userID = userId;
-      model.items = new ArrayList<>();
-      model.sdid = order.getDomainId();
-      validateOrderStatusChange(order, IOrder.COMPLETED);
-      DomainConfig dc = DomainConfig.getInstance(order.getDomainId());
-      for (IDemandItem demandItem : order.getItems()) {
-        if (BigUtil.greaterThanZero(demandItem.getQuantity())) {
-          ShipmentItemModel shipmentItemModel = new ShipmentItemModel();
-          shipmentItemModel.mId = demandItem.getMaterialId();
-          shipmentItemModel.q = demandItem.getQuantity();
-          shipmentItemModel.afo = dc.autoGI();
-          IMaterial material = mcs.getMaterial(shipmentItemModel.mId);
-          shipmentItemModel.isBa = material.isBatchEnabled() && vendor.isBatchMgmtEnabled();
-          shipmentItemModel.mnm = material.getName();
-          model.items.add(shipmentItemModel);
-        }
-      }
-      return shipmentService.createShipment(model,source);
-    } catch (LogiException e) {
-      throw e;
-    } catch (Exception e) {
-      xLogger.severe("Exception:{0} Failed to ship order {1} ", e, order.getOrderId());
-      throw new ServiceException(e);
+                        Date expectedFulfilmentDate, String userId, String ps, int source)
+      throws ServiceException, ObjectNotFoundException, ValidationException {
+    IShipmentService
+        shipmentService =
+        Services.getService(ShipmentService.class, this.getLocale());
+    MaterialCatalogService
+        mcs =
+        Services.getService(MaterialCatalogServiceImpl.class, this.getLocale());
+    EntitiesService as = Services.getService(EntitiesServiceImpl.class, this.getLocale());
+    ShipmentModel model = new ShipmentModel();
+    if (expectedFulfilmentDate != null) {
+      model.ead = new SimpleDateFormat(Constants.DATE_FORMAT).format(expectedFulfilmentDate);
     }
-
+    model.trackingId = trackingId;
+    model.transporter = transporter;
+    model.ps = ps;
+    model.orderId = order.getOrderId();
+    model.customerId = order.getKioskId();
+    model.vendorId = order.getServicingKiosk();
+    IKiosk vendor = as.getKiosk(model.vendorId, false);
+    model.reason = reason;
+    model.status = ShipmentStatus.SHIPPED;
+    model.tags = order.getTags(TagUtil.TYPE_ORDER);
+    model.userID = userId;
+    model.items = new ArrayList<>();
+    model.sdid = order.getDomainId();
+    DomainConfig dc = DomainConfig.getInstance(order.getDomainId());
+    for (IDemandItem demandItem : order.getItems()) {
+      if (BigUtil.greaterThanZero(demandItem.getQuantity())) {
+        ShipmentItemModel shipmentItemModel = new ShipmentItemModel();
+        shipmentItemModel.mId = demandItem.getMaterialId();
+        shipmentItemModel.q = demandItem.getQuantity();
+        shipmentItemModel.afo = dc.autoGI();
+        IMaterial material = mcs.getMaterial(shipmentItemModel.mId);
+        shipmentItemModel.isBa = material.isBatchEnabled() && vendor.isBatchMgmtEnabled();
+        shipmentItemModel.mnm = material.getName();
+        model.items.add(shipmentItemModel);
+      }
+    }
+    return shipmentService.createShipment(model, source);
   }
 
   private IMessage addMessageToOrder(Long orderId, Long domainId, String message,
@@ -700,7 +576,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       if (message != null && !message.isEmpty() || (userIds != null && !userIds.isEmpty())) {
         customOptions.message = message;
         if (userIds != null && !userIds.isEmpty()) {
-          Map<Integer, List<String>> userIdsMap = new HashMap<Integer, List<String>>();
+          Map<Integer, List<String>> userIdsMap = new HashMap<>();
           userIdsMap.put(Integer.valueOf(EventSpec.NotifyOptions.IMMEDIATE), userIds);
           customOptions.userIds = userIdsMap;
         }
@@ -727,29 +603,22 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
             "ORDER:" + orderId, pm);
   }
 
-  public Results getOrders(Long domainId, Long kioskId, String status, Date since, Date untilDate,
-                           String otype, String tagType, String tag, List<Long> kioskIds,
-                           PageParams pageParams) throws ServiceException {
-    return getOrders(domainId, kioskId, status, since, untilDate, otype, tagType, tag, kioskIds,
-        pageParams, null, null);
-  }
-
   /**
    * Get orders for a given kiosk, status (optional) and a time limit (optional)
    */
   @SuppressWarnings("unchecked")
   public Results getOrders(Long domainId, Long kioskId, String status, Date since, Date until,
                            String otype, String tagType, String tag, List<Long> kioskIds,
-                           PageParams pageParams, Integer orderType, String referenceId)
+                           PageParams pageParams, Integer orderType, String referenceId, String approvalStatus)
       throws ServiceException {
     return getOrders(domainId, kioskId, status, since, until, otype, tagType, tag, kioskIds,
-        pageParams, orderType, referenceId, false);
+        pageParams, orderType, referenceId, approvalStatus, false);
   }
 
   public Results getOrders(Long domainId, Long kioskId, String status, Date since, Date until,
                            String otype, String tagType, String tag, List<Long> kioskIds,
                            PageParams pageParams, Integer orderType, String referenceId,
-                           boolean withDemand) throws ServiceException {
+                           String approvalStatus, boolean withDemand) throws ServiceException {
     xLogger.fine("Entered getOrders");
     if (kioskId == null && domainId == null) {
       throw new ServiceException(
@@ -1350,29 +1219,21 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           o.setSrc(source);
           DomainConfig dc = DomainConfig.getInstance(domainId);
           ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
-          if(approvalsConfig != null) {
-              String approvalType = "";
-              boolean isApprovalRequired = false;
-              if(o.getOrderType() == 0) {
-                approvalType = ApprovalsConfig.TRANSFER_ORDER_APPROVAL;
-              } else if(o.getOrderType() == 1) {
-                approvalType = ApprovalsConfig.PURCHASE_ORDER_APPROVAL;
-              }
-              if(StringUtils.isNotEmpty(approvalType)) {
-                  isApprovalRequired = isApprovalRequired(o, getLocale(), approvalType);
-              }
-            if (isApprovalRequired && ApprovalsConfig.PURCHASE_ORDER_APPROVAL
-                .equals(approvalType)) {
-                  o.setVisibleToCustomer(true);
-                  o.setVisibleToVendor(false);
-            } else if (isApprovalRequired && ApprovalsConfig.TRANSFER_ORDER_APPROVAL
-                .equals(approvalType)) {
-                  o.setVisibleToCustomer(false);
-                  o.setVisibleToVendor(false);
-              } else{
-                  o.setVisibleToCustomer(true);
-                  o.setVisibleToVendor(true);
-              }
+          boolean isApprovalRequired = StaticApplicationContext.getBean(
+              IOrderApprovalsService.class).isApprovalRequired(o);
+          if(isApprovalRequired){
+            o = setOrderVisibility(o, approvalsConfig);
+            if(IOrder.PURCHASE_ORDER.equals(o.getOrderType())
+                || IOrder.TRANSFER_ORDER.equals(o.getOrderType())) {
+              o = setDomainVisibility(o);
+              o.setDomainId(domainId);
+            } else {
+              DomainsUtil.addToDomain(o, domainId, null);
+            }
+          } else {
+            o.setVisibleToCustomer(true);
+            o.setVisibleToVendor(true);
+            DomainsUtil.addToDomain(o, domainId, null);
           }
           o = pm.makePersistent(o);
           demandList = (List<IDemandItem>) pm.makePersistentAll(demandList);
@@ -1440,6 +1301,34 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     // Update kiosk activity timestamp
     updateEntityActivityTimestamps(o);
     return new OrderResults(items, null, o);
+  }
+
+  private IOrder setOrderVisibility(IOrder o, ApprovalsConfig approvalsConfig)
+      throws ServiceException {
+    if(approvalsConfig != null) {
+      if(IOrder.PURCHASE_ORDER.equals(o.getOrderType())) {
+          o.setVisibleToCustomer(true);
+          o.setVisibleToVendor(false);
+      } else if(IOrder.SALES_ORDER.equals(o.getOrderType())) {
+          o.setVisibleToCustomer(true);
+          o.setVisibleToVendor(true);
+      } else if(IOrder.TRANSFER_ORDER.equals(o.getOrderType())) {
+          o.setVisibleToCustomer(false);
+          o.setVisibleToVendor(false);
+        }
+    }
+    return o;
+  }
+
+  private IOrder setDomainVisibility(IOrder o) throws ServiceException {
+    EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class, getLocale());
+    if(IOrder.PURCHASE_ORDER.equals(o.getOrderType())) {
+      IKiosk kiosk = entitiesService.getKiosk(o.getKioskId());
+      o.setDomainIds(DomainsUtil.getVisibleDomains(kiosk.getDomainId(), IDomainLink.TYPE_PARENT));
+    } else if(IOrder.TRANSFER_ORDER.equals(o.getOrderType())) {
+      o.setDomainIds(DomainsUtil.getVisibleDomains(SecurityUtils.getCurrentDomainId(), IDomainLink.TYPE_PARENT));
+    }
+    return o;
   }
 
   private void validateHU(BigDecimal quantity, Long mId, String mName) throws LogiException {
@@ -1518,9 +1407,9 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       orderType = 1;
     }*/
     o.setOrderType(orderType);
-    // Add the order to this domain and parent domains (superdomains)
+    /*// Add the order to this domain and parent domains (superdomains)
     // NOTE: kioskId has to be set in the order first, before this call, given addToDomain relies on the kiosk to get the domain Ids
-    DomainsUtil.addToDomain(o, domainId, null);
+    DomainsUtil.addToDomain(o, domainId, null);*/
     // Update the demand items with order id and compute price
     if (items != null && !items.isEmpty()) {
       Iterator<IDemandItem> it = items.iterator();
@@ -1789,185 +1678,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     return di;
   }
 
-  // Generate and update inventory transactions
-  private String updateInvTransactions(String type, Long kioskId, Long linkedKioskId, IOrder o,
-                                       String updatingUserId, InventoryManagementService ims,
-                                       int source) throws ServiceException, DuplicationException {
-    xLogger.fine("Entered updateInvTransactions");
-    if (o.getItems() == null) {
-      xLogger.warn("No demand items in order {0}", o.getOrderId());
-      throw new ServiceException("No demand items in order " + o.getOrderId());
-    }
-    if (kioskId
-        == null) { // do not post any inventory, if no kiosk was specified (this is a valid case, esp. for kiosks with no relationships)
-      throw new ServiceException("No kiosk ID specified");
-    }
-    List<ITransaction> trans = new ArrayList<ITransaction>();
-    // Get order's geo properties, if any
-    Double lat = o.getLatitude(), lng = o.getLongitude(), geoAccuracy = o.getGeoAccuracy();
-    String geoErrorCode = o.getGeoErrorCode();
-    Long domainId = o.getDomainId();
-    // Check to ensure that the transaction's domain is the same as that of the kiosk on which it is being made (superdomains)
-    try {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class, getLocale());
-      domainId =
-          as.getKiosk(kioskId, false)
-              .getDomainId(); // this ensures that the transactions' domain ID will be the same as that of the kiosk, independent of its source domain
-    } catch (Exception e) {
-      e.printStackTrace();
-      xLogger.warn(
-          "{0} when finding the kiosk {1} to assign its domain to transactions of type {2}: {3}",
-          e.getClass().getName(), kioskId, type, e.getMessage());
-    }
-
-    // Get the transaction list from demand items
-    Iterator<IDemandItem> it = (Iterator<IDemandItem>) o.getItems().iterator();
-    while (it.hasNext()) {
-      IDemandItem di = it.next();
-      if (BigUtil.equalsZero(di.getQuantity())) // if quantity is 0, do not post a transaction
-      {
-        continue;
-      }
-      ITransaction t = JDOUtils.createInstance(ITransaction.class);
-      t.setType(type);
-      t.setKioskId(kioskId);
-      t.setSrc(source);
-      t.setLinkedKioskId(linkedKioskId);
-      t.setMaterialId(di.getMaterialId());
-      t.setMessage(di.getMessage());
-      if (updatingUserId != null) {
-        t.setSourceUserId(updatingUserId);
-      } else {
-        t.setSourceUserId(di.getUserId());
-      }
-      t.setTimestamp(o.getUpdatedOn());
-      t.setTrackingId(String.valueOf(o.getOrderId()));
-      t.setTrackingObjectType(ITransaction.TYPE_ORDER);
-      // Update domain Ids
-      DomainsUtil.addToDomain(t, domainId, null);
-      // Add geo properties, if any
-      if (lat != null) {
-        t.setLatitude(lat.doubleValue());
-      }
-      if (lng != null) {
-        t.setLongitude(lng.doubleValue());
-      }
-      if (geoAccuracy != null) {
-        t.setGeoAccuracy(geoAccuracy.doubleValue());
-      }
-      if (geoErrorCode != null) {
-        t.setGeoErrorCode(geoErrorCode);
-      }
-      // Check if there are batches of quantities allocated to this item
-      Set<IDemandItemBatch> batches = (Set<IDemandItemBatch>) di.getItemBatches();
-      if (batches != null && !batches.isEmpty()) {
-        Iterator<IDemandItemBatch> itBatches = batches.iterator();
-        while (itBatches.hasNext()) {
-          IDemandItemBatch dib = itBatches.next();
-          if (BigUtil.equalsZero(dib.getQuantity())) {
-            continue;
-          }
-          ITransaction batchTrans = t.clone();
-          batchTrans.setBatchId(dib.getBatchId());
-          batchTrans.setQuantity(dib.getQuantity());
-          batchTrans.setBatchExpiry(new Date(dib.getBatchExpiry().getTime()));
-          batchTrans.setBatchManufacturer(dib.getBatchManufacturer());
-          if (dib.getBatchManufacturedDate() != null) {
-            batchTrans.setBatchManufacturedDate(new Date(dib.getBatchManufacturedDate().getTime()));
-          }
-          batchTrans.setSrc(source);
-          transDao.setKey(batchTrans);
-          // Add to list
-          trans.add(batchTrans);
-        }
-      } else {
-        t.setQuantity(di.getQuantity());
-        transDao.setKey(t);
-        // Add to list
-        trans.add(t);
-      }
-    }
-    // Update transactions
-    List<ITransaction> errors = null;
-    String msg = null;
-    try {
-      errors =
-          ims.updateInventoryTransactions(domainId,
-              trans); // TODO: do we need to surface these errors to the user? // earlier: instead of domainId passed, it was o.getDomainId() - changed due to superdomains
-      msg = getUpdateInvTransMessage(trans.size(), kioskId, errors);
-    } catch (ServiceException e) {
-      msg =
-          backendMessages.getString("transactions.posterror") + " " + o.getOrderId() + ". "
-              + backendMessages.getString("transactions.postmanually");
-      xLogger.warn("ServiceException when doing auto {0} for order {1}: {2}", type, o.getOrderId(),
-          e.getMessage());
-      throw new ServiceException(msg);
-    } catch (DuplicationException e1) {
-      msg = backendMessages.getString("transactions.duplicates");
-      xLogger
-          .warn("DuplicationException when doing auto {0} for order {1}: {2}", type, o.getOrderId(),
-              e1.getMessage());
-      throw new DuplicationException(msg);
-    }
-    xLogger.fine("Exiting updateInvTransactions");
-    if (errors != null && errors.size() > 0) {
-      throw new ServiceException(msg);
-    } else {
-      return msg;
-    }
-  }
-
-  // Undo inventory transactions
-  @SuppressWarnings("unchecked")
-  private String undoInvTransactions(Long oid, InventoryManagementService ims)
-      throws ServiceException {
-    xLogger.fine("Entered undoInvTransactions");
-    // Get transactions associated with the given order (i.e. previously posted against this order)
-    List<ITransaction> trans = null;
-    String msg = null;
-    try {
-      Results r = ims.getInventoryTransactionsByTrackingId(oid);
-      if (r != null) {
-        trans = r.getResults();
-      }
-      // Get the transaction keys
-      if (trans == null) { // do nothing
-        xLogger.warn("No transactions to undo for order {0}", oid);
-        throw new ServiceException(
-            backendMessages.getString("transactions.unabletofindforundo") + " " + oid);
-      }
-    } catch (ServiceException e) {
-      xLogger.warn("ServiceException when finding transactions to undo for order {0}: {1}", oid,
-          e.getMessage());
-      throw new ServiceException(
-          backendMessages.getString("transactions.unabletofindforundo") + " " + oid + " [" + e
-              .getMessage() + "]");
-    }
-
-    Iterator<ITransaction> it = trans.iterator();
-    List<String> transIds = new ArrayList<String>();
-    while (it.hasNext()) {
-      transIds.add(it.next().getKeyString());
-    }
-    // Undo transactions
-    try {
-      ims.undoTransactions(transIds);
-      msg =
-          transIds.size() + " " + backendMessages.getString(
-              "transactions.undo"); // " transaction(s) associated with this order (" + oid + ") were un-done, since they were automatically posted earler";
-    } catch (ServiceException e) {
-      xLogger.warn(
-          "ServiceException when trying to undo transactions for order {0} and trans Ids. {1}: {2}",
-          oid, transIds, e.getMessage());
-      throw new ServiceException(
-          backendMessages.getString("transactions.unabletoreverse") + " " + oid + ". "
-              + backendMessages.getString("transactions.undomanually"));
-    }
-    xLogger.info("Un-did {0} transactions for order {1}", transIds.size(), oid);
-    xLogger.fine("Exiting undoInvTransactions");
-    return msg;
-  }
-
   // Generate order events, if configured
   private void generateEvent(Long domainId, int eventId, IOrder o, String message,
                              List<String> userIds) {
@@ -1995,56 +1705,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       xLogger.severe("{0} when generating Order event {1} for order {2} in domain {3}: {4}",
           e.getClass().getName(), eventId, o.getOrderId(), domainId, e);
     }
-  }
-
-  // Get the message to be shown to user on updating inv. transactions automatically
-  private String getUpdateInvTransMessage(int numTrans, Long kioskId, List<ITransaction> errors) {
-    // Get the kiosk name
-    String kname = null;
-    try {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      IKiosk k = as.getKiosk(kioskId, false);
-      kname = k.getName();
-    } catch (ServiceException e) {
-      xLogger.warn("ServiceException when getting kiosk {0}: {1}", kioskId, e.getMessage());
-    }
-    int numErrors = (errors != null ? errors.size() : 0);
-    String msg = (numTrans - numErrors) + " " + backendMessages.getString("transactions.posted");
-    if (kname != null) {
-      msg += " " + messages.getString("for") + " " + kname + ".";
-    }
-    if (numErrors > 0) {
-      if (!msg.isEmpty()) {
-        msg += "\n\n";
-      }
-      msg += backendMessages.getString("errors.oneormore") + ":\n";
-      // Get the material catalog service
-      try {
-        MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
-        for (int i = 0; i < numErrors; i++) {
-          ITransaction error = errors.get(i);
-          if (i > 0) {
-            msg += ";  ";
-          }
-          msg += mcs.getMaterial(error.getMaterialId()).getName() + ": " + error.getMessage();
-        }
-      } catch (Exception e) {
-        xLogger.warn("ServiceException when getting material: {0}", e.getMessage());
-      }
-    }
-    return msg;
-  }
-
-  public void destroy() throws ServiceException {
-    xLogger.fine("Entering destroy");
-    // TODO Auto-generated method stub
-    xLogger.fine("Exiting destroy");
-  }
-
-  public void init(Services services) throws ServiceException {
-    xLogger.fine("Entering init");
-    // TODO Auto-generated method stub
-    xLogger.fine("Exiting init");
   }
 
   @Override
@@ -2275,79 +1935,5 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     return allQtyZero;
   }
 
-  private List<IMaterial> getMaterialsNotExistingInKiosk(Long kioskId, IOrder order) {
-    List<IMaterial> materialsNotExisting = new ArrayList<>(1);
-    try {
-      InventoryManagementService
-          ims =
-          Services.getService(InventoryManagementServiceImpl.class);
-      MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
-      for (IDemandItem demandItem : order.getItems()) {
-        IInvntry inv = ims.getInventory(kioskId, demandItem.getMaterialId());
-        if (inv == null && BigUtil.greaterThanZero(demandItem.getQuantity())) {
-          IMaterial material = mcs.getMaterial(demandItem.getMaterialId());
-          materialsNotExisting.add(material);
-        }
-      }
-    } catch (ServiceException e) {
-      xLogger.warn("Exception while getting materials not existing in kioskId {0}", kioskId, e);
-    }
-    return materialsNotExisting;
-  }
 
-  private void validateOrderStatusChange(IOrder order, String newStatus) throws ServiceException {
-    List<IMaterial>
-        materialsNotExistingInVendor =
-        getMaterialsNotExistingInKiosk(order.getServicingKiosk(), order);
-    if ((IOrder.CONFIRMED.equals(newStatus) || IOrder.COMPLETED.equals(newStatus)) &&
-        materialsNotExistingInVendor != null && !materialsNotExistingInVendor.isEmpty()) {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      IKiosk vnd = as.getKiosk(order.getServicingKiosk(), false);
-      String errorCode = "I003";
-      if (IOrder.CONFIRMED.equals(newStatus)) {
-        errorCode = "I003";
-      } else if (IOrder.COMPLETED.equals(newStatus)) {
-        errorCode = "I004";
-      }
-      throw new ServiceException(errorCode, MsgUtil.bold(vnd.getName()),
-      MaterialUtils.getMaterialNamesString(materialsNotExistingInVendor));
-      }
-  }
-  public List<IOrderApprovalMapping> getOrdersApprovalMapping(Set<Long> orderIds, int orderAppprovalType) {
-
-    if (orderIds == null || orderIds.isEmpty()) {
-      return null;
-    }
-    PersistenceManager pm = PMF.get().getPersistenceManager();
-    Query query = null;
-    List<IOrderApprovalMapping> results = null;
-    try {
-
-      StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER_APPROVAL_MAPPING` ");
-      queryBuilder.append("WHERE ORDER_ID IN (");
-      for (Long orderId : orderIds) {
-        queryBuilder.append(orderId).append(CharacterConstants.COMMA);
-      }
-      queryBuilder.setLength(queryBuilder.length() - 1);
-      queryBuilder.append(" )");
-      queryBuilder.append(" AND APPROVAL_TYPE=").append(orderAppprovalType);
-      queryBuilder.append(" ORDER BY ORDER_ID ASC");
-      query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
-      query.setClass(OrderApprovalMapping.class);
-      results = (List<IOrderApprovalMapping>) query.execute();
-      results=(List<IOrderApprovalMapping>) pm.detachCopyAll(results);
-    } catch (Exception e) {
-      xLogger.warn("Exception while fetching approval status", e);
-    } finally {
-      if (query != null) {
-        try {
-          query.closeAll();
-        } catch (Exception ignored) {
-          xLogger.warn("Exception while closing query", ignored);
-        }
-      }
-      pm.close();
-    }
-    return results;
-  }
 }

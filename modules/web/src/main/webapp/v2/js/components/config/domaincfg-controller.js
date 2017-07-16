@@ -74,7 +74,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         CurrencyController.call(this, $scope, configService);
         LocationController.call(this, $scope, configService);
         $scope.setGeneralConfig = function () {
-            if($scope.pUser)
+            if ($scope.pUser)
             $scope.continue = true;
             if($scope.cnf.snh && checkNullEmpty($scope.cnf.nhn)){
                 $scope.showWarning($scope.resourceBundle['enternewhostnamemsg']);
@@ -102,22 +102,22 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 }
             }
         };
-        $scope.getUser = function(data,uType){
-            if(checkNotNullEmpty(data)){
-                userService.getUser(data).then(function(data){
-                    if(uType=='p'){
+        $scope.getUser = function (data, uType) {
+            if (checkNotNullEmpty(data)) {
+                userService.getUser(data).then(function (data) {
+                    if (uType == 'p') {
                         $scope.pUser = data.data;
-                    }else {
+                    } else {
                         $scope.sUser = data.data;
                     }
                     updateAdminContacts();
-                }).catch(function error(msg){
+                }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
                 })
             }
         }
-        function updateAdminContacts(){
-            if($scope.pUser) {
+        function updateAdminContacts() {
+            if ($scope.pUser) {
                 $scope.cnf.adminContact.primary = {};
                 $scope.cnf.adminContact.primary.usrid = $scope.pUser.id;
                 $scope.cnf.adminContact.primary.usrname = $scope.pUser.fnm + ' ' + $scope.pUser.lnm;
@@ -125,7 +125,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 $scope.cnf.adminContact.primary.phnm = $scope.pUser.phm;
                 $scope.cnf.adminContact.primary.role = $scope.pUser.ro;
             }
-            if ($scope.sUser){
+            if ($scope.sUser) {
                 $scope.cnf.adminContact.secondary = {};
                 $scope.cnf.adminContact.secondary.usrid = $scope.sUser.id;
                 $scope.cnf.adminContact.secondary.usrname = $scope.sUser.fnm + ' ' + $scope.sUser.lnm;
@@ -134,7 +134,8 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 $scope.cnf.adminContact.secondary.role = $scope.sUser.ro;
             }
         }
-        function updatePSUser(){
+
+        function updatePSUser() {
             if ($scope.cnf.adminContact.primary) {
                 $scope.pUser = {};
                 $scope.pUser.id = $scope.cnf.adminContact.primary.usrid;
@@ -150,11 +151,12 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 $scope.sUser.ro = $scope.cnf.adminContact.secondary.role;
             }
         }
-        $scope.checkAdminUser = function(usr,r){
-            if(checkNullEmpty(usr)) {
-                if(r=='p') {
+
+        $scope.checkAdminUser = function (usr, r) {
+            if (checkNullEmpty(usr)) {
+                if (r == 'p') {
                     $scope.cnf.adminContact.primary = undefined;
-                }else{
+                } else {
                     $scope.cnf.adminContact.secondary = undefined;
                 }
             }
@@ -532,9 +534,9 @@ domainCfgControllers.controller('CapabilitiesConfigurationController', ['$scope'
 domainCfgControllers.controller('ApprovalConfigurationController',['$scope','domainCfgService',
 function($scope,domainCfgService){
     var ty = {ps:true, t:false};
-    var hdng = {ps: "Purchases and sales", t: "Transfers/Releases"};
-    var info = {ps: "Specify entity tags and enable approvals for purchase or sales orders for entities with these tags. For sales orders, approvals will be enabled at the time of shipping.",
-                t: "Specify one or more primary or secondary approvers for transfer/release orders. Approval request will be sent to all primary approvers first, and on request expiry, it will be sent to all the secondary approvers, if specified."}
+    var hdng = {ps: $scope.resourceBundle['approval.config.purchase.sales'], t: $scope.resourceBundle['approval.config.transfer']};
+    var info = {ps: $scope.resourceBundle['approval.config.purchase.sales.info'],
+                t: $scope.resourceBundle['approval.config.transfer.info']};
     $scope.init = function(){
         $scope.orderType = ty;
         $scope.spc = false;
@@ -624,24 +626,22 @@ function($scope,domainCfgService){
         }
     };
     $scope.validateApprovals = function() {
-        if((checkNullEmpty($scope.orderCfg.psoa) || $scope.orderCfg.psoa.length == 0) && checkNullEmpty($scope.pa) && checkNullEmpty($scope.sa)) {
-            $scope.showWarning("No approvals configured.");
+        if(checkNotNullEmpty($scope.orderCfg.sa) && checkNullEmpty($scope.orderCfg.pa)) {
+            $scope.showWarning($scope.resourceBundle['approval.config.primary.approver.configure']);
             $scope.continue = false;
             return;
-        } else if(checkNullEmpty($scope.orderCfg.pa) && checkNotNullEmpty($scope.orderCfg.sa)) {
-            $scope.showWarning("Please select primary approvers for approving transfer orders.");
-            $scope.continue = false;
-            return;
-        } else {
+        }
+        if(checkNotNullEmpty($scope.orderCfg.psoa))
+        {
             $scope.orderCfg.psoa.some(function(data){
                 if(checkNotNullEmpty(data)) {
                     if(checkNullEmpty(data.enTgs)){
-                        $scope.showWarning("Please configure entity tags for purchase/sales order approvals.");
+                        $scope.showWarning($scope.resourceBundle['approval.config.purchase.entity.tags.configure']);
                         $scope.continue = false;
                         return;
                     }
                     if(!data.poa && !data.soa) {
-                        $scope.showWarning("Please select the time when approval is required.");
+                        $scope.showWarning($scope.resourceBundle['approval.config.time.of.approval']);
                         $scope.continue = false;
                         return;
                     }
@@ -667,7 +667,7 @@ function($scope,domainCfgService){
                 });
             }
         }else {
-            $scope.showWarning("No approvals configured.")
+            $scope.showWarning($scope.resourceBundle['approval.config.none']);
         }
     };
 

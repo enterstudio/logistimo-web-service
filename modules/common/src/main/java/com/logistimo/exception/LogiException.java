@@ -39,6 +39,8 @@ import java.util.ResourceBundle;
 public class LogiException extends Exception {
   private final transient Object[] arguments;
   private final String code;
+  private int statusCode = 500;
+
 
   public LogiException(String code, Locale locale, Object... arguments) {
     super(constructMessage(code, locale, arguments));
@@ -61,13 +63,13 @@ public class LogiException extends Exception {
   public LogiException(String code, Throwable t, Object... arguments) {
     super(constructMessage(code, Locale.ENGLISH, arguments), t);
     this.code = code;
-    this.arguments = new Object[0];
+    this.arguments = arguments;
   }
 
   public LogiException(String code, Object... arguments) {
     super(constructMessage(code, Locale.ENGLISH, arguments));
     this.code = code;
-    this.arguments = new Object[0];
+    this.arguments = arguments;
   }
 
   public LogiException(Throwable t) {
@@ -108,4 +110,11 @@ public class LogiException extends Exception {
     return getLocalizedMessage();
   }
 
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  public void setStatusCode(int statusCode) {
+    this.statusCode = statusCode;
+  }
 }

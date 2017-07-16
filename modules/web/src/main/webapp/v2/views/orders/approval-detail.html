@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div ng-controller="ApprovalDetailCtrl">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <span ng-show="type == 'p'">Purchase approval</span>
+            <span ng-show="type == 's'">Sale approval</span>
+            <span ng-show="type == 't'">Transfer approval</span>
+        </div>
+        <div class="panel-body">
+            <div ng-if="loading" class="row mt18" style="min-height: 700px;color: #aaaaaa">
+                <div class="text-center">
+                    Loading... <span class="glyphicons glyphicons-cogwheel spin"></span>
+                </div>
+            </div>
+            <div ng-if="!loading">
+                <div class="col-sm-9" ng-show="!cancelApproval">
+                    <span class="control-label"
+                          ng-show="type == 'p' && request == true || type == 'p' && approve == true">This order requires approval</span>
+                    <span class="control-label"
+                          ng-show="type == 's' && request == true || type == 's' && approve == true">This order requires shipping approval</span>
+                    <span class="control-label"
+                          ng-show="type == 't' && request == true || type == 't' && approve == true">This order requires transfer approval</span>
+                    <span class="control-label" ng-show="approved == true"><span
+                            class="glyphicons glyphicons-ok-circle c-green"></span> Approved on {{approval.status.updated_at | formatDate:this }} by <a
+                            href="#/setup/users/all/detail?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
+                </div>
+                <div class="col-sm-9" ng-show="cancelApproval">
+                    <span ng-show="approval.status.status = 'pn'">Pending approval by</span>
+                    <span ng-repeat="item in approval.approvers" style="display:inline-block;">
+                        <a ng-hide="$index == approval.approvers.length - 1"
+                           href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
+                        <a ng-show="$index == approval.approvers.length - 1"
+                           href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}}</a>
+                    </span>
+                </div>
+                <div class="col-sm-9" ng-show="cancelApproval">
+                    <span class="litetext" style="display: inline-block">Requested on {{approval.created_at | formatDate:this }} by </span>
+                    <a class="litetext" href="#/setup/users/all/details?userId={{approval.requester.user_id}}"
+                       style="display: inline">{{approval.requester.name}}</a>
+                </div>
+                <div class="col-sm-3">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
+                                ng-show="request == true && !isApprover && isUndef(approval.approvers)" disabled>Request
+                            approval
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
+                                ng-show="request == true && !isApprover && isDef(approval.approvers)">Request approval
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('cn')"
+                                ng-show="cancelApproval == true && !isApprover">Cancel approval
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rj')"
+                                ng-show="reject == true">Reject
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('ap')"
+                                ng-show="approve == true">Approve
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-12" ng-show="request">
+                    <span ng-show="cancelled && !isApprover">Cancelled on</span>
+                    <span ng-show="approved && !isApprover">Approved on</span>
+                    <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> Rejected on</span>
+                    <span ng-show="expired">Expired on {{approval.status.updated_at | fromNow:this }}</span>
+                    <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} by <a
+                            href="#/setup/users/all/detail?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
+                </div>
+            </div>
+            <div class="pt10">
+                <div class="col-sm-12" ng-show="isDef(id)">
+                    <div class="bgr">
+                        <div ng-include="'views/conversation/messages.html'"
+                             ng-init="objId = id;objType = 'APPROVAL'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12" ng-show="count > 1">
+                <a href="#/orders/approvals/?oid={{order.id}}" target="_blank">View all requests</a>
+            </div>
+        </div>
+    </div>
+</div>

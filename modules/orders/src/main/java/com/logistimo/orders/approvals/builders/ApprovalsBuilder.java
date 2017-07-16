@@ -134,6 +134,7 @@ public class ApprovalsBuilder {
 
   }
 
+
   public ApprovalModel buildApprovalModel(CreateApprovalResponse approvalResponse, String[] embed)
       throws ServiceException, ObjectNotFoundException {
     ApprovalModel model = new ApprovalModel();
@@ -141,11 +142,18 @@ public class ApprovalsBuilder {
     model.setOrderId(Long.parseLong(approvalResponse.getTypeId()));
     model.setCreatedAt(approvalResponse.getCreatedAt());
     model.setExpiresAt(approvalResponse.getExpireAt());
+    StatusModel statusModel = new StatusModel();
+    statusModel.setStatus(approvalResponse.getStatus());
+    statusModel.setUpdatedBy(approvalResponse.getUpdatedBy());
+    statusModel.setUpdatedAt(approvalResponse.getUpdatedAt());
+    model.setStatus(statusModel);
+    model.setActiveApproverType(approvalResponse.getActiveApproverType());
     model.setApprovalType(ApprovalType.get(
         approvalsDao.getApprovalType(Long.valueOf(approvalResponse.getTypeId()),
             model.getId())));
     model.setApprovers(buildApproversModel(approvalResponse, usersService));
     model.setConversationId(approvalResponse.getConversationId());
+    model.setStatusUpdatedBy(buildRequestorModel(approvalResponse.getUpdatedBy(), approvalResponse.getApprovalId()));
     model.setRequester(buildRequestorModel(approvalResponse.getRequesterId(), approvalResponse.getApprovalId()));
     if (embed != null) {
       for (String s : embed) {
@@ -171,13 +179,18 @@ public class ApprovalsBuilder {
 
   public ApprovalModel buildApprovalListingModel(Approval approval, String[] embed)
       throws ServiceException {
-    ApprovalModel model = new ApprovalModel();
+      ApprovalModel model = new ApprovalModel();
     model.setId(approval.getId());
     model.setOrderId(Long.parseLong(approval.getTypeId()));
     model.setCreatedAt(approval.getCreatedAt());
     model.setExpiresAt(approval.getExpireAt());
     model.setApprovers(buildApprovers(approval));
     model.setConversationId(approval.getConversationId());
+    StatusModel statusModel = new StatusModel();
+    statusModel.setStatus(approval.getStatus());
+    statusModel.setUpdatedAt(approval.getUpdatedAt());
+    statusModel.setUpdatedBy(approval.getUpdatedBy());
+    model.setStatus(statusModel);
     model.setRequester(buildRequestorModel(approval.getRequesterId(), approval.getId()));
 
     if (embed != null) {
@@ -253,19 +266,21 @@ public class ApprovalsBuilder {
       throws ServiceException, ObjectNotFoundException {
     List<ApproverModel> models = new ArrayList<>();
     List<ApproverResponse> approverResponses = response.getApprovers();
-    for (ApproverResponse approverResponse : approverResponses) {
-      ApproverModel model = new ApproverModel();
-      if (StringUtils.isNotEmpty(approverResponse.getUserId())) {
-        IUserAccount userAccount = usersService.getUserAccount(approverResponse.getUserId());
-        model.setApproverType(approverResponse.getType());
-        model.setEmail(userAccount.getEmail());
-        model.setName(userAccount.getFullName());
-        model.setPhone(userAccount.getMobilePhoneNumber());
-        model.setUserId(userAccount.getUserId());
-        models.add(model);
+    if(response.getApprovers() != null && !response.getApprovers().isEmpty()) {
+      for (ApproverResponse approverResponse : approverResponses) {
+        ApproverModel model = new ApproverModel();
+        if (StringUtils.isNotEmpty(approverResponse.getUserId())) {
+          IUserAccount userAccount = usersService.getUserAccount(approverResponse.getUserId());
+          model.setApproverType(approverResponse.getType());
+          model.setEmail(userAccount.getEmail());
+          model.setName(userAccount.getFullName());
+          model.setPhone(userAccount.getMobilePhoneNumber());
+          model.setUserId(userAccount.getUserId());
+          models.add(model);
+        }
       }
-
     }
+
     return models;
   }
 

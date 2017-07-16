@@ -37,5 +37,6 @@ import java.util.Locale;
 public interface LocationFailedJobService extends Service {
   List<ILocationFailedJob> getLocationFailedJobs(Locale locale, String timezone)
       throws ServiceException, ObjectNotFoundException;
+
   void updateLocations(List<ILocationFailedJob> locationFailedJobs) throws ServiceException;
 }

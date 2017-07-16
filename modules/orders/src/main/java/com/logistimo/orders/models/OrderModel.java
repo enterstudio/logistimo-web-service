@@ -36,6 +36,7 @@ public class OrderModel {
   private EntityMinModel customer;
   private EntityMinModel vendor;
   private Long orderId;
+  private Integer type;
   @SerializedName("created_at")
   private Date createdAt;
   @SerializedName("num_items")
@@ -79,5 +80,13 @@ public class OrderModel {
 
   public void setNumItems(int numItems) {
     this.numItems = numItems;
+  }
+
+  public Integer getType() {
+    return type;
+  }
+
+  public void setType(Integer type) {
+    this.type = type;
   }
 }

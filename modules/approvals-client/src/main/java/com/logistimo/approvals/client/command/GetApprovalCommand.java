@@ -1,7 +1,7 @@
 package com.logistimo.approvals.client.command;
 
 import com.logistimo.approvals.client.config.Constants;
-import com.logistimo.approvals.client.exceptions.ApprovalBadRequestException;
+import com.logistimo.approvals.client.exceptions.BadRequestException;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.approvals.client.models.ErrorResponse;
 import com.netflix.hystrix.HystrixCommand;
@@ -34,7 +34,7 @@ public class GetApprovalCommand extends HystrixCommand<CreateApprovalResponse> {
       return restTemplate.getForEntity(path, CreateApprovalResponse.class, approvalId).getBody();
     } catch (HttpClientErrorException exception) {
       throw new HystrixBadRequestException(exception.getMessage(),
-          new ApprovalBadRequestException(ErrorResponse.getErrorResponse(exception), exception));
+          new BadRequestException(ErrorResponse.getErrorResponse(exception), exception));
     }
 
   }

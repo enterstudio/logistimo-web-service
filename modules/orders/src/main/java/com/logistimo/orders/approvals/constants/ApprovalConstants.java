@@ -33,4 +33,7 @@ public final class ApprovalConstants {
   public static final String REJECTED = "rj";
   public static final String EXPIRED = "ex";
   public static final String APPROVED = "ap";
+  public static final String PURCHASE = "p";
+  public static final String SALES = "s";
+  public static final String TRANSFER = "t";
 }

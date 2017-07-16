@@ -27,60 +27,60 @@ package com.logistimo.entity;
  * Created by yuvaraj on 16/03/17.
  */
 public interface ILocationConfig {
-    double getLatitude();
+  double getLatitude();
 
-    void setLatitude(double latitude);
+  void setLatitude(double latitude);
 
-    double getLongitude();
+  double getLongitude();
 
-    void setLongitude(double longitude);
+  void setLongitude(double longitude);
 
-    String getStreet();
+  String getStreet();
 
-    void setStreet(String street);
+  void setStreet(String street);
 
-    String getCity();
+  String getCity();
 
-    void setCity(String city);
+  void setCity(String city);
 
-    String getTaluk();
+  String getTaluk();
 
-    void setTaluk(String taluk);
+  void setTaluk(String taluk);
 
-    String getDistrict();
+  String getDistrict();
 
-    void setDistrict(String district);
+  void setDistrict(String district);
 
-    String getState();
+  String getState();
 
-    void setState(String state);
+  void setState(String state);
 
-    String getCountry();
+  String getCountry();
 
-    void setCountry(String country);
+  void setCountry(String country);
 
-    String getPinCode();
+  String getPinCode();
 
-    void setPinCode(String pinCode);
+  void setPinCode(String pinCode);
 
-    String getCountryId();
+  String getCountryId();
 
-    void setCountryId(String countryId);
+  void setCountryId(String countryId);
 
-    String getStateId();
+  String getStateId();
 
-    void setStateId(String stateId);
+  void setStateId(String stateId);
 
-    String getDistrictId();
+  String getDistrictId();
 
-    void setDistrictId(String districtId);
+  void setDistrictId(String districtId);
 
-    String getTalukId();
+  String getTalukId();
 
-    void setTalukId(String talukId);
+  void setTalukId(String talukId);
 
-    String getCityId();
+  String getCityId();
 
-    void setCityId(String cityId);
+  void setCityId(String cityId);
 
 }

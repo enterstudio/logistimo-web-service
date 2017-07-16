@@ -74,12 +74,12 @@ public class LocationFailedJobServiceImpl extends ServiceImpl implements Locatio
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query q = pm.newQuery("javax.jdo.query.SQL", query);
     q.setClass(JDOUtils.getImplClass(ILocationFailedJob.class));
-    return  (List<ILocationFailedJob>) q.execute();
+    return (List<ILocationFailedJob>) q.execute();
   }
 
   public void updateLocations(List<ILocationFailedJob> locationFailedJobs) throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    Map<String,Object> objectMap = new HashMap<>();
+    Map<String, Object> objectMap = new HashMap<>();
     String payLoad;
     for (ILocationFailedJob locationFailedJob : locationFailedJobs) {
       payLoad = locationFailedJob.getPayLoad();
@@ -93,11 +93,11 @@ public class LocationFailedJobServiceImpl extends ServiceImpl implements Locatio
         objectMap = LocationServiceUtil.getInstance().getLocationIds(kiosk, objectMap);
         EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
         entitiesService.updateKioskLocationIds(kiosk, objectMap, pm);
-      } else if(locationFailedJob.getType().equals("user")) {
+      } else if (locationFailedJob.getType().equals("user")) {
         String userId = String.valueOf(map.get("userId"));
         IUserAccount userAccount = JDOUtils.getObjectById(IUserAccount.class, userId, pm);
-        objectMap.put("userId",userAccount.getUserId());
-        objectMap.put("userName",userAccount.getRegisteredBy());
+        objectMap.put("userId", userAccount.getUserId());
+        objectMap.put("userName", userAccount.getRegisteredBy());
         objectMap = LocationServiceUtil.getInstance().getLocationIds(userAccount, objectMap);
         UsersService usersService = Services.getService(UsersServiceImpl.class);
         usersService.updateUserLocationIds(userAccount, objectMap, pm);

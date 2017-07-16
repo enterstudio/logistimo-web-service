@@ -53,7 +53,8 @@
     <cron>
         <url>/s2/api/admin/location-failedjobs</url>
         <description>Check and run failed jobs on Location service</description>
-        <schedule>every day 00:30</schedule> <!-- 06:00 AM IST -->
+        <schedule>every day 00:30</schedule>
+        <!-- 06:00 AM IST -->
     </cron>
 
 </cronentries>

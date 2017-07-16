@@ -92,18 +92,57 @@
             <bean ref="approvalStatusProcessor"/>
         </route>
 
+        <route id="approverStatusUpdateRoute" errorHandlerRef="approverStatusUpdateErrorHandler"
+          autoStartup="{{task.server}}">
+            <from uri="activemq:queue:approver-status-update"/>
+            <unmarshal ref="approverStatusUpdateEvent"/>
+            <log message="Routing message from topic to Logistimo Web ${body}"/>
+            <bean ref="approverStatusProcessor"/>
+        </route>
+
+        <route id="approvalRequested" errorHandlerRef="approvalRequestedErrorHandler"
+               autoStartup="{{task.server}}">
+            <from uri="activemq:queue:approval-requested"/>
+            <unmarshal ref="approvalRequested"/>
+            <log message="Routing message from topic to Logistimo Web ${body}"/>
+            <bean ref="approvalRequestedProcessor"/>
+        </route>
+
     </camelContext>
+
+    <bean id="approvalRequestedProcessor"
+          class="com.logistimo.orders.approvals.utils.ApprovalRequestedEventProcessor">
+    </bean>
+
+    <bean id="approvalRequestedErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
+        <property name="deadLetterUri" value="activemq:queue:approval-requested-deadletter"/>
+        <property name="redeliveryPolicy" ref="approvalStatusUpdateRedeliveryPolicyConfig"/>
+    </bean>
 
     <bean id="approvalStatusProcessor"
           class="com.logistimo.orders.approvals.utils.ApprovalStatusUpdateEventProcessor">
     </bean>
 
     <bean id="approvalStatusUpdateErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
-        <property name="deadLetterUri" value="activemq:queue:asset-alarms-deadletter"/>
+        <property name="deadLetterUri" value="activemq:queue:approval-status-update-deadletter"/>
         <property name="redeliveryPolicy" ref="approvalStatusUpdateRedeliveryPolicyConfig"/>
     </bean>
 
     <bean id="approvalStatusUpdateRedeliveryPolicyConfig" class="org.apache.camel.processor.RedeliveryPolicy">
+        <property name="maximumRedeliveries" value="3"/>
+        <property name="redeliveryDelay" value="5000"/>
+    </bean>
+
+    <bean id="approverStatusProcessor"
+      class="com.logistimo.orders.approvals.utils.ApproverStatusUpdateEventProcessor">
+    </bean>
+
+    <bean id="approverStatusUpdateErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
+        <property name="deadLetterUri" value="activemq:queue:approver-status-update-deadletter"/>
+        <property name="redeliveryPolicy" ref="approverStatusUpdateRedeliveryPolicyConfig"/>
+    </bean>
+
+    <bean id="approverStatusUpdateRedeliveryPolicyConfig" class="org.apache.camel.processor.RedeliveryPolicy">
         <property name="maximumRedeliveries" value="3"/>
         <property name="redeliveryDelay" value="5000"/>
     </bean>
@@ -162,6 +201,14 @@
 
     <bean id="approvalStatusUpdateEvent" class="org.apache.camel.component.gson.GsonDataFormat">
         <property name="unmarshalType" value="com.logistimo.orders.approvals.utils.ApprovalStatusUpdateEvent"/>
+    </bean>
+
+    <bean id="approverStatusUpdateEvent" class="org.apache.camel.component.gson.GsonDataFormat">
+      <property name="unmarshalType" value="com.logistimo.orders.approvals.utils.ApproverStatusUpdateEvent"/>
+    </bean>
+
+    <bean id="approvalRequested" class="org.apache.camel.component.gson.GsonDataFormat">
+        <property name="unmarshalType" value="com.logistimo.approvals.client.models.CreateApprovalResponse"/>
     </bean>
 
 </beans>

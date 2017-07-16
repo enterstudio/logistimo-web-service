@@ -75,6 +75,7 @@ public class CurrentUserBuilder {
       model.unm = userId;
       model.dnm = domainName;
       model.lng = loggedUserLng;
+      model.tz = sUser.getTimezone();
       model.em = user.getEmail();
       model.eid = user.getPrimaryKiosk();
       if (model.eid == null) {

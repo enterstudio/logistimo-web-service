@@ -33,4 +33,5 @@ public class CurrentUserModel {
   public Long eid; //Default entity Id.
   public String em; //email id.
   public String ufn; // user full name
+  public String tz; //user timezone
 }

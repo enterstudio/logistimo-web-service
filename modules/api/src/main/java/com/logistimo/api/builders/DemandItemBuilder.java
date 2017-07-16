@@ -182,14 +182,15 @@ public class DemandItemBuilder {
     return itemModel;
   }
 
-  public List<DemandModel> getDemandItems(List<IDemandItem> demandItems, SecureUserDetails sUser) throws ServiceException {
+  public List<DemandModel> getDemandItems(List<IDemandItem> demandItems, SecureUserDetails sUser)
+      throws ServiceException {
     List<DemandModel> demandModelList = new ArrayList<>();
     try {
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
       EntitiesService es = Services.getService(EntitiesServiceImpl.class);
       InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
       DomainConfig dc = DomainConfig.getInstance(sUser.getDomainId());
-      for(IDemandItem item: demandItems) {
+      for (IDemandItem item : demandItems) {
         DemandModel model = new DemandModel();
         IMaterial material = mcs.getMaterial(item.getMaterialId());
         model.id = item.getMaterialId();
@@ -204,13 +205,16 @@ public class DemandItemBuilder {
         model.q = item.getQuantity();
         model.isBa = material.isBatchEnabled();
         IInvntry inv = ims.getInventory(item.getKioskId(), item.getMaterialId());
-        if(inv != null) {
+        if (inv != null) {
           IInvntryEvntLog lastEventLog = new InvntryDao().getInvntryEvntLog(inv);
-          if(lastEventLog != null) {
+          if (lastEventLog != null) {
             model.event = inv.getStockEvent();
           }
-          model.csavibper = ims.getStockAvailabilityPeriod(inv, dc).setScale(1, BigDecimal.ROUND_HALF_UP);
-          model.crFreq = InventoryConfig.getFrequencyDisplay(dc.getInventoryConfig().getDisplayCRFreq(), false, sUser.getLocale());
+          model.csavibper =
+              ims.getStockAvailabilityPeriod(inv, dc).setScale(1, BigDecimal.ROUND_HALF_UP);
+          model.crFreq =
+              InventoryConfig.getFrequencyDisplay(dc.getInventoryConfig().getDisplayCRFreq(), false,
+                  sUser.getLocale());
         }
         demandModelList.add(model);
       }

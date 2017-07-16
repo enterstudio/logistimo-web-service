@@ -2132,12 +2132,15 @@ entityControllers.controller('EntityApproversController',['$scope','entityServic
         };
 
         function validateApprovers() {
-            if($scope.ipa && (checkNullEmpty($scope.eapr.pap) || $scope.eapr.pap.length == 0)){
+            if($scope.ipa && (checkNullEmpty($scope.eapr.pap))) {
                 $scope.showWarning("Primary approvers not configured for purchases order.");
                 $scope.continue = false;
-            } else if($scope.isa && (checkNullEmpty($scope.eapr.pas) || $scope.eapr.pas.length == 0)){
-                $scope.showWarning("Primary approvers not configured for sales order.");
+                return;
+            }
+            if($scope.isa && (checkNullEmpty($scope.eapr.pas))) {
+                $scope.showWarning("Primary approvers are not configured for sales order.");
                 $scope.continue = false;
+                return;
             }
         }
 
@@ -2173,7 +2176,7 @@ entityControllers.controller('EntityApproversController',['$scope','entityServic
                     });
                 }
             }
-        };
+        }
     }]);
 
 entityControllers.controller('RelationPermissionController',['$scope','entityService',

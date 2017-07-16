@@ -116,7 +116,7 @@ public class JsonUtil {
 
   public static Map<String, Object> toMap(String json) {
     Type type = new TypeToken<Map<String, Object>>() {
-      }.getType();
+    }.getType();
     return new GsonBuilder().create().fromJson(json, type);
   }
 }

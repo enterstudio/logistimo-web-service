@@ -36,8 +36,6 @@ import java.util.List;
 public class MobileUserBuilder {
   /**
    * Builds a list of user models as required by the mobile from a list of user account objects
-   * @param users
-   * @return
    */
   public List<MobileUserModel> buildMobileUserModels(List<IUserAccount> users) {
     if (users == null || users.isEmpty()) {
@@ -62,9 +60,6 @@ public class MobileUserBuilder {
 
   /**
    * Constructs a list of UserAccount objects from a list of user ids
-   * @param as
-   * @param userIds
-   * @return
    */
   public List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
     if (userIds == null || userIds.isEmpty()) {

@@ -26,19 +26,26 @@ package com.logistimo.orders.approvals.actions;
 import com.logistimo.approvals.client.IApprovalsClient;
 import com.logistimo.approvals.client.models.UpdateApprovalRequest;
 import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.models.StatusModel;
 import com.logistimo.orders.approvals.builders.ApprovalsBuilder;
 import com.logistimo.orders.approvals.constants.ApprovalConstants;
 import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.approvals.validations.ApprovalStatusUpdateRequesterValidator;
+import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.impl.PMF;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
 
 /**
  * Created by naveensnair on 23/06/17.
@@ -59,7 +66,7 @@ public class UpdateApprovalStatusAction {
   private OrderManagementService oms;
 
   public void invoke(StatusModel statusModel, String approvalId)
-      throws ObjectNotFoundException, ValidationException {
+      throws ObjectNotFoundException, ValidationException, ServiceException {
     IOrderApprovalMapping orderApprovalMapping = approvalDao.getOrderApprovalMapping(approvalId,
         ApprovalConstants.PENDING);
     SecureUserDetails secureUserDetails = SecurityUtils.getUserDetails();
@@ -67,7 +74,23 @@ public class UpdateApprovalStatusAction {
     UpdateApprovalRequest updateApprovalRequest = builder.buildUpdateApprovalRequest(statusModel);
     updateApprovalStatus(updateApprovalRequest, approvalId);
     approvalDao.updateOrderApprovalStatus(approvalId, statusModel, secureUserDetails.getUsername());
-    oms.updateOrderVisibility(orderApprovalMapping.getOrderId());
+    IOrder order = oms.getOrder(orderApprovalMapping.getOrderId());
+    if(statusModel.getStatus().equals(ApprovalConstants.APPROVED)) {
+      oms.updateOrderVisibility(orderApprovalMapping.getOrderId(), order.getOrderType());
+      if(IOrder.PURCHASE_ORDER.equals(order.getOrderType()) || IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
+        PersistenceManager pm = null;
+        try {
+          pm = PMF.get().getPersistenceManager();
+          DomainsUtil.addToDomain(order, order.getDomainId(), pm);
+        }catch (JDOObjectNotFoundException e) {
+          throw new ObjectNotFoundException(e.getMessage());
+        } finally {
+          if(pm != null) {
+            pm.close();
+          }
+        }
+      }
+    }
   }
 
   private void validateReqeusterStatus(IOrderApprovalMapping orderApprovalMapping,

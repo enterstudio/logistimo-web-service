@@ -76,6 +76,17 @@
                                   aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span>
                         </div>
                     </div>
+                    <div class="col-sm-3 ">
+                        <span class="filter-label">Approval status</span>
+                        <select class="form-control" ng-model="approval_status">
+                            <option value="">{{resourceBundle.all}}</option>
+                            <option value="pn">{{resourceBundle['order.pending']}}</option>
+                            <option value="cn">Cancelled</option>
+                            <option value="rj">Rejected</option>
+                            <option value="ap">Approved</option>
+                            <option value="ex">Expired</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="row" ng-show="showMore">
                     <div ng-show="iAdm && isUndef(entity.id) && isUndef(orderId)" class="col-sm-3 cbx pt10 mh40">
@@ -175,10 +186,14 @@
                         <td><a ng-href="#/setup/users/all/details?userId={{item.uid}}" ng-click="$event.stopPropagation();" target="_blank">{{item.unm}}</a><span class="litetext">{{item.cdt}}</span></td>
                         <td><a href="#/setup/entities/detail/{{item.vid}}" ng-click="$event.stopPropagation();" target="_blank">{{item.vnm}}</a><span class="litetext">{{item.vadd}}</span></td>
                         <td>
-                            <span ng-if="item.src == 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
-                            <span ng-if="item.src == 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
-                            <span ng-if="item.src == 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
-                            <span ng-if="item.src == 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src == 1" class="glyphicons glyphicons-display"
+                                  uib-tooltip="{{resourceBundle['web']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src == 2" class="glyphicons glyphicons-iphone"
+                                  uib-tooltip="{{resourceBundle['mob']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src == 3" class="glyphicons glyphicons-cloud-upload"
+                                  uib-tooltip="{{resourceBundle['upl']}}" tooltip-placement="left"></span>
+                            <span ng-if="item.src == 4" class="glyphicons glyphicons-sms"
+                                  uib-tooltip="{{resourceBundle['sms']}}" tooltip-placement="left"></span>
                         </td>
                         <td ng-click="openOrder(item, 'true');$event.stopPropagation();"><span ng-hide="item.lt == undefined || item.ln == undefined || (item.lt == 0 && item.ln == 0)"><span class="glyphicons glyphicons-globe"></span></span></td>
 

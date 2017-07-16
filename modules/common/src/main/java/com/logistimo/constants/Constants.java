@@ -179,7 +179,7 @@ public final class Constants {
   public static final String MINUSONE = "-1";
   public static final String ERROR = "ERROR";
   public static final Integer LAST_ACCESSED_BY_SYSTEM = 1;
-  public static final BigDecimal WEEKLY_COMPUTATION =  BigDecimal.valueOf(7);
+  public static final BigDecimal WEEKLY_COMPUTATION = BigDecimal.valueOf(7);
   public static final BigDecimal MONTHLY_COMPUTATION = BigDecimal.valueOf(30.4375);
   public static final String YES = "yes";
   public static final String NO = "no";
@@ -206,7 +206,7 @@ public final class Constants {
   public static final String TYPE_RETURN = "rt";
   public static final String TYPE_SHIPMENT = "s";
   public static final String MATERIAL_TAG = "mTag";
-  public static final int LOCATION_FAILED_JOB_LIMIT=15;
+  public static final int LOCATION_FAILED_JOB_LIMIT = 15;
 
   public static final String REQ_ID = "x-request-id";
 

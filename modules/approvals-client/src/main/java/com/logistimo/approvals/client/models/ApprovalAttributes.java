@@ -23,6 +23,8 @@
 
 package com.logistimo.approvals.client.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -30,16 +32,16 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class ApprovalAttributes {
 
-    @JsonProperty("id")
+    @SerializedName("id")
     private Long id;
 
-    @JsonProperty("approval_id")
+    @SerializedName("approval_id")
     private String approval_id;
 
-    @JsonProperty("key")
+    @SerializedName("key")
     private String key;
 
-    @JsonProperty("value")
+    @SerializedName("value")
     private String value;
 
     public Long getId() {

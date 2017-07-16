@@ -65,6 +65,9 @@ public class ApprovalRequesterValidator implements Validator {
               > 0;
       boolean hasAccessToVendor = EntityAuthoriser.authoriseEntityPerm(
           SecurityUtils.getUserDetails(), order.getServicingKiosk()) > 0;
+      if (approvalRequestModel.getApprovalType() == null) {
+        throw new ValidationException("OA017", new Object[0]);
+      }
       if (approvalRequestModel.getApprovalType().equals(ApprovalType.TRANSFERS) && !(
           hasAccessToCustomer && hasAccessToVendor)) {
         throw new ValidationException("OA006", locale, userId);

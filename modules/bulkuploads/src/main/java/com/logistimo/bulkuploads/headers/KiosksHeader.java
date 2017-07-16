@@ -23,9 +23,8 @@
 
 package com.logistimo.bulkuploads.headers;
 
-import com.logistimo.bulkuploads.BulkUploadMgr;
-import com.logistimo.services.Resources;
 import com.logistimo.constants.CharacterConstants;
+import com.logistimo.services.Resources;
 import com.logistimo.utils.FieldLimits;
 
 import java.util.Locale;
@@ -62,7 +61,8 @@ public class KiosksHeader implements IHeader {
       format =
           "Operation* (a = add / e = edit / d = delete; if empty it is defaulted to add; ensure "
               + messageBundle.getString("kiosk.lower") + " name is EXACT for edit/delete)," +
-              messageBundle.getString("kiosk.name") + "* (1-" + FieldLimits.TEXT_FIELD_MAX_LENGTH + ") characters)," +
+              messageBundle.getString("kiosk.name") + "* (1-" + FieldLimits.TEXT_FIELD_MAX_LENGTH
+              + ") characters)," +
               messageBundle.getString("users")
               + "* (semi-colon separated list of user IDs - e.g. user1;user2;user3)," +
               messageBundle.getString("country")
@@ -70,19 +70,29 @@ public class KiosksHeader implements IHeader {
               +
               messageBundle.getString("state")
               + "* (should be the same as in the corresponding LogiWeb drop-downs)," + messageBundle
-              .getString("village") + "* (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
-              messageBundle.getString("latitude") + " (should be a number rounded to eight decimal places maximum between " + FieldLimits.LATITUDE_MIN + " and " + FieldLimits.LATITUDE_MAX + ")" + "," + messageBundle
-              .getString("longitude") + " (should be a number rounded to eight decimal places maximum between" + FieldLimits.LONGITUDE_MIN + " and " + FieldLimits.LONGITUDE_MAX + ")" + "," +
+              .getString("village") + "* (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH
+              + " characters)" + "," +
+              messageBundle.getString("latitude")
+              + " (should be a number rounded to eight decimal places maximum between "
+              + FieldLimits.LATITUDE_MIN + " and " + FieldLimits.LATITUDE_MAX + ")" + ","
+              + messageBundle
+              .getString("longitude")
+              + " (should be a number rounded to eight decimal places maximum between"
+              + FieldLimits.LONGITUDE_MIN + " and " + FieldLimits.LONGITUDE_MAX + ")" + "," +
               messageBundle.getString("district")
               + " (should be the same as in the corresponding LogiWeb drop-downs)," + messageBundle
               .getString("taluk")
               + " (should be the same as in the corresponding LogiWeb drop-downs)," +
-              messageBundle.getString("streetaddress") + " (not more than " + FieldLimits.STREET_ADDRESS_MAX_LENGTH + " characters)" + "," +
-              messageBundle.getString("zipcode") + " (not more than " + + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+              messageBundle.getString("streetaddress") + " (not more than "
+              + FieldLimits.STREET_ADDRESS_MAX_LENGTH + " characters)" + "," +
+              messageBundle.getString("zipcode") + " (not more than "
+              + +FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
               messageBundle.getString("currency")
               + " (ISO-4217 3-letter codes as at http://en.wikipedia.org/wiki/ISO_4217)," +
-              messageBundle.getString("tax") + " (in % between " + FieldLimits.TAX_MIN_VALUE + " and " + FieldLimits.TAX_MAX_VALUE + "; rounded to two decimal places maximum)," +
-              messageBundle.getString("tax.id") + " (not more than " + + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
+              messageBundle.getString("tax") + " (in % between " + FieldLimits.TAX_MIN_VALUE
+              + " and " + FieldLimits.TAX_MAX_VALUE + "; rounded to two decimal places maximum)," +
+              messageBundle.getString("tax.id") + " (not more than "
+              + +FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)" + "," +
               messageBundle.getString("inventory.policy")
               + " (sq = System-determined replenishment - s/Q; leave empty for default; default is user-determined replenishment),"
               + messageBundle.getString("inventory.servicelevel") + " (in %)," +
@@ -108,7 +118,8 @@ public class KiosksHeader implements IHeader {
               .getString("kiosks.lowercase") + " are already present)," +
               messageBundle.getString("tags") + " (semi-colon separate tags; e.g. tag1;tag2;tag3),"
               +
-              messageBundle.getString("customid.entity") + " (not more than " + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)," +
+              messageBundle.getString("customid.entity") + " (not more than "
+              + FieldLimits.TEXT_FIELD_MAX_LENGTH + " characters)," +
               messageBundle.getString("disable.batch") + " (true/false ; defaults to false)";
     }
 

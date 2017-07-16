@@ -1690,7 +1690,9 @@ public class RESTUtil {
         ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
         if (approvalsConfig != null) {
           MobileConfigBuilder mobileConfigBuilder = new MobileConfigBuilder();
-          MobileApprovalsConfigModel mobileApprovalsConfigModel = mobileConfigBuilder.buildApprovalConfiguration(approvalsConfig);
+          MobileApprovalsConfigModel
+              mobileApprovalsConfigModel =
+              mobileConfigBuilder.buildApprovalConfiguration(approvalsConfig);
           if (mobileApprovalsConfigModel != null) {
             config.put(JsonTagsZ.APPROVALS, mobileApprovalsConfigModel);
           }

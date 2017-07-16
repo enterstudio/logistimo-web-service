@@ -23,13 +23,15 @@
 
 package com.logistimo.api.models;
 
+import com.logistimo.entities.entity.IApprovers;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-public class OrderModel {
+public class OrderModel extends PermissionsModel {
 
   public Long id;
   public Integer size;
@@ -51,7 +53,6 @@ public class OrderModel {
   public String vid;
   public String vnm = "";
   public String enm = "";
-
   /**
    *   Source of order creation
    */
@@ -60,7 +61,6 @@ public class OrderModel {
    * Available Credit
    */
   public BigDecimal avc;
-
 
   /**
    * Available Credit Error
@@ -237,64 +237,28 @@ public class OrderModel {
    */
   public String orderUpdatedAt;
   /**
-   * Order approval request required
-   */
-  private boolean appr;
-  /**
-   * primary approvers
-   */
-  private List<UserModel> pa = new ArrayList<>(1);
-  /**
-   * secondary approvers
-   */
-  private List<UserModel> sa = new ArrayList<>(1);
-  /**
-   * Order approval message
-   */
-  private String aprmsg;
-  /**
    * domain ids
    */
   private List<Long> dids = new ArrayList<>(1);
-  /**
-   * Order approver detail
-   */
-  private String aprdetail;
   /**
    * Order visible to customer
    * @return
    */
   private boolean vtc;
-
   /**
    * Order visible to vendor
    * @return
    */
   private boolean vtv;
-
-  public List<UserModel> getPa() {
-    return pa;
-  }
-
-  public void setPa(List<UserModel> pa) {
-    this.pa = pa;
-  }
-
-  public List<UserModel> getSa() {
-    return sa;
-  }
-
-  public void setSa(List<UserModel> sa) {
-    this.sa = sa;
-  }
-
-  public String getAprmsg() {
-    return aprmsg;
-  }
-
-  public void setAprmsg(String aprmsg) {
-    this.aprmsg = aprmsg;
-  }
+  /**
+   * approval types
+   */
+  private List<OrderApprovalTypesModel> approvalTypesModels;
+  /**
+   * Is approver
+   * @return
+   */
+  private OrderApproverModel approver;
 
   public List<Long> getDids() {
     return dids;
@@ -304,34 +268,37 @@ public class OrderModel {
     this.dids = dids;
   }
 
-  public String getAprdetail() {
-    return aprdetail;
-  }
-
-  public void setAprdetail(String aprdetail) {
-    this.aprdetail = aprdetail;
-  }
-  public boolean isAppr() {
-    return appr;
-  }
-
-  public void setAppr(boolean appr) {
-    this.appr = appr;
-  }
-
-  public boolean isVtc() {
+  public boolean isVisibleToCustomer() {
     return vtc;
   }
 
-  public void setVtc(boolean vtc) {
+  public void setVisibleToCustomer(boolean vtc) {
     this.vtc = vtc;
   }
 
-  public boolean isVtv() {
+  public boolean isVisibleToVendor() {
     return vtv;
   }
 
-  public void setVtv(boolean vtv) {
+  public void setVisibleToVendor(boolean vtv) {
     this.vtv = vtv;
   }
+
+  public List<OrderApprovalTypesModel> getApprovalTypesModels() {
+    return approvalTypesModels;
+  }
+
+  public void setApprovalTypesModels(
+      List<OrderApprovalTypesModel> approvalTypesModels) {
+    this.approvalTypesModels = approvalTypesModels;
+  }
+
+  public OrderApproverModel getApprover() {
+    return approver;
+  }
+
+  public void setApprover(OrderApproverModel approver) {
+    this.approver = approver;
+  }
+
 }

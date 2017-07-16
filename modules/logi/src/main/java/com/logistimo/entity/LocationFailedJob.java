@@ -34,7 +34,7 @@ import javax.jdo.annotations.PrimaryKey;
  * Created by yuvaraj on 22/03/17.
  */
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
-public class LocationFailedJob implements ILocationFailedJob{
+public class LocationFailedJob implements ILocationFailedJob {
 
 
   @PrimaryKey
@@ -58,7 +58,7 @@ public class LocationFailedJob implements ILocationFailedJob{
     return id;
   }
 
- @Override
+  @Override
   public void setId(String id) {
     this.id = id;
   }

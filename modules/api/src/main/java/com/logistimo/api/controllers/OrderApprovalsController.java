@@ -26,11 +26,8 @@ package com.logistimo.api.controllers;
 import com.logistimo.approvals.client.models.Approval;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.approvals.client.models.RestResponsePage;
-import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SecurityUtils;
-import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.exception.ValidationException;
-import com.logistimo.logger.XLog;
 import com.logistimo.models.StatusModel;
 import com.logistimo.orders.approvals.actions.CreateApprovalAction;
 import com.logistimo.orders.approvals.actions.GetOrderApprovalAction;
@@ -41,17 +38,10 @@ import com.logistimo.orders.approvals.models.ApprovalModel;
 import com.logistimo.orders.approvals.models.ApprovalRequestModel;
 import com.logistimo.orders.approvals.models.CreateApprovalResponseModel;
 import com.logistimo.orders.approvals.models.OrderApprovalFilters;
-import com.logistimo.orders.approvals.service.IApprovalService;
-import com.logistimo.orders.approvals.service.impl.ApprovalServiceImpl;
 import com.logistimo.pagination.PageParams;
-import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,18 +51,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Collection;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletRequest;
-
 @Controller
 @RequestMapping("/order-approvals")
-public class ApprovalsController {
-
-  private static final XLog LOGGER = XLog.getLog(ApprovalsController.class);
-
-  private static final String QUEUED = "QUEUED";
+public class OrderApprovalsController {
 
   @Autowired
   private CreateApprovalAction createApprovalAction;
@@ -85,7 +66,6 @@ public class ApprovalsController {
 
   @Autowired
   private UpdateApprovalStatusAction updateApprovalStatusAction;
-
 
   @Autowired
   private ApprovalsBuilder builder;
@@ -136,7 +116,6 @@ public class ApprovalsController {
             .setOrderId(orderId)
             .setExpiringInMinutes(expiringIn)
             .setStatus(status)
-            .setType(type)
             .setRequesterId(requesterId)
             .setApproverId(approverId)
             .setDomainId(SecurityUtils.getCurrentDomainId())
@@ -155,51 +134,6 @@ public class ApprovalsController {
     return builder.buildApprovalModel(getOrderApprovalAction.invoke(approvalId), embed);
   }
 
-  @RequestMapping(value = "/requesters", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  Collection<String> findRequesters(@RequestParam String q,
-                                    HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    Locale locale = sUser.getLocale();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-    IApprovalService approvalService;
-    UsersService usersService;
-    Collection<String> requesters = null;
-    if (StringUtils.isNotEmpty(q)) {
-      try {
-        approvalService = Services.getService(ApprovalServiceImpl.class, locale);
-        usersService = Services.getService(UsersServiceImpl.class, locale);
-        requesters = approvalService.getFilteredRequesters(q, domainId, usersService, 0);
-      } catch (Exception e) {
-        LOGGER.fine("Exception while fetching requesters for domain {0} and starting with {1}",
-            domainId, q, e);
-      }
-    }
-    return requesters;
-  }
 
-  @RequestMapping(value = "/approvers", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  Collection<String> findApprovers(@RequestParam String q,
-                                   HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    Locale locale = sUser.getLocale();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-    IApprovalService approvalService;
-    UsersService usersService;
-    Collection<String> approvers = null;
-    if (StringUtils.isNotEmpty(q)) {
-      try {
-        approvalService = Services.getService(ApprovalServiceImpl.class, locale);
-        usersService = Services.getService(UsersServiceImpl.class, locale);
-        approvers = approvalService.getFilteredRequesters(q, domainId, usersService, 1);
-      } catch (ServiceException e) {
-        e.printStackTrace();
-      }
-    }
-    return approvers;
-  }
 
 }

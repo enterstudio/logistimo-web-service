@@ -252,9 +252,7 @@ public class AssetSystemConfig {
 
   /**
    * Returns the config pull for the requested device model.
-   * @param type
-   * @param vendorId
-   * @param model
+   *
    * @return true - if config enabled.
    */
   public boolean isConfigPullEnabled(Integer type, String vendorId, String model) {

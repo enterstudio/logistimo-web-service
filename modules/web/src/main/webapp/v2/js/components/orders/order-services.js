@@ -63,41 +63,9 @@ ordServices.factory('ordService', ['$http', function ($http) {
             return this.fetch(urlStr);
         },
         getOrder: function (orderId) {
-            return this.fetch('/s2/api/orders/order/' + orderId);
+            return this.fetch('/s2/api/orders/order/' + orderId + '?embed=permissions');
         },
-        getApprovals: function(offset, size, entityId, orderId, reqStatus, expiry, reqType, reqId, aprId, domainId){
-            offset = typeof offset !== 'undefined' ? offset : 0;
-            size = typeof size !== 'undefined' ? size : 50;
-            var urlStr = '/s2/api/order-approvals/?offset=' + offset + "&size=" + size;
-            if(checkNotNullEmpty(entityId)) {
-                urlStr = urlStr + "&entity_id=" + entityId;
-            }
-            if(checkNotNullEmpty(reqStatus)) {
-                urlStr = urlStr + "&status=" + reqStatus;
-            }
-            if(checkNotNullEmpty(expiry)) {
-                urlStr = urlStr + "&expiry=" + expiry;
-            }
-            if(checkNotNullEmpty(reqType)) {
-                urlStr = urlStr + "&type=" + reqType;
-            }
-            if(checkNotNullEmpty(reqId)) {
-                urlStr = urlStr + "&requester_id=" + reqId;
-            }
-            if(checkNotNullEmpty(aprId)) {
-                urlStr = urlStr + "&aprrover_id=" + aprId;
-            }
-            if(checkNotNullEmpty(domainId)) {
-                urlStr = urlStr + "&domainId=" + domainId;
-            }
-            if(checkNotNullEmpty(orderId)) {
-                urlStr = urlStr + "&order_id=" + orderId;
-            }
-            urlStr = urlStr + "&embed=order_meta";
-
-            return this.fetch(urlStr);
-        },
-        getOrders: function (orderType, status, tgType, tag, from, to, offset, size, oType, rid) {
+        getOrders: function (orderType, status, tgType, tag, from, to, offset, size, oType, rid, approvalStatus) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
             var urlStr = '/s2/api/orders/?offset=' + offset + "&size=" + size;
@@ -125,6 +93,9 @@ ordServices.factory('ordService', ['$http', function ($http) {
             if (checkNotNullEmpty(rid)) {
                 urlStr = urlStr + "&rid=" + encodeURIComponent(rid);
             }
+            if (checkNotNullEmpty(approvalStatus)) {
+                urlStr = urlStr + "&approval_status=" + approvalStatus;
+            }
             return this.fetch(urlStr);
         },
         updateOrderStatus: function (orderId, orderStaus) {
@@ -138,9 +109,6 @@ ordServices.factory('ordService', ['$http', function ($http) {
         },
         createOrder: function (data) {
             return this.fetchP(data, '/s2/api/orders/add/');
-        },
-        createApproval: function(data) {
-            return this.fetchP(data, '/s2/api/order-approvals');
         },
         createShipment: function (data) {
             return this.fetchP(data, '/s2/api/shipment/add/');
@@ -263,14 +231,14 @@ ordServices.factory('ordService', ['$http', function ($http) {
         updateShipmentPackageSize: function (updValue, sID) {
             return this.fetchP("'" + updValue + "'", '/s2/api/shipment/update/' + sID + '/ps');
         },
-        requestApproval: function(data){
-            return this.fetchP(data, '/s2/api/order/approval');
-        },
         fetchRequesters: function(text) {
-            return this.fetch("/s2/api/approvals/requesters/?name=" + text);
+            return this.fetch("/s2/api/order-approvals-meta/requesters?q=" + text);
         },
         fetchApprovers: function(text) {
-            return this.fetch("/s2/api/approvals/approvers/?name=" + text);
+            return this.fetch("/s2/api/order-approvals-meta/approvers?q=" + text);
+        },
+        fetchPrimaryApprovers: function(orderId) {
+            return this.fetch("/s2/api/orders/order/" + orderId + "/approvers");
         }
     }
 }]);

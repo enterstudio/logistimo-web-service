@@ -28,6 +28,7 @@ package com.logistimo.api.servlets;
 
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.constants.Constants;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.Resources;
@@ -177,9 +178,9 @@ public abstract class SgServlet extends HttpServlet {
   // GET/POST Methods to be implmented by children
   protected abstract void processGet(HttpServletRequest request, HttpServletResponse response,
                                      ResourceBundle backendMessages, ResourceBundle messages)
-      throws ServletException, IOException, ServiceException;
+      throws ServletException, IOException, ServiceException, ValidationException;
 
   protected abstract void processPost(HttpServletRequest request, HttpServletResponse response,
                                       ResourceBundle backendMessages, ResourceBundle messages)
-      throws ServletException, IOException, ServiceException;
+      throws ServletException, IOException, ServiceException, ValidationException;
 }

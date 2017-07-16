@@ -27,7 +27,7 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import com.logistimo.AppFactory;
 import com.logistimo.api.builders.DemandBuilder;
-import com.logistimo.api.builders.OrderBuilder;
+import com.logistimo.api.builders.OrdersAPIBuilder;
 import com.logistimo.api.models.DemandItemBatchModel;
 import com.logistimo.api.models.DemandModel;
 import com.logistimo.api.models.OrderMaterialsModel;
@@ -36,13 +36,13 @@ import com.logistimo.api.models.OrderResponseModel;
 import com.logistimo.api.models.OrderStatusModel;
 import com.logistimo.api.models.OrderUpdateModel;
 import com.logistimo.api.models.PaymentModel;
-import com.logistimo.api.models.UserModel;
+import com.logistimo.api.models.Permissions;
+import com.logistimo.api.models.UserContactModel;
 import com.logistimo.api.util.DedupUtil;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
-import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventsConfig;
 import com.logistimo.config.models.OrdersConfig;
@@ -50,8 +50,6 @@ import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
-import com.logistimo.entities.entity.IApprovers;
-import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.events.generators.EventGeneratorFactory;
@@ -60,6 +58,7 @@ import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
@@ -70,8 +69,7 @@ import com.logistimo.models.ICounter;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
-import com.logistimo.orders.dao.IOrderDao;
-import com.logistimo.orders.dao.impl.OrderDao;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.models.UpdatedOrder;
@@ -96,8 +94,6 @@ import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.LocalDateUtil;
@@ -106,6 +102,8 @@ import com.logistimo.utils.MsgUtil;
 import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -127,148 +125,77 @@ import java.util.ResourceBundle;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/orders")
 public class OrdersController {
 
+
   public static final String WARN_PREFIX = "w:";
   private static final XLog xLogger = XLog.getLog(OrdersController.class);
   private static final String CACHE_KEY = "order";
-  private static final String PURCHASE_ORDER_APPROVAL = "poa";
-    private static final String SALES_ORDER_APPROVAL = "soa";
-    private static final String TRANSFER_ORDER_APPROVAL = "toa";
-    private static final String PURCHASE = "p";
-    private static final String SALES = "s";
-    private static final String TRANSFER = "t";
-    private static final Integer PRIMARY_APPROVER = 0;
-    private static final Integer SECONDARY_APPROVER = 1;
-    private static final String SPACE = " ";
-    private static final String COMMA_SPACE = ", ";
-  OrderBuilder builder = new OrderBuilder();
-  private IOrderDao orderDao = new OrderDao();
+
+    private static final String PERMISSIONS = "permissions";
+
+  @Autowired
+  OrdersAPIBuilder builder;
+
+  @Autowired
+  IOrderApprovalsService orderApprovalsService;
 
   @RequestMapping("/order/{orderId}")
   public
   @ResponseBody
-  OrderModel getOrder(@PathVariable Long orderId, HttpServletRequest request) {
+  OrderModel getOrder(@PathVariable Long orderId,
+                      @RequestParam(required = false, value = "embed") String[] embed,
+                      HttpServletRequest request) throws Exception {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
-    boolean noAccess = false;
-    OrderModel model = null;
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    try {
-      Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
-      OrderManagementService oms =
-          Services.getService(OrderManagementServiceImpl.class, locale);
-      EntitiesService es = Services.getService(EntitiesServiceImpl.class, locale);
-      UsersService usersService = Services.getService(UsersServiceImpl.class, locale);
-      IOrder order = oms.getOrder(orderId);
-      if (order == null || domainId == null) {
-        throw new InvalidServiceException(CharacterConstants.EMPTY);
-      }
-      List<Long> domainIds = order.getDomainIds();
-      if (domainIds != null && !domainIds.contains(domainId)) {
-        noAccess = true;
-        throw new ObjectNotFoundException(CharacterConstants.EMPTY);
-      }
-      model = builder.buildFull(order, user, domainId);
-      if(model != null) {
-          String approvalType = StringUtils.EMPTY;
-          String approverType = StringUtils.EMPTY;
-          if(IOrder.PENDING.equals(order.getStatus())) {
-            if (IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
-                  approvalType = PURCHASE_ORDER_APPROVAL;
-                  approverType = PURCHASE;
-            } else if (IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
-                  approvalType = TRANSFER_ORDER_APPROVAL;
-                  approverType = TRANSFER;
-              }
-          } else if (IOrder.CONFIRMED.equals(order.getStatus()) && IOrder.SALES_ORDER
-              .equals(order.getOrderType())) {
-                  approvalType = SALES_ORDER_APPROVAL;
-                  approverType = SALES;
-          }
-          model.setAppr(oms.isApprovalRequired(order, locale, approvalType));
-        if(model.isAppr()) {
-            List<IApprovers> primaryApprovers = null;
-            List<IApprovers> secondaryApprovers = null;
-          if (IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
-                IKiosk kiosk = es.getKiosk(order.getKioskId()); //get the domain config of source domain of the kiosk of this order
-                DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
-                ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
-                if(approvalsConfig != null) {
-                    ApprovalsConfig.OrderConfig orderConfig = approvalsConfig.getOrderConfig();
-                    if(orderConfig != null) {
-                        model.setPa(builder.buildUserModels(orderConfig.getPrimaryApprovers(), usersService, locale, user.getTimezone()));
-                        model.setSa(builder.buildUserModels(orderConfig.getSecondaryApprovers(), usersService, locale, user.getTimezone()));
-                    }
-                }
-            } else {
-                primaryApprovers = es.getApprovers(model.eid, PRIMARY_APPROVER, approverType);
-                secondaryApprovers = es.getApprovers(model.eid, SECONDARY_APPROVER, approverType);
-            }
-            if(primaryApprovers != null) {
-                model = builder.populateApprovalParams(model, primaryApprovers, secondaryApprovers, usersService, locale, user.getTimezone());
-            }
-        }
-          if(model.getPa() != null) {
-              StringBuilder sb = new StringBuilder();
-              int j=0;
-              for(int i=0; i<model.getPa().size(); i++) {
-                  UserModel userModel = model.getPa().get(i);
-                  if(userModel.fnm != null) {
-                      sb.append(userModel.fnm);
-                      sb.append(SPACE);
-                  }
-                  if(userModel.lnm != null) {
-                      sb.append(userModel.lnm);
-                      sb.append(SPACE);
-                  }
-                  if(StringUtils.isNotEmpty(userModel.phm) || StringUtils.isNotEmpty(userModel.em)) {
-                      sb.append("(");
-                      boolean found = false;
-                      if(userModel.phm != null) {
-                          sb.append(userModel.phm);
-                          found = true;
-                      }
-                      if(userModel.em != null) {
-                          if(found){
-                              sb.append(COMMA_SPACE);
-                          }
-                          sb.append(userModel.em);
-                      }
-                  }
-                  if(i < model.getPa().size()) {
-                      sb.append(")");
-                      j = j+1;
-                  }
-                  if(j < model.getPa().size()) {
-                      sb.append(COMMA_SPACE);
-                  }
-              }
-              if(sb.length() > 0) {
-                  model.setAprdetail(sb.toString());
-              }
-          }
-          if(order.getDomainIds() != null && !order.getDomainIds().isEmpty()) {
-              model.setDids(order.getDomainIds());
-          }
-      }
-      return model;
-    } catch (ObjectNotFoundException e) {
-      xLogger.severe("Order not found {0}", orderId, e);
-      if (noAccess) {
-        throw new InvalidServiceException(
-            WARN_PREFIX + backendMessages.getString("order.invalid.domain"));
-      } else {
-        throw new InvalidServiceException(WARN_PREFIX + backendMessages.getString("order.removed"));
-      }
-    } catch (Exception e) {
-      xLogger.severe("Failed to fetch order {0}", orderId, e);
-      throw new InvalidServiceException(backendMessages.getString("orders.fetch.error"));
+    OrderModel model;
+
+    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+    OrderManagementService oms =
+        Services.getService(OrderManagementServiceImpl.class, locale);
+    IOrder order = oms.getOrder(orderId);
+    if (order == null || domainId == null) {
+      throw new InvalidServiceException(CharacterConstants.EMPTY);
     }
+    List<Long> domainIds = order.getDomainIds();
+    if (domainIds != null && !domainIds.contains(domainId)) {
+      throw new UnauthorizedException(CharacterConstants.EMPTY, HttpStatus.FORBIDDEN);
+    }
+    model = builder.buildFullOrderModel(order, user, domainId);
+    model.setApprovalTypesModels(builder.buildOrderApprovalTypesModel(model, oms, locale));
+    Integer approvalType = builder.getApprovalType(order);
+    boolean isApprovalRequired = false;
+    if (approvalType != null) {
+      model.setApprover(
+          builder.buildOrderApproverModel(user.getUsername(), approvalType, domainId, order));
+      isApprovalRequired = orderApprovalsService.isApprovalRequired(order, approvalType);
+    }
+    if (embed != null) {
+      for (String s : embed) {
+        if (s.equals(PERMISSIONS)) {
+          Permissions
+              permissions =
+              builder.buildPermissionModel(order, model, approvalType, isApprovalRequired);
+          model.setPermissions(permissions);
+        }
+      }
+    }
+    return model;
+
+  }
+
+  @RequestMapping(value = "/order/{orderId}/approvers", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  List<UserContactModel> getPrimaryApprovers(@PathVariable Long orderId)
+      throws ServiceException, ObjectNotFoundException {
+    OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
+    IOrder order = oms.getOrder(orderId);
+    Integer approvalType = builder.getApprovalType(order);
+    return builder.buildPrimaryApprovers(order, SecurityUtils.getLocale(), approvalType);
   }
 
   @RequestMapping("/")
@@ -284,9 +211,10 @@ public class OrdersController {
                           @RequestParam(required = false) String tag,
                           @RequestParam(required = false) Integer oty,
                           @RequestParam(required = false) String rid,
+                          @RequestParam(required = false) String approval_status,
                           HttpServletRequest request) {
     return getOrders(null, offset, size, status, from, until, otype, tgType, tag, oty, rid,
-        request);
+        approval_status, request);
   }
 
   @RequestMapping("/entity/{entityId}")
@@ -303,9 +231,10 @@ public class OrdersController {
                           @RequestParam(required = false) String tag,
                           @RequestParam(required = false) Integer oty,
                           @RequestParam(required = false) String rid,
+                          @RequestParam(required = false) String approval_status,
                           HttpServletRequest request) {
     return getOrders(entityId, offset, size, status, from, until, otype, tgType, tag, oty, rid,
-        request);
+        approval_status, request);
   }
 
 
@@ -330,11 +259,11 @@ public class OrdersController {
   public
   @ResponseBody
   OrderResponseModel updateStatus(@PathVariable Long orderId, @RequestBody OrderStatusModel status,
-                                  HttpServletRequest request, HttpServletResponse response) {
+                                  HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       UpdatedOrder updOrder;
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
@@ -398,9 +327,9 @@ public class OrdersController {
         o = oms.getOrder(orderId);
         updOrder = new UpdatedOrder(o);
       } else {
-        updOrder = OrderUtils.updateOrderStatus(orderId, status.st,
-            user.getUsername(), status.msg, status.users, DomainConfig.getInstance(domainId),
-            SourceConstants.WEB, status.cdrsn);
+        updOrder = oms.updateOrderStatus(orderId, status.st,
+            user.getUsername(), status.msg, status.users,
+            SourceConstants.WEB, null, status.cdrsn);
       }
       return builder.buildOrderResponseModel(updOrder, true, user, domainId, true);
     } catch (ServiceException ie) {
@@ -704,7 +633,7 @@ public class OrdersController {
 
   public Results getOrders(Long entityId, int offset, int size,
                            String status, String from, String until, String otype, String tgType,
-                           String tag, Integer oty, String rid, HttpServletRequest request) {
+                           String tag, Integer oty, String rid, String approvalStatus, HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
@@ -743,7 +672,7 @@ public class OrdersController {
       Results
           or =
           oms.getOrders(domainId, entityId, status, startDate, endDate, otype, tgType, tag,
-              kioskIds, pageParams, oty, rid);
+              kioskIds, pageParams, oty, rid, approvalStatus);
       int total = -1;
       if (!(SecurityConstants.ROLE_SERVICEMANAGER.equals(user.getRole()) && entityId == null) && (
           status == null || status.isEmpty()) && startDate == null

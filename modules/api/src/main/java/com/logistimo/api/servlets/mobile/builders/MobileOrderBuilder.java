@@ -36,16 +36,16 @@ import com.logistimo.activity.service.impl.ActivityServiceImpl;
 import com.logistimo.api.models.OrderMinimumResponseModel;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.OrderUtils;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
-import com.logistimo.orders.service.OrderManagementService;
-import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.Results;
 import com.logistimo.proto.MobileConversationModel;
 import com.logistimo.proto.MobileDemandItemModel;
@@ -351,7 +351,7 @@ public class MobileOrderBuilder {
    */
   private Set<Long> getOrderIds(List<IOrder> orderList) {
     Set<Long> orderIdSet = new HashSet<>();
-    if(orderList!=null && !orderList.isEmpty()) {
+    if (orderList != null && !orderList.isEmpty()) {
       for (IOrder order : orderList) {
         orderIdSet.add(order.getOrderId());
       }
@@ -369,10 +369,10 @@ public class MobileOrderBuilder {
   private Map<Long, IOrderApprovalMapping> getOrderApprovalMap(Set<Long> orderIds,
                                                                int orderType) {
 
-    OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
     List<IOrderApprovalMapping>
         orderApprovalMappingList =
-        oms.getOrdersApprovalMapping(orderIds, orderType);
+        StaticApplicationContext
+            .getBean(IOrderApprovalsService.class).getOrdersApprovalMapping(orderIds, orderType);
     Map<Long, IOrderApprovalMapping> orderMap = new HashMap<>(orderApprovalMappingList.size());
     for (IOrderApprovalMapping orderApprovalMapping : orderApprovalMappingList) {
       orderMap.put(orderApprovalMapping.getOrderId(), orderApprovalMapping);

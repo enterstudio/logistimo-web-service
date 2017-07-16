@@ -21,7 +21,7 @@
   ~ the commercial license, please contact us at opensource@logistimo.com
   -->
 <div class="box topbox">
-    <div ng-controller="OrdersApprovalCtrl">
+    <div ng-controller="ApprovalsCtrl">
         <div class="filter-box form-group">
             <div ng-controller="ResetController">
                 <div class="row">
@@ -72,6 +72,7 @@
                     </div>
                     <div class="col-sm-3">
                         <span class="filter-label">Requester</span>
+
                         <div class="has-feedback">
                             <input type="text" ng-model="reqId" name="requesterId"
                                    autocomplete="off"
@@ -90,6 +91,7 @@
                     </div>
                     <div class="col-sm-3">
                         <span class="filter-label">Approver</span>
+
                         <div class="has-feedback">
                             <input type="text" ng-model="aprId" name="approverId"
                                    autocomplete="off"
@@ -106,14 +108,6 @@
                             </span>
                         </div>
                     </div>
-                    <!--<div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle.from}}</span>
-                        <date-picker date-model="from" place-holder="From" max-date="today"></date-picker>
-                    </div>
-                    <div class="col-sm-3">
-                        <span class="filter-label">{{resourceBundle.to}}</span>
-                        <date-picker date-model="to" place-holder="To" min-date="from"></date-picker>
-                    </div>-->
                 </div>
                 <div ng-include="'views/common/reset-filters.html'"/>
             </div>
@@ -121,14 +115,16 @@
         <div class="row">
             <div ng-hide="showMore">
                 <div class="col-sm-12">
-                    <span class="glyphicons glyphicons-chevron-down medium filter-expand" ng-click="showMore = true"></span>
+                    <span class="glyphicons glyphicons-chevron-down medium filter-expand"
+                          ng-click="showMore = true"></span>
                 </div>
             </div>
         </div>
         <div class="row">
             <div ng-show="showMore">
                 <div class="col-sm-12">
-                    <span class="glyphicons glyphicons-chevron-up medium filter-expand" ng-click="showMore = false"></span>
+                    <span class="glyphicons glyphicons-chevron-up medium filter-expand"
+                          ng-click="showMore = false"></span>
                 </div>
             </div>
         </div>
@@ -140,44 +136,75 @@
                 <div class="pull-right" style="padding-top: 10px;"></div>
             </div>
         </div>
-        <!--<div class="row pull-right" style="margin-bottom:5px;">
-            <div class="col-sm-12">
-                <button class="btn btn-primary" ng-click="fetch()">Fetch data</button>
-            </div>
-        </div>-->
         <div class="row" ng-show="filtered.length > 0">
             <div class="col-sm-12">
                 <table class="table table-condensed table-hover table-logistimo" id="fixTable">
                     <thead>
-                        <tr>
-                            <th class="text-center">{{resourceBundle['serialnum']}}</th>
-                            <th class="text-center">Order</th>
-                            <th>Type</th>
-                            <th>Customer</th>
-                            <th>Vendor</th>
-                            <th>Request status</th>
-                            <th>Requester</th>
-                            <th>Approver(s)</th>
-                        </tr>
+                    <tr>
+                        <th class="text-center">{{resourceBundle['serialnum']}}</th>
+                        <th class="text-center">Order</th>
+                        <th>Type</th>
+                        <th>Customer</th>
+                        <th>Vendor</th>
+                        <th>Request status</th>
+                        <th>Requester</th>
+                        <th>Approver(s)</th>
+                    </tr>
                     </thead>
-                    <tbody ng-repeat="item in filtered" ng-controller="NoController">
-                        <tr>
-                            <td class="text-center">{{$index + offset * 1 + 1}}</td>
-                            <td class="text-center"><a href="#/orders/detail/{{item.oid}}/">{{item.oid}}</a></td>
-                            <td>{{item.otype}}</td>
-                            <td><a href="#/setup/entities/detail/{{item.cid}}/" ng-click="$event.stopPropagation();">{{item.cust}}</a><span class="litetext">{{item.cadd}}</span></td>
-                            <td><a href="#/setup/entities/detail/{{item.vid}}/" ng-click="$event.stopPropagation();">{{item.vend}}</a><span class="litetext">{{item.vadd}}</span></td>
-                            <td>{{item.st}}
-                                <span class="litetext" style="display: block;">{{item.ut}}</span>
-                                <span class="litetext">Expiry: <span class="c-red">{{item.exp}}</span></span></td>
-                            <td ng-href="#/setup/users/all/details?userId={{order.uid}}" target="_blank" ng-click="$event.stopPropagation();">{{item.req}}</td>
-                            <td>
-                                <span class="litetext-head" ng-show="pending == {{item.st}}">Sent to:</span>
-                                <span ng-repeat="(key,val) in item.apprv" style="display: block;">
-                                    <a href="#/setup/users/all/details?userId={{val}}" target="_blank" ng-click="$event.stopPropagation();">{{key}}</a>
+                    <tbody ng-repeat="item in filtered" ng-controller="NoController" data-ng-switch
+                           on="showApproval[$index]">
+                    <tr class="clickable">
+                        <td class="text-center">{{$index + offset * 1 + 1}}</td>
+                        <td ng-click="toggle($index)" class="text-center"><a
+                                href="#/orders/detail/{{item.order.orderId}}/"
+                                target="_blank">{{item.order.orderId}}</a></td>
+                        <td ng-click="toggle($index)" ng-show="item.order.type == 1">Purchase</td>
+                        <td ng-click="toggle($index)" ng-show="item.order.type == 2">Sales</td>
+                        <td ng-click="toggle($index)" ng-show="item.order.type == 0">Transfer</td>
+                        <td ng-click="toggle($index)"><a href="#/setup/entities/detail/{{item.order.customer.id}}/"
+                                                         target="_blank">{{item.order.customer.name}}</a><span
+                                class="litetext">{{item.order.customer.address}}</span></td>
+                        <td ng-click="toggle($index)"><a href="#/setup/entities/detail/{{item.order.vendor.id}}/"
+                                                         target="_blank">{{item.order.vendor.name}}</a><span
+                                class="litetext">{{item.order.vendor.address}}</span></td>
+                        <td ng-click="toggle($index)"><span ng-show="item.status.status == 'pn'">Pending</span>
+                            <span ng-show="item.status.status == 'rj'">Rejected</span>
+                            <span ng-show="item.status.status == 'cn'">Cancelled</span>
+                            <span ng-show="item.status.status == 'ap'">Approved</span>
+                            <span ng-show="item.status.status == 'ex'">Expired</span>
+                            <span class="litetext"
+                                  style="display: block;">{{item.status.updated_at | formatDate:this }}</span>
+                                <span class="litetext" ng-if="item.status.status == 'pn'">Expiry: <span
+                                        class="c-red">{{item.expires_at | fromNow:this}}</span></span></td>
+                        <td ng-click="toggle($index)"><a
+                                ng-href="#/setup/users/all/details?userId={{item.requester.user_id}}" target="_blank">{{item.requester.name}}</a>
+                            <span class="litetext">{{item.created_at | formatDate:this}}</span></td>
+                        <td ng-click="toggle($index)">
+                                <span ng-show="pn == item.status.status">
+                                    <span class="litetext-head">Sent to:</span>
+                                    <span ng-repeat="item in item.approvers" style="display:inline-block;">
+                                    <a ng-hide="$index == item.approvers.length - 1"
+                                       href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
+                                    <a ng-show="$index == item.approvers.length - 1"
+                                       href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}}</a>
                                 </span>
-                            </td>
-                        </tr>
+                                </span>
+                                <span ng-show="item.status.status == ex">
+                                    NIL
+                                </span>
+                                <span ng-show="item.status.status != ex || item.status.status != pn">
+                                    {{item.status.updated_by}}
+                                </span>
+                        </td>
+                    </tr>
+                    <tr data-ng-switch-when="true">
+                        <td colspan="100%" class="partialview">
+                            <div ng-init="view='views/orders/approval-detail.html'; order = item.order;
+                            id = item.approval_id; type = item.order.type; count = 1; index = $index ;"
+                                 ng-include="'views/partial.html'">
+                            </div>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>

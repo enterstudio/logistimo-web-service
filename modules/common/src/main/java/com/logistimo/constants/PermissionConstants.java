@@ -21,22 +21,28 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.orders.approvals.service;
-
-import com.logistimo.services.Service;
-import com.logistimo.services.ServiceException;
-import com.logistimo.users.service.UsersService;
-
-import java.util.Collection;
+package com.logistimo.constants;
 
 /**
- * Created by naveensnair on 13/06/17.
+ * Created by naveensnair on 11/07/17.
  */
-public interface IApprovalService extends Service{
+public final class PermissionConstants {
 
-    Collection<String> getFilteredRequesters(String requester, Long domainId, UsersService usersService, Integer type)
-            throws ServiceException;
+  //Order constants
+  public static final String EDIT = "edit";
+  public static final String ALLOCATE = "allocate";
+  public static final String SHIP = "ship";
+  public static final String FULFILL = "fulfill";
+  public static final String CANCEL = "cancel";
+  public static final String CREATE_SHIPMENT = "create_shipment";
+  public static final String CONFIRM = "confirm";
+  public static final String APPROVAL_REQUIRED = "required";
 
-    String getOrderType(Long orderId, String approvalId);
+  //Approval constants
+  public static final String REQUEST_APPROVAL = "request";
+  public static final String SHOW_HISTORY = "history";
+  public static final String APPROVE = "approve";
+  public static final String REJECT = "reject";
+
 
 }

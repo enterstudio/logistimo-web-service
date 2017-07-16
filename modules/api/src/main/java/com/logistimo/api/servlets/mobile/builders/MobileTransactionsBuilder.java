@@ -293,8 +293,8 @@ public class MobileTransactionsBuilder {
  private MobileInvModel buildMobileInvModel(IInvntry inventory,
                                              Long domainId, String userId,
                                              InventoryManagementService ims, EntitiesService es) {
-    MobileInvModel inv = new MobileInvModel();
-    try {
+   MobileInvModel inv = new MobileInvModel();
+   try {
       DomainConfig dc = DomainConfig.getInstance(domainId);
       UsersService us = Services.getService(UsersServiceImpl.class);
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);

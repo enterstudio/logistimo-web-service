@@ -38,18 +38,16 @@ import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -61,6 +59,10 @@ import javax.jdo.Query;
 public class ApprovalsDao implements IApprovalsDao {
 
   public static final String APPROVAL_ID_PARAM = "approvalIdParam";
+  public static final String ORDER_ID_PARAM = "orderIdParam";
+  public static final String STATUS_PARAM = "statusParam";
+  public static final String APPROVAL_TYPE_PARAM = "approvalTypeParam";
+
   private static final XLog xLogger = XLog.getLog(ApprovalsDao.class);
   private ApprovalsBuilder builder = new ApprovalsBuilder();
 
@@ -117,8 +119,159 @@ public class ApprovalsDao implements IApprovalsDao {
     }
   }
 
-  public IOrderApprovalMapping getOrderApprovalMapping(String approvalId, String status) {
+  public IOrderApprovalMapping getOrderApprovalMapping(Long orderId, String status) {
+    IOrderApprovalMapping orderApprovalMapping = null;
+    if(orderId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
+        query.setFilter("status == statusParam && orderId == orderIdParam");
+        query.declareParameters("String statusParam, Long orderIdParam");
+        params.put(STATUS_PARAM, status);
+        params.put(ORDER_ID_PARAM, orderId);
+        query.setUnique(true);
+        orderApprovalMapping = (IOrderApprovalMapping) query.executeWithMap(params);
+        orderApprovalMapping = pm.detachCopy(orderApprovalMapping);
+      } catch (Exception e) {
+        xLogger.fine("Failed to get order approval mapping for order: {0} with status: {1}",
+            orderApprovalMapping, status, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return orderApprovalMapping;
+  }
 
+  public IOrderApprovalMapping getOrderApprovalMapping(Long orderId, Integer approvalType) {
+    IOrderApprovalMapping orderApprovalMapping = null;
+    List<IOrderApprovalMapping> results = null;
+    if(orderId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
+        query.setFilter("orderId == orderIdParam && approvalType == approvalTypeParam");
+        query.declareParameters("Long orderIdParam, Integer approvalTypeParam");
+        query.setOrdering("createdAt desc");
+        query.setRange(0,1);
+        params.put(ORDER_ID_PARAM, orderId);
+        params.put(APPROVAL_TYPE_PARAM, approvalType);
+        results = (List<IOrderApprovalMapping>) query.executeWithMap(params);
+        if(results != null && !results.isEmpty()) {
+          orderApprovalMapping = results.get(0);
+        }
+      } catch (Exception e) {
+        xLogger.fine("Failed to get order approval mapping for order: {0}",
+            orderId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return orderApprovalMapping;
+  }
+
+  /**
+   * returns the total approvals against that order
+   * @param orderId
+   * @return
+   */
+  public List<IOrderApprovalMapping> getTotalOrderApprovalMapping(Long orderId) {
+    List<IOrderApprovalMapping> results = null;
+    if(orderId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
+        query.setFilter("orderId == orderIdParam");
+        query.declareParameters("Long orderIdParam");
+        query.setOrdering("createdAt desc");
+        params.put(ORDER_ID_PARAM, orderId);
+        results = (List<IOrderApprovalMapping>) query.executeWithMap(params);
+        results = (List<IOrderApprovalMapping>) pm.detachCopyAll(results);
+      } catch (Exception e) {
+        xLogger.fine("Failed to get order approval mapping for order: {0}",
+            orderId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return results;
+
+  }
+
+  public IOrderApprovalMapping getOrderApprovalMapping(Long orderId) {
+    IOrderApprovalMapping orderApprovalMapping = null;
+    List<IOrderApprovalMapping> results = null;
+    if(orderId != null) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
+        query.setFilter("orderId == orderIdParam");
+        query.declareParameters("Long orderIdParam");
+        query.setOrdering("createdAt desc");
+        params.put(ORDER_ID_PARAM, orderId);
+        results = (List<IOrderApprovalMapping>) query.executeWithMap(params);
+        if(results != null && !results.isEmpty()) {
+          orderApprovalMapping = results.get(0);
+        }
+      } catch (Exception e) {
+        xLogger.fine("Failed to get order approval mapping for order: {0}",
+            orderId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn("Exception while closing query", ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return orderApprovalMapping;
+  }
+
+
+  public IOrderApprovalMapping getOrderApprovalMapping(String approvalId, String status) {
     IOrderApprovalMapping orderApprovalMapping = null;
     if(StringUtils.isNotEmpty(approvalId)) {
       PersistenceManager pm = null;
@@ -153,6 +306,40 @@ public class ApprovalsDao implements IApprovalsDao {
     return orderApprovalMapping;
   }
 
+  public IOrderApprovalMapping getOrderApprovalMapping(String approvalId) {
+    IOrderApprovalMapping orderApprovalMapping = null;
+    if(StringUtils.isNotEmpty(approvalId)) {
+      PersistenceManager pm = null;
+      Query query = null;
+      try {
+        pm = PMF.get().getPersistenceManager();
+        Map<String, Object> params = new HashMap<>();
+        query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
+        query.setFilter("approvalId == approvalIdParam");
+        query.declareParameters("String approvalIdParam");
+        params.put(APPROVAL_ID_PARAM, approvalId);
+        query.setUnique(true);
+        orderApprovalMapping = (IOrderApprovalMapping) query.executeWithMap(params);
+        orderApprovalMapping = pm.detachCopy(orderApprovalMapping);
+      } catch (Exception e) {
+        xLogger.fine("Failed to get order approval mapping for approval: {0} ",
+            approvalId, e);
+      } finally {
+        if (query != null) {
+          try {
+            query.closeAll();
+          } catch (Exception ignored) {
+            xLogger.warn(ignored.getMessage(), ignored);
+          }
+        }
+        if (pm != null) {
+          pm.close();
+        }
+      }
+    }
+    return orderApprovalMapping;
+  }
+
   public void updateOrderApprovalStatus(Long orderId, String approvalId, String status) {
     if (orderId != null && StringUtils.isNotEmpty(approvalId)) {
       PersistenceManager pm = null;
@@ -161,7 +348,7 @@ public class ApprovalsDao implements IApprovalsDao {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
         query = pm.newQuery(JDOUtils.getImplClass(IOrderApprovalMapping.class));
-        query.setFilter("orderId == orderIdParam && approvalId == approvalIdParam");
+        query.setFilter("orderId == orderIdParam && approvalId == approvalIdParam ");
         query.declareParameters("Long orderIdParam, String approvalIdParam");
         params.put("orderIdParam", orderId);
         params.put(APPROVAL_ID_PARAM, approvalId);
@@ -233,60 +420,46 @@ public class ApprovalsDao implements IApprovalsDao {
     return type;
   }
 
-  public Set<String> getFilteredRequesters(String requester, Long domainId,
-      UsersService usersService) throws ServiceException {
-    Set<String> requesters = null;
+  public Collection<String> getFilteredRequesters(String requester, Long domainId) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    Query query;
-    if (StringUtils.isNotEmpty(requester)) {
-      requesters = new HashSet<>();
-      try {
+    Query query = null;
+    try {
+      if (StringUtils.isNotEmpty(requester)) {
         query = pm.newQuery("javax.jdo.query.SQL",
-            "SELECT DISTINCT RID FROM ORDER_APPROVAL_MAPPING WHERE RID LIKE '"
-                + requester + "%'");
-        List requesterList = (List) query.execute();
-        if (requesterList != null && !requesterList.isEmpty()) {
-          for (Object object : requesterList) {
-            IUserAccount userAccount = usersService.getUserAccount(object.toString());
-            if (domainId.equals(userAccount.getDomainId())) {
-              requesters.add(object.toString());
-            }
-          }
-        }
-      } catch (ObjectNotFoundException e) {
-        xLogger
-            .severe("Error while fetching requesters for domain {0} with name starting with {1}",
-                domainId, requester, e);
-        throw new ServiceException("Error while fetching requesters for domain " + domainId);
+            "SELECT DISTINCT RID FROM ORDER_APPROVAL_MAPPING WHERE "
+                + "EXISTS (SELECT 1 from USERACCOUNT_DOMAINS WHERE RID = USERID_OID "
+                + "AND DOMAIN_ID = ?) AND "
+                + "AND RID in (SELECT USERID from USERACCOUNT WHERE NNAME like ?) limit 10");
+        return (List<String>) query.executeWithArray(domainId, requester.toLowerCase());
       }
+    } finally {
+      if (query != null) {
+        query.closeAll();
+      }
+      pm.close();
     }
-    return requesters;
+    return Collections.emptyList();
   }
 
-  public Set<String> getFilteredApprovers(String approver, Long domainId) throws ServiceException {
-    Set<String> approvers = null;
+  public Collection<String> getFilteredApprovers(String requester, Long domainId) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    Query query;
-    if (StringUtils.isNotEmpty(approver)) {
-      approvers = new HashSet<>();
-      try {
+    Query query = null;
+    try {
+      if (StringUtils.isNotEmpty(requester)) {
         query = pm.newQuery("javax.jdo.query.SQL",
-            "SELECT DISTINCT UID FROM APPROVERS WHERE UID LIKE '" + approver + "%' AND SDID="
-                + domainId);
-        List approversList = (List) query.execute();
-        if (approversList != null && !approversList.isEmpty()) {
-          for (Object object : approversList) {
-            approvers.add(object.toString());
-          }
-        }
-      } catch (Exception e) {
-        xLogger.fine("Error while fetching approvers for domain {0} with name starting with {1}",
-            domainId, approver, e);
-        throw new ServiceException(
-            "Unable to fetch approvers for domain " + domainId + " with name starting with "
-                + approver);
+            "SELECT DISTINCT RID FROM APPROVERS WHERE "
+                + "EXISTS (SELECT 1 from USERACCOUNT_DOMAINS WHERE RID = USERID_OID "
+                + "AND DOMAIN_ID = ?) AND "
+                + "AND RID in (SELECT USERID from USERACCOUNT WHERE NNAME like ?) limit 10");
+        return (List<String>) query.executeWithArray(domainId, requester.toLowerCase());
       }
+    } finally {
+      if (query != null) {
+        query.closeAll();
+      }
+      pm.close();
     }
-    return approvers;
+    return Collections.emptyList();
   }
+
 }

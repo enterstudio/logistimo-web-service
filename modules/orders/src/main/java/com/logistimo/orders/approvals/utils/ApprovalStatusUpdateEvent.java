@@ -24,6 +24,7 @@
 package com.logistimo.orders.approvals.utils;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by nitisha.khandelwal on 02/06/17.
@@ -36,6 +37,10 @@ public class ApprovalStatusUpdateEvent {
   private String type;
 
   private String typeId;
+
+  private String requesterId;
+
+  private List<String> approverIds;
 
   private String status;
 
@@ -53,6 +58,14 @@ public class ApprovalStatusUpdateEvent {
 
   public String getTypeId() {
     return typeId;
+  }
+
+  public String getRequesterId() {
+    return requesterId;
+  }
+
+  public List<String> getApproverIds() {
+    return approverIds;
   }
 
   public String getStatus() {

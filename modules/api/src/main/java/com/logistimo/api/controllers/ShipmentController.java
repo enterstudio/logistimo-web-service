@@ -88,7 +88,8 @@ public class ShipmentController {
   @RequestMapping(value = "/add/", method = RequestMethod.POST)
   public
   @ResponseBody
-  ShipmentMaterialsModel addShipment(@RequestBody ShipmentModel model, HttpServletRequest request) {
+  ShipmentMaterialsModel addShipment(@RequestBody ShipmentModel model, HttpServletRequest request)
+      throws ValidationException {
     SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
@@ -126,9 +127,6 @@ public class ShipmentController {
       } else {
         throw new InvalidServiceException("Error while creating shipments");
       }
-    } catch (Exception e) {
-      xLogger.severe("Error while creating shipments", e);
-      throw new InvalidServiceException("Error while creating shipments");
     }
   }
 
@@ -209,7 +207,7 @@ public class ShipmentController {
       boolean isSuccess;
       ResponseModel responseModel = new ResponseModel();
       if (model.isFulfil) {
-        responseModel = ss.fulfillShipment(model, model.userId,SourceConstants.WEB);
+        responseModel = ss.fulfillShipment(model, model.userId, SourceConstants.WEB);
         isSuccess = responseModel.status;
       } else {
         isSuccess = ss.updateShipment(model);
@@ -279,7 +277,7 @@ public class ShipmentController {
       ResponseModel
           responseModel =
           ss.updateShipmentStatus(shipId, shipmentStatus, status.msg, user.getUsername(),
-              status.cdrsn,SourceConstants.WEB);
+              status.cdrsn, SourceConstants.WEB);
       boolean isSuccess = responseModel.status;
       if (!isSuccess) {
         throw new Exception("Error while updating status for shipment " + shipId);

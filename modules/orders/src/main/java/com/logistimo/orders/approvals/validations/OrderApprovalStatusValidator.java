@@ -79,6 +79,5 @@ public class OrderApprovalStatusValidator implements Validator {
     } else {
       throw new ValidationException("OA004", approvalType);
     }
-
   }
 }

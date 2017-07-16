@@ -107,10 +107,11 @@
 			as = Services.getService( UsersServiceImpl.class );
 			es = Services.getService( EntitiesServiceImpl.class );
 			IUserAccount u = as.getUserAccount( userId );
-			if ( search != null )
-				items = SearchUtil.findKiosks( domainId, search, pageParams, u ).getResults();
-			else
-				items = es.getKiosks( u, domainId, null, pageParams ).getResults();
+            if (search != null)
+                items = SearchUtil.findKiosks(domainId, search, pageParams, u).getResults();
+            else {
+                items = es.getKiosks(u, domainId, null, null, pageParams).getResults();
+            }
 		} else if ( "userkiosks".equals( type ) ) {
 			as = Services.getService( UsersServiceImpl.class );
 			es = Services.getService( EntitiesServiceImpl.class );

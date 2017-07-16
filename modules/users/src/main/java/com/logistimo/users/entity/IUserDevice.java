@@ -31,16 +31,24 @@ import java.util.Date;
 public interface IUserDevice {
 
   String getUserId();
-  void setUserId(String userId);
-  String getToken();
-  void setToken(String token);
-  String getAppname();
-  void setAppname(String appname);
-  Date getCreatedOn();
-  void setCreatedOn(Date createdOn);
-  Date getUpdatedOn();
-  void setUpdatedOn(Date updatedOn);
 
+  void setUserId(String userId);
+
+  String getToken();
+
+  void setToken(String token);
+
+  String getAppname();
+
+  void setAppname(String appname);
+
+  Date getCreatedOn();
+
+  void setCreatedOn(Date createdOn);
+
+  Date getUpdatedOn();
+
+  void setUpdatedOn(Date updatedOn);
 
 
 }

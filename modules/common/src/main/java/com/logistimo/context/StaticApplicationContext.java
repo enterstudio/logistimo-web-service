@@ -46,4 +46,7 @@ public class StaticApplicationContext implements ApplicationContextAware {
     StaticApplicationContext.setStaticContext(applicationContext);
   }
 
+  public static <T> T getBean(Class<T> clazz) {
+    return applicationContext.getBean(clazz);
+  }
 }

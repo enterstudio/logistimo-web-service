@@ -170,13 +170,13 @@ public class InventoryBuilder {
   }
 
   public InventoryDetailModel buildMInventoryDetailModel(IInvntry invntry,
-                                                          DomainConfig domainConfig,
-                                                          EntitiesService accountsService,
-                                                          MaterialCatalogService mCatalogService,
-                                                          InventoryManagementService ims,
-                                                          IKiosk kiosk,
-                                                          int itemCount,
-                                                          Map<Long, String> domainNames) {
+                                                         DomainConfig domainConfig,
+                                                         EntitiesService accountsService,
+                                                         MaterialCatalogService mCatalogService,
+                                                         InventoryManagementService ims,
+                                                         IKiosk kiosk,
+                                                         int itemCount,
+                                                         Map<Long, String> domainNames) {
     InventoryDetailModel model = new InventoryDetailModel();
     model.mId = invntry.getMaterialId();
     model.eId = invntry.getKioskId();

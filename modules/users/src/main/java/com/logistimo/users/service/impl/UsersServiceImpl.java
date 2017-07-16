@@ -213,7 +213,9 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
         Map<String, Object> reqMap = new HashMap<>();
         reqMap.put("userId", account.getUserId());
         reqMap.put("userName", account.getRegisteredBy());
-        Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
+        Map<String, Object>
+            lidMap =
+            LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
         if (lidMap.get("status") == "success") {
           updateUserLocationIds(account, lidMap, pm);
         }
@@ -581,7 +583,9 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       Map<String, Object> reqMap = new HashMap<>();
       reqMap.put("userId", account.getUserId());
       reqMap.put("userName", account.getRegisteredBy());
-      Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
+      Map<String, Object>
+          lidMap =
+          LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
       if (lidMap.get("status") == "success") {
         updateUserLocationIds(account, lidMap, pm);
       }
@@ -1433,6 +1437,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     }
     return false;
   }
+
   /**
    * This method will update applicable location ids for an user
    */
@@ -1500,7 +1505,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
       pm.makePersistent(userDevice);
-    } catch (Exception e){
+    } catch (Exception e) {
       xLogger.warn("Issue with add edit user device {}", e.getMessage());
       throw new ServiceException(e.getMessage(), e);
     } finally {
@@ -1513,7 +1518,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
 
     IUserDevice userDevice = null;
     PersistenceManager pm = null;
-    try{
+    try {
       pm = PMF.get().getPersistenceManager();
       Query query = pm.newQuery(JDOUtils.getImplClass(IUserDevice.class));
       query.setFilter("userId == userIdParam && appname == appnameParam");
@@ -1523,7 +1528,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       userDevice = (IUserDevice) query.execute(userid, appname);
       userDevice = pm.detachCopy(userDevice);
       return userDevice;
-    }catch (Exception e){
+    } catch (Exception e) {
       xLogger.severe("{0} while getting user device {1}", e.getMessage(), userid, e);
       throw new ServiceException("Issue with getting user device for user :" + userid);
     } finally {
@@ -1627,12 +1632,13 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
 
   /**
    * Method to fetch the user account details for the given userIds
+   *
    * @param userIds User Id list
    * @return List<IUserAccount>
    */
-  public List<IUserAccount> getUsersByIds(List<String> userIds){
+  public List<IUserAccount> getUsersByIds(List<String> userIds) {
 
-    if(userIds==null ||userIds.isEmpty()){
+    if (userIds == null || userIds.isEmpty()) {
       return null;
     }
     List<IUserAccount> results = null;
@@ -1640,18 +1646,18 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     Query query = null;
     try {
 
-        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `USERACCOUNT` ");
-        queryBuilder.append("WHERE USERID IN (");
-        for (String userId : userIds) {
-          queryBuilder.append("'").append(userId).append("'").append(CharacterConstants.COMMA);
-        }
-        queryBuilder.setLength(queryBuilder.length() - 1);
-        queryBuilder.append(" )");
-        query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
-        query.setClass(JDOUtils.getImplClass(IUserAccount.class));
-        results = (List<IUserAccount>) query.execute();
-        results= (List<IUserAccount>) pm.detachCopyAll(results);
-    }catch (Exception e) {
+      StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `USERACCOUNT` ");
+      queryBuilder.append("WHERE USERID IN (");
+      for (String userId : userIds) {
+        queryBuilder.append("'").append(userId).append("'").append(CharacterConstants.COMMA);
+      }
+      queryBuilder.setLength(queryBuilder.length() - 1);
+      queryBuilder.append(" )");
+      query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
+      query.setClass(JDOUtils.getImplClass(IUserAccount.class));
+      results = (List<IUserAccount>) query.execute();
+      results = (List<IUserAccount>) pm.detachCopyAll(results);
+    } catch (Exception e) {
       xLogger.warn("Exception while fetching approval status", e);
     } finally {
       if (query != null) {

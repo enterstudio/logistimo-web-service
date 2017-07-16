@@ -43,7 +43,7 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setEntityId(Long entityId) {
     this.entityId = entityId;
-    setAttributeKey("entity");
+    setAttributeKey("kioskid");
     setAttributeValue(Objects.toString(entityId, Constants.EMPTY));
     return this;
   }

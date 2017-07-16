@@ -78,13 +78,14 @@ public class SecurityFilter implements Filter {
       resp.sendRedirect(isForceNewUI ? HOME_URL_NEW : HOME_URL);
       return;
     }
+    SecureUserDetails
+        userDetails = null;
     // END BACKWARD COMPATIBILITY
     if (!LOGIN_URL.equals(servletPath) && !AUTHENTICATE_URL.equals(servletPath) && (
         servletPath.isEmpty() || servletPath.equals("/") || servletPath.startsWith("/s/") || (
             servletPath.startsWith(TASK_URL) && StringUtils
                 .isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME))))) {
-      SecureUserDetails
-          userDetails = SecurityMgr
+      userDetails = SecurityMgr
           .getSessionDetails(req.getSession());
       if (userDetails == null) { // session not authenticated yet; direct to login screen
         if (!(servletPath.startsWith(TASK_ADMIN_URL) && ACTION_UPDATESYSCONFIG
@@ -119,15 +120,20 @@ public class SecurityFilter implements Filter {
           resp.sendRedirect(LOGIN_URL + "?status=4"); // access denied
           return;
         }
-        SecurityUtils.setUserDetails(userDetails);
+
       }
+    }
+    if (userDetails != null) {
+      SecurityUtils.setUserDetails(userDetails);
     }
     try {
       if (filterChain != null) {
         filterChain.doFilter(request, response);
       }
     } finally {
-      SecurityUtils.setUserDetails(null);
+      if (userDetails != null) {
+        SecurityUtils.setUserDetails(null);
+      }
     }
   }
 

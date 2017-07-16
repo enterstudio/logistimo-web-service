@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,9 +51,11 @@ public class ApprovalsConfig implements Serializable {
   public static final String TRANSFER_ORDER_APPROVAL_EXPIRY = "tx";
   private static final String ORDER = "order";
   private OrderConfig orderConfig;
-  public ApprovalsConfig(){
+
+  public ApprovalsConfig() {
     orderConfig = new OrderConfig();
   }
+
   public ApprovalsConfig(JSONObject json) {
     try {
       orderConfig = new OrderConfig(json.getJSONObject(ORDER));
@@ -81,14 +84,14 @@ public class ApprovalsConfig implements Serializable {
     }
   }
 
-  public static class OrderConfig implements Serializable{
+  public static class OrderConfig implements Serializable {
 
     private List<PurchaseSalesOrderConfig> psoa = new ArrayList<>(1);
     private List<String> pa = new ArrayList<>(1); //primary approvers
     private List<String> sa = new ArrayList<>(1); //secondary approvers
-    private int px; //purchase order approval expiry time
-    private int sx; //sales order approval expiry time
-    private int tx; //transfer order approval expiry time
+    private int px = 24; //purchase order approval expiry time
+    private int sx = 24; //sales order approval expiry time
+    private int tx = 24; //transfer order approval expiry time
 
     public OrderConfig() {
 
@@ -104,7 +107,7 @@ public class ApprovalsConfig implements Serializable {
           }
           pa = primaryApprovers;
         } catch (Exception e) {
-          pa = null;
+          pa = Collections.emptyList();
         }
 
         try {
@@ -115,7 +118,7 @@ public class ApprovalsConfig implements Serializable {
           }
           sa = secondaryApprovers;
         } catch (Exception e) {
-          sa = null;
+          sa = Collections.emptyList();
         }
 
         if (jsonObject.get(PURCHASE_SALES_ORDER_APPROVAL) != null) {
@@ -127,6 +130,23 @@ public class ApprovalsConfig implements Serializable {
           }
           psoa = purchaseSalesOrderConfigs;
         }
+
+        try {
+          px = jsonObject.getInt(PURCHASE_ORDER_APPROVAL_EXPIRY);
+        } catch (Exception e) {
+          px = 24;
+        }
+        try {
+          sx = jsonObject.getInt(SALES_ORDER_APPROVAL_EXPIRY);
+        } catch (Exception e) {
+          px = 24;
+        }
+        try {
+          tx = jsonObject.getInt(TRANSFER_ORDER_APPROVAL_EXPIRY);
+        } catch (Exception e) {
+          px = 24;
+        }
+
       }
     }
 
@@ -213,24 +233,32 @@ public class ApprovalsConfig implements Serializable {
           .findFirst().isPresent();
     }
 
+
+    public boolean isTransferApprovalEnabled() {
+      return !pa.isEmpty();
+    }
+
     public JSONObject toJSONObject() {
       JSONObject json = new JSONObject();
-      if(pa != null && pa.size() > 0) {
+      if (pa != null && pa.size() > 0) {
         json.put(PRIMARY_APPROVERS, pa);
       }
-      if(sa != null && sa.size() > 0) {
+      if (sa != null && sa.size() > 0) {
         json.put(SECONDARY_APPROVERS, sa);
       }
-      if(psoa != null && psoa.size() > 0) {
+      if (psoa != null && psoa.size() > 0) {
         JSONArray jsonArray = new JSONArray();
-        for(PurchaseSalesOrderConfig purchaseSalesOrderConfig : psoa) {
+        for (PurchaseSalesOrderConfig purchaseSalesOrderConfig : psoa) {
           JSONObject jsonObject = purchaseSalesOrderConfig.toJSONObject();
           jsonArray.put(jsonObject);
         }
-        if(jsonArray.length() > 0) {
+        if (jsonArray.length() > 0) {
           json.put(PURCHASE_SALES_ORDER_APPROVAL, jsonArray);
         }
       }
+      json.put(PURCHASE_ORDER_APPROVAL_EXPIRY, px);
+      json.put(SALES_ORDER_APPROVAL_EXPIRY, sx);
+      json.put(TRANSFER_ORDER_APPROVAL_EXPIRY, tx);
 
       return json;
     }
@@ -238,7 +266,7 @@ public class ApprovalsConfig implements Serializable {
   }
 
 
-  public static class PurchaseSalesOrderConfig implements Serializable{
+  public static class PurchaseSalesOrderConfig implements Serializable {
     private List<String> et = new ArrayList<>(1); //entity tags
     private boolean poa; //purchase order approval
     private boolean soa; //purchase order approval
@@ -254,7 +282,7 @@ public class ApprovalsConfig implements Serializable {
         try {
           JSONArray jsonArray = jsonObject.getJSONArray(ENTITY_TAGS);
           et = new ArrayList<>();
-          for(int i=0; i<jsonArray.length(); i++) {
+          for (int i = 0; i < jsonArray.length(); i++) {
             Object obj = jsonArray.get(i);
             et.add((String) obj);
           }
@@ -278,7 +306,7 @@ public class ApprovalsConfig implements Serializable {
       }
     }
 
-    public JSONObject toJSONObject() throws JSONException{
+    public JSONObject toJSONObject() throws JSONException {
       JSONObject json = new JSONObject();
       json.put(ENTITY_TAGS, et);
       json.put(PURCHASE_ORDER_APPROVAL, poa);
@@ -304,9 +332,13 @@ public class ApprovalsConfig implements Serializable {
       this.poa = poa;
     }
 
-    public boolean isSalesOrderApproval() { return soa; }
+    public boolean isSalesOrderApproval() {
+      return soa;
+    }
 
-    public void setSalesOrderApproval(boolean soa) { this.soa = soa; }
+    public void setSalesOrderApproval(boolean soa) {
+      this.soa = soa;
+    }
 
   }
 }

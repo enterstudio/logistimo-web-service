@@ -184,7 +184,7 @@ public class InventoryController {
                       ReportsConstants.FREQ_DAILY, filters,
                       locale, timezone, pageParams, dc, userId);
           results = new Results(reportData.getResults(), null);
-        }else {
+        } else {
           results =
               ims.getInventory(domainId, entityId, null, null, null, null, tag, matType, onlyNZStk, pdos,
                   null, pageParams);

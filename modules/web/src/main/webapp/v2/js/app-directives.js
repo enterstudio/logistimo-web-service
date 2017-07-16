@@ -212,28 +212,28 @@ logistimoApp.directive('locationSelect', function(){
                 if ((oldValue == undefined && newValue != undefined) ||
                     (oldValue != undefined && newValue == undefined) ||
                     (newValue != undefined && oldValue != undefined && newValue.label != oldValue.label)) {
-                    if($scope.filterType == 'state'){
+                    if ($scope.filterType == 'state') {
                         $scope.filterModel.state = newValue;
-                        if(oldValue != undefined && !oldValue.autofilled){
+                        if (oldValue != undefined && !oldValue.autofilled) {
                             $scope.filterModel.district = undefined;
                             $scope.filterModel.taluk = undefined;
                         }
-                    } else if($scope.filterType == 'district'){
-                        if(checkNullEmpty(newValue)){
+                    } else if ($scope.filterType == 'district') {
+                        if (checkNullEmpty(newValue)) {
                             $scope.filterModel.district = undefined;
-                        } else if(checkNotNullEmpty($scope.model.state)){
+                        } else if (checkNotNullEmpty($scope.model.state)) {
                             $scope.filterModel.district = newValue;
                             $scope.filterModel.state = {};
                             $scope.filterModel.state.label = $scope.model.state;
                             $scope.filterModel.state.autofilled = true;
                         }
-                        if(oldValue != undefined && !oldValue.autofilled){
+                        if (oldValue != undefined && !oldValue.autofilled) {
                             $scope.filterModel.taluk = undefined;
                         }
-                    } else if($scope.filterType == 'taluk'){
-                        if(checkNullEmpty(newValue)){
+                    } else if ($scope.filterType == 'taluk') {
+                        if (checkNullEmpty(newValue)) {
                             $scope.filterModel.taluk = undefined;
-                        } else if(checkNotNullEmpty($scope.model.state) && checkNotNullEmpty($scope.model.district)){
+                        } else if (checkNotNullEmpty($scope.model.state) && checkNotNullEmpty($scope.model.district)) {
                             $scope.filterModel.taluk = newValue;
                             $scope.filterModel.state = {};
                             $scope.filterModel.state.label = $scope.model.state;
@@ -246,9 +246,9 @@ logistimoApp.directive('locationSelect', function(){
                     }
                 }
             });
-            $scope.$watch('filterModel'+ "." + $scope.filterType, function(newValue, oldValue) {
+            $scope.$watch('filterModel' + "." + $scope.filterType, function (newValue, oldValue) {
                 if(newValue != oldValue) {
-                    $scope.model = newValue ? {label:newValue.label} : undefined;
+                    $scope.model = newValue ? {label: newValue.label} : undefined;
                 }
             });
 
@@ -289,8 +289,8 @@ logistimoApp.directive('locationSelect', function(){
         templateUrl: 'views/location-select.html'
     };
 });
-logistimoApp.directive('multipleTagsFilter', function() {
-    return{
+logistimoApp.directive('multipleTagsFilter', function () {
+    return {
         restrict: 'AE',
         templateUrl: 'views/tag-filters.html',
         scope: {
@@ -301,37 +301,38 @@ logistimoApp.directive('multipleTagsFilter', function() {
             type: '=',
             name: '@'
         },
-        controller: ['$scope', function($scope) {
-            function setTags(){
+        controller: ['$scope', function ($scope) {
+            function setTags() {
                 $scope.inTags = (checkNotNullEmpty($scope.includedTags))
-                    ? $scope.includedTags.split(',').map(function(val){
+                    ? $scope.includedTags.split(',').map(function (val) {
                     return {id: val, text: val};
-                    })
+                })
                     : null;
                 $scope.exTags = ($scope.showExcluded && checkNotNullEmpty($scope.excludedTags))
-                    ? $scope.excludedTags.split(',').map(function(val){
-                        return {id: val, text: val};
-                    })
+                    ? $scope.excludedTags.split(',').map(function (val) {
+                    return {id: val, text: val};
+                })
                     : null;
             }
+
             setTags();
-            $scope.$watch('inTags', function(newVal, oldVal){
-                if(newVal != oldVal){
-                    if(checkNotNullEmpty(newVal) && newVal.length > 0){
+            $scope.$watch('inTags', function (newVal, oldVal) {
+                if (newVal != oldVal) {
+                    if (checkNotNullEmpty(newVal) && newVal.length > 0) {
                         $scope.exTags = null;
                     }
                 }
             });
-            $scope.$watch('exTags', function(newVal, oldVal){
-                if(newVal != oldVal){
-                    if(checkNotNullEmpty(newVal) && newVal.length > 0){
+            $scope.$watch('exTags', function (newVal, oldVal) {
+                if (newVal != oldVal) {
+                    if (checkNotNullEmpty(newVal) && newVal.length > 0) {
                         $scope.inTags = null;
                     }
                 }
             });
 
             $scope.toggleFilter = function (cancel) {
-                var d = document.getElementById($scope.type+'-filter');
+                var d = document.getElementById($scope.type + '-filter');
                 if (cancel != undefined) {
                     $scope.showFilter = false;
                     setTags();
@@ -347,25 +348,25 @@ logistimoApp.directive('multipleTagsFilter', function() {
                 }
             };
 
-            $scope.applyTagFilters = function(){
-                if(checkNotNullEmpty($scope.inTags) && $scope.inTags.length > 0){
-                    $scope.includedTags = $scope.inTags.map(function(val){
+            $scope.applyTagFilters = function () {
+                if (checkNotNullEmpty($scope.inTags) && $scope.inTags.length > 0) {
+                    $scope.includedTags = $scope.inTags.map(function (val) {
                         return val.text;
                     }).join(',');
-                }else{
+                } else {
                     $scope.includedTags = null;
                 }
-                if(checkNotNullEmpty($scope.exTags) && $scope.exTags.length > 0){
-                    $scope.excludedTags = $scope.exTags.map(function(val){
+                if (checkNotNullEmpty($scope.exTags) && $scope.exTags.length > 0) {
+                    $scope.excludedTags = $scope.exTags.map(function (val) {
                         return val.text;
                     }).join(',');
-                }else if($scope.showExcluded){
+                } else if ($scope.showExcluded) {
                     $scope.excludedTags = null;
                 }
                 $scope.toggleFilter();
             };
 
-            $scope.resetFilters = function(){
+            $scope.resetFilters = function () {
                 $scope.inTags = null;
                 $scope.exTags = null;
             }
@@ -398,7 +399,7 @@ logistimoApp.directive('tagSelect', function ($compile) {
                     domainCfgService.getEntityTagsCfg().then(function (data) {
                         $scope.tags = data.data.tags;
                         $scope.udf = data.data.udf;
-                        if(callback) {
+                        if (callback) {
                             callback(query);
                         }
                     });
@@ -406,7 +407,7 @@ logistimoApp.directive('tagSelect', function ($compile) {
                     domainCfgService.getMaterialTagsCfg().then(function (data) {
                         $scope.tags = data.data.tags;
                         $scope.udf = data.data.udf;
-                        if(callback) {
+                        if (callback) {
                             callback(query);
                         }
                     });
@@ -414,7 +415,7 @@ logistimoApp.directive('tagSelect', function ($compile) {
                     domainCfgService.getOrderTagsCfg().then(function (data) {
                         $scope.tags = data.data.tags;
                         $scope.udf = data.data.udf;
-                        if(callback) {
+                        if (callback) {
                             callback(query);
                         }
                     });
@@ -422,7 +423,7 @@ logistimoApp.directive('tagSelect', function ($compile) {
                     domainCfgService.getUserTagsCfg().then(function (data) {
                         $scope.tags = data.data.tags;
                         $scope.udf = data.data.udf;
-                        if(callback) {
+                        if (callback) {
                             callback(query);
                         }
                     });
@@ -450,13 +451,15 @@ logistimoApp.directive('tagSelect', function ($compile) {
                 }
                 return data;
             }
-            function filterTags (query) {
+
+            function filterTags(query) {
                 var data = filterData(query.term.toLowerCase());
                 query.callback(data);
             }
+
             $scope.query = function (query) {
-                if(checkNullEmptyObject($scope.tags)) {
-                    fetchTagData(filterTags,query)
+                if (checkNullEmptyObject($scope.tags)) {
+                    fetchTagData(filterTags, query)
                 } else {
                     filterTags(query);
                 }
@@ -811,7 +814,7 @@ logistimoApp.directive('domainTagSelect', function ($compile) {
                         return true;
                     }
                 }
-                for(var j in $scope.preSelected) {
+                for (var j in $scope.preSelected) {
                     if(i == $scope.preSelected[j].id) {
                         return true;
                     }
@@ -853,7 +856,7 @@ logistimoApp.directive('domainTagSelect', function ($compile) {
 });
 logistimoApp.directive('domainUserSelect', function ($compile) {
     var multiple = '<div><a ng-blur="bCallback()" href="">' +
-        '<lg-uib-select multiple="multiple" reset="reset" query="query(q)" limit="2" ui-model="dUserModel" place-holder="{{placeHolder}}"> </lg-uib-select>' +
+        '<lg-uib-select multiple="multiple" reset="reset" query="query(q)" limit="{{limit}}" ui-model="dUserModel" place-holder="{{placeHolder}}"> </lg-uib-select>' +
         '</a></div>';
     var singleNew = '<div class="form-group has-feedback mgh0 mgb0"><input ng-blur="bCallback()" type="text" typeahead-editable="false" ng-model="dUserModel" class="form-control" placeholder="{{placeHolder}}" uib-typeahead="item as item.text for item in query($viewValue) | limitTo:8"' +
         'class="form-control" maxlength="50" typeahead-on-select="setUsersModel($item)"  typeahead-loading="loadingUser"/><span ng-show="loadingUser" class="form-control-feedback typehead-loading" aria-hidden="true"> <span class="glyphicons glyphicons-cogwheel spin"></span> </span></div>';
@@ -870,7 +873,8 @@ logistimoApp.directive('domainUserSelect', function ($compile) {
             role: "@",
             includeSuperusers: "=",
             includeChildDomainUsers: "=",
-            preSelected: "="
+            preSelected: "=",
+            limit: "="
         },
         controller: ['$scope', '$location', 'userService', '$q', function ($scope, $location, userService, $q) {
             $scope.offset = 0;
@@ -1003,6 +1007,15 @@ logistimoApp.directive('domainUserSelect', function ($compile) {
                 if(checkNotNullEmpty(query.term)) {
                     var term = query.term.toLowerCase();
                     var deferred = $q.defer();
+                    if ($scope.role == 'admin') {
+                        $scope.uRole = 'ROLE_do';
+                    } else if ($scope.role == 'mgr') {
+                        $scope.uRole = 'ROLE_sm';
+                    } else if ($scope.role == 'su') {
+                        $scope.$uRole = 'ROLE_su';
+                    } else if ($scope.role == 'oper') {
+                        $scope.uRole = 'ROLE_ko';
+                    }
                     if (checkNullEmpty($scope.uRole)) {
                         var utype = undefined;
                         if ($scope.onlyActive == 'true') {
@@ -2248,17 +2261,17 @@ logistimoApp.directive('popoverTemplate', ['$tooltip', function ($tooltip) {
 logistimoApp.directive('noteData', function () {
     var noteTemplate ='<div class="box topbox">' +
         '<div>' +
-        '<div class="modal-header">'+
-        '<h3 class="modal-title">Note</h3>'+
+        '<div class="modal-header">' +
+        '<h3 class="modal-title">Note</h3>' +
         '</div>'+
-        '<div class="modal-body">'+
-        '<p>{{msg}}</p>'+
-        '</div>'+
-        '<div class="modal-footer">'+
-        '<button class="btn btn-primary" ng-click="confirm()">OK</button>'+
+        '<div class="modal-body">' +
+        '<p>{{msg}}</p>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+        '<button class="btn btn-primary" ng-click="confirm()">OK</button>' +
         '<button class="btn btn-default" ng-click="close()">Cancel</button>'
-    '</div>'+
-    '</div>'+
+    '</div>' +
+    '</div>' +
     '</div>';
     return {
         restrict: 'AE',
@@ -2756,6 +2769,21 @@ logistimoApp.directive('multiSelect', function () {
         }]
     }
 });
+
+logistimoApp.filter('formatDate', function () {
+    return function (input, scope) {
+        return scope.formatDate(input);
+    }
+});
+
+
+logistimoApp.filter('fromNow', function () {
+    return function (input, scope) {
+        return scope.fromNow(input);
+    }
+});
+
+
 
 logistimoApp.filter('timeago', function () {
     return function (input, p_allowFuture, p_agoreq) {

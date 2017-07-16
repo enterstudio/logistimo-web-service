@@ -159,7 +159,6 @@ public class AuthControllerMV1 {
    * This method will validate user's otp
    *
    * @param otpModel consists of user id, otp
-   *
    */
   @RequestMapping(value = "/validate-otp", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -193,7 +192,6 @@ public class AuthControllerMV1 {
    * This will reset user's password
    *
    * @param pwdModel consists of user id ,otp and new password
-   *
    */
   @RequestMapping(value = "/change-password", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.NO_CONTENT)

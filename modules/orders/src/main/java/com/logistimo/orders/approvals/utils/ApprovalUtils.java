@@ -34,6 +34,7 @@ import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
@@ -54,14 +55,15 @@ public class ApprovalUtils {
       throws ServiceException, ValidationException {
 
     ApprovalsConfig.OrderConfig
-        orderConfig =
-        DomainConfig.getInstance(order.getDomainId()).getApprovalsConfig().getOrderConfig();
-    int expiry = orderConfig.getExpiry(order.getOrderType());
+        orderConfig = null;
+    int expiry;
     List<Approver> approvers = new ArrayList<>();
     List<String> primaryApprovers;
     List<String> secondaryApprovers;
 
     if (ApprovalType.TRANSFERS.equals(approvalType)) {
+      orderConfig = DomainConfig.getInstance(order.getDomainId()).getApprovalsConfig().getOrderConfig();
+      expiry = orderConfig.getExpiry(order.getOrderType());
       primaryApprovers = orderConfig.getPrimaryApprovers();
       secondaryApprovers = orderConfig.getSecondaryApprovers();
     } else {
@@ -79,6 +81,8 @@ public class ApprovalUtils {
         } catch (ObjectNotFoundException e) {
           throw new ValidationException("OA016", kioskId);
         }
+        orderConfig = DomainConfig.getInstance(kiosk.getDomainId()).getApprovalsConfig().getOrderConfig();
+        expiry = orderConfig.getExpiry(order.getOrderType());
         if (!orderConfig.isPurchaseApprovalEnabled(kiosk.getTags())) {
           throw new ValidationException("OA013", SecurityUtils.getLocale(), kiosk.getName());
         }
@@ -91,6 +95,8 @@ public class ApprovalUtils {
         } catch (ObjectNotFoundException e) {
           throw new ValidationException("OA016", kioskId);
         }
+        orderConfig = DomainConfig.getInstance(kiosk.getDomainId()).getApprovalsConfig().getOrderConfig();
+        expiry = orderConfig.getExpiry(order.getOrderType());
         if (!orderConfig.isSaleApprovalEnabled(kiosk.getTags())) {
           throw new ValidationException("OA014", SecurityUtils.getLocale(), kiosk.getName());
         }
@@ -114,7 +120,7 @@ public class ApprovalUtils {
   }
 
   private static void setApprovers(int expiry, List<Approver> approvers,
-                                   List<String> primaryApprovers, String primary) {
+      List<String> primaryApprovers, String primary) {
     if (!primaryApprovers.isEmpty()) {
       Approver approver = new Approver();
       approver.setExpiry(expiry);
@@ -122,6 +128,19 @@ public class ApprovalUtils {
       approver.setType(primary);
       approvers.add(approver);
     }
+  }
+
+  public static String getApprovalType(Integer approvalType) {
+    if (IOrder.PURCHASE_ORDER == approvalType) {
+      return "purchase";
+    }
+    if (IOrder.TRANSFER_ORDER == approvalType) {
+      return "transfer";
+    }
+    if (IOrder.SALES_ORDER == approvalType) {
+      return "sales";
+    }
+    return null;
   }
 
 }
