@@ -512,3 +512,10 @@ function momentFromNow(date, tz, locale) {
     return "";
 }
 
+trimGeo = function(geo) {
+    if (checkNotNullEmpty(geo)) {
+        geo.ltt = geo.lat().toFixed(8);
+        geo.lgt = geo.lng().toFixed(8);
+    }
+    return geo;
+}

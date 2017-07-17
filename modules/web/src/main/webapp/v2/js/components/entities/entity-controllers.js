@@ -1096,17 +1096,17 @@ entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route'
         };
         $scope.setMapObj = function (results,isInitLoad) {
             if(results.length == 1) {
-                var center = results[0].geometry.location;
-                $scope.lmap = {center: {latitude: center.lat(), longitude: center.lng()}, zoom: 8};
-                $scope.entity.lt = center.lat();
-                $scope.entity.ln = center.lng();
-                var latlngs = [{latitude: center.lat(), longitude: center.lng(), id:0, options : {title:results[0].formatted_address + '\n(' + center.lat() +', '+center.lng() +')' , draggable: true}}];
+                var center = trimGeo(results[0].geometry.location);
+                $scope.lmap = {center: {latitude: center.ltt, longitude: center.lgt}, zoom: 8};
+                $scope.entity.lt = center.ltt;
+                $scope.entity.ln = center.lgt;
+                var latlngs = [{latitude: center.ltt, longitude: center.lgt, id:0, options : {title:results[0].formatted_address + '\n(' + center.ltt +', '+center.lgt +')' , draggable: true}}];
             } else {
                 $scope.lmap = angular.copy($scope.map);
                 latlngs = [];
                 for(var i=0;i<results.length;i++){
-                    var loc = results[i].geometry.location;
-                    latlngs.push({latitude:loc.lat(),longitude: loc.lng(), id:i, options : {title:results[i].formatted_address + '\n(' + loc.lat() +', '+loc.lng() +')' , draggable: true}});
+                    var loc = trimGeo(results[i].geometry.location);
+                    latlngs.push({latitude:loc.ltt,longitude: loc.lgt, id:i, options : {title:results[i].formatted_address + '\n(' + loc.ltt +', '+loc.lgt +')' , draggable: true}});
                 }
             }
             $scope.lmap.markers = latlngs;
@@ -1137,8 +1137,8 @@ entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route'
                     return;
                 }
             }
-            var pos = marker.getPosition();
-            $scope.setMarker(pos.lat(),pos.lng());
+            var pos = trimGeo(marker.getPosition());
+            $scope.setMarker(pos.ltt,pos.lgt);
         };
 
         $scope.getGeoCodes = function () {
