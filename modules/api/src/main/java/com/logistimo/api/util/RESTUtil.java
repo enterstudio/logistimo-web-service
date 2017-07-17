@@ -1092,7 +1092,7 @@ public class RESTUtil {
       // If tags are specified, send that back
       List<String> tags = k.getTags();
       if (tags != null && !tags.isEmpty()) {
-        kioskData.put(JsonTagsZ.TAGS, StringUtil.getCSV(tags));
+        kioskData.put(JsonTagsZ.ENTITY_TAG, StringUtil.getCSV(tags));
       }
     } catch (ServiceException e) {
       xLogger
