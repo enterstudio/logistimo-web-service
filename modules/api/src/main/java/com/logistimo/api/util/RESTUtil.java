@@ -1089,10 +1089,10 @@ public class RESTUtil {
             mobileEntityBuilder.buildApproversModel(approversList));
       }
       // Add kiosk tags if any configured for the kiosk
-      // If tags are specified, send that back
+      // If tags are specified, send that back as an array
       List<String> tags = k.getTags();
       if (tags != null && !tags.isEmpty()) {
-        kioskData.put(JsonTagsZ.ENTITY_TAG, StringUtil.getCSV(tags));
+        kioskData.put(JsonTagsZ.ENTITY_TAG, tags);
       }
     } catch (ServiceException e) {
       xLogger
