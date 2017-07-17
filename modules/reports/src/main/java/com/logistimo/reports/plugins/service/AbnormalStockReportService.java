@@ -221,8 +221,8 @@ public class AbnormalStockReportService extends ReportServiceUtil implements IRe
     } else {
       values.add(
           addData(Math.min(
-              100 * (float) report.getStockOutInventory100() / report.getLiveInventoryCount(),
-              100)));
+              100 * (float) report.getStockOutInventory100() / report.getLiveInventoryCount(), 100)
+          , report.getStockOutInventory100(), report.getLiveInventoryCount()));
       values.add(addData(Math.min(100 * (float) report.getStockOutInventoryGreaterThan90() / report
           .getLiveInventoryCount(), 100), report.getStockOutInventoryGreaterThan90(), report
           .getLiveInventoryCount()));
