@@ -390,13 +390,12 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         return new UpdatedOrder(o);
       }
 
-      StaticApplicationContext.getBean(UpdateOrderStatusValidator.class)
-          .validateOrderStatusChange(o,
-              newStatus);
-
       IDemandService ds = Services.getService(DemandService.class);
       List<IDemandItem> demandList = ds.getDemandItems(orderId, pm);
       o.setItems(demandList);
+      StaticApplicationContext.getBean(UpdateOrderStatusValidator.class)
+          .validateOrderStatusChange(o,
+              newStatus);
       domainId = o.getDomainId();
       DomainConfig dc = DomainConfig.getInstance(domainId);
       String tag = IInvAllocation.Type.ORDER + CharacterConstants.COLON + orderId;

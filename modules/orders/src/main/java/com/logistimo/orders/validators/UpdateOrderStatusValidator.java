@@ -95,12 +95,14 @@ public class UpdateOrderStatusValidator {
   public List<IMaterial> getMaterialsNotExistingInKiosk(Long kioskId, IOrder order)
       throws ServiceException {
     List<IMaterial> materialsNotExisting = new ArrayList<>(1);
-    for (IDemandItem demandItem : order.getItems()) {
-      if (BigUtil.greaterThanZero(demandItem.getQuantity())) {
-        IInvntry inv = inventoryManagementService.getInventory(kioskId, demandItem.getMaterialId());
-        if (inv == null) {
-          IMaterial material = materialCatalogService.getMaterial(demandItem.getMaterialId());
-          materialsNotExisting.add(material);
+    if(order.getItems() != null) {
+      for (IDemandItem demandItem : order.getItems()) {
+        if (BigUtil.greaterThanZero(demandItem.getQuantity())) {
+          IInvntry inv = inventoryManagementService.getInventory(kioskId, demandItem.getMaterialId());
+          if (inv == null) {
+            IMaterial material = materialCatalogService.getMaterial(demandItem.getMaterialId());
+            materialsNotExisting.add(material);
+          }
         }
       }
     }
