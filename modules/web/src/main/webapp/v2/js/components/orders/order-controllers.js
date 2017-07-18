@@ -719,6 +719,11 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     $scope.disableScroll();
                 }
             };
+        $scope.cancel = function () {
+            $scope.enableScroll();
+            $scope.order.aprmsg = "";
+            $scope.modalInstance.dismiss('cancel');
+        };
             $scope.cancelShipNow = function () {
                 $scope.enableScroll();
                 $scope.modalInstance.dismiss('cancel');
