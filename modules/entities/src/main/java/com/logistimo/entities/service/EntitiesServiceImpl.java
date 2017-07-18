@@ -24,6 +24,7 @@
 package com.logistimo.entities.service;
 
 import com.google.gson.Gson;
+
 import com.logistimo.AppFactory;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
@@ -47,7 +48,14 @@ import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
 import com.logistimo.entities.dao.EntityDao;
 import com.logistimo.entities.dao.IEntityDao;
-import com.logistimo.entities.entity.*;
+import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IKiosk;
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.entity.IKioskToPoolGroup;
+import com.logistimo.entities.entity.IPoolGroup;
+import com.logistimo.entities.entity.IUserToKiosk;
+import com.logistimo.entities.entity.KioskLink;
+import com.logistimo.entities.entity.UserToKiosk;
 import com.logistimo.entities.models.EntityLinkModel;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.models.UserEntitiesModel;
@@ -81,12 +89,26 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.QueryUtil;
 import com.logistimo.utils.StringUtil;
+
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.jdo.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.jdo.JDOException;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
+import javax.jdo.Transaction;
 
 @Service
 public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService {
@@ -696,7 +718,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             true; // state, district and taluk are used as tags for temperature devices (which are modeled as inventory items here)
       }
       //check for location
-      int locindex = new LocationComparator().compare(k,kiosk);
+      int locindex = new LocationComparator().compare(k, kiosk);
       // Update kiosk
       k.setStreet(kiosk.getStreet());
       k.setCity(kiosk.getCity());
@@ -783,7 +805,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       exception = e;
     } finally {
       xLogger.fine("Exiting updateKiosk");
-      if(tx.isActive()) {
+      if (tx.isActive()) {
         tx.rollback();
       }
       pm.close();

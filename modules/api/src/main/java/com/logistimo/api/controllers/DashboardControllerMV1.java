@@ -222,59 +222,59 @@ public class DashboardControllerMV1 {
                                        @RequestParam(required = false, defaultValue = "false")
                                        Boolean refresh) throws SQLException {
     MainDashboardModel model;
-  Long domainId = SecurityUtils.getCurrentDomainId();
-  MemcacheService cache = AppFactory.get().getMemcacheService();
-  DomainConfig dc = DomainConfig.getInstance(domainId);
-  String country = dc.getCountry();
-  String state = null;
-  String district = null;
-  if (StringUtils.isNotEmpty(dc.getDistrict())) {
-    state = dc.getState();
-    district = dc.getDistrict();
-  } else if (StringUtils.isNotEmpty(dc.getState())) {
-    state = dc.getState();
-  }
-  DashQueryModel
-      queryModel =
-      new DashQueryModel(country, state, district, excludeETag, filter, tPeriod, domainId, aType,
-          level, includeETag);
-  String cacheKey = buildCacheKey(queryModel);
-  cacheKey += "_AD";
-  if (!refresh) {
-    model = (MainDashboardModel) cache.get(cacheKey);
-    if (model != null) {
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    MemcacheService cache = AppFactory.get().getMemcacheService();
+    DomainConfig dc = DomainConfig.getInstance(domainId);
+    String country = dc.getCountry();
+    String state = null;
+    String district = null;
+    if (StringUtils.isNotEmpty(dc.getDistrict())) {
+      state = dc.getState();
+      district = dc.getDistrict();
+    } else if (StringUtils.isNotEmpty(dc.getState())) {
+      state = dc.getState();
+    }
+    DashQueryModel
+        queryModel =
+        new DashQueryModel(country, state, district, excludeETag, filter, tPeriod, domainId, aType,
+            level, includeETag);
+    String cacheKey = buildCacheKey(queryModel);
+    cacheKey += "_AD";
+    if (!refresh) {
+      model = (MainDashboardModel) cache.get(cacheKey);
+      if (model != null) {
       return model;
     }
   }
-  Map<String, String> filters = buildQueryFilters(queryModel);
-  level = queryModel.locty;
-  String colFilter;
-  if (DISTRICT_LOWER.equals(level) || queryModel.district != null) {
-    colFilter = "NAME";
-  } else if (STATE_LOWER.equals(level) || queryModel.state != null) {
-    colFilter = DISTRICT;
-  } else {
-    colFilter = STATE;
-  }
-  IDashboardService ds = Services.getService(DashboardService.class);
-  ResultSet tempRes = ds.getMainDashboardResults(domainId, filters, "temperature");
-  DashboardBuilder builder = new DashboardBuilder();
-  model =
-      builder
-          .getMainDashBoardData(null, null, null, null, tempRes, null, colFilter);
-  if (StringUtils.isBlank(filter) && queryModel.state == null) {
-    model.mLev = COUNTRY_LOWER;
-  } else if (StringUtils.isBlank(filter) && queryModel.district == null) {
-    model.mLev = STATE_LOWER;
-  } else {
-    model.mLev = level != null ? level : DISTRICT_LOWER;
-  }
+    Map<String, String> filters = buildQueryFilters(queryModel);
+    level = queryModel.locty;
+    String colFilter;
+    if (DISTRICT_LOWER.equals(level) || queryModel.district != null) {
+      colFilter = "NAME";
+    } else if (STATE_LOWER.equals(level) || queryModel.state != null) {
+      colFilter = DISTRICT;
+    } else {
+      colFilter = STATE;
+    }
+    IDashboardService ds = Services.getService(DashboardService.class);
+    ResultSet tempRes = ds.getMainDashboardResults(domainId, filters, "temperature");
+    DashboardBuilder builder = new DashboardBuilder();
+    model =
+        builder
+            .getMainDashBoardData(null, null, null, null, tempRes, null, colFilter);
+    if (StringUtils.isBlank(filter) && queryModel.state == null) {
+      model.mLev = COUNTRY_LOWER;
+    } else if (StringUtils.isBlank(filter) && queryModel.district == null) {
+      model.mLev = STATE_LOWER;
+    } else {
+      model.mLev = level != null ? level : DISTRICT_LOWER;
+    }
 
-  if (cache != null) {
-    cache.put(cacheKey, model, 1800); // 30 min expiry
+    if (cache != null) {
+      cache.put(cacheKey, model, 1800); // 30 min expiry
+    }
+    return model;
   }
-  return model;
-}
 
 
   private String buildCacheKey(DashQueryModel model) {

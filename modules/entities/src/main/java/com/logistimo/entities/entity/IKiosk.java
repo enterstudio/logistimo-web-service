@@ -24,11 +24,10 @@
 package com.logistimo.entities.entity;
 
 import com.logistimo.config.models.Permissions;
+import com.logistimo.domains.ISuperDomain;
 import com.logistimo.entity.ILocation;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.users.entity.IUserAccount;
-
-import com.logistimo.domains.ISuperDomain;
 
 import java.math.BigDecimal;
 import java.util.Date;

@@ -25,6 +25,7 @@ package com.logistimo.users.entity;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
 import com.logistimo.constants.Constants;
 import com.logistimo.entity.ILocation;
 import com.logistimo.proto.JsonTagsZ;
@@ -32,8 +33,22 @@ import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.tags.entity.Tag;
 
-import javax.jdo.annotations.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+import javax.jdo.annotations.Element;
+import javax.jdo.annotations.Extension;
+import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.Join;
+import javax.jdo.annotations.NotPersistent;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
 public class UserAccount implements IUserAccount, ILocation {
@@ -1020,7 +1035,7 @@ public class UserAccount implements IUserAccount, ILocation {
   public void setStoreAppTheme(Integer theme) { this.theme = theme; }
 
   @Override
-  public String user () {
+  public String user() {
     return this.getUpdatedBy();
   }
 

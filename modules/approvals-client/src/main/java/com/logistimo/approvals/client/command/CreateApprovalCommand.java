@@ -31,6 +31,7 @@ import com.logistimo.exception.HttpBadRequestException;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
+
 import org.glassfish.jersey.uri.internal.JerseyUriBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;

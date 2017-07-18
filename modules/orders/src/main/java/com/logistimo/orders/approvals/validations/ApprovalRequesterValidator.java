@@ -30,37 +30,26 @@ import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.orders.approvals.models.ApprovalRequestModel;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.services.ServiceException;
-import com.logistimo.validations.Validator;
+
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
 /**
  * Created by charan on 22/06/17.
  */
-public class ApprovalRequesterValidator implements Validator {
+@Component
+public class ApprovalRequesterValidator {
 
-  private final ApprovalRequestModel approvalRequestModel;
-  private final String userId;
-  private final Locale locale;
-  private final IOrder order;
-
-  public ApprovalRequesterValidator(ApprovalRequestModel approvalRequestModel, IOrder order,
-                                    String userId, Locale locale) {
-    this.approvalRequestModel = approvalRequestModel;
-    this.userId = userId;
-    this.locale = locale;
-    this.order = order;
-  }
-
-  public void validate() throws ValidationException {
+  public void validate(ApprovalRequestModel approvalRequestModel, IOrder order,
+                       String userId, Locale locale) throws ValidationException {
 
     if (!approvalRequestModel.getRequesterId().equals(userId)) {
       throw new ValidationException("OA005", locale, approvalRequestModel.getRequesterId(), userId);
     }
 
     try {
-      boolean
-          hasAccessToCustomer =
+      boolean hasAccessToCustomer =
           EntityAuthoriser.authoriseEntityPerm(SecurityUtils.getUserDetails(), order.getKioskId())
               > 0;
       boolean hasAccessToVendor = EntityAuthoriser.authoriseEntityPerm(

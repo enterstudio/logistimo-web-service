@@ -2,6 +2,7 @@ package com.logistimo.exception;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+
 import org.springframework.web.client.HttpClientErrorException;
 
 /**

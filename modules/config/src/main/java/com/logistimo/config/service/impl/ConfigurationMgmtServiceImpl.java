@@ -46,10 +46,11 @@ import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
 
+import java.util.Date;
+
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
-import java.util.Date;
 
 /**
  * @author arun
@@ -107,7 +108,7 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
       xLogger.fine("Exception while adding configuation object: {0}", e.getMessage());
       throw new ServiceException(e.getMessage());
     } finally {
-      if(tx.isActive()){
+      if (tx.isActive()) {
         tx.rollback();
       }
       pm.close();
@@ -178,7 +179,7 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
       c.setUserId(config.getUserId());
       c.setDomainId(config.getDomainId());
       c.setLastUpdated(new Date());
-      int locindex = compareLocationChange(c,config);
+      int locindex = compareLocationChange(c, config);
       //update loc ids
       if (locindex != 0) {
         updateDomainConfigLocIds(config);
@@ -296,9 +297,9 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
     config.setDistrictId(response.getDistrictId());
   }
 
-  private int compareLocationChange(IConfig d1,IConfig d2) throws ConfigurationException {
+  private int compareLocationChange(IConfig d1, IConfig d2) throws ConfigurationException {
     DomainConfig dc1 = new DomainConfig(d1.getConfig());
     DomainConfig dc2 = new DomainConfig(d2.getConfig());
-    return new LocationComparator().compare(dc1,dc2);
+    return new LocationComparator().compare(dc1, dc2);
   }
 }

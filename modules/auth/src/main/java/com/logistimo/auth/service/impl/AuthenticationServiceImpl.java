@@ -50,6 +50,7 @@ import com.logistimo.users.entity.IUserToken;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.PasswordEncoder;
+
 import org.apache.commons.lang.StringUtils;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
@@ -57,14 +58,25 @@ import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.keys.AesKey;
 import org.jose4j.lang.JoseException;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
+
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 
 
 public class AuthenticationServiceImpl extends ServiceImpl implements AuthenticationService {

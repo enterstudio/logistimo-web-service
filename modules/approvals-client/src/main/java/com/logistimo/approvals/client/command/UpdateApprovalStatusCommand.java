@@ -30,6 +30,7 @@ import com.logistimo.exception.HttpBadRequestException;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
+
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 

@@ -23,10 +23,9 @@
 
 package com.logistimo.users.entity;
 
+import com.logistimo.domains.ISuperDomain;
 import com.logistimo.entity.ILocation;
 import com.logistimo.tags.entity.ITag;
-
-import com.logistimo.domains.ISuperDomain;
 
 import java.util.Date;
 import java.util.Hashtable;

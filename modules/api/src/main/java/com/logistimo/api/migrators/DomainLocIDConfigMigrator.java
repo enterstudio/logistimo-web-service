@@ -44,82 +44,86 @@ import java.util.List;
 
 public class DomainLocIDConfigMigrator {
 
-    private static final XLog xlogger = XLog.getLog(DomainLocIDConfigMigrator.class);
+  private static final XLog xlogger = XLog.getLog(DomainLocIDConfigMigrator.class);
 
-    /**
-     * Migrate the events config
-     */
-    public void updateDomainLocConfig() throws ServiceException {
-        DomainsService ds = Services.getService(DomainsServiceImpl.class);
-        Results domains = ds.getAllDomains(null);
-        List domainList = domains.getResults();
-        if (domainList != null && domainList.size() > 0) {
-            int total = domainList.size();
-            int limit = 25;
-            int plimit = limit;
-            int noOfPages = total / limit;
-            if (total % limit != 0) {
-                noOfPages = noOfPages + 1;
-            }
-            int p = 0;
-            int k = 0;
-            while (p < noOfPages - 1) {
-                process(domainList.subList(k, limit));
-                p++;
-                k += plimit;
-                limit += plimit;
-                try {
-                    Thread.sleep(5000l);
-                } catch (InterruptedException e) {
-                    xlogger.warn("Issue with domain location config update {}", e);
-                }
-            }
-            process(domainList.subList(k, total));
-        }
-        xlogger.info("Migration of events config completed");
-    }
-
-    private void process(List domainList) {
-        for (Object domainObj : domainList) {
-            try {
-                updateLocId((IDomain) domainObj);
-            } catch (Exception e) {
-                xlogger.warn("Issue with domain location config update {}", ((IDomain) domainObj).getId());
-            }
-        }
-    }
-
-
-    private void updateLocId(IDomain domain) throws ServiceException {
-        DomainConfig domainConfig = DomainConfig.getInstance(domain.getId());
-        LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
+  /**
+   * Migrate the events config
+   */
+  public void updateDomainLocConfig() throws ServiceException {
+    DomainsService ds = Services.getService(DomainsServiceImpl.class);
+    Results domains = ds.getAllDomains(null);
+    List domainList = domains.getResults();
+    if (domainList != null && domainList.size() > 0) {
+      int total = domainList.size();
+      int limit = 25;
+      int plimit = limit;
+      int noOfPages = total / limit;
+      if (total % limit != 0) {
+        noOfPages = noOfPages + 1;
+      }
+      int p = 0;
+      int k = 0;
+      while (p < noOfPages - 1) {
+        process(domainList.subList(k, limit));
+        p++;
+        k += plimit;
+        limit += plimit;
         try {
-            LocationResponseModel response = client.getLocationIds(domainConfig);
-            if (null != response) {
-                domainConfig.setCountryId(response.getCountryId());
-                domainConfig.setStateId(response.getStateId());
-                domainConfig.setDistrictId(response.getDistrictId());
-            }
-        } catch (Exception e) {
-            xlogger.severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(), domain.getName(), e);
-            throw new ServiceException(e);
+          Thread.sleep(5000l);
+        } catch (InterruptedException e) {
+          xlogger.warn("Issue with domain location config update {}", e);
         }
-        ConfigurationMgmtService
-                cms =
-                Services.getService(ConfigurationMgmtServiceImpl.class);
-        IConfig config;
-        try {
-            config = cms.getConfiguration(IConfig.CONFIG_PREFIX + domain.getId());
-            config.setConfig(domainConfig.toJSONSring());
-            cms.updateConfiguration(config);
-            MemcacheService cache = AppFactory.get().getMemcacheService();
-            if (cache != null) {
-                cache.put(DomainConfig.getCacheKey(domain.getId()), domainConfig);
-            }
-            xlogger.info("Location id updated for domain {0}:{1}", domain.getId(), domain.getName());
-        } catch (Exception e) {
-            xlogger.severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(), domain.getName(), e);
+      }
+      process(domainList.subList(k, total));
         }
+    xlogger.info("Migration of events config completed");
+  }
+
+  private void process(List domainList) {
+    for (Object domainObj : domainList) {
+      try {
+        updateLocId((IDomain) domainObj);
+      } catch (Exception e) {
+        xlogger.warn("Issue with domain location config update {}", ((IDomain) domainObj).getId());
+      }
     }
+  }
+
+
+  private void updateLocId(IDomain domain) throws ServiceException {
+    DomainConfig domainConfig = DomainConfig.getInstance(domain.getId());
+    LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
+    try {
+      LocationResponseModel response = client.getLocationIds(domainConfig);
+      if (null != response) {
+        domainConfig.setCountryId(response.getCountryId());
+        domainConfig.setStateId(response.getStateId());
+        domainConfig.setDistrictId(response.getDistrictId());
+      }
+    } catch (Exception e) {
+      xlogger
+          .severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(), domain.getName(),
+              e);
+      throw new ServiceException(e);
+    }
+    ConfigurationMgmtService
+        cms =
+        Services.getService(ConfigurationMgmtServiceImpl.class);
+    IConfig config;
+    try {
+      config = cms.getConfiguration(IConfig.CONFIG_PREFIX + domain.getId());
+      config.setConfig(domainConfig.toJSONSring());
+      cms.updateConfiguration(config);
+      MemcacheService cache = AppFactory.get().getMemcacheService();
+      if (cache != null) {
+        cache.put(DomainConfig.getCacheKey(domain.getId()), domainConfig);
+      }
+      xlogger.info("Location id updated for domain {0}:{1}", domain.getId(), domain.getName());
+    } catch (Exception e) {
+      xlogger
+          .severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(), domain.getName(),
+              e);
+    }
+  }
 }
 

@@ -8,5 +8,5 @@ import com.logistimo.locations.model.LocationResponseModel;
  */
 public interface LocationClient {
 
-    LocationResponseModel getLocationIds(ILocation location);
+  LocationResponseModel getLocationIds(ILocation location);
 }

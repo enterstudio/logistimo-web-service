@@ -40,9 +40,10 @@ import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.users.entity.IUserAccount;
 
-import javax.jdo.PersistenceManager;
 import java.util.Date;
 import java.util.List;
+
+import javax.jdo.PersistenceManager;
 
 public interface EntitiesService extends Service {
 

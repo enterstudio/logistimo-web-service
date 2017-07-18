@@ -19,13 +19,18 @@ import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MetricsUtil;
+
 import org.apache.camel.Handler;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 /**
  * Created by nitisha.khandelwal on 04/07/17.
@@ -48,7 +53,7 @@ public class ApproverStatusUpdateEventProcessor {
   public void execute(ApproverStatusUpdateEvent event) throws ServiceException {
 
     jmsMeter.mark();
-    xLogger.info("Received event - {0}", event);
+    xLogger.info("Approver status update event received - {0}", event);
 
     if (ORDER.equalsIgnoreCase(event.getType())) {
 
@@ -99,7 +104,7 @@ public class ApproverStatusUpdateEventProcessor {
     String message = null;
     ResourceBundle messages = Resources.get().getBundle("Messages", requester.getLocale());
 
-    Map<String, String> values = new HashMap<String, String>();
+    Map<String, String> values = new HashMap<>();
     values.put("approvalType", ApprovalUtils.getApprovalType(orderApproval.getApprovalType()));
     values.put("orderId", event.getTypeId());
     values.put("requestorName", requester.getFullName());

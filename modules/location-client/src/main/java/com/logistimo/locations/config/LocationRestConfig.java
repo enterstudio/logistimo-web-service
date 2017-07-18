@@ -1,6 +1,7 @@
 package com.logistimo.locations.config;
 
 import com.logistimo.rest.client.RestConfig;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -11,9 +12,9 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class LocationRestConfig {
 
-    @Bean(name = "locationsRestTemplate")
-    public RestTemplate locationsRestTemplate() {
-        return RestConfig.restTemplate();
-    }
+  @Bean(name = "locationsRestTemplate")
+  public RestTemplate locationsRestTemplate() {
+    return RestConfig.restTemplate();
+  }
 
 }

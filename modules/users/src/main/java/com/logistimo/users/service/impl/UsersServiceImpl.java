@@ -69,17 +69,33 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.IUserDevice;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.users.service.UsersService;
-import com.logistimo.utils.*;
+import com.logistimo.utils.Counter;
+import com.logistimo.utils.GsonUtils;
+import com.logistimo.utils.MessageUtil;
+import com.logistimo.utils.PasswordEncoder;
+import com.logistimo.utils.QueryUtil;
+import com.logistimo.utils.StringUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
 
 /**
  * Created by charan on 04/03/17.
@@ -218,7 +234,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       errMsg = e.getMessage();
       exception = e;
     } finally {
-      if (tx.isActive()){
+      if (tx.isActive()) {
         tx.rollback();
       }
       pm.close();
@@ -497,7 +513,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       //First check if the user already exists in the database
       IUserAccount user = JDOUtils.getObjectById(IUserAccount.class, account.getUserId(), pm);
       //location check
-      int locindex = new LocationComparator().compare(user,account);
+      int locindex = new LocationComparator().compare(user, account);
       //If we get here, it means the user exists
       user.setRole(account.getRole());
       user.setFirstName(StringUtil.getTrimmedName(account.getFirstName()));

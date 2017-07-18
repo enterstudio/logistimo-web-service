@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jdo.PersistenceManager;
-
 /**
  * Created by charan on 04/03/17.
  */

@@ -23,8 +23,14 @@
 
 package com.logistimo.rest.client;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
+
 import com.logistimo.services.utils.ConfigUtil;
+
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;

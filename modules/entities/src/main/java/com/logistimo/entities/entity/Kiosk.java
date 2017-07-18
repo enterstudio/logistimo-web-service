@@ -26,6 +26,7 @@ package com.logistimo.entities.entity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+
 import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.Permissions;
 import com.logistimo.constants.Constants;
@@ -39,11 +40,29 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.NumberUtil;
+
 import org.apache.commons.lang.StringUtils;
 
-import javax.jdo.annotations.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.jdo.annotations.Element;
+import javax.jdo.annotations.Extension;
+import javax.jdo.annotations.IdGeneratorStrategy;
+import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.Join;
+import javax.jdo.annotations.NotPersistent;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
 public class Kiosk implements IKiosk {
@@ -989,7 +1008,7 @@ public class Kiosk implements IKiosk {
   }
 
   @Override
-  public String user () {
+  public String user() {
     return this.getUpdatedBy();
   }
 

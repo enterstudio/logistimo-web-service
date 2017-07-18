@@ -28,6 +28,7 @@ package com.logistimo.config.models;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import com.logistimo.AppFactory;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
@@ -40,12 +41,18 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.utils.StringUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 
 /**
@@ -53,7 +60,7 @@ import java.util.*;
  *
  * @author Arun
  */
-public class DomainConfig implements ILocation,Serializable {
+public class DomainConfig implements ILocation, Serializable {
 
   // JSON Tags
   public static final String ALLOW_EMPTY_ORDERS = "empords";

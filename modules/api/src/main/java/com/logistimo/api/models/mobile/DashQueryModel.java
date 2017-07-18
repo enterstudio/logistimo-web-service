@@ -66,7 +66,8 @@ public class DashQueryModel {
   }
 
   public DashQueryModel(String country, String state, String district, String excludeETags,
-                        String loc, String tPeriod, Long domainId, String assetType, String level, String includeETag) {
+                        String loc, String tPeriod, Long domainId, String assetType, String level,
+                        String includeETag) {
     this.country = country;
     this.state = state;
     this.district = district;

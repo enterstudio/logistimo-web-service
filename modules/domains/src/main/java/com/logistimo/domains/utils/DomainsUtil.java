@@ -25,7 +25,11 @@ package com.logistimo.domains.utils;
 
 import com.logistimo.AppFactory;
 import com.logistimo.constants.MethodNameConstants;
-import com.logistimo.domains.*;
+import com.logistimo.domains.ICrossDomain;
+import com.logistimo.domains.IMultiDomain;
+import com.logistimo.domains.IOverlappedDomain;
+import com.logistimo.domains.ISubDomain;
+import com.logistimo.domains.ISuperDomain;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
@@ -33,9 +37,15 @@ import com.logistimo.logger.XLog;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 
-import javax.jdo.PersistenceManager;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.jdo.PersistenceManager;
 
 /**
  * Utility methods commonly used to fetching or updating domain IDs across objects

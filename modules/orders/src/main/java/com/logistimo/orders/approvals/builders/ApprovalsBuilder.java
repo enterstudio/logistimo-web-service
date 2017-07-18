@@ -24,7 +24,14 @@
 package com.logistimo.orders.approvals.builders;
 
 import com.logistimo.approvals.builders.RestResponsePageBuilder;
-import com.logistimo.approvals.client.models.*;
+import com.logistimo.approvals.client.models.Approval;
+import com.logistimo.approvals.client.models.Approver;
+import com.logistimo.approvals.client.models.ApproverQueue;
+import com.logistimo.approvals.client.models.ApproverResponse;
+import com.logistimo.approvals.client.models.CreateApprovalRequest;
+import com.logistimo.approvals.client.models.CreateApprovalResponse;
+import com.logistimo.approvals.client.models.RestResponsePage;
+import com.logistimo.approvals.client.models.UpdateApprovalRequest;
 import com.logistimo.constants.EmbedConstants;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.StatusModel;
@@ -43,11 +50,17 @@ import com.logistimo.users.builders.UserBuilder;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.models.UserContactModel;
 import com.logistimo.users.service.UsersService;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by naveensnair on 13/06/17.

@@ -30,6 +30,7 @@ import com.logistimo.locations.constants.LocationConstants;
 import com.logistimo.locations.model.LocationRequestModel;
 import com.logistimo.locations.model.LocationResponseModel;
 import com.logistimo.logger.XLog;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;

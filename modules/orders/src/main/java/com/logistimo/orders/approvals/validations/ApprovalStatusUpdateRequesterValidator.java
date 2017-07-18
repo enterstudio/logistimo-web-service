@@ -31,31 +31,22 @@ import com.logistimo.orders.approvals.constants.ApprovalConstants;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ServiceException;
-import com.logistimo.validations.Validator;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Created by naveensnair on 23/06/17.
  */
-public class ApprovalStatusUpdateRequesterValidator implements Validator{
-
-  private final SecureUserDetails userDetails;
-  private final IOrderApprovalMapping orderApprovalMapping;
-  private final StatusModel statusModel;
-
-  public ApprovalStatusUpdateRequesterValidator(IOrderApprovalMapping orderApprovalMapping,
-                                                SecureUserDetails secureUserDetails,
-                                                StatusModel statusModel) {
-    this.userDetails = secureUserDetails;
-    this.orderApprovalMapping = orderApprovalMapping;
-    this.statusModel = statusModel;
-  }
+@Component
+public class ApprovalStatusUpdateRequesterValidator {
 
   /**
    * checks whether user is admin, user has access to respective kiosk
    * @throws ValidationException
    */
-  @Override
-  public void validate() throws ValidationException {
+  public void validate(IOrderApprovalMapping orderApprovalMapping,
+                       SecureUserDetails userDetails,
+                       StatusModel statusModel) throws ValidationException {
     if(statusModel.getStatus().equals(ApprovalConstants.CANCELLED)) {
         Long kioskId = orderApprovalMapping.getKioskId();
       try {

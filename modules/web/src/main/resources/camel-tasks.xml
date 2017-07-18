@@ -204,11 +204,11 @@
     </bean>
 
     <bean id="approverStatusUpdateEvent" class="org.apache.camel.component.gson.GsonDataFormat">
-      <property name="unmarshalType" value="com.logistimo.orders.approvals.utils.ApproverStatusUpdateEvent"/>
+        <property name="unmarshalType" value="com.logistimo.orders.approvals.utils.ApproverStatusUpdateEvent"/>
     </bean>
 
     <bean id="approvalRequested" class="org.apache.camel.component.gson.GsonDataFormat">
-        <property name="unmarshalType" value="com.logistimo.approvals.client.models.CreateApprovalResponse"/>
+        <property name="unmarshalType" value="com.logistimo.orders.approvals.utils.ApprovalCreatedEvent"/>
     </bean>
 
 </beans>

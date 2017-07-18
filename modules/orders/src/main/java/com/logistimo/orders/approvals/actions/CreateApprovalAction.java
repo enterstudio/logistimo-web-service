@@ -35,11 +35,13 @@ import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.approvals.models.ApprovalRequestModel;
 import com.logistimo.orders.approvals.utils.ApprovalUtils;
 import com.logistimo.orders.approvals.validations.ApprovalRequesterValidator;
+import com.logistimo.orders.approvals.validations.CreateApprovalValidator;
 import com.logistimo.orders.approvals.validations.OrderApprovalStatusValidator;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,6 +66,15 @@ public class CreateApprovalAction {
   @Autowired
   private OrderManagementService oms;
 
+  @Autowired
+  private ApprovalRequesterValidator approvalRequesterValidator;
+
+  @Autowired
+  private OrderApprovalStatusValidator orderApprovalStatusValidator;
+
+  @Autowired
+  private CreateApprovalValidator createApprovalValidator;
+
   public CreateApprovalResponse invoke(ApprovalRequestModel approvalRequestModel)
       throws ServiceException, ObjectNotFoundException, ValidationException {
 
@@ -73,8 +84,7 @@ public class CreateApprovalAction {
 
     validateApprovalRequest(approvalRequestModel, order, locale);
 
-    List<Approver>
-        approvers =
+    List<Approver> approvers =
         ApprovalUtils.getApproversForOrderType(order, approvalRequestModel.getApprovalType());
 
     CreateApprovalRequest approvalRequest = builder.buildApprovalRequest(order,
@@ -86,16 +96,17 @@ public class CreateApprovalAction {
 
   private void validateApprovalRequest(ApprovalRequestModel approvalRequest, IOrder order,
                                        Locale locale) throws ValidationException {
-    new ApprovalRequesterValidator(approvalRequest, order,
-        SecurityUtils.getUserDetails().getUsername(), locale).validate();
-    new OrderApprovalStatusValidator(approvalRequest, order, locale).validate();
+    createApprovalValidator.validate(approvalRequest);
+    approvalRequesterValidator.validate(approvalRequest, order,
+        SecurityUtils.getUserDetails().getUsername(), locale);
+    orderApprovalStatusValidator.validate(approvalRequest, order, locale);
   }
 
   private CreateApprovalResponse createApproval(CreateApprovalRequest approvalRequest,
                                                 ApprovalType approvalType)
       throws ServiceException, ObjectNotFoundException {
     CreateApprovalResponse approvalResponse = approvalsClient.createApproval(approvalRequest);
-      approvalDao.updateOrderApprovalMapping(approvalResponse, approvalType.getValue());
+    approvalDao.updateOrderApprovalMapping(approvalResponse, approvalType.getValue());
     return approvalResponse;
   }
 

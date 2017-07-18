@@ -42,6 +42,7 @@ import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MetricsUtil;
+
 import org.apache.camel.Handler;
 import org.apache.commons.lang.text.StrSubstitutor;
 
@@ -74,7 +75,7 @@ public class ApprovalStatusUpdateEventProcessor {
   public void execute(ApprovalStatusUpdateEvent event) throws ServiceException {
 
     jmsMeter.mark();
-    xLogger.info("Received event - {0}", event);
+    xLogger.info("Approval status update event received - {0}", event);
 
     if (ORDER.equalsIgnoreCase(event.getType())) {
 
@@ -108,7 +109,7 @@ public class ApprovalStatusUpdateEventProcessor {
         }
 
       } catch (ObjectNotFoundException e) {
-        e.printStackTrace();
+        xLogger.warn("Object not found : {0}", e);
       } catch (IOException e) {
         xLogger.warn("Error in sending message - ", e);
       } catch (MessageHandlingException e) {
@@ -123,7 +124,7 @@ public class ApprovalStatusUpdateEventProcessor {
       IUserAccount requester, IKiosk kiosk) {
 
     String message = getMessage(event.getStatus(), requester.getLocale());
-    Map<String, String> values = new HashMap<String, String>();
+    Map<String, String> values = new HashMap<>();
     values.put("approvalType", ApprovalUtils.getApprovalType(orderApproval.getApprovalType()));
     values.put("requestorName", requester.getFullName());
     values.put("requestorPhone", requester.getMobilePhoneNumber());
@@ -139,7 +140,7 @@ public class ApprovalStatusUpdateEventProcessor {
   }
 
   private String getMessage(String status, Locale locale) {
-    String message = null;
+    String message;
     ResourceBundle messages = Resources.get().getBundle("Messages", locale);
     switch (status) {
       case APPROVED_STATUS:
@@ -154,6 +155,8 @@ public class ApprovalStatusUpdateEventProcessor {
       case EXPIRED_STATUS:
         message = messages.getString("approval.expired.message");
         break;
+      default:
+        message = messages.getString("approval.status.general.message");
     }
     return message;
   }

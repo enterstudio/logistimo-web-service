@@ -2,6 +2,7 @@ package com.logistimo.rest.client;
 
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.utils.ThreadLocalUtil;
+
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;

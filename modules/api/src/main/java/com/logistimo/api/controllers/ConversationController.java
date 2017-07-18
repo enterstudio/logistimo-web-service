@@ -49,15 +49,22 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.shipments.service.impl.ShipmentService;
 import com.logistimo.utils.LocalDateUtil;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by kumargaurav on 04/10/16.

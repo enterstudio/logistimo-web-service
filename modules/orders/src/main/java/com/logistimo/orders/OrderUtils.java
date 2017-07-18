@@ -52,13 +52,22 @@ import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.shipments.service.impl.ShipmentService;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
+
 import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static com.logistimo.orders.entity.IOrder.NONTRANSFER;
 

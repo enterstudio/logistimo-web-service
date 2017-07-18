@@ -27,7 +27,9 @@ import com.logistimo.services.utils.ConfigUtil;
 
 public class LocationConstants {
 
-  private static final String LS_URL = ConfigUtil.get("location.service.url", "http://localhost:9090");
+  private static final String
+      LS_URL =
+      ConfigUtil.get("location.service.url", "http://localhost:9090");
   private static final String LS_PATH = ConfigUtil.get("location.service.path", "/locations/ids");
   public static final Integer TIMED_OUT = ConfigUtil.getInt("location.service.timeout", 5000);
   public static final String APP_NAME = "logistimo";
