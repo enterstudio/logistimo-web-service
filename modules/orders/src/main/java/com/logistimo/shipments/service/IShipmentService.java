@@ -36,13 +36,12 @@ import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
 
+import javax.jdo.PersistenceManager;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import javax.jdo.PersistenceManager;
 
 /**
  * Created by Mohan Raja on 29/09/16

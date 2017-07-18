@@ -24,23 +24,13 @@
 package com.logistimo.api.errors;
 
 import com.logistimo.auth.utils.SecurityUtils;
-import com.logistimo.exception.BadRequestException;
-import com.logistimo.exception.ConfigurationServiceException;
-import com.logistimo.exception.ErrorResource;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.InvalidTaskException;
-import com.logistimo.exception.LogiException;
-import com.logistimo.exception.SystemException;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.exception.ValidationException;
+import com.logistimo.exception.*;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.UserDisabledException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

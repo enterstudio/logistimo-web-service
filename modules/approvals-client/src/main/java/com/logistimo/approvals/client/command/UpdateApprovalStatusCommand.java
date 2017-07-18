@@ -24,13 +24,12 @@
 package com.logistimo.approvals.client.command;
 
 import com.logistimo.approvals.client.config.Constants;
-import com.logistimo.approvals.client.exceptions.BadRequestException;
-import com.logistimo.approvals.client.models.ErrorResponse;
 import com.logistimo.approvals.client.models.UpdateApprovalRequest;
+import com.logistimo.exception.ErrorResponse;
+import com.logistimo.exception.HttpBadRequestException;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
-
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -62,7 +61,7 @@ public class UpdateApprovalStatusCommand extends HystrixCommand<String> {
       return approvalId;
     } catch (HttpClientErrorException exception) {
       throw new HystrixBadRequestException(exception.getMessage(),
-          new BadRequestException(ErrorResponse.getErrorResponse(exception), exception));
+          new HttpBadRequestException(ErrorResponse.getErrorResponse(exception), exception));
     }
   }
 }

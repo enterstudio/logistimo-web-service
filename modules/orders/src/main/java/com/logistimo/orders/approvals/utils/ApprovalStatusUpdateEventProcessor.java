@@ -42,14 +42,14 @@ import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MetricsUtil;
+import org.apache.camel.Handler;
+import org.apache.commons.lang.text.StrSubstitutor;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import org.apache.camel.Handler;
-import org.apache.commons.lang.text.StrSubstitutor;
 
 /**
  * Created by nitisha.khandelwal on 02/06/17.

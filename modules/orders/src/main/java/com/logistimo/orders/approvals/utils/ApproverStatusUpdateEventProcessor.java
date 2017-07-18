@@ -19,16 +19,13 @@ import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MetricsUtil;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 import org.apache.camel.Handler;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by nitisha.khandelwal on 04/07/17.

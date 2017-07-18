@@ -42,24 +42,18 @@ import com.logistimo.services.impl.PMF;
 import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.tags.entity.ITag;
 import com.sun.rowset.CachedRowSetImpl;
-
 import org.apache.commons.lang.StringUtils;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.datastore.JDOConnection;
 import javax.sql.rowset.CachedRowSet;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author Mohan Raja

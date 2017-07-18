@@ -24,7 +24,6 @@
 package com.logistimo.api.models;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by naveensnair on 30/06/17.

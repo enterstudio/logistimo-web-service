@@ -24,7 +24,6 @@
 package com.logistimo.entities.service;
 
 import com.google.gson.Gson;
-
 import com.logistimo.AppFactory;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
@@ -38,6 +37,7 @@ import com.logistimo.config.models.ReportsConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.QueryConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.entity.IDomainLink;
@@ -47,24 +47,19 @@ import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
 import com.logistimo.entities.dao.EntityDao;
 import com.logistimo.entities.dao.IEntityDao;
-import com.logistimo.entities.entity.IApprovers;
-import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.entity.IKioskLink;
-import com.logistimo.entities.entity.IKioskToPoolGroup;
-import com.logistimo.entities.entity.IPoolGroup;
-import com.logistimo.entities.entity.IUserToKiosk;
-import com.logistimo.entities.entity.KioskLink;
-import com.logistimo.entities.entity.UserToKiosk;
+import com.logistimo.entities.entity.*;
 import com.logistimo.entities.models.EntityLinkModel;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.models.UserEntitiesModel;
 import com.logistimo.entities.pagination.processor.UpdateRouteProcessor;
 import com.logistimo.entities.utils.EntityUtils;
+import com.logistimo.entity.comparator.LocationComparator;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.exceptions.EventGenerationException;
 import com.logistimo.events.processor.EventPublisher;
 import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.locations.LocationServiceUtil;
+import com.logistimo.locations.client.LocationClient;
+import com.logistimo.locations.model.LocationResponseModel;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.PagedExec;
@@ -86,25 +81,12 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.QueryUtil;
 import com.logistimo.utils.StringUtil;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.jdo.JDOException;
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
+import java.util.*;
 
 @Service
 public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService {
@@ -573,12 +555,14 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     // Trim extra spaces if any in kiosk name
     kiosk.setName(StringUtil.getTrimmedName(kiosk.getName()));
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    Transaction tx = pm.currentTransaction();
     try {
       // Check if a kiosk by this name already exists??
       Query query = pm.newQuery(JDOUtils.getImplClass(IKiosk.class));
       query.setFilter("dId.contains(domainIdParam) && nName == nameParam");
       query.declareParameters("Long domainIdParam, String nameParam");
       List<IKiosk> results = null;
+      tx.begin();
       try {
         results = (List<IKiosk>) query.execute(domainId, kiosk.getName().toLowerCase());
         results
@@ -589,6 +573,8 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       }
       if (results == null || results.size() == 0) {
         // Kiosk by this name does NOT exist; so save this
+        //add loc ids and fast fail if location service is down
+        updateKioskLocationIds(kiosk);
         // Check if custom ID is specified for the kiosk. If yes, check if the specified custom ID already exists.
         boolean customIdExists = false;
         if (kiosk.getCustomId() != null && !kiosk.getCustomId().isEmpty()) {
@@ -599,7 +585,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
           xLogger.warn("addKiosk: FAILED!! Cannot add kiosk {0}. Custom ID {1} already exists.",
               kiosk.getName(), kiosk.getCustomId());
           throw new ServiceException(
-              backendMessages.getString("error.cannotadd") + " '" + kiosk.getName() + "'. "
+              backendMessages.getString("error.cannotadd") + "'" + kiosk.getName() + "'. "
                   + messages.getString("customid") + " " + kiosk.getCustomId() + " "
                   + backendMessages.getString("error.alreadyexists") + ".");
         }
@@ -632,16 +618,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             Counter.getUserToKioskCounter(domainId, userId).increment(1);
           }
         }
-        //add kiosk location ids
-        Map<String, Object> reqMap = new HashMap<>();
-        reqMap.put("kioskId", kiosk.getKioskId());
-        reqMap.put("userName", sUserId);
-        Map<String, Object>
-            lidMap =
-            LocationServiceUtil.getInstance().getLocationIds(kiosk, reqMap);
-        if (lidMap.get("status") == "success") {
-          updateKioskLocationIds(kiosk, lidMap, pm);
-        }
+        tx.commit();
         try {
           EventPublisher.generate(domainId, IEvent.CREATED, null,
               JDOUtils.getImplClass(IKiosk.class).getName(), entityDao.getKeyString(kiosk), null);
@@ -656,6 +633,9 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     } catch (Exception e) {
       errMsg = e.getMessage();
     } finally {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
       pm.close();
     }
     if (errMsg != null) {
@@ -690,6 +670,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     List<String> oldTags = null;
     String sUserId = StringUtils.isNotBlank(username) ? username : kiosk.getUpdatedBy();
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    Transaction tx = pm.currentTransaction();
     try {
       if (!AppFactory.get().getAuthorizationService().authoriseUpdateKiosk(sUserId, domainId)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
@@ -701,6 +682,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             backendMessages.getString("entity.updation.permission.denied") + " : " + k.getName());
       }
       xLogger.info("updateKiosk: Updating kiosk {0}", kiosk.getName());
+      tx.begin();
       //If we get here, it means the kiosk exists
       kiosk.setName(StringUtil.getTrimmedName(kiosk.getName()));
       if (!k.getName().equals(kiosk.getName())) {
@@ -713,8 +695,8 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
         updateDeviceTags =
             true; // state, district and taluk are used as tags for temperature devices (which are modeled as inventory items here)
       }
-
-
+      //check for location
+      int locindex = new LocationComparator().compare(k,kiosk);
       // Update kiosk
       k.setStreet(kiosk.getStreet());
       k.setCity(kiosk.getCity());
@@ -744,7 +726,10 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       k.setTgs(tagDao.getTagsByNames(kiosk.getTags(), ITag.KIOSK_TAG));
       k.setCustomerPerm(kiosk.getCustomerPerm());
       k.setVendorPerm(kiosk.getVendorPerm());
-
+      //add loc ids and fail fast
+      if (locindex != 0) {
+        updateKioskLocationIds(k);
+      }
       // Update users for this kiosk, if necessary. First, check if the kiosk to user mappings have changed
       xLogger.fine("updateKiosk: Updating user kiosk mappings for kiosk {0}", kiosk.getName());
       updateUsersForKiosk(kiosk, pm);
@@ -788,14 +773,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             kiosk.getKioskId(), kiosk.getDomainId(), e.getMessage());
       }
       pm.makePersistent(k);
-      //add kiosk location ids
-      /*Map<String, Object> reqMap = new HashMap<>();
-      reqMap.put("kioskId", kiosk.getKioskId());
-      reqMap.put("userName", sUserId);
-      Map<String, Object> lidMap = LocationServiceUtil.getInstance().getLocationIds(kiosk, reqMap);
-      if (lidMap.get("status") == "success") {
-        updateKioskLocationIds(kiosk, lidMap, pm);
-      }*/
+      tx.commit();
     } catch (JDOObjectNotFoundException e) {
       xLogger.warn("updateKiosk: Kiosk {0} does not exist", kiosk.getKioskId());
       exception = e;
@@ -805,11 +783,14 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       exception = e;
     } finally {
       xLogger.fine("Exiting updateKiosk");
+      if(tx.isActive()) {
+        tx.rollback();
+      }
       pm.close();
     }
 
     if (exception != null) {
-      throw new ServiceException(exception);
+      throw new ServiceException(exception.getMessage());
     }
     // Update the reports configuration for this domain
     if (kiosk.getDomainIds() != null) {
@@ -825,15 +806,14 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
   /**
    * This method will update applicable location ids for a Kisok
    */
-  public void updateKioskLocationIds(IKiosk kiosk, Map<String, Object> lidMap,
-                                     PersistenceManager pm) {
-    IKiosk k = JDOUtils.getObjectById(IKiosk.class, kiosk.getKioskId(), pm);
-    k.setCountryId((String) lidMap.get("countryId"));
-    k.setStateId((String) lidMap.get("stateId"));
-    k.setDistrictId((String) lidMap.get("districtId"));
-    k.setTalukId((String) lidMap.get("talukId"));
-    k.setCityId((String) lidMap.get("placeId"));
-    pm.makePersistent(k);
+  private void updateKioskLocationIds(IKiosk kiosk) {
+    LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
+    LocationResponseModel response = client.getLocationIds(kiosk);
+    kiosk.setCountryId(response.getCountryId());
+    kiosk.setStateId(response.getStateId());
+    kiosk.setDistrictId(response.getDistrictId());
+    kiosk.setTalukId(response.getTalukId());
+    kiosk.setCityId(response.getCityId());
   }
 
   /**

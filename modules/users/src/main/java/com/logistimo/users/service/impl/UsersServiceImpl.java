@@ -31,12 +31,14 @@ import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.QueryConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.entities.entity.IUserToKiosk;
+import com.logistimo.entity.comparator.LocationComparator;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.exceptions.EventGenerationException;
 import com.logistimo.events.processor.EventPublisher;
@@ -44,7 +46,8 @@ import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.SystemException;
 import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.locations.LocationServiceUtil;
+import com.logistimo.locations.client.LocationClient;
+import com.logistimo.locations.model.LocationResponseModel;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.users.UserLoginHistoryModel;
 import com.logistimo.pagination.PageParams;
@@ -66,33 +69,17 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.entity.IUserDevice;
 import com.logistimo.users.entity.UserAccount;
 import com.logistimo.users.service.UsersService;
-import com.logistimo.utils.Counter;
-import com.logistimo.utils.GsonUtils;
-import com.logistimo.utils.MessageUtil;
-import com.logistimo.utils.PasswordEncoder;
-import com.logistimo.utils.QueryUtil;
-import com.logistimo.utils.StringUtil;
-
+import com.logistimo.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
-
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * Created by charan on 04/03/17.
@@ -147,6 +134,8 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     boolean userExists = false;
     String errMsg = null;
     Exception exception = null;
+    //add loc ids and fast fail if location service is down
+    updateUserLocationIds(account);
     //Assuming that all other fields including registeredBy is set by the calling function
     Date now = new Date();
     //account.setLastLogin(now);
@@ -166,12 +155,14 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     String accountId = account.getUserId();
     xLogger.info("addAccount: userId is {0}", accountId);
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    Transaction tx = pm.currentTransaction();
     try {
       try {
         if (!AppFactory.get().getAuthorizationService().authoriseUpdateKiosk(
             account.getRegisteredBy(), domainId)) {
           throw new UnauthorizedException(backendMessages.getString("permission.denied"));
         }
+        tx.begin();
         //First check if the user already exists in the database
         @SuppressWarnings("unused")
         IUserAccount user = JDOUtils.getObjectById(IUserAccount.class, accountId, pm);
@@ -209,17 +200,8 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
             account.getUserId());
         // Increment counter
         List<Long> domainIds = account.getDomainIds();
-        //add user location ids
-        Map<String, Object> reqMap = new HashMap<>();
-        reqMap.put("userId", account.getUserId());
-        reqMap.put("userName", account.getRegisteredBy());
-        Map<String, Object>
-            lidMap =
-            LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
-        if (lidMap.get("status") == "success") {
-          updateUserLocationIds(account, lidMap, pm);
-        }
         account = pm.detachCopy(account);
+        tx.commit();
       }
       // Generate event, if configured
       try {
@@ -236,6 +218,9 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       errMsg = e.getMessage();
       exception = e;
     } finally {
+      if (tx.isActive()){
+        tx.rollback();
+      }
       pm.close();
     }
     if (userExists) {
@@ -500,6 +485,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     Exception exception = null;
     Date now = new Date();
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    Transaction tx = pm.currentTransaction();
     //We use an atomic transaction here to check if the user exists and then update it
     ///Transaction tx = pm.currentTransaction();
     try {
@@ -507,8 +493,11 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
           .authoriseUpdateKiosk(updatedBy, account.getDomainId())) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
+      tx.begin();
       //First check if the user already exists in the database
       IUserAccount user = JDOUtils.getObjectById(IUserAccount.class, account.getUserId(), pm);
+      //location check
+      int locindex = new LocationComparator().compare(user,account);
       //If we get here, it means the user exists
       user.setRole(account.getRole());
       user.setFirstName(StringUtil.getTrimmedName(account.getFirstName()));
@@ -540,7 +529,6 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       user.setTimezone(account.getTimezone());
       user.setSimId(account.getSimId());
       user.setPermission(account.getPermission());
-
       // Update user agent strings
       user.setUserAgent(account.getUserAgent());
       user.setPreviousUserAgent(account.getPreviousUserAgent());
@@ -559,7 +547,10 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       user.setAccessibleDomainIds(account.getAccessibleDomainIds());
       user.setLoginReconnect(account.getLoginReconnect());
       user.setStoreAppTheme(account.getStoreAppTheme());
-
+      //add loc ids and fail fast
+      if (locindex != 0) {
+        updateUserLocationIds(user);
+      }
       // Check if custom ID is specified for the user account. If yes, check if the specified custom ID already exists.
       boolean customIdExists = false;
       if (account.getCustomId() != null && !account.getCustomId().isEmpty() && !account
@@ -577,18 +568,8 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
                 + backendMessages.getString("error.alreadyexists") + ".");
       }
       user.setCustomId(account.getCustomId());
-
       user.setTgs(tagDao.getTagsByNames(account.getTags(), ITag.USER_TAG));
-      //add user location ids
-      Map<String, Object> reqMap = new HashMap<>();
-      reqMap.put("userId", account.getUserId());
-      reqMap.put("userName", account.getRegisteredBy());
-      Map<String, Object>
-          lidMap =
-          LocationServiceUtil.getInstance().getLocationIds(account, reqMap);
-      if (lidMap.get("status") == "success") {
-        updateUserLocationIds(account, lidMap, pm);
-      }
+      tx.commit();
       // Generate event, if configured
       try {
         EventPublisher.generate(account.getDomainId(), IEvent.MODIFIED, null,
@@ -608,6 +589,9 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       errMsg = e.getMessage();
       exception = e;
     } finally {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
       pm.close();
     }
     if (!userExists) {
@@ -1437,19 +1421,17 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     }
     return false;
   }
-
   /**
    * This method will update applicable location ids for an user
    */
-  public void updateUserLocationIds(IUserAccount user, Map<String, Object> lidMap,
-                                    PersistenceManager pm) {
-    IUserAccount k = JDOUtils.getObjectById(IUserAccount.class, user.getUserId(), pm);
-    k.setCountryId((String) lidMap.get("countryId"));
-    k.setStateId((String) lidMap.get("stateId"));
-    k.setDistrictId((String) lidMap.get("districtId"));
-    k.setTalukId((String) lidMap.get("talukId"));
-    k.setCityId((String) lidMap.get("placeId"));
-    pm.makePersistent(k);
+  private void updateUserLocationIds(IUserAccount user) {
+    LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
+    LocationResponseModel response = client.getLocationIds(user);
+    user.setCountryId(response.getCountryId());
+    user.setStateId(response.getStateId());
+    user.setDistrictId(response.getDistrictId());
+    user.setTalukId(response.getTalukId());
+    user.setCityId(response.getCityId());
   }
 
   /**

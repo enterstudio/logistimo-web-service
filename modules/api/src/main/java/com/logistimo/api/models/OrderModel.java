@@ -23,8 +23,6 @@
 
 package com.logistimo.api.models;
 
-import com.logistimo.entities.entity.IApprovers;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

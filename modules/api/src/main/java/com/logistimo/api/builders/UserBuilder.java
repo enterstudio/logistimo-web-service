@@ -23,12 +23,7 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.api.models.LocationModel;
-import com.logistimo.api.models.UserConfigModel;
-import com.logistimo.api.models.UserDashboardConfigModel;
-import com.logistimo.api.models.UserDetailModel;
-import com.logistimo.api.models.UserDomainDetail;
-import com.logistimo.api.models.UserModel;
+import com.logistimo.api.models.*;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.AssetSystemConfig;
@@ -51,7 +46,6 @@ import com.logistimo.users.UserUtils;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.StringUtil;
-
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;

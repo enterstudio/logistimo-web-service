@@ -25,8 +25,6 @@ package com.logistimo.approvals.client.models;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * Created by naveensnair on 16/06/17.
  */

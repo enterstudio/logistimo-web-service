@@ -5,7 +5,6 @@ import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.logger.XLog;
 import com.logistimo.services.ServiceException;
 import com.logistimo.utils.MetricsUtil;
-
 import org.apache.camel.Handler;
 
 /**

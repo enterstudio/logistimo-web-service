@@ -24,7 +24,6 @@
 package com.logistimo.exception;
 
 import com.logistimo.services.Resources;
-
 import org.apache.commons.lang.StringUtils;
 
 import java.text.MessageFormat;

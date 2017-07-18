@@ -24,7 +24,6 @@
 package com.logistimo.orders.models;
 
 import com.google.gson.annotations.SerializedName;
-
 import com.logistimo.entities.models.EntityMinModel;
 
 import java.util.Date;

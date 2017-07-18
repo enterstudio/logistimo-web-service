@@ -24,19 +24,10 @@
 package com.logistimo.api.controllers;
 
 import com.google.gson.Gson;
-
 import com.logistimo.api.builders.FChartBuilder;
 import com.logistimo.api.builders.InventoryBuilder;
 import com.logistimo.api.builders.MarkerBuilder;
-import com.logistimo.api.models.FChartModel;
-import com.logistimo.api.models.InventoryAbnStockModel;
-import com.logistimo.api.models.InventoryBatchMaterialModel;
-import com.logistimo.api.models.InventoryDetailModel;
-import com.logistimo.api.models.InventoryDomainModel;
-import com.logistimo.api.models.InventoryMinMaxLogModel;
-import com.logistimo.api.models.InventoryModel;
-import com.logistimo.api.models.InvntryBatchModel;
-import com.logistimo.api.models.MarkerModel;
+import com.logistimo.api.models.*;
 import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
 import com.logistimo.auth.SecurityConstants;
@@ -79,35 +70,20 @@ import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.utils.ConfigUtil;
-import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
 import com.logistimo.utils.LocalDateUtil;
-
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.ParseException;
+import java.util.*;
 
 @Controller
 @RequestMapping("/inventory")

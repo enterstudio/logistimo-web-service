@@ -25,25 +25,13 @@ package com.logistimo.api.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
 import com.logistimo.AppFactory;
 import com.logistimo.api.builders.EntityBuilder;
 import com.logistimo.api.builders.InventoryBuilder;
 import com.logistimo.api.builders.StockBoardBuilder;
 import com.logistimo.api.builders.UserBuilder;
-import com.logistimo.api.models.EntityApproversModel;
-import com.logistimo.api.models.EntityDomainModel;
-import com.logistimo.api.models.EntityModel;
-import com.logistimo.api.models.EntitySummaryModel;
-import com.logistimo.api.models.InventoryModel;
-import com.logistimo.api.models.PermissionModel;
-import com.logistimo.api.models.RelationModel;
-import com.logistimo.api.models.StockBoardModel;
-import com.logistimo.api.request.AddMaterialsRequestObj;
-import com.logistimo.api.request.EditMaterialsReqObj;
-import com.logistimo.api.request.NetworkViewResponseObj;
-import com.logistimo.api.request.RemoveMaterialsRequestObj;
-import com.logistimo.api.request.ReorderEntityRequestObj;
+import com.logistimo.api.models.*;
+import com.logistimo.api.request.*;
 import com.logistimo.api.util.DomainRemover;
 import com.logistimo.api.util.SearchUtil;
 import com.logistimo.auth.GenericAuthoriser;
@@ -53,12 +41,8 @@ import com.logistimo.auth.SecurityUtil;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
-import com.logistimo.config.models.ApprovalsConfig;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.config.models.KioskConfig;
+import com.logistimo.config.models.*;
 import com.logistimo.config.models.Permissions;
-import com.logistimo.config.models.StockboardConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.CharacterConstants;
@@ -103,35 +87,16 @@ import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.Counter;
-import com.logistimo.utils.GsonUtils;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.MsgUtil;
-import com.logistimo.utils.QueryUtil;
-
+import com.logistimo.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import org.springframework.web.bind.annotation.*;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 @Controller
 @RequestMapping("/entities")

@@ -25,7 +25,6 @@ package com.logistimo.api.builders;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.logistimo.api.models.AssetBaseModel;
 import com.logistimo.api.models.AssetDetailsModel;
 import com.logistimo.api.models.EntityModel;
@@ -33,15 +32,7 @@ import com.logistimo.api.models.TemperatureDomainModel;
 import com.logistimo.assets.AssetUtil;
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.assets.entity.IAssetRelation;
-import com.logistimo.assets.models.AssetDataModel;
-import com.logistimo.assets.models.AssetDeviceModel;
-import com.logistimo.assets.models.AssetModel;
-import com.logistimo.assets.models.AssetModels;
-import com.logistimo.assets.models.AssetRelationModel;
-import com.logistimo.assets.models.DeviceTempModel;
-import com.logistimo.assets.models.DeviceTempsModel;
-import com.logistimo.assets.models.Temperature;
-import com.logistimo.assets.models.TemperatureResponse;
+import com.logistimo.assets.models.*;
 import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
 import com.logistimo.constants.Constants;
@@ -62,15 +53,7 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.MsgUtil;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created by kaniyarasu on 03/11/15.

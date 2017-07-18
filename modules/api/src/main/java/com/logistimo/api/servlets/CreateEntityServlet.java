@@ -41,7 +41,7 @@ import com.logistimo.config.models.Permissions;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.Constants;
-import com.logistimo.constants.LocationConstants;
+import com.logistimo.locations.constants.LocationConstants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;

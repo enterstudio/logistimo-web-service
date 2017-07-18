@@ -57,20 +57,13 @@ import com.logistimo.shipments.entity.IShipmentItemBatch;
 import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.shipments.service.impl.ShipmentService;
 import com.logistimo.utils.BigUtil;
-
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 
 /**

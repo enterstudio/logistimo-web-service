@@ -38,12 +38,11 @@ import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 
+import javax.jdo.PersistenceManager;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
-import javax.jdo.PersistenceManager;
 
 public interface OrderManagementService extends Service {
 

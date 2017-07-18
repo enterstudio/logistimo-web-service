@@ -23,13 +23,7 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.api.models.EntityApproversModel;
-import com.logistimo.api.models.EntityDomainModel;
-import com.logistimo.api.models.EntityHierarchyModel;
-import com.logistimo.api.models.EntityModel;
-import com.logistimo.api.models.EntitySummaryModel;
-import com.logistimo.api.models.PermissionModel;
-import com.logistimo.api.models.UserModel;
+import com.logistimo.api.models.*;
 import com.logistimo.api.request.NetworkViewResponseObj;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
@@ -59,24 +53,12 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.CommonUtils;
 import com.logistimo.utils.LocalDateUtil;
-
 import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class EntityBuilder {
 

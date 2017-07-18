@@ -24,7 +24,6 @@
 package com.logistimo.orders.approvals.models;
 
 import com.google.gson.annotations.SerializedName;
-
 import com.logistimo.models.StatusModel;
 import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.orders.models.OrderModel;

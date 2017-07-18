@@ -40,13 +40,10 @@ import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.users.entity.IUserAccount;
 
-import org.springframework.stereotype.Component;
-
+import javax.jdo.PersistenceManager;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import javax.jdo.PersistenceManager;
 public interface EntitiesService extends Service {
 
 
@@ -403,6 +400,4 @@ public interface EntitiesService extends Service {
    */
   boolean isAnApprover(String userId, Long domainId);
 
-  void updateKioskLocationIds(IKiosk kiosk, Map<String, Object> lidMap, PersistenceManager pm)
-      throws ServiceException;
 }

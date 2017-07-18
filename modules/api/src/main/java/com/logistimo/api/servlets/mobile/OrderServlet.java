@@ -26,7 +26,6 @@ package com.logistimo.api.servlets.mobile;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-
 import com.logistimo.AppFactory;
 import com.logistimo.api.servlets.JsonRestServlet;
 import com.logistimo.api.servlets.mobile.builders.MobileOrderBuilder;
@@ -42,11 +41,7 @@ import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.entity.IJobStatus;
-import com.logistimo.exception.InvalidDataException;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.LogiException;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.exception.ValidationException;
+import com.logistimo.exception.*;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
@@ -66,14 +61,7 @@ import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
-import com.logistimo.proto.BatchRequest;
-import com.logistimo.proto.JsonTagsZ;
-import com.logistimo.proto.MaterialRequest;
-import com.logistimo.proto.MobileOrderModel;
-import com.logistimo.proto.MobileOrdersModel;
-import com.logistimo.proto.RestConstantsZ;
-import com.logistimo.proto.UpdateOrderRequest;
-import com.logistimo.proto.UpdateOrderStatusRequest;
+import com.logistimo.proto.*;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
@@ -85,23 +73,16 @@ import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.CommonUtils;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.StringUtil;
-
 import org.apache.commons.lang.StringUtils;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class OrderServlet extends JsonRestServlet {

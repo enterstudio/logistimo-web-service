@@ -34,7 +34,6 @@ import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;

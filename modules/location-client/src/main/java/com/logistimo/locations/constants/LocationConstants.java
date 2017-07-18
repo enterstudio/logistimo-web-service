@@ -21,66 +21,21 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.entity;
+package com.logistimo.locations.constants;
 
-/**
- * Created by yuvaraj on 16/03/17.
- */
-public interface ILocationConfig {
-  double getLatitude();
+import com.logistimo.services.utils.ConfigUtil;
 
-  void setLatitude(double latitude);
+public class LocationConstants {
 
-  double getLongitude();
-
-  void setLongitude(double longitude);
-
-  String getStreet();
-
-  void setStreet(String street);
-
-  String getCity();
-
-  void setCity(String city);
-
-  String getTaluk();
-
-  void setTaluk(String taluk);
-
-  String getDistrict();
-
-  void setDistrict(String district);
-
-  String getState();
-
-  void setState(String state);
-
-  String getCountry();
-
-  void setCountry(String country);
-
-  String getPinCode();
-
-  void setPinCode(String pinCode);
-
-  String getCountryId();
-
-  void setCountryId(String countryId);
-
-  String getStateId();
-
-  void setStateId(String stateId);
-
-  String getDistrictId();
-
-  void setDistrictId(String districtId);
-
-  String getTalukId();
-
-  void setTalukId(String talukId);
-
-  String getCityId();
-
-  void setCityId(String cityId);
-
+  private static final String LS_URL = ConfigUtil.get("location.service.url", "http://localhost:9090");
+  private static final String LS_PATH = ConfigUtil.get("location.service.path", "/locations/ids");
+  public static final Integer TIMED_OUT = ConfigUtil.getInt("location.service.timeout", 5000);
+  public static final String APP_NAME = "logistimo";
+  public static final String CLIENT_NAME = "LocationServiceClient";
+  public static final String URL = LS_URL.concat(LS_PATH);
+  public static final String STATE_LITERAL = "state";
+  public static final String DIST_LITERAL = "district";
+  public static final String SUBDIST_LITERAL = "taluk";
+  public static final String ZIP_LITERAL = "pincode";
+  public static final String STREET_LITERAL = "street";
 }

@@ -23,12 +23,7 @@
 
 package com.logistimo.api.builders;
 
-import com.logistimo.api.models.DashboardChartModel;
-import com.logistimo.api.models.DashboardModel;
-import com.logistimo.api.models.EventDistribModel;
-import com.logistimo.api.models.InvDashboardModel;
-import com.logistimo.api.models.MainDashboardModel;
-import com.logistimo.api.models.SessionDashboardModel;
+import com.logistimo.api.models.*;
 import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.dashboards.entity.IDashboard;
@@ -39,7 +34,6 @@ import com.logistimo.services.Services;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
-
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.ResultSet;
@@ -47,16 +41,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Mohan Raja

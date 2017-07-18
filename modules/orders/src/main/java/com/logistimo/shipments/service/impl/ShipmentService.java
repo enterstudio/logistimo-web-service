@@ -94,29 +94,16 @@ import com.logistimo.shipments.validators.CreateShipmentValidator;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.BigUtil;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.LockUtil;
-import com.logistimo.utils.MsgUtil;
-import com.logistimo.utils.StringUtil;
-
+import com.logistimo.utils.*;
 import org.apache.commons.lang.StringUtils;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by Mohan Raja on 29/09/16
