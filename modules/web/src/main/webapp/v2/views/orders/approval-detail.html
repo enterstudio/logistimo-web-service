@@ -55,6 +55,7 @@
                         <a ng-show="$index == approval.approvers.length - 1"
                            href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}}</a>
                     </span>
+                    <span class="glyphicons glyphicons-clock c-red large" uib-tooltip="Expiring {{approval.expires_at | fromNow:this}}" tooltip-append-to-body="true"></span>
                 </div>
                 <div class="col-sm-9" ng-show="cancelApproval">
                     <span class="litetext" style="display: inline-block">Requested on {{approval.created_at | formatDate:this }} by </span>
@@ -91,7 +92,7 @@
                 </div>
             </div>
             <div class="pt10">
-                <div class="col-sm-12" ng-show="isDef(id)">
+                <div class="col-sm-12 lPad10 rPad10" ng-show="isDef(id)">
                     <div class="bgr">
                         <div ng-include="'views/conversation/messages.html'"
                              ng-init="objId = id;objType = 'APPROVAL'"></div>

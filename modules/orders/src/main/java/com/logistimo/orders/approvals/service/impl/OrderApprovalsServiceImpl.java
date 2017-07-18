@@ -131,7 +131,7 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
   }
 
   public boolean isApprovalRequired(IOrder order) throws ServiceException {
-    return isApprovalRequired(order, null);
+    return isApprovalRequired(order, getApprovalType(order));
   }
 
   /**
@@ -140,11 +140,17 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
   public boolean isApprovalRequired(IOrder order, Integer approvalType) throws ServiceException {
     boolean required = false;
     if (order != null) {
-      IKiosk kiosk;
-      List<String> entityTags;
+      IKiosk kiosk = null;
+      List<String> entityTags = null;
       List<String> configTags;
-      kiosk = entitiesService.getKiosk(order.getKioskId());
-      entityTags = kiosk.getTags();
+      if(IOrder.PURCHASE_ORDER.equals(approvalType)) {
+        kiosk = entitiesService.getKiosk(order.getKioskId());
+      } else if(IOrder.SALES_ORDER.equals(approvalType)) {
+        kiosk = entitiesService.getKiosk(order.getServicingKiosk());
+      }
+      if(kiosk != null) {
+        entityTags = kiosk.getTags();
+      }
       if (entityTags != null && !entityTags.isEmpty()) {
         DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
         ApprovalsConfig ac = dc.getApprovalsConfig();
@@ -233,6 +239,26 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
       }
     }
     return found;
+  }
+
+  /**
+   * Get the approval type for a given order
+   */
+  @Override
+  public Integer getApprovalType(IOrder order) {
+    Integer approvalType = null;
+    if (IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
+      if (!order.isVisibleToVendor()) {
+        approvalType = IOrder.PURCHASE_ORDER;
+      } else {
+        approvalType = IOrder.SALES_ORDER;
+      }
+    } else if (IOrder.SALES_ORDER.equals(order.getOrderType())) {
+      approvalType = IOrder.SALES_ORDER;
+    } else if (IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
+      approvalType = IOrder.TRANSFER_ORDER;
+    }
+    return approvalType;
   }
 
 }

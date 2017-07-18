@@ -32,7 +32,6 @@ import com.logistimo.api.models.OrderModel;
 import com.logistimo.api.models.OrderResponseModel;
 import com.logistimo.api.models.Permissions;
 import com.logistimo.api.models.UserContactModel;
-import com.logistimo.api.models.UserModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.ApprovalsConfig;
@@ -349,15 +348,8 @@ public class OrdersAPIBuilder {
     List<String> prApprovers = new ArrayList<>(1);
     EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class, locale);
     if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
-      IKiosk kiosk = entitiesService.getKiosk(order.getKioskId());
-      DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
-      ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
-      if (approvalsConfig != null) {
-        ApprovalsConfig.OrderConfig orderConfig = approvalsConfig.getOrderConfig();
-        if (orderConfig != null) {
-          prApprovers = orderConfig.getPrimaryApprovers();
-        }
-      }
+      prApprovers = DomainConfig.getInstance(order.getDomainId()).getApprovalsConfig()
+          .getOrderConfig().getPrimaryApprovers();
     } else {
       List<IApprovers> primaryApprovers;
       if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
@@ -427,8 +419,7 @@ public class OrdersAPIBuilder {
    * Returns the permission to be restricted
    */
   public Permissions buildPermissionModel(IOrder order, OrderModel orderModel, Integer approvalType,
-                                          boolean isApprovalRequired)
-      throws ServiceException {
+                                          boolean isApprovalRequired) {
     Permissions model = new Permissions();
     List<String> permissions = new ArrayList<>(1);
     ApprovalsDao approvalsDao = new ApprovalsDao();
@@ -510,24 +501,6 @@ public class OrdersAPIBuilder {
     return model;
   }
 
-  /**
-   * Get the approval type for a given order
-   */
-  public Integer getApprovalType(IOrder order) {
-    Integer approvalType = null;
-    if (IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
-      if (!order.isVisibleToVendor()) {
-        approvalType = IOrder.PURCHASE_ORDER;
-      } else {
-        approvalType = IOrder.SALES_ORDER;
-      }
-    } else if (IOrder.SALES_ORDER.equals(order.getOrderType())) {
-      approvalType = IOrder.SALES_ORDER;
-    } else if(IOrder.TRANSFER_ORDER.equals(order.getOrderType())){
-      approvalType = IOrder.TRANSFER_ORDER;
-    }
-    return approvalType;
-  }
 
   /**
    * Gives the types of approval to be shown to the user
@@ -542,11 +515,12 @@ public class OrdersAPIBuilder {
     boolean isTransferApprovalRequired = false;
     ApprovalsDao approvalsDao = new ApprovalsDao();
     IOrder order = oms.getOrder(orderModel.id);
-    if (!orderModel.isVisibleToCustomer() && !orderModel.isVisibleToVendor()) {
+    if (IOrder.TRANSFER_ORDER.equals(order.getOrderType()) && !orderModel.isVisibleToCustomer()
+        && !orderModel.isVisibleToVendor()) {
       isTransferApprovalRequired = orderApprovalsService.isApprovalRequired(order,
           IOrder.TRANSFER_ORDER);
     } else {
-      if (orderModel.isVisibleToCustomer() && orderModel.atc) {
+      if (IOrder.PURCHASE_ORDER.equals(order.getOrderType()) && orderModel.isVisibleToCustomer() && orderModel.atc) {
         isPurchaseApprovalRequired =
             orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER);
       }
@@ -998,40 +972,6 @@ public class OrdersAPIBuilder {
     return model;
   }
 
-  public List<UserModel> buildUserModels(List<String> approvers, UsersService us, Locale locale,
-                                         String timezone) {
-    List<UserModel> userModels = null;
-    if (approvers != null && !approvers.isEmpty()) {
-      UserBuilder userBuilder = new UserBuilder();
-      userModels =
-          userBuilder.buildUserModels(constructUserAccount(us, approvers), locale, timezone, true);
-    }
-    return userModels;
-  }
-  /*public OrderModel populateApprovalParams(OrderModel model, List<IApprovers> primaryApprovers,
-                                           List<IApprovers> secondaryApprovers, UsersService as, Locale locale,
-                                           String timeZone) {
-    UserBuilder userBuilder = new UserBuilder();
-    List<String> primaryApvrs = new ArrayList<>();
-    List<String> secondaryApvrs = new ArrayList<>();
-    if(primaryApprovers != null && !primaryApprovers.isEmpty()) {
-      primaryApvrs.addAll(primaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
-      if(!primaryApvrs.isEmpty()) {
-        model.setPrimaryApprovers(userBuilder
-            .buildUserModels(constructUserAccount(as, primaryApvrs), locale, timeZone, true));
-      }
-    }
-    if(secondaryApprovers != null && !secondaryApprovers.isEmpty()) {
-      secondaryApvrs.addAll(secondaryApprovers.stream().map(IApprovers::getUserId).collect(Collectors.toList()));
-      if(!secondaryApvrs.isEmpty()) {
-        model.setSecondaryApprovers(userBuilder
-            .buildUserModels(constructUserAccount(as, secondaryApvrs), locale, timeZone, true));
-      }
-    }
-    return model;
-
-  }*/
-
   private ShipmentItemBatchModel getShipmentItemBatchBD(String shipmentID,
                                                         IShipmentItemBatch iShipmentItemBatch) {
     ShipmentItemBatchModel bd = new ShipmentItemBatchModel();
@@ -1105,21 +1045,6 @@ public class OrdersAPIBuilder {
     return order;
   }
 
-  private List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
-    if (userIds != null && !userIds.isEmpty()) {
-      List<IUserAccount> list = new ArrayList<>(userIds.size());
-      for (String userId : userIds) {
-        try {
-          list.add(as.getUserAccount(userId));
-        } catch (Exception ignored) {
-          // do nothing
-        }
-      }
-      return list;
-    }
-    return new ArrayList<>();
-  }
-
   private class DemandBatchMeta {
     public BigDecimal quantity;
     List<ShipmentItemBatchModel> bd = new ArrayList<>();
@@ -1127,40 +1052,6 @@ public class OrdersAPIBuilder {
     DemandBatchMeta(BigDecimal quantity) {
       this.quantity = quantity;
     }
-  }
-
-  public List<OrderModel> buildOrderMetaData(List<IOrder> orders, Long domainId)
-      throws ServiceException {
-    List<OrderModel> orderModels = new ArrayList<>();
-    SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_CSV);
-    try {
-      EntitiesService service = Services.getService(EntitiesServiceImpl.class);
-      for (IOrder order : orders) {
-        OrderModel model = new OrderModel();
-        model.id = order.getOrderId();
-        model.eid = order.getKioskId();
-        IKiosk k = service.getKiosk(model.eid);
-        model.enm = k.getName();
-        model.eadd =
-            CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
-        if (order.getServicingKiosk() != null) {
-          model.vid = order.getServicingKiosk().toString();
-          k = service.getKiosk(order.getServicingKiosk());
-          model.vnm = k.getName();
-          model.vadd =
-              CommonUtils.getAddress(k.getCity(), k.getTaluk(), k.getDistrict(), k.getState());
-        }
-        model.size = order.getNumberOfItems();
-        if (order.getDueDate() != null) {
-          model.edd = sdf.format(order.getDueDate());
-        }
-        orderModels.add(model);
-      }
-    } catch (Exception e) {
-      xLogger.warn("Error while fetching entity data in domain:{0} ", domainId, e);
-      throw new ServiceException(e);
-    }
-    return orderModels;
   }
 
   public OrderApproverModel buildOrderApproverModel(String userId, Integer approvalType,

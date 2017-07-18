@@ -57,4 +57,6 @@ public interface IOrderApprovalsService {
   boolean isTransferApprovalComplete(IOrder order);
 
   boolean isTransferApprovalRequired(IOrder order);
+
+  Integer getApprovalType(IOrder order);
 }

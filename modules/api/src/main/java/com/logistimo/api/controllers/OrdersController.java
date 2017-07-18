@@ -166,7 +166,7 @@ public class OrdersController {
     }
     model = builder.buildFullOrderModel(order, user, domainId);
     model.setApprovalTypesModels(builder.buildOrderApprovalTypesModel(model, oms, locale));
-    Integer approvalType = builder.getApprovalType(order);
+    Integer approvalType = orderApprovalsService.getApprovalType(order);
     boolean isApprovalRequired = false;
     if (approvalType != null) {
       model.setApprover(
@@ -194,8 +194,8 @@ public class OrdersController {
       throws ServiceException, ObjectNotFoundException {
     OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
     IOrder order = oms.getOrder(orderId);
-    Integer approvalType = builder.getApprovalType(order);
-    return builder.buildPrimaryApprovers(order, SecurityUtils.getLocale(), approvalType);
+    return builder.buildPrimaryApprovers(order, SecurityUtils.getLocale(),
+        orderApprovalsService.getApprovalType(order));
   }
 
   @RequestMapping("/")

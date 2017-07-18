@@ -244,7 +244,7 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
 
 approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'ordService', 'userService', 'entityService', 'requestContext', '$location',
     function ($scope, approvalService, ordService, userService, entityService, requestContext, $location) {
-        $scope.wparams = [["eid", "entity.id"], ["oid", "ordId"], ["rs", "reqStatus"], ["ex", "exp"], ["rt", "reqType"], ["req", "reqId"], ["apr", "aprId"], ["s", "size"], ["o", "offset"]];
+        $scope.wparams = [["eid", "entity.id"], ["oid", "ordId"], ["rs", "reqStatus"], ["exp", "exp"], ["rt", "reqType"], ["req", "reqId"], ["apr", "aprId"], ["s", "size"], ["o", "offset"]];
         $scope.localFilters = ['entity', 'orderId', 'reqStatus', 'reqType', 'reqId', 'aprId', 'exp'];
         ListingController.call(this, $scope, requestContext, $location);
         $scope.init = function (firstTimeInit) {
@@ -257,7 +257,7 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
             $scope.showApproval = [];
             $scope.orderId = $scope.ordId = requestContext.getParam("oid") || "";
             $scope.reqStatus = requestContext.getParam("rs") || "";
-            $scope.ex = requestContext.getParam("exp") || "";
+            $scope.exp = requestContext.getParam("exp") || "";
             $scope.reqType = requestContext.getParam("rt");
             $scope.reqId = requestContext.getParam("req");
             $scope.aprId = requestContext.getParam("apr");
