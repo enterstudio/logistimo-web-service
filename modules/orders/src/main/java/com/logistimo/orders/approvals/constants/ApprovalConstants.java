@@ -36,4 +36,6 @@ public final class ApprovalConstants {
   public static final String PURCHASE = "p";
   public static final String SALES = "s";
   public static final String TRANSFER = "t";
+  public static final String ATTRIBUTE_KIOSK_ID = "kiosk_id";
+  public static final String ATTRIBUTE_ORDER_TYPE = "order_type";
 }
