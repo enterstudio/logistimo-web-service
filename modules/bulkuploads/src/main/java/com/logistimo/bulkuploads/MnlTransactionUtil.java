@@ -200,9 +200,8 @@ public class MnlTransactionUtil {
     // Form the text to be appended
     String
         lineMsg =
-        BulkUploadMgr.getErrorMessageString(offset, csvLine, ec.operation, ec.getMessages());
+        BulkUploadMgr.getErrorMessageString(offset, csvLine, ec.operation, ec.getMessages(), ec.getMessagesCount());
     // Create an UploadedMsgLog
-    //Key parentKey = KeyFactory.createKey( Uploaded.class.getSimpleName(), uploadedKey );
     IUploadedMsgLog entity = JDOUtils.createInstance(IUploadedMsgLog.class);
 
     try {

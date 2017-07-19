@@ -137,6 +137,7 @@ public class BulkUploadMgr {
   public static final String INTRALINE_DELIMITER = ":::::";
   // Inventory model - user-specified replenishment
   public static final String INVNTRY_MODEL_USERSPECIFIED = "us";
+  public static final int ERROR_MESSAGE_MAX_LENGTH = 1800;
   // need in bulk-upload, so that empty cell can be supported to indicate that no change be made
   // Logger
   private static final XLog xLogger = XLog.getLog(BulkUploadMgr.class);
@@ -157,6 +158,8 @@ public class BulkUploadMgr {
   private static final String MATERIAL_DESC_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
   private static final String MATERIAL_ADD_INFO_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
   private static final String STREET_ADDRESS_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.STREET_ADDRESS_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String ERROR_COUNT_MSG = "Remaining number of errors: ";
+  private static final String ERRORS_TRUNCATED_MSG = "... Message truncated due to too many errors. ";
 
   // Get the display name of a given type
   public static String getDisplayName(String type, Locale locale) {
@@ -237,11 +240,15 @@ public class BulkUploadMgr {
     return uploaded;
   }
 
-  // Get a line of error message
+  // Get a line of error message. Trim the message to 1800 characters and append a message with the remaining error count
   public static String getErrorMessageString(long offset, String csvLine, String operation,
-                                             String message) {
-    return (offset + BulkUploadMgr.INTRALINE_DELIMITER + csvLine + BulkUploadMgr.INTRALINE_DELIMITER
-        + operation + BulkUploadMgr.INTRALINE_DELIMITER + message);
+                                             String message, int errorCount) {
+    StringBuilder errMsgSb = new StringBuilder();
+    errMsgSb.append(offset).append(BulkUploadMgr.INTRALINE_DELIMITER).append(csvLine).append(BulkUploadMgr.INTRALINE_DELIMITER).append(operation).append(BulkUploadMgr.INTRALINE_DELIMITER).append(message);
+    if (errMsgSb.length() <= ERROR_MESSAGE_MAX_LENGTH) {
+      return errMsgSb.toString();
+    }
+    return getTrimmedErrorMessageString(errMsgSb.toString(), errorCount);
   }
 
   // Given a line, get a message object
@@ -3008,6 +3015,15 @@ public class BulkUploadMgr {
     return "";
   }
 
+  private static String getTrimmedErrorMessageString(String errMessage, int errorCount) {
+    StringBuilder trimmedErrMsgSb = new StringBuilder();
+    trimmedErrMsgSb.append(StringUtils.substringBeforeLast(
+        errMessage.substring(0, ERROR_MESSAGE_MAX_LENGTH), BulkUploadMgr.MESSAGE_DELIMITER));
+    int remainingErrorCount = errorCount - (StringUtils.countMatches(trimmedErrMsgSb.toString(), MESSAGE_DELIMITER) + 1);
+    trimmedErrMsgSb.append(BulkUploadMgr.MESSAGE_DELIMITER).append(CharacterConstants.SPACE).append(ERRORS_TRUNCATED_MSG).append(CharacterConstants.O_BRACKET).append(ERROR_COUNT_MSG).append(remainingErrorCount).append(CharacterConstants.C_BRACKET);
+    return trimmedErrMsgSb.toString();
+  }
+
   public static class EntityContainer {
     public String operation = OP_ADD; // operation
     public List<String> messages = new ArrayList<String>(); // error messages, if any
@@ -3028,6 +3044,10 @@ public class BulkUploadMgr {
         messageSb.setLength(messageSb.length() - MESSAGE_DELIMITER.length());
       }
       return messageSb.toString();
+    }
+
+    public int getMessagesCount() {
+      return messages.size();
     }
   }
 

@@ -97,9 +97,8 @@ public class BulkImportMapper
       // Form the text to be appended
       String
           lineMsg =
-          BulkUploadMgr.getErrorMessageString(offset, csvLine, ec.operation, ec.getMessages());
+          BulkUploadMgr.getErrorMessageString(offset, csvLine, ec.operation, ec.getMessages(), ec.getMessagesCount());
       // Create an UploadedMsgLog
-      //Long parentKey = KeyFactory.createKey(Uploaded.class.getSimpleName(), uploadedKey);
       Entity entity = new Entity(UploadedMsgLog.class.getSimpleName(), new Key(0l));
       if (lineMsg != null && !lineMsg.isEmpty()) {
         entity.setProperty("uploadedId", uploadedKey);

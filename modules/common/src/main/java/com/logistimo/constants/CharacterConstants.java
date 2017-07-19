@@ -27,6 +27,8 @@ package com.logistimo.constants;
  * @author Mohan Raja
  */
 public class CharacterConstants {
+  private CharacterConstants() {
+  }
   public static final String COMMA = ",";
   public static final String COLON = ":";
   public static final String AMPERSAND = "&";
@@ -52,4 +54,5 @@ public class CharacterConstants {
   public static final String HYPHEN = "-";
   public static final String ASTERISK = "*";
   public static final String PLUS = "+";
+  public static final String AT = "@";
 }
