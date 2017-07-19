@@ -75,7 +75,7 @@ public class DomainLocIDConfigMigrator {
         }
       }
       process(domainList.subList(k, total));
-        }
+    }
     xlogger.info("Migration of events config completed");
   }
 

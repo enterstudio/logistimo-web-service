@@ -174,32 +174,11 @@ public class DomainsUtil {
 
   public static List<Long> getVisibleDomains(Long domainId, int linkType) throws ServiceException {
     List<Long> domainIds =  getLinkedDomains(domainId, linkType);
-    if(!domainIds.isEmpty() && !domainIds.contains(domainId)) {
+    if(!domainIds.contains(domainId)) {
       domainIds.add(domainId);
     }
     return domainIds;
   }
-
-  // Add or remove domains Ids belonging to the entity
-        /*
-        private static void addOrRemoveEntityDomains( boolean add, MultiDomainTransaction object ) throws ServiceException {
-		xLogger.fine( "Entered addOrRemoveEntitysDomains" );
-		Long kioskId = object.getKioskId();
-		AccountsService as = Services.getService( AccountsServiceImpl.class );
-		List<Long> domainIds = as.getKiosk( kioskId, false ).getDomainIds();
-		if ( domainIds != null && !domainIds.isEmpty() ) {
-			Iterator<Long> it = domainIds.iterator();
-			while ( it.hasNext() ) {
-				Long dId = it.next();
-				if ( add )
-					object.setDomainId( dId );
-				else
-					object.removeDomainId( dId );
-			}
-		}
-		xLogger.fine( "Exiting addOrRemoveEntitysDomains" );
-	}
-	*/
 
   // Get domains to add to or remove from for a given type of multidomain object
   private static List<Long> getMultiDomainIds(IMultiDomain object) throws ServiceException {

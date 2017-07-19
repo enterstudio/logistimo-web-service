@@ -165,7 +165,7 @@ public class OrdersController {
       throw new UnauthorizedException(CharacterConstants.EMPTY, HttpStatus.FORBIDDEN);
     }
     model = builder.buildFullOrderModel(order, user, domainId);
-    model.setApprovalTypesModels(builder.buildOrderApprovalTypesModel(model, oms, locale));
+    model.setApprovalTypesModels(builder.buildOrderApprovalTypesModel(model, oms));
     Integer approvalType = orderApprovalsService.getApprovalType(order);
     boolean isApprovalRequired = false;
     if (approvalType != null) {

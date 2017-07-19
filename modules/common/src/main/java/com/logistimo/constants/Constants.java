@@ -33,6 +33,9 @@ import java.math.BigDecimal;
  */
 public final class Constants {
 
+  private Constants() {
+  }
+
   // Country codes - ISO 3166 standard codes
   public static final String COUNTRY_INDIA = "IN";
   public static final String COUNTRY_VIETNAM = "VN";
@@ -151,8 +154,6 @@ public final class Constants {
 
   public static final String GAE_DEPLOYMENT = "gae.deployment";
   public static final String GCS_BUCKET_DEFAULT = "default";
-  public static final String GCS_BUCKET_MEDIA = "media";
-  public static final String GCS_ROOT_PATH = "/gs/";
   public static final String INTERNAL_TASK = "INTERNAL_TASK";
   public static final String EMPTY = "";
   public static final String UTF8 = "UTF-8";
@@ -217,6 +218,7 @@ public final class Constants {
   // Attributes for store app theme
   public static final int GUI_THEME_BLACK = 0;
   public static final int GUI_THEME_RED = 1;
+  public static final String JAVAX_JDO_QUERY_SQL = "javax.jdo.query.SQL";
 
 
   public static String getVerticalDisplay(String vertical) {

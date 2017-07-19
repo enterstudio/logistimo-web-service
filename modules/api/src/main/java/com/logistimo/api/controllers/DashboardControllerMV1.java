@@ -243,9 +243,9 @@ public class DashboardControllerMV1 {
     if (!refresh) {
       model = (MainDashboardModel) cache.get(cacheKey);
       if (model != null) {
-      return model;
+        return model;
     }
-  }
+    }
     Map<String, String> filters = buildQueryFilters(queryModel);
     level = queryModel.locty;
     String colFilter;

@@ -30,7 +30,7 @@ approvalServices.factory('approvalService', ['$http', function ($http) {
                 urlStr = urlStr + "&status=" + reqStatus;
             }
             if(checkNotNullEmpty(expiry)) {
-                urlStr = urlStr + "&expiring_in=" + expiry*60;
+                urlStr = urlStr + "&expiring_in=" + expiry * 60;
             }
             if(checkNotNullEmpty(reqType)) {
                 urlStr = urlStr + "&type=" + reqType;

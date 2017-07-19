@@ -114,9 +114,6 @@ import java.util.TreeSet;
 @Component
 public class OrdersAPIBuilder {
 
-  private static final String SPACE = " ";
-  private static final String COMMA_SPACE = ", ";
-
   private static final XLog xLogger = XLog.getLog(OrdersAPIBuilder.class);
 
   @Autowired
@@ -136,9 +133,8 @@ public class OrdersAPIBuilder {
         newOrders.add(model);
       }
     }
-    Results finalResults = new Results(newOrders, results.getCursor(),
+    return new Results(newOrders, results.getCursor(),
         results.getNumFound(), results.getOffset());
-    return finalResults;
   }
 
   public OrderModel build(IOrder o, SecureUserDetails user, Long domainId,
@@ -147,7 +143,7 @@ public class OrdersAPIBuilder {
     Long kioskId = o.getKioskId();
     Locale locale = user.getLocale();
     String timezone = user.getTimezone();
-    IKiosk k = null;
+    IKiosk k;
     IKiosk vendor = null;
     try {
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
@@ -347,12 +343,12 @@ public class OrdersAPIBuilder {
       throws ServiceException, ObjectNotFoundException {
     List<String> prApprovers = new ArrayList<>(1);
     EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class, locale);
-    if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
+    if (IOrder.TRANSFER_ORDER == approvalType) {
       prApprovers = DomainConfig.getInstance(order.getDomainId()).getApprovalsConfig()
           .getOrderConfig().getPrimaryApprovers();
     } else {
       List<IApprovers> primaryApprovers;
-      if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
+      if (IOrder.PURCHASE_ORDER == approvalType) {
         primaryApprovers =
             entitiesService.getApprovers(order.getKioskId(), IApprovers.PRIMARY_APPROVER,
                 IApprovers.PURCHASE_ORDER);
@@ -428,7 +424,7 @@ public class OrdersAPIBuilder {
           approvalMapping =
           approvalsDao.getOrderApprovalMapping(order.getOrderId(), approvalType);
       if (approvalMapping != null) {
-        if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
+        if (IOrder.PURCHASE_ORDER == approvalType) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             if (orderModel.atc) {
               permissions.add(PermissionConstants.CANCEL);
@@ -448,7 +444,7 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.CANCEL);
             }
           }
-        } else if (IOrder.SALES_ORDER.equals(approvalType)) {
+        } else if (IOrder.SALES_ORDER == approvalType) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             if(orderModel.atv) {
               permissions.add(PermissionConstants.CANCEL);
@@ -469,7 +465,7 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.CONFIRM);
             }
           }
-        } else if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
+        } else if (IOrder.TRANSFER_ORDER == approvalType) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             permissions.add(PermissionConstants.CANCEL);
 
@@ -506,8 +502,7 @@ public class OrdersAPIBuilder {
    * Gives the types of approval to be shown to the user
    */
   public List<OrderApprovalTypesModel> buildOrderApprovalTypesModel(OrderModel orderModel,
-                                                                    OrderManagementService oms,
-                                                                    Locale locale)
+                                                                    OrderManagementService oms)
       throws ServiceException, ObjectNotFoundException {
     List<OrderApprovalTypesModel> models = new ArrayList<>(1);
     boolean isPurchaseApprovalRequired = false;
@@ -515,12 +510,13 @@ public class OrdersAPIBuilder {
     boolean isTransferApprovalRequired = false;
     ApprovalsDao approvalsDao = new ApprovalsDao();
     IOrder order = oms.getOrder(orderModel.id);
-    if (IOrder.TRANSFER_ORDER.equals(order.getOrderType()) && !orderModel.isVisibleToCustomer()
+    if (IOrder.TRANSFER_ORDER == order.getOrderType() && !orderModel.isVisibleToCustomer()
         && !orderModel.isVisibleToVendor()) {
       isTransferApprovalRequired = orderApprovalsService.isApprovalRequired(order,
           IOrder.TRANSFER_ORDER);
     } else {
-      if (IOrder.PURCHASE_ORDER.equals(order.getOrderType()) && orderModel.isVisibleToCustomer() && orderModel.atc) {
+      if (IOrder.PURCHASE_ORDER == order.getOrderType() && orderModel.isVisibleToCustomer()
+          && orderModel.atc) {
         isPurchaseApprovalRequired =
             orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER);
       }
@@ -770,7 +766,7 @@ public class OrdersAPIBuilder {
               }
             } else if (isFulfilled) {
               if (!fReasons.containsKey(iShipmentItem.getMaterialId())) {
-                fReasons.put(iShipmentItem.getMaterialId(), new ArrayList<ShipmentItemModel>());
+                fReasons.put(iShipmentItem.getMaterialId(), new ArrayList<>());
               }
               ShipmentItemModel m = new ShipmentItemModel();
               m.sid = shipment.getShipmentId();
@@ -789,7 +785,7 @@ public class OrdersAPIBuilder {
       Set<DemandModel> modelItems = new TreeSet<>();
       for (IDemandItem item : items) {
         Long mid = item.getMaterialId();
-        IMaterial m = null;
+        IMaterial m;
         try {
           m = mcs.getMaterial(item.getMaterialId());
         } catch (Exception e) {
@@ -1061,7 +1057,7 @@ public class OrdersAPIBuilder {
     EntitiesService
         entitiesService =
         Services.getService(EntitiesServiceImpl.class, SecurityUtils.getLocale());
-    if (IOrder.TRANSFER_ORDER.equals(approvalType)) {
+    if (IOrder.TRANSFER_ORDER == approvalType) {
       DomainConfig dc = DomainConfig.getInstance(domainId);
       ApprovalsConfig ac = dc.getApprovalsConfig();
       ApprovalsConfig.OrderConfig orderConfig = ac.getOrderConfig();
@@ -1091,10 +1087,10 @@ public class OrdersAPIBuilder {
     } else {
       Long kioskId = null;
       String oty = "";
-      if (IOrder.PURCHASE_ORDER.equals(approvalType)) {
+      if (IOrder.PURCHASE_ORDER == approvalType) {
         kioskId = order.getKioskId();
         oty = "p";
-      } else if (IOrder.SALES_ORDER.equals(approvalType)) {
+      } else if (IOrder.SALES_ORDER == approvalType) {
         kioskId = order.getServicingKiosk();
         oty = "s";
       }

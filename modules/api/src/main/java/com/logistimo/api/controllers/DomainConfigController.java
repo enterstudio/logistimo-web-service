@@ -181,7 +181,7 @@ public class DomainConfigController {
     } else {
       xLogger.info("Error in migrating configuration");
     }
-    }
+  }
 
   @RequestMapping(value = "/irmigrator/")
   public
@@ -200,21 +200,21 @@ public class DomainConfigController {
     } else {
       xLogger.info("Error in migrating configuration");
     }
-    }
+  }
 
   @RequestMapping(value = "/tags/materials", method = RequestMethod.GET)
   public
   @ResponseBody
   TagsModel getMaterialTags(HttpServletRequest request) {
     return getTags(MATERIAL, request);
-    }
+  }
 
   @RequestMapping(value = "/tags/route", method = RequestMethod.GET)
   public
   @ResponseBody
   TagsModel getRouteTags(HttpServletRequest request) {
     return getTags(ROUTE, request);
-    }
+  }
 
   @RequestMapping(value = "/tags/order", method = RequestMethod.GET)
   public
@@ -264,14 +264,14 @@ public class DomainConfigController {
         allowUserDef = !dc.forceTagsUser();
     }
     return new TagsModel(StringUtil.getList(tags), allowUserDef);
-    }
+  }
 
   private List generateUpdateList(String uId) {
     List<String> list = new ArrayList<>();
     list.add(uId);
     list.add(String.valueOf(System.currentTimeMillis()));
     return list;
-    }
+  }
 
   @RequestMapping(value = "/country", method = RequestMethod.GET)
   public
@@ -281,7 +281,7 @@ public class DomainConfigController {
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     DomainConfig dc = DomainConfig.getInstance(domainId);
     return StringUtil.getList(dc.getCountry());
-    }
+  }
 
   @RequestMapping(value = "/artype", method = RequestMethod.GET)
   public
@@ -290,7 +290,7 @@ public class DomainConfigController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     return DomainConfig.getInstance(domainId).getRouteBy();
-    }
+  }
 
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public
@@ -299,7 +299,7 @@ public class DomainConfigController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     return DomainConfig.getInstance(domainId);
-    }
+  }
 
   @RequestMapping(value = "/menustats", method = RequestMethod.GET)
   public
@@ -320,7 +320,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching menu status");
       throw new InvalidServiceException(backendMessages.getString("menustats.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/optimizer", method = RequestMethod.GET)
   public
@@ -330,7 +330,7 @@ public class DomainConfigController {
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     DomainConfig dc = DomainConfig.getInstance(domainId);
     return dc.getOptimizerConfig();
-    }
+  }
 
   @RequestMapping(value = "/general", method = RequestMethod.GET)
   public
@@ -341,7 +341,7 @@ public class DomainConfigController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-        }
+    }
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     try {
@@ -349,7 +349,7 @@ public class DomainConfigController {
     } catch (ServiceException | ObjectNotFoundException | ConfigurationException e) {
       xLogger.severe("Error in fetching general configuration", e);
       throw new InvalidServiceException(backendMessages.getString("general.config.fetch.error"));
-        }
+    }
   }
 
   @RequestMapping(value = "/support", method = RequestMethod.GET)
@@ -365,7 +365,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching support configuration for the domain", e);
       throw new InvalidServiceException(
           backendMessages.getString("general.support.config.fetch.error"));
-        }
+    }
   }
 
   @RequestMapping(value = "/accounts", method = RequestMethod.GET)
@@ -382,7 +382,7 @@ public class DomainConfigController {
     } catch (ServiceException | ObjectNotFoundException | JSONException e) {
       xLogger.severe("Error in fetching account configuration", e);
       throw new InvalidServiceException(backendMessages.getString("account.config.fetch.error"));
-        }
+    }
   }
 
   @RequestMapping(value = "/tags", method = RequestMethod.GET)
@@ -403,7 +403,7 @@ public class DomainConfigController {
     } catch (ServiceException | ObjectNotFoundException | ConfigurationServiceException e) {
       xLogger.severe("Error in fetching tags", e);
       throw new InvalidServiceException(backendMessages.getString("tags.config.fetch.error"));
-        }
+    }
   }
 
   @RequestMapping(value = "/tags", method = RequestMethod.POST)
@@ -415,7 +415,7 @@ public class DomainConfigController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (model == null) {
       throw new BadRequestException(backendMessages.getString("tags.config.update.error"));
-        }
+    }
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     try {
@@ -488,7 +488,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(backendMessages.getString("tags.config.update.error"));
     }
     return backendMessages.getString("tags.config.update.success");
-    }
+  }
 
   @RequestMapping(value = "/map/locations", method = RequestMethod.GET)
   public
@@ -508,7 +508,7 @@ public class DomainConfigController {
     }
 
     return "{}";
-    }
+  }
 
   @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
   public
@@ -527,7 +527,7 @@ public class DomainConfigController {
     }
 
     return "{}";
-    }
+  }
 
   @RequestMapping(value = "/asset", method = RequestMethod.GET)
   public
@@ -545,7 +545,7 @@ public class DomainConfigController {
     }
 
     return null;
-    }
+  }
 
 /*    @RequestMapping(value = "/temperature/vendors", method = RequestMethod.GET)
     public
@@ -586,7 +586,7 @@ public class DomainConfigController {
       xLogger.severe("Error in reading Asset System Configuration", e);
       throw new InvalidServiceException("Error in reading asset meta data.");
     }
-    }
+  }
 
   @RequestMapping(value = "/assetconfig/manufacturer", method = RequestMethod.GET)
   public
@@ -599,7 +599,7 @@ public class DomainConfigController {
       xLogger.severe("Error in reading Asset System Configuration for manufacturers", e);
       throw new InvalidServiceException("Error in reading asset meta data.");
     }
-    }
+  }
 
   @RequestMapping(value = "/assetconfig/workingstatus", method = RequestMethod.GET)
   public
@@ -612,7 +612,7 @@ public class DomainConfigController {
       xLogger.severe("Error in reading Asset System Configuration for manufacturers", e);
       throw new InvalidServiceException("Error in reading asset meta data.");
     }
-    }
+  }
 
   @RequestMapping(value = "/asset", method = RequestMethod.POST)
   public
@@ -664,9 +664,9 @@ public class DomainConfigController {
                 }
               }
             }
-                    }
-                }
-            }
+          }
+        }
+      }
 
       ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
 
@@ -701,7 +701,7 @@ public class DomainConfigController {
       e.printStackTrace();
     }
     return backendMessages.getString("temp.config.update.success");
-    }
+  }
 
   @RequestMapping(value = "/add", method = RequestMethod.POST)
   public
@@ -743,7 +743,7 @@ public class DomainConfigController {
       e.printStackTrace();
     }
     return backendMessages.getString("account.config.update.success");
-    }
+  }
 
   @RequestMapping(value = "/general", method = RequestMethod.POST)
   public
@@ -754,7 +754,7 @@ public class DomainConfigController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-        }
+    }
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     try {
@@ -807,7 +807,7 @@ public class DomainConfigController {
       xLogger.warn("Error while printing configuration to log", e);
     }
     return backendMessages.getString("general.config.update.success");
-    }
+  }
 
   @RequestMapping(value = "/capabilities", method = RequestMethod.GET)
   public
@@ -834,7 +834,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(
           backendMessages.getString("capabilities.config.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/rolecapabs", method = RequestMethod.GET)
   public
@@ -862,7 +862,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(
           backendMessages.getString("capabilities.config.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/capabilities", method = RequestMethod.POST)
   public
@@ -875,7 +875,7 @@ public class DomainConfigController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-        }
+    }
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     try {
@@ -977,7 +977,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(
           backendMessages.getString("capabilities.config.update.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/inventory", method = RequestMethod.GET)
   public
@@ -1003,7 +1003,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching Inventory configuration", e);
       throw new InvalidServiceException(backendMessages.getString("inventory.config.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/inventory/transReasons", method = RequestMethod.GET)
   public
@@ -1029,7 +1029,7 @@ public class DomainConfigController {
       xLogger.warn("Error in fetching reasons for transactions", e);
       return null;
     }
-    }
+  }
 
   @RequestMapping(value = "/getactualtrans", method = RequestMethod.GET)
   public
@@ -1075,7 +1075,7 @@ public class DomainConfigController {
               : false;
     }
     return hasAtd;
-    }
+  }
 
   @RequestMapping(value = "/inventory", method = RequestMethod.POST)
   public
@@ -1304,14 +1304,14 @@ public class DomainConfigController {
       } else {
         inventoryConfig.setMinMaxDur(model.mmDur);
         inventoryConfig.setMinMaxFreq(model.mmFreq);
-            }
+      }
       // Get the optimization config
       OptimizerConfig oc = cc.dc.getOptimizerConfig();
       String computeOption = model.co;
       int coption = OptimizerConfig.COMPUTE_NONE;
       if (computeOption != null && !computeOption.isEmpty()) {
         coption = Integer.parseInt(computeOption);
-            }
+      }
       oc.setCompute(coption);
       oc.setComputeFrequency(model.crfreq);
       oc.setExcludeDiscards(model.edis);
@@ -1378,7 +1378,7 @@ public class DomainConfigController {
             leadTimeAvgConfig.setExcludeOrderProcTime(leadTimeAvgConfigModel.exopt);
           }
         }
-            }
+      }
       oc.setDisplayDF(model.ddf);
       oc.setDisplayOOQ(model.dooq);
       cc.dc.setOptimizerConfig(oc);
@@ -1392,9 +1392,9 @@ public class DomainConfigController {
       throw new InvalidServiceException(backendMessages.getString("inventory.config.update.error"));
     } catch (ConfigurationException e) {
       xLogger.severe("Error in updating Inventory configuration");
-        }
-    return backendMessages.getString("inventory.config.update.success");
     }
+    return backendMessages.getString("inventory.config.update.success");
+  }
 
   @RequestMapping(value = "/orders", method = RequestMethod.GET)
   public
@@ -1419,7 +1419,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching Inventory configuration", e);
       throw new InvalidServiceException(backendMessages.getString("inventory.config.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/orders", method = RequestMethod.POST)
   public
@@ -1537,9 +1537,9 @@ public class DomainConfigController {
     } catch (ServiceException | ConfigurationException e) {
       xLogger.severe("Error in updating Orders configuration", e);
       throw new InvalidServiceException(backendMessages.getString("orders.config.update.error"));
-        }
-    return backendMessages.getString("orders.config.update.success");
     }
+    return backendMessages.getString("orders.config.update.success");
+  }
 
   @RequestMapping(value = "/notifications", method = RequestMethod.POST)
   public
@@ -1581,7 +1581,7 @@ public class DomainConfigController {
     } else {
       return backendMessages.getString("notif.config.update.success");
     }
-    }
+  }
 
   private EventsConfig getEventsConfig(NotificationsConfigModel model, Long domainId,
                                        ResourceBundle backendMessages) throws ServiceException {
@@ -1609,7 +1609,7 @@ public class DomainConfigController {
           backendMessages.getString("notif.config.update.error"));
     }
     return ec;
-    }
+  }
 
   @RequestMapping(value = "/notifications/fetch", method = RequestMethod.GET)
   public
@@ -1644,7 +1644,7 @@ public class DomainConfigController {
       throw new ConfigurationServiceException(
           backendMessages.getString("notif.config.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/notifications/delete", method = RequestMethod.POST)
   public
@@ -1721,7 +1721,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(backendMessages.getString("notif.delete.error"));
     }
     return backendMessages.getString("notif.delete.success");
-    }
+  }
 
   @RequestMapping(value = "/notifcations/messages", method = RequestMethod.GET)
   public
@@ -1788,7 +1788,7 @@ public class DomainConfigController {
       }
     }
     return new Results(userMessageStatus, results.getCursor(), -1, offset);
-    }
+  }
 
   @RequestMapping(value = "/bulletinboard", method = RequestMethod.POST)
   public
@@ -1828,7 +1828,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(backendMessages.getString("bulletin.config.update.error"));
     }
     return backendMessages.getString("bulletin.config.update.success");
-    }
+  }
 
   @RequestMapping(value = "/bulletinboard", method = RequestMethod.GET)
   public
@@ -1867,7 +1867,7 @@ public class DomainConfigController {
       }
     }
     return model;
-    }
+  }
 
   @RequestMapping(value = "/posttoboard", method = RequestMethod.POST)
   public
@@ -1897,7 +1897,7 @@ public class DomainConfigController {
     xLogger.info("AUDITLOG \t {0} \t {1} \t CONFIGURATION \t " +
         "SET MESSAGE BOARD", domainId, sUser.getUsername());
     return backendMessages.getString("message.post.success");
-    }
+  }
 
   @RequestMapping(value = "/accesslogs", method = RequestMethod.GET)
   public
@@ -1911,19 +1911,19 @@ public class DomainConfigController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-        }
+    }
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     if (domainId == null) {
       xLogger.severe("Error in fetching Access log");
       throw new InvalidServiceException(backendMessages.getString("accesslog.fetch.error"));
-        }
+    }
     Date start = null;
     if (duration != null && !duration.isEmpty()) {
       Calendar cal = LocalDateUtil.getZeroTime(DomainConfig.getInstance(domainId).getTimezone());
       cal.add(Calendar.DATE, -1 * Integer.parseInt(duration));
       start = cal.getTime();
-        }
+    }
     Navigator
         navigator =
         new Navigator(request.getSession(), "DomainConfigController.getAccessLogs", o, s, "dummy",
@@ -1933,7 +1933,7 @@ public class DomainConfigController {
     navigator.setResultParams(results);
     if (results == null || results.getResults() == null) {
       return null;
-        }
+    }
     List<IALog> logs = results.getResults();
     List<AccessLogModel> models = new ArrayList<AccessLogModel>();
     for (IALog log : logs) {
@@ -1959,9 +1959,9 @@ public class DomainConfigController {
         }
       }
       models.add(model);
-        }
-    return new Results(models, "accesslog", -1, o);
     }
+    return new Results(models, "accesslog", -1, o);
+  }
 
   @RequestMapping(value = "/customreports", method = RequestMethod.GET)
   public
@@ -1979,7 +1979,7 @@ public class DomainConfigController {
       return blobstoreService.createUploadUrl(fullURL);
     }
     return null;
-    }
+  }
 
   @RequestMapping(value = "/customreports", method = RequestMethod.POST)
   public
@@ -2017,7 +2017,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching configuration", e);
       throw new InvalidServiceException(backendMessages.getString("config.fetch.error"));
     }
-    }
+  }
 
   @RequestMapping(value = "/customreport/add", method = RequestMethod.POST)
   public
@@ -2066,7 +2066,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(backendMessages.getString("customreports.update.error"));
     }
     return backendMessages.getString("customreports.update.success");
-    }
+  }
 
   @RequestMapping(value = "/customreport", method = RequestMethod.GET)
   public
@@ -2100,7 +2100,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching list of Custom Reports", e);
       throw new InvalidServiceException("Error in fetching list of Custom Reports");
     }
-    }
+  }
 
   @RequestMapping(value = "/customreport/delete", method = RequestMethod.POST)
   public
@@ -2160,7 +2160,7 @@ public class DomainConfigController {
       throw new InvalidServiceException(backendMessages.getString("customreports.delete.error"));
     }
     return backendMessages.getString("customreports.delete.success");
-    }
+  }
 
   @RequestMapping(value = "/customreport/fetch", method = RequestMethod.GET)
   public
@@ -2213,7 +2213,7 @@ public class DomainConfigController {
       throw new InvalidServiceException("Ero");
     }
 
-    }
+  }
 
   private List<IUserAccount> constructUserAccount(UsersService as, List<String> userIds) {
     if (userIds != null && userIds.size() > 0) {
@@ -2228,7 +2228,7 @@ public class DomainConfigController {
       return list;
     }
     return new ArrayList<>();
-    }
+  }
 
   @RequestMapping(value = "/customreport/update", method = RequestMethod.POST)
   public
@@ -2270,7 +2270,7 @@ public class DomainConfigController {
       e.printStackTrace();
     }
     return "Custom Report updated successfully";
-    }
+  }
 
   @RequestMapping(value = "/customreport/export", method = RequestMethod.POST)
   public
@@ -2298,23 +2298,23 @@ public class DomainConfigController {
       params.put("jobid", jobId.toString());
     }
 
-        try {
-          AppFactory.get().getTaskService()
-              .schedule(ITaskService.QUEUE_EXPORTER, "/task/customreportsexport", params, headers,
-                  ITaskService.METHOD_POST);
-        } catch (TaskSchedulingException e) {
-          xLogger.severe("{0} when scheduling task for custom report export of {1}: {2}",
-              e.getClass().getName(), name, e.getMessage());
-          throw new InvalidTaskException(
-              e.getClass().getName() + " " + backendMessages
-                  .getString("customreports.schedule.export")
-                  + " " + name);
-        }
+    try {
+      AppFactory.get().getTaskService()
+          .schedule(ITaskService.QUEUE_EXPORTER, "/task/customreportsexport", params, headers,
+              ITaskService.METHOD_POST);
+    } catch (TaskSchedulingException e) {
+      xLogger.severe("{0} when scheduling task for custom report export of {1}: {2}",
+          e.getClass().getName(), name, e.getMessage());
+      throw new InvalidTaskException(
+          e.getClass().getName() + " " + backendMessages
+              .getString("customreports.schedule.export")
+              + " " + name);
+    }
     if (jobId != null) {
       return String.valueOf(jobId);
     }
     return backendMessages.getString("report.export.success");
-    }
+  }
 
   @RequestMapping(value = "/report/filters", method = RequestMethod.GET)
   public
@@ -2338,7 +2338,7 @@ public class DomainConfigController {
     filters.put(ReportsConstants.FILTER_PINCODE,
         rConfig.getFilterValues(ReportsConstants.FILTER_PINCODE));
     return filters;
-    }
+  }
 
   @RequestMapping(value = "/domains/all", method = RequestMethod.GET)
   public
@@ -2398,14 +2398,14 @@ public class DomainConfigController {
       pm.close();
     }
     return new Results(domains, null, -1, Integer.parseInt(o));
-    }
+  }
 
   @RequestMapping(value = "/domaininfo")
   public
   @ResponseBody
   CurrentUserModel getCurrentSessionDetails(HttpServletRequest request) {
     return new CurrentUserBuilder().buildCurrentUserModel(request);
-    }
+  }
 
   @RequestMapping(value = "/approvals", method = RequestMethod.POST)
   public
@@ -2442,7 +2442,7 @@ public class DomainConfigController {
       throw new InvalidServiceException("Error in updating Approvals configuration");
     }
     return "Approvals config updated successfully";
-    }
+  }
 
   @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
   public
@@ -2463,7 +2463,7 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching Dashboard configuration", e);
       throw new InvalidServiceException("Error in fetching Dashboard configuration");
     }
-    }
+  }
 
   @RequestMapping(value = "/approvals", method = RequestMethod.GET)
   public
@@ -2484,7 +2484,7 @@ public class DomainConfigController {
       throw new InvalidServiceException("Error in fetching Approvals configuration");
     }
 
-    }
+  }
 
   @RequestMapping(value = "/dashboard", method = RequestMethod.POST)
   public
@@ -2572,10 +2572,10 @@ public class DomainConfigController {
     } catch (ServiceException | ConfigurationException e) {
       xLogger.severe("Error in updating Custom Report", e);
       throw new InvalidServiceException(backendMessages.getString("customreport.update.error"));
-        }
+    }
 
     return backendMessages.getString("dashboard.config.update.success");
-    }
+  }
 
   private void saveDomainConfig(Locale locale, Long domainId, ConfigContainer cc,
                                 ResourceBundle backendMessages)
@@ -2623,7 +2623,7 @@ public class DomainConfigController {
       cc.add = true;
     }
     return cc;
-    }
+  }
 
   private SyncConfig generateSyncConfig(CapabilitiesConfigModel model) {
     SyncConfig syncCfg = new SyncConfig();
@@ -2631,7 +2631,7 @@ public class DomainConfigController {
     syncCfg.setAppLogUploadInterval(model.aplui * SyncConfig.HOURS_IN_A_DAY);
     syncCfg.setSmsTransmissionWaitDuration(model.stwd * SyncConfig.HOURS_IN_A_DAY);
     return syncCfg;
-    }
+  }
 
   private class ConfigContainer {
     public IConfig c = null;

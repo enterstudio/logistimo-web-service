@@ -86,11 +86,6 @@ public interface OrderManagementService extends Service {
       throws ObjectNotFoundException, ServiceException;
 
   /**
-   * Add a new order
-   */
-  Long addOrder(IOrder order) throws ServiceException;
-
-  /**
    * Update an order and automatically post goods issued/received (GI/GR)
    */
   UpdatedOrder updateOrder(IOrder order, int source) throws LogiException;
@@ -248,8 +243,5 @@ public interface OrderManagementService extends Service {
   List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams, String orderType,
                          boolean isTransfer)
       throws ServiceException;
-
-  void updateOrderVisibility(Long orderId, Integer orderType) throws ObjectNotFoundException;
-
 
 }

@@ -21,29 +21,35 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.orders.dao;
+package com.logistimo.orders.approvals.actions;
 
-import com.logistimo.exception.LogiException;
+import com.logistimo.domains.utils.DomainsUtil;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
+import com.logistimo.orders.approvals.utils.OrderVisibilityUtils;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.services.ServiceException;
 
-import java.util.List;
-
-import javax.jdo.PersistenceManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * Created by charan on 03/03/15.
+ * Created by charan on 18/07/17.
  */
-public interface IOrderDao {
+@Component
+public class OrderVisibilityAction {
 
-  String getKeyAsString(IOrder order);
+  @Autowired
+  private IOrderApprovalsService orderApprovalsService;
 
-  Object createKey(Long orderId);
+  public void invoke(IOrder o, Long domainId) throws ServiceException {
+    boolean isApprovalRequired = orderApprovalsService.isApprovalRequired(o);
+    if (isApprovalRequired) {
+      OrderVisibilityUtils.setOrderVisibility(o, domainId, false);
+    } else {
+      o.setVisibleToCustomer(true);
+      o.setVisibleToVendor(true);
+      DomainsUtil.addToDomain(o, domainId, null);
+    }
+  }
 
-  IOrder getOrder(Long orderId);
-
-  IOrder getOrder(Long orderId, PersistenceManager persistenceManager);
-
-  OrderUpdateStatus update(IOrder order, PersistenceManager pm) throws LogiException;
-
-  List<IOrder> getMigratoryOrders(Integer offset, Integer size, String cutoffDate);
 }

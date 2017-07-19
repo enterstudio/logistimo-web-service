@@ -143,12 +143,12 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
       IKiosk kiosk = null;
       List<String> entityTags = null;
       List<String> configTags;
-      if(IOrder.PURCHASE_ORDER.equals(approvalType)) {
+      if (IOrder.PURCHASE_ORDER == approvalType) {
         kiosk = entitiesService.getKiosk(order.getKioskId());
-      } else if(IOrder.SALES_ORDER.equals(approvalType)) {
+      } else if (IOrder.SALES_ORDER == approvalType) {
         kiosk = entitiesService.getKiosk(order.getServicingKiosk());
       }
-      if(kiosk != null) {
+      if (kiosk != null) {
         entityTags = kiosk.getTags();
       }
       if (entityTags != null && !entityTags.isEmpty()) {
@@ -227,9 +227,9 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
     for (String entityTag : entityTags) {
       for (String configTag : configTags) {
         if (entityTag.equals(configTag)) {
-          if (IOrder.PURCHASE_ORDER.equals(orderType)) {
+          if (IOrder.PURCHASE_ORDER == orderType) {
             found = ps.isPurchaseOrderApproval();
-          } else if (IOrder.SALES_ORDER.equals(orderType)) {
+          } else if (IOrder.SALES_ORDER == orderType) {
             found = ps.isSalesOrderApproval();
           }
           if (found) {
@@ -247,15 +247,15 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
   @Override
   public Integer getApprovalType(IOrder order) {
     Integer approvalType = null;
-    if (IOrder.PURCHASE_ORDER.equals(order.getOrderType())) {
+    if (IOrder.PURCHASE_ORDER == order.getOrderType()) {
       if (!order.isVisibleToVendor()) {
         approvalType = IOrder.PURCHASE_ORDER;
       } else {
         approvalType = IOrder.SALES_ORDER;
       }
-    } else if (IOrder.SALES_ORDER.equals(order.getOrderType())) {
+    } else if (IOrder.SALES_ORDER == order.getOrderType()) {
       approvalType = IOrder.SALES_ORDER;
-    } else if (IOrder.TRANSFER_ORDER.equals(order.getOrderType())) {
+    } else if (IOrder.TRANSFER_ORDER == order.getOrderType()) {
       approvalType = IOrder.TRANSFER_ORDER;
     }
     return approvalType;
