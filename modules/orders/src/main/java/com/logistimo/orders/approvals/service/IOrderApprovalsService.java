@@ -28,6 +28,7 @@ import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -59,4 +60,11 @@ public interface IOrderApprovalsService {
   boolean isTransferApprovalRequired(IOrder order);
 
   Integer getApprovalType(IOrder order);
+
+  /**
+   * Identifies whether user is an approver
+   * @param userId
+   * @return true - If user is approver
+   */
+  Boolean isApprover(String userId) throws SQLException;
 }

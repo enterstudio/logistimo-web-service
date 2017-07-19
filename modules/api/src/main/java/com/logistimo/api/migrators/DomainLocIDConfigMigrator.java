@@ -84,7 +84,7 @@ public class DomainLocIDConfigMigrator {
       try {
         updateLocId((IDomain) domainObj);
       } catch (Exception e) {
-        xlogger.warn("Issue with domain location config update {}", ((IDomain) domainObj).getId());
+        xlogger.warn("Issue with domain location config update {0}", ((IDomain) domainObj).getId());
       }
     }
   }

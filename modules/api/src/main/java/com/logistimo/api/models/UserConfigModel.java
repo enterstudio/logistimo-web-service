@@ -35,5 +35,6 @@ public class UserConfigModel {
   public AssetConfigModel tempSysConfig;
   public String[] etags;
   public String[] mtags;
+  public boolean isApprover;
 
 }

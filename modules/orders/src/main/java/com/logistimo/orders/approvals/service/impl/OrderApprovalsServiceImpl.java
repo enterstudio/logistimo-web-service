@@ -26,6 +26,8 @@ package com.logistimo.orders.approvals.service.impl;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.logger.XLog;
@@ -38,10 +40,12 @@ import com.logistimo.orders.entity.approvals.OrderApprovalMapping;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.impl.PMF;
+import com.logistimo.users.entity.IUserAccount;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -259,6 +263,31 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
       approvalType = IOrder.TRANSFER_ORDER;
     }
     return approvalType;
+  }
+  @Override
+  public Boolean isApprover(String userId) throws SQLException {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    Query query = null;
+    IUserAccount userAccount;
+    try {
+      String
+          sqlQuery =
+          "SELECT 1 FROM APPROVERS WHERE UID = ? LIMIT 1";
+      query = pm.newQuery(Constants.JAVAX_JDO_QUERY_SQL, sqlQuery);
+      query.setUnique(true);
+      if ((query.execute(userId)) != null) {
+        return true;
+      }
+      userAccount = JDOUtils.getObjectById(IUserAccount.class, userId, pm);
+      DomainConfig dc = DomainConfig.getInstance(userAccount.getDomainId());
+      ApprovalsConfig.OrderConfig ac = dc.getApprovalsConfig().getOrderConfig();
+      return ac != null && ac.isApprover(userId);
+    } finally {
+      if(query != null) {
+        query.closeAll();
+      }
+      pm.close();
+    }
   }
 
 }

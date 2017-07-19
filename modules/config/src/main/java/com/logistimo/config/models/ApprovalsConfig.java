@@ -217,6 +217,10 @@ public class ApprovalsConfig implements Serializable {
       return expiry;
     }
 
+    public boolean isApprover(String userId) {
+      return (getPrimaryApprovers().contains(userId) || getSecondaryApprovers().contains(userId));
+    }
+
     public boolean isPurchaseApprovalEnabled(List<String> entityTags) {
       return psoa.stream()
           .filter(config -> entityTags.stream()

@@ -34,6 +34,7 @@ import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
@@ -42,6 +43,7 @@ import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.superdomains.DomainSuggestionModel;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
@@ -205,7 +207,8 @@ public class UserBuilder {
       if (StringUtils.isNotEmpty(dc.getKioskTags())) {
         model.config.etags = StringUtil.getArray(dc.getKioskTags());
       }
-
+      model.config.isApprover = StaticApplicationContext.getBean(
+          IOrderApprovalsService.class).isApprover(user.getUserId());
     } catch (Exception e) {
       xLogger.warn("Unable to fetch the domain details", e);
     }
