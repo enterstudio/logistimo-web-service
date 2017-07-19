@@ -106,7 +106,7 @@ public class KiosksHeader implements IHeader {
               messageBundle.getString("materials")
               + " (semi-colon separated Material Names if ALL materials are not to be added; e.g. material-name1;material-name2;material-name3; use only with 'add' operation and ENSURE that these materials are present),"
               +
-              messageBundle.getString("stock") + " (inital stock level for all materials in this "
+              messageBundle.getString("stock") + " (initial stock level for all materials in this "
               + messageBundle.getString("kiosk.lower") + "; default is 0)," +
               messageBundle.getString("customers") + " (semi-colon separated " + messageBundle
               .getString("customer.lower") + " names; " + messageBundle.getString("kiosks.example")
