@@ -285,8 +285,7 @@
                         <div class="form-group" ng-if="isEOQ && entity.inv == 'sq'">
                             <label for="sl" class="col-sm-4 control-label">{{resourceBundle['inventory.servicelevel']}}</label>
                             <div class="col-sm-8">
-                                <select ng-model="entity.sl" class="form-control" id="sl">
-                                    <option ng-repeat="item in serviceLevels" value={{item}} ng-selected="item === entity.sl">{{item}}</option>
+                                <select ng-model="entity.sl" class="form-control" id="sl" ng-options="item for item in serviceLevels">
                                 </select>
                             </div>
                         </div>
