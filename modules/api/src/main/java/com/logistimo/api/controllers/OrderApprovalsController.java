@@ -104,7 +104,7 @@ public class OrderApprovalsController {
       @RequestParam(required = false, name = "order_id") Long orderId,
       @RequestParam(required = false, name = "status") String status,
       @RequestParam(required = false, name = "expiring_in") Integer expiringIn,
-      @RequestParam(required = false, name = "type") String type,
+      @RequestParam(required = false, name = "request_type") Integer requestType,
       @RequestParam(required = false, name = "requester_id") String requesterId,
       @RequestParam(required = false, name = "approver_id") String approverId,
       @RequestParam(required = false, value = "embed") String[] embed)
@@ -114,6 +114,7 @@ public class OrderApprovalsController {
         (OrderApprovalFilters) new OrderApprovalFilters()
             .setEntityId(entityId)
             .setOrderId(orderId)
+            .setRequestType(requestType)
             .setExpiringInMinutes(expiringIn)
             .setStatus(status)
             .setRequesterId(requesterId)

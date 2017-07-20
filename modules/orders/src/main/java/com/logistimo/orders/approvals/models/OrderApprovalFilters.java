@@ -25,6 +25,7 @@ package com.logistimo.orders.approvals.models;
 
 import com.logistimo.approvals.client.models.ApprovalFilters;
 import com.logistimo.constants.Constants;
+import com.logistimo.orders.approvals.constants.ApprovalConstants;
 
 import java.util.Objects;
 
@@ -36,6 +37,7 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   private Long entityId;
   private Long orderId;
+  private Integer requestType;
 
   public Long getEntityId() {
     return entityId;
@@ -43,7 +45,7 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setEntityId(Long entityId) {
     this.entityId = entityId;
-    setAttributeKey("kioskid");
+    setAttributeKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID);
     setAttributeValue(Objects.toString(entityId, Constants.EMPTY));
     return this;
   }
@@ -63,4 +65,14 @@ public class OrderApprovalFilters extends ApprovalFilters {
     setExpiringInMinutes(Objects.toString(expiringIn, Constants.EMPTY));
     return this;
   }
+
+  public OrderApprovalFilters setRequestType(Integer requestType) {
+    this.requestType = requestType;
+    setAttributeKey(ApprovalConstants.ATTRIBUTE_ORDER_TYPE);
+    setAttributeValue(Objects.toString(requestType, Constants.EMPTY));
+    return this;
+  }
+
+  public Integer getRequestType() {return requestType;}
+
 }

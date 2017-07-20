@@ -42,8 +42,8 @@ import com.logistimo.services.impl.PMF;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -423,14 +423,21 @@ public class ApprovalsDao implements IApprovalsDao {
   public Collection<String> getFilteredRequesters(String requester, Long domainId) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query query = null;
+    List<String> queryList = new ArrayList<>(0);
     try {
       if (StringUtils.isNotEmpty(requester)) {
         query = pm.newQuery("javax.jdo.query.SQL",
-            "SELECT DISTINCT RID FROM ORDER_APPROVAL_MAPPING WHERE "
-                + "EXISTS (SELECT 1 from USERACCOUNT_DOMAINS WHERE RID = USERID_OID "
-                + "AND DOMAIN_ID = ?) AND "
-                + "AND RID in (SELECT USERID from USERACCOUNT WHERE NNAME like ?) limit 10");
-        return (List<String>) query.executeWithArray(domainId, requester.toLowerCase());
+            "SELECT DISTINCT CREATED_BY FROM ORDER_APPROVAL_MAPPING WHERE "
+                + "EXISTS (SELECT 1 from USERACCOUNT_DOMAINS WHERE CREATED_BY = USERID_OID "
+                + "AND DOMAIN_ID = ?) "
+                + "AND CREATED_BY in (SELECT USERID from USERACCOUNT WHERE NNAME like ?) limit 10");
+        List results = (List) query.executeWithArray(domainId, requester.toLowerCase() + "%");
+        if(results != null && !results.isEmpty()) {
+          queryList = new ArrayList<>(results.size());
+          for(Object o : results) {
+            queryList.add((String)o);
+          }
+        }
       }
     } finally {
       if (query != null) {
@@ -438,20 +445,27 @@ public class ApprovalsDao implements IApprovalsDao {
       }
       pm.close();
     }
-    return Collections.emptyList();
+    return queryList;
   }
 
   public Collection<String> getFilteredApprovers(String requester, Long domainId) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query query = null;
+    List<String> queryList = new ArrayList<>(0);
     try {
       if (StringUtils.isNotEmpty(requester)) {
         query = pm.newQuery("javax.jdo.query.SQL",
-            "SELECT DISTINCT RID FROM APPROVERS WHERE "
-                + "EXISTS (SELECT 1 from USERACCOUNT_DOMAINS WHERE RID = USERID_OID "
-                + "AND DOMAIN_ID = ?) AND "
-                + "AND RID in (SELECT USERID from USERACCOUNT WHERE NNAME like ?) limit 10");
-        return (List<String>) query.executeWithArray(domainId, requester.toLowerCase());
+            "SELECT DISTINCT UID FROM APPROVERS WHERE "
+                + "EXISTS (SELECT 1 from USERACCOUNT_DOMAINS WHERE UID = USERID_OID "
+                + "AND DOMAIN_ID = ?) "
+                + "AND UID in (SELECT USERID from USERACCOUNT WHERE NNAME like ?) limit 10");
+        List results = (List) query.executeWithArray(domainId, requester.toLowerCase()+"%");
+        if(results != null && !results.isEmpty()) {
+          queryList = new ArrayList<>(results.size());
+          for(Object o : results) {
+            queryList.add((String)o);
+          }
+        }
       }
     } finally {
       if (query != null) {
@@ -459,7 +473,7 @@ public class ApprovalsDao implements IApprovalsDao {
       }
       pm.close();
     }
-    return Collections.emptyList();
+    return queryList;
   }
 
 }
