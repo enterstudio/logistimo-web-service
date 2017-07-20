@@ -172,9 +172,10 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
       code = ((LogiException) e.getCause()).getCode();
       statusCode = ((LogiException) e.getCause()).getStatusCode();
       //409 is used in Logi to reload when domain Id changes, hence changing it.
-      if (statusCode == 409) {
+      if (statusCode == 409 || statusCode == 0) {
         statusCode = 400;
       }
+
     }
     ErrorResource
         error =

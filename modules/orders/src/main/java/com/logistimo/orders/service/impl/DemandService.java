@@ -23,6 +23,9 @@
 
 package com.logistimo.orders.service.impl;
 
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.QueryConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
@@ -31,35 +34,31 @@ import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.pagination.QueryParams;
+import com.logistimo.models.orders.DiscrepancyModel;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.service.OrderManagementService;
-import com.logistimo.tags.dao.ITagDao;
-import com.logistimo.tags.dao.TagDao;
-import com.logistimo.tags.entity.ITag;
-import com.sun.rowset.CachedRowSetImpl;
-
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
 import com.logistimo.orders.service.IDemandService;
+import com.logistimo.orders.service.OrderManagementService;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.QueryParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
-import com.logistimo.proto.JsonTagsZ;
+import com.logistimo.tags.dao.ITagDao;
+import com.logistimo.tags.dao.TagDao;
+import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
-import com.logistimo.models.orders.DiscrepancyModel;
 import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.constants.QueryConstants;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
+import com.sun.rowset.CachedRowSetImpl;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -83,6 +82,7 @@ import javax.sql.rowset.CachedRowSet;
 /**
  * Created by smriti on 9/30/16.
  */
+@org.springframework.stereotype.Service
 public class DemandService extends ServiceImpl implements IDemandService {
   private static final XLog xLogger = XLog.getLog(DemandService.class);
   private ITagDao tagDao = new TagDao();

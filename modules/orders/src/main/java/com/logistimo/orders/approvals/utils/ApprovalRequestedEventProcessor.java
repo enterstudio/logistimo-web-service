@@ -25,6 +25,7 @@ package com.logistimo.orders.approvals.utils;
 
 import com.codahale.metrics.Meter;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.approvals.service.IOrderApprovalsService;
@@ -35,7 +36,6 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.utils.MetricsUtil;
 
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by charan on 14/07/17.
@@ -48,20 +48,21 @@ public class ApprovalRequestedEventProcessor {
 
   private static final XLog xLogger = XLog.getLog(ApprovalRequestedEventProcessor.class);
 
-  @Autowired
-  private IApprovalsDao approvalDao;
-
-  @Autowired
-  private OrderManagementService orderManagementService;
-
-  @Autowired
-  private IOrderApprovalsService orderApprovalsService;
-
   @Handler
   public void execute(ApprovalCreatedEvent event) throws ServiceException {
 
     jmsMeter.mark();
     xLogger.info("Approval created event received -  {0}", event);
+
+    IApprovalsDao approvalDao = StaticApplicationContext.getBean(IApprovalsDao.class);
+
+    OrderManagementService
+        orderManagementService =
+        StaticApplicationContext.getBean(OrderManagementService.class);
+
+    IOrderApprovalsService
+        orderApprovalsService =
+        StaticApplicationContext.getBean(IOrderApprovalsService.class);
 
     IOrderApprovalMapping orderApprovalMapping = approvalDao
         .getOrderApprovalMapping(event.getApprovalId());

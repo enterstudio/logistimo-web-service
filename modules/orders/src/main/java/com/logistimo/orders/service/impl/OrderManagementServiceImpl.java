@@ -68,6 +68,7 @@ import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.actions.GenerateOrderEventsAction;
+import com.logistimo.orders.actions.GetFilteredOrdersAction;
 import com.logistimo.orders.approvals.actions.OrderVisibilityAction;
 import com.logistimo.orders.dao.IOrderDao;
 import com.logistimo.orders.dao.OrderUpdateStatus;
@@ -76,6 +77,7 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.Order;
+import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
@@ -562,137 +564,26 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   public Results getOrders(Long domainId, Long kioskId, String status, Date since, Date until,
                            String otype, String tagType, String tag, List<Long> kioskIds,
                            PageParams pageParams, Integer orderType, String referenceId,
-                           String approvalStatus, boolean withDemand) throws ServiceException {
-    xLogger.fine("Entered getOrders");
-    if (kioskId == null && domainId == null) {
-      throw new ServiceException(
-          "No kiosk or domain specified. At least one of them must be specified");
-    }
-    OrderResults results = null;
-    PersistenceManager pm = PMF.get().getPersistenceManager();
-    try {
-      // Get query filters
-      String filters = "";
-      String declarations = "";
-      String imports = null;
-      Map<String, Object> paramMap = new HashMap<>();
-      if (kioskId != null) {
-        if (IOrder.TYPE_SALE.equals(otype)) { // sales orders
-          filters = "skId == skIdParam";
-          declarations = "Long skIdParam";
-          paramMap.put("skIdParam", kioskId);
-        } else if (IOrder.TYPE_PURCHASE.equals(otype)) { // purchase orders
-          filters = "kId == kIdParam";
-          declarations = "Long kIdParam";
-          paramMap.put("kIdParam", kioskId);
-        }
-      } else if (kioskIds != null && !kioskIds.isEmpty()) {
-        String kioskField = (IOrder.TYPE_SALE.equals(otype) ? "skId" : "kId");
-        filters = "kioskIds.contains( " + kioskField + " )";
-        declarations = "java.util.Collection kioskIds";
-        paramMap.put("kioskIds", kioskIds);
-      } else if (domainId != null) {
-        filters = "dId.contains(dIdParam)";
-        declarations = "Long dIdParam";
-        paramMap.put("dIdParam", domainId);
-      }
+                           String approvalStatus, boolean withDemand) {
+    OrderFilters filters = new OrderFilters().setDomainId(domainId)
+        .setKioskId(kioskId)
+        .setStatus(status)
+        .setSince(since)
+        .setUntil(until)
+        .setOtype(otype)
+        .setTagType(tagType)
+        .setTag(tag)
+        .setKioskIds(kioskIds)
+        .setOrderType(orderType)
+        .setReferenceId(referenceId)
+        .setApprovalStatus(approvalStatus)
+        .setWithDemand(withDemand);
+    return getOrders(filters, pageParams);
+  }
 
-      if (status != null && !status.isEmpty()) {
-        filters += " && st == stParam";
-        declarations += ", String stParam";
-        paramMap.put("stParam", status);
-      }
-      if (kioskId == null && (domainId != null || status != null) && tagType != null && !tagType
-          .isEmpty() && tag != null && !tag
-          .isEmpty()) { // tag inclusion in query possible on with domainId and/or status
-        if (TagUtil.TYPE_ENTITY.equals(tagType)) {
-          filters += " && ktgs.contains(ktgsParam)";
-          declarations += ", Long ktgsParam";
-          paramMap.put("ktgsParam", tagDao.getTagFilter(tag, ITag.KIOSK_TAG));
-        } else if (TagUtil.TYPE_ORDER.equals(tagType)) {
-          filters += " && otgs.contains(otgsParam)";
-          declarations += ", Long otgsParam";
-          paramMap.put("otgsParam", tagDao.getTagFilter(tag, ITag.ORDER_TAG));
-        }
-      } else if (kioskId != null && tagType != null && !tagType.isEmpty() && tag != null && !tag
-          .isEmpty() && TagUtil.TYPE_ORDER.equals(tagType)) {
-        filters += " && otgs.contains(otgsParam)";
-        declarations += ", Long otgsParam";
-        paramMap.put("otgsParam", tagDao.getTagFilter(tag, ITag.ORDER_TAG));
-      }
-      // Add from date
-      if (since != null) {
-        filters += " && cOn > cOnParam";
-        declarations += ", Date cOnParam";
-        imports = "import java.util.Date;";
-        paramMap.put("cOnParam", LocalDateUtil.getOffsetDate(since, -1, Calendar.MILLISECOND));
-      }
-      // Add until date
-      if (until != null) {
-        filters += " && cOn < untilParam";
-        declarations += ", Date untilParam";
-        imports = "import java.util.Date;";
-        paramMap.put("untilParam", until);
-      }
-      // Filter transfer order
-      if (orderType != null) {
-          if(orderType == IOrder.TRANSFER) {
-              filters += " && oty == otyParam";
-          } else {
-              orderType = IOrder.TRANSFER;
-              filters += " && oty != otyParam";
-          }
-
-        declarations += ", Integer otyParam";
-        paramMap.put("otyParam", orderType);
-      }
-      if (referenceId != null) {
-        filters += " && rid == ridParam";
-        declarations += ", String ridParam";
-        paramMap.put("ridParam", referenceId);
-      }
-      // Form the query
-      Query q = pm.newQuery(JDOUtils.getImplClass(IOrder.class));
-      q.setFilter(filters);
-      q.declareParameters(declarations);
-      q.setOrdering("cOn desc");
-      if (imports != null) {
-        q.declareImports(imports);
-      }
-      // Add pagination parameters, if needed
-      if (pageParams != null) {
-        QueryUtil.setPageParams(q, pageParams);
-      }
-      // Execute query
-      try {
-        // Execute query
-        List<IOrder> orders = (List<IOrder>) q.executeWithMap(paramMap);
-        orders.size(); // to ensure orders are retrieved before PM is closed
-        // Get the cursor of the next element in the result set (for future iteration, efficiently)
-        String cursorStr = QueryUtil.getCursor(orders);
-        orders = (List<IOrder>) pm.detachCopyAll(orders);
-
-        if (withDemand) {
-          IDemandService ds = Services.getService(DemandService.class);
-          for (IOrder order : orders) {
-            order.setItems(ds.getDemandItems(order.getOrderId()));
-          }
-        }
-        // Create the result set
-        results = new OrderResults(orders, cursorStr);
-      } finally {
-        q.closeAll();
-      }
-    } catch (Exception e) {
-      xLogger.severe("Exception in getOrders(): {0}", e.getMessage());
-      throw new ServiceException(e.getMessage(), e);
-    } finally {
-      // Close PM
-      pm.close();
-    }
-
-    xLogger.fine("Exiting getOrders");
-    return results;
+  public Results getOrders(OrderFilters orderFilters, PageParams pageParams) {
+    return StaticApplicationContext.getBean(GetFilteredOrdersAction.class)
+        .invoke(orderFilters, pageParams);
   }
 
   /**

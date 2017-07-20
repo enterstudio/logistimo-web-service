@@ -32,6 +32,7 @@ import com.logistimo.orders.approvals.constants.ApprovalConstants;
 import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
+import com.logistimo.orders.entity.approvals.OrderApprovalMapping;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.services.ObjectNotFoundException;
@@ -48,6 +49,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -64,27 +66,32 @@ public class ApprovalsDao implements IApprovalsDao {
   public static final String APPROVAL_TYPE_PARAM = "approvalTypeParam";
 
   private static final XLog xLogger = XLog.getLog(ApprovalsDao.class);
+  private static final String APRROVAL_TYPE_PARAM = "approvalTypeParam";
   private ApprovalsBuilder builder = new ApprovalsBuilder();
 
   public IOrderApprovalMapping updateOrderApprovalMapping(CreateApprovalResponse approvalResponse,
-      Integer approvalType) throws ServiceException, ObjectNotFoundException {
+                                                          Integer approvalType)
+      throws ServiceException, ObjectNotFoundException {
     IOrderApprovalMapping orderApprovalMapping = null;
     if (approvalResponse != null) {
       Long kioskId = null;
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
       IOrder order = oms.getOrder(Long.parseLong(approvalResponse.getTypeId()));
-      if(approvalType.equals(IOrder.PURCHASE_ORDER)) {
+      if (approvalType.equals(IOrder.PURCHASE_ORDER)) {
         kioskId = order.getKioskId();
-      } else if(approvalType.equals(IOrder.SALES_ORDER)) {
+      } else if (approvalType.equals(IOrder.SALES_ORDER)) {
         kioskId = order.getServicingKiosk();
       }
-      orderApprovalMapping = builder.buildOrderApprovalMapping(approvalResponse, approvalType, kioskId);
+      orderApprovalMapping =
+          builder.buildOrderApprovalMapping(approvalResponse, approvalType, kioskId);
+      orderApprovalMapping.setLatest(true);
     }
     if (orderApprovalMapping != null) {
       PersistenceManager pm = null;
       try {
         pm = PMF.get().getPersistenceManager();
         pm.makePersistent(orderApprovalMapping);
+        updateOldApprovalRequests(orderApprovalMapping, pm);
         orderApprovalMapping = pm.detachCopy(orderApprovalMapping);
       } catch (Exception e) {
         xLogger.severe("Error while persisting order approval mapping {0} for order type {1}",
@@ -97,6 +104,22 @@ public class ApprovalsDao implements IApprovalsDao {
       }
     }
     return orderApprovalMapping;
+  }
+
+  private void updateOldApprovalRequests(final IOrderApprovalMapping orderApprovalMapping,
+                                         PersistenceManager pm) {
+    Query query = pm.newQuery(OrderApprovalMapping.class);
+    query.setFilter("orderId == orderIdParam && approvalType == approvalTypeParam && latest ");
+    query.declareParameters("Long orderIdParam, Integer approvalTypeParam");
+    Map<String, Object> params = new HashMap<>();
+    params.put(APRROVAL_TYPE_PARAM, orderApprovalMapping.getApprovalType());
+    params.put(ORDER_ID_PARAM, orderApprovalMapping.getOrderId());
+    List<OrderApprovalMapping> results = (List<OrderApprovalMapping>) query.executeWithMap(params);
+    if (results != null && !results.isEmpty()) {
+      results.stream().filter(approvalMapping -> !Objects
+          .equals(approvalMapping.getApprovalId(), orderApprovalMapping.getApprovalId()))
+          .forEach(approvalMapping -> approvalMapping.setLatest(false));
+    }
   }
 
   public void updateOrderApprovalStatus(String approvalId, StatusModel model, String userId) {
@@ -121,7 +144,7 @@ public class ApprovalsDao implements IApprovalsDao {
 
   public IOrderApprovalMapping getOrderApprovalMapping(Long orderId, String status) {
     IOrderApprovalMapping orderApprovalMapping = null;
-    if(orderId != null) {
+    if (orderId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
@@ -143,7 +166,7 @@ public class ApprovalsDao implements IApprovalsDao {
           try {
             query.closeAll();
           } catch (Exception ignored) {
-            xLogger.warn("Exception while closing query", ignored);
+            //ignored
           }
         }
         if (pm != null) {
@@ -157,7 +180,7 @@ public class ApprovalsDao implements IApprovalsDao {
   public IOrderApprovalMapping getOrderApprovalMapping(Long orderId, Integer approvalType) {
     IOrderApprovalMapping orderApprovalMapping = null;
     List<IOrderApprovalMapping> results = null;
-    if(orderId != null) {
+    if (orderId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
@@ -167,15 +190,15 @@ public class ApprovalsDao implements IApprovalsDao {
         query.setFilter("orderId == orderIdParam && approvalType == approvalTypeParam");
         query.declareParameters("Long orderIdParam, Integer approvalTypeParam");
         query.setOrdering("createdAt desc");
-        query.setRange(0,1);
+        query.setRange(0, 1);
         params.put(ORDER_ID_PARAM, orderId);
         params.put(APPROVAL_TYPE_PARAM, approvalType);
         results = (List<IOrderApprovalMapping>) query.executeWithMap(params);
-        if(results != null && !results.isEmpty()) {
+        if (results != null && !results.isEmpty()) {
           orderApprovalMapping = results.get(0);
         }
       } catch (Exception e) {
-        xLogger.fine("Failed to get order approval mapping for order: {0}",
+        xLogger.warn("Failed to get order approval mapping for order: {0}",
             orderId, e);
       } finally {
         if (query != null) {
@@ -195,12 +218,10 @@ public class ApprovalsDao implements IApprovalsDao {
 
   /**
    * returns the total approvals against that order
-   * @param orderId
-   * @return
    */
   public List<IOrderApprovalMapping> getTotalOrderApprovalMapping(Long orderId) {
     List<IOrderApprovalMapping> results = null;
-    if(orderId != null) {
+    if (orderId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
@@ -236,7 +257,7 @@ public class ApprovalsDao implements IApprovalsDao {
   public IOrderApprovalMapping getOrderApprovalMapping(Long orderId) {
     IOrderApprovalMapping orderApprovalMapping = null;
     List<IOrderApprovalMapping> results = null;
-    if(orderId != null) {
+    if (orderId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
@@ -248,7 +269,7 @@ public class ApprovalsDao implements IApprovalsDao {
         query.setOrdering("createdAt desc");
         params.put(ORDER_ID_PARAM, orderId);
         results = (List<IOrderApprovalMapping>) query.executeWithMap(params);
-        if(results != null && !results.isEmpty()) {
+        if (results != null && !results.isEmpty()) {
           orderApprovalMapping = results.get(0);
         }
       } catch (Exception e) {
@@ -273,7 +294,7 @@ public class ApprovalsDao implements IApprovalsDao {
 
   public IOrderApprovalMapping getOrderApprovalMapping(String approvalId, String status) {
     IOrderApprovalMapping orderApprovalMapping = null;
-    if(StringUtils.isNotEmpty(approvalId)) {
+    if (StringUtils.isNotEmpty(approvalId)) {
       PersistenceManager pm = null;
       Query query = null;
       try {
@@ -308,7 +329,7 @@ public class ApprovalsDao implements IApprovalsDao {
 
   public IOrderApprovalMapping getOrderApprovalMapping(String approvalId) {
     IOrderApprovalMapping orderApprovalMapping = null;
-    if(StringUtils.isNotEmpty(approvalId)) {
+    if (StringUtils.isNotEmpty(approvalId)) {
       PersistenceManager pm = null;
       Query query = null;
       try {

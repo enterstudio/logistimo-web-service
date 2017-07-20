@@ -147,24 +147,20 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
                 if(checkNotNullEmpty($scope.referenceId) && orderData.length == 1) {
                     $scope.orderId = orderData[0].id;
                 }
-            } else if($scope.initLoad && (data == null || (checkNullEmpty(data.results) && $scope.iMan))) {
-                if ($scope.otype == "sle") {
-                    $scope.otype = "prc";
-                    $scope.fetch();
-                } else if ($scope.otype == "prc") {
-                    $scope.otype = "sle";
-                    $scope.initLoad = false;
-                }
-            }
-            else {
-                $scope.orders = {results:[]};
+            } else {
+                $scope.orders = {results: []};
                 $scope.setResults(null);
             }
-            $scope.loading = false;
-            $scope.hideLoading();
-            setTimeout(function () {
-                fixTable();
-            },200);
+
+            if ($scope.initLoad && (data == null || checkNullEmpty(data.results)) && $scope.iMan) {
+                $scope.initLoad = false;
+                if ($scope.otype == "sle") {
+                    $scope.otype = "prc";
+                } else if ($scope.otype == "prc") {
+                    $scope.otype = "sle";
+                }
+            }
+
         };
         $scope.fetch = function () {
             $scope.orders = {};
@@ -197,7 +193,12 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
                     }
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
-                    $scope.setData(null);
+                }).finally(function () {
+                    $scope.loading = false;
+                    $scope.hideLoading();
+                    setTimeout(function () {
+                        fixTable();
+                    }, 200);
                 });
             } else {
                 ordService.getOrders($scope.otype, $scope.status, $scope.tType, $scope.ft, formatDate($scope.from), formatDate($scope.to), $scope.offset, $scope.size, oty, $scope.referenceId, $scope.approval_status).then(function (data) {
@@ -209,8 +210,14 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
                     }
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
-                    $scope.setData(null);
+                }).finally(function () {
+                    $scope.loading = false;
+                    $scope.hideLoading();
+                    setTimeout(function () {
+                        fixTable();
+                    }, 200);
                 });
+                ;
             }
         };
         $scope.getSuggestions = function (text, type) {

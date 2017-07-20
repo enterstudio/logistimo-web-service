@@ -24,7 +24,9 @@
 package com.logistimo.auth.utils;
 
 
+import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.SecurityUtil;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.constants.CharacterConstants;
@@ -39,6 +41,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.security.GeneralSecurityException;
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -168,6 +171,21 @@ public class SecurityUtils {
     } else {
       return userDetails.getDomainId();
     }
+  }
 
+  public static boolean isManager() {
+    return Objects
+        .equals(SecurityUtils.getUserDetails().getRole(), SecurityConstants.ROLE_SERVICEMANAGER);
+  }
+
+  public static boolean isOperator() {
+    return Objects
+        .equals(SecurityUtils.getUserDetails().getRole(), SecurityConstants.ROLE_KIOSKOWNER);
+  }
+
+  public static boolean isAdmin() {
+    return SecurityUtil
+        .compareRoles(SecurityUtils.getUserDetails().getRole(), SecurityConstants.ROLE_DOMAINOWNER)
+        >= 0;
   }
 }

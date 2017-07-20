@@ -69,4 +69,8 @@ public interface IOrderApprovalMapping {
     Long getKioskId();
 
     void setKioskId(Long kioskId);
+
+  boolean isLatest();
+
+  void setLatest(boolean latest);
 }

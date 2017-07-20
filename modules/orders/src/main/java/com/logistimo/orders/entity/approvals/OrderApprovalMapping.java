@@ -23,9 +23,6 @@
 
 package com.logistimo.orders.entity.approvals;
 
-import com.logistimo.logger.XLog;
-import com.logistimo.orders.entity.Order;
-
 import java.util.Date;
 
 import javax.jdo.annotations.Column;
@@ -38,121 +35,131 @@ import javax.jdo.annotations.PrimaryKey;
 /**
  * Created by naveensnair on 08/06/17.
  */
-@PersistenceCapable(table="ORDER_APPROVAL_MAPPING", identityType = IdentityType.APPLICATION, detachable = "true")
-public class OrderApprovalMapping implements IOrderApprovalMapping{
+@PersistenceCapable(table = "ORDER_APPROVAL_MAPPING", identityType = IdentityType.APPLICATION, detachable = "true")
+public class OrderApprovalMapping implements IOrderApprovalMapping {
 
-    // Logger
-    static XLog xLogger = XLog.getLog(Order.class);
-    @PrimaryKey
-    @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-    @Column(name = "ID")
-    private Long id; // order approval mapping id
-    @Persistent
-    @Column(name = "ORDER_ID")
-    private Long orderId; // order id
-    @Persistent
-    @Column(name = "APPROVAL_ID")
-    private String approvalId; // approval id
-    @Persistent
-    @Column(name = "STATUS")
-    private String status; //approval status
-    @Persistent
-    @Column(name = "APPROVAL_TYPE")
-    private Integer approvalType; //order type
-    @Column(name = "CREATED_AT")
-    private Date createdAt;
-    @Column(name = "UPDATED_AT")
-    private Date updatedAt;
-    @Column(name = "CREATED_BY")
-    private String createdBy;
-    @Column(name = "UPDATED_BY")
-    private String updatedBy;
-    @Column(name = "KIOSK_ID")
-    private Long kioskId;
+  @PrimaryKey
+  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+  @Column(name = "ID")
+  private Long id; // order approval mapping id
+  @Persistent
+  @Column(name = "ORDER_ID")
+  private Long orderId; // order id
+  @Persistent
+  @Column(name = "APPROVAL_ID")
+  private String approvalId; // approval id
+  @Persistent
+  @Column(name = "STATUS")
+  private String status; //approval status
+  @Persistent
+  @Column(name = "APPROVAL_TYPE")
+  private Integer approvalType; //order type
+  @Column(name = "CREATED_AT")
+  private Date createdAt;
+  @Column(name = "UPDATED_AT")
+  private Date updatedAt;
+  @Column(name = "CREATED_BY")
+  private String createdBy;
+  @Column(name = "UPDATED_BY")
+  private String updatedBy;
+  @Column(name = "KIOSK_ID")
+  private Long kioskId;
+  @Column(name = "LATEST")
+  private boolean latest;
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    @Override
-    public Long getOrderId() {
-        return orderId;
-    }
+  @Override
+  public Long getOrderId() {
+    return orderId;
+  }
 
-    @Override
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
+  @Override
+  public void setOrderId(Long orderId) {
+    this.orderId = orderId;
+  }
 
-    @Override
-    public String getApprovalId() {
-        return approvalId;
-    }
+  @Override
+  public String getApprovalId() {
+    return approvalId;
+  }
 
-    @Override
-    public void setApprovalId(String approvalId) {
-        this.approvalId = approvalId;
-    }
+  @Override
+  public void setApprovalId(String approvalId) {
+    this.approvalId = approvalId;
+  }
 
-    @Override
-    public String getStatus() {
-        return status;
-    }
+  @Override
+  public String getStatus() {
+    return status;
+  }
 
-    @Override
-    public void setStatus(String status) {
-        this.status = status;
-    }
+  @Override
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-    public Integer getApprovalType() {
-        return approvalType;
-    }
+  public Integer getApprovalType() {
+    return approvalType;
+  }
 
-    public void setApprovalType(Integer approvalType) {
-        this.approvalType = approvalType;
-    }
+  public void setApprovalType(Integer approvalType) {
+    this.approvalType = approvalType;
+  }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+  public Date getCreatedAt() {
+    return createdAt;
+  }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
+  public String getCreatedBy() {
+    return createdBy;
+  }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
 
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+  public void setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
+  }
 
-    public Long getKioskId() {
-        return kioskId;
-    }
+  public Long getKioskId() {
+    return kioskId;
+  }
 
-    public void setKioskId(Long kioskId) {
-        this.kioskId = kioskId;
-    }
+  public void setKioskId(Long kioskId) {
+    this.kioskId = kioskId;
+  }
+
+  @Override
+  public boolean isLatest() {
+    return latest;
+  }
+
+  @Override
+  public void setLatest(boolean latest) {
+    this.latest = latest;
+  }
 }

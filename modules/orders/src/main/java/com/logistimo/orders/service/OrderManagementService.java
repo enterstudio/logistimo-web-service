@@ -124,7 +124,7 @@ public interface OrderManagementService extends Service {
   Results getOrders(Long domainId, Long kioskId, String status, Date since, Date untilDate,
                     String otype, String tagType, String tag, List<Long> kioskIds,
                     PageParams pageParams, Integer orderType, String referenceId, String approvalStatus,
-                    boolean withDemand) throws ServiceException;
+                    boolean withDemand);
 
   /**
    * Get orders placed by a certain user
