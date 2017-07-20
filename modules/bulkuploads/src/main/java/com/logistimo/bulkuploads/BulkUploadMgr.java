@@ -1971,9 +1971,14 @@ public class BulkUploadMgr {
         }
         m.setTemperatureMax(tempMax);
       }
-      if (m.getTemperatureMin() > m.getTemperatureMax()) {
-        ec.messages.add(
-            "Temperature Min. cannot be greater than Temperature Max.");
+      if (tempMonitoringEnabled) {
+        if (m.getTemperatureMin() == m.getTemperatureMax()) {
+          ec.messages.add(
+              "Temperature Min. cannot be same as Temperature Max.");
+        } else if (m.getTemperatureMin() > m.getTemperatureMax()) {
+          ec.messages.add(
+              "Temperature Min. cannot be greater than Temperature Max.");
+        }
       }
       // If there are errors, return
       if (ec.hasErrors()) {
