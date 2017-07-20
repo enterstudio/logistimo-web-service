@@ -2153,11 +2153,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       }
     } else if (ITransaction.TYPE_PHYSICALCOUNT.equals(transType)) {
       // Stock & Stock difference at inv. level
-      BigDecimal invQuantity = quantity;
-      BigDecimal stockDifference = quantity.subtract(in.getStock());
-      BigDecimal invATP = quantity;
-      ///if ( stockDifference != 0 )
-      ///trans.setStockDifference( stockDifference );
+      BigDecimal invQuantity;
+      BigDecimal stockDifference;
+      BigDecimal invATP;
       // Check batch presence
       if (invBatch == null && trans.hasBatch()) {
         invBatch = createInventoryBatch(trans, in);
@@ -2168,6 +2166,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
               null);
           in.setAllocatedStock(BigDecimal.ZERO);
         }
+        invQuantity = quantity;
+        stockDifference = quantity.subtract(in.getStock());
+        invATP = in.getAvailableStock().add(stockDifference);
       } else {
         if (BigUtil.lesserThan(quantity, invBatch.getAllocatedStock())) {
           clearAllocation(in.getKioskId(), in.getMaterialId(), null, null, null, trans.getBatchId(),
@@ -2176,8 +2177,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           invBatch.setAllocatedStock(BigDecimal.ZERO);
         }
         stockDifference = quantity.subtract(invBatch.getQuantity());
-        ///if ( batchStockDiff != 0F ) {
-        ///trans.setStockDifference( batchStockDiff ); // NOTE: reset the stock diff. to be that at batch level
         invBatch.setQuantity(quantity);
         invBatch.setAvailableStock(invBatch.getAvailableStock().add(stockDifference));
         invQuantity = in.getStock().add(stockDifference);
@@ -2188,8 +2187,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                   " and entity {3}", invATP, invQuantity, in.getMaterialId(), in.getKioskId());
           invATP = invQuantity;
         }
-        ///in.setStock( invQuantity ); // apply the batch-level stock difference to the main one
-        ///}
         updateInventoryBatchMetadata(invBatch, trans);
       }
       in.setStock(invQuantity);
@@ -3196,14 +3193,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       throws ServiceException {
     clearAllocation(kid, mid, null, null, tag, null, pm);
   }
-
-
-  private void clearAllocation(Long kid, Long mid, IInvAllocation.Type type, List<String> typeIds,
-                               String tag,
-                               String batchId) throws ServiceException {
-    clearAllocation(kid, mid, type, typeIds, tag, batchId, null);
-  }
-
 
   private void clearAllocation(Long kid, Long mid, IInvAllocation.Type type, List<String> typeIds,
                                String tag,
