@@ -45,7 +45,7 @@ public class MobileInvDashboardDetailModel implements Serializable {
   public Long eId;//store id
   public String enm;//store name
   public Long mId;//material id
-  public String mnm;//matrial name
+  public String mnm;//material name
 
 
   @Override

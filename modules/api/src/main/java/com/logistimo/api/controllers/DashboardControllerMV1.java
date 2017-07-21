@@ -194,7 +194,7 @@ public class DashboardControllerMV1 {
     //preparing the model
     details =
         MobileInvDashboardBuilder
-            .buildInvDetailDashboard(invTyRes, invAlRes, alstRes, locty, groupby);
+            .buildInvDetailDashboard(invTyRes, invAlRes, alstRes, paramModel.locty, groupby);
     //adding loc level in response
     if (StringUtils.isBlank(loc) && paramModel.state == null) {
       details.level = COUNTRY_LOWER;

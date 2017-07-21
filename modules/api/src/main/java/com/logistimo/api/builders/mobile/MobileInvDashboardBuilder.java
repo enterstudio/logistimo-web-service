@@ -189,9 +189,6 @@ public class MobileInvDashboardBuilder {
         } else if (locty.equals(DISTRICT_LOWER)) {
           model.eId = invAlRes.getLong(KID);
           model.enm = invAlRes.getString(NAME);
-          if (store && (alstRes.getString(1).equals(model.enm))) {
-            model.tsc = alstRes.getLong(3);
-          }
         }
       }
       mInvDashboardList.add(model);

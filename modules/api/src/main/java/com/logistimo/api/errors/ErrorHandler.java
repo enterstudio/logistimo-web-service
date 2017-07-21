@@ -104,7 +104,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler({BadRequestException.class, BadCredentialsException.class})
-  protected ResponseEntity<Object> handleBadRequest(RuntimeException e, WebRequest request) {
+  protected ResponseEntity<Object> handleBadRequest(Exception e, WebRequest request) {
     logWarning(request, e);
     ErrorResource error = new ErrorResource("[Bad Request]", e.getMessage());
     HttpHeaders headers = new HttpHeaders();
