@@ -1521,10 +1521,6 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
             "yAxisMaxValue": 100
         };
 
-        function checkDateNullOrCurrent(date){
-            return checkNullEmpty(date) || (date.toDateString() == (new Date()).toDateString());
-        }
-
         function constructBarData(data, allData, event, addLink, level) {
             var bData = [];
             for (var f in allData) {
@@ -1976,7 +1972,7 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
         };
 
         $scope.drillDownInventory = function(search){
-            if(checkDateNullOrCurrent($scope.date)){
+            if(checkNullEmpty($scope.date)){
                 $window.open("#/inventory/"+search);
             }else{
                 $scope.showWarning($scope.resourceBundle['past.date.selected']);

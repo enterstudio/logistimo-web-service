@@ -1029,11 +1029,12 @@ approval.config.transfer.info=Spécifiez un ou plusieurs approbateurs pour les c
 approval.config.primary.approver.configure=S'il vous plaît configurer approbateurs primaire.
 approval.config.purchase.entity.tags.configure=S'il vous plaît configurer les balises d'entités pour l'approbation d'achat / de commande client.
 approval.config.time.of.approval=S'il vous plaît choisir le moment où elle est requise.
-approval.config.none=Aucune approbation configuré.invalid.age.message=Entrez un nombre valide entre 1 et 99
+approval.config.none=Aucune approbation configuré.
+invalid.age.message=Entrez un nombre valide entre 1 et 99
 invalid.latitude.message=Latitude doit être entre -90 et 90 arrondis à huit décimales maximum
 invalid.longitude.message=La longitude doit être comprise entre -180 et 180 arrondis à huit décimales maximum
 invalid.tax.message=La taxe (%) doit être comprise entre 0 et 100 arrondis à deux décimales maximum
 invalid.msrp.message=Le PDSF devrait être inférieur à 1 milliard arrondi à deux décimales maximum
 invalid.retailerprice.message=Le prix du détaillant devrait être inférieur à 1 milliard arrondi à deux décimales maximum
 invalid.temperature.message=La plage de température devrait être de -99,99 à 99,99 arrondie à deux décimales maximum
-past.date.selected=Vous avez sélectionné une date passée dans le filtre Inventaire de ce tableau de bord. Vous ne pourrez pas cliquer et afficher la vue stockée sur une date antérieure. Modifiez la «date» à la date actuelle pour décrire la page des vues de stock.
+past.date.selected=Vous avez sélectionné une date passée dans le filtre Inventaire de ce tableau de bord. Vous ne pourrez pas cliquer sur la page de vues stock pour une date passée. Veuillez effacer la «Date» dans le filtre du tableau de bord pour explorer la page des vues stock.
