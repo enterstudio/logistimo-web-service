@@ -128,8 +128,8 @@ public class ApprovalStatusUpdateEventProcessor {
     values.put("approvalType", ApprovalUtils.getApprovalType(orderApproval.getApprovalType()));
     values.put("requestorName", requester.getFullName());
     values.put("requestorPhone", requester.getMobilePhoneNumber());
-    values.put("entityName", kiosk.getName());
-    values.put("entityCity", requester.getCity());
+    values.put("eName", kiosk.getName());
+    values.put("eCity", requester.getCity());
     values.put("orderId", event.getTypeId());
     values.put("statusChangedTime", LocalDateUtil.format(event.getUpdatedAt(),
         requester.getLocale(), requester.getTimezone()));

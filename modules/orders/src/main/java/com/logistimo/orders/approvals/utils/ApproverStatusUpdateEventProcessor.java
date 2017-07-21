@@ -109,8 +109,8 @@ public class ApproverStatusUpdateEventProcessor {
     values.put("orderId", event.getTypeId());
     values.put("requestorName", requester.getFullName());
     values.put("requestorPhone", requester.getMobilePhoneNumber());
-    values.put("entityName", kiosk.getName());
-    values.put("entityCity", requester.getCity());
+    values.put("eName", kiosk.getName());
+    values.put("eCity", requester.getCity());
     values.put("requestedAt", LocalDateUtil.format(event.getRequestedAt(),
         requester.getLocale(), requester.getTimezone()));
 
