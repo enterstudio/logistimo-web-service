@@ -136,7 +136,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       List<Long> results = (List<Long>) q.execute(userId);
       if (results != null) {
         for (Long result : results) {
-          if (result.equals(kioskId)) {
+          if (result != null && result.equals(kioskId)) {
             return true;
           }
         }

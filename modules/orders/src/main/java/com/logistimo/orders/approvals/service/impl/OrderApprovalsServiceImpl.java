@@ -24,12 +24,10 @@
 package com.logistimo.orders.approvals.service.impl;
 
 import com.logistimo.config.models.ApprovalsConfig;
-import com.logistimo.config.models.DashboardConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
-import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.approvals.constants.ApprovalConstants;
@@ -161,7 +159,8 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
   @Override
   public boolean isPurchaseApprovalRequired(IOrder order)
       throws ServiceException, ObjectNotFoundException {
-    return DomainConfig.getInstance(order.getKioskDomainId()).getApprovalsConfig().getOrderConfig()
+    return !order.isTransfer() && DomainConfig.getInstance(order.getKioskDomainId())
+        .getApprovalsConfig().getOrderConfig()
         .isPurchaseApprovalEnabled(
             entitiesService.getKioskIfPresent(order.getKioskId()).getTags());
   }
@@ -169,7 +168,8 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
   @Override
   public boolean isShippingApprovalRequired(IOrder order)
       throws ServiceException, ObjectNotFoundException {
-    return DomainConfig.getInstance(order.getLinkedDomainId()).getApprovalsConfig().getOrderConfig()
+    return !order.isTransfer() && DomainConfig.getInstance(order.getLinkedDomainId())
+        .getApprovalsConfig().getOrderConfig()
         .isSaleApprovalEnabled(
             entitiesService.getKioskIfPresent(order.getServicingKiosk()).getTags());
   }

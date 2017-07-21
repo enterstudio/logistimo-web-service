@@ -292,7 +292,7 @@ public class ApprovalsConfig implements Serializable {
           }
 
         } catch (JSONException e) {
-          // do nothing
+          et = new ArrayList<>(1);
         }
 
         if (jsonObject.get(SALES_ORDER_APPROVAL) != null) {

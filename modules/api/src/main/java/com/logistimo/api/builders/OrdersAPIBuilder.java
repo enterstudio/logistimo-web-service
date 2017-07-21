@@ -419,12 +419,13 @@ public class OrdersAPIBuilder {
     Permissions model = new Permissions();
     List<String> permissions = new ArrayList<>(1);
     ApprovalsDao approvalsDao = new ApprovalsDao();
-    if(isApprovalRequired) {
+    if (isApprovalRequired) {
       IOrderApprovalMapping
           approvalMapping =
           approvalsDao.getOrderApprovalMapping(order.getOrderId(), approvalType);
-      if (approvalMapping != null) {
-        if (IOrder.PURCHASE_ORDER == approvalType) {
+
+      if (IOrder.PURCHASE_ORDER == approvalType) {
+        if (approvalMapping != null) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             if (orderModel.atc) {
               permissions.add(PermissionConstants.CANCEL);
@@ -444,28 +445,45 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.CANCEL);
             }
           }
-        } else if (IOrder.SALES_ORDER == approvalType) {
+        } else {
+          if (orderModel.atc) {
+            permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.EDIT);
+          }
+        }
+      } else if (IOrder.SALES_ORDER == approvalType) {
+        if (approvalMapping != null) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
-            if(orderModel.atv) {
+            if (orderModel.atv) {
               permissions.add(PermissionConstants.CANCEL);
             }
           } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
-            if(orderModel.atv) {
+            if (orderModel.atv) {
               permissions.add(PermissionConstants.ALLOCATE);
               permissions.add(PermissionConstants.CANCEL);
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.EDIT);
             }
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
-            if(orderModel.atv) {
+            if (orderModel.atv) {
+              permissions.add(PermissionConstants.ALLOCATE);
               permissions.add(PermissionConstants.SHIP);
               permissions.add(PermissionConstants.CREATE_SHIPMENT);
               permissions.add(PermissionConstants.CONFIRM);
             }
           }
-        } else if (IOrder.TRANSFER_ORDER == approvalType) {
+        } else {
+          if (orderModel.atv) {
+            permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.CONFIRM);
+            permissions.add(PermissionConstants.ALLOCATE);
+            permissions.add(PermissionConstants.EDIT);
+          }
+        }
+      } else if (IOrder.TRANSFER_ORDER == approvalType) {
+        if (approvalMapping != null) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             permissions.add(PermissionConstants.CANCEL);
 
@@ -476,13 +494,16 @@ public class OrdersAPIBuilder {
             permissions.add(PermissionConstants.CANCEL);
 
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
-            permissions.add(PermissionConstants.CANCEL);
-            permissions.add(PermissionConstants.CONFIRM);
-            permissions.add(PermissionConstants.ALLOCATE);
-            permissions.add(PermissionConstants.EDIT);
-            permissions.add(PermissionConstants.SHIP);
-            permissions.add(PermissionConstants.CREATE_SHIPMENT);
+            if (orderModel.atv) {
+              permissions.add(PermissionConstants.CONFIRM);
+              permissions.add(PermissionConstants.ALLOCATE);
+              permissions.add(PermissionConstants.SHIP);
+              permissions.add(PermissionConstants.CREATE_SHIPMENT);
+            }
           }
+        } else {
+          permissions.add(PermissionConstants.CANCEL);
+          permissions.add(PermissionConstants.EDIT);
         }
       }
     } else {
