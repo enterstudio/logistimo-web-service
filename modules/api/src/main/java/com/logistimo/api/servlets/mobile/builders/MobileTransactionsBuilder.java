@@ -402,7 +402,7 @@ public class MobileTransactionsBuilder {
               .formatCustom(invBatch.getBatchManufacturedDate(), Constants.DATE_FORMAT, null);
     }
     mobileInvBatchModel.bmfnm = invBatch.getBatchManufacturer();
-    if (mobileInvBatchModel.bexp != null) {
+    if (invBatch.getBatchExpiry() != null) {
       mobileInvBatchModel.bexp =
           LocalDateUtil.formatCustom(invBatch.getBatchExpiry(), Constants.DATE_FORMAT, null);
     } else {
@@ -440,6 +440,9 @@ public class MobileTransactionsBuilder {
             break;
           case Constants.FREQ_MONTHLY:
             mobConRateModel.ty = Constants.FREQ_TYPE_MONTHLY;
+            break;
+          default:
+            xLogger.warn("Invalid displayFrequency: {0} while building mobile consumption rate model for inventory with kid: {1} and mid: {1}", displayFreq, inv.getKioskId(), inv.getMaterialId());
             break;
         }
         return mobConRateModel;
