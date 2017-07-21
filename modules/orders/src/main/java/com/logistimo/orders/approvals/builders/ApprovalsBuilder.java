@@ -122,7 +122,7 @@ public class ApprovalsBuilder {
 
   public RestResponsePage<ApprovalModel> buildApprovalsModel(RestResponsePage<Approval> response,
                                                              String[] embed)
-      throws ServiceException {
+      throws ServiceException, ObjectNotFoundException {
 
     List<ApprovalModel> approvalModels = new ArrayList<>(1);
     for (Approval approval : response.getContent()) {
@@ -180,7 +180,7 @@ public class ApprovalsBuilder {
   }
 
   public ApprovalModel buildApprovalListingModel(Approval approval, String[] embed)
-      throws ServiceException {
+      throws ServiceException, ObjectNotFoundException {
       ApprovalModel model = new ApprovalModel();
     model.setId(approval.getId());
     model.setOrderId(Long.parseLong(approval.getTypeId()));
@@ -191,7 +191,10 @@ public class ApprovalsBuilder {
     StatusModel statusModel = new StatusModel();
     statusModel.setStatus(approval.getStatus());
     statusModel.setUpdatedAt(approval.getUpdatedAt());
-    statusModel.setUpdatedBy(approval.getUpdatedBy());
+    if(StringUtils.isNotBlank(approval.getUpdatedBy())) {
+      statusModel.setUpdatedBy(approval.getUpdatedBy());
+      statusModel.setName(usersService.getUserAccount(approval.getUpdatedBy()).getFullName());
+    }
     model.setStatus(statusModel);
     model.setRequester(buildRequestorModel(approval.getRequesterId(), approval.getId()));
 
