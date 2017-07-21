@@ -59,27 +59,25 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
         };
 
         $scope.checkApprover = function () {
-            if (checkNotNullEmpty($scope.order.approver) && $scope.approval.status.status == 'pn') {
+            if (checkNotNullEmpty($scope.approval.approvers)) {
+                $scope.approval.approvers.forEach(function (data) {
+                    if (data.user_id == $scope.curUser) {
+                        $scope.isApprover = true;
+                    }
+                });
+            } else if (checkNotNullEmpty($scope.order.approver) && $scope.approval.status.status == 'pn') {
                 if ($scope.order.approver.aty == 0 && $scope.approval.active_approver_type == 'pr') {
                     $scope.isApprover = true;
                 } else if ($scope.order.approver.aty == 1 && $scope.approval.active_approver_type == 'sc') {
                     $scope.isApprover = true;
                 }
-            } else {
-                if(checkNotNullEmpty($scope.approval.approvers)) {
-                    $scope.approval.approvers.forEach(function(data) {
-                        if(data.user_id == $scope.curUser) {
-                            $scope.isApprover = true;
-                        }
-                    });
-                }
-                if($scope.approval.approval_type == '1') {
-                    $scope.type = 'p';
-                } else if($scope.approval.approval_type == '2') {
-                    $scope.type = 's';
-                } else if($scope.approval.approval_type == '0'){
-                    $scope.type = 't';
-                }
+            }
+            if ($scope.approval.approval_type == '1') {
+                $scope.type = 'p';
+            } else if ($scope.approval.approval_type == '2') {
+                $scope.type = 's';
+            } else if ($scope.approval.approval_type == '0') {
+                $scope.type = 't';
             }
         };
 
