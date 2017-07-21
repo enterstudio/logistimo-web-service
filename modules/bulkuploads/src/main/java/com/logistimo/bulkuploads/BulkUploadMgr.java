@@ -144,8 +144,8 @@ public class BulkUploadMgr {
   public static final String ASSET_YOM = "yom";
   public static final String DEV_YOM = "dev.yom";
   public static final int LOWER_BOUND_FOR_YOM = 1980;
-  public static final String TEMP_MIN = "tmin.";
-  public static final String TEMP_MAX = "tmax";
+  public static final String TEMP_MIN = "Temperature Min.";
+  public static final String TEMP_MAX = "Temperature Max.";
   private static ITaskService taskService = AppFactory.get().getTaskService();
 
   private static final String MAX_LENGTH_MSG = " cannot be greater than ";
@@ -2876,13 +2876,13 @@ public class BulkUploadMgr {
     DomainConfig dc = DomainConfig.getInstance(domainId);
     AssetConfig tc = dc.getAssetConfig();
     if (tc == null) {
-      ec.messages.add("Temperature Configuration is not available.");
+      ec.messages.add(tempType + ": Temperature Configuration is not available.");
       return 0;
     }
     if (tc.isTemperatureMonitoringWithLogisticsEnabled() || tc.isTemperatureMonitoringEnabled()) {
       AssetConfig.Configuration configuration = tc.getConfiguration();
       if (configuration == null) {
-        ec.messages.add("Temperature Configuration is not available.");
+        ec.messages.add(tempType + ": Temperature Configuration is not available.");
         return 0;
       }
 
@@ -2891,11 +2891,11 @@ public class BulkUploadMgr {
       } else if (TEMP_MIN.equals(tempType) && configuration.getLowAlarm() != null) {
         return configuration.getLowAlarm().getTemp();
       } else {
-        ec.messages.add("Temperature Configuration is not available.");
+        ec.messages.add(tempType +": Temperature Configuration is not available.");
         return 0;
       }
     } else {
-      ec.messages.add("Temperature Monitoring is not enabled.");
+      ec.messages.add(tempType + ": Temperature Monitoring is not enabled.");
       return 0;
     }
   }
