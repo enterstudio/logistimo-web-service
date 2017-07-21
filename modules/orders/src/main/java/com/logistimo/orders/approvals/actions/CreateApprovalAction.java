@@ -28,6 +28,7 @@ import com.logistimo.approvals.client.models.Approver;
 import com.logistimo.approvals.client.models.CreateApprovalRequest;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.constants.Constants;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.orders.approvals.builders.ApprovalsBuilder;
@@ -41,6 +42,7 @@ import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
+import com.logistimo.utils.LockUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -104,10 +106,18 @@ public class CreateApprovalAction {
 
   private CreateApprovalResponse createApproval(CreateApprovalRequest approvalRequest,
                                                 ApprovalType approvalType)
-      throws ServiceException, ObjectNotFoundException {
-    CreateApprovalResponse approvalResponse = approvalsClient.createApproval(approvalRequest);
-    approvalDao.updateOrderApprovalMapping(approvalResponse, approvalType.getValue());
-    return approvalResponse;
+      throws ServiceException, ObjectNotFoundException, ValidationException {
+    LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_OA + approvalRequest.getTypeId());
+    if (!LockUtil.isLocked(lockStatus)) {
+      throw new ValidationException("OA019", approvalRequest.getTypeId());
+    }
+    try {
+      CreateApprovalResponse approvalResponse = approvalsClient.createApproval(approvalRequest);
+      approvalDao.updateOrderApprovalMapping(approvalResponse, approvalType.getValue());
+      return approvalResponse;
+    } finally {
+      LockUtil.release(Constants.TX_OA + approvalRequest.getTypeId());
+    }
   }
 
 }

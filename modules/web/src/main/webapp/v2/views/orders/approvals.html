@@ -201,7 +201,7 @@
                     </tr>
                     <tr data-ng-switch-when="true">
                         <td colspan="100%" class="partialview">
-                            <div ng-init="view='views/orders/approval-detail.html'; order = item.order;
+                            <div ng-init="view='views/orders/approval-detail.html'; order = item.order; orderId = item.order.orderId;
                             id = item.approval_id; type = item.order.type; count = 1; index = $index ;"
                                  ng-include="'views/partial.html'">
                             </div>

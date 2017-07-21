@@ -201,7 +201,7 @@ public class OrdersAPIBuilder {
 
       if (vendorId != null) {
         try {
-          vendor = es.getKiosk(vendorId);
+          vendor = es.getKiosk(vendorId, false);
           model.vid = vendorId.toString();
           model.vnm = vendor.getName();
           model.vadd =
@@ -520,7 +520,7 @@ public class OrdersAPIBuilder {
         isPurchaseApprovalRequired =
             orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER);
       }
-      if (orderModel.isVisibleToVendor() && orderModel.atv) {
+      if (IOrder.TRANSFER_ORDER != order.getOrderType() && orderModel.isVisibleToVendor() && orderModel.atv) {
         isSalesApprovalRequired =
             orderApprovalsService.isApprovalRequired(order, IOrder.SALES_ORDER);
       }

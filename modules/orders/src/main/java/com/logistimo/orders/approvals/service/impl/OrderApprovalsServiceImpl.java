@@ -24,6 +24,7 @@
 package com.logistimo.orders.approvals.service.impl;
 
 import com.logistimo.config.models.ApprovalsConfig;
+import com.logistimo.config.models.DashboardConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
@@ -134,55 +135,35 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
     return results;
   }
 
-  public boolean isApprovalRequired(IOrder order) throws ServiceException {
+  public boolean isApprovalRequired(IOrder order) throws ServiceException, ObjectNotFoundException {
     return isApprovalRequired(order, getApprovalType(order));
   }
 
   /**
    * Checks if any of the entity tags of the entity associated with this order is configured for approval in domain approval config
    */
-  public boolean isApprovalRequired(IOrder order, Integer approvalType) throws ServiceException {
-    boolean required = false;
+  public boolean isApprovalRequired(IOrder order, Integer approvalType)
+      throws ServiceException, ObjectNotFoundException {
+
     if (order != null) {
-      IKiosk kiosk = null;
-      List<String> entityTags = null;
-      List<String> configTags;
       if (IOrder.PURCHASE_ORDER == approvalType) {
-        kiosk = entitiesService.getKiosk(order.getKioskId());
+        return isPurchaseApprovalRequired(order);
       } else if (IOrder.SALES_ORDER == approvalType) {
-        kiosk = entitiesService.getKiosk(order.getServicingKiosk());
+        return isShippingApprovalRequired(order);
+      } else if(IOrder.TRANSFER_ORDER == approvalType) {
+        return isTransferApprovalRequired(order);
       }
-      if (kiosk != null) {
-        entityTags = kiosk.getTags();
-      }
-      if (entityTags != null && !entityTags.isEmpty()) {
-        DomainConfig dc = DomainConfig.getInstance(kiosk.getDomainId());
-        ApprovalsConfig ac = dc.getApprovalsConfig();
-        ApprovalsConfig.OrderConfig orderConfig = ac.getOrderConfig();
-        if (orderConfig != null) {
-          if (order.getOrderType().equals(IOrder.TRANSFER)
-              && orderConfig.getPrimaryApprovers() != null && !orderConfig.getPrimaryApprovers()
-              .isEmpty()) {
-            required = true;
-          } else {
-            List<ApprovalsConfig.PurchaseSalesOrderConfig>
-                psoa =
-                orderConfig.getPurchaseSalesOrderApproval();
-            for (ApprovalsConfig.PurchaseSalesOrderConfig ps : psoa) {
-              configTags = ps.getEntityTags();
-              int atype = approvalType != null ? approvalType : order.getOrderType();
-              if (configTags != null && !configTags.isEmpty()) {
-                required = isTagConfigured(entityTags, configTags, atype, ps);
-              }
-              if (required) {
-                break;
-              }
-            }
-          }
-        }
-      }
+
     }
-    return required;
+    return false;
+  }
+
+  @Override
+  public boolean isPurchaseApprovalRequired(IOrder order)
+      throws ServiceException, ObjectNotFoundException {
+    return DomainConfig.getInstance(order.getKioskDomainId()).getApprovalsConfig().getOrderConfig()
+        .isPurchaseApprovalEnabled(
+            entitiesService.getKioskIfPresent(order.getKioskId()).getTags());
   }
 
   @Override

@@ -27,6 +27,7 @@ import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.approvals.utils.OrderVisibilityUtils;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class OrderVisibilityAction {
   @Autowired
   private IOrderApprovalsService orderApprovalsService;
 
-  public void invoke(IOrder o, Long domainId) throws ServiceException {
+  public void invoke(IOrder o, Long domainId) throws ServiceException, ObjectNotFoundException {
     boolean isApprovalRequired = orderApprovalsService.isApprovalRequired(o);
     if (isApprovalRequired) {
       OrderVisibilityUtils.setOrderVisibility(o, domainId, false);

@@ -25,7 +25,9 @@ package com.logistimo.orders.approvals.utils;
 
 import com.codahale.metrics.Meter;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
+import com.logistimo.constants.Constants;
 import com.logistimo.context.StaticApplicationContext;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.approvals.service.IOrderApprovalsService;
@@ -33,6 +35,7 @@ import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
+import com.logistimo.utils.LockUtil;
 import com.logistimo.utils.MetricsUtil;
 
 import org.apache.camel.Handler;
@@ -49,7 +52,7 @@ public class ApprovalRequestedEventProcessor {
   private static final XLog xLogger = XLog.getLog(ApprovalRequestedEventProcessor.class);
 
   @Handler
-  public void execute(ApprovalCreatedEvent event) throws ServiceException {
+  public void execute(ApprovalCreatedEvent event) throws ServiceException, ValidationException {
 
     jmsMeter.mark();
     xLogger.info("Approval created event received -  {0}", event);
@@ -64,20 +67,30 @@ public class ApprovalRequestedEventProcessor {
         orderApprovalsService =
         StaticApplicationContext.getBean(IOrderApprovalsService.class);
 
-    IOrderApprovalMapping orderApprovalMapping = approvalDao
-        .getOrderApprovalMapping(event.getApprovalId());
+    LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_OA + event.getTypeId(), 100);
+    if (!LockUtil.isLocked(lockStatus)) {
+      throw new ValidationException("OA019", event.getTypeId());
+    }
 
-    if (orderApprovalMapping == null) {
-      xLogger.info("Order approval was created, but no mapping found for order {0}",
-          event.getTypeId());
-      try {
-        approvalDao.updateOrderApprovalMapping(createApprovalResponseFromEvent(event),
-            orderApprovalsService
-                .getApprovalType(orderManagementService.getOrder(Long.valueOf(event.getTypeId()))));
-      } catch (ObjectNotFoundException e) {
-        xLogger.warn("Order not available for order id - ", event.getTypeId(), e);
+    try {
+      IOrderApprovalMapping orderApprovalMapping = approvalDao
+          .getOrderApprovalMapping(event.getApprovalId());
+
+      if (orderApprovalMapping == null) {
+        xLogger.info("Order approval was created, but no mapping found for order {0}",
+            event.getTypeId());
+        try {
+          approvalDao.updateOrderApprovalMapping(createApprovalResponseFromEvent(event),
+              orderApprovalsService
+                  .getApprovalType(
+                      orderManagementService.getOrder(Long.valueOf(event.getTypeId()))));
+        } catch (ObjectNotFoundException e) {
+          xLogger.warn("Order not available for order id - ", event.getTypeId(), e);
+        }
+
       }
-
+    } finally {
+      LockUtil.release(Constants.TX_OA + event.getTypeId());
     }
   }
 

@@ -97,7 +97,7 @@ public class ApprovalUtils {
         orderConfig = DomainConfig.getInstance(kiosk.getDomainId()).getApprovalsConfig().getOrderConfig();
         expiry = orderConfig.getExpiry(order.getOrderType());
         if (!orderConfig.isSaleApprovalEnabled(kiosk.getTags())) {
-          throw new ValidationException("OA014", SecurityUtils.getLocale(), kiosk.getName());
+          throw new ValidationException("OA014", kiosk.getName());
         }
       }
 

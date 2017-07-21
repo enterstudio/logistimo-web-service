@@ -65,7 +65,6 @@ import com.logistimo.inventory.exceptions.InventoryAllocationException;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.logger.XLog;
-import com.logistimo.models.ICounter;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
@@ -95,7 +94,6 @@ import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.utils.Counter;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.LockUtil;
 import com.logistimo.utils.MsgUtil;
@@ -673,22 +671,6 @@ public class OrdersController {
           or =
           oms.getOrders(domainId, entityId, status, startDate, endDate, otype, tgType, tag,
               kioskIds, pageParams, oty, rid, approvalStatus);
-      int total = -1;
-      if (!(SecurityConstants.ROLE_SERVICEMANAGER.equals(user.getRole()) && entityId == null) && (
-          status == null || status.isEmpty()) && startDate == null
-          && endDate == null && rid == null) {
-        ICounter counter;
-        if (tag != null && !tag.isEmpty()) {
-          counter = Counter.getOrderCounter(domainId, tag, oty, tgType);
-        } else if (oty == IOrder.TRANSFER) {
-          counter = Counter.getTransferOrderCounter(domainId, entityId, otype);
-        } else {
-          counter = Counter.getOrderCounter(domainId, entityId, otype, oty);
-        }
-        total = counter.getCount();
-      }
-      or.setNumFound(total);
-      or.setOffset(offset);
       return builder.buildOrders(or, user, SecurityUtils.getDomainId(request));
     } catch (Exception e) {
       xLogger.severe("Error in fetching orders for entity {0} of type {1}", entityId, otype, e);

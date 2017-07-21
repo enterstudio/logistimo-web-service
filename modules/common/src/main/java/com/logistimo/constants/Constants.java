@@ -33,6 +33,11 @@ import java.math.BigDecimal;
  */
 public final class Constants {
 
+  /**
+   * Order approval locking key prefix
+   */
+  public static final String TX_OA = "TX_OA";
+
   private Constants() {
   }
 

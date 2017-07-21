@@ -47,13 +47,16 @@ public interface IOrderApprovalsService {
 
   List<IOrderApprovalMapping> getOrdersApprovalMapping(Set<Long> orderIds, int orderAppprovalType);
 
-  boolean isApprovalRequired(IOrder order) throws ServiceException;
+  boolean isApprovalRequired(IOrder order) throws ServiceException, ObjectNotFoundException;
 
-  boolean isApprovalRequired(IOrder order, Integer approvalType) throws ServiceException;
+  boolean isApprovalRequired(IOrder order, Integer approvalType)
+      throws ServiceException, ObjectNotFoundException;
 
   boolean isShippingApprovalRequired(IOrder order) throws ServiceException, ObjectNotFoundException;
 
   boolean isShippingApprovalComplete(IOrder order) throws ServiceException, ObjectNotFoundException;
+
+  boolean isPurchaseApprovalRequired(IOrder order) throws ServiceException, ObjectNotFoundException;
 
   boolean isTransferApprovalComplete(IOrder order);
 

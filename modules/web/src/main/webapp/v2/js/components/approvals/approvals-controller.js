@@ -50,6 +50,7 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
             }
             ordService.fetchPrimaryApprovers(orderId).then(function (data) {
                 $scope.approval.approvers = data.data;
+                $scope.checkApprover();
             }).catch(function (errorMsg) {
                 $scope.showErrorMsg(errorMsg);
             }).finally(function () {
