@@ -235,7 +235,7 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
     if (IOrder.PURCHASE_ORDER == order.getOrderType()) {
       if (!order.isVisibleToVendor()) {
         approvalType = IOrder.PURCHASE_ORDER;
-      } else {
+      } else if(order.getServicingKiosk() != null) {
         approvalType = IOrder.SALES_ORDER;
       }
     } else if (IOrder.SALES_ORDER == order.getOrderType()) {

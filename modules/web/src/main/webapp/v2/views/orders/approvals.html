@@ -174,8 +174,7 @@
                             <span ng-show="item.status.status == 'cn'">Cancelled</span>
                             <span ng-show="item.status.status == 'ap'">Approved</span>
                             <span ng-show="item.status.status == 'ex'">Expired</span>
-                            <span class="litetext"
-                                  style="display: block;">{{item.status.updated_at | formatDate:this }}</span>
+                            <span class="litetext">{{item.status.updated_at | formatDate:this }}</span>
                                 <span class="litetext" ng-if="item.status.status == 'pn'">Expiry: <span
                                         class="c-red">{{item.expires_at | fromNow:this}}</span></span></td>
                         <td ng-click="toggle($index)"><a
@@ -183,19 +182,17 @@
                             <span class="litetext">{{item.created_at | formatDate:this}}</span></td>
                         <td ng-click="toggle($index)">
                                 <span ng-show="'pn' == item.status.status">
-                                    <span class="litetext-head">Sent to:</span>
-                                    <span ng-repeat="it in item.approvers" style="display:inline-block;">
-                                    <a ng-hide="$index == item.approvers.length - 1"
-                                       href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}},&nbsp;</a>
-                                    <a ng-show="$index == item.approvers.length - 1"
-                                       href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a>
-                                </span>
+                                    <span class="litetext">Sent to:</span>
+                                    <span ng-repeat="it in item.approvers">
+                                    <span ng-hide="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a>,&nbsp;</span>
+                                    <span ng-show="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a></span>
+                                    </span>
                                 </span>
                                 <span ng-show="item.status.status == 'ex'">
                                     None
                                 </span>
                                 <span ng-show="item.status.status == 'rj' || item.status.status == 'cn' ||  item.status.status == 'ap'">
-                                    {{item.status.name}}
+                                    <a href="#/setup/users/all/details?userId={{item.status.updated_by}}">{{item.status.name}}</a>
                                 </span>
                         </td>
                     </tr>

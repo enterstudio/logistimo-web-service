@@ -104,7 +104,8 @@ public class ApprovalsBuilder {
   }
 
   public CreateApprovalRequest buildApprovalRequest(IOrder order, String msg, String userId,
-                                                    List<Approver> approverList) {
+                                                    List<Approver> approverList,
+                                                    ApprovalType approvalType) {
     CreateApprovalRequest request = new CreateApprovalRequest();
     request.setType("order");
     request.setTypeId(order.getIdString());
@@ -113,6 +114,8 @@ public class ApprovalsBuilder {
     Map<String, String> attributes = new HashMap<>(2);
     attributes.put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getKioskId()));
     attributes.put(ApprovalConstants.ATTRIBUTE_ORDER_TYPE, String.valueOf(order.getOrderType()));
+    attributes
+        .put(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE, String.valueOf(approvalType.getValue()));
     request.setAttributes(attributes);
     request.setMessage(msg);
     request.setRequesterId(userId);
@@ -150,9 +153,13 @@ public class ApprovalsBuilder {
     statusModel.setUpdatedAt(approvalResponse.getUpdatedAt());
     model.setStatus(statusModel);
     model.setActiveApproverType(approvalResponse.getActiveApproverType());
-    model.setApprovalType(ApprovalType.get(
-        approvalsDao.getApprovalType(Long.valueOf(approvalResponse.getTypeId()),
-            model.getId())));
+    String
+        approvalType =
+        approvalResponse.getAttributes().get(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE);
+    if (approvalType != null) {
+      model.setApprovalType(ApprovalType.get(
+          Integer.parseInt(approvalType)));
+    }
     model.setApprovers(buildApproversModel(approvalResponse, usersService));
     model.setConversationId(approvalResponse.getConversationId());
     model.setStatusUpdatedBy(buildRequestorModel(approvalResponse.getUpdatedBy(), approvalResponse.getApprovalId()));
@@ -236,16 +243,17 @@ public class ApprovalsBuilder {
     List<ApproverModel> approverModels = new ArrayList<>(1);
     Set<ApproverQueue> approverQueueSet = approval.getApprovers();
     for (ApproverQueue queue : approverQueueSet) {
-
-      ApproverModel model = new ApproverModel();
-      model.setApproverType(queue.getType());
-      try {
-        userBuilder.buildUserContactModel(queue.getUserId(), model);
-      } catch (ObjectNotFoundException e) {
-        LOGGER.info("Unable to find approver {0} defined for approval {1}", queue.getUserId(),
-            queue.getApprovalId());
+      if(queue.getApproverStatus().equals(ApprovalConstants.APPROVER_STATUS_ACTIVE)) {
+        ApproverModel model = new ApproverModel();
+        model.setApproverType(queue.getType());
+        try {
+          userBuilder.buildUserContactModel(queue.getUserId(), model);
+        } catch (ObjectNotFoundException e) {
+          LOGGER.info("Unable to find approver {0} defined for approval {1}", queue.getUserId(),
+              queue.getApprovalId());
+        }
+        approverModels.add(model);
       }
-      approverModels.add(model);
     }
     return approverModels;
   }

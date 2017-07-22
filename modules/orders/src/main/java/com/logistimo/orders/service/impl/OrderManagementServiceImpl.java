@@ -1516,7 +1516,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
               sqlQuery.append("SELECT DISTINCT RID FROM `ORDER` WHERE ID IN (").append(filterQuery)
                       .append(") AND RID LIKE '").append(id).append("%' ");
           } else if ("oid".equals(type)) {
-              sqlQuery.append("SELECT ID FROM `ORDER` WHERE ID IN(");
+            sqlQuery.append("SELECT ID FROM `ORDER` WHERE ID IN (");
               sqlQuery.append(filterQuery).append(" AND ID_OID LIKE '").append(id).append("%')");
           }
       }
@@ -1524,17 +1524,17 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       sqlQuery.append(" AND OTY = ").append(oty);
     }
     if (kioskIds != null && !kioskIds.isEmpty()) {
-      sqlQuery.append(" AND (KID IN(");
+      sqlQuery.append(" AND ((KID IN(");
       for (Long kid : kioskIds) {
         sqlQuery.append(kid).append(CharacterConstants.COMMA);
       }
       sqlQuery.setLength(sqlQuery.length() - 1);
-      sqlQuery.append(") OR SKID IN(");
+      sqlQuery.append(") AND VTC = 1) OR (SKID IN(");
       for (Long kid : kioskIds) {
         sqlQuery.append(kid).append(CharacterConstants.COMMA);
       }
       sqlQuery.setLength(sqlQuery.length() - 1);
-      sqlQuery.append("))");
+      sqlQuery.append(") AND VTV = 1))");
     }
     sqlQuery.append(CharacterConstants.SPACE);
 

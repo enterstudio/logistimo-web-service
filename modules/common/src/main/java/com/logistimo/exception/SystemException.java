@@ -23,19 +23,52 @@
 
 package com.logistimo.exception;
 
+import java.util.Locale;
+
 /**
  * Created by charan on 22/06/17.
  */
-public class SystemException extends RuntimeException {
+public class SystemException extends RuntimeException implements ExceptionWithCodes {
+
+  private final Object[] arguments;
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+  private String code;
+
   public SystemException(Exception e) {
     super(e);
+    this.arguments = new Object[0];
+  }
+
+  public SystemException(Exception e, String code, Object... arguments) {
+    super(e);
+    this.code = code;
+    this.arguments = arguments;
   }
 
   public SystemException(String message) {
     super(message);
+    this.arguments = new Object[0];
   }
 
   public SystemException(String message, Exception e) {
     super(message, e);
+    this.arguments = new Object[0];
+  }
+
+  public String getMessage() {
+    return ExceptionUtils.constructMessage(code, Locale.getDefault(), arguments);
+  }
+
+  @Override
+  public Object[] getArguments() {
+    return this.arguments;
   }
 }

@@ -68,7 +68,7 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setRequestType(Integer requestType) {
     this.requestType = requestType;
-    setAttributeKey(ApprovalConstants.ATTRIBUTE_ORDER_TYPE);
+    setAttributeKey(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE);
     setAttributeValue(Objects.toString(requestType, Constants.EMPTY));
     return this;
   }

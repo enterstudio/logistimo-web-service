@@ -90,7 +90,8 @@ public class CreateApprovalAction {
         ApprovalUtils.getApproversForOrderType(order, approvalRequestModel.getApprovalType());
 
     CreateApprovalRequest approvalRequest = builder.buildApprovalRequest(order,
-        approvalRequestModel.getMessage(), approvalRequestModel.getRequesterId(), approvers);
+        approvalRequestModel.getMessage(), approvalRequestModel.getRequesterId(), approvers,
+        approvalRequestModel.getApprovalType());
 
     return createApproval(approvalRequest, approvalRequestModel.getApprovalType());
 
