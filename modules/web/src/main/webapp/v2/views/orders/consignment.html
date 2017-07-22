@@ -158,7 +158,7 @@
                                 </div>
                             </div>
                             <div ng-show="edit.mat && order.atv && isAllocating">
-                                <a ng-disabled="(item.atpstk == 0 && item.astk == 0) || item.q == item.sq" ng-show="item.isBa" ng-click="select($index,'show');hidePop(item,$index,true,true)" class="btn btn-sm btn-primary">{{resourceBundle['allocate.batch']}}</a>
+                                <a ng-disabled="(item.atpstk == 0 && item.astk == 0) || item.q == item.sq || exRow[$index]" ng-show="item.isBa" ng-click="select($index,'show');hidePop(item,$index,true,true)" class="btn btn-sm btn-primary">{{resourceBundle['allocate.batch']}}</a>
                                 <input ng-if="!item.isBa" class="form-control" type="text" only-digits ng-model="item.nastk"
                                        id="a{{item.id}}{{$index}}"
                                        ng-disabled="(item.atpstk == 0 && item.astk == 0) || item.q == item.sq"
