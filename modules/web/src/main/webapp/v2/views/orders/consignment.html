@@ -320,7 +320,7 @@
                         </td>
                     </tr>
                     </tbody>
-                    <tr ng-show="edit.mat && order.alc" ng-controller="orders.MaterialController">
+                    <tr ng-show="edit.mat && order.alc && !isAllocating" ng-controller="orders.MaterialController">
                         <td colspan="2">
                             <div class="form-group has-feedback">
                                 <input type="text"
