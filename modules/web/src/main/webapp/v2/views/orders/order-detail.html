@@ -37,10 +37,6 @@
                             </span>
                         </span>
                         <span class="badge currentstatus" ng-class="{'cancelled':order.st == ORDER.CANCELLED}">{{order.status}}</span>
-                        <div ng-show="order.appr && aprMsg" class="tooltip-wrapper" uib-tooltip="Approvers are not configured." tooltip-placement="right" style="display: inline-block">
-                            <button type="button" class="btn btn-sm btn-primary pr left-5" disabled>Request approval</button>
-                        </div>
-                        <button ng-show="order.appr && !aprMsg" type="button" class="btn btn-sm btn-primary pr left-5" ng-click="openApproval()">Request approval</button>
                         <div>
                             <span class="litetext lnk" ng-show="!edit.rid && (order.st == ORDER.PENDING || order.st == ORDER.CONFIRMED || order.st == ORDER.BACKORDERED)">{{order.rid? resourceBundle['referenceid'] + ": " + order.rid : "Add " + resourceBundle['referenceid'] }} </span>
                             <span class="litetext lnk" ng-show="order.rid && !(order.st == ORDER.PENDING || order.st == ORDER.CONFIRMED || order.st == ORDER.BACKORDERED)">{{order.rid? resourceBundle['referenceid'] + ": " + order.rid : "Add " + resourceBundle['referenceid'] }} </span>
@@ -56,7 +52,7 @@
                                 </div>
                                 <a ng-show="!edit.rid && (dp.vp || order.st == ORDER.PENDING || order.st == ORDER.CONFIRMED || order.st == ORDER.BACKORDERED)"
                                    uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true" ng-click="editRID()">
-                                    <span class="glyphicons glyphicons-edit pt2 ml15"></span>
+                                    <span ng-show="editPermission" class="glyphicons glyphicons-edit pt2 ml15"></span>
                                 </a>
                             </div>
                         </div>
@@ -104,7 +100,7 @@
                         <div ng-logi-tags tgs="order.tgs" style="border-radius: 10px;"></div>
                         <span ng-show="isUndef(order.tgs)" class="dinline cbx control-label">Add order tags</span>
                         <a uib-tooltip="Edit" ng-click="editTags()" tooltip-append-to-body="true">
-                            <span ng-hide="dp.vp" class="ml15 glyphicons glyphicons-edit cbx"></span>
+                            <span ng-hide="dp.vp || !editPermission" class="ml15 glyphicons glyphicons-edit cbx"></span>
                         </a>
                     </span>
                     <span ng-hide="!edit.otags">
@@ -127,6 +123,13 @@
                 <div class="col-sm-12">
                     <div ng-init=" type = 'c'; dName = order.enm; lt = order.lt; ln = order.ln; lklt = order.elt; lkln = order.eln; mtype = 'o'; accuracy = order.ac;"
                          ng-include="'views/transactions/view-map.html'"></div>
+                </div>
+            </div>
+            <div class="row mt10" ng-repeat="item in order.approvalTypesModels">
+                <div class="col-sm-12">
+                    <div ng-init="order = order; type = item.type ; id = item.id; count = item.count"
+                         ng-include="'views/orders/approval-detail.html'">
+                    </div>
                 </div>
             </div>
             <div class="row mt10" ng-show="!order.appr">
@@ -157,7 +160,7 @@
                                         </li>
                                     </ul>
                                     <span class="lPad5">
-                                        <button type="button" ng-show="hasStatus('cm')" class="btn btn-sm btn-primary" ng-click="changeStatus('cm')">{{resourceBundle['ship']}}
+                                        <button type="button" ng-show="hasStatus('cm') && shipPermission" class="btn btn-sm btn-primary" ng-click="changeStatus('cm')">{{resourceBundle['ship']}}
                                              </button>
                                           <button type="button" ng-show="hasStatus('fl')" class="btn btn-sm btn-primary" ng-click="changeStatus('fl')">{{resourceBundle['fulfill']}}
                                              </button>

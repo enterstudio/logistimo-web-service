@@ -24,6 +24,7 @@
 package com.logistimo.domains.utils;
 
 import com.logistimo.AppFactory;
+import com.logistimo.constants.MethodNameConstants;
 import com.logistimo.domains.ICrossDomain;
 import com.logistimo.domains.IMultiDomain;
 import com.logistimo.domains.IOverlappedDomain;
@@ -32,10 +33,9 @@ import com.logistimo.domains.ISuperDomain;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-import com.logistimo.constants.MethodNameConstants;
-import com.logistimo.logger.XLog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -172,26 +172,13 @@ public class DomainsUtil {
     return domainIds;
   }
 
-  // Add or remove domains Ids belonging to the entity
-        /*
-        private static void addOrRemoveEntityDomains( boolean add, MultiDomainTransaction object ) throws ServiceException {
-		xLogger.fine( "Entered addOrRemoveEntitysDomains" );
-		Long kioskId = object.getKioskId();
-		AccountsService as = Services.getService( AccountsServiceImpl.class );
-		List<Long> domainIds = as.getKiosk( kioskId, false ).getDomainIds();
-		if ( domainIds != null && !domainIds.isEmpty() ) {
-			Iterator<Long> it = domainIds.iterator();
-			while ( it.hasNext() ) {
-				Long dId = it.next();
-				if ( add )
-					object.setDomainId( dId );
-				else
-					object.removeDomainId( dId );
-			}
-		}
-		xLogger.fine( "Exiting addOrRemoveEntitysDomains" );
-	}
-	*/
+  public static List<Long> getVisibleDomains(Long domainId, int linkType) throws ServiceException {
+    List<Long> domainIds =  getLinkedDomains(domainId, linkType);
+    if(!domainIds.contains(domainId)) {
+      domainIds.add(domainId);
+    }
+    return domainIds;
+  }
 
   // Get domains to add to or remove from for a given type of multidomain object
   private static List<Long> getMultiDomainIds(IMultiDomain object) throws ServiceException {

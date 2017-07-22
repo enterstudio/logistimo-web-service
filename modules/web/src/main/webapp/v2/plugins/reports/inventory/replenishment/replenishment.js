@@ -210,7 +210,7 @@ registerWidget('ir', 'rpt-replenishment', 'Inventory', 'Replenishment response t
                     $scope.dtableHeading.push($scope.cOptions.caption);
                 }
                 $scope.dtableData = getReportTableData(cData, cLabel);
-                $scope.swapData($scope.dtableHeading,$scope.dtableData);
+                $scope.swapData($scope.dtableHeading, $scope.dtableData);
                 $scope.dtableDataLength = Object.keys($scope.dtableData).length;
                 $scope.dcOptions = angular.copy($scope.cOptions);
                 if(cLabel.length > 10) {
@@ -239,7 +239,7 @@ registerWidget('ir', 'rpt-replenishment', 'Inventory', 'Replenishment response t
                     $scope.tableHeading.push($scope.cOptions.caption);
                 }
                 $scope.tableData = getReportTableData(cData, cLabel,$scope.getReportDateFormat());
-                $scope.swapData($scope.tableHeading,$scope.tableData);
+                $scope.swapData($scope.tableHeading, $scope.tableData);
                 $scope.tableDataLength = Object.keys($scope.tableData).length;
             }
 

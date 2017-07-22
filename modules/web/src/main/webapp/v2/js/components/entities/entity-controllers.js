@@ -1096,17 +1096,17 @@ entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route'
         };
         $scope.setMapObj = function (results,isInitLoad) {
             if(results.length == 1) {
-                var center = results[0].geometry.location;
-                $scope.lmap = {center: {latitude: center.lat(), longitude: center.lng()}, zoom: 8};
-                $scope.entity.lt = center.lat();
-                $scope.entity.ln = center.lng();
-                var latlngs = [{latitude: center.lat(), longitude: center.lng(), id:0, options : {title:results[0].formatted_address + '\n(' + center.lat() +', '+center.lng() +')' , draggable: true}}];
+                var center = trimGeo(results[0].geometry.location);
+                $scope.lmap = {center: {latitude: center.ltt, longitude: center.lgt}, zoom: 8};
+                $scope.entity.lt = center.ltt;
+                $scope.entity.ln = center.lgt;
+                var latlngs = [{latitude: center.ltt, longitude: center.lgt, id:0, options : {title:results[0].formatted_address + '\n(' + center.ltt +', '+center.lgt +')' , draggable: true}}];
             } else {
                 $scope.lmap = angular.copy($scope.map);
                 latlngs = [];
                 for(var i=0;i<results.length;i++){
-                    var loc = results[i].geometry.location;
-                    latlngs.push({latitude:loc.lat(),longitude: loc.lng(), id:i, options : {title:results[i].formatted_address + '\n(' + loc.lat() +', '+loc.lng() +')' , draggable: true}});
+                    var loc = trimGeo(results[i].geometry.location);
+                    latlngs.push({latitude:loc.ltt,longitude: loc.lgt, id:i, options : {title:results[i].formatted_address + '\n(' + loc.ltt +', '+loc.lgt +')' , draggable: true}});
                 }
             }
             $scope.lmap.markers = latlngs;
@@ -1137,8 +1137,8 @@ entityControllers.controller('AddEntController', ['$scope', '$uibModal','$route'
                     return;
                 }
             }
-            var pos = marker.getPosition();
-            $scope.setMarker(pos.lat(),pos.lng());
+            var pos = trimGeo(marker.getPosition());
+            $scope.setMarker(pos.ltt,pos.lgt);
         };
 
         $scope.getGeoCodes = function () {
@@ -1694,32 +1694,17 @@ entityControllers.controller('RelationAddController', ['$scope', 'entityService'
             });
         }
     };
-    $scope.searchEntity = function() {
-        $scope.loading = true;
-        $scope.showLoading();
-        entityService.getAll($scope.offset, $scope.size,null,$scope.enm).then(function(data) {
-            $scope.entities = data.data.results.length > 0 ? data.data.results : undefined;
-            $scope.filtered = angular.copy($scope.entities);
-            $scope.selAll = false;
-            $scope.setResults(data.data);
-            $scope.setLink();
-        }).catch(function error(msg) {
-            $scope.setResults(null);
-            $scope.showErrorMsg(msg);
-        }).finally(function() {
-            $scope.loading = false;
-            $scope.hideLoading();
-        });
-    };
     $scope.resetLinks = function () {
         $scope.filtered = angular.copy($scope.entities);
         $scope.setLink();
         $scope.loading = false;
+        $scope.enm = undefined;
+        $scope.eTag = undefined;
     };
     $scope.fetch = function () {
         $scope.loading = true;
         $scope.showLoading();
-        entityService.getAll($scope.offset, $scope.size).then(function (data) {
+        entityService.getAll($scope.offset, $scope.size, $scope.tag, null, null, null, $scope.linkedEntityId).then(function (data) {
             $scope.entities = data.data.results;
             $scope.filtered = angular.copy($scope.entities);
             $scope.setResults(data.data);
@@ -1743,6 +1728,34 @@ entityControllers.controller('RelationAddController', ['$scope', 'entityService'
                 item['selected'] = newval;
             }
         });
+    };
+    $scope.$watch("enm", function(newVal, oldVal) {
+        if(newVal != oldVal) {
+            if(checkNullEmpty(newVal)) {
+                $scope.linkedEntityId = undefined;
+                $scope.offset = 0;
+            } else {
+                $scope.linkedEntityId = $scope.enm.id;
+                $scope.eTag = $scope.tag = undefined;
+            }
+            $scope.fetch();
+        }
+    });
+    $scope.$watch("eTag", function (newVal, oldVal) {
+       if(newVal != oldVal) {
+           if(checkNullEmpty(newVal)) {
+               $scope.tag = undefined;
+               $scope.offset = 0;
+           } else {
+               $scope.tag = $scope.eTag;
+               $scope.enm = $scope.linkedEntityId = undefined;
+           }
+           $scope.fetch();
+       }
+    });
+    $scope.resetFilter = function() {
+        $scope.enm = undefined;
+        $scope.eTag = undefined;
     };
     $scope.addEntityLinks = function (linkIds) {
         if(checkNullEmpty($scope.entityLinks)) {
@@ -1804,22 +1817,24 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
     $scope.getCustomers = function () {
         $scope.showLoading();
         setPageParams();
-        entityService.getCustomers($scope.entityId,size,offset, $scope.searchkey).then(function (data) {
+        entityService.getCustomers($scope.entityId,size,offset, $scope.searchkey, $scope.linkedEntityId, $scope.entityTag).then(function (data) {
             setData(data.data);
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
         }).finally(function(){
+            searchCount = 0;
             $scope.hideLoading();
         });
     };
     $scope.getVendors = function () {
         $scope.showLoading();
         setPageParams();
-        entityService.getVendors($scope.entityId,size,offset,$scope.searchkey).then(function (data) {
+        entityService.getVendors($scope.entityId,size,offset,$scope.searchkey, $scope.linkedEntityId, $scope.entityTag).then(function (data) {
             setData(data.data);
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
         }).finally(function(){
+            searchCount = 0;
             $scope.hideLoading();
         });
     };
@@ -1925,10 +1940,18 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
 
     $scope.getKioskLinkCounts = function() {
         $scope.showLoading();
-        entityService.getLinksCount($scope.entityId,$scope.searchkey).then(function (data) {
+        entityService.getLinksCount($scope.entityId,$scope.searchkey,$scope.linkedEntityId,$scope.entityTag).then(function (data) {
             var counts = data.data.replace(/"/g, "").split(",");
-            $scope.customerCount = counts[0];
-            $scope.vendorCount = counts[1];
+            if(checkNullEmpty($scope.entityTag) && checkNullEmpty($scope.linkedEntityId)) {
+                $scope.customerCount = counts[0];
+                $scope.vendorCount = counts[1];
+            } else if(checkNotNullEmpty($scope.linkedEntityId) || checkNotNullEmpty($scope.entityTag)) {
+                if($scope.linkType == 'c') {
+                    $scope.customerCount = counts[0];
+                } else if($scope.linkType == 'v') {
+                    $scope.vendorCount = counts[1];
+                }
+            }
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
         }).finally(function(){
@@ -1944,6 +1967,8 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
         }
         $scope.offset = 0;
         offset = 0;
+        $scope.ent = $scope.linkedEntityId = undefined;
+        $scope.eTag = $scope.entityTag = undefined;
     };
     $scope.fetch = function() {
         $scope.hideDeleteRel = false;
@@ -2014,6 +2039,35 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
             $scope.vw = sourceVw;
         }
     };
+    var searchCount = 0;
+    $scope.$watch("ent", function(newVal, oldVal) {
+        if(newVal != oldVal) {
+            if(checkNullEmpty(newVal)) {
+                $scope.linkedEntityId = undefined;
+                offset = 0;
+            } else {
+                $scope.linkedEntityId = newVal.id;
+                $scope.eTag = $scope.entityTag = undefined;
+            }
+            searchCustomerVendor();
+        }
+    });
+    $scope.$watch("eTag", function(newVal, oldVal) {
+        if(newVal != oldVal) {
+            if(checkNullEmpty(newVal)) {
+                $scope.entityTag = undefined;
+                offset = 0;
+            } else {
+                $scope.entityTag = newVal;
+                $scope.ent = $scope.linkedEntityId = undefined;
+            }
+            searchCustomerVendor();
+        }
+    });
+    function searchCustomerVendor(){
+        searchCount++;
+        $scope.searchEntity();
+    }
     $scope.searchEntity = function() {
         $scope.rData = undefined;
         if ( checkNullEmpty($scope.searchkey) ) {
@@ -2022,12 +2076,14 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
         } else {
             $scope.hideReorder = true;
         }
-        if( $scope.linkType == 'c' ) {
-            $scope.getCustomers();
-        } else {
-            $scope.getVendors();
+        if(searchCount < 2) {
+            if ($scope.linkType == 'c') {
+                $scope.getCustomers();
+            } else {
+                $scope.getVendors();
+            }
+            $scope.getKioskLinkCounts();
         }
-        $scope.getKioskLinkCounts();
     };
     $scope.goToDetail = function(nv){
         $window.open("#/setup/entities/detail/" + nv.id,'_blank');
@@ -2076,12 +2132,15 @@ entityControllers.controller('EntityApproversController',['$scope','entityServic
         };
 
         function validateApprovers() {
-            if($scope.ipa && (checkNullEmpty($scope.eapr.pap) || $scope.eapr.pap.length == 0)){
+            if($scope.ipa && (checkNullEmpty($scope.eapr.pap))) {
                 $scope.showWarning("Primary approvers not configured for purchases order.");
                 $scope.continue = false;
-            } else if($scope.isa && (checkNullEmpty($scope.eapr.pas) || $scope.eapr.pas.length == 0)){
-                $scope.showWarning("Primary approvers not configured for sales order.");
+                return;
+            }
+            if($scope.isa && (checkNullEmpty($scope.eapr.pas))) {
+                $scope.showWarning("Primary approvers are not configured for sales order.");
                 $scope.continue = false;
+                return;
             }
         }
 
@@ -2117,7 +2176,7 @@ entityControllers.controller('EntityApproversController',['$scope','entityServic
                     });
                 }
             }
-        };
+        }
     }]);
 
 entityControllers.controller('RelationPermissionController',['$scope','entityService',

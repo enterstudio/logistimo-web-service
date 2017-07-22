@@ -156,6 +156,8 @@ public class ConfigurationModelsBuilder {
       model.dnm = domain.getName();
       model.dId = domain.getId();
       model.lng = userAccount.getLanguage();
+      model.locale = userAccount.getLocale().toLanguageTag();
+      model.utz = userAccount.getTimezone();
       model.em = userAccount.getEmail();
       if (userAccount.getDomainId().equals(domainId)) {
         model.eid = userAccount.getPrimaryKiosk();

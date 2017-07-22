@@ -79,7 +79,6 @@ import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.utils.ConfigUtil;
-import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.Counter;
@@ -95,8 +94,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -184,7 +181,7 @@ public class InventoryController {
                       ReportsConstants.FREQ_DAILY, filters,
                       locale, timezone, pageParams, dc, userId);
           results = new Results(reportData.getResults(), null);
-        }else {
+        } else {
           results =
               ims.getInventory(domainId, entityId, null, null, null, null, tag, matType, onlyNZStk, pdos,
                   null, pageParams);

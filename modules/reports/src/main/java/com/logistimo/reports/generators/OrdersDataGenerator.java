@@ -32,16 +32,15 @@ import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.QueryParams;
+import com.logistimo.pagination.Results;
 import com.logistimo.reports.ReportsConstants;
+import com.logistimo.services.Services;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.QueryParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.services.Services;
 
 import java.util.Date;
 import java.util.List;
@@ -98,7 +97,7 @@ public class OrdersDataGenerator implements ReportDataGenerator {
       Results
           or =
           oms.getOrders(domainId, kioskId, status, from, until, otype, tagType, tag, kioskIds,
-              pageParams, null, null);
+              pageParams, null, null, null);
       od = new OrdersData(from, null, filters, locale, timezone, or.getResults(), or.getCursor());
     } catch (Exception e) {
       throw new ReportingDataException(e.getMessage());

@@ -1,55 +1,55 @@
 /*
- * Copyright © 2017 Logistimo.
- *
- * This file is part of Logistimo.
- *
- * Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
- * low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
- * for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
- * <http://www.gnu.org/licenses/>.
- *
- * You can be released from the requirements of the license by purchasing a commercial license. To know more about
- * the commercial license, please contact us at opensource@logistimo.com
- */
+* Copyright © 2017 Logistimo.
+*
+* This file is part of Logistimo.
+*
+* Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+* low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+*
+* This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+* Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+* later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+* for more details.
+*
+* You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+* <http://www.gnu.org/licenses/>.
+*
+* You can be released from the requirements of the license by purchasing a commercial license. To know more about
+* the commercial license, please contact us at opensource@logistimo.com
+*/
 
 package com.logistimo.api.builders;
 
 import com.logistimo.AppFactory;
-import com.logistimo.customreports.CustomReportConstants;
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.services.blobstore.BlobInfo;
-import com.logistimo.services.blobstore.BlobstoreService;
-
-import org.apache.commons.lang.StringUtils;
+import com.logistimo.api.constants.ConfigConstants;
+import com.logistimo.api.controllers.DomainConfigController;
+import com.logistimo.api.models.UserModel;
+import com.logistimo.api.models.configuration.CustomReportsConfigModel;
+import com.logistimo.api.models.configuration.NotificationsModel;
 import com.logistimo.config.models.CustomReportsConfig;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.customreports.CustomReportConstants;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.entity.IUploaded;
+import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.UploadService;
+import com.logistimo.services.blobstore.BlobInfo;
+import com.logistimo.services.blobstore.BlobstoreService;
 import com.logistimo.services.impl.UploadServiceImpl;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.LocalDateUtil;
-import com.logistimo.utils.NumberUtil;
-import com.logistimo.logger.XLog;
-import com.logistimo.api.controllers.DomainConfigController;
-import com.logistimo.api.constants.ConfigConstants;
-import com.logistimo.api.models.UserModel;
-import com.logistimo.api.models.configuration.CustomReportsConfigModel;
-import com.logistimo.api.models.configuration.NotificationsModel;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.NumberUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;

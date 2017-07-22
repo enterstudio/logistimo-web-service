@@ -30,6 +30,7 @@ import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.QueryConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.models.LocationSuggestionModel;
@@ -54,8 +55,10 @@ import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.mnltransactions.entity.IMnlTransaction;
 import com.logistimo.models.orders.DiscrepancyModel;
+import com.logistimo.orders.actions.GetFilteredOrdersQueryAction;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.models.DiscrepancyExportableModel;
+import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
@@ -334,6 +337,15 @@ public class BulkExportMgr {
       return transDao.buildTransactionsQuery(from, to, domainId, kioskId, materialId,
           trnType != null ? Collections.singletonList(trnType) : null, lkIdParam, eTags, mTag,
           kioskIds, batchIdStr, hasAtd, reason, null);
+    } else if (TYPE_ORDERS.equals(type)) {
+      return StaticApplicationContext.getBean(GetFilteredOrdersQueryAction.class).invoke(
+          new OrderFilters()
+              .setDomainId(domainId)
+              .setKioskId(kioskId)
+              .setStatus(orderStatus)
+              .setOtype(oType)
+              .setUserId(sourceUserId)
+              .setOrderType(Integer.parseInt(spTransfer)));
     }
     // Form query params.
     StringBuilder queryStr = new StringBuilder();
@@ -366,24 +378,7 @@ public class BulkExportMgr {
       paramsStr += "Long dIdParam";
       params.put("dIdParam", domainId);
     }
-    // Object-specific query
-    if (TYPE_ORDERS.equals(type)) {
-      queryStr = new StringBuilder(
-          QueryConstants.SELECT + QueryConstants.FROM + JDOUtils.getImplClass(IOrder.class).getName() + QueryConstants.WHERE + queryStr.toString());
-      // Order status, if any
-      if (orderStatus != null && !orderStatus.isEmpty()) {
-        queryStr.append(" && st == stParam");
-        paramsStr += ",String stParam";
-        params.put("stParam", orderStatus);
-      }
-
-      queryStr.append(" && oty == otParam");
-      paramsStr += ",Long otParam";
-      params.put("otParam", Integer.parseInt(spTransfer));
-
-      dateField = "cOn";
-      orderingStr = "ORDER BY cOn DESC";
-    } else if (TYPE_MATERIALS.equals(type)) {
+    if (TYPE_MATERIALS.equals(type)) {
       queryStr = new StringBuilder(
           QueryConstants.SELECT + QueryConstants.FROM  + JDOUtils.getImplClass(IMaterial.class).getName() + QueryConstants.WHERE
               + queryStr.toString());

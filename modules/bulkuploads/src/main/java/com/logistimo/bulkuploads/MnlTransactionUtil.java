@@ -26,11 +26,16 @@ package com.logistimo.bulkuploads;
 import com.logistimo.AppFactory;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.entity.IUploaded;
+import com.logistimo.entity.IUploadedMsgLog;
+import com.logistimo.events.entity.IEvent;
 import com.logistimo.inventory.dao.ITransDao;
 import com.logistimo.inventory.dao.impl.TransDao;
 import com.logistimo.inventory.entity.IInvntry;
@@ -38,39 +43,33 @@ import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.mnltransactions.entity.IMnlTransaction;
 import com.logistimo.orders.OrderResults;
-import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
-import com.logistimo.services.blobstore.BlobstoreService;
-import com.logistimo.shipments.service.IShipmentService;
-import com.logistimo.shipments.service.impl.ShipmentService;
-
-import com.logistimo.events.entity.IEvent;
-import com.logistimo.entity.IUploaded;
-import com.logistimo.entity.IUploadedMsgLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.UploadService;
+import com.logistimo.services.blobstore.BlobstoreService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.UploadServiceImpl;
+import com.logistimo.shipments.service.IShipmentService;
+import com.logistimo.shipments.service.impl.ShipmentService;
 import com.logistimo.tags.dao.TagDao;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.NumberUtil;
 import com.logistimo.utils.QueryUtil;
-import com.logistimo.constants.SourceConstants;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.logger.XLog;
 
 import org.springframework.util.StringUtils;
 
@@ -163,8 +162,10 @@ public class MnlTransactionUtil {
         }
         if (order.getServicingKiosk() != null) {
           // Mark order as shipped
-          String shipmentId = oms.shipNow(order, null, null, null, null, userId, null,SourceConstants.UPLOAD);
-          shipmentService.fulfillShipment(shipmentId, userId,SourceConstants.UPLOAD);
+          String
+              shipmentId =
+              oms.shipNow(order, null, null, null, null, userId, null, SourceConstants.UPLOAD);
+          shipmentService.fulfillShipment(shipmentId, userId, SourceConstants.UPLOAD);
         }
       } else {
         //Cancel order.. no fulfilled quantities.
@@ -199,9 +200,8 @@ public class MnlTransactionUtil {
     // Form the text to be appended
     String
         lineMsg =
-        BulkUploadMgr.getErrorMessageString(offset, csvLine, ec.operation, ec.getMessages());
+        BulkUploadMgr.getErrorMessageString(offset, csvLine, ec.operation, ec.getMessages(), ec.getMessagesCount());
     // Create an UploadedMsgLog
-    //Key parentKey = KeyFactory.createKey( Uploaded.class.getSimpleName(), uploadedKey );
     IUploadedMsgLog entity = JDOUtils.createInstance(IUploadedMsgLog.class);
 
     try {

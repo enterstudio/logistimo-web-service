@@ -39,7 +39,9 @@ import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.UserDisabledException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
+import com.netflix.hystrix.exception.HystrixBadRequestException;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -66,6 +68,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler({InvalidServiceException.class})
   protected ResponseEntity<Object> handleInvalidServiceRequest(RuntimeException e,
                                                                WebRequest request) {
+    logWarning(request, e);
     ErrorResource error = new ErrorResource("[Internal Server Error]", e.getMessage());
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -75,7 +78,13 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler({UnauthorizedException.class})
   protected ResponseEntity<Object> handleUnauthorizedRequest(RuntimeException e,
                                                              WebRequest request) {
-    ErrorResource error = new ErrorResource("[Unauthorized]", e.getMessage());
+    logWarning(request, e);
+    String message = e.getMessage();
+    if (StringUtils.isBlank(message)) {
+      message = LogiException.constructMessage("G002",
+          getLocale(), null);
+    }
+    ErrorResource error = new ErrorResource("[Unauthorized]", message);
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, ((UnauthorizedException) e).getCode(),
@@ -95,7 +104,8 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler({BadRequestException.class, BadCredentialsException.class})
-  protected ResponseEntity<Object> handleBadRequest(RuntimeException e, WebRequest request) {
+  protected ResponseEntity<Object> handleBadRequest(Exception e, WebRequest request) {
+    logWarning(request, e);
     ErrorResource error = new ErrorResource("[Bad Request]", e.getMessage());
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -117,9 +127,12 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler({ObjectNotFoundException.class})
   protected ResponseEntity<Object> handleObjectNotFoundException(ObjectNotFoundException e,
                                                                  WebRequest request) {
+    logWarning(request, e);
     ErrorResource
         error =
-        new ErrorResource("[Not found]", e.getLocalisedMessage(getLocale()));
+        new ErrorResource(StringUtils.isNotBlank(e.getCode()) ? e.getCode() : "[Not found]",
+            e.getLocalisedMessage(
+                getLocale()));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.NOT_FOUND, request);
@@ -131,6 +144,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
   }
 
   private ResponseEntity<Object> handleBadRequest(ValidationException e, WebRequest request) {
+    logWarning(request, e);
     ErrorResource
         error =
         new ErrorResource("[Bad Request]", e.getLocalisedMessage(getLocale()));
@@ -147,13 +161,35 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     }
   }
 
+  @ExceptionHandler({HystrixBadRequestException.class})
+  protected ResponseEntity<Object> handleBadRequest(HystrixBadRequestException e, WebRequest request) {
+    logWarning(request, e);
+    String message = e.getMessage();
+    String code = "[Bad Request]";
+    int statusCode = 400;
+    if(e.getCause() instanceof LogiException){
+      message = e.getCause().getMessage();
+      code = ((LogiException) e.getCause()).getCode();
+      statusCode = ((LogiException) e.getCause()).getStatusCode();
+      //409 is used in Logi to reload when domain Id changes, hence changing it.
+      if (statusCode == 409 || statusCode == 0) {
+        statusCode = 400;
+      }
+
+    }
+    ErrorResource
+        error =
+        new ErrorResource(code, message);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return handleExceptionInternal(e, error, headers, HttpStatus.valueOf(statusCode), request);
+  }
+
   @ExceptionHandler({ServiceException.class, SystemException.class, Exception.class})
   @Order(Ordered.LOWEST_PRECEDENCE)
   protected ResponseEntity<Object> handleServiceException(Exception e,
                                                           WebRequest request) {
-
-    XLOGGER.severe("{2}: {0} failed for user {1}", request.getContextPath(),
-        SecurityUtils.getUserDetails(), e);
+    log(request, e);
     ErrorResource
         error =
         new ErrorResource("[System error]", LogiException.constructMessage("G001",
@@ -161,6 +197,24 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
+  }
+
+  private void log(WebRequest request, Throwable throwable) {
+    try {
+      XLOGGER.severe("{2}: {0} failed for user {1}", request.getContextPath(),
+          SecurityUtils.getUserDetails(), throwable);
+    } catch (UnauthorizedException uae) {
+      //ignored;
+    }
+  }
+
+  private void logWarning(WebRequest request, Throwable throwable) {
+    try {
+      XLOGGER.warn("{2}: {0} failed for user {1}", request.getContextPath(),
+          SecurityUtils.getUserDetails(), throwable);
+    } catch (UnauthorizedException uae) {
+      //ignored;
+    }
   }
 
 }

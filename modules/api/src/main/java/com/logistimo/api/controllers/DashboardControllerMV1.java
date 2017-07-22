@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -193,7 +194,7 @@ public class DashboardControllerMV1 {
     //preparing the model
     details =
         MobileInvDashboardBuilder
-            .buildInvDetailDashboard(invTyRes, invAlRes, alstRes, locty, groupby);
+            .buildInvDetailDashboard(invTyRes, invAlRes, alstRes, paramModel.locty, groupby);
     //adding loc level in response
     if (StringUtils.isBlank(loc) && paramModel.state == null) {
       details.level = COUNTRY_LOWER;
@@ -217,8 +218,9 @@ public class DashboardControllerMV1 {
                                        @RequestParam(required = false) String tPeriod,
                                        @RequestParam(required = false) String aType,
                                        @RequestParam(required = false) String excludeETag,
+                                       @RequestParam(required = false) String includeETag,
                                        @RequestParam(required = false, defaultValue = "false")
-                                       Boolean refresh) {
+                                       Boolean refresh) throws SQLException {
     MainDashboardModel model;
     Long domainId = SecurityUtils.getCurrentDomainId();
     MemcacheService cache = AppFactory.get().getMemcacheService();
@@ -235,14 +237,14 @@ public class DashboardControllerMV1 {
     DashQueryModel
         queryModel =
         new DashQueryModel(country, state, district, excludeETag, filter, tPeriod, domainId, aType,
-            level);
+            level, includeETag);
     String cacheKey = buildCacheKey(queryModel);
     cacheKey += "_AD";
     if (!refresh) {
       model = (MainDashboardModel) cache.get(cacheKey);
       if (model != null) {
         return model;
-      }
+    }
     }
     Map<String, String> filters = buildQueryFilters(queryModel);
     level = queryModel.locty;
@@ -254,32 +256,24 @@ public class DashboardControllerMV1 {
     } else {
       colFilter = STATE;
     }
-    try {
-      IDashboardService ds = Services.getService(DashboardService.class);
-      ResultSet tempRes = ds.getMainDashboardResults(domainId, filters, "temperature");
-      DashboardBuilder builder = new DashboardBuilder();
-      model =
-          builder
-              .getMainDashBoardData(null, null, null, null, tempRes, null, colFilter);
-      if (StringUtils.isBlank(filter) && queryModel.state == null) {
-        model.mLev = COUNTRY_LOWER;
-      } else if (StringUtils.isBlank(filter) && queryModel.district == null) {
-        model.mLev = STATE_LOWER;
-      } else {
-        model.mLev = level != null ? level : DISTRICT_LOWER;
-      }
-      try {
-        if (cache != null) {
-          cache.put(cacheKey, model, 1800); // 30 min expiry
-        }
-      } catch (Exception e) {
-        xLogger.warn("Error in caching dashboard data", e);
-      }
-      return model;
-    } catch (Exception e) {
-      xLogger.warn("Error while fetching asset dashboard for domain: {0}", domainId, e);
-      throw new InvalidServiceException(e);
+    IDashboardService ds = Services.getService(DashboardService.class);
+    ResultSet tempRes = ds.getMainDashboardResults(domainId, filters, "temperature");
+    DashboardBuilder builder = new DashboardBuilder();
+    model =
+        builder
+            .getMainDashBoardData(null, null, null, null, tempRes, null, colFilter);
+    if (StringUtils.isBlank(filter) && queryModel.state == null) {
+      model.mLev = COUNTRY_LOWER;
+    } else if (StringUtils.isBlank(filter) && queryModel.district == null) {
+      model.mLev = STATE_LOWER;
+    } else {
+      model.mLev = level != null ? level : DISTRICT_LOWER;
     }
+
+    if (cache != null) {
+      cache.put(cacheKey, model, 1800); // 30 min expiry
+    }
+    return model;
   }
 
 

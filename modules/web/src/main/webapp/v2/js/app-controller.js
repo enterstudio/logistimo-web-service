@@ -337,6 +337,7 @@
                 $scope.isDmdOnly = null;
                 $scope.headerImage = null;
                 $scope.mailId = null;
+                $scope.userTz = null;
                 $scope.defaultEntityId = null;
                 $scope.defaultCurrency = null;
                 $scope.dcntry = null;
@@ -447,6 +448,7 @@
                     $scope.mailId = details.em;
                     $scope.defaultEntityId = details.eid;
                     $scope.curUserName = details.ufn;
+                    $scope.userTz = details.tz;
                     if(checkNotNullEmpty(promiseHandle)){
                         promiseHandle.resolve(true);
                     }
@@ -700,7 +702,13 @@
                 } else {
                     $location.path('/setup/entities/detail/'+$scope.defaultEntityId + "/");
                 }
-            }
+            };
+            $scope.formatDate = function (date) {
+                return momentFormat(date, $scope.dc.utz, $scope.dc.locale);
+            };
+            $scope.fromNow = function (date) {
+                return momentFromNow(date, $scope.dc.utz, $scope.dc.locale);
+            };
             /*$rootScope.getReportsMenu = function(){
                 return reportMenus;
             };*/

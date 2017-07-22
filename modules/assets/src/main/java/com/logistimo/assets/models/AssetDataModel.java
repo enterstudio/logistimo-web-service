@@ -30,5 +30,5 @@ import java.util.List;
  */
 
 public class AssetDataModel {
-    public List<AssetDeviceModel> data;
+  public List<AssetDeviceModel> data;
 }

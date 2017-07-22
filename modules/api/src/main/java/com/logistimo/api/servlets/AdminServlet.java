@@ -28,7 +28,6 @@ package com.logistimo.api.servlets;
 
 import com.logistimo.AppFactory;
 import com.logistimo.auth.SecurityConstants;
-import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
@@ -41,9 +40,6 @@ import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.processor.DeleteProcessor;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.service.EntitiesService;
-import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.entity.IBBoard;
 import com.logistimo.entity.IDownloaded;
 import com.logistimo.entity.IUploaded;
@@ -57,9 +53,7 @@ import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.optimization.entity.IOptimizerLog;
 import com.logistimo.inventory.pagination.processor.InventoryResetProcessor;
 import com.logistimo.logger.XLog;
-import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.mnltransactions.entity.IMnlTransaction;
-import com.logistimo.models.ICounter;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
@@ -69,17 +63,13 @@ import com.logistimo.pagination.QueryParams;
 import com.logistimo.reports.entity.slices.IDaySlice;
 import com.logistimo.reports.entity.slices.IMonthSlice;
 import com.logistimo.services.Services;
-import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.Counter;
 import com.logistimo.utils.HttpUtil;
 import com.logistimo.utils.LocalDateUtil;
-
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -93,7 +83,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -118,16 +107,12 @@ public class AdminServlet extends HttpServlet {
   private static final String DOMAIN_PARAM = "domainid";
 
   // Actions
-  private static final String ACTION_RESETCACHECOUNT = "resetcachecount";
-  private static final String ACTION_RESETCOUNT = "resetcount";
-  private static final String ACTION_ADDCOUNT = "addcount";
   private static final String ACTION_RESETTRANSACTIONS = "resettransactions";
   private static final String ACTION_DELETEENTITIES = "deleteentities";
   private static final String ACTION_DELETEENTITIESBYQUERY = "deleteentitiesbyquery";
   private static final String ACTION_DELETESESSIONS = "deletesessions";
   private static final String ACTION_GETSYSCONFIG = "getsysconfig";
   private static final String ACTION_UPDATESYSCONFIG = "updatesysconfig";
-  private static final String ACTION_BACKUPDATA = "backupdata";
 
   // URLs
   private static final String URL_PROD = "https://logistimo-web.appspot.com";
@@ -147,164 +132,6 @@ public class AdminServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
 
   private static ITaskService taskService = AppFactory.get().getTaskService();
-
-  // Reset a given count in cache
-  private static void resetCacheCount(HttpServletRequest req) throws IOException {
-    xLogger.fine("Entered resetCacheCount");
-    String key = req.getParameter("key");
-    String value = req.getParameter("value");
-    if (StringUtils.isNotEmpty(key)) {
-      MemcacheService memcache = AppFactory.get().getMemcacheService();
-      if (memcache != null) {
-        if (StringUtils.isNotEmpty(value)) {
-          try {
-            memcache.put(key, new Integer(value));
-          } catch (NumberFormatException e) {
-            xLogger.severe("Invalid number " + value);
-          }
-        } else if (!memcache.delete(key)) {
-          xLogger.warn("Unable to delete key {0} from memcache", key);
-        }
-      }
-    } else {
-      xLogger.warn("No key or value supplied");
-    }
-    xLogger.fine("Exiting resetCacheCount");
-  }
-
-  // Reset a counter, both in cache and persistent database
-  private static void resetCount(HttpServletRequest req) {
-    xLogger.fine("Entered resetCount");
-    String domainIdStr = req.getParameter(DOMAIN_PARAM);
-    String key = req.getParameter("key");
-    String kind = req.getParameter("kind");
-    Long domainId = null;
-    if (domainIdStr != null && !domainIdStr.isEmpty()) {
-      domainId = Long.valueOf(domainIdStr);
-    } else {
-      xLogger.severe("Domain ID is missing");
-      return;
-    }
-    if ((key == null || key.isEmpty()) && (kind == null || kind.isEmpty())) {
-      xLogger.severe("Either key or kind must be present");
-      return;
-    }
-    if (key != null && !key.isEmpty()) {
-      // Get the counter
-      ICounter c = Counter.getInstance(domainId, key);
-      c.delete();
-      return;
-    }
-    // Reset all counters of the given kind
-    resetKindCounters(domainId, kind);
-    xLogger.fine("Exiting resetCount");
-  }
-
-  // Reset the kind counter
-  @SuppressWarnings("unchecked")
-  private static void resetKindCounters(Long domainId, String kind) {
-    xLogger.fine("Entered resetKindCounter");
-    // Get all the kiosks
-    EntitiesService as = null;
-    try {
-      as = Services.getService(EntitiesServiceImpl.class);
-    } catch (Exception e) {
-      xLogger.severe(
-          "{0} when getting AccountsService in resetKindCounters() for domainId {1}, kind {2}: {3}",
-          e.getClass().getName(), domainId, kind, e.getMessage());
-      return;
-    }
-    List<IKiosk> kiosks = as.getAllKiosks(domainId, null, null, null).getResults();
-    // Material counters
-    if (JDOUtils.getImplClass(IMaterial.class).getSimpleName().equals(kind)) {
-      // Reset the material counter
-      try {
-        Counter.getMaterialCounter(domainId, null).delete();
-      } catch (Exception e) {
-        xLogger
-            .warn("{0} when removing domain-wide material counter with domainId {1}, kind {2}: {3}",
-                e.getClass().getName(), domainId, kind, e.getMessage());
-      }
-    } else if (JDOUtils.getImplClass(IOrder.class).getSimpleName().equals(kind)) { // Order counters
-      // Remove domain-wide order counter
-      try {
-        Counter.getOrderCounter(domainId, null,null).delete();
-      } catch (Exception e) {
-        xLogger.warn("{0} when removing domain-wide order for domainId {1}: {2}",
-            e.getClass().getName(), domainId, e.getMessage());
-      }
-      // Remove kiosk-specific order counters (by otype)
-      if (kiosks != null) {
-        Iterator<IKiosk> it = kiosks.iterator();
-        while (it.hasNext()) {
-          IKiosk k = it.next();
-          // Remove purchase order counter
-          try {
-            Counter.getOrderCounter(domainId, k.getKioskId(), IOrder.TYPE_PURCHASE, null).delete();
-          } catch (Exception e) {
-            xLogger.warn(
-                "{0} when removing kiosk-specific purchase orders for domainId {1}, kiosk {2}: {3}",
-                e.getClass().getName(), domainId, k.getKioskId(), e.getMessage());
-          }
-          // Remove sales order counter
-          try {
-            Counter.getOrderCounter(domainId, k.getKioskId(), IOrder.TYPE_SALE, null).delete();
-          } catch (Exception e) {
-            xLogger.warn(
-                "{0} when removing kiosk-specific sales orders for domainId {1}, kiosk {2}: {3}",
-                e.getClass().getName(), domainId, k.getKioskId(), e.getMessage());
-          }
-        }
-      }
-    } else if (JDOUtils.getImplClass(IUserAccount.class).getSimpleName().equals(kind)) {
-      try {
-        Counter.getUserCounter(domainId).delete();
-      } catch (Exception e) {
-        xLogger.warn("{0} when removing user counter for domainId {1}: {2}", e.getClass().getName(),
-            domainId, e.getMessage());
-      }
-    } else if (JDOUtils.getImplClass(IKiosk.class).getSimpleName().equals(kind)) {
-      try {
-        Counter.getKioskCounter(domainId).delete();
-      } catch (Exception e) {
-        xLogger
-            .warn("{0} when removing kiosk counter for domainId {1}: {2}", e.getClass().getName(),
-                domainId, e.getMessage());
-      }
-    } else {
-      try {
-        Counter.getInstance(domainId, kind).delete();
-      } catch (Exception e) {
-        xLogger.warn("{0} when removing counter for domainId {1}, kind {2}: {3}",
-            e.getClass().getName(), domainId, kind, e.getMessage());
-      }
-    }
-
-    xLogger.fine("Exiting resetKindCounter");
-  }
-
-  // Add a given count to the counter
-  private static void addCount(HttpServletRequest req) {
-    xLogger.fine("Entered addCount");
-    String domainIdStr = req.getParameter(DOMAIN_PARAM);
-    String key = req.getParameter("key");
-    String valueStr = req.getParameter("value");
-    Long domainId = null;
-    if (domainIdStr != null && !domainIdStr.isEmpty()) {
-      domainId = Long.valueOf(domainIdStr);
-    } else {
-      xLogger.severe("Domain ID is missing");
-      return;
-    }
-    if (key == null || key.isEmpty() || valueStr == null || valueStr.isEmpty()) {
-      xLogger.severe("Key and/or value must be present");
-      return;
-    }
-    int value = Integer.parseInt(valueStr);
-    // Get the counter and increment
-    Counter.getInstance(domainId, key).increment(value);
-    xLogger.fine("Exiting addCount");
-  }
 
   // Add a given count to the counter
   private static void resetDomainTransactions(HttpServletRequest req) {
@@ -565,70 +392,12 @@ public class AdminServlet extends HttpServlet {
     xLogger.fine("Exiting deleteSessions");
   }
 
-  // Backup data store
-  private static void backupData(HttpServletRequest req) {
-    xLogger.fine("Entered backupData");
-    String name = req.getParameter("name");
-    String bucketName = req.getParameter("bucket");
-    boolean verifyOnly = req.getParameter("verifyonly") != null;
-    boolean force = req.getParameter("force") != null;
-    String appName = SecurityMgr.getApplicationName();
-    xLogger.info("App: {0}", appName);
-    // Do not backup, if its the dev. server
-    if (!force && (appName == null || !appName.equals(PROD_APP_NAME))) {
-      xLogger.warn("Not prod. server. Not backing up anything. Goodbye!");
-      return;
-    }
-    if (name == null || name.isEmpty()) {
-      name = "BackupToCloud";
-    }
-    if (bucketName == null || bucketName.isEmpty()) {
-      bucketName = appName + ".appspot.com";
-    }
-    // Form the URL by getting all the classes
-    //String backupUrl = "http://" + req.getServerName() + ( SecurityManager.isDevServer() ? ":" + req.getServerPort() : "" ) + URL_BACKUPDATA;
-    String backupUrl = URL_BACKUPDATA;
-    backupUrl += "?name=" + name + "&filesystem=gs&gs_bucket_name=" + bucketName;
-    List<String> doNotBackup = Arrays.asList(DO_NOT_BACKUP_LIST);
-    //TODO Charan Backup.. Not required in SQL I suppose..
-    backupUrl = AppFactory.get().getBackendService().getBackupURL(backupUrl, doNotBackup);
-
-    xLogger.info("BACKUP URL: {0}", backupUrl);
-    if (verifyOnly) {
-      return; // DO not perform the actual backup
-    }
-    try {
-      taskService.schedule(ITaskService.QUEUE_DEFAULT, backupUrl, null, ITaskService.METHOD_GET);
-                        /*
-                        URL url = new URL( backupUrl );
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-            String line;
-            while ((line = reader.readLine()) != null)
-                xLogger.info( line );
-            reader.close();
-            */
-    } catch (Exception e) {
-      xLogger.severe("{0} when invoking backup URL {1}: {2}", e.getClass().getName(), backupUrl,
-          e.getMessage(), e);
-    }
-    xLogger.fine("Exiting backupData");
-                /*
-                 * old cron url:     <url>/_ah/datastore_admin/backup.create?name=BackupToCloud&amp;kind=ALog&amp;kind=Account&amp;kind=BBoard&amp;kind=Conig&amp;kind=DemandItem&amp;kind=DemandItemBatch&amp;kind=Domain&amp;kind=Event&amp;kind=Invntry&amp;kind=InvntryBatch&amp;kind=InvntryEvntLog&amp;kind=InvntryLog&amp;kind=Kiosk&amp;kind=KioskLink&amp;kind=KioskToPoolGroup&amp;kind=Material&amp;kind=Media&amp;kind=MessageLog&amp;kind=OptimizerLog&amp;kind=Order&amp;kind=OrderQuantityLog&amp;kind=PoolGroup&amp;kind=ShardedCounter&amp;kind=Tag&amp;kind=Transaction&amp;kind=Transporter&amp;kind=UserAccount&amp;kind=UserToKiosk&amp;filesystem=gs&amp;gs_bucket_name=logistimo-web.appspot.com</url>
-		 */
-  }
-
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
     xLogger.fine("Entered doGet");
     String action = req.getParameter("action");
-    if (ACTION_RESETCACHECOUNT.equals(action)) {
-      resetCacheCount(req);
-    } else if (ACTION_RESETCOUNT.equals(action)) {
-      resetCount(req);
-    } else if (ACTION_ADDCOUNT.equals(action)) {
-      addCount(req);
-    } else if (ACTION_RESETTRANSACTIONS.equals(action)) {
+    if (ACTION_RESETTRANSACTIONS.equals(action)) {
       resetDomainTransactions(req);
     } else if (ACTION_DELETEENTITIES.equals(action)) {
       deleteEntitiesByDate(req);
@@ -638,8 +407,6 @@ public class AdminServlet extends HttpServlet {
       updateSysConfig(req, resp);
     } else if (ACTION_DELETEENTITIESBYQUERY.equals(action)) {
       deleteEntitiesByQuery(req);
-    } else if (ACTION_BACKUPDATA.equals(action)) {
-      backupData(req);
     } else {
       xLogger.severe("Invalid action: {0}", action);
     }

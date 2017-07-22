@@ -42,8 +42,6 @@ public class MobileEntityBuilder {
 
   /**
    * Builds a list of approver models for an entity as required by the mobile from a list of IApporver objects
-   * @param approversList
-   * @return
    */
   public MobileEntityApproversModel buildApproversModel(List<IApprovers> approversList) {
     if (approversList == null || approversList.isEmpty()) {
@@ -73,22 +71,26 @@ public class MobileEntityBuilder {
     if (pap.isEmpty() && pas.isEmpty() && sap.isEmpty() && sas.isEmpty()) {
       return null;
     }
-    MobileEntityApproversModel  mobileEntityApproversModel = new MobileEntityApproversModel();
+    MobileEntityApproversModel mobileEntityApproversModel = new MobileEntityApproversModel();
     MobileUserBuilder mobileUserBuilder = new MobileUserBuilder();
     UsersService us = Services.getService(UsersServiceImpl.class);
     if (!pap.isEmpty() || !sap.isEmpty()) {
       MobileApproversModel mobileApproversModel = new MobileApproversModel();
-      mobileApproversModel.prm = mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(
-          us, pap));
-      mobileApproversModel.scn = mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(
-          us, sap));
+      mobileApproversModel.prm =
+          mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(
+              us, pap));
+      mobileApproversModel.scn =
+          mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(
+              us, sap));
       mobileEntityApproversModel.prc = mobileApproversModel;
     }
     if (!pas.isEmpty() || !sas.isEmpty()) {
       MobileApproversModel mobileApproversModel = new MobileApproversModel();
-      mobileApproversModel.prm = mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(
-          us, pas));
-      mobileApproversModel.scn = mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(us, sas));
+      mobileApproversModel.prm =
+          mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(
+              us, pas));
+      mobileApproversModel.scn =
+          mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(us, sas));
       mobileEntityApproversModel.sle = mobileApproversModel;
     }
     return mobileEntityApproversModel;

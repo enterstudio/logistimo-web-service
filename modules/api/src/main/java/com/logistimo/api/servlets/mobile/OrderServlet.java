@@ -46,6 +46,7 @@ import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
@@ -118,7 +119,7 @@ public class OrderServlet extends JsonRestServlet {
 
   public void processGet(HttpServletRequest req, HttpServletResponse resp,
                          ResourceBundle backendMessages, ResourceBundle messages)
-      throws IOException, ServiceException {
+      throws IOException, ServiceException, ValidationException {
     xLogger.fine("OrderServlet: Entering doGet");
     String action = req.getParameter(RestConstantsZ.ACTION);
     if (RestConstantsZ.ACTION_GETORDERS.equals(action)) {
@@ -148,7 +149,7 @@ public class OrderServlet extends JsonRestServlet {
 
   public void processPost(HttpServletRequest req, HttpServletResponse resp,
                           ResourceBundle backendMessages, ResourceBundle messages)
-      throws IOException, ServiceException {
+      throws IOException, ServiceException, ValidationException {
     String action = req.getParameter(RestConstantsZ.ACTION);
     if (RestConstantsZ.ACTION_UPDATEORDERSTATUS.equals(action)) {
       updateOrderStatus(req, resp, backendMessages, messages);
@@ -436,7 +437,7 @@ public class OrderServlet extends JsonRestServlet {
           Results
               res =
               oms.getOrders(domainId, kioskId, statusStr, startDate, endDate, otype, null, null,
-                  null, pageParams, orderType, null, loadAll);
+                  null, pageParams, orderType, null, null, loadAll);
           if (res != null) {
             orders = res.getResults();
           }
@@ -610,7 +611,6 @@ public class OrderServlet extends JsonRestServlet {
             } else {
               order = getOrder(orderId);
             }
-
 
 
           }
@@ -1045,7 +1045,7 @@ public class OrderServlet extends JsonRestServlet {
   @SuppressWarnings("rawtypes")
   private void updateOrderStatusOld(HttpServletRequest req, HttpServletResponse resp,
                                     ResourceBundle backendMessages, ResourceBundle messages)
-      throws IOException {
+      throws IOException, ValidationException {
     xLogger.fine("Entered updateOrderStatusOld");
     // Get request parameters
     String userId = req.getParameter(RestConstantsZ.USER_ID);

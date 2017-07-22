@@ -23,17 +23,18 @@
 
 package com.logistimo.orders.dao.impl;
 
-import com.logistimo.orders.dao.OrderUpdateStatus;
+import com.logistimo.constants.CharacterConstants;
 import com.logistimo.exception.LogiException;
+import com.logistimo.logger.XLog;
 import com.logistimo.orders.dao.IOrderDao;
+import com.logistimo.orders.dao.OrderUpdateStatus;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.Order;
-import com.logistimo.tags.TagUtil;
-
 import com.logistimo.services.impl.PMF;
+import com.logistimo.tags.TagUtil;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.logger.XLog;
+
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import javax.jdo.Query;
 /**
  * Created by charan on 03/03/15.
  */
+@Repository
 public class OrderDao implements IOrderDao {
 
   private static final XLog xlogger = XLog.getLog(OrderDao.class);
@@ -61,10 +63,10 @@ public class OrderDao implements IOrderDao {
   }
 
   @Override
-  public IOrder getOrder(IOrder order) {
+  public IOrder getOrder(Long orderId) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
-      return getOrder(order, pm);
+      return getOrder(orderId, pm);
     } finally {
       pm.close();
     }
@@ -72,14 +74,14 @@ public class OrderDao implements IOrderDao {
   }
 
   @Override
-  public IOrder getOrder(IOrder order, PersistenceManager persistenceManager) {
-    return persistenceManager.getObjectById(Order.class, ((Order) order).getId());
+  public IOrder getOrder(Long orderId, PersistenceManager persistenceManager) {
+    return persistenceManager.getObjectById(Order.class, orderId);
   }
 
   @Override
   public OrderUpdateStatus update(IOrder order, PersistenceManager pm) throws LogiException {
     // Get the order with specified ID
-    IOrder o = getOrder(order, pm);
+    IOrder o = getOrder(order.getOrderId(), pm);
     // Check if status has changed
     String oldStatus = o.getStatus();
     String newStatus = order.getStatus();
@@ -122,8 +124,6 @@ public class OrderDao implements IOrderDao {
               +
               " ORDER BY ord.ID ASC limit " + offset + CharacterConstants.COMMA + size;
       params.add(cutoffDate);
-      //params.add(String.valueOf(offset));
-      //params.add(String.valueOf(size));
       pm = PMF.get().getPersistenceManager();
       query = pm.newQuery("javax.jdo.query.SQL", squery);
       query.setClass(Order.class);

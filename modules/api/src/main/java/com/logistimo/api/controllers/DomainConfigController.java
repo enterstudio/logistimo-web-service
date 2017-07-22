@@ -1747,30 +1747,31 @@ public class DomainConfigController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-    }
-    try {
-      Date startDate = null, endDate = null;
-      if (StringUtils.isNotEmpty(start)) {
-        try {
-          startDate = LocalDateUtil.parseCustom(start, Constants.DATE_FORMAT, dc.getTimezone());
-        } catch (Exception e) {
-          xLogger.warn("Exception when parsing start date " + start, e);
         }
-      }
-      if (StringUtils.isNotEmpty(end)) {
         try {
-          endDate = LocalDateUtil.parseCustom(end, Constants.DATE_FORMAT, dc.getTimezone());
-        } catch (Exception e) {
-          xLogger.warn("Exception when parsing start date " + end, e);
-        }
-      }
+          Date startDate = null, endDate = null;
+          if (StringUtils.isNotEmpty(start)) {
+            try {
+              startDate = LocalDateUtil.parseCustom(start, Constants.DATE_FORMAT, dc.getTimezone());
+            } catch (Exception e) {
+              xLogger.warn("Exception when parsing start date " + start, e);
+            }
+          }
+          if (StringUtils.isNotEmpty(end)) {
+            try {
+              endDate = LocalDateUtil.parseCustom(end, Constants.DATE_FORMAT, dc.getTimezone());
+            } catch (Exception e) {
+              xLogger.warn("Exception when parsing start date " + end, e);
+            }
+          }
 
-      results = MessageUtil.getNotifactionLogs(domainId, startDate, endDate, pageParams);
-      navigator.setResultParams(results);
-    } catch (MessageHandlingException e) {
-      xLogger.warn("Error in building message status", e);
-      throw new InvalidServiceException(backendMessages.getString("message.status.build.error"));
-    }
+          results = MessageUtil.getNotifactionLogs(domainId, startDate, endDate, pageParams);
+          navigator.setResultParams(results);
+        } catch (MessageHandlingException e) {
+          xLogger.warn("Error in building message status", e);
+          throw new InvalidServiceException(
+              backendMessages.getString("message.status.build.error"));
+        }
     String timezone = sUser.getTimezone();
     UsersService as;
     as = Services.getService(UsersServiceImpl.class, locale);
@@ -2305,7 +2306,8 @@ public class DomainConfigController {
       xLogger.severe("{0} when scheduling task for custom report export of {1}: {2}",
           e.getClass().getName(), name, e.getMessage());
       throw new InvalidTaskException(
-          e.getClass().getName() + " " + backendMessages.getString("customreports.schedule.export")
+          e.getClass().getName() + " " + backendMessages
+              .getString("customreports.schedule.export")
               + " " + name);
     }
     if (jobId != null) {
@@ -2323,12 +2325,18 @@ public class DomainConfigController {
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
     ReportsConfig rConfig = ReportsConfig.getInstance(domainId);
     Map<String, List<String>> filters = new HashMap<String, List<String>>(6);
-    filters.put(ReportsConstants.FILTER_COUNTRY, rConfig.getFilterValues(ReportsConstants.FILTER_COUNTRY));
-    filters.put(ReportsConstants.FILTER_STATE, rConfig.getFilterValues(ReportsConstants.FILTER_STATE));
-    filters.put(ReportsConstants.FILTER_DISTRICT, rConfig.getFilterValues(ReportsConstants.FILTER_DISTRICT));
-    filters.put(ReportsConstants.FILTER_TALUK, rConfig.getFilterValues(ReportsConstants.FILTER_TALUK));
-    filters.put(ReportsConstants.FILTER_CITY, rConfig.getFilterValues(ReportsConstants.FILTER_CITY));
-    filters.put(ReportsConstants.FILTER_PINCODE, rConfig.getFilterValues(ReportsConstants.FILTER_PINCODE));
+    filters.put(ReportsConstants.FILTER_COUNTRY,
+        rConfig.getFilterValues(ReportsConstants.FILTER_COUNTRY));
+    filters
+        .put(ReportsConstants.FILTER_STATE, rConfig.getFilterValues(ReportsConstants.FILTER_STATE));
+    filters.put(ReportsConstants.FILTER_DISTRICT,
+        rConfig.getFilterValues(ReportsConstants.FILTER_DISTRICT));
+    filters
+        .put(ReportsConstants.FILTER_TALUK, rConfig.getFilterValues(ReportsConstants.FILTER_TALUK));
+    filters
+        .put(ReportsConstants.FILTER_CITY, rConfig.getFilterValues(ReportsConstants.FILTER_CITY));
+    filters.put(ReportsConstants.FILTER_PINCODE,
+        rConfig.getFilterValues(ReportsConstants.FILTER_PINCODE));
     return filters;
   }
 
@@ -2412,8 +2420,8 @@ public class DomainConfigController {
     }
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
-    try{
-      if(domainId == null) {
+    try {
+      if (domainId == null) {
         xLogger.severe("Error in updating Approvals configuration");
         throw new InvalidServiceException(
             "Error in updating Approvals configuration");
@@ -2469,8 +2477,8 @@ public class DomainConfigController {
     DomainConfig dc = DomainConfig.getInstance(domainId);
     ApprovalsConfig ac = dc.getApprovalsConfig();
     UsersService as = Services.getService(UsersServiceImpl.class, locale);
-    try{
-      return builder.buildApprovalsConfigModel(ac,as,domainId,locale,sUser.getTimezone());
+    try {
+      return builder.buildApprovalsConfigModel(ac, as, domainId, locale, sUser.getTimezone());
     } catch (Exception e) {
       xLogger.severe("Error in fetching Approval configuration", e);
       throw new InvalidServiceException("Error in fetching Approvals configuration");

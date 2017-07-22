@@ -28,27 +28,19 @@ import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.orders.approvals.models.ApprovalRequestModel;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.validations.Validator;
+
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
 /**
  * Created by charan on 22/06/17.
  */
-public class OrderApprovalStatusValidator implements Validator {
+@Component
+public class OrderApprovalStatusValidator {
 
-  private final ApprovalRequestModel approvalRequestModel;
-  private final IOrder order;
-  private final Locale locale;
-
-  public OrderApprovalStatusValidator(ApprovalRequestModel approvalRequestModel, IOrder order,
-                                      Locale locale) {
-    this.approvalRequestModel = approvalRequestModel;
-    this.order = order;
-    this.locale = locale;
-  }
-
-  public void validate() throws ValidationException {
+  public void validate(ApprovalRequestModel approvalRequestModel, IOrder order,
+                       Locale locale) throws ValidationException {
     ApprovalType approvalType = approvalRequestModel.getApprovalType();
     if (ApprovalType.PURCHASE_ORDER.equals(approvalType)) {
       if (!(order.getStatus().equals(IOrder.PENDING) || order.getStatus()
@@ -79,6 +71,5 @@ public class OrderApprovalStatusValidator implements Validator {
     } else {
       throw new ValidationException("OA004", approvalType);
     }
-
   }
 }

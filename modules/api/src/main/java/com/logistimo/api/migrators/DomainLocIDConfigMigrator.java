@@ -28,22 +28,19 @@ import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
-import com.logistimo.constants.LocationConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
-import com.logistimo.locations.LocationServiceUtil;
+import com.logistimo.locations.client.LocationClient;
+import com.logistimo.locations.model.LocationResponseModel;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DomainLocIDConfigMigrator {
 
@@ -87,7 +84,7 @@ public class DomainLocIDConfigMigrator {
       try {
         updateLocId((IDomain) domainObj);
       } catch (Exception e) {
-        xlogger.warn("Issue with domain location config update {}", ((IDomain) domainObj).getId());
+        xlogger.warn("Issue with domain location config update {0}", ((IDomain) domainObj).getId());
       }
     }
   }
@@ -95,48 +92,38 @@ public class DomainLocIDConfigMigrator {
 
   private void updateLocId(IDomain domain) throws ServiceException {
     DomainConfig domainConfig = DomainConfig.getInstance(domain.getId());
-    Map<String, Object> map = prepareParam(domainConfig);
-    //call location service to get country id, state id and district id
-    Map res = LocationServiceUtil.getInstance().getLocationIds(map);
-    if (res.get(LocationConstants.STATUS_TYPE_LITERAL).equals(LocationConstants.SUCCESS_LITERAL)) {
-      domainConfig.setCountryId((String) res.get(LocationConstants.COUNTRYID_LITERAL));
-      domainConfig.setStateId((String) res.get(LocationConstants.STATEID_LITERAL));
-      domainConfig.setDistrictId((String) res.get(LocationConstants.DISTID_LITERAL));
-      ConfigurationMgmtService
-          cms =
-          Services.getService(ConfigurationMgmtServiceImpl.class);
-      IConfig config;
-      try {
-        config = cms.getConfiguration(IConfig.CONFIG_PREFIX + domain.getId());
-        config.setConfig(domainConfig.toJSONSring());
-        cms.updateConfiguration(config);
-        MemcacheService cache = AppFactory.get().getMemcacheService();
-        if (cache != null) {
-          cache.put(DomainConfig.getCacheKey(domain.getId()), domainConfig);
-        }
-        xlogger.info("Location id updated for domain {0}:{1}", domain.getId(), domain.getName());
-      } catch (Exception e) {
-        xlogger.severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(),
-            domain.getName(),
-            e);
+    LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
+    try {
+      LocationResponseModel response = client.getLocationIds(domainConfig);
+      if (null != response) {
+        domainConfig.setCountryId(response.getCountryId());
+        domainConfig.setStateId(response.getStateId());
+        domainConfig.setDistrictId(response.getDistrictId());
       }
+    } catch (Exception e) {
+      xlogger
+          .severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(), domain.getName(),
+              e);
+      throw new ServiceException(e);
     }
-  }
-
-  private Map<String, Object> prepareParam(DomainConfig dc) {
-    Map<String, Object> lcMap = new HashMap<>();
-    if (StringUtils.isNotEmpty(dc.getCountry())) {
-      lcMap.put(LocationConstants.COUNTRY_LITERAL, dc.getCountry());
+    ConfigurationMgmtService
+        cms =
+        Services.getService(ConfigurationMgmtServiceImpl.class);
+    IConfig config;
+    try {
+      config = cms.getConfiguration(IConfig.CONFIG_PREFIX + domain.getId());
+      config.setConfig(domainConfig.toJSONSring());
+      cms.updateConfiguration(config);
+      MemcacheService cache = AppFactory.get().getMemcacheService();
+      if (cache != null) {
+        cache.put(DomainConfig.getCacheKey(domain.getId()), domainConfig);
+      }
+      xlogger.info("Location id updated for domain {0}:{1}", domain.getId(), domain.getName());
+    } catch (Exception e) {
+      xlogger
+          .severe("{2}: Failed to update loc config for {0}:{1}", domain.getId(), domain.getName(),
+              e);
     }
-    if (StringUtils.isNotEmpty(dc.getState())) {
-      lcMap.put(LocationConstants.STATE_LITERAL, dc.getState());
-    }
-    if (StringUtils.isNotEmpty(dc.getDistrict())) {
-      lcMap.put(LocationConstants.DIST_LITERAL, dc.getDistrict());
-    }
-    //add app name and user name
-    lcMap.put(LocationConstants.APP_LITERAL, LocationConstants.APP_NAME);
-    lcMap.put(LocationConstants.USER_LITERAL, "migration-user");
-    return lcMap;
   }
 }
+

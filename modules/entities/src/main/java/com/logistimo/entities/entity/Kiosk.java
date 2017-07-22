@@ -1007,5 +1007,10 @@ public class Kiosk implements IKiosk {
     this.cityId = cityId;
   }
 
+  @Override
+  public String user() {
+    return this.getUpdatedBy();
+  }
+
 }
 

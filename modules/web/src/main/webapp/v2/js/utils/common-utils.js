@@ -495,3 +495,27 @@ function sortByKeyDesc(array, key) {
         return ((x > y) ? -1 : ((x < y) ? 1 : 0));
     });
 }
+
+function momentFormat(date, tz, locale) {
+    if (checkNotNullEmpty(date)) {
+        tmp = moment(date).tz(tz).locale(locale);
+        return tmp.format('L') + " " + tmp.format('LT');
+    }
+    return "";
+}
+
+
+function momentFromNow(date, tz, locale) {
+    if (checkNotNullEmpty(date)) {
+        return moment(date).tz(tz).locale(locale).fromNow();
+    }
+    return "";
+}
+
+trimGeo = function(geo) {
+    if (checkNotNullEmpty(geo)) {
+        geo.ltt = geo.lat().toFixed(8);
+        geo.lgt = geo.lng().toFixed(8);
+    }
+    return geo;
+}

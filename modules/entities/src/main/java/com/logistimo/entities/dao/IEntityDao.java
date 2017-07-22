@@ -25,7 +25,6 @@ package com.logistimo.entities.dao;
 
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IPoolGroup;
-
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 

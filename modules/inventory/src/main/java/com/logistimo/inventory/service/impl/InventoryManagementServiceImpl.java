@@ -254,7 +254,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
      */
   public IInvntry getInventory(Long kioskId, Long materialId) throws ServiceException {
     if (kioskId == null || materialId == null) {
-      throw new ServiceException("Invalid kiosk ID or material ID");
+      throw new IllegalArgumentException("Invalid kiosk ID or material ID");
     }
     IInvntry inv = null;
     PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -344,7 +344,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
   @SuppressWarnings("unchecked")
   public Results getInventoryByBatchId(Long materialId, String batchId, PageParams pageParams,
-       Long domainId, String kioskTags, String excludedKioskTags, LocationSuggestionModel location)
+                                       Long domainId, String kioskTags, String excludedKioskTags,
+                                       LocationSuggestionModel location)
       throws ServiceException {
     xLogger.fine("Entered getInventoryByBatch");
     if (materialId == null || batchId == null || batchId.isEmpty()) {
@@ -444,7 +445,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   // Get inv. batches that are expiring within a specified time
   @SuppressWarnings("unchecked")
   public Results getInventoryByBatchExpiry(Long domainId, Long materialId, Date start, Date end,
-                                           String kioskTags, String excludedKioskTags, String materialTag,
+                                           String kioskTags, String excludedKioskTags,
+                                           String materialTag,
                                            LocationSuggestionModel location,
                                            PageParams pageParams) throws ServiceException {
     xLogger.fine("Entered getInventoryByBatchExpiry");
@@ -546,7 +548,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       queryStr.append(CharacterConstants.C_BRACKET);
     }
     declaration += locationParamDeclaration.toString();
-    queryStr.append(locSubQuery.toString()+kioskVariableDeclaration + " PARAMETERS " + declaration + ordering);
+    queryStr.append(locSubQuery.toString() + kioskVariableDeclaration + " PARAMETERS " + declaration
+        + ordering);
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query q = pm.newQuery(queryStr.toString());
     if (pageParams != null) {
@@ -1905,15 +1908,20 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   private Results getInventoryByIds(Long kioskId, Long materialId, String kioskTag,
                                     String materialTag, List<Long> kioskIds, PageParams pageParams,
                                     PersistenceManager pm) throws ServiceException {
-    return invntryDao.getInventory(kioskId, materialId, kioskTag, null, materialTag, kioskIds, pageParams,
+    return invntryDao
+        .getInventory(kioskId, materialId, kioskTag, null, materialTag, kioskIds, pageParams,
         pm, null, null,IInvntry.ALL,false,null, null);
   }
 
-  public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location, String kioskTags, String excludedKioskTags, String materialTags, String pdos, PageParams params)
+  public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location,
+                                      String kioskTags, String excludedKioskTags,
+                                      String materialTags, String pdos, PageParams params)
           throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
-        return invntryDao.getInventory(null, null, kioskTags, excludedKioskTags, materialTags, null, params, pm, domainId,
+      return invntryDao
+          .getInventory(null, null, kioskTags, excludedKioskTags, materialTags, null, params, pm,
+              domainId,
                         null,IInvntry.ALL,false,location, pdos);
     } finally {
       pm.close();
@@ -2145,11 +2153,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       }
     } else if (ITransaction.TYPE_PHYSICALCOUNT.equals(transType)) {
       // Stock & Stock difference at inv. level
-      BigDecimal invQuantity = quantity;
-      BigDecimal stockDifference = quantity.subtract(in.getStock());
-      BigDecimal invATP = quantity;
-      ///if ( stockDifference != 0 )
-      ///trans.setStockDifference( stockDifference );
+      BigDecimal invQuantity;
+      BigDecimal stockDifference;
+      BigDecimal invATP;
       // Check batch presence
       if (invBatch == null && trans.hasBatch()) {
         invBatch = createInventoryBatch(trans, in);
@@ -2160,6 +2166,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
               null);
           in.setAllocatedStock(BigDecimal.ZERO);
         }
+        invQuantity = quantity;
+        stockDifference = quantity.subtract(in.getStock());
+        invATP = in.getAvailableStock().add(stockDifference);
       } else {
         if (BigUtil.lesserThan(quantity, invBatch.getAllocatedStock())) {
           clearAllocation(in.getKioskId(), in.getMaterialId(), null, null, null, trans.getBatchId(),
@@ -2168,8 +2177,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           invBatch.setAllocatedStock(BigDecimal.ZERO);
         }
         stockDifference = quantity.subtract(invBatch.getQuantity());
-        ///if ( batchStockDiff != 0F ) {
-        ///trans.setStockDifference( batchStockDiff ); // NOTE: reset the stock diff. to be that at batch level
         invBatch.setQuantity(quantity);
         invBatch.setAvailableStock(invBatch.getAvailableStock().add(stockDifference));
         invQuantity = in.getStock().add(stockDifference);
@@ -2180,8 +2187,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                   " and entity {3}", invATP, invQuantity, in.getMaterialId(), in.getKioskId());
           invATP = invQuantity;
         }
-        ///in.setStock( invQuantity ); // apply the batch-level stock difference to the main one
-        ///}
         updateInventoryBatchMetadata(invBatch, trans);
       }
       in.setStock(invQuantity);
@@ -3189,14 +3194,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     clearAllocation(kid, mid, null, null, tag, null, pm);
   }
 
-
-  private void clearAllocation(Long kid, Long mid, IInvAllocation.Type type, List<String> typeIds,
-                               String tag,
-                               String batchId) throws ServiceException {
-    clearAllocation(kid, mid, type, typeIds, tag, batchId, null);
-  }
-
-
   private void clearAllocation(Long kid, Long mid, IInvAllocation.Type type, List<String> typeIds,
                                String tag,
                                String batchId, PersistenceManager pm) throws ServiceException {
@@ -3650,7 +3647,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return true;
   }
 
-  public Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTags, String excludedKioskTags,
+  public Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTags,
+                              String excludedKioskTags,
                               Long materialId, String materialTag, int matType,
                               boolean onlyNonZeroStk, String pdos, LocationSuggestionModel location,
                               PageParams params) throws ServiceException {
@@ -3658,7 +3656,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(kioskId, materialId, kioskTags, excludedKioskTags, materialTag, kioskIds, params, pm, domainId,
+          invntryDao.getInventory(kioskId, materialId, kioskTags, excludedKioskTags, materialTag,
+              kioskIds, params, pm, domainId,
               null,matType,onlyNonZeroStk,location, pdos);
     } finally {
       pm.close();

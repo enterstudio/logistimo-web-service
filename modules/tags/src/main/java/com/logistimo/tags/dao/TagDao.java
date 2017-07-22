@@ -24,11 +24,12 @@
 package com.logistimo.tags.dao;
 
 
+import com.logistimo.logger.XLog;
+import com.logistimo.services.impl.PMF;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.tags.entity.Tag;
 
-import com.logistimo.services.impl.PMF;
-import com.logistimo.logger.XLog;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ import javax.jdo.Query;
 /**
  * Created by charan on 17/02/15.
  */
+@Repository
 public class TagDao implements ITagDao {
 
   private static final XLog xLogger = XLog.getLog(TagDao.class);

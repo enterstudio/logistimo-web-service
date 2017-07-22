@@ -24,11 +24,10 @@
 package com.logistimo.entities.entity;
 
 import com.logistimo.config.models.Permissions;
-import com.logistimo.entity.ILocationConfig;
+import com.logistimo.domains.ISuperDomain;
+import com.logistimo.entity.ILocation;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.users.entity.IUserAccount;
-
-import com.logistimo.domains.ISuperDomain;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -39,7 +38,7 @@ import java.util.Map;
 /**
  * Created by charan on 20/05/15.
  */
-public interface IKiosk extends ISuperDomain, ILocationConfig {
+public interface IKiosk extends ISuperDomain, ILocation {
   // Kiosk types
   String TYPE_RETAIL = "r";
   String TYPE_DISTRIBUTOR = "d";

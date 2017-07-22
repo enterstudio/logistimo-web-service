@@ -34,6 +34,7 @@ import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.Constants;
+import com.logistimo.entity.ILocation;
 import com.logistimo.logger.XLog;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
@@ -59,7 +60,7 @@ import java.util.Map;
  *
  * @author Arun
  */
-public class DomainConfig implements Serializable {
+public class DomainConfig implements ILocation, Serializable {
 
   // JSON Tags
   public static final String ALLOW_EMPTY_ORDERS = "empords";
@@ -280,6 +281,8 @@ public class DomainConfig implements Serializable {
   private boolean localLoginRequired = true;
 
   private int storeAppTheme = Constants.GUI_THEME_BLACK;
+
+  private String user;
 
   public DomainConfig() {
     optimizerConfig = new OptimizerConfig();
@@ -1745,4 +1748,92 @@ public class DomainConfig implements Serializable {
 
   public void setStoreAppTheme(int storeAppTheme) { this.storeAppTheme = storeAppTheme; }
 
+  @Override
+  public double getLatitude() {
+    return 0;
+  }
+
+  @Override
+  public void setLatitude(double latitude) {
+
+  }
+
+  @Override
+  public double getLongitude() {
+    return 0;
+  }
+
+  @Override
+  public void setLongitude(double longitude) {
+
+  }
+
+  @Override
+  public String getStreet() {
+    return null;
+  }
+
+  @Override
+  public void setStreet(String street) {
+
+  }
+
+  @Override
+  public String getCity() {
+    return null;
+  }
+
+  @Override
+  public void setCity(String city) {
+
+  }
+
+  @Override
+  public String getTaluk() {
+    return null;
+  }
+
+  @Override
+  public void setTaluk(String taluk) {
+
+  }
+
+  @Override
+  public String getPinCode() {
+    return null;
+  }
+
+  @Override
+  public void setPinCode(String pinCode) {
+
+  }
+
+  @Override
+  public String getTalukId() {
+    return null;
+  }
+
+  @Override
+  public void setTalukId(String talukId) {
+
+  }
+
+  @Override
+  public String getCityId() {
+    return null;
+  }
+
+  @Override
+  public void setCityId(String cityId) {
+
+  }
+
+  @Override
+  public String user() {
+    return this.user;
+  }
+
+  public void setUser(String user) {
+    this.user = user;
+  }
 }

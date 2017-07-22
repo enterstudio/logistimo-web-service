@@ -43,6 +43,9 @@ public class StatusModel {
   @SerializedName("updated_at")
   private Date updatedAt;
 
+  @SerializedName("name")
+  private String name;
+
   public String getStatus() {
     return status;
   }
@@ -73,5 +76,13 @@ public class StatusModel {
 
   public void setUpdatedAt(Date updatedAt) {
     this.updatedAt = updatedAt;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

@@ -27,7 +27,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import com.logistimo.constants.Constants;
-import com.logistimo.entity.ILocationConfig;
+import com.logistimo.entity.ILocation;
 import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.entity.ITag;
@@ -51,7 +51,7 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
-public class UserAccount implements IUserAccount, ILocationConfig {
+public class UserAccount implements IUserAccount, ILocation {
 
   // NOTE: All constants are represented as String with 3-5 chars, given that it minimizes GAE storage cost and is readable
 
@@ -1034,5 +1034,9 @@ public class UserAccount implements IUserAccount, ILocationConfig {
   @Override
   public void setStoreAppTheme(Integer theme) { this.theme = theme; }
 
+  @Override
+  public String user() {
+    return this.getUpdatedBy();
+  }
 
 }

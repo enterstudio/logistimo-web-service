@@ -45,7 +45,7 @@
     </mvc:annotation-driven>
 
     <bean id="gsonBuilder" class="com.google.gson.GsonBuilder">
-        <property name="dateFormat" value="yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"/>
+        <property name="dateFormat" value="yyyy-MM-dd'T'HH:mm:ss.SSSZ"/>
     </bean>
 
     <bean id="contextHolder" class="com.logistimo.context.StaticApplicationContext"/>

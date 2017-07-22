@@ -42,7 +42,6 @@ import com.logistimo.users.entity.IUserAccount;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 
@@ -202,7 +201,23 @@ public interface EntitiesService extends Service {
    * @param text linked kiosk name starts with
    * @return A list of KioskLink objects
    */
-  Results getKioskLinks(Long kioskId, String linkType, String routeTag, String text, PageParams pageParams)
+  Results getKioskLinks(Long kioskId, String linkType, String routeTag, String text,
+                        PageParams pageParams)
+      throws ServiceException;
+
+  /**
+   * Get the kiosk links for a given kiosk, specific type of a link and for given linked kiosk (e.g., CUSTOMER, VENDOR)
+   *
+   * @param kioskId ID of kiosk of interest
+   * @param linkType The type of link of interest (e.g. VENDOR, CUSTOMER)
+   * @param routeTag linked kiosk name starts with
+   * @param text  A list of KioskLink objects
+   * @param linkedKioskId ID of linked kiosk of interest
+   * @return A list of KioskLink objects
+   */
+  Results getKioskLinks(Long kioskId, String linkType, String routeTag, String text,
+                        PageParams pageParams, Boolean isCountOnly, Long linkedKioskId,
+                        String entityTag)
       throws ServiceException;
 
   /**
@@ -265,6 +280,7 @@ public interface EntitiesService extends Service {
    *
    * @deprecated Moved to DomainsService, but preserved here to enable backward compatibility in JSPs
    */
+  @Deprecated
   IDomain getDomain(Long domainId) throws ServiceException, ObjectNotFoundException;
 
   /**
@@ -272,6 +288,7 @@ public interface EntitiesService extends Service {
    *
    * @deprecated Moved to DomainsService, but preserved here to enable backward compatibility in JSPs
    */
+  @Deprecated
   Results getAllDomains(PageParams pageParams) throws ServiceException;
 
   Results getAllDomainKiosks(Long domainId, String tags, String excludedTags, PageParams pageParams);
@@ -384,5 +401,4 @@ public interface EntitiesService extends Service {
    */
   boolean isAnApprover(String userId, Long domainId);
 
-  void updateKioskLocationIds(IKiosk kiosk, Map<String, Object> lidMap, PersistenceManager pm) throws ServiceException;
 }

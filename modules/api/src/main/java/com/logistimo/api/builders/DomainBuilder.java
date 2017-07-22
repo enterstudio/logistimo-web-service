@@ -24,21 +24,20 @@
 package com.logistimo.api.builders;
 
 import com.logistimo.api.models.superdomains.DomainDBModel;
-import com.logistimo.auth.SecurityConstants;
-import com.logistimo.dao.JDOUtils;
-
-import com.logistimo.config.models.CapabilityConfig;
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.services.ObjectNotFoundException;
-import com.logistimo.services.ServiceException;
-import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.api.models.superdomains.DomainModel;
 import com.logistimo.api.models.superdomains.DomainPermissionModel;
-import com.logistimo.models.superdomains.DomainSuggestionModel;
+import com.logistimo.auth.SecurityConstants;
+import com.logistimo.config.models.CapabilityConfig;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.entity.IDomainPermission;
 import com.logistimo.domains.service.DomainsService;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.models.superdomains.DomainSuggestionModel;
+import com.logistimo.services.ObjectNotFoundException;
+import com.logistimo.services.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Date;

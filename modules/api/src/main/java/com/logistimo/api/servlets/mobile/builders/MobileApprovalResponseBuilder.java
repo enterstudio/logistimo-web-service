@@ -26,14 +26,16 @@ package com.logistimo.api.servlets.mobile.builders;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.orders.approvals.actions.GetOrderApprovalAction;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
-import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.proto.MobileApprovalResponse;
+import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,10 +47,11 @@ public class MobileApprovalResponseBuilder {
 
   /**
    * Build a approval response
+   *
    * @param o Order
    * @return Approval response
    */
-  public MobileApprovalResponse buildApprovalResponse(IOrder o) {
+  public MobileApprovalResponse buildApprovalResponse(IOrder o) throws ObjectNotFoundException {
     List<IOrderApprovalMapping> orderApprovalMappings = getOrderApprovalMappings(o);
     if (orderApprovalMappings == null || orderApprovalMappings.isEmpty()) {
       return null;
@@ -64,11 +67,11 @@ public class MobileApprovalResponseBuilder {
     setUserDetails(orderApprovalMapping.getUpdatedBy(), createApprovalResponse.getRequesterId(),
         response);
     response.setApprid(createApprovalResponse.getApprovalId());
-    if(createApprovalResponse.getExpireAt()!=null) {
+    if (createApprovalResponse.getExpireAt() != null) {
       response.setExpt(createApprovalResponse.getExpireAt().getTime());
     }
     response.setSt(createApprovalResponse.getStatus());
-    if(createApprovalResponse.getUpdatedAt()!=null) {
+    if (createApprovalResponse.getUpdatedAt() != null) {
       response.setT(createApprovalResponse.getUpdatedAt().getTime());
     }
     return response;
@@ -83,7 +86,7 @@ public class MobileApprovalResponseBuilder {
   private List<IOrderApprovalMapping> getOrderApprovalMappings(IOrder o) {
     Set<Long> orderIdSet = new HashSet<>(1);
     orderIdSet.add(o.getOrderId());
-    return Services.getService(OrderManagementServiceImpl.class)
+    return StaticApplicationContext.getBean(IOrderApprovalsService.class)
         .getOrdersApprovalMapping(orderIdSet, o.getOrderType());
   }
 
@@ -93,7 +96,8 @@ public class MobileApprovalResponseBuilder {
    * @param approvalId Approval Id
    * @return response
    */
-  private CreateApprovalResponse getCreateApprovalResponse(String approvalId) {
+  private CreateApprovalResponse getCreateApprovalResponse(String approvalId)
+      throws ObjectNotFoundException {
     return ((GetOrderApprovalAction) StaticApplicationContext.getApplicationContext()
         .getBean(GET_ORDER_APPROVAL_ACTION))
         .invoke(approvalId);
@@ -101,6 +105,7 @@ public class MobileApprovalResponseBuilder {
 
   /**
    * Method to fetch the approver and requester details and set the same in response
+   *
    * @param approverId  Approver Id same as updated by
    * @param requesterId Requester Id
    * @param response    Populated response
@@ -116,7 +121,8 @@ public class MobileApprovalResponseBuilder {
       if (iUserAccount.getUserId().equals(approverId)) {
         response.setArrpvrn(iUserAccount.getFullName());
         response.setArrpvr(approverId);
-      }if (iUserAccount.getUserId().equals(requesterId)) {
+      }
+      if (iUserAccount.getUserId().equals(requesterId)) {
         response.setReqrn(iUserAccount.getFullName());
         response.setReqr(requesterId);
       }

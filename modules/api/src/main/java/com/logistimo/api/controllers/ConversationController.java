@@ -265,8 +265,8 @@ public class ConversationController {
         iMessage = shipmentService.addMessage(objId, message.data, user.getUsername());
       } else if ("APPROVAL".equals(objType)) {
         ConversationService cs = Services.getService(ConversationServiceImpl.class);
-        iMessage = cs.addMsgToConversation(objType,objId,message.data, user.getUsername(),
-            Collections.singleton(objType + objId),user.getDomainId(),null);
+        iMessage = cs.addMsgToConversation(objType, objId, message.data, user.getUsername(),
+            Collections.singleton(objType + objId), user.getDomainId(), null);
       } else {
         throw new InvalidDataException("Unrecognised object type " + objType);
       }

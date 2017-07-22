@@ -379,6 +379,8 @@ public class EntityController {
   @ResponseBody
   String getLinksCountByEntityId(@PathVariable Long entityId,
                                  @RequestParam(required = false) String q,
+                                 @RequestParam(required = false) Long linkedEntityId,
+                                 @RequestParam(required = false) String entityTag,
                                  HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
@@ -390,12 +392,13 @@ public class EntityController {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      IKiosk k = as.getKiosk(entityId, false);
       PageParams pageParams = new PageParams(1);
       customerCount =
-          as.getKioskLinks(entityId, IKioskLink.TYPE_CUSTOMER, null, q, pageParams).getNumFound();
+          as.getKioskLinks(entityId, IKioskLink.TYPE_CUSTOMER, null, q, pageParams, true, linkedEntityId, entityTag)
+              .getNumFound();
       vendorsCount =
-          as.getKioskLinks(entityId, IKioskLink.TYPE_VENDOR, null, q, pageParams).getNumFound();
+          as.getKioskLinks(entityId, IKioskLink.TYPE_VENDOR, null, q, pageParams, true, linkedEntityId, entityTag)
+              .getNumFound();
     } catch (ServiceException e) {
       xLogger.warn("Error in fetching Counts for " + entityId, e);
       throw new InvalidServiceException(
@@ -443,6 +446,8 @@ public class EntityController {
                              @RequestParam(required = false) String q,
                              @RequestParam(required = false) String size,
                              @RequestParam(required = false) String offset,
+                             @RequestParam(required = false) Long linkedEntityId,
+                             @RequestParam(required = false) String entityTag,
                              HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
@@ -464,7 +469,10 @@ public class EntityController {
                 "custEntity", 0);
         pageParams = new PageParams(navigator.getCursor(o), o, s);
       }
-      Results results = as.getKioskLinks(entityId, IKioskLink.TYPE_CUSTOMER, null, q, pageParams);
+      Results
+          results =
+          as.getKioskLinks(entityId, IKioskLink.TYPE_CUSTOMER, null, q, pageParams, false, linkedEntityId,
+              entityTag);
       List customers = results.getResults();
       return new Results(builder
           .buildEntityLinks(as, customers, locale, timezone, sUser.getUsername(),
@@ -507,6 +515,8 @@ public class EntityController {
                            @RequestParam(required = false) String size,
                            @RequestParam(required = false) String offset,
                            @RequestParam(required = false) String q,
+                           @RequestParam(required = false) Long linkedEntityId,
+                           @RequestParam(required = false) String entityTag,
                            HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
@@ -516,7 +526,8 @@ public class EntityController {
     try {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       //TODO: Temporary fix. Required for Order listing on a sales order.
-      if (!EntityAuthoriser.authoriseEntityDomain(sUser, entityId, SecurityUtils.getDomainId(request))) {
+      if (!EntityAuthoriser
+          .authoriseEntityDomain(sUser, entityId, SecurityUtils.getDomainId(request))) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IKiosk k = as.getKiosk(entityId, false);
@@ -529,7 +540,9 @@ public class EntityController {
             new Navigator(request.getSession(), Constants.CURSOR_KIOSKLINKS, o, s, "custEntity", 0);
         pageParams = new PageParams(navigator.getCursor(o), o, s);
       }
-      Results results = as.getKioskLinks(entityId, IKioskLink.TYPE_VENDOR, null, q, pageParams);
+      Results
+          results =
+          as.getKioskLinks(entityId, IKioskLink.TYPE_VENDOR, null, q, pageParams, false, linkedEntityId, entityTag);
       List vendors = results.getResults();
       return new Results(builder
           .buildEntityLinks(as, vendors, locale, timezone, sUser.getUsername(),
@@ -553,6 +566,7 @@ public class EntityController {
       @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
       @RequestParam(required = false) String q,
       @RequestParam(required = false) Boolean mt,
+      @RequestParam(required = false) Long linkedEntityId,
       HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     String userId = sUser.getUsername();
@@ -571,12 +585,16 @@ public class EntityController {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       usersService = Services.getService(UsersServiceImpl.class, locale);
       IUserAccount user = usersService.getUserAccount(userId);
-      if (StringUtils.isNotBlank(q)) {
+      if (linkedEntityId == null && StringUtils.isNotBlank(q)) {
         kioskResults = SearchUtil.findKiosks(domainId, q, pageParams, user);
+      } else if(linkedEntityId != null) {
+        List<IKiosk> kiosk = new ArrayList<>();
+        kiosk.add(as.getKiosk(linkedEntityId));
+        kioskResults = new Results(kiosk, null);
       } else {
         kioskResults = as.getKiosks(user, domainId, tag, extag, pageParams);
       }
-      if (StringUtils.isBlank(q)
+      if (StringUtils.isBlank(q) && linkedEntityId == null
           && SecurityUtil.compareRoles(user.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) {
         ICounter counter = Counter.getKioskCounter(domainId, tag, extag);
         kioskResults.setNumFound(counter.getCount());

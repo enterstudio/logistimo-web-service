@@ -24,10 +24,10 @@
 package com.logistimo.approvals.client.command;
 
 import com.logistimo.approvals.client.config.Constants;
-import com.logistimo.approvals.client.exceptions.ApprovalBadRequestException;
 import com.logistimo.approvals.client.models.Approval;
-import com.logistimo.approvals.client.models.ErrorResponse;
 import com.logistimo.approvals.client.models.RestResponsePage;
+import com.logistimo.exception.ErrorResponse;
+import com.logistimo.exception.HttpBadRequestException;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
@@ -137,7 +137,7 @@ public class GetFilteredApprovalsCommand extends HystrixCommand<RestResponsePage
       return result.getBody();
     } catch (HttpClientErrorException exception) {
       throw new HystrixBadRequestException(exception.getMessage(),
-          new ApprovalBadRequestException(ErrorResponse.getErrorResponse(exception), exception));
+          new HttpBadRequestException(ErrorResponse.getErrorResponse(exception), exception));
     }
   }
 

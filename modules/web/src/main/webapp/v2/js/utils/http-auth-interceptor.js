@@ -93,7 +93,7 @@
                                     $rootScope.$broadcast('event:auth-loginRequired', rejection);
                                     return deferred.promise;
                                 case 404:
-                                    if(navigator.onLine)
+                                    if (!navigator.onLine)
                                         $rootScope.$broadcast('event:resource-notFound', rejection);
                                     break;
                                 case 403:

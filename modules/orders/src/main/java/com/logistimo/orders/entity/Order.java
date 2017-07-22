@@ -1308,17 +1308,17 @@ public class Order implements IOrder {
 
   @Override
   public boolean isTransfer() {
-    return TRANSFER_ORDER.equals(oty);
+    return TRANSFER_ORDER == oty;
   }
 
   @Override
   public boolean isSales() {
-    return SALES_ORDER.equals(oty);
+    return SALES_ORDER == oty;
   }
 
   @Override
   public boolean isPurchase() {
-    return PURCHASE_ORDER.equals(oty);
+    return PURCHASE_ORDER == oty;
   }
 
   @Override

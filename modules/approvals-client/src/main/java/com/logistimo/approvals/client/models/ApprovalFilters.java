@@ -1,5 +1,7 @@
 package com.logistimo.approvals.client.models;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by charan on 22/06/17.
  */
@@ -11,24 +13,33 @@ public class ApprovalFilters {
 
   private String type;
 
+  @SerializedName("type_id")
   private String typeId;
 
   private String status;
 
+  @SerializedName("expiring_in")
   private String expiringInMinutes;
 
+  @SerializedName("requester_id")
   private String requesterId;
 
+  @SerializedName("approver_id")
   private String approverId;
 
+  @SerializedName("approver_status")
   private String approverStatus;
 
+  @SerializedName("attribute_key")
   private String attributeKey;
 
+  @SerializedName("attribute_value")
   private String attributeValue;
 
+  @SerializedName("domain_id")
   private long domainId;
 
+  @SerializedName("order_by")
   private String orderedBy;
 
   public int getOffset() {

@@ -58,7 +58,7 @@
                     <div class="col-sm-2" ng-show="isDef(abntype)">
                         <span class="filter-label">{{resourceBundle['abnormality.duration']}}</span>
                         <div class="input">
-                            <input type="text" placeholder="> days" class="form-control" ng-model="abndur"
+                            <input type="text" placeholder=">= days" class="form-control" ng-model="abndur"
                                    maxlength="5" only-digits ng-enter="onAbnDurationChanged()">
                             <!--<span class="input-group-btn">
                                 <button class="btn btn-default" type="button" ng-click="onAbnDurationChanged()"

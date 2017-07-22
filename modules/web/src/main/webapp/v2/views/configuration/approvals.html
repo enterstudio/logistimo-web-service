@@ -73,7 +73,9 @@
                                                                 </td>
                                                                 <td class="text-center">
                                                                     <span>
-                                                                        <button type="submit" value="delete" ng-click="deleteRow($index)"></button>
+                                                                        <span class="glyphicons glyphicons-bin"
+                                                                              uib-tooltip="Delete"
+                                                                              ng-click="deleteRow($index)"></span>
                                                                     </span>
                                                                 </td>
                                                             </tr>
@@ -95,7 +97,7 @@
                                                         <div class="form-group">
                                                             <label class="col-sm-3 control-label">Primary approvers</label>
                                                             <div class="col-sm-6">
-                                                                <domain-user-select only-active="true" users-model="orderCfg.pa" pre-selected="orderCfg.sa" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                                                <domain-user-select only-active="true" users-model="orderCfg.pa" pre-selected="orderCfg.sa" limit="3" role="admin" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -105,7 +107,7 @@
                                                         <div class="form-group">
                                                             <label class="col-sm-3 control-label">Secondary approvers</label>
                                                             <div class="col-sm-6">
-                                                                <domain-user-select only-active="true" users-model="orderCfg.sa" disabled="isUndef(orderCfg.pa)" pre-selected="orderCfg.pa" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
+                                                                <domain-user-select only-active="true" users-model="orderCfg.sa" disable="isUndef(orderCfg.pa)" pre-selected="orderCfg.pa" limit="3" role="admin" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
                                                             </div>
                                                         </div>
                                                     </div>

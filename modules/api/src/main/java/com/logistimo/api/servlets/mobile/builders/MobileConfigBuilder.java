@@ -41,10 +41,9 @@ import java.util.Map;
 public class MobileConfigBuilder {
   private static final int ENABLED = 1;
   private static final int DISABLED = 0;
+
   /**
    * Builds the approval configuration model as required by the mobile from approvals configuration as obtained from domain configuration
-   * @param approvalsConfig
-   * @return
    */
   public MobileApprovalsConfigModel buildApprovalConfiguration(ApprovalsConfig approvalsConfig) {
     if (approvalsConfig == null) {
@@ -58,16 +57,21 @@ public class MobileConfigBuilder {
     return mobileApprovalsConfigModel;
   }
 
-  private Map<String,MobilePurchaseSalesOrdersApprovalModel> buildPurchaseSalesOrderApprovalConfigModel(ApprovalsConfig.OrderConfig orderConfig) {
+  private Map<String, MobilePurchaseSalesOrdersApprovalModel> buildPurchaseSalesOrderApprovalConfigModel(
+      ApprovalsConfig.OrderConfig orderConfig) {
     if (orderConfig == null) {
       return null;
     }
-    List<ApprovalsConfig.PurchaseSalesOrderConfig> psoConfigList = orderConfig.getPurchaseSalesOrderApproval();
+    List<ApprovalsConfig.PurchaseSalesOrderConfig>
+        psoConfigList =
+        orderConfig.getPurchaseSalesOrderApproval();
     if (psoConfigList == null || psoConfigList.isEmpty()) {
       return null;
     }
     // Iterate through each item in the list and build the model
-    Map<String,MobilePurchaseSalesOrdersApprovalModel> ordersApprovalConfigModelMap = new HashMap<>(psoConfigList.size());
+    Map<String, MobilePurchaseSalesOrdersApprovalModel>
+        ordersApprovalConfigModelMap =
+        new HashMap<>(psoConfigList.size());
     for (ApprovalsConfig.PurchaseSalesOrderConfig psoConfig : psoConfigList) {
       boolean isPOApproval = psoConfig.isPurchaseOrderApproval();
       boolean isSOApproval = psoConfig.isSalesOrderApproval();
@@ -87,24 +91,31 @@ public class MobileConfigBuilder {
     return ordersApprovalConfigModelMap;
   }
 
-  private MobileApprovalsConfigModel.MobileTransfersApprovalModel buildTransfersApprovalConfigModel(ApprovalsConfig.OrderConfig orderConfig){
+  private MobileApprovalsConfigModel.MobileTransfersApprovalModel buildTransfersApprovalConfigModel(
+      ApprovalsConfig.OrderConfig orderConfig) {
     if (orderConfig == null) {
       return null;
     }
-    MobileApprovalsConfigModel.MobileTransfersApprovalModel transfersApprovalModel = new MobileApprovalsConfigModel.MobileTransfersApprovalModel();
+    MobileApprovalsConfigModel.MobileTransfersApprovalModel
+        transfersApprovalModel =
+        new MobileApprovalsConfigModel.MobileTransfersApprovalModel();
     List<String> primaryApprovers = orderConfig.getPrimaryApprovers();
     List<String> secondaryApprovers = orderConfig.getSecondaryApprovers();
-    if ((primaryApprovers == null || primaryApprovers.isEmpty()) && (secondaryApprovers == null || secondaryApprovers.isEmpty())) {
+    if ((primaryApprovers == null || primaryApprovers.isEmpty()) && (secondaryApprovers == null
+        || secondaryApprovers.isEmpty())) {
       transfersApprovalModel.enb = DISABLED;
       return transfersApprovalModel;
     }
     transfersApprovalModel.enb = ENABLED;
-    transfersApprovalModel.apprvrs = buildTransfersApproversModel(primaryApprovers,secondaryApprovers);
+    transfersApprovalModel.apprvrs =
+        buildTransfersApproversModel(primaryApprovers, secondaryApprovers);
     return transfersApprovalModel;
   }
 
-  private MobileApproversModel buildTransfersApproversModel(List<String> primaryApprovers, List<String> secApprovers) {
-    if ((primaryApprovers == null || primaryApprovers.isEmpty()) && (secApprovers == null || secApprovers.isEmpty())) {
+  private MobileApproversModel buildTransfersApproversModel(List<String> primaryApprovers,
+                                                            List<String> secApprovers) {
+    if ((primaryApprovers == null || primaryApprovers.isEmpty()) && (secApprovers == null
+        || secApprovers.isEmpty())) {
       return null;
     }
     MobileUserBuilder mobileUserBuilder = new MobileUserBuilder();
@@ -117,8 +128,9 @@ public class MobileConfigBuilder {
     }
     if (secApprovers != null && !secApprovers.isEmpty()) {
       approversModel.scn =
-          mobileUserBuilder.buildMobileUserModels(mobileUserBuilder.constructUserAccount(us, secApprovers));
+          mobileUserBuilder
+              .buildMobileUserModels(mobileUserBuilder.constructUserAccount(us, secApprovers));
     }
-    return  approversModel;
+    return approversModel;
   }
 }

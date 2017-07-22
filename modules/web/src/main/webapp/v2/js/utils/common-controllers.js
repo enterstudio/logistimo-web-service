@@ -237,15 +237,19 @@ function ListingController($scope, requestContext, $location, contextChangeCallb
             } else {
                 $scope.resSize = 0;
             }
-            /*if ($scope.numFound == -1 && $scope.resSize < $scope.size) {
-                $scope.maxFound = parseInt($scope.offset) + parseInt($scope.resSize);
+        } else {
+            $scope.numFound = 0;
+            $scope.resSize = 0;
+        }
+    };
+    $scope.setPagedResults = function (results) {
+        if (results != null) {
+            $scope.numFound = results.total;
+            if (results.results != null) {
+                $scope.resSize = results.content.length;
+            } else {
+                $scope.resSize = 0;
             }
-            if ($scope.numFound == -1 && $scope.maxFound > 0) {
-                $scope.numFound = $scope.maxFound;
-                if ($scope.resSize == 0) {
-                    $scope.fetchLast();
-                }
-            }*/
         } else {
             $scope.numFound = 0;
             $scope.resSize = 0;

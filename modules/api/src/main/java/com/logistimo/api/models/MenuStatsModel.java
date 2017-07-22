@@ -135,4 +135,10 @@ public class MenuStatsModel {
    * Manager has dashboard access or not
    */
   public boolean mdp = false;
+
+  /**
+   * user timezone
+   */
+  public String utz;
+  public String locale;
 }

@@ -15,14 +15,14 @@ import java.util.Locale;
  */
 public class OrderApprovalStatusValidatorTest extends TestCase {
 
+
   public void testValidate() throws Exception {
     Order order = new Order(1l);
     order.setStatus(IOrder.COMPLETED);
     ApprovalRequestModel approvalRequestModel = new ApprovalRequestModel();
     approvalRequestModel.setApprovalType(ApprovalType.PURCHASE_ORDER);
     try {
-      OrderApprovalStatusValidator validator = new OrderApprovalStatusValidator(approvalRequestModel, order, Locale.ENGLISH);
-      validator.validate();
+      new OrderApprovalStatusValidator().validate(approvalRequestModel, order, Locale.ENGLISH);
     } catch (ValidationException e) {
       assertTrue("Expected validation exception OA001", e.getCode().equals("OA001"));
     }

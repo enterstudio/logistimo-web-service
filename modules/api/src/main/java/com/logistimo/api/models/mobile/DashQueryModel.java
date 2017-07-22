@@ -65,7 +65,9 @@ public class DashQueryModel {
     this.groupby = groupby;
   }
 
-  public DashQueryModel(String country, String state, String district, String excludeETags, String loc, String tPeriod, Long domainId, String assetType, String level) {
+  public DashQueryModel(String country, String state, String district, String excludeETags,
+                        String loc, String tPeriod, Long domainId, String assetType, String level,
+                        String includeETag) {
     this.country = country;
     this.state = state;
     this.district = district;
@@ -75,6 +77,7 @@ public class DashQueryModel {
     this.domainId = domainId;
     this.aty = assetType;
     this.locty = level;
+    this.incetags = includeETag;
   }
 
 }

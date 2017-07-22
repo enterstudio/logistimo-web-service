@@ -64,6 +64,7 @@
         <module>modules/logi</module>
         <module>modules/web</module>
         <module>modules/approvals-client</module>
+        <module>modules/location-client</module>
     </modules>
 
     <dependencies>

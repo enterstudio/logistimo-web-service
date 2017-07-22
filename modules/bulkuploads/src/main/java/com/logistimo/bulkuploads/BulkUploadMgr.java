@@ -50,6 +50,8 @@ import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomainPermission;
 import com.logistimo.domains.service.DomainsService;
@@ -58,26 +60,15 @@ import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
-import com.logistimo.inventory.dao.IInvntryDao;
-import com.logistimo.inventory.dao.impl.InvntryDao;
+import com.logistimo.entity.IUploaded;
+import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
+import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IMaterial;
 import com.logistimo.materials.service.MaterialCatalogService;
 import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
-import com.logistimo.services.taskqueue.ITaskService;
-import com.logistimo.tags.TagUtil;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
-
-import java.util.Arrays;
-import java.util.Calendar;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.logistimo.entity.IUploaded;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
@@ -85,18 +76,25 @@ import com.logistimo.services.Services;
 import com.logistimo.services.UploadService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.UploadServiceImpl;
+import com.logistimo.services.taskqueue.ITaskService;
+import com.logistimo.tags.TagUtil;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.Constants;
 import com.logistimo.utils.FieldLimits;
 import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.PatternConstants;
 import com.logistimo.utils.StringUtil;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -139,26 +137,29 @@ public class BulkUploadMgr {
   public static final String INTRALINE_DELIMITER = ":::::";
   // Inventory model - user-specified replenishment
   public static final String INVNTRY_MODEL_USERSPECIFIED = "us";
+  public static final int ERROR_MESSAGE_MAX_LENGTH = 1800;
   // need in bulk-upload, so that empty cell can be supported to indicate that no change be made
   // Logger
   private static final XLog xLogger = XLog.getLog(BulkUploadMgr.class);
   public static final String ASSET_YOM = "yom";
   public static final String DEV_YOM = "dev.yom";
   public static final int LOWER_BOUND_FOR_YOM = 1980;
-  public static String TEMP_MIN = "tmin.";
-  public static String TEMP_MAX = "tmax";
+  public static final String TEMP_MIN = "Temperature Min.";
+  public static final String TEMP_MAX = "Temperature Max.";
   private static ITaskService taskService = AppFactory.get().getTaskService();
-  private static IInvntryDao invDao = new InvntryDao();
 
   private static final String MAX_LENGTH_MSG = " cannot be greater than ";
   private static final String CHARACTERS = " characters";
-  private static final String TEXT_FIELD_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.TEXT_FIELD_MAX_LENGTH + CHARACTERS;
-  private static final String MOBILE_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MOBILE_PHONE_MAX_LENGTH + CHARACTERS;
-  private static final String EMAIL_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.EMAIL_MAX_LENGTH + CHARACTERS;
+  private static final String TEXT_FIELD_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.TEXT_FIELD_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String MOBILE_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MOBILE_PHONE_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String LAND_PHONE_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.LAND_PHONE_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String EMAIL_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.EMAIL_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
   private static final String MATERIAL_SHORT_NAME_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_SHORTNAME_MAX_LENGTH + CHARACTERS;
-  private static final String MATERIAL_DESC_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH + CHARACTERS;
-  private static final String MATERIAL_ADD_INFO_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH + CHARACTERS;
-  private static final String STREET_ADDRESS_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.STREET_ADDRESS_MAX_LENGTH + CHARACTERS;
+  private static final String MATERIAL_DESC_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_DESCRIPTION_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String MATERIAL_ADD_INFO_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.MATERIAL_ADDITIONAL_INFO_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String STREET_ADDRESS_MAX_LENGTH_MSG = MAX_LENGTH_MSG + FieldLimits.STREET_ADDRESS_MAX_LENGTH + CHARACTERS + CharacterConstants.DOT;
+  private static final String ERROR_COUNT_MSG = "Remaining number of errors: ";
+  private static final String ERRORS_TRUNCATED_MSG = "... Message truncated due to too many errors. ";
 
   // Get the display name of a given type
   public static String getDisplayName(String type, Locale locale) {
@@ -239,11 +240,15 @@ public class BulkUploadMgr {
     return uploaded;
   }
 
-  // Get a line of error message
+  // Get a line of error message. Trim the message to 1800 characters and append a message with the remaining error count
   public static String getErrorMessageString(long offset, String csvLine, String operation,
-                                             String message) {
-    return (offset + BulkUploadMgr.INTRALINE_DELIMITER + csvLine + BulkUploadMgr.INTRALINE_DELIMITER
-        + operation + BulkUploadMgr.INTRALINE_DELIMITER + message);
+                                             String message, int errorCount) {
+    StringBuilder errMsgSb = new StringBuilder();
+    errMsgSb.append(offset).append(BulkUploadMgr.INTRALINE_DELIMITER).append(csvLine).append(BulkUploadMgr.INTRALINE_DELIMITER).append(operation).append(BulkUploadMgr.INTRALINE_DELIMITER).append(message);
+    if (errMsgSb.length() <= ERROR_MESSAGE_MAX_LENGTH) {
+      return errMsgSb.toString();
+    }
+    return getTrimmedErrorMessageString(errMsgSb.toString(), errorCount);
   }
 
   // Given a line, get a message object
@@ -1333,7 +1338,7 @@ public class BulkUploadMgr {
           if (languageKey.contains(language) && language.length() == 2) {
             u.setLanguage(language);
           } else {
-            ec.messages.add("Language: Language code '" + language
+            ec.messages.add("Language: Language code '" + language + CharacterConstants.S_QUOTE
                 + " is not available in the configuration. Please enter the proper language code.");
           }
         } else {
@@ -1409,7 +1414,7 @@ public class BulkUploadMgr {
         landPhone = tokens[i].trim();
         if (!landPhone.isEmpty()) {
           if (landPhone.length() > FieldLimits.LAND_PHONE_MAX_LENGTH) {
-            ec.messages.add("Land line number: '" + landPhone + CharacterConstants.S_QUOTE + TEXT_FIELD_MAX_LENGTH_MSG);
+            ec.messages.add("Land line number: '" + landPhone + CharacterConstants.S_QUOTE + LAND_PHONE_MAX_LENGTH_MSG);
           }
           String validatedLandPhone = validPhone(landPhone);
           if (validatedLandPhone != null) {
@@ -1532,7 +1537,7 @@ public class BulkUploadMgr {
         }
       }
       // Old password, in case of edit (and password has to be edited)
-      String oldPassword = "";
+      String oldPassword = CharacterConstants.EMPTY;
       if (++i < size) {
         oldPassword = tokens[i].trim();
       }
@@ -1966,9 +1971,14 @@ public class BulkUploadMgr {
         }
         m.setTemperatureMax(tempMax);
       }
-      if (m.getTemperatureMin() > m.getTemperatureMax()) {
-        ec.messages.add(
-            "Temperature Min. cannot be greater than Temperature Max.");
+      if (tempMonitoringEnabled) {
+        if (m.getTemperatureMin() == m.getTemperatureMax()) {
+          ec.messages.add(
+              "Temperature Min. cannot be same as Temperature Max.");
+        } else if (m.getTemperatureMin() > m.getTemperatureMax()) {
+          ec.messages.add(
+              "Temperature Min. cannot be greater than Temperature Max.");
+        }
       }
       // If there are errors, return
       if (ec.hasErrors()) {
@@ -2408,10 +2418,12 @@ public class BulkUploadMgr {
             } else {
               ec.messages.add(
                   "Tax: Not a valid number (" + tax + "). It should be between " + FieldLimits.TAX_MIN_VALUE
-                      + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum");
+                      + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum.");
             }
           } catch (NumberFormatException e) {
-            ec.messages.add("Tax: Not a valid number (" + tax + "). Please specify a valid number");
+            ec.messages.add(
+                "Tax: Not a valid number (" + tax + "). It should be between " + FieldLimits.TAX_MIN_VALUE
+                    + " and " + FieldLimits.TAX_MAX_VALUE + " rounded to two decimal places maximum.");
           }
         }
       }
@@ -2442,13 +2454,13 @@ public class BulkUploadMgr {
             int svcLevel = Integer.parseInt(serviceLevel);
             if (svcLevel < FieldLimits.MIN_SERVICE_LEVEL || svcLevel > FieldLimits.MAX_SERVICE_LEVEL) {
               ec.messages.add(
-                  "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL);
+                  "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL + CharacterConstants.DOT);
             } else {
             k.setServiceLevel(svcLevel);
             }
           } catch (NumberFormatException e) {
             ec.messages.add(
-                "Service Level: " + serviceLevel + " is not valid. Please specify a valid level.");
+                "Service Level: " + serviceLevel + " is not valid. Please specify a valid level between " + FieldLimits.MIN_SERVICE_LEVEL + " and " + FieldLimits.MAX_SERVICE_LEVEL + CharacterConstants.DOT);
           }
         }
       }
@@ -2662,12 +2674,13 @@ public class BulkUploadMgr {
     }
     try {
       String countryCode = tokens[0].substring(1, tokens[0].length());
-      Long.valueOf(countryCode);
-      Double.valueOf(tokens[1]);
+      if (Long.parseLong(countryCode) < 0 || Double.parseDouble(tokens[1]) < 0) {
+        return null;
+      }
     } catch (Exception e) {
       return null;
     }
-    return tokens[0] + " " + tokens[1];
+    return tokens[0] + CharacterConstants.SPACE + tokens[1];
   }
 
   private static String getAssetValidPhone(String phone) {
@@ -2863,13 +2876,13 @@ public class BulkUploadMgr {
     DomainConfig dc = DomainConfig.getInstance(domainId);
     AssetConfig tc = dc.getAssetConfig();
     if (tc == null) {
-      ec.messages.add("Temperature Configuration is not available.");
+      ec.messages.add(tempType + ": Temperature Configuration is not available.");
       return 0;
     }
     if (tc.isTemperatureMonitoringWithLogisticsEnabled() || tc.isTemperatureMonitoringEnabled()) {
       AssetConfig.Configuration configuration = tc.getConfiguration();
       if (configuration == null) {
-        ec.messages.add("Temperature Configuration is not available.");
+        ec.messages.add(tempType + ": Temperature Configuration is not available.");
         return 0;
       }
 
@@ -2878,11 +2891,11 @@ public class BulkUploadMgr {
       } else if (TEMP_MIN.equals(tempType) && configuration.getLowAlarm() != null) {
         return configuration.getLowAlarm().getTemp();
       } else {
-        ec.messages.add("Temperature Configuration is not available.");
+        ec.messages.add(tempType +": Temperature Configuration is not available.");
         return 0;
       }
     } else {
-      ec.messages.add("Temperature Monitoring is not enabled.");
+      ec.messages.add(tempType + ": Temperature Monitoring is not enabled.");
       return 0;
     }
   }
@@ -3007,6 +3020,15 @@ public class BulkUploadMgr {
     return "";
   }
 
+  private static String getTrimmedErrorMessageString(String errMessage, int errorCount) {
+    StringBuilder trimmedErrMsgSb = new StringBuilder();
+    trimmedErrMsgSb.append(StringUtils.substringBeforeLast(
+        errMessage.substring(0, ERROR_MESSAGE_MAX_LENGTH), BulkUploadMgr.MESSAGE_DELIMITER));
+    int remainingErrorCount = errorCount - (StringUtils.countMatches(trimmedErrMsgSb.toString(), MESSAGE_DELIMITER) + 1);
+    trimmedErrMsgSb.append(BulkUploadMgr.MESSAGE_DELIMITER).append(CharacterConstants.SPACE).append(ERRORS_TRUNCATED_MSG).append(CharacterConstants.O_BRACKET).append(ERROR_COUNT_MSG).append(remainingErrorCount).append(CharacterConstants.C_BRACKET);
+    return trimmedErrMsgSb.toString();
+  }
+
   public static class EntityContainer {
     public String operation = OP_ADD; // operation
     public List<String> messages = new ArrayList<String>(); // error messages, if any
@@ -3017,15 +3039,20 @@ public class BulkUploadMgr {
     }
 
     public String getMessages() {
-      Iterator<String> it = messages.iterator();
-      String txt = "";
-      while (it.hasNext()) {
-        if (!txt.isEmpty()) {
-          txt += MESSAGE_DELIMITER;
-        }
-        txt += it.next();
+      StringBuilder messageSb = new StringBuilder();
+      for (String message : messages) {
+        messageSb.append(message);
+        messageSb.append(MESSAGE_DELIMITER);
       }
-      return txt;
+      // Remove the last MESSAGE_DELIMITER
+      if (messageSb.length() >= MESSAGE_DELIMITER.length()) {
+        messageSb.setLength(messageSb.length() - MESSAGE_DELIMITER.length());
+      }
+      return messageSb.toString();
+    }
+
+    public int getMessagesCount() {
+      return messages.size();
     }
   }
 

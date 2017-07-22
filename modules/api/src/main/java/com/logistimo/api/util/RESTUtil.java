@@ -1089,10 +1089,10 @@ public class RESTUtil {
             mobileEntityBuilder.buildApproversModel(approversList));
       }
       // Add kiosk tags if any configured for the kiosk
-      // If tags are specified, send that back
+      // If tags are specified, send that back as an array
       List<String> tags = k.getTags();
       if (tags != null && !tags.isEmpty()) {
-        kioskData.put(JsonTagsZ.TAGS, StringUtil.getCSV(tags));
+        kioskData.put(JsonTagsZ.ENTITY_TAG, tags);
       }
     } catch (ServiceException e) {
       xLogger
@@ -1526,11 +1526,11 @@ public class RESTUtil {
       //Min Max Frequency
       String minMaxFreq = ic.getMinMaxDur();
       if (minMaxFreq != null && !minMaxFreq.isEmpty()) {
-        if (ic.FREQ_DAILY.equals(minMaxFreq)) {
+        if (InventoryConfig.FREQ_DAILY.equals(minMaxFreq)) {
           config.put(JsonTagsZ.MINMAX_FREQUENCY, 'd');
-        } else if (ic.FREQ_WEEKLY.equals(minMaxFreq)) {
+        } else if (InventoryConfig.FREQ_WEEKLY.equals(minMaxFreq)) {
           config.put(JsonTagsZ.MINMAX_FREQUENCY, 'w');
-        } else if (ic.FREQ_MONTHLY.equals(minMaxFreq)) {
+        } else if (InventoryConfig.FREQ_MONTHLY.equals(minMaxFreq)) {
           config.put(JsonTagsZ.MINMAX_FREQUENCY, 'm');
         }
       }
@@ -1690,7 +1690,9 @@ public class RESTUtil {
         ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
         if (approvalsConfig != null) {
           MobileConfigBuilder mobileConfigBuilder = new MobileConfigBuilder();
-          MobileApprovalsConfigModel mobileApprovalsConfigModel = mobileConfigBuilder.buildApprovalConfiguration(approvalsConfig);
+          MobileApprovalsConfigModel
+              mobileApprovalsConfigModel =
+              mobileConfigBuilder.buildApprovalConfiguration(approvalsConfig);
           if (mobileApprovalsConfigModel != null) {
             config.put(JsonTagsZ.APPROVALS, mobileApprovalsConfigModel);
           }
@@ -2185,7 +2187,7 @@ public class RESTUtil {
     if (oc != null) {
       ordCfg.put(JsonTagsZ.TRANSFER_RELEASE, oc.isTransferRelease());
       // Configuration for automatic allocation and material status assignment to order
-      ordCfg.put(JsonTagsZ.AUTO_ALLOCATE_INVENTORY_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
+      ordCfg.put(JsonTagsZ.AUTO_ALLOCATE_INVENTORY_TO_ORDERS, oc.allocateStockOnConfirmation());
       ordCfg.put(JsonTagsZ.AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
     }
     if (dc.isTransporterMandatory()) {

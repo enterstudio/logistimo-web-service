@@ -63,9 +63,9 @@ public interface IOrder extends ICrossDomain {
   int DISCOUNT_PERCENTAGE = 2;
   int TRANSFER = 0;
   int NONTRANSFER = 1;
-  Integer PURCHASE_ORDER = 1;
-  Integer SALES_ORDER = 2;
-  Integer TRANSFER_ORDER = 0;
+  int PURCHASE_ORDER = 1;
+  int SALES_ORDER = 2;
+  int TRANSFER_ORDER = 0;
 
   Long getOrderId();
 

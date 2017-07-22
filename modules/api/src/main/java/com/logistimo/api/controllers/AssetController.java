@@ -225,7 +225,8 @@ public class AssetController {
       AssetModel
           assetModel =
           new Gson()
-              .fromJson(AssetUtil.getAssetDetails(assetDetailsModel.getvId(), assetDetailsModel.getdId()),
+              .fromJson(
+                  AssetUtil.getAssetDetails(assetDetailsModel.getvId(), assetDetailsModel.getdId()),
                   AssetModel.class);
       assetDetailsModel.meta = assetModel.meta;
 
@@ -679,11 +680,11 @@ public class AssetController {
     return null;
   }
 
-  @RequestMapping(value="/get-by-ids", method = RequestMethod.POST)
+  @RequestMapping(value = "/get-by-ids", method = RequestMethod.POST)
   public
   @ResponseBody
   List<AssetBaseModel> getAssets(@RequestBody AssetDataModel tempData)
       throws ServiceException {
-      return assetBuilder.buildAssets(tempData);
+    return assetBuilder.buildAssets(tempData);
   }
 }

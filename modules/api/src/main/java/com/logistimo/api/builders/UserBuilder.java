@@ -34,6 +34,7 @@ import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
@@ -42,6 +43,7 @@ import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.superdomains.DomainSuggestionModel;
+import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
@@ -150,19 +152,19 @@ public class UserBuilder {
       AssetConfigModel assetConfigModel = new AssetConfigModel();
       AssetSystemConfig asc = AssetSystemConfig.getInstance();
       AssetConfigModel.WorkingStatus workingStatus;
-      for(AssetSystemConfig.WorkingStatus ws : asc.workingStatuses) {
+      for (AssetSystemConfig.WorkingStatus ws : asc.workingStatuses) {
         workingStatus = new AssetConfigModel.WorkingStatus();
         workingStatus.status = ws.status;
         workingStatus.dV = ws.displayValue;
         assetConfigModel.wses.put(workingStatus.status, workingStatus);
       }
-      for(Integer key: asc.assets.keySet()) {
+      for (Integer key : asc.assets.keySet()) {
         AssetSystemConfig.Asset asset = asc.assets.get(key);
         AssetConfigModel.Asset assetData = new AssetConfigModel.Asset();
         assetData.id = key;
         assetData.an = asset.getName();
         assetData.at = asset.type;
-        if(asset.monitoringPositions != null) {
+        if (asset.monitoringPositions != null) {
           for (AssetSystemConfig.MonitoringPosition monitoringPosition : asset.monitoringPositions) {
             AssetConfigModel.MonitoringPosition mps = new AssetConfigModel.MonitoringPosition();
             mps.mpId = monitoringPosition.mpId;
@@ -171,17 +173,17 @@ public class UserBuilder {
             assetData.mps.put(mps.mpId, mps);
           }
         }
-        for(String manufacturer : asset.getManufacturers().keySet()) {
+        for (String manufacturer : asset.getManufacturers().keySet()) {
           AssetConfigModel.Mancfacturer manc = new AssetConfigModel.Mancfacturer();
           AssetSystemConfig.Manufacturer manufacturer1 = asset.getManufacturers().get(manufacturer);
           manc.id = manufacturer;
           manc.name = manufacturer1.name;
-          if(manufacturer1.model != null) {
-            for(AssetSystemConfig.Model assetModel: manufacturer1.model) {
+          if (manufacturer1.model != null) {
+            for (AssetSystemConfig.Model assetModel : manufacturer1.model) {
               AssetConfigModel.Model aModel = new AssetConfigModel.Model();
               aModel.name = assetModel.name;
               aModel.type = assetModel.type;
-              for(AssetSystemConfig.Sensor sensor : assetModel.sns) {
+              for (AssetSystemConfig.Sensor sensor : assetModel.sns) {
                 AssetConfigModel.Sensor assetSns = new AssetConfigModel.Sensor();
                 assetSns.name = sensor.name;
                 assetSns.mpId = sensor.mpId;
@@ -205,7 +207,8 @@ public class UserBuilder {
       if (StringUtils.isNotEmpty(dc.getKioskTags())) {
         model.config.etags = StringUtil.getArray(dc.getKioskTags());
       }
-
+      model.config.isApprover = StaticApplicationContext.getBean(
+          IOrderApprovalsService.class).isApprover(user.getUserId());
     } catch (Exception e) {
       xLogger.warn("Unable to fetch the domain details", e);
     }

@@ -33,6 +33,14 @@ import java.math.BigDecimal;
  */
 public final class Constants {
 
+  /**
+   * Order approval locking key prefix
+   */
+  public static final String TX_OA = "TX_OA";
+
+  private Constants() {
+  }
+
   // Country codes - ISO 3166 standard codes
   public static final String COUNTRY_INDIA = "IN";
   public static final String COUNTRY_VIETNAM = "VN";
@@ -151,8 +159,6 @@ public final class Constants {
 
   public static final String GAE_DEPLOYMENT = "gae.deployment";
   public static final String GCS_BUCKET_DEFAULT = "default";
-  public static final String GCS_BUCKET_MEDIA = "media";
-  public static final String GCS_ROOT_PATH = "/gs/";
   public static final String INTERNAL_TASK = "INTERNAL_TASK";
   public static final String EMPTY = "";
   public static final String UTF8 = "UTF-8";
@@ -179,7 +185,7 @@ public final class Constants {
   public static final String MINUSONE = "-1";
   public static final String ERROR = "ERROR";
   public static final Integer LAST_ACCESSED_BY_SYSTEM = 1;
-  public static final BigDecimal WEEKLY_COMPUTATION =  BigDecimal.valueOf(7);
+  public static final BigDecimal WEEKLY_COMPUTATION = BigDecimal.valueOf(7);
   public static final BigDecimal MONTHLY_COMPUTATION = BigDecimal.valueOf(30.4375);
   public static final String YES = "yes";
   public static final String NO = "no";
@@ -206,7 +212,7 @@ public final class Constants {
   public static final String TYPE_RETURN = "rt";
   public static final String TYPE_SHIPMENT = "s";
   public static final String MATERIAL_TAG = "mTag";
-  public static final int LOCATION_FAILED_JOB_LIMIT=15;
+  public static final int LOCATION_FAILED_JOB_LIMIT = 15;
 
   public static final String REQ_ID = "x-request-id";
 
@@ -217,6 +223,7 @@ public final class Constants {
   // Attributes for store app theme
   public static final int GUI_THEME_BLACK = 0;
   public static final int GUI_THEME_RED = 1;
+  public static final String JAVAX_JDO_QUERY_SQL = "javax.jdo.query.SQL";
 
 
   public static String getVerticalDisplay(String vertical) {

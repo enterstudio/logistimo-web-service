@@ -180,6 +180,7 @@
                                     <input type="text" class="form-control" id="lt" ng-blur="setManualGeo()"
                                            ng-model="entity.lt" name="lat" autocomplete="off" only-digits allow-decimal allow-negative
                                            placeholder="{{resourceBundle['latitude']}}" ng-pattern="latitudePattern">
+
                                     <div class="has-error" ng-show="!addEntityForm.lat.$valid">
                                         <span class="help-block ent-title">{{resourceBundle['invalid.latitude.message']}}</span>
                                     </div>
@@ -191,6 +192,7 @@
                                     <input type="text" class="form-control" id="ln" ng-blur="setManualGeo()"
                                            ng-model="entity.ln" name="lon" autocomplete="off" only-digits allow-decimal allow-negative
                                            placeholder="{{resourceBundle['longitude']}}" ng-pattern="longitudePattern">
+
                                     <div class="has-error" ng-show="!addEntityForm.lon.$valid">
                                         <span class="help-block ent-title">{{resourceBundle['invalid.longitude.message']}}</span>
                                     </div>
@@ -240,6 +242,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" ng-model="entity.tx" name="tx" only-digits allow-decimal
                                        placeholder="{{resourceBundle['tax']}}" ng-pattern="taxPattern">
+
                                 <div class="has-error" ng-show="!addEntityForm.tx.$valid">
                                     <span class="help-block ent-title">{{resourceBundle['invalid.tax.message']}}</span>
                                 </div>
@@ -282,8 +285,8 @@
                         <div class="form-group" ng-if="isEOQ && entity.inv == 'sq'">
                             <label for="sl" class="col-sm-4 control-label">{{resourceBundle['inventory.servicelevel']}}</label>
                             <div class="col-sm-8">
-                                <select ng-model="entity.sl" class="form-control" id="sl">
-                                    <option ng-repeat="item in serviceLevels" value={{item}} ng-selected="item === entity.sl">{{item}}</option>
+                                <select ng-model="entity.sl" class="form-control" id="sl"
+                                        ng-options="item for item in serviceLevels">
                                 </select>
                             </div>
                         </div>

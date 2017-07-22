@@ -26,11 +26,11 @@ package com.logistimo.service;
 import com.logistimo.LgTestCase;
 import com.logistimo.api.builders.ShipmentBuilder;
 import com.logistimo.auth.SecurityConstants;
-import com.logistimo.config.models.OptimizerConfig;
-import com.logistimo.constants.SourceConstants;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
@@ -43,24 +43,21 @@ import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.DuplicationException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
-
-import com.logistimo.config.models.DomainConfig;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.Results;
-import com.logistimo.security.SecureUserDetails;
 import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
 import com.logistimo.shipments.entity.IShipmentItemBatch;
 import com.logistimo.shipments.service.IShipmentService;
 import com.logistimo.shipments.service.impl.ShipmentService;
-import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.utils.BigUtil;
-import com.logistimo.constants.Constants;
+
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
@@ -71,7 +68,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static com.logistimo.users.entity.IUserAccount.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -122,7 +118,7 @@ public class OrderMgmtServiceTest extends LgTestCase {
 
   @Test
   public void checkTransactions()
-      throws ServiceException, ObjectNotFoundException, DuplicationException {
+      throws ServiceException, ObjectNotFoundException, DuplicationException, ValidationException {
 
     OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
     Date now = new Date();
@@ -173,7 +169,8 @@ public class OrderMgmtServiceTest extends LgTestCase {
       order = oms.getOrder(orderId, true);
       String
           shipmentId =
-          oms.shipNow(order, "Tusker India", "TS1234", "Reaping profits", null, userId, null,SourceConstants.WEB);
+          oms.shipNow(order, "Tusker India", "TS1234", "Reaping profits", null, userId, null,
+              SourceConstants.WEB);
       IShipment shipment = ss.getShipment(shipmentId);
       assertEquals(shipment.getShipmentItems().size(), 1, "Shipment count doesnt match");
       Results results = ims.getInventoryTransactions(now, null, domainId, vendorId, materialId,
@@ -207,7 +204,7 @@ public class OrderMgmtServiceTest extends LgTestCase {
           }
         }
       }
-      ss.fulfillShipment(smm, userId,SourceConstants.WEB);
+      ss.fulfillShipment(smm, userId, SourceConstants.WEB);
       shipment = ss.getShipment(shipmentId);
       assertEquals(shipment.getStatus(), ShipmentStatus.FULFILLED, "Shipment status doesn't match");
       List<IShipmentItem> items = (List<IShipmentItem>) shipment.getShipmentItems();
@@ -228,14 +225,14 @@ public class OrderMgmtServiceTest extends LgTestCase {
 
   @Test
   public void shipOrderTest()
-      throws ServiceException, ObjectNotFoundException, DuplicationException {
+      throws ServiceException, ObjectNotFoundException, DuplicationException, ValidationException {
 
     createShipmentLocal();
 
   }
 
   public String createShipmentLocal()
-      throws ServiceException, ObjectNotFoundException, DuplicationException {
+      throws ServiceException, ObjectNotFoundException, DuplicationException, ValidationException {
     Long orderId = createOrderLocal();
     IShipmentService ss = Services.getService(ShipmentService.class);
     Date now = new Date();
@@ -279,7 +276,7 @@ public class OrderMgmtServiceTest extends LgTestCase {
 
   @Test
   public void fulfilOrderTest()
-      throws ServiceException, ObjectNotFoundException, DuplicationException {
+      throws ServiceException, ObjectNotFoundException, DuplicationException, ValidationException {
 
     String shipmentId = createShipmentLocal();
     OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
@@ -299,7 +296,7 @@ public class OrderMgmtServiceTest extends LgTestCase {
       Long vendorId = getKiosk(domainId, "storetest").getKioskId();
       String userId = getUser("dilbert").getUserId();
 
-      ss.fulfillShipment(shipmentId, userId,SourceConstants.WEB);
+      ss.fulfillShipment(shipmentId, userId, SourceConstants.WEB);
 
       Long orderId = Long.valueOf(shipmentId.substring(0, shipmentId.indexOf("-")));
 //

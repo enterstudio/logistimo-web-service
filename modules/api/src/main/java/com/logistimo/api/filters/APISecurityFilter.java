@@ -79,48 +79,48 @@ public class APISecurityFilter implements Filter {
     if (StringUtils.isNotEmpty(req.getHeader("app-name"))) {
       filterChain.doFilter(request, response);
     }
-
-    //this is meant for internal api client
-    if (StringUtils.isNotBlank(req.getHeader(X_ACCESS_USER))) {
-      try {
-        SecurityMgr.setSessionDetails(req.getHeader(X_ACCESS_USER));
-      } catch (Exception e) {
-        xLogger.severe("Issue with api client authentication", e);
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        return;
-      }
-
-    } else if (StringUtils.isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME)) && !(
-        StringUtils.isNotBlank(servletPath) && (servletPath.startsWith(ASSET_STATUS_URL)
-            || servletPath.startsWith(SMS_API_URL) || servletPath.startsWith(M_AUTH_URL)))) {
-      String recvdCookie = getAppCookie(req);
-      if (appVerAvailable && recvdCookie != null && !appVersion.equals(recvdCookie)) {
-        resp.setHeader(ERROR_HEADER_NAME, UPGRADE_REQUIRED_RESPONSE_CODE);
-        resp.sendError(HttpServletResponse.SC_CONFLICT, "Upgrade required");
-        return;
-      }
-      if (StringUtils.isNotBlank(servletPath) && !(servletPath.startsWith(APP_STATUS_URL)
-          || servletPath.startsWith(AUTHENTICATE_URL))) {
-        SecureUserDetails
-            userDetails = SecurityMgr
-            .getSessionDetails(req.getSession());
-        if (userDetails == null) {
-          resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Required.");
-          return;
-        }
-        SecurityUtils.setUserDetails(userDetails);
-        String reqDomainId = SecurityUtils.getReqCookieUserDomain(req);
-        if (reqDomainId != null && !reqDomainId.equals(
-            userDetails.getUsername() + CharacterConstants.COLON + SecurityUtils
-                .getCurrentDomainId())) {
-          resp.setHeader(ERROR_HEADER_NAME, DOMAIN_CHANGE_RESPONSE_CODE);
-          resp.sendError(HttpServletResponse.SC_CONFLICT, "Invalid session on client");
-          return;
-        }
-      }
-
-    }
     try {
+      //this is meant for internal api client
+      if (StringUtils.isNotBlank(req.getHeader(X_ACCESS_USER))) {
+        try {
+          SecurityMgr.setSessionDetails(req.getHeader(X_ACCESS_USER));
+        } catch (Exception e) {
+          xLogger.severe("Issue with api client authentication", e);
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+          return;
+        }
+
+      } else if (StringUtils.isBlank(req.getHeader(Constants.X_APP_ENGINE_TASK_NAME)) && !(
+          StringUtils.isNotBlank(servletPath) && (servletPath.startsWith(ASSET_STATUS_URL)
+              || servletPath.startsWith(SMS_API_URL) || servletPath.startsWith(M_AUTH_URL)))) {
+        String recvdCookie = getAppCookie(req);
+        if (appVerAvailable && recvdCookie != null && !appVersion.equals(recvdCookie)) {
+          resp.setHeader(ERROR_HEADER_NAME, UPGRADE_REQUIRED_RESPONSE_CODE);
+          resp.sendError(HttpServletResponse.SC_CONFLICT, "Upgrade required");
+          return;
+        }
+        if (StringUtils.isNotBlank(servletPath) && !(servletPath.startsWith(APP_STATUS_URL)
+            || servletPath.startsWith(AUTHENTICATE_URL))) {
+          SecureUserDetails
+              userDetails = SecurityMgr
+              .getSessionDetails(req.getSession());
+          if (userDetails == null) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Required.");
+            return;
+          }
+          SecurityUtils.setUserDetails(userDetails);
+          String reqDomainId = SecurityUtils.getReqCookieUserDomain(req);
+          if (reqDomainId != null && !reqDomainId.equals(
+              userDetails.getUsername() + CharacterConstants.COLON + SecurityUtils
+                  .getCurrentDomainId())) {
+            resp.setHeader(ERROR_HEADER_NAME, DOMAIN_CHANGE_RESPONSE_CODE);
+            resp.sendError(HttpServletResponse.SC_CONFLICT, "Invalid session on client");
+            return;
+          }
+        }
+
+      }
+
       if (filterChain != null) {
         filterChain.doFilter(request, response);
       }

@@ -267,13 +267,13 @@ public class AssetBuilder {
       throws ServiceException {
     List<AssetBaseModel> detailsModel = new ArrayList<>(1);
     if (results != null) {
-        for (AssetDeviceModel dModel : results.data) {
-          AssetBaseModel model = buildAssetModel(dModel.vId, dModel.dId);
-          if (model != null) {
-            detailsModel.add(model);
-          }
+      for (AssetDeviceModel dModel : results.data) {
+        AssetBaseModel model = buildAssetModel(dModel.vId, dModel.dId);
+        if (model != null) {
+          detailsModel.add(model);
         }
       }
+    }
     return detailsModel;
   }
 

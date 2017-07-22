@@ -21,5 +21,10 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-.glyphicons-cogwheel:before{content:"\e019"}
-.glyphicons-table:before{content:"\e011"}
+.glyphicons-cogwheel:before {
+    content: "\e019"
+}
+
+.glyphicons-table:before {
+    content: "\e011"
+}

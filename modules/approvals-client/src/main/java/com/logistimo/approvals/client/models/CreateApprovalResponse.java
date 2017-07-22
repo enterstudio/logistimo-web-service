@@ -76,6 +76,9 @@ public class CreateApprovalResponse {
   @SerializedName("updated_at")
   private Date updatedAt;
 
+  @SerializedName("updated_by")
+  private String updatedBy;
+
   public String getApprovalId() {
     return approvalId;
   }
@@ -186,5 +189,13 @@ public class CreateApprovalResponse {
 
   public void setActiveApproverType(String activeApproverType) {
     this.activeApproverType = activeApproverType;
+  }
+
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
+
+  public void setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
   }
 }

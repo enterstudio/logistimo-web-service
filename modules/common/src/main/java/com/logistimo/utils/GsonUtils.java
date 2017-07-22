@@ -32,7 +32,7 @@ public class GsonUtils {
 
   private static GsonBuilder
       builder =
-      new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   private GsonUtils() {
 

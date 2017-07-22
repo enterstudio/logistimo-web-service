@@ -27,25 +27,30 @@
 package com.logistimo.config.service.impl;
 
 import com.logistimo.AppFactory;
-import com.logistimo.config.service.ConfigurationMgmtService;
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.services.cache.MemcacheService;
-
+import com.logistimo.config.entity.IConfig;
+import com.logistimo.config.models.ConfigurationException;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.LocationConfig;
-import com.logistimo.config.entity.IConfig;
+import com.logistimo.config.service.ConfigurationMgmtService;
+import com.logistimo.context.StaticApplicationContext;
+import com.logistimo.dao.JDOUtils;
+import com.logistimo.entity.comparator.LocationComparator;
+import com.logistimo.locations.client.LocationClient;
+import com.logistimo.locations.model.LocationResponseModel;
+import com.logistimo.logger.XLog;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
-import com.logistimo.logger.XLog;
 
 import java.util.Date;
 
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.Transaction;
 
 /**
  * @author arun
@@ -79,8 +84,10 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
 
     // Save the config object to data store
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    Transaction tx = pm.currentTransaction();
     try {
       // Check if a config with this key already exists
+      tx.begin();
       try {
         String realKey = getRealKey(key, domainId);
         JDOUtils.getObjectById(IConfig.class, realKey, pm);
@@ -89,16 +96,21 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
       } catch (JDOObjectNotFoundException e) {
         // This key does not exist; so it is valid to add a config with this key
       }
-
+      //add loc ids
+      updateDomainConfigLocIds(config);
       config.setKey(key);
       config.setConfig(getCleanString(config.getConfig()));
       config.setLastUpdated(new Date());
       pm.makePersistent(config);
       pm.detachCopy(config);
+      tx.commit();
     } catch (Exception e) {
       xLogger.fine("Exception while adding configuation object: {0}", e.getMessage());
       throw new ServiceException(e.getMessage());
     } finally {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
       pm.close();
     }
   }
@@ -157,7 +169,9 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
 
     // Save the config object to data store
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    Transaction tx = pm.currentTransaction();
     try {
+      tx.begin();
       IConfig c = JDOUtils.getObjectById(IConfig.class, config.getKey(), pm);
       c.setPrevConfig(c.getConfig()); // backup the current configuration before updating
       c.setConfig(
@@ -165,17 +179,26 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
       c.setUserId(config.getUserId());
       c.setDomainId(config.getDomainId());
       c.setLastUpdated(new Date());
+      int locindex = compareLocationChange(c, config);
+      //update loc ids
+      if (locindex != 0) {
+        updateDomainConfigLocIds(config);
+      }
       // whenever there is a change in the location configuration, re-initialize it
       if (c.getKey().equals(IConfig.LOCATIONS)) {
         LocationConfig.initialize();
       }
-//			pm.makePersistent( c );
+      //pm.makePersistent( c );
+      tx.commit();
     } catch (Exception e) {
       xLogger
           .fine("Exception while updating configuration object with key {0}: {1}", config.getKey(),
               e.getMessage(), e);
       throw new ServiceException(e.getMessage());
     } finally {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
       pm.close();
     }
   }
@@ -262,5 +285,21 @@ public class ConfigurationMgmtServiceImpl extends ServiceImpl implements Configu
       realKey += "." + domainId.toString();
     }
     return realKey;
+  }
+
+  private void updateDomainConfigLocIds(IConfig dc) throws ConfigurationException {
+    DomainConfig config = new DomainConfig(dc.getConfig());
+    config.setUser(dc.getUserId());
+    LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
+    LocationResponseModel response = client.getLocationIds(config);
+    config.setCountryId(response.getCountryId());
+    config.setStateId(response.getStateId());
+    config.setDistrictId(response.getDistrictId());
+  }
+
+  private int compareLocationChange(IConfig d1, IConfig d2) throws ConfigurationException {
+    DomainConfig dc1 = new DomainConfig(d1.getConfig());
+    DomainConfig dc2 = new DomainConfig(d2.getConfig());
+    return new LocationComparator().compare(dc1, dc2);
   }
 }

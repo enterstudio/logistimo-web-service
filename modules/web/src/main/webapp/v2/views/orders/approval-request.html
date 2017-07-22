@@ -1,11 +1,25 @@
 <div class="modal-header ws">
-    <h3 class="modal-title">Request approval for {{resourceBundle['order']}}: {{orderId}}</h3>
-    <p class="litetext">Approver(s): {{order.aprdetail}}</p>
+    <h3 class="modal-title" ng-show="action == 'rq'">Request approval for {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'cn'">Cancel approval for {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'ap'">Approve approval for {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'rj'">Reject approval for {{resourceBundle['order']}}: {{orderId}}</h3>
+    <span ng-show="action == 'rq'">
+        Approvers:
+          <span ng-repeat="item in approval.approvers" style="display:inline-block;">
+            <a ng-hide="$index == approval.approvers.length - 1"
+               href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
+            <a ng-show="$index == approval.approvers.length - 1"
+               href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}}</a>
+          </span>
+    </span>
 </div>
 <div class="panel-body ws" style="background: #ffffff">
-    <textarea id="aprvmsg" ng-model="order.aprmsg" placeholder ="Comments" maxlength="5000" rows="10" style="height:auto;width:100%"></textarea>
+    <textarea id="aprvmsg" ng-model="approval.msg" placeholder ="Comments" maxlength="5000" rows="10" style="height:auto;width:100%"></textarea>
 </div>
 <div class="modal-footer ws">
-    <button class="btn btn-primary" ng-click="proceed()">Request</button>
-    <button class="btn btn-default" ng-click="cancel()">{{resourceBundle['cancel']}}</button>
+    <button class="btn btn-primary" ng-click="proceed('rq')" ng-show="action == 'rq'">Request</button>
+    <button class="btn btn-primary" ng-click="proceed('cn')" ng-show="action == 'cn'">Cancel</button>
+    <button class="btn btn-primary" ng-click="proceed('ap')" ng-show="action == 'ap'">Approve</button>
+    <button class="btn btn-primary" ng-click="proceed('rj')" ng-show="action == 'rj'">Reject</button>
+    <button class="btn btn-default" ng-click="cancel()">Close</button>
 </div>

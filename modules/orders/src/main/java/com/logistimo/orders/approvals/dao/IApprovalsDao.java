@@ -28,9 +28,8 @@ import com.logistimo.models.StatusModel;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
-import com.logistimo.users.service.UsersService;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Created by naveensnair on 21/06/17.
@@ -42,15 +41,21 @@ public interface IApprovalsDao {
 
   void updateOrderApprovalStatus(Long orderId, String approvalId, String status);
 
-  Set<String> getFilteredRequesters(String requester, Long domainId, UsersService usersService)
-      throws ServiceException;
+  Collection<String> getFilteredRequesters(String requester, Long domainId);
 
-  Set<String> getFilteredApprovers(String approver, Long domainId) throws ServiceException;
+  Collection<String> getFilteredApprovers(String approver, Long domainId);
 
   Integer getApprovalType(Long orderId, String approvalId);
 
   IOrderApprovalMapping getOrderApprovalMapping(String approvalId, String status);
 
+  IOrderApprovalMapping getOrderApprovalMapping(String approvalId);
+
   void updateOrderApprovalStatus(String approvalId, StatusModel model, String userId);
 
+  IOrderApprovalMapping getOrderApprovalMapping(Long orderId, String status);
+
+  IOrderApprovalMapping getOrderApprovalMapping(Long orderId);
+
+  IOrderApprovalMapping getOrderApprovalMapping(Long orderId, Integer approvalType);
 }

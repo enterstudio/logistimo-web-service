@@ -35,7 +35,7 @@ public class MobileApprovalsConfigModel {
    * Approval configuration model for purchase/sales orders
    */
   @Expose
-  public Map<String,MobilePurchaseSalesOrdersApprovalModel> ords;
+  public Map<String, MobilePurchaseSalesOrdersApprovalModel> ords;
   /**
    * Approval configuration model for transfers
    */

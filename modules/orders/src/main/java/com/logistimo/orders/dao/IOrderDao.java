@@ -26,7 +26,6 @@ package com.logistimo.orders.dao;
 import com.logistimo.exception.LogiException;
 import com.logistimo.orders.entity.IOrder;
 
-
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
@@ -40,9 +39,9 @@ public interface IOrderDao {
 
   Object createKey(Long orderId);
 
-  IOrder getOrder(IOrder order);
+  IOrder getOrder(Long orderId);
 
-  IOrder getOrder(IOrder order, PersistenceManager persistenceManager);
+  IOrder getOrder(Long orderId, PersistenceManager persistenceManager);
 
   OrderUpdateStatus update(IOrder order, PersistenceManager pm) throws LogiException;
 

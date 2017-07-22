@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jdo.PersistenceManager;
-
 /**
  * Created by charan on 04/03/17.
  */
@@ -170,14 +168,12 @@ public interface UsersService extends Service {
 
   boolean hasAccessToUser(String userId, String rUserId, Long domainId, String role);
 
-  /**
-   *
-   */
-  void updateUserLocationIds(IUserAccount userAccount, Map<String, Object> lidMap, PersistenceManager pm) throws ServiceException;
-
   void addEditUserDevice(UserDeviceModel ud) throws ServiceException;
 
   IUserDevice getUserDevice(String userid, String appname) throws ServiceException;
+
   List<IUserAccount> getUsersByIds(List<String> userIds);
+
+
 
 }

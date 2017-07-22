@@ -293,8 +293,8 @@ public class MobileTransactionsBuilder {
  private MobileInvModel buildMobileInvModel(IInvntry inventory,
                                              Long domainId, String userId,
                                              InventoryManagementService ims, EntitiesService es) {
-    MobileInvModel inv = new MobileInvModel();
-    try {
+   MobileInvModel inv = new MobileInvModel();
+   try {
       DomainConfig dc = DomainConfig.getInstance(domainId);
       UsersService us = Services.getService(UsersServiceImpl.class);
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
@@ -396,12 +396,19 @@ public class MobileTransactionsBuilder {
     }
     MobileInvBatchModel mobileInvBatchModel = new MobileInvBatchModel();
     mobileInvBatchModel.bid = invBatch.getBatchId();
-    mobileInvBatchModel.bmfdt =
-        LocalDateUtil
-            .formatCustom(invBatch.getBatchManufacturedDate(), Constants.DATE_FORMAT, null);
+    if (invBatch.getBatchManufacturedDate() != null) {
+      mobileInvBatchModel.bmfdt =
+          LocalDateUtil
+              .formatCustom(invBatch.getBatchManufacturedDate(), Constants.DATE_FORMAT, null);
+    }
     mobileInvBatchModel.bmfnm = invBatch.getBatchManufacturer();
-    mobileInvBatchModel.bexp =
-        LocalDateUtil.formatCustom(invBatch.getBatchExpiry(), Constants.DATE_FORMAT, null);
+    if (invBatch.getBatchExpiry() != null) {
+      mobileInvBatchModel.bexp =
+          LocalDateUtil.formatCustom(invBatch.getBatchExpiry(), Constants.DATE_FORMAT, null);
+    } else {
+      xLogger.warn("Null Batch expiry date when building mobile inventory batch model for kid: {0}, mid: {1}, bid: {2}, bexp: {3}", invBatch.getKioskId(), invBatch.getMaterialId(), invBatch.getBatchId(),
+          invBatch.getBatchExpiry());
+    }
 
     mobileInvBatchModel.q = invBatch.getQuantity();
     if (isAutoPostingIssuesEnabled && validBatchesOnly) {
@@ -433,6 +440,9 @@ public class MobileTransactionsBuilder {
             break;
           case Constants.FREQ_MONTHLY:
             mobConRateModel.ty = Constants.FREQ_TYPE_MONTHLY;
+            break;
+          default:
+            xLogger.warn("Invalid displayFrequency: {0} while building mobile consumption rate model for inventory with kid: {1} and mid: {1}", displayFreq, inv.getKioskId(), inv.getMaterialId());
             break;
         }
         return mobConRateModel;

@@ -36,6 +36,7 @@ import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.QueryConstants;
 import com.logistimo.constants.SourceConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.conversations.service.ConversationService;
 import com.logistimo.conversations.service.impl.ConversationServiceImpl;
@@ -51,6 +52,7 @@ import com.logistimo.events.processor.EventPublisher;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
@@ -88,6 +90,7 @@ import com.logistimo.shipments.entity.IShipmentItem;
 import com.logistimo.shipments.entity.IShipmentItemBatch;
 import com.logistimo.shipments.entity.ShipmentItem;
 import com.logistimo.shipments.service.IShipmentService;
+import com.logistimo.shipments.validators.CreateShipmentValidator;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
@@ -143,7 +146,8 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public String createShipment(ShipmentModel model,int source) throws ServiceException {
+  public String createShipment(ShipmentModel model, int source)
+      throws ServiceException, ValidationException {
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + model.orderId);
     if (!LockUtil.isLocked(lockStatus)) {
       throw new InvalidServiceException(new ServiceException("O002", model.orderId));
@@ -179,11 +183,9 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       shipment.setGeoAccuracy(model.geoAccuracy);
       shipment.setGeoErrorCode(model.geoError);
       shipment.setSrc(source);
-      try {
-        validateBeforeCreateShipment(model, pm);
-      } catch (ServiceException e) {
-        throw e;
-      }
+      //validate
+      StaticApplicationContext.getBean(CreateShipmentValidator.class).validate(
+          model);
       DomainsUtil.addToDomain(shipment, model.sdid, null);
       DomainConfig dc = DomainConfig.getInstance(model.sdid);
       InventoryManagementService
@@ -292,7 +294,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       // if both conversation and activity returns success, proceed to commit changes
       if (model.status != null && !model.status.equals(ShipmentStatus.OPEN)) {
         updateShipmentStatus(shipment.getShipmentId(), model.status, null, model.userID, pm, null,
-            shipment,source);
+            shipment, source);
       }
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
       oms.updateOrderMetadata(model.orderId, model.userID, pm);
@@ -300,7 +302,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
 
       tx.commit();
       return shipment.getShipmentId();
-    } catch (ServiceException ie) {
+    } catch (ServiceException | ValidationException ie) {
       throw ie;
     } catch (Exception e) {
       xLogger.severe("Error while creating shipment", e);
@@ -449,7 +451,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       if (StringUtils.isNotEmpty(message) || (userIds != null && !userIds.isEmpty())) {
         customOptions.message = message;
         if (userIds != null && !userIds.isEmpty()) {
-          Map<Integer, List<String>> userIdsMap = new HashMap<Integer, List<String>>();
+          Map<Integer, List<String>> userIdsMap = new HashMap<>();
           userIdsMap.put(Integer.valueOf(EventSpec.NotifyOptions.IMMEDIATE), userIds);
           customOptions.userIds = userIdsMap;
         }
@@ -468,17 +470,18 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       String message,
       String userId,
       String reason, boolean updateOrderStatus,
-      PersistenceManager pm,int source) throws LogiException {
+                                            PersistenceManager pm, int source)
+      throws LogiException {
     return updateShipmentStatus(shipmentId, status, message, userId, pm, reason, null,
-        updateOrderStatus, false,source);
+        updateOrderStatus, false, source);
   }
 
   @Override
   public ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status,
       String message,
       String userId,
-      String reason,int source) throws LogiException {
-    return updateShipmentStatus(shipmentId, status, message, userId, null, reason, null,source);
+                                            String reason, int source) throws LogiException {
+    return updateShipmentStatus(shipmentId, status, message, userId, null, reason, null, source);
   }
 
   /**
@@ -490,19 +493,21 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   private ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status,
       String message,
       String userId,
-      PersistenceManager pm, String reason, IShipment shipment,int source)
+                                             PersistenceManager pm, String reason,
+                                             IShipment shipment, int source)
       throws LogiException {
     return updateShipmentStatus(shipmentId, status, message, userId, pm, reason, shipment, true,
-        false,source);
+        false, source);
   }
 
   private ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status,
       String message,
       String userId,
       PersistenceManager pm, String reason, IShipment shipment,
-      boolean isOrderFulfil,int source) throws LogiException {
+                                             boolean isOrderFulfil, int source)
+      throws LogiException {
     return updateShipmentStatus(shipmentId, status, message, userId, pm, reason, shipment, true,
-        isOrderFulfil,source);
+        isOrderFulfil, source);
   }
 
 
@@ -510,7 +515,8 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       String message,
       String userId,
       PersistenceManager pm, String reason, IShipment shipment,
-      boolean updateOrderStatus, boolean isOrderFulfil,int source)
+                                             boolean updateOrderStatus, boolean isOrderFulfil,
+                                             int source)
       throws LogiException {
     Long orderId = extractOrderId(shipmentId);
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + orderId);
@@ -547,7 +553,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         cancelShipment(shipmentId, message, userId, pm, reason);
         if (ShipmentStatus.SHIPPED.equals(prevStatus) ||
             ShipmentStatus.FULFILLED.equals(prevStatus)) {
-          postInventoryTransaction(shipment, userId, pm, prevStatus,source);
+          postInventoryTransaction(shipment, userId, pm, prevStatus, source);
         } else if (ShipmentStatus.OPEN.equals(prevStatus)) {
           DomainConfig dc = DomainConfig.getInstance(shipment.getDomainId());
           if (dc.autoGI()) {
@@ -616,12 +622,12 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
               .setShippedQuantity(demandItem.getShippedQuantity().add(shipmentItem.getQuantity()));
         }
         pm.makePersistentAll(demandItems.values());
-        postInventoryTransaction(shipment, userId, pm, prevStatus,source);
+        postInventoryTransaction(shipment, userId, pm, prevStatus, source);
       }
 
       if (status == ShipmentStatus.FULFILLED && prevStatus != ShipmentStatus.FULFILLED) {
         //Only post fulfilled transaction here.
-        postInventoryTransaction(shipment, userId, pm, ShipmentStatus.SHIPPED,source);
+        postInventoryTransaction(shipment, userId, pm, ShipmentStatus.SHIPPED, source);
       }
 
       generateEvent(shipment.getDomainId(), IEvent.STATUS_CHANGE, shipment, null, null);
@@ -685,7 +691,8 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   }
 
   private void postInventoryTransaction(IShipment shipment, String userId, PersistenceManager pm,
-                                        ShipmentStatus prevStatus,int src) throws ServiceException {
+                                        ShipmentStatus prevStatus, int src)
+      throws ServiceException {
     DomainConfig dc = DomainConfig.getInstance(shipment.getDomainId());
     if (!dc.autoGI()) {
       return;
@@ -1203,7 +1210,8 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   }
 
   @Override
-  public ResponseModel fulfillShipment(String shipmentId, String userId,int source) throws ServiceException {
+  public ResponseModel fulfillShipment(String shipmentId, String userId, int source)
+      throws ServiceException {
     IShipment shipment = getShipmentById(shipmentId);
     includeShipmentItems(shipment);
     ShipmentMaterialsModel sModel = new ShipmentMaterialsModel();
@@ -1258,12 +1266,12 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       sModel.items.add(siModel);
     }
 
-    return fulfillShipment(sModel, userId,source);
+    return fulfillShipment(sModel, userId, source);
   }
 
 
   @Override
-  public ResponseModel fulfillShipment(ShipmentMaterialsModel model, String userId,int source) {
+  public ResponseModel fulfillShipment(ShipmentMaterialsModel model, String userId, int source) {
     Long orderId = extractOrderId(model.sId);
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + orderId);
     if (!LockUtil.isLocked(lockStatus)) {
@@ -1390,7 +1398,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         shipment.setActualFulfilmentDate(sdf.parse(model.afd));
         pm.makePersistent(shipment);
         responseModel = updateShipmentStatus(model.sId, ShipmentStatus.FULFILLED, model.msg, model.userId,
-            pm, null, shipment, model.isOrderFulfil,source);
+            pm, null, shipment, model.isOrderFulfil, source);
         oms.updateOrderMetadata(orderId, userId, pm);
         tx.commit();
       }
@@ -2226,46 +2234,6 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       xLogger.warn("Exception while getting materials not existing in kioskId {0}", kioskId, e);
     }
     return materialsNotExisting;
-  }
-
-  private List<IMaterial> getMaterialsNotExistingInKiosk(Long kioskId,
-                                                         List<ShipmentItemModel> models, PersistenceManager pm) {
-    List<IMaterial> materialsNotExisting = new ArrayList<>(1);
-    try {
-      InventoryManagementService
-          ims =
-          Services.getService(InventoryManagementServiceImpl.class);
-      MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
-      for (ShipmentItemModel shipmentItem : models) {
-        IInvntry inv = ims.getInventory(kioskId, shipmentItem.mId, pm);
-        if (inv == null) {
-          IMaterial material = mcs.getMaterial(shipmentItem.mId);
-          materialsNotExisting.add(material);
-        }
-      }
-    } catch (ServiceException e) {
-      xLogger.warn("Exception while getting materials not existing in kioskId {0}", kioskId, e);
-    }
-    return materialsNotExisting;
-  }
-
-  private void validateBeforeCreateShipment(ShipmentModel model, PersistenceManager pm)
-      throws ServiceException {
-    // Validate only vendor inventory while creating shipment
-    InventoryManagementService
-        ims =
-        Services.getService(InventoryManagementServiceImpl.class);
-    MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
-    List<IMaterial>
-        materialsNotExistingInVendor =
-        getMaterialsNotExistingInKiosk(model.vendorId, model.items, pm);
-    if (materialsNotExistingInVendor != null && !materialsNotExistingInVendor.isEmpty()) {
-      EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-      IKiosk vnd = as.getKiosk(model.vendorId, false);
-      throw new ServiceException("I005", MsgUtil.bold(vnd.getName()),
-          MaterialUtils.getMaterialNamesString(
-              materialsNotExistingInVendor));
-    }
   }
 
   private ResponseModel validateStatusChange(IShipment shipment, String newStatus, PersistenceManager pm)

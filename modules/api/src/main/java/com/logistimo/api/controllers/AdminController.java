@@ -27,17 +27,12 @@ import com.logistimo.AppFactory;
 import com.logistimo.api.migrators.DomainLocIDConfigMigrator;
 import com.logistimo.api.migrators.EventsConfigMigrator;
 import com.logistimo.api.migrators.UserDomainIdsMigrator;
-import com.logistimo.api.models.OrderModel;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.utils.SecurityUtils;
-import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
-import com.logistimo.entity.ILocationFailedJob;
 import com.logistimo.events.handlers.EventHandler;
 import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.locations.LocationFailedJobService;
-import com.logistimo.locations.LocationFailedJobServiceImpl;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ServiceException;
@@ -56,10 +51,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
-import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -219,30 +212,6 @@ public class AdminController {
       }
     }
     return (result != null) ? result.getToken() : "";
-  }
-
-  @RequestMapping(value = "/location-failedjobs")
-  public
-  @ResponseBody
-  OrderModel getLocationPayload() {
-    PersistenceManager pm = PMF.get().getPersistenceManager();
-    try {
-      Long domainId = SecurityUtils.getCurrentDomainId();
-      DomainConfig dc = DomainConfig.getInstance(domainId);
-      LocationFailedJobService locationFailedJobService = Services.getService(
-          LocationFailedJobServiceImpl.class);
-      List<ILocationFailedJob>
-          locationFailedJobs = locationFailedJobService.getLocationFailedJobs(dc.getLocale(),
-          dc.getTimezone());
-      locationFailedJobService.updateLocations(locationFailedJobs);
-    } catch (Exception e) {
-      xLogger.warn("Exception while fetching the from LocationFailedJob", e);
-    } finally {
-      if (pm != null) {
-        pm.close();
-      }
-    }
-    return null;
   }
 
 }

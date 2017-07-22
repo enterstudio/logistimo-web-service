@@ -59,7 +59,7 @@ invServices.factory('invService', ['$http', function ($http) {
                 + "?offset=" + offset + "&size=" + size;
             if (checkNotNullEmpty(kioskTags)) {
                 urlStr = urlStr + "&kioskTags=" + kioskTags;
-            }else if(checkNotNullEmpty(excludedKioskTags)){
+            } else if (checkNotNullEmpty(excludedKioskTags)) {
                 urlStr = urlStr + "&excludedKioskTags=" + excludedKioskTags;
             }
             if (checkNotNullEmpty(materialTag)) {
@@ -97,7 +97,7 @@ invServices.factory('invService', ['$http', function ($http) {
                 + "?offset=" + offset + "&size=" + size;
             if (checkNotNullEmpty(etag)) {
                 urlStr = urlStr + "&etag=" + etag;
-            }else if (checkNotNullEmpty(eetag)) {
+            } else if (checkNotNullEmpty(eetag)) {
                 urlStr = urlStr + "&eetag=" + eetag;
             }
             if (checkNotNullEmpty(matType)) {
@@ -127,7 +127,7 @@ invServices.factory('invService', ['$http', function ($http) {
             }
             if (checkNotNullEmpty(data.etag)) {
                 url = url + "&etag=" + data.etag;
-            }else if (checkNotNullEmpty(data.eetag)) {
+            } else if (checkNotNullEmpty(data.eetag)) {
                 url = url + "&eetag=" + data.eetag;
             }
             if (checkNotNullEmpty(data.mtag)) {
@@ -190,7 +190,7 @@ invServices.factory('invService', ['$http', function ($http) {
             }
             if (checkNotNullEmpty(data.etag)) {
                 url = url + "&etag=" + data.etag;
-            }else if (checkNotNullEmpty(data.eetag)) {
+            } else if (checkNotNullEmpty(data.eetag)) {
                 url = url + "&eetag=" + data.eetag;
             }
             if (checkNotNullEmpty(data.mtag)) {

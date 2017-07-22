@@ -451,7 +451,7 @@ public class EntityBuilder {
     List<IApprovers> approvers = null;
     if(model != null) {
       approvers = new ArrayList<>();
-      if(model.pap != null && model.pap.size() > 0) {
+      if(model.pap != null && !model.pap.isEmpty()) {
         for(UserModel um : model.pap) {
           IApprovers primaryApprover = JDOUtils.createInstance(IApprovers.class);
           primaryApprover.setKioskId(model.entityId);
@@ -464,7 +464,7 @@ public class EntityBuilder {
           approvers.add(primaryApprover);
         }
       }
-      if(model.sap != null && model.sap.size() > 0) {
+      if(model.sap != null && !model.sap.isEmpty()) {
         for(UserModel um : model.sap) {
           IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
           secondaryApprover.setKioskId(model.entityId);
@@ -477,7 +477,7 @@ public class EntityBuilder {
           approvers.add(secondaryApprover);
         }
       }
-      if(model.pas != null && model.pas.size() > 0) {
+      if(model.pas != null && !model.pas.isEmpty()) {
         for(UserModel um : model.pas) {
           IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
           secondaryApprover.setKioskId(model.entityId);
@@ -490,7 +490,7 @@ public class EntityBuilder {
           approvers.add(secondaryApprover);
         }
       }
-      if(model.sas != null && model.sas.size() > 0) {
+      if(model.sas != null && !model.sas.isEmpty()) {
         for(UserModel um : model.sas) {
           IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
           secondaryApprover.setKioskId(model.entityId);
@@ -511,7 +511,7 @@ public class EntityBuilder {
   public EntityApproversModel buildApprovalsModel(List<IApprovers> approvers, UsersService as, Locale locale,
                                                   String timezone) {
     EntityApproversModel model = new EntityApproversModel();
-    if(approvers != null && approvers.size() > 0) {
+    if(approvers != null && !approvers.isEmpty()) {
       List<String> pap = new ArrayList<>();
       List<String> sap = new ArrayList<>();
       List<String> pas = new ArrayList<>();
@@ -534,17 +534,21 @@ public class EntityBuilder {
           }
         }
       }
-      if(pap.size() > 0) {
-        model.pap = userBuilder.buildUserModels(constructUserAccount(as, pap), locale, timezone, true);
+      if(!pap.isEmpty()) {
+        model.pap =
+            userBuilder.buildUserModels(constructUserAccount(as, pap), locale, timezone, true);
       }
-      if(sap.size() > 0) {
-        model.sap = userBuilder.buildUserModels(constructUserAccount(as, sap), locale, timezone, true);
+      if(!sap.isEmpty()) {
+        model.sap =
+            userBuilder.buildUserModels(constructUserAccount(as, sap), locale, timezone, true);
       }
-      if(pas.size() > 0) {
-        model.pas = userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true);
+      if(!pas.isEmpty()) {
+        model.pas =
+            userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true);
       }
-      if(sap.size() > 0) {
-        model.sas = userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true);
+      if(!sap.isEmpty()) {
+        model.sas =
+            userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true);
       }
       model.createdBy = approvers.get(0).getCreatedBy();
       model.lastUpdated = approvers.get(0).getUpdatedOn();

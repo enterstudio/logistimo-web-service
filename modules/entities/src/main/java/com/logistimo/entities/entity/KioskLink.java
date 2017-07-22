@@ -23,12 +23,13 @@
 
 package com.logistimo.entities.entity;
 
-import com.logistimo.services.Services;
-
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
-import com.logistimo.utils.NumberUtil;
 import com.logistimo.logger.XLog;
+import com.logistimo.services.Services;
+import com.logistimo.utils.NumberUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -198,7 +199,9 @@ public class KioskLink implements IKioskLink {
 
   @Override
   public void setLinkedKioskName(String linkedKioskName) {
-    lknm = linkedKioskName.toLowerCase();
+    if(StringUtils.isNotEmpty(linkedKioskName)) {
+      lknm = linkedKioskName.toLowerCase();
+    }
   }
 
   @Override

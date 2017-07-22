@@ -29,6 +29,7 @@ package com.logistimo.utils;
 public class FieldLimits {
   private FieldLimits() {
   }
+
   // Limits for fields
   public static final int USERID_MIN_LENGTH = 4;
   public static final int USERID_MAX_LENGTH = 20;

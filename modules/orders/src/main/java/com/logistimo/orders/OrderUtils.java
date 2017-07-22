@@ -29,6 +29,7 @@ import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
@@ -111,7 +112,7 @@ public class OrderUtils {
                                                String updatingUserId, String message,
                                                DomainConfig dc, int source,
                                                ResourceBundle backendMessages)
-      throws ObjectNotFoundException, ServiceException {
+      throws ObjectNotFoundException, ServiceException, ValidationException {
     OrderManagementService
         oms =
         Services.getService(OrderManagementServiceImpl.class, dc.getLocale());
@@ -125,7 +126,7 @@ public class OrderUtils {
         List<IShipment> shipments = ss.getShipmentsByOrderId(orderId);
         if (shipments != null && !shipments.isEmpty()) {
           IShipment s = shipments.get(0);
-          updated = ss.fulfillShipment(s.getShipmentId(), updatingUserId,source).status;
+          updated = ss.fulfillShipment(s.getShipmentId(), updatingUserId, source).status;
         }
       } catch (Exception e) {
         uo.inventoryError = true;
@@ -138,7 +139,7 @@ public class OrderUtils {
         uo.message = backendMessages.getString("error.unabletofulfilorder");
       }
     } else if (IOrder.COMPLETED.equals(newStatus)) {
-      oms.shipNow(o, null, null, null, null, updatingUserId, null,source);
+      oms.shipNow(o, null, null, null, null, updatingUserId, null, source);
       if (message != null && !message.isEmpty()) {
         oms.addMessageToOrder(orderId, message, updatingUserId);
       }
@@ -172,7 +173,7 @@ public class OrderUtils {
 
   public static UpdatedOrder updateOrdStatus(UpdateOrderStatusRequest uosReq, DomainConfig dc,
                                              int source, ResourceBundle backendMessages)
-      throws ObjectNotFoundException, ServiceException {
+      throws ObjectNotFoundException, ServiceException, ValidationException {
     OrderManagementService
         oms =
         Services.getService(OrderManagementServiceImpl.class, dc.getLocale());
@@ -189,7 +190,7 @@ public class OrderUtils {
           return uo;
         }
         ss = Services.getService(ShipmentService.class, dc.getLocale());
-        updated = ss.fulfillShipment(smm, uosReq.uid,source).status;
+        updated = ss.fulfillShipment(smm, uosReq.uid, source).status;
       } catch (Exception e) {
         uo.inventoryError = true;
         uo.message = backendMessages.getString("error.unabletofulfilorder");
@@ -201,7 +202,7 @@ public class OrderUtils {
         uo.message = backendMessages.getString("error.unabletofulfilorder");
       }
     } else if (IOrder.COMPLETED.equals(uosReq.ost)) {
-      oms.shipNow(o, uosReq.trsp, uosReq.trid, null, uosReq.ead, uosReq.uid, uosReq.pksz,source);
+      oms.shipNow(o, uosReq.trsp, uosReq.trid, null, uosReq.ead, uosReq.uid, uosReq.pksz, source);
       if (uosReq.ms != null && !uosReq.ms.isEmpty()) {
         oms.addMessageToOrder(uosReq.tid, uosReq.ms, uosReq.uid);
       }
@@ -279,7 +280,7 @@ public class OrderUtils {
   public static UpdatedOrder updateShpStatus(UpdateOrderStatusRequest uosReq, DomainConfig dc,
                                              int source, ResourceBundle backendMessages,
                                              String previousUpdatedTime)
-      throws ObjectNotFoundException, ServiceException, LogiException {
+      throws LogiException {
     IShipmentService ss = Services.getService(ShipmentService.class, dc.getLocale());
     OrderManagementService
         oms =
@@ -308,7 +309,7 @@ public class OrderUtils {
           return uo;
         }
         ss = Services.getService(ShipmentService.class, dc.getLocale());
-        updated = ss.fulfillShipment(smm, uosReq.uid,source).status;
+        updated = ss.fulfillShipment(smm, uosReq.uid, source).status;
       } catch (Exception e) {
         uo.inventoryError = true;
         uo.message = backendMessages.getString("error.unabletofulfilorder");
@@ -330,7 +331,7 @@ public class OrderUtils {
       }
       updated =
           ss.updateShipmentStatus(uosReq.sid, shipmentStatus, uosReq.ms, uosReq.uid,
-              uosReq.rsnco,source).status;
+              uosReq.rsnco, source).status;
     }
 
     if (updated) {
@@ -594,15 +595,16 @@ public class OrderUtils {
 
   /**
    * Returns the string constants for the order types
+   *
    * @param type 0-TRANSFER, 1- PURCHASE, 2-SALES
    * @return try-TRANSFER, prc- PURCHASE,sle- SALES
    */
-  public static String getOrderType(Integer type){
-    if(type==0)
+  public static String getOrderType(Integer type) {
+    if (type == 0) {
       return IOrder.TYPE_TRANSFER;
-    else if(type==1){
+    } else if (type == 1) {
       return IOrder.TYPE_PURCHASE;
-    }else if(type==2){
+    } else if (type == 2) {
       return IOrder.TYPE_SALE;
     }
     return StringUtils.EMPTY;

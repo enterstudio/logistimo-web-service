@@ -23,17 +23,17 @@
 
 package com.logistimo.shipments.service;
 
+import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.models.ResponseModel;
-import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
 import com.logistimo.models.shipments.ShipmentModel;
-import com.logistimo.shipments.entity.IShipment;
-
-import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
+import com.logistimo.shipments.ShipmentStatus;
+import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
 
 import java.math.BigDecimal;
@@ -49,10 +49,11 @@ import javax.jdo.PersistenceManager;
  */
 public interface IShipmentService extends Service {
 
-  String createShipment(ShipmentModel model,int source) throws ServiceException;
+  String createShipment(ShipmentModel model, int source)
+      throws ServiceException, ValidationException;
 
   ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status, String message,
-                               String userId, String reason,int source) throws LogiException;
+                                     String userId, String reason, int source) throws LogiException;
 
   /**
    * Update the shipment status with message
@@ -68,7 +69,8 @@ public interface IShipmentService extends Service {
    */
   ResponseModel updateShipmentStatus(String shipmentId, ShipmentStatus status, String message,
                                String userId,
-                               String reason, boolean updateOrderStatus, PersistenceManager pm,int source)
+                                     String reason, boolean updateOrderStatus,
+                                     PersistenceManager pm, int source)
       throws LogiException;
 
   boolean updateShipment(ShipmentMaterialsModel model) throws LogiException;
@@ -76,7 +78,8 @@ public interface IShipmentService extends Service {
   IShipment updateShipmentData(String updType, String updValue, String orderUpdatedAt, String sId,
                              String userId) throws ServiceException;
 
-  ResponseModel fulfillShipment(String shipmentId, String userId,int source) throws ServiceException;
+  ResponseModel fulfillShipment(String shipmentId, String userId, int source)
+      throws ServiceException;
 
   /**
    * Change the status of shipment as fulfilled with message and capture discrepancy if any with reasons.
@@ -84,7 +87,7 @@ public interface IShipmentService extends Service {
    * @param model {@code ShipmentMaterialsModel}
    * @return - ResponseModel  containing true/false for success or failure and a message in case of partial success
    */
-  ResponseModel fulfillShipment(ShipmentMaterialsModel model, String userId,int source);
+  ResponseModel fulfillShipment(ShipmentMaterialsModel model, String userId, int source);
 
 //    boolean cancelShipmentsByOrderId(Long orderId, String message, String userId);
 

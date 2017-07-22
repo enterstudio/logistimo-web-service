@@ -56,7 +56,7 @@
                                 {{resourceBundle['cancel']}}
                             </button>
                         </div>
-                        <a ng-hide="dp.vp || order.st == ORDER.FULFILLED || order.st == ORDER.CANCELLED || edit.etdate || !order.atc" ng-click="toggleEdit('etdate',true)"
+                        <a ng-hide="!editPermission || dp.vp || order.st == ORDER.FULFILLED || order.st == ORDER.CANCELLED || edit.etdate || !order.atc" ng-click="toggleEdit('etdate',true)"
                            uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
                             <span class="glyphicons glyphicons-edit"></span>
                         </a>
@@ -79,7 +79,7 @@
                                target="_blank">{{order.vnm}}</a>
                             <span ng-show="isUndef(order.vnm) && !edit.vend">Specify {{resourceBundle['vendor']}}</span>
                             <a class="ml15"
-                               ng-show="!dp.vp && !shipAvailable && order.st == ORDER.PENDING && !edit.mat && (order.oty!=0 || (order.oty==0 && order.alc)) && !edit.vend"
+                               ng-show="editPermission && !dp.vp && !shipAvailable && order.st == ORDER.PENDING && !edit.mat && (order.oty!=0 || (order.oty==0 && order.alc)) && !edit.vend"
                                ng-click="toggleEdit('vend')" uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
                                 <span class="glyphicons glyphicons-edit" ng-if="order.st != ORDER.FULFILLED"></span>
                             </a>
@@ -119,7 +119,7 @@
                                 {{resourceBundle['cancel']}}
                             </button>
                         </div>
-                        <a ng-hide="dp.vp || order.st == ORDER.FULFILLED || edit.efdate || !order.atv" ng-click="toggleEdit('efdate',true)"
+                        <a ng-hide="!editPermission || dp.vp || order.st == ORDER.FULFILLED || edit.efdate || !order.atv" ng-click="toggleEdit('efdate',true)"
                            uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
                             <span class="glyphicons glyphicons-edit" ng-if="order.st != ORDER.CANCELLED"></span>
                         </a>

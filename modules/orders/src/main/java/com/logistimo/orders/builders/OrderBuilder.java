@@ -68,9 +68,13 @@ public class OrderBuilder {
 
     public OrderModel buildMeta(Long orderId) throws ServiceException, ObjectNotFoundException {
         IOrder order = orderManagementService.getOrder(orderId);
-        return buildOrderModel(order, false);
+        OrderModel model =  buildOrderModel(order, false);
+        model.setNumItems(order.getNumberOfItems());
+        model.setCreatedAt(order.getCreatedOn());
+        model.setType(order.getOrderType());
+        return model;
     }
-
+    
     public OrderModel build(Long orderId) throws ServiceException, ObjectNotFoundException {
         IOrder order = orderManagementService.getOrder(orderId, true);
         return buildOrderModel(order, true);

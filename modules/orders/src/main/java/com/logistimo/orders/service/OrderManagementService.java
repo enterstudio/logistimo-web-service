@@ -26,11 +26,11 @@ package com.logistimo.orders.service;
 import com.logistimo.config.models.LeadTimeAvgConfig;
 import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.exception.LogiException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -42,8 +42,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 import javax.jdo.PersistenceManager;
 
@@ -66,7 +64,8 @@ public interface OrderManagementService extends Service {
    */
   String shipNow(IOrder order, String transporter, String trackingId, String reason,
                  Date expectedFulfilmentDate,
-                 String userId, String ps,int source) throws ServiceException;
+                 String userId, String ps, int source)
+      throws ServiceException, ObjectNotFoundException, ValidationException;
 
   /**
    * Gets the order details for given order. This method does not fetch demand items.
@@ -85,11 +84,6 @@ public interface OrderManagementService extends Service {
    */
   IOrder getOrder(Long orderId, boolean includeItems)
       throws ObjectNotFoundException, ServiceException;
-
-  /**
-   * Add a new order
-   */
-  Long addOrder(IOrder order) throws ServiceException;
 
   /**
    * Update an order and automatically post goods issued/received (GI/GR)
@@ -124,13 +118,13 @@ public interface OrderManagementService extends Service {
    */
   Results getOrders(Long domainId, Long kioskId, String status, Date since, Date untilDate,
                     String otype, String tagType, String tag, List<Long> kioskIds,
-                    PageParams pageParams, Integer orderType, String referenceId)
+                    PageParams pageParams, Integer orderType, String referenceId, String approvalStatus)
       throws ServiceException;
 
   Results getOrders(Long domainId, Long kioskId, String status, Date since, Date untilDate,
                     String otype, String tagType, String tag, List<Long> kioskIds,
-                    PageParams pageParams, Integer orderType, String referenceId,
-                    boolean withDemand) throws ServiceException;
+                    PageParams pageParams, Integer orderType, String referenceId, String approvalStatus,
+                    boolean withDemand);
 
   /**
    * Get orders placed by a certain user
@@ -246,12 +240,8 @@ public interface OrderManagementService extends Service {
 
   void updateOrderMetadata(Long orderId, String updatedBy, PersistenceManager pm);
 
-  boolean isApprovalRequired(IOrder order, Locale locale, String approvalType);
+  List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams, String orderType,
+                         boolean isTransfer)
+      throws ServiceException;
 
-   List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams, String orderType, boolean isTransfer)
-       throws ServiceException;
-
-  void updateOrderVisibility(Long orderId) throws ObjectNotFoundException;
-
-  List<IOrderApprovalMapping> getOrdersApprovalMapping(Set<Long> orderIds, int orderAppprovalType);
 }

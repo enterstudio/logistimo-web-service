@@ -29,13 +29,18 @@ package com.logistimo.utils;
 public class PatternConstants {
   private PatternConstants() {
   }
+
   public static final String TAX = "^(\\d{0,2}(\\.\\d{1,2})?|100(\\.00?)?)$";
   public static final String PRICE = "^(\\d{0,9}(\\.\\d{1,2})?|1000000000(\\.00?)?)$";
-  public static final String LATITUDE = "^-?(([0-8])?((([0-9])(\\.\\d{1,8})?)|(90(\\.[0]{0,8})?)))$";
+  public static final String
+      LATITUDE =
+      "^-?(([0-8])?((([0-9])(\\.\\d{1,8})?)|(90(\\.[0]{0,8})?)))$";
   public static final String LONGITUDE = "^-?(((1[0-7][0-9])|(\\d{1,2})|180)(\\.\\d{1,8})?)$";
   public static final String TEMPERATURE = "^-?(\\d{0,2}(\\.\\d{1,2})?)$";
   // Email validation regex is as specified in the UI by Angular JS
-  public static final String EMAIL = "^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$";
+  public static final String
+      EMAIL =
+      "^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$";
   public static final String USERID = "[a-z0-9\\.\\-_@\\s]+";
   public static final String FIRSTNAME = "[A-Za-z ]+";
   public static final String LASTNAME = "[A-Za-z ]*";

@@ -53,6 +53,7 @@ public class RestConfig {
   public static RestTemplate restTemplate() {
     RestTemplate restTemplate = new RestTemplate(getClientHttpRequestFactory());
     restTemplate.setMessageConverters(Collections.singletonList(createGsonHttpMessageConverter()));
+    restTemplate.setInterceptors(Collections.singletonList(new LocaleRequestInterceptor()));
     return restTemplate;
   }
 

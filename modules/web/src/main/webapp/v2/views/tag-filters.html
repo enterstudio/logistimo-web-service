@@ -24,10 +24,14 @@
 
 <div>
     <label class="cbx filter-label ml10">{{name + ' ' + $parent.resourceBundle['tags.lower'] + ':'}}</label>
-    <span ng-show="$parent.isDef(includedTags)"><span ng-repeat="tag in includedTags.split(',') track by $index" class="label label-default mt5 dinline" style="padding:.2em;">{{tag}}</span></span>
+    <span ng-show="$parent.isDef(includedTags)"><span ng-repeat="tag in includedTags.split(',') track by $index"
+                                                      class="label label-default mt5 dinline" style="padding:.2em;">{{tag}}</span></span>
     <span ng-show="$parent.isUndef(includedTags)" class="cbx" style="margin-top: 20px">All</span>
-    <span ng-show="$parent.isDef(excludedTags)" class="codegray">(Exclude: <span ng-repeat="tag in excludedTags.split(',') track by $index" class="label label-default mt5 dinline" style="padding:.2em;">{{tag}}</span>)</span>
+    <span ng-show="$parent.isDef(excludedTags)" class="codegray">(Exclude: <span
+            ng-repeat="tag in excludedTags.split(',') track by $index" class="label label-default mt5 dinline"
+            style="padding:.2em;">{{tag}}</span>)</span>
     <span ng-click="toggleFilter()" class="caret pt5"></span>
+
     <div class="pop_filter_box col-sm-10 ws " ng-attr-id="{{type+'-filter'}}" style="top: 90%">
         <div class="row pt10">
             <div class="col-sm-12">
@@ -36,7 +40,7 @@
                 </label>
                 <span class="col-sm-8 noLRpad lPad5">
                     <tag-select tags-model="inTags" place-holder="All" type="type"
-                        multiple="'true'" force-no-udf="'true'" disabled="disabled">
+                                multiple="'true'" force-no-udf="'true'" disabled="disabled">
                     </tag-select>
                 </span>
             </div>
@@ -48,7 +52,7 @@
                 </label>
                 <span class="col-sm-8 noLRpad lPad5">
                     <tag-select tags-model="exTags" place-holder="None" type="type"
-                            multiple="'true'" force-no-udf="'true'" disabled="disabled">
+                                multiple="'true'" force-no-udf="'true'" disabled="disabled">
                     </tag-select>
                 </span>
             </div>
