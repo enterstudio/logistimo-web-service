@@ -45,7 +45,7 @@ public class ApprovalRequesterValidator {
                        String userId, Locale locale) throws ValidationException {
 
     if (!approvalRequestModel.getRequesterId().equals(userId)) {
-      throw new ValidationException("OA005", locale, approvalRequestModel.getRequesterId(), userId);
+      throw new ValidationException("OA005", approvalRequestModel.getRequesterId(), userId);
     }
 
     try {
