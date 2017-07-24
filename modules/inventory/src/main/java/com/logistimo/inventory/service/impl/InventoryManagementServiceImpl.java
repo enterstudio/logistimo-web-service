@@ -3713,7 +3713,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         ITransaction transaction = transactions.get(0);
         Long kioskId = transaction.getKioskId();
         Long materialId = transaction.getMaterialId();
-        String batchId = transaction.getBatchId();
         Set<Long> kiosksToLock = getKioskIdsToLock(transactions);
         Map<Long,LockUtil.LockStatus> kidLockStatusMap = lockKiosks(kiosksToLock);
         locks = new HashMap<>(kiosksToLock.size());
@@ -3725,7 +3724,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
             throw new ServiceException(backendMessages.getString("lockinventory.failed"));
           }
         }
-        ITransaction lastWebTrans = getLastWebTransaction(kioskId, materialId, batchId);
+        ITransaction lastWebTrans = getLastWebTransaction(kioskId, materialId, null);
         int rejectUntilPosition = mobTransHandler.applyPolicy(transactions, lastWebTrans);
         if (rejectUntilPosition != -1) {
           updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M011", rejectUntilPosition);
@@ -3736,7 +3735,21 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           continue;
         }
         try {
-          mobTransHandler.addStockCountIfNeeded(lastWebTrans, transactions);
+          // If the transaction has batch, then get a map of batch id  and the first transaction for that batch
+          if (transaction.hasBatch()) {
+            Map<String,List<ITransaction>> bidTransactionsMap = getBatchIdFirstTransactionMap(transactions);
+            // Iterate through the map and get lastWebTrans for every bid and add stock count if needed for every batch
+            for (Map.Entry<String,List<ITransaction>> entry : bidTransactionsMap.entrySet()) {
+              ITransaction lastWebTransactionForBatch = getLastWebTransaction(kioskId, materialId, entry.getKey());
+              mobTransHandler.addStockCountIfNeeded(lastWebTransactionForBatch, entry.getValue());
+              if (entry.getValue().size() == 2) {
+                // Stock count has been added. Update the transactions
+                transactions.add(0, entry.getValue().get(0));
+              }
+            }
+          } else {
+            mobTransHandler.addStockCountIfNeeded(lastWebTrans, transactions);
+          }
         } catch (LogiException e) {
           // Reject all transactions
           transactions.clear();
@@ -3887,9 +3900,18 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return kidLockStatusMap;
   }
 
+  private Map<String,List<ITransaction>> getBatchIdFirstTransactionMap(List<ITransaction> transactions) {
+    // Iterate through transactions and form a map of bid and first transaction for that batch
+    Map<String,List<ITransaction>> bidFirstTransactionMap = new HashMap<>();
+    transactions.stream().filter(transaction -> !bidFirstTransactionMap.containsKey(transaction.getBatchId()))
+        .forEach((transaction) -> bidFirstTransactionMap.put(transaction.getBatchId(),
+            new ArrayList<>(Arrays.asList(transaction))));
+    return bidFirstTransactionMap;
+  }
+
   public boolean validateMaterialBatchManagementUpdate(Long materialId) throws ServiceException {
     if (materialId == null) {
-      throw new ServiceException("Invalid or null kioskId {0} while changing batch management on material", materialId);
+      throw new ServiceException("Invalid or null materialId while changing batch management on material");
     }
     PersistenceManager pm = PMF.get().getPersistenceManager();
     boolean allowUpdate = false;
