@@ -36,6 +36,7 @@ import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.proto.RestConstantsZ;
@@ -103,7 +104,7 @@ public class LoginServlet extends JsonRestServlet {
 
   public void processGet(HttpServletRequest req, HttpServletResponse resp,
                          ResourceBundle backendMessages, ResourceBundle messages)
-      throws IOException, ServiceException {
+      throws IOException, ServiceException, ValidationException {
     String action = req.getParameter(RestConstantsZ.ACTION);
     if (RestConstantsZ.ACTION_LOGIN.equalsIgnoreCase(action)) {
       authenticateUser(req, resp, backendMessages, messages);
@@ -119,7 +120,7 @@ public class LoginServlet extends JsonRestServlet {
 
   public void processPost(HttpServletRequest req, HttpServletResponse resp,
                           ResourceBundle backendMessages, ResourceBundle messages)
-      throws IOException, ServiceException {
+      throws IOException, ServiceException, ValidationException {
     processGet(req, resp, backendMessages, messages);
   }
 
@@ -380,7 +381,7 @@ public class LoginServlet extends JsonRestServlet {
   }
 
   public void generateNewPassword(HttpServletRequest req, HttpServletResponse resp,
-                                  ResourceBundle backendMessages) {
+                                  ResourceBundle backendMessages) throws ValidationException {
     xLogger.fine("Entering forgot password");
     String message = null;
     boolean status = false;
@@ -480,7 +481,7 @@ public class LoginServlet extends JsonRestServlet {
   }
 
   public void validateForgotPassword(HttpServletRequest req, HttpServletResponse resp,
-                                     ResourceBundle backendMessages) {
+                                     ResourceBundle backendMessages) throws ValidationException {
     String otp = req.getParameter(OTP);
     String au = req.getParameter(AU);
     String type = req.getParameter(RestConstantsZ.TYPE);

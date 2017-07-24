@@ -179,7 +179,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         o.setItems(ds.getDemandItems(orderId));
       }
     } catch (JDOObjectNotFoundException e) {
-      throw new ObjectNotFoundException(e.getMessage());
+      throw new ObjectNotFoundException("O009", orderId);
     } catch (Exception e) {
       xLogger.severe("Exception in getOrder: {0}", e.getMessage(), e);
       throw new ServiceException(e.getMessage());

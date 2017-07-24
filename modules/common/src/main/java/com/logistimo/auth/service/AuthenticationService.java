@@ -26,6 +26,7 @@ package com.logistimo.auth.service;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
@@ -64,7 +65,7 @@ public interface AuthenticationService extends Service {
   String resetPassword(String userId, int mode, String otp, String src,
                               String au)
       throws ServiceException, ObjectNotFoundException, MessageHandlingException, IOException,
-      InputMismatchException;
+      InputMismatchException, ValidationException;
 
   String generateOTP(String userId, int mode, String src, Long domainId, String hostUri)
       throws MessageHandlingException, IOException, ServiceException, ObjectNotFoundException,
@@ -79,5 +80,5 @@ public interface AuthenticationService extends Service {
 
   String generatePassword(String id);
 
-  void validateOtpMMode(String userId, String otp);
+  void validateOtpMMode(String userId, String otp) throws ValidationException;
 }
