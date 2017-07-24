@@ -1486,7 +1486,7 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
             "toolTipSepChar": ": ",
             "legendPosition": "BOTTOM",
             "borderColor": "FFFFFF",
-            "entityBorderHoverThickness": "2",
+            //"entityBorderHoverThickness": "2",
             "interactiveLegend": 1,
             "exportEnabled": 1,
             "baseFontColor": "#000000"
@@ -2941,7 +2941,7 @@ domainControllers.controller('PredictiveController', ['$scope', '$timeout', '$sc
             "toolTipSepChar": ": ",
             "legendPosition": "BOTTOM",
             "borderColor": "FFFFFF",
-            "entityBorderHoverThickness": "2",
+            // "entityBorderHoverThickness": "2",
             "interactiveLegend": 1,
             "exportEnabled": 1
         };
