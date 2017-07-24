@@ -27,7 +27,10 @@ import com.logistimo.approvals.client.models.ApprovalFilters;
 import com.logistimo.constants.Constants;
 import com.logistimo.orders.approvals.constants.ApprovalConstants;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by charan on 22/06/17.
@@ -38,6 +41,7 @@ public class OrderApprovalFilters extends ApprovalFilters {
   private Long entityId;
   private Long orderId;
   private Integer requestType;
+  private List<Long> entityList;
 
   public Long getEntityId() {
     return entityId;
@@ -45,8 +49,10 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setEntityId(Long entityId) {
     this.entityId = entityId;
-    setAttributeKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID);
-    setAttributeValue(Objects.toString(entityId, Constants.EMPTY));
+    if (entityId != null) {
+      setAttributeKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID);
+      setAttributeValues(Collections.singletonList(Objects.toString(entityId)));
+    }
     return this;
   }
 
@@ -68,11 +74,23 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setRequestType(Integer requestType) {
     this.requestType = requestType;
-    setAttributeKey(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE);
-    setAttributeValue(Objects.toString(requestType, Constants.EMPTY));
+    if (requestType != null) {
+      setAttributeKey(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE);
+      setAttributeValues(Collections.singletonList(Objects.toString(requestType)));
+    }
     return this;
   }
 
   public Integer getRequestType() {return requestType;}
 
+  public void setEntityList(List<Long> entityList) {
+    this.entityList = entityList;
+    if (entityList != null && !entityList.isEmpty()) {
+      setAttributeKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID);
+      setAttributeValues(
+          entityList.stream()
+              .map(String::valueOf)
+              .collect(Collectors.toList()));
+    }
+  }
 }

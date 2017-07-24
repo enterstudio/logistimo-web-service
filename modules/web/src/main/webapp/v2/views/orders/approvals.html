@@ -65,7 +65,8 @@
                 <div class="row" ng-show="showMore" style="margin-bottom: 15px;">
                     <div class="col-sm-3">
                         <span class="filter-label">Request type</span>
-                        <select class="form-control" ng-model="reqType" disable="isDef(reqId) || isDef(aprId)">
+                        <select class="form-control" ng-model="reqType"
+                                ng-disabled="isDef(reqId) || isDef(aprId) || iMan || isDef(entity)">
                             <option value="">{{resourceBundle.all}}</option>
                             <option value="1">Purchase</option>
                             <option value="2">Sales</option>

@@ -2,6 +2,8 @@ package com.logistimo.approvals.client.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by charan on 22/06/17.
  */
@@ -34,7 +36,7 @@ public class ApprovalFilters {
   private String attributeKey;
 
   @SerializedName("attribute_value")
-  private String attributeValue;
+  private List<String> attributeValues;
 
   @SerializedName("domain_id")
   private long domainId;
@@ -132,12 +134,12 @@ public class ApprovalFilters {
     return this;
   }
 
-  public String getAttributeValue() {
-    return attributeValue;
+  public List<String> getAttributeValues() {
+    return attributeValues;
   }
 
-  public ApprovalFilters setAttributeValue(String attributeValue) {
-    this.attributeValue = attributeValue;
+  public ApprovalFilters setAttributeValues(List<String> attributeValues) {
+    this.attributeValues = attributeValues;
     return this;
   }
 

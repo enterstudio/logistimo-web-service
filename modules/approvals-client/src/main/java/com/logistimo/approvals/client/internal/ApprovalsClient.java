@@ -68,7 +68,7 @@ public class ApprovalsClient implements IApprovalsClient {
         new GetFilteredApprovalsCommand(restTemplate, configuration.getPath())
             .withApprover(approvalFilters.getApproverId())
             .withRequester(approvalFilters.getRequesterId())
-            .withAttribute(approvalFilters.getAttributeKey(), approvalFilters.getAttributeValue())
+            .withAttribute(approvalFilters.getAttributeKey(), approvalFilters.getAttributeValues())
             .withDomainId(approvalFilters.getDomainId())
             .withExpiringIn(approvalFilters.getExpiringInMinutes())
             .withOffset(approvalFilters.getOffset())

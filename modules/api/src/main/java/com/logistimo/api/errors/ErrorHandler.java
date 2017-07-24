@@ -150,7 +150,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     logWarning(request, e);
     ErrorResource
         error =
-        new ErrorResource("[Bad Request]", e.getLocalisedMessage(getLocale()));
+        new ErrorResource(e.getCode(), e.getLocalisedMessage(getLocale()));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.BAD_REQUEST, request);

@@ -188,4 +188,8 @@ public class SecurityUtils {
         .compareRoles(SecurityUtils.getUserDetails().getRole(), SecurityConstants.ROLE_DOMAINOWNER)
         >= 0;
   }
+
+  public static String getUsername() {
+    return getUserDetails().getUsername();
+  }
 }

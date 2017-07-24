@@ -26,10 +26,15 @@ package com.logistimo.orders.approvals.actions;
 import com.logistimo.approvals.client.IApprovalsClient;
 import com.logistimo.approvals.client.models.Approval;
 import com.logistimo.approvals.client.models.RestResponsePage;
+import com.logistimo.auth.utils.SecurityUtils;
+import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.orders.approvals.models.OrderApprovalFilters;
+import com.logistimo.services.ServiceException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by charan on 22/06/17.
@@ -40,7 +45,17 @@ public class GetOrderApprovalsAction {
   @Autowired
   IApprovalsClient approvalsClient;
 
-  public RestResponsePage<Approval> invoke(OrderApprovalFilters orderApprovalFilters) {
+  @Autowired
+  private EntitiesService entitiesService;
+
+  public RestResponsePage<Approval> invoke(OrderApprovalFilters orderApprovalFilters)
+      throws ServiceException {
+    if (!SecurityUtils.isAdmin() && orderApprovalFilters.getEntityId() == null) {
+      List<Long> kioskIds =
+          entitiesService.getKioskIdsForUser(SecurityUtils.getUsername(), null, null)
+              .getResults();
+      orderApprovalFilters.setEntityList(kioskIds);
+    }
     return approvalsClient.fetchApprovals(orderApprovalFilters);
   }
 }

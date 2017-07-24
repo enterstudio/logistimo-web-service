@@ -40,6 +40,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+
 /**
  * Created by naveensnair on 16/06/17.
  */
@@ -80,10 +82,10 @@ public class GetFilteredApprovalsCommand extends HystrixCommand<RestResponsePage
     return this;
   }
 
-  public GetFilteredApprovalsCommand withAttribute(String name, String value) {
-    if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
+  public GetFilteredApprovalsCommand withAttribute(String name, List<String> values) {
+    if (StringUtils.isNotBlank(name) && values != null && !values.isEmpty()) {
       uriBuilder.queryParam("attribute_key", name);
-      uriBuilder.queryParam("attribute_value", value);
+      uriBuilder.queryParam("attribute_value", values.toArray());
     }
     return this;
   }
