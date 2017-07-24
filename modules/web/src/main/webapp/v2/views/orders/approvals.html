@@ -66,8 +66,7 @@
                     <div class="col-sm-3">
                         <span class="filter-label">{{resourceBundle['approvals.request.type']}}</span>
                         <select class="form-control" ng-model="reqType"
-                                ng-disabled="isDef(reqId) || isDef(aprId) || iMan || isDef(entity)">
-
+                                ng-disabled="isDef(reqId) || isDef(aprId)">
                             <option value="">{{resourceBundle.all}}</option>
                             <option value="1">{{resourceBundle['approvals.purchase']}}</option>
                             <option value="2">{{resourceBundle['order.sales']}}</option>
