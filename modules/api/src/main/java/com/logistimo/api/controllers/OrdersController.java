@@ -36,7 +36,6 @@ import com.logistimo.api.models.OrderResponseModel;
 import com.logistimo.api.models.OrderStatusModel;
 import com.logistimo.api.models.OrderUpdateModel;
 import com.logistimo.api.models.PaymentModel;
-import com.logistimo.api.models.Permissions;
 import com.logistimo.api.models.UserContactModel;
 import com.logistimo.api.util.DedupUtil;
 import com.logistimo.auth.SecurityConstants;
@@ -133,8 +132,6 @@ public class OrdersController {
   private static final XLog xLogger = XLog.getLog(OrdersController.class);
   private static final String CACHE_KEY = "order";
 
-    private static final String PERMISSIONS = "permissions";
-
   @Autowired
   OrdersAPIBuilder builder;
 
@@ -162,25 +159,7 @@ public class OrdersController {
     if (domainIds != null && !domainIds.contains(domainId)) {
       throw new UnauthorizedException(CharacterConstants.EMPTY, HttpStatus.FORBIDDEN);
     }
-    model = builder.buildFullOrderModel(order, user, domainId);
-    model.setApprovalTypesModels(builder.buildOrderApprovalTypesModel(model, oms));
-    Integer approvalType = orderApprovalsService.getApprovalType(order);
-    boolean isApprovalRequired = false;
-    if (approvalType != null) {
-      model.setApprover(
-          builder.buildOrderApproverModel(user.getUsername(), approvalType, domainId, order));
-      isApprovalRequired = orderApprovalsService.isApprovalRequired(order, approvalType);
-    }
-    if (embed != null) {
-      for (String s : embed) {
-        if (s.equals(PERMISSIONS)) {
-          Permissions
-              permissions =
-              builder.buildPermissionModel(order, model, approvalType, isApprovalRequired);
-          model.setPermissions(permissions);
-        }
-      }
-    }
+    model = builder.buildFullOrderModel(order, user, domainId, embed);
     return model;
 
   }
@@ -330,7 +309,8 @@ public class OrdersController {
             user.getUsername(), status.msg, status.users,
             SourceConstants.WEB, null, status.cdrsn);
       }
-      return builder.buildOrderResponseModel(updOrder, true, user, domainId, true);
+      return builder.buildOrderResponseModel(updOrder, true, user, domainId, true,
+          OrdersAPIBuilder.DEFAULT_EMBED);
     } catch (ServiceException ie) {
       xLogger.severe("Error in updating order status", ie);
       if (ie.getCode() != null) {
@@ -510,7 +490,8 @@ public class OrdersController {
           updorder =
           oms.updateOrder(order, SourceConstants.WEB, true, true, user.getUsername());
       tx.commit();
-      return builder.buildOrderResponseModel(updorder, true, user, domainId, true);
+      return builder.buildOrderResponseModel(updorder, true, user, domainId, true,
+          OrdersAPIBuilder.DEFAULT_EMBED);
     } catch (InventoryAllocationException ie) {
       xLogger.severe("Error in updating demand items for order {0}", orderId, ie);
       if (ie.getCode() != null) {
@@ -618,7 +599,8 @@ public class OrdersController {
       UpdatedOrder updOrder = oms.updateOrder(order, SourceConstants.WEB);
       OrderResponseModel
           orderResponseModel =
-          builder.buildOrderResponseModel(updOrder, true, user, domainId, fullOrder);
+          builder.buildOrderResponseModel(updOrder, true, user, domainId, fullOrder,
+              fullOrder ? OrdersAPIBuilder.DEFAULT_EMBED : null);
       orderResponseModel.respData = labelText;
       return orderResponseModel;
     } catch (LogiException le) {

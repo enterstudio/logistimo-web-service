@@ -77,6 +77,7 @@ import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
+import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.Results;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
@@ -102,6 +103,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -115,6 +117,11 @@ import java.util.TreeSet;
 public class OrdersAPIBuilder {
 
   private static final XLog xLogger = XLog.getLog(OrdersAPIBuilder.class);
+
+  public static final String PERMISSIONS = "permissions";
+
+  public static final String[] DEFAULT_EMBED = new String[]{OrdersAPIBuilder.PERMISSIONS};
+
 
   @Autowired
   private IOrderApprovalsService orderApprovalsService;
@@ -602,9 +609,31 @@ public class OrdersAPIBuilder {
   }
 
   public OrderModel buildFullOrderModel(IOrder order, SecureUserDetails user,
-                                        Long domainId) throws Exception {
-    return buildOrderModel(order, user, domainId);
+                                        Long domainId, String[] embed) throws Exception {
+    OrderModel model = buildOrderModel(order, user, domainId);
+    includeApprovals(model, order, user, domainId,
+        embed != null && Arrays.asList(embed).contains(PERMISSIONS));
+    return model;
+  }
 
+  private void includeApprovals(OrderModel model, IOrder order, SecureUserDetails user,
+                                Long domainId, boolean includePermissions)
+      throws ServiceException, ObjectNotFoundException {
+    model.setApprovalTypesModels(buildOrderApprovalTypesModel(model,
+        Services.getService(OrderManagementServiceImpl.class, SecurityUtils.getLocale())));
+    Integer approvalType = orderApprovalsService.getApprovalType(order);
+    boolean isApprovalRequired = false;
+    if (approvalType != null) {
+      model.setApprover(
+          buildOrderApproverModel(user.getUsername(), approvalType, domainId, order));
+      isApprovalRequired = orderApprovalsService.isApprovalRequired(order, approvalType);
+    }
+    if (includePermissions) {
+      Permissions
+          permissions =
+          buildPermissionModel(order, model, approvalType, isApprovalRequired);
+      model.setPermissions(permissions);
+    }
   }
 
   public OrderModel buildOrderModel(IOrder order, SecureUserDetails user,
@@ -1001,12 +1030,13 @@ public class OrdersAPIBuilder {
 
   public OrderResponseModel buildOrderResponseModel(UpdatedOrder updOrder,
                                                     boolean includeOrder, SecureUserDetails sUser,
-                                                    Long domainId, boolean isFullOrder)
+                                                    Long domainId, boolean isFullOrder,
+                                                    String[] embed)
       throws Exception {
     OrderModel order = null;
     if (includeOrder) {
       if (isFullOrder) {
-        order = buildOrderModel(updOrder.order, sUser, domainId);
+        order = buildFullOrderModel(updOrder.order, sUser, domainId, embed);
       } else {
         order = build(updOrder.order, sUser, domainId, new HashMap<>());
       }
