@@ -5,13 +5,13 @@
             <form class="form-horizontal">
                 <div class="bgr" ng-show="ipa">
                     <div class="title-heading">
-                        Purchase order
+                        {{resourceBundle['approvals.purchase']}} {{resourceBundle['order.lowercase']}}
                     </div>
                     <div class="row">
                         <div class="col-sm-8">
-                            <span class="litetext">Specify the primary and secondary approvers for purchase order</span>
+                            <span class="litetext">{{resourceBundle['approvals.config.specify.approvers']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['transactions.purchase']}} {{resourceBundle['order.lowercase']}}</span>
                             <div class="form-group">
-                                <label class="col-sm-4 control-label top14">Primary approvers</label>
+                                <label class="col-sm-4 control-label top14">{{resourceBundle['approvals.primary.approvers']}}</label>
                                 <div class="col-sm-8">
                                     <div class="form-group" style="margin-top:15px;">
                                         <div class="col-sm-10">
@@ -25,7 +25,7 @@
                     <div class="row">
                         <div class="col-sm-8">
                             <div class="form-group">
-                                <label class="col-sm-4 control-label top14">Secondary approvers</label>
+                                <label class="col-sm-4 control-label top14">{{resourceBundle['approvals.secondary.approvers']}}</label>
                                 <div class="col-sm-8">
                                     <div class="form-group" style="margin-top:15px;">
                                         <div class="col-sm-10">
@@ -44,7 +44,7 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-8">
-                            <span class="litetext">Specify the primary and secondary approvers for sales order</span>
+                            <span class="litetext">{{resourceBundle['approvals.config.specify.approvers']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order.sales.lowercase']}} {{resourceBundle['order.lowercase']}}</span>
                             <div class="form-group">
                                 <label class="col-sm-4 control-label top14">Primary approvers</label>
                                 <div class="col-sm-8">

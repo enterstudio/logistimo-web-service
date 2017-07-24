@@ -46,40 +46,41 @@
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <span class="filter-label">Request status</span>
+                        <span class="filter-label">{{resourceBundle['approvals.request.status']}}</span>
                         <select class="form-control" ng-model="reqStatus">
                             <option value="">{{resourceBundle.all}}</option>
-                            <option value="pn">Pending</option>
-                            <option value="cn">Cancelled</option>
-                            <option value="rj">Rejected</option>
-                            <option value="ap">Approved</option>
-                            <option value="ex">Expired</option>
+                            <option value="pn">{{resourceBundle['approvals.pending']}}</option>
+                            <option value="cn">{{resourceBundle['approvals.cancelled']}}</option>
+                            <option value="rj">{{resourceBundle['approvals.rejected']}}</option>
+                            <option value="ap">{{resourceBundle['approvals.approved']}}</option>
+                            <option value="ex">{{resourceBundle['approvals.expired']}}</option>
                         </select>
                     </div>
                     <div class="col-sm-3" ng-show="reqStatus == 'pn'">
-                        <span class="filter-label">Expiry</span>
-                        <input type="text" class="form-control" ng-model="exp" autocomplete="off" placeholder="In hours"
+                        <span class="filter-label">{{resourceBundle['approvals.expiry']}}</span>
+                        <input type="text" class="form-control" ng-model="exp" autocomplete="off" placeholder="{{resourceBundle['approvals.expiry.in.hours']}}"
                                only-digits>
                     </div>
                 </div>
                 <div class="row" ng-show="showMore" style="margin-bottom: 15px;">
                     <div class="col-sm-3">
-                        <span class="filter-label">Request type</span>
+                        <span class="filter-label">{{resourceBundle['approvals.request.type']}}</span>
                         <select class="form-control" ng-model="reqType"
                                 ng-disabled="isDef(reqId) || isDef(aprId) || iMan || isDef(entity)">
+
                             <option value="">{{resourceBundle.all}}</option>
-                            <option value="1">Purchase</option>
-                            <option value="2">Sales</option>
-                            <option value="0">Transfer</option>
+                            <option value="1">{{resourceBundle['approvals.purchase']}}</option>
+                            <option value="2">{{resourceBundle['order.sales']}}</option>
+                            <option value="0">{{resourceBundle['approvals.transfer']}}</option>
                         </select>
                     </div>
                     <div class="col-sm-3">
-                        <span class="filter-label">Requester</span>
+                        <span class="filter-label">{{resourceBundle['approvals.requester']}}</span>
 
                         <div class="has-feedback">
                             <input type="text" ng-model="reqId" name="requesterId"
                                    autocomplete="off"
-                                   placeholder="Requester"
+                                   placeholder="{{resourceBundle['approvals.requester']}}"
                                    typeahead-wait-ms="300"
                                    ng-class="{'c-visited' : submitted}"
                                    typeahead-on-select="goToRequester(reqId)"
@@ -93,12 +94,12 @@
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <span class="filter-label">Approver</span>
+                        <span class="filter-label">{{resourceBundle['approvals.approver']}}</span>
 
                         <div class="has-feedback">
                             <input type="text" ng-model="aprId" name="approverId"
                                    autocomplete="off"
-                                   placeholder="Approver"
+                                   placeholder="{{resourceBundle['approvals.approver']}}"
                                    typeahead-wait-ms="300"
                                    ng-class="{'c-visited' : submitted}"
                                    typeahead-on-select="goToApprover(aprId)"
@@ -145,13 +146,13 @@
                     <thead>
                     <tr>
                         <th class="text-center">{{resourceBundle['serialnum']}}</th>
-                        <th class="text-center">Order</th>
-                        <th>Type</th>
-                        <th>Customer</th>
-                        <th>Vendor</th>
-                        <th>Request status</th>
-                        <th>Requester</th>
-                        <th>Approver(s)</th>
+                        <th class="text-center">{{resourceBundle['order']}}</th>
+                        <th>{{resourceBundle['approvals.type']}}</th>
+                        <th>{{resourceBundle['customer']}}</th>
+                        <th>{{resourceBundle['vendor.uppercase']}}</th>
+                        <th>{{resourceBundle['approvals.request.status']}}</th>
+                        <th>{{resourceBundle['approvals.requester']}}</th>
+                        <th>{{resourceBundle['approvals.approver']}}(s)</th>
                     </tr>
                     </thead>
                     <tbody ng-repeat="item in filtered" ng-controller="NoController" data-ng-switch
@@ -161,36 +162,36 @@
                         <td ng-click="toggle($index)" class="text-center"><a
                                 href="#/orders/detail/{{item.order.orderId}}/"
                                 target="_blank">{{item.order.orderId}}</a></td>
-                        <td ng-click="toggle($index)" ng-show="item.order.type == 1">Purchase</td>
-                        <td ng-click="toggle($index)" ng-show="item.order.type == 2">Sales</td>
-                        <td ng-click="toggle($index)" ng-show="item.order.type == 0">Transfer</td>
+                        <td ng-click="toggle($index)" ng-show="item.order.type == 1">{{resourceBundle['approvals.purchase']}}</td>
+                        <td ng-click="toggle($index)" ng-show="item.order.type == 2">{{resourceBundle['approvals.sales']}}</td>
+                        <td ng-click="toggle($index)" ng-show="item.order.type == 0">{{resourceBundle['approvals.transfer']}}</td>
                         <td ng-click="toggle($index)"><a href="#/setup/entities/detail/{{item.order.customer.id}}/"
                                                          target="_blank">{{item.order.customer.name}}</a><span
                                 class="litetext">{{item.order.customer.address}}</span></td>
                         <td ng-click="toggle($index)"><a href="#/setup/entities/detail/{{item.order.vendor.id}}/"
                                                          target="_blank">{{item.order.vendor.name}}</a><span
                                 class="litetext">{{item.order.vendor.address}}</span></td>
-                        <td ng-click="toggle($index)"><span ng-show="item.status.status == 'pn'">Pending</span>
-                            <span ng-show="item.status.status == 'rj'">Rejected</span>
-                            <span ng-show="item.status.status == 'cn'">Cancelled</span>
-                            <span ng-show="item.status.status == 'ap'">Approved</span>
-                            <span ng-show="item.status.status == 'ex'">Expired</span>
+                        <td ng-click="toggle($index)"><span ng-show="item.status.status == 'pn'">{{resourceBundle['approvals.pending']}}</span>
+                            <span ng-show="item.status.status == 'rj'">{{resourceBundle['approvals.rejected']}}</span>
+                            <span ng-show="item.status.status == 'cn'">{{resourceBundle['approvals.cancelled']}}</span>
+                            <span ng-show="item.status.status == 'ap'">{{resourceBundle['approvals.approved']}}</span>
+                            <span ng-show="item.status.status == 'ex'">{{resourceBundle['approvals.expired']}}</span>
                             <span class="litetext">{{item.status.updated_at | formatDate:this }}</span>
-                                <span class="litetext" ng-if="item.status.status == 'pn'">Expiry: <span
+                                <span class="litetext" ng-if="item.status.status == 'pn'">{{resourceBundle['approvals.expiry']}}: <span
                                         class="c-red">{{item.expires_at | fromNow:this}}</span></span></td>
                         <td ng-click="toggle($index)"><a
                                 ng-href="#/setup/users/all/details?userId={{item.requester.user_id}}" target="_blank">{{item.requester.name}}</a>
                             <span class="litetext">{{item.created_at | formatDate:this}}</span></td>
                         <td ng-click="toggle($index)">
                                 <span ng-show="'pn' == item.status.status">
-                                    <span class="litetext">Sent to:</span>
+                                    <span class="litetext">{{resourceBundle['approvals.sent.to']}}:</span>
                                     <span ng-repeat="it in item.approvers">
                                     <span ng-hide="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a>,&nbsp;</span>
                                     <span ng-show="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a></span>
                                     </span>
                                 </span>
                                 <span ng-show="item.status.status == 'ex'">
-                                    None
+                                    {{resourceBundle['approvals.approvers.none']}}
                                 </span>
                                 <span ng-show="item.status.status == 'rj' || item.status.status == 'cn' ||  item.status.status == 'ap'">
                                     <a href="#/setup/users/all/details?userId={{item.status.updated_by}}">{{item.status.name}}</a>
@@ -212,7 +213,7 @@
         <div class="row mt5" ng-show="filtered.length == 0">
             <div class="col-sm-12">
                 <p class=" alert alert-warning">
-                    No approvals found</p>
+                    {{resourceBundle['approvals.nil']}}</p>
             </div>
         </div>
         <div class="row">
