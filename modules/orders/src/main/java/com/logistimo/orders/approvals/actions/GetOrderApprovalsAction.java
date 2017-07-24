@@ -25,15 +25,19 @@ package com.logistimo.orders.approvals.actions;
 
 import com.logistimo.approvals.client.IApprovalsClient;
 import com.logistimo.approvals.client.models.Approval;
+import com.logistimo.approvals.client.models.AttributeFilter;
 import com.logistimo.approvals.client.models.RestResponsePage;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.entities.service.EntitiesService;
+import com.logistimo.orders.approvals.constants.ApprovalConstants;
 import com.logistimo.orders.approvals.models.OrderApprovalFilters;
+import com.logistimo.orders.entity.IOrder;
 import com.logistimo.services.ServiceException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,12 +54,27 @@ public class GetOrderApprovalsAction {
 
   public RestResponsePage<Approval> invoke(OrderApprovalFilters orderApprovalFilters)
       throws ServiceException {
-    if (!SecurityUtils.isAdmin() && orderApprovalFilters.getEntityId() == null) {
-      List<Long> kioskIds =
-          entitiesService.getKioskIdsForUser(SecurityUtils.getUsername(), null, null)
-              .getResults();
-      orderApprovalFilters.setEntityList(kioskIds);
-    }
+    checkManager(orderApprovalFilters);
     return approvalsClient.fetchApprovals(orderApprovalFilters);
+  }
+
+  private void checkManager(OrderApprovalFilters orderApprovalFilters) throws ServiceException {
+    if (!SecurityUtils.isAdmin()) {
+      if (orderApprovalFilters.getEntityId() == null) {
+        List<Long> kioskIds =
+            entitiesService.getKioskIdsForUser(SecurityUtils.getUsername(), null, null)
+                .getResults();
+        orderApprovalFilters.setEntityList(kioskIds);
+      }
+      if (orderApprovalFilters.getRequestType() == null) {
+        orderApprovalFilters.addAttribute(
+            new AttributeFilter()
+                .setKey(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE)
+                .setValues(
+                    Arrays.asList(String.valueOf(IOrder.PURCHASE_ORDER),
+                        String.valueOf(IOrder.SALES_ORDER))));
+      }
+
+    }
   }
 }

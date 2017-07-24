@@ -435,7 +435,7 @@ public class OrdersAPIBuilder {
         if (approvalMapping != null) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             if (orderModel.atc) {
-              permissions.add(PermissionConstants.CANCEL);
+              //permissions.add(PermissionConstants.CANCEL);
             }
           } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
@@ -462,7 +462,7 @@ public class OrdersAPIBuilder {
         if (approvalMapping != null) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
             if (orderModel.atv) {
-              permissions.add(PermissionConstants.CANCEL);
+              //permissions.add(PermissionConstants.CANCEL);
             }
           } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
@@ -492,7 +492,7 @@ public class OrdersAPIBuilder {
       } else if (IOrder.TRANSFER_ORDER == approvalType) {
         if (approvalMapping != null) {
           if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
-            permissions.add(PermissionConstants.CANCEL);
+            //permissions.add(PermissionConstants.CANCEL);
 
           } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus())
               || ApprovalConstants.REJECTED.equals(approvalMapping.getStatus())

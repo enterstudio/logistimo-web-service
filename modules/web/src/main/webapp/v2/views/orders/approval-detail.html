@@ -71,7 +71,8 @@
                             {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && !isApprover && isDef(approval.approvers)">{{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}}
+                                ng-show="request == true && isDef(approval.approvers)">
+                            {{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('cn')"
                                 ng-show="cancelApproval == true && !isApprover">{{resourceBundle['approvals.cancel']}} {{resourceBundle['approval.lowercase']}}

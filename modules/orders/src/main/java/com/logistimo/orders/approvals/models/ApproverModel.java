@@ -35,12 +35,23 @@ public class ApproverModel extends UserContactModel {
   @SerializedName("approver_type")
   private String approverType;
 
+  @SerializedName("approver_status")
+  private String approverStatus;
+
   public String getApproverType() {
     return approverType;
   }
 
   public void setApproverType(String approverType) {
     this.approverType = approverType;
+  }
+
+  public String getApproverStatus() {
+    return approverStatus;
+  }
+
+  public void setApproverStatus(String approverStatus) {
+    this.approverStatus = approverStatus;
   }
 
 }

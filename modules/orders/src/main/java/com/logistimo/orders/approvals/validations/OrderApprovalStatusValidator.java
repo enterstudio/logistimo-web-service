@@ -43,8 +43,7 @@ public class OrderApprovalStatusValidator {
                        Locale locale) throws ValidationException {
     ApprovalType approvalType = approvalRequestModel.getApprovalType();
     if (ApprovalType.PURCHASE_ORDER.equals(approvalType)) {
-      if (!(order.getStatus().equals(IOrder.PENDING) || order.getStatus()
-          .equals(IOrder.CONFIRMED))) {
+      if (!(order.getStatus().equals(IOrder.PENDING))) {
         throw new ValidationException("OA001", order.getIdString(),
             OrderUtils.getStatusDisplay(order.getStatus(), locale));
       } else if (!(order.isVisibleToCustomer() && !order.isVisibleToVendor())) {

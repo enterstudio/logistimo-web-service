@@ -70,7 +70,7 @@
                             <option value="">{{resourceBundle.all}}</option>
                             <option value="1">{{resourceBundle['approvals.purchase']}}</option>
                             <option value="2">{{resourceBundle['order.sales']}}</option>
-                            <option value="0">{{resourceBundle['approvals.transfer']}}</option>
+                            <option value="0" ng-hide="iMan">{{resourceBundle['approvals.transfer']}}</option>
                         </select>
                     </div>
                     <div class="col-sm-3">
@@ -85,7 +85,7 @@
                                    typeahead-on-select="goToRequester(reqId)"
                                    uib-typeahead="usr as usr for usr in  getFilteredRequesters($viewValue) | limitTo:8"
                                    class="form-control" typeahead-editable="false"
-                                   ng-disabled="isDef(entity) || isDef(aprId) || isDef(ordId) || isDef(reqType)"/>
+                                   ng-disabled="isDef(ordId)"/>
                             <span ng-show="loadingRequesterId" class="form-control-feedback typehead-loading"
                                   aria-hidden="true">
                                 <span class="glyphicons glyphicons-cogwheel spin"></span>
@@ -104,7 +104,7 @@
                                    typeahead-on-select="goToApprover(aprId)"
                                    uib-typeahead="usr as usr for usr in  getFilteredApprovers($viewValue) | limitTo:8"
                                    class="form-control" typeahead-editable="false"
-                                   ng-disabled="isDef(entity) || isDef(reqId) || isDef(ordId) || isDef(reqType)"/>
+                                   ng-disabled="isDef(ordId)"/>
                             <span ng-show="loadingApproverId" class="form-control-feedback typehead-loading"
                                   aria-hidden="true">
                                 <span class="glyphicons glyphicons-cogwheel spin"></span>
@@ -161,9 +161,11 @@
                         <td ng-click="toggle($index)" class="text-center"><a
                                 href="#/orders/detail/{{item.order.orderId}}/"
                                 target="_blank">{{item.order.orderId}}</a></td>
-                        <td ng-click="toggle($index)" ng-show="item.order.type == 1">{{resourceBundle['approvals.purchase']}}</td>
-                        <td ng-click="toggle($index)" ng-show="item.order.type == 2">{{resourceBundle['approvals.sales']}}</td>
-                        <td ng-click="toggle($index)" ng-show="item.order.type == 0">{{resourceBundle['approvals.transfer']}}</td>
+                        <td ng-click="toggle($index)" ng-show="item.approval_type == 1">{{resourceBundle['approvals.purchase']}}</td>
+                        <td ng-click="toggle($index)" ng-show="item.approval_type == 2">
+                            {{resourceBundle['order.sales']}}
+                        </td>
+                        <td ng-click="toggle($index)" ng-show="item.approval_type == 0">{{resourceBundle['approvals.transfer']}}</td>
                         <td ng-click="toggle($index)"><a href="#/setup/entities/detail/{{item.order.customer.id}}/"
                                                          target="_blank">{{item.order.customer.name}}</a><span
                                 class="litetext">{{item.order.customer.address}}</span></td>
@@ -185,8 +187,10 @@
                                 <span ng-show="'pn' == item.status.status">
                                     <span class="litetext">{{resourceBundle['approvals.sent.to']}}:</span>
                                     <span ng-repeat="it in item.approvers">
-                                    <span ng-hide="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a>,&nbsp;</span>
-                                    <span ng-show="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a></span>
+                                        <span ng-show="it.approver_status == 'ac'">
+                                            <span ng-hide="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a>,&nbsp;</span>
+                                            <span ng-show="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a></span>
+                                        </span>
                                     </span>
                                 </span>
                                 <span ng-show="item.status.status == 'ex'">

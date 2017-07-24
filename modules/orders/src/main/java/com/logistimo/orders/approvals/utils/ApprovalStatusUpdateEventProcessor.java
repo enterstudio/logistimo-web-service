@@ -92,10 +92,10 @@ public class ApprovalStatusUpdateEventProcessor {
 
         IUserAccount requester = usersService.getUserAccount(event.getRequesterId());
 
-        MessageService messageService = MessageService
-            .getInstance(MessageService.SMS, requester.getCountry());
-
         IKiosk kiosk = entitiesService.getKiosk(orderApprovalMapping.getKioskId());
+
+        MessageService messageService = MessageService.getInstance(
+            MessageService.SMS, requester.getCountry(), true, kiosk.getDomainId(), null, null);
 
         String resolvedMessage = getMessage(event, orderApprovalMapping, requester, kiosk);
 
@@ -129,7 +129,7 @@ public class ApprovalStatusUpdateEventProcessor {
     values.put("requestorName", requester.getFullName());
     values.put("requestorPhone", requester.getMobilePhoneNumber());
     values.put("eName", kiosk.getName());
-    values.put("eCity", requester.getCity());
+    values.put("eCity", kiosk.getCity());
     values.put("orderId", event.getTypeId());
     values.put("statusChangedTime", LocalDateUtil.format(event.getUpdatedAt(),
         requester.getLocale(), requester.getTimezone()));

@@ -645,6 +645,10 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 }
             };
             $scope.checkStatusList = function () {
+                if ($scope.dp.vp) {
+                    $scope.statusList = [];
+                    return;
+                }
                 var shipmentSize = $scope.shipmentList.length;
                 switch ($scope.order.st) {
                     case ORDER.PENDING:
@@ -1086,7 +1090,9 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
             };
 
             $scope.updatePermissions = function() {
-                if(checkNotNullEmpty($scope.order.permissions) && checkNotNullEmpty($scope.order.permissions.permissions)) {
+                if (checkNotNullEmpty($scope.order.permissions) &&
+                    checkNotNullEmpty($scope.order.permissions.permissions) && !$scope.dp.vp) {
+
                     $scope.order.permissions.permissions.forEach(function(data) {
                         if(data == 'cancel') {
                             $scope.cancelPermission = true;
@@ -1252,12 +1258,21 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 $scope.fetchOrder();
             }
 
+        $scope.shouldShowStatusChange = function () {
+            if (checkNotNullEmpty($scope.statusList)) {
+                return $scope.statusList.some(function (status) {
+                    return !$scope.checkHideStatus(status);
+                })
+            }
+            return false;
+        };
+
             $scope.checkHideStatus = function (status) {
                 return (checkNotNullEmpty(status) && (status == 'cm' || status == 'fl'));
-            }
+            };
             $scope.hasStatus = function (status) {
                 return (checkNotNullEmpty($scope.statusList) && $scope.statusList.indexOf(status) > -1);
-            }
+            };
 
 
             $scope.getInventory = function (mIds) {

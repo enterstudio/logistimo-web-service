@@ -111,11 +111,19 @@ public class ApprovalsBuilder {
     request.setTypeId(order.getIdString());
     request.setSourceDomainId(order.getDomainId());
     request.setDomains(order.getDomainIds());
-    Map<String, String> attributes = new HashMap<>(2);
-    attributes.put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getKioskId()));
+    Map<String, String> attributes = new HashMap<>(3);
     attributes.put(ApprovalConstants.ATTRIBUTE_ORDER_TYPE, String.valueOf(order.getOrderType()));
     attributes
         .put(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE, String.valueOf(approvalType.getValue()));
+    switch (approvalType) {
+      case SALES_ORDER:
+      case TRANSFERS:
+        attributes
+            .put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getServicingKiosk()));
+        break;
+      default:
+        attributes.put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getKioskId()));
+    }
     request.setAttributes(attributes);
     request.setMessage(msg);
     request.setRequesterId(userId);
@@ -204,6 +212,11 @@ public class ApprovalsBuilder {
     }
     model.setStatus(statusModel);
     model.setRequester(buildRequestorModel(approval.getRequesterId(), approval.getId()));
+    if(approval.getAttributes() != null && !approval.getAttributes().isEmpty()) {
+      approval.getAttributes().stream()
+          .filter(at -> at.getKey().equals(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE))
+          .forEach(at -> model.setApprovalType(ApprovalType.get(Integer.parseInt(at.getValue()))));
+    }
 
     if (embed != null) {
       for (String s : embed) {
@@ -245,6 +258,7 @@ public class ApprovalsBuilder {
     for (ApproverQueue queue : approverQueueSet) {
       ApproverModel model = new ApproverModel();
       model.setApproverType(queue.getType());
+      model.setApproverStatus(queue.getApproverStatus());
       try {
         userBuilder.buildUserContactModel(queue.getUserId(), model);
       } catch (ObjectNotFoundException e) {

@@ -69,10 +69,10 @@ public class ApproverStatusUpdateEventProcessor {
         IUserAccount requester = usersService.getUserAccount(event.getRequesterId());
         IUserAccount userAccount = usersService.getUserAccount(event.getUserId());
 
-        MessageService messageService = MessageService.getInstance(
-            MessageService.SMS, userAccount.getCountry());
-
         IKiosk kiosk = entitiesService.getKiosk(orderApprovalMapping.getKioskId());
+
+        MessageService messageService = MessageService.getInstance(
+            MessageService.SMS, userAccount.getCountry(), true, kiosk.getDomainId(), null, null);
 
         List<String> nextApproverNames = new ArrayList<>();
 
@@ -105,7 +105,7 @@ public class ApproverStatusUpdateEventProcessor {
     values.put("requestorName", requester.getFullName());
     values.put("requestorPhone", requester.getMobilePhoneNumber());
     values.put("eName", kiosk.getName());
-    values.put("eCity", requester.getCity());
+    values.put("eCity", kiosk.getCity());
     values.put("requestedAt", LocalDateUtil.format(event.getRequestedAt(),
         requester.getLocale(), requester.getTimezone()));
 
