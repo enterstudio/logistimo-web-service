@@ -243,17 +243,15 @@ public class ApprovalsBuilder {
     List<ApproverModel> approverModels = new ArrayList<>(1);
     Set<ApproverQueue> approverQueueSet = approval.getApprovers();
     for (ApproverQueue queue : approverQueueSet) {
-      if(queue.getApproverStatus().equals(ApprovalConstants.APPROVER_STATUS_ACTIVE)) {
-        ApproverModel model = new ApproverModel();
-        model.setApproverType(queue.getType());
-        try {
-          userBuilder.buildUserContactModel(queue.getUserId(), model);
-        } catch (ObjectNotFoundException e) {
-          LOGGER.info("Unable to find approver {0} defined for approval {1}", queue.getUserId(),
-              queue.getApprovalId());
-        }
-        approverModels.add(model);
+      ApproverModel model = new ApproverModel();
+      model.setApproverType(queue.getType());
+      try {
+        userBuilder.buildUserContactModel(queue.getUserId(), model);
+      } catch (ObjectNotFoundException e) {
+        LOGGER.info("Unable to find approver {0} defined for approval {1}", queue.getUserId(),
+            queue.getApprovalId());
       }
+      approverModels.add(model);
     }
     return approverModels;
   }
