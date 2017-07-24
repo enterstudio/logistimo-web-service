@@ -266,7 +266,8 @@ public class OrdersController {
       UpdatedOrder updOrder;
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
       IOrder o = oms.getOrder(orderId,true);
-      if(!status.orderUpdatedAt.equals(LocalDateUtil.formatCustom(o.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
+      if (status.orderUpdatedAt != null && !status.orderUpdatedAt
+          .equals(LocalDateUtil.formatCustom(o.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
         throw new LogiException("O004", user.getUsername(), LocalDateUtil.format(o.getUpdatedOn(), user.getLocale(), user.getTimezone()));
       }
       if (IOrder.COMPLETED.equals(status.st) || IOrder.FULFILLED.equals(status.st)) {

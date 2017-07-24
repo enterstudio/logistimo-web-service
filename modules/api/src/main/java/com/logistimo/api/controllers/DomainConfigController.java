@@ -2427,8 +2427,7 @@ public class DomainConfigController {
             "Error in updating Approvals configuration");
       }
       ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
-      DomainConfig dc = cc.dc;
-      ApprovalsConfig.OrderConfig orderConfig = builder.buildApprovalsOrderConfig(model, dc);
+      ApprovalsConfig.OrderConfig orderConfig = builder.buildApprovalsOrderConfig(model);
       ApprovalsConfig approvalsConfig = new ApprovalsConfig();
       approvalsConfig.setOrderConfig(orderConfig);
       cc.dc.setApprovalsConfig(approvalsConfig);

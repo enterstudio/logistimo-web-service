@@ -50,7 +50,8 @@ public class ApproverStatusUpdateEventProcessor {
   private static final XLog xLogger = XLog.getLog(ApproverStatusUpdateEventProcessor.class);
 
   @Handler
-  public void execute(ApproverStatusUpdateEvent event) throws ServiceException {
+  public void execute(ApproverStatusUpdateEvent event)
+      throws ServiceException, MessageHandlingException, IOException {
 
     jmsMeter.mark();
     xLogger.info("Approver status update event received - {0}", event);
@@ -87,13 +88,7 @@ public class ApproverStatusUpdateEventProcessor {
         messageService.send(userAccount, message, MessageService.NORMAL, null, null, null);
 
       } catch (ObjectNotFoundException e) {
-        e.printStackTrace();
-      } catch (MessageHandlingException e) {
         xLogger.warn("Error in building message status", e);
-      } catch (IOException e) {
-        xLogger.warn("Error in sending message ", e);
-      } catch (Exception e) {
-        xLogger.warn("Error in handling approver message - ", e);
       }
     }
   }
