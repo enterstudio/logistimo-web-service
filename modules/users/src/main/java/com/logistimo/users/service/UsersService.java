@@ -53,7 +53,7 @@ public interface UsersService extends Service {
   /**
    * Add a new user account
    */
-  String addAccount(Long domainId, IUserAccount account) throws ServiceException;
+  IUserAccount addAccount(Long domainId, IUserAccount account) throws ServiceException;
 
   /**
    * Get a user account, given the domain and user ID (also gets kiosks associated with this user); using 'deep=false' in alternate method will only retrieve the user object

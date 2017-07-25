@@ -406,8 +406,8 @@ public class UsersController {
     try {
       UsersService as = Services.getService(UsersServiceImpl.class, locale);
       if (ua.getUserId() != null) {
-        long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-        as.addAccount(domainId, ua);
+        long domainId = SecurityUtils.getCurrentDomainId();
+        ua = as.addAccount(domainId, ua);
         xLogger.info("AUDITLOG \t {0} \t {1} \t USER \t " +
                 "CREATE \t {2} \t {3}", domainId, sUser.getUsername(), ua.getUserId(),
             ua.getFullName());

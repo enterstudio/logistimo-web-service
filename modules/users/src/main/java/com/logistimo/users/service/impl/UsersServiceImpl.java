@@ -140,7 +140,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
    * Add a new user account
    */
   @SuppressWarnings("finally")
-  public String addAccount(Long domainId, IUserAccount account) throws ServiceException {
+  public IUserAccount addAccount(Long domainId, IUserAccount account) throws ServiceException {
     xLogger.fine("Entering addAccount");
 
     if (domainId == null || account == null) {
@@ -250,7 +250,7 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       throw new ServiceException(errMsg, exception);
     }
 
-    return accountId;
+    return account;
   }
 
   @SuppressWarnings("unchecked")
