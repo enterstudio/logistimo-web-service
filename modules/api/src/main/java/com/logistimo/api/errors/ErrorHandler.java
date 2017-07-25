@@ -27,6 +27,8 @@ import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.ConfigurationServiceException;
 import com.logistimo.exception.ErrorResource;
+import com.logistimo.exception.ExceptionUtils;
+import com.logistimo.exception.ExceptionWithCodes;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.InvalidTaskException;
@@ -63,6 +65,7 @@ import java.util.Locale;
 public class ErrorHandler extends ResponseEntityExceptionHandler {
 
   private static final XLog XLOGGER = XLog.getLog(ErrorHandler.class);
+  public static final String GENERAL_SYSTEM_ERROR = "G001";
 
 
   @ExceptionHandler({InvalidServiceException.class})
@@ -81,7 +84,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     logWarning(request, e);
     String message = e.getMessage();
     if (StringUtils.isBlank(message)) {
-      message = LogiException.constructMessage("G002",
+      message = ExceptionUtils.constructMessage("G002",
           getLocale(), null);
     }
     ErrorResource error = new ErrorResource("[Unauthorized]", message);
@@ -147,7 +150,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     logWarning(request, e);
     ErrorResource
         error =
-        new ErrorResource("[Bad Request]", e.getLocalisedMessage(getLocale()));
+        new ErrorResource(e.getCode(), e.getLocalisedMessage(getLocale()));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.BAD_REQUEST, request);
@@ -192,11 +195,27 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     log(request, e);
     ErrorResource
         error =
-        new ErrorResource("[System error]", LogiException.constructMessage("G001",
-            getLocale(), null));
+        new ErrorResource(getCode(e), getMessage(e));
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return handleExceptionInternal(e, error, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
+  }
+
+  private String getCode(Exception e) {
+    if (e instanceof ExceptionWithCodes) {
+      return ((ExceptionWithCodes) e).getCode();
+    } else {
+      return GENERAL_SYSTEM_ERROR;
+    }
+  }
+
+  private String getMessage(Exception e) {
+    if (e instanceof ExceptionWithCodes) {
+      return ((ExceptionWithCodes) e).getLocalisedMessage(getLocale());
+    } else {
+      return ExceptionUtils.constructMessage(GENERAL_SYSTEM_ERROR,
+          getLocale(), null);
+    }
   }
 
   private void log(WebRequest request, Throwable throwable) {

@@ -65,17 +65,8 @@ public class ApprovalsClient implements IApprovalsClient {
   public RestResponsePage<Approval> fetchApprovals(ApprovalFilters approvalFilters) {
     GetFilteredApprovalsCommand
         command =
-        new GetFilteredApprovalsCommand(restTemplate, configuration.getPath())
-            .withApprover(approvalFilters.getApproverId())
-            .withRequester(approvalFilters.getRequesterId())
-            .withAttribute(approvalFilters.getAttributeKey(), approvalFilters.getAttributeValue())
-            .withDomainId(approvalFilters.getDomainId())
-            .withExpiringIn(approvalFilters.getExpiringInMinutes())
-            .withOffset(approvalFilters.getOffset())
-            .withSize(approvalFilters.getSize())
-            .withStatus(approvalFilters.getStatus())
-            .withType(approvalFilters.getType(), approvalFilters.getTypeId())
-            .withOrderedBy(approvalFilters.getOrderedBy());
+        new GetFilteredApprovalsCommand(restTemplate,
+            configuration.getUrl() + "/v1/approvals-search", approvalFilters);
     return command.execute();
   }
 

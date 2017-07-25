@@ -23,27 +23,22 @@
 
 package com.logistimo.exception;
 
-import com.logistimo.services.Resources;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  * Exception handler based on error codes
  *
  * @author Mohan Raja
  */
-public class LogiException extends Exception {
+public class LogiException extends Exception implements ExceptionWithCodes {
   private final transient Object[] arguments;
   private final String code;
   private int statusCode = 500;
 
 
   public LogiException(String code, Locale locale, Object... arguments) {
-    super(constructMessage(code, locale, arguments));
+    super(ExceptionUtils.constructMessage(code, locale, arguments));
     this.arguments = arguments;
     this.code = code;
   }
@@ -61,13 +56,13 @@ public class LogiException extends Exception {
   }
 
   public LogiException(String code, Throwable t, Object... arguments) {
-    super(constructMessage(code, Locale.ENGLISH, arguments), t);
+    super(ExceptionUtils.constructMessage(code, Locale.ENGLISH, arguments), t);
     this.code = code;
     this.arguments = arguments;
   }
 
   public LogiException(String code, Object... arguments) {
-    super(constructMessage(code, Locale.ENGLISH, arguments));
+    super(ExceptionUtils.constructMessage(code, Locale.ENGLISH, arguments));
     this.code = code;
     this.arguments = arguments;
   }
@@ -78,36 +73,17 @@ public class LogiException extends Exception {
     code = null;
   }
 
-  /**
-   * @return error message
-   */
-  public static String constructMessage(String code, Locale locale, Object[] params) {
-    ResourceBundle
-        errors =
-        Resources.get().getBundle("errors", locale != null ? locale : Locale.ENGLISH);
-    String message;
-    try {
-      message = errors.getString(code);
-      if (params != null && params.length > 0) {
-        return MessageFormat.format(message, params);
-      } else if (StringUtils.isNotEmpty(message)) {
-        return message;
-      }
-    } catch (Exception ignored) {
-      // ignored
-    }
-    return code;
-  }
-
   public String getCode() {
     return code;
   }
 
-  public String getLocalisedMessage(Locale locale) {
-    if (StringUtils.isNotBlank(code)) {
-      return constructMessage(code, locale, arguments);
-    }
-    return getLocalizedMessage();
+  @Override
+  public Object[] getArguments() {
+    return arguments;
+  }
+
+  public String getMessage() {
+    return ExceptionUtils.constructMessage(code, Locale.getDefault(), arguments);
   }
 
   public int getStatusCode() {

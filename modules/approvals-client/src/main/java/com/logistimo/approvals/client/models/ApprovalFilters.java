@@ -2,6 +2,9 @@ package com.logistimo.approvals.client.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by charan on 22/06/17.
  */
@@ -30,11 +33,7 @@ public class ApprovalFilters {
   @SerializedName("approver_status")
   private String approverStatus;
 
-  @SerializedName("attribute_key")
-  private String attributeKey;
-
-  @SerializedName("attribute_value")
-  private String attributeValue;
+  private List<AttributeFilter> attributes = new ArrayList<>(1);
 
   @SerializedName("domain_id")
   private long domainId;
@@ -123,24 +122,6 @@ public class ApprovalFilters {
     return this;
   }
 
-  public String getAttributeKey() {
-    return attributeKey;
-  }
-
-  public ApprovalFilters setAttributeKey(String attributeKey) {
-    this.attributeKey = attributeKey;
-    return this;
-  }
-
-  public String getAttributeValue() {
-    return attributeValue;
-  }
-
-  public ApprovalFilters setAttributeValue(String attributeValue) {
-    this.attributeValue = attributeValue;
-    return this;
-  }
-
   public long getDomainId() {
     return domainId;
   }
@@ -157,5 +138,18 @@ public class ApprovalFilters {
   public ApprovalFilters setOrderedBy(String orderedBy) {
     this.orderedBy = orderedBy;
     return this;
+  }
+
+  public List<AttributeFilter> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(
+      List<AttributeFilter> attributes) {
+    this.attributes = attributes;
+  }
+
+  public void addAttribute(AttributeFilter attributeFilter) {
+    this.attributes.add(attributeFilter);
   }
 }

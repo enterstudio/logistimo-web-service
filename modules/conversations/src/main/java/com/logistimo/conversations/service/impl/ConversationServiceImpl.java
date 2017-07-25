@@ -40,6 +40,8 @@ import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -229,12 +231,15 @@ public class ConversationServiceImpl extends ServiceImpl implements Conversation
       }
       if (conversationId != null) {
         iMessage = JDOUtils.createInstance(IMessage.class);
+        if (!StringUtils.isBlank(message)) {
+          iMessage.setConversationId(conversationId);
+          iMessage.setCreateDate(cdate);
+          iMessage.setMessage(message);
+          iMessage.setUserId(updatingUserId);
+          localPm.makePersistent(iMessage);
+          iMessage = localPm.detachCopy(iMessage);
+        }
         iMessage.setConversationId(conversationId);
-        iMessage.setCreateDate(cdate);
-        iMessage.setMessage(message);
-        iMessage.setUserId(updatingUserId);
-        localPm.makePersistent(iMessage);
-        iMessage = localPm.detachCopy(iMessage);
       }
       if (tx != null) {
         tx.commit();

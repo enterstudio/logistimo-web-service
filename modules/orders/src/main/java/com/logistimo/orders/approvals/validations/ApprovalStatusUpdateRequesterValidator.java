@@ -47,14 +47,15 @@ public class ApprovalStatusUpdateRequesterValidator {
   public void validate(IOrderApprovalMapping orderApprovalMapping,
                        SecureUserDetails userDetails,
                        StatusModel statusModel) throws ValidationException {
-    if(statusModel.getStatus().equals(ApprovalConstants.CANCELLED)) {
+    if (orderApprovalMapping != null && statusModel.getStatus()
+        .equals(ApprovalConstants.CANCELLED)) {
         Long kioskId = orderApprovalMapping.getKioskId();
       try {
         if(!EntityAuthoriser.authoriseEntity(userDetails, kioskId)){
           throw new ValidationException("OA015", userDetails.getLocale(), kioskId);
         }
       } catch (ServiceException e) {
-        throw new SystemException(e);
+        throw new SystemException(e, "OA020");
       }
     }
   }

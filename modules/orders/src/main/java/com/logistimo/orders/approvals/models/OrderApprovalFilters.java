@@ -24,10 +24,14 @@
 package com.logistimo.orders.approvals.models;
 
 import com.logistimo.approvals.client.models.ApprovalFilters;
+import com.logistimo.approvals.client.models.AttributeFilter;
 import com.logistimo.constants.Constants;
 import com.logistimo.orders.approvals.constants.ApprovalConstants;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by charan on 22/06/17.
@@ -38,6 +42,7 @@ public class OrderApprovalFilters extends ApprovalFilters {
   private Long entityId;
   private Long orderId;
   private Integer requestType;
+  private List<Long> entityList;
 
   public Long getEntityId() {
     return entityId;
@@ -45,8 +50,11 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setEntityId(Long entityId) {
     this.entityId = entityId;
-    setAttributeKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID);
-    setAttributeValue(Objects.toString(entityId, Constants.EMPTY));
+    if (entityId != null) {
+      this.addAttribute(
+          new AttributeFilter().setKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID).setValues(
+              Collections.singletonList(Objects.toString(entityId))));
+    }
     return this;
   }
 
@@ -56,8 +64,10 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setOrderId(Long orderId) {
     this.orderId = orderId;
-    setType("ORDER");
-    setTypeId(Objects.toString(orderId, Constants.EMPTY));
+    if (orderId != null) {
+      setType("ORDER");
+      setTypeId(String.valueOf(orderId));
+    }
     return this;
   }
 
@@ -68,11 +78,27 @@ public class OrderApprovalFilters extends ApprovalFilters {
 
   public OrderApprovalFilters setRequestType(Integer requestType) {
     this.requestType = requestType;
-    setAttributeKey(ApprovalConstants.ATTRIBUTE_ORDER_TYPE);
-    setAttributeValue(Objects.toString(requestType, Constants.EMPTY));
+    if (requestType != null) {
+      this.addAttribute(
+          new AttributeFilter().setKey(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE).setValues(
+              Collections.singletonList(Objects.toString(requestType))));
+    }
     return this;
   }
 
-  public Integer getRequestType() {return requestType;}
+  public Integer getRequestType() {
+    return requestType;
+  }
 
+  public void setEntityList(List<Long> entityList) {
+    this.entityList = entityList;
+    System.out.print(true);
+    if (entityList != null && !entityList.isEmpty()) {
+      this.addAttribute(
+          new AttributeFilter().setKey(ApprovalConstants.ATTRIBUTE_KIOSK_ID).setValues(
+              entityList.stream()
+                  .map(String::valueOf)
+                  .collect(Collectors.toList())));
+    }
+  }
 }

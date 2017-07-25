@@ -150,22 +150,18 @@ authControllers.controller('ForgotPasswordController', ['$scope', 'iAuthService'
                 }
                 iAuthService.generateOtp($scope.fpw).then(function(data){
                     $scope.fpResponse = data.data;
-                    if ($scope.fpResponse.isError) {
-                        $scope.invalid = true;
-                        $scope.showMsg = true;
-                        $scope.errorMsg = $scope.fpResponse.errorMsg;
-                    } else {
-                        $scope.invalid = false;
-                        $scope.errorMsg = undefined;
-                        $scope.showSuccess($scope.fpResponse.errorMsg);
-                        $scope.resetPwd = true;
-                        if (!$scope.newotp && $scope.fpw.mode == '0') {
-                            $scope.otp = false;
-                            $scope.toggleOTP();
-                        }
+                    $scope.invalid = false;
+                    $scope.errorMsg = undefined;
+                    $scope.showSuccess($scope.fpResponse.errorMsg);
+                    $scope.resetPwd = true;
+                    if (!$scope.newotp && $scope.fpw.mode == '0') {
+                        $scope.otp = false;
+                        $scope.toggleOTP();
                     }
                 }).catch(function error(msg){
-                    $scope.showErrorMsg(msg);
+                    $scope.invalid = true;
+                    $scope.showMsg = true;
+                    $scope.errorMsg = msg.data.message;
                 }).finally(function (){
                     $scope.fLoading = false;
                     $scope.nLoading = false;
@@ -187,18 +183,14 @@ authControllers.controller('ForgotPasswordController', ['$scope', 'iAuthService'
             $scope.fLoading = true;
             iAuthService.generatePassword($scope.fpw, null).then(function(data){
                 $scope.fpResponse = data.data;
-                if ($scope.fpResponse.isError) {
-                    $scope.invalid = true;
-                    $scope.showMsg = true;
-                    $scope.errorMsg = $scope.fpResponse.errorMsg;
-                } else {
-                    $scope.invalid = false;
-                    $scope.errorMsg = undefined;
-                    $scope.showSuccess($scope.fpResponse.errorMsg);
-                    $scope.cancelFP();
-                }
+                $scope.invalid = false;
+                $scope.errorMsg = undefined;
+                $scope.showSuccess($scope.fpResponse.errorMsg);
+                $scope.cancelFP();
             }).catch(function error(msg){
-                $scope.showErrorMsg(msg);
+                $scope.invalid = true;
+                $scope.showMsg = true;
+                $scope.errorMsg = msg.data.message;
             }).finally(function (){
                 $scope.fLoading = false;
             });

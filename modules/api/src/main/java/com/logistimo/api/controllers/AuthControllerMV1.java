@@ -34,6 +34,7 @@ import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.exception.BadRequestException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.UserDisabledException;
@@ -162,7 +163,7 @@ public class AuthControllerMV1 {
    */
   @RequestMapping(value = "/validate-otp", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void validateOtp(@RequestBody ValidateOtpModel otpModel) {
+  public void validateOtp(@RequestBody ValidateOtpModel otpModel) throws ValidationException {
     AuthenticationService as;
     as = Services.getService(AuthenticationServiceImpl.class);
     as.validateOtpMMode(otpModel.uid, otpModel.otp);
@@ -195,7 +196,8 @@ public class AuthControllerMV1 {
    */
   @RequestMapping(value = "/change-password", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void resetPassword(@RequestBody ChangePasswordModel pwdModel) throws ServiceException {
+  public void resetPassword(@RequestBody ChangePasswordModel pwdModel)
+      throws ServiceException, ValidationException {
     UsersService us;
     AuthenticationService as;
     as = Services.getService(AuthenticationServiceImpl.class);

@@ -25,30 +25,30 @@
 <div ng-controller="ApprovalDetailCtrl">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <span ng-show="type == 'p'">Purchase approval</span>
-            <span ng-show="type == 's'">Sale approval</span>
-            <span ng-show="type == 't'">Transfer approval</span>
+            <span ng-show="type == 'p'">{{resourceBundle['approvals.purchase']}} {{resourceBundle['approval.lowercase']}}</span>
+            <span ng-show="type == 's'">{{resourceBundle['order.sales']}} {{resourceBundle['approval.lowercase']}}</span>
+            <span ng-show="type == 't'">{{resourceBundle['approvals.transfer']}} {{resourceBundle['approval.lowercase']}}</span>
         </div>
         <div class="panel-body">
-            <div ng-if="loading" class="row mt18" style="min-height: 700px;color: #aaaaaa">
+            <div ng-if="loading" class="row mt18" style="min-height: 100px;color: #aaaaaa">
                 <div class="text-center">
-                    Loading... <span class="glyphicons glyphicons-cogwheel spin"></span>
+                    {{resourceBundle['loading.uppercase']}}... <span class="glyphicons glyphicons-cogwheel spin"></span>
                 </div>
             </div>
             <div ng-if="!loading">
                 <div class="col-sm-9" ng-show="!cancelApproval">
                     <span class="control-label"
-                          ng-show="type == 'p' && request == true || type == 'p' && approve == true">This order requires approval</span>
+                          ng-show="type == 'p' && request == true || type == 'p' && approve == true">{{resourceBundle['approvals.purchase.required']}}</span>
                     <span class="control-label"
-                          ng-show="type == 's' && request == true || type == 's' && approve == true">This order requires shipping approval</span>
+                          ng-show="type == 's' && request == true || type == 's' && approve == true">{{resourceBundle['approvals.shipping.required']}}</span>
                     <span class="control-label"
-                          ng-show="type == 't' && request == true || type == 't' && approve == true">This order requires transfer approval</span>
+                          ng-show="type == 't' && request == true || type == 't' && approve == true">{{resourceBundle['approvals.transfer.required']}}</span>
                     <span class="control-label" ng-show="approved == true"><span
-                            class="glyphicons glyphicons-ok-circle c-green"></span> Approved on {{approval.status.updated_at | formatDate:this }} by <a
+                            class="glyphicons glyphicons-ok-circle c-green"></span> {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lowercase']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lowercase']}} <a
                             href="#/setup/users/all/detail?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
                 <div class="col-sm-9" ng-show="cancelApproval">
-                    <span ng-show="approval.status.status = 'pn'">Pending approval by</span>
+                    <span ng-show="approval.status.status = 'pn'">{{resourceBundle['approvals.pending']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['by.lowercase']}}</span>
                     <span ng-repeat="item in approval.approvers" style="display:inline-block;">
                         <a ng-hide="$index == approval.approvers.length - 1"
                            href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
@@ -60,36 +60,37 @@
                           tooltip-append-to-body="true"></span>
                 </div>
                 <div class="col-sm-9" ng-show="cancelApproval">
-                    <span class="litetext" style="display: inline-block">Requested on {{approval.created_at | formatDate:this }} by </span>
+                    <span class="litetext" style="display: inline-block">{{resourceBundle['approvals.requested']}} {{resourceBundle['on.lowercase']}} {{approval.created_at | formatDate:this }} {{resourceBundle['by.lowercase']}} </span>
                     <a class="litetext" href="#/setup/users/all/details?userId={{approval.requester.user_id}}"
                        style="display: inline">{{approval.requester.name}}</a>
                 </div>
                 <div class="col-sm-3">
                     <div class="pull-right">
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && !isApprover && isUndef(approval.approvers)" disabled>Request
-                            approval
+                                ng-show="request == true && !isApprover && isUndef(approval.approvers)" disabled>{{resourceBundle['approvals.request']}}
+                            {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && !isApprover && isDef(approval.approvers)">Request approval
+                                ng-show="request == true && isDef(approval.approvers)">
+                            {{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('cn')"
-                                ng-show="cancelApproval == true && !isApprover">Cancel approval
+                                ng-show="cancelApproval == true && !isApprover">{{resourceBundle['approvals.cancel']}} {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rj')"
-                                ng-show="reject == true">Reject
+                                ng-show="reject == true">{{resourceBundle['approvals.reject']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('ap')"
-                                ng-show="approve == true">Approve
+                                ng-show="approve == true">{{resourceBundle['approvals.approve']}}
                         </button>
                     </div>
                 </div>
                 <div class="col-sm-12" ng-show="request">
-                    <span ng-show="cancelled && !isApprover">Cancelled on</span>
-                    <span ng-show="approved && !isApprover">Approved on</span>
-                    <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> Rejected on</span>
-                    <span ng-show="expired">Expired on {{approval.status.updated_at | fromNow:this }}</span>
-                    <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} by <a
+                    <span ng-show="cancelled && !isApprover">{{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lowercase']}}</span>
+                    <span ng-show="approved && !isApprover">{{resourceBundle['approvals.approved']}} {{resourceBundle['on.lowercase']}}</span>
+                    <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lowercase']}}</span>
+                    <span ng-show="expired">{{resourceBundle['approvals.expired']}} {{resourceBundle['on.lowercase']}} {{approval.status.updated_at | fromNow:this }}</span>
+                    <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lowercase']}} <a
                             href="#/setup/users/all/detail?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
             </div>
@@ -102,7 +103,7 @@
                 </div>
             </div>
             <div class="col-sm-12" ng-show="count > 1">
-                <a href="#/orders/approvals/?oid={{order.id}}" target="_blank">View all requests</a>
+                <a href="#/orders/approvals/?oid={{order.id}}" target="_blank">{{resourceBundle['approvals.view.all']}}</a>
             </div>
         </div>
     </div>

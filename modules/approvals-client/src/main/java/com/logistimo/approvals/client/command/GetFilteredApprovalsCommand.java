@@ -25,6 +25,7 @@ package com.logistimo.approvals.client.command;
 
 import com.logistimo.approvals.client.config.Constants;
 import com.logistimo.approvals.client.models.Approval;
+import com.logistimo.approvals.client.models.ApprovalFilters;
 import com.logistimo.approvals.client.models.RestResponsePage;
 import com.logistimo.exception.ErrorResponse;
 import com.logistimo.exception.HttpBadRequestException;
@@ -32,8 +33,8 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -47,80 +48,15 @@ public class GetFilteredApprovalsCommand extends HystrixCommand<RestResponsePage
 
   private final UriComponentsBuilder uriBuilder;
   private final RestTemplate restTemplate;
+  private ApprovalFilters approvalFilters;
 
-  public GetFilteredApprovalsCommand(RestTemplate restTemplate, String url) {
+  public GetFilteredApprovalsCommand(RestTemplate restTemplate, String url,
+                                     ApprovalFilters approvalFilters) {
     super(HystrixCommandGroupKey.Factory.asKey(Constants.APPROVALS_CLIENT),
         Constants.TIMEOUT_IN_MILLISECONDS);
     this.restTemplate = restTemplate;
     this.uriBuilder = UriComponentsBuilder.fromHttpUrl(url);
-  }
-
-  public GetFilteredApprovalsCommand withOffset(int offset) {
-    uriBuilder.queryParam("offset", offset);
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withSize(int size) {
-    uriBuilder.queryParam("size", size);
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withType(String type, String typeId) {
-    if (StringUtils.isNotBlank(type) && StringUtils.isNotBlank(typeId)) {
-      uriBuilder.queryParam("type", type);
-      uriBuilder.queryParam("type_id", typeId);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withStatus(String status) {
-    if (StringUtils.isNotBlank(status)) {
-      uriBuilder.queryParam("status", status);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withAttribute(String name, String value) {
-    if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
-      uriBuilder.queryParam("attribute_key", name);
-      uriBuilder.queryParam("attribute_value", value);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withRequester(String requesterId) {
-    if(StringUtils.isNotBlank(requesterId)) {
-      uriBuilder.queryParam("requester_id", requesterId);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withApprover(String approverId) {
-    if (StringUtils.isNotBlank(approverId)) {
-      uriBuilder.queryParam("approver_id", approverId);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withExpiringIn(String expiringIn) {
-    if (StringUtils.isNotBlank(expiringIn)) {
-      uriBuilder.queryParam("expiring_in", expiringIn);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withDomainId(Long domainId) {
-    if (domainId != null) {
-      uriBuilder.queryParam("domain_id", domainId);
-    }
-    return this;
-  }
-
-  public GetFilteredApprovalsCommand withOrderedBy(String orderedBy) {
-    if (StringUtils.isNotBlank(orderedBy)) {
-      uriBuilder.queryParam("ordered_by", orderedBy);
-    }
-    return this;
+    this.approvalFilters = approvalFilters;
   }
 
   @Override
@@ -133,13 +69,13 @@ public class GetFilteredApprovalsCommand extends HystrixCommand<RestResponsePage
       ResponseEntity<RestResponsePage<Approval>>
           result =
           restTemplate
-              .exchange(uriBuilder.build().encode().toUri(), HttpMethod.GET, null, responsetype);
+              .exchange(uriBuilder.build().encode().toUri(), HttpMethod.POST,
+                  new HttpEntity<>(approvalFilters), responsetype);
       return result.getBody();
     } catch (HttpClientErrorException exception) {
       throw new HystrixBadRequestException(exception.getMessage(),
           new HttpBadRequestException(ErrorResponse.getErrorResponse(exception), exception));
     }
   }
-
 
 }

@@ -370,6 +370,11 @@ logistimoApp.config(function ($routeProvider) {
         action: "orders.shipment.shipmentdetail"
     })
 });
+
+if (typeof updateRouteProviderConfig === "function") {
+    updateRouteProviderConfig();
+}
+
 logistimoApp.config(['$httpProvider', function($httpProvider) {
     var ua = window.navigator.userAgent;
     if(ua.indexOf( "MSIE ") > 0 || ua.indexOf('Trident/') > 0 || ua.indexOf('Edge/') > 0 || navigator.appVersion.indexOf("MSIE 9.0") !== -1) {

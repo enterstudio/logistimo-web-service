@@ -392,7 +392,7 @@
                                                                 </div>
                                                             </div>
                                                             <div ng-show="edit.ship">
-                                                                <a ng-disabled="item.atpstk == 0 && item.aq == 0" ng-show="item.isBa && !exRow[$index]" ng-click="hidePop(item,$index,'s'); select($index,'show')"
+                                                                <a ng-disabled="item.atpstk == 0 && item.aq == 0 || exRow[$index]" ng-show="item.isBa" ng-click="hidePop(item,$index,'s'); select($index,'show')"
                                                                    class="btn btn-sm btn-primary">{{resourceBundle['allocate.batch']}}</a>
                                                                 <input ng-if="!item.isBa" class="form-control"
                                                                        ng-disabled="item.atpstk == 0 && item.aq == 0"

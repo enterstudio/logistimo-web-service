@@ -291,50 +291,55 @@ public class ConfigurationModelsBuilder {
     return model;
   }
 
-  public ApprovalsConfig.OrderConfig buildApprovalsOrderConfig(ApprovalsConfigModel model, DomainConfig dc) {
-    if(model != null) {
+  public ApprovalsConfig.OrderConfig buildApprovalsOrderConfig(ApprovalsConfigModel model) {
+    if (model != null) {
       ApprovalsConfig.OrderConfig orderConfig = new ApprovalsConfig.OrderConfig();
-      List<ApprovalsConfig.PurchaseSalesOrderConfig> purchaseSalesOrderConfigList = new ArrayList<>();
-      if(model.psoa != null && model.psoa.size() > 0) {
-        for(ApprovalsConfigModel.PurchaseSalesOrderApproval psa : model.psoa) {
-          ApprovalsConfig.PurchaseSalesOrderConfig psConfig = new ApprovalsConfig.PurchaseSalesOrderConfig();
+      List<ApprovalsConfig.PurchaseSalesOrderConfig>
+          purchaseSalesOrderConfigList =
+          new ArrayList<>();
+      if (model.psoa != null && model.psoa.size() > 0) {
+        for (ApprovalsConfigModel.PurchaseSalesOrderApproval psa : model.psoa) {
+          ApprovalsConfig.PurchaseSalesOrderConfig
+              psConfig =
+              new ApprovalsConfig.PurchaseSalesOrderConfig();
           psConfig.setPurchaseOrderApproval(psa.poa);
           psConfig.setSalesOrderApproval(psa.soa);
           psConfig.setEntityTags(psa.eTgs);
           purchaseSalesOrderConfigList.add(psConfig);
         }
         orderConfig.setPurchaseSalesOrderApproval(purchaseSalesOrderConfigList);
-        if(model.pa != null && model.pa.size() > 0) {
-          List<String> puIds = new ArrayList<>();
-          for(int i=0; i<model.pa.size(); i++) {
-            puIds.add(model.pa.get(i).id);
-          }
-          orderConfig.setPrimaryApprovers(puIds);
-        }
-        if(model.sa != null && model.sa.size() > 0) {
-          List<String> suIds = new ArrayList<>();
-          for(int i=0; i<model.sa.size(); i++) {
-            suIds.add(model.sa.get(i).id);
-          }
-          orderConfig.setSecondaryApprovers(suIds);
-        }
-        if(model.px == 0) {
+        if (model.px == 0) {
           orderConfig.setPurchaseOrderApprovalExpiry(24);
         } else {
           orderConfig.setPurchaseOrderApprovalExpiry(model.px);
         }
-        if(model.sx == 0) {
+        if (model.sx == 0) {
           orderConfig.setSalesOrderApprovalExpiry(24);
         } else {
           orderConfig.setSalesOrderApprovalExpiry(model.sx);
         }
-        if(model.tx == 0) {
-          orderConfig.setTransferOrderApprovalExpiry(24);
-        } else {
-          orderConfig.setTransferOrderApprovalExpiry(model.tx);
-        }
-        return orderConfig;
       }
+      if (model.pa != null && model.pa.size() > 0) {
+        List<String> puIds = new ArrayList<>();
+        for (int i = 0; i < model.pa.size(); i++) {
+          puIds.add(model.pa.get(i).id);
+        }
+        orderConfig.setPrimaryApprovers(puIds);
+      }
+      if (model.sa != null && model.sa.size() > 0) {
+        List<String> suIds = new ArrayList<>();
+        for (int i = 0; i < model.sa.size(); i++) {
+          suIds.add(model.sa.get(i).id);
+        }
+        orderConfig.setSecondaryApprovers(suIds);
+      }
+
+      if (model.tx == 0) {
+        orderConfig.setTransferOrderApprovalExpiry(24);
+      } else {
+        orderConfig.setTransferOrderApprovalExpiry(model.tx);
+      }
+      return orderConfig;
     }
     return null;
   }

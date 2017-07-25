@@ -35,6 +35,7 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.TaskSchedulingException;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
@@ -284,7 +285,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
     UsersService as = Services.getService(UsersServiceImpl.class, null);
     IUserAccount account = as.getUserAccount(userId);
     if (!account.isEnabled()) {
-      throw new ObjectNotFoundException("User not found");
+      throw new ObjectNotFoundException("USR001", userId);
     }
     Locale locale = account.getLocale();
     backendMessages = Resources.get().getBundle("BackendMessages", locale);
@@ -364,7 +365,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
   public String resetPassword(String userId, int mode, String otp, String src,
                               String au)
       throws ServiceException, ObjectNotFoundException, MessageHandlingException, IOException,
-      InputMismatchException {
+      InputMismatchException, ValidationException {
     UsersService as = Services.getService(UsersServiceImpl.class, null);
     IUserAccount account = as.getUserAccount(userId);
     Locale locale = account.getLocale();
@@ -416,7 +417,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
    * Validate otp if chosen mode is mobile
    */
   @Override
-  public void validateOtpMMode(String userId, String otp) {
+  public void validateOtpMMode(String userId, String otp) throws ValidationException {
 
     MemcacheService cache = AppFactory.get().getMemcacheService();
     if (cache.get("OTP_" + userId) == null) {
@@ -427,7 +428,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
       cache.delete("OTP_" + userId);
     } else {
       xLogger.warn("Wrong OTP entered for  " + userId);
-      throw new InputMismatchException("OTP not valid");
+      throw new ValidationException("UA002",userId);
     }
   }
 

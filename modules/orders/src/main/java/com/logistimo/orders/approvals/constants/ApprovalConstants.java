@@ -38,4 +38,8 @@ public final class ApprovalConstants {
   public static final String TRANSFER = "t";
   public static final String ATTRIBUTE_KIOSK_ID = "kiosk_id";
   public static final String ATTRIBUTE_ORDER_TYPE = "order_type";
+  public static final String APPROVER_STATUS_ACTIVE = "ac";
+  public static final String APPROVER_STATUS_QUEUED = "qd";
+
+  public static final String ATTRIBUTE_APPROVAL_TYPE = "approval_type";
 }

@@ -628,6 +628,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
         //Now add all the user to kiosk mappings to the database
         //TODO: Check to see if the user exists?
         List<IUserAccount> users = (List<IUserAccount>) kiosk.getUsers();
+        kiosk = pm.detachCopy(kiosk);
         if (users != null) {
           for (IUserAccount user : users) {
             String userId = user.getUserId();

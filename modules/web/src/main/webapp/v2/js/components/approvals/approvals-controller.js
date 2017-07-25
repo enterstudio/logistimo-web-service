@@ -276,11 +276,31 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
             }
         };
 
+        $scope.setActiveApprovers = function () {
+            if (checkNotNullEmpty($scope.filtered)) {
+                $scope.filtered.forEach(function (data) {
+                    if (data.status.status == 'pn') {
+                        if (checkNotNullEmpty(data.approvers)) {
+                            var activeApprovers = [];
+                            data.approvers.forEach(function (approver) {
+                                if (approver.approver_status == 'ac') {
+                                    activeApprovers.push(approver);
+                                }
+                            });
+                            data.approvers = activeApprovers;
+                        }
+                    }
+                });
+            }
+        };
+
+
         $scope.fetch = function () {
             $scope.showLoading();
             approvalService.getApprovals($scope.offset, $scope.size, $scope.entity ? $scope.entity.id : undefined, $scope.ordId, $scope.reqStatus,
                 $scope.exp, $scope.reqType, $scope.reqId, $scope.aprId, $scope.domainId).then(function (data) {
                     $scope.filtered = data.data.content;
+                    $scope.setActiveApprovers();
                     $scope.setPagedResults(data.data);
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);

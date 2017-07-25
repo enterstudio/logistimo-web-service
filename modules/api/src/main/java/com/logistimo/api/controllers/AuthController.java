@@ -40,7 +40,7 @@ import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.events.processor.EventPublisher;
-import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.security.BadCredentialsException;
 import com.logistimo.security.SecureUserDetails;
@@ -246,26 +246,14 @@ public class AuthController {
   @RequestMapping(value = "/resetpassword", method = RequestMethod.POST)
   public
   @ResponseBody
-  AuthModel generatePassword(@RequestBody PasswordModel model, HttpServletRequest request) {
+  AuthModel generatePassword(@RequestBody PasswordModel model, HttpServletRequest request)
+      throws ValidationException, ServiceException, ObjectNotFoundException,
+      MessageHandlingException, IOException {
     if (model != null) {
-      try {
         AuthenticationService as = Services.getService(AuthenticationServiceImpl.class, null);
         String successMsg = as.resetPassword(model.uid, model.mode, model.otp, "w",
             request.getParameter("au"));
         return new AuthModel(false, successMsg);
-      } catch (ServiceException | MessageHandlingException | IOException e) {
-        xLogger.warn("Error updating password for " + model.uid, e);
-        return constructAuthModel(SYSTEM_ERROR, null);
-      } catch (ObjectNotFoundException e) {
-        xLogger.warn("Error updating password for {0}", model.uid, e);
-        return constructAuthModel(USER_NOTFOUND, null);
-      } catch (InvalidDataException e) {
-        xLogger.warn("Email Id not available {0}", model.uid, e);
-        return constructAuthModel(EMAIL_UNAVAILABLE, null);
-      } catch (InputMismatchException e) {
-        xLogger.warn("Invalid One-time password {0}", model.uid, e);
-        return constructAuthModel(OTP_EXPIRED, null);
-      }
     }
 
     return null;
@@ -274,9 +262,9 @@ public class AuthController {
   @RequestMapping(value = "/generateOtp", method = RequestMethod.POST)
   public
   @ResponseBody
-  AuthModel generateOtp(@RequestBody PasswordModel model, HttpServletRequest request) {
+  AuthModel generateOtp(@RequestBody PasswordModel model, HttpServletRequest request)
+      throws ServiceException, ObjectNotFoundException, IOException, MessageHandlingException {
     if (model != null) {
-      try {
         AuthenticationService as = Services.getService(AuthenticationServiceImpl.class, null);
         UsersService us = Services.getService(UsersServiceImpl.class);
         Long domainId = us.getUserAccount(model.uid).getDomainId();
@@ -287,16 +275,6 @@ public class AuthController {
         String successMsg = as.generateOTP(model.uid, model.mode, model.udty, domainId,
             request.getHeader("host"));
         return new AuthModel(false, successMsg);
-      } catch (MessageHandlingException | IOException | ServiceException e) {
-        xLogger.severe("Exception: " + e);
-        return constructAuthModel(SYSTEM_ERROR, null);
-      } catch (ObjectNotFoundException e) {
-        xLogger.warn("Error updating password for {0}", model.uid, e);
-        return constructAuthModel(USER_NOTFOUND, null);
-      } catch (InvalidDataException e) {
-        xLogger.severe("Email Id not available {0}", model.uid, e);
-        return constructAuthModel(EMAIL_UNAVAILABLE, null);
-      }
     }
 
     return null;

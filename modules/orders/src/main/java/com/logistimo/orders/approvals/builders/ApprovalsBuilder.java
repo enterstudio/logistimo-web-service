@@ -104,15 +104,26 @@ public class ApprovalsBuilder {
   }
 
   public CreateApprovalRequest buildApprovalRequest(IOrder order, String msg, String userId,
-                                                    List<Approver> approverList) {
+                                                    List<Approver> approverList,
+                                                    ApprovalType approvalType) {
     CreateApprovalRequest request = new CreateApprovalRequest();
     request.setType("order");
     request.setTypeId(order.getIdString());
     request.setSourceDomainId(order.getDomainId());
     request.setDomains(order.getDomainIds());
-    Map<String, String> attributes = new HashMap<>(2);
-    attributes.put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getKioskId()));
+    Map<String, String> attributes = new HashMap<>(3);
     attributes.put(ApprovalConstants.ATTRIBUTE_ORDER_TYPE, String.valueOf(order.getOrderType()));
+    attributes
+        .put(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE, String.valueOf(approvalType.getValue()));
+    switch (approvalType) {
+      case SALES_ORDER:
+      case TRANSFERS:
+        attributes
+            .put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getServicingKiosk()));
+        break;
+      default:
+        attributes.put(ApprovalConstants.ATTRIBUTE_KIOSK_ID, String.valueOf(order.getKioskId()));
+    }
     request.setAttributes(attributes);
     request.setMessage(msg);
     request.setRequesterId(userId);
@@ -150,9 +161,13 @@ public class ApprovalsBuilder {
     statusModel.setUpdatedAt(approvalResponse.getUpdatedAt());
     model.setStatus(statusModel);
     model.setActiveApproverType(approvalResponse.getActiveApproverType());
-    model.setApprovalType(ApprovalType.get(
-        approvalsDao.getApprovalType(Long.valueOf(approvalResponse.getTypeId()),
-            model.getId())));
+    String
+        approvalType =
+        approvalResponse.getAttributes().get(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE);
+    if (approvalType != null) {
+      model.setApprovalType(ApprovalType.get(
+          Integer.parseInt(approvalType)));
+    }
     model.setApprovers(buildApproversModel(approvalResponse, usersService));
     model.setConversationId(approvalResponse.getConversationId());
     model.setStatusUpdatedBy(buildRequestorModel(approvalResponse.getUpdatedBy(), approvalResponse.getApprovalId()));
@@ -197,6 +212,11 @@ public class ApprovalsBuilder {
     }
     model.setStatus(statusModel);
     model.setRequester(buildRequestorModel(approval.getRequesterId(), approval.getId()));
+    if(approval.getAttributes() != null && !approval.getAttributes().isEmpty()) {
+      approval.getAttributes().stream()
+          .filter(at -> at.getKey().equals(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE))
+          .forEach(at -> model.setApprovalType(ApprovalType.get(Integer.parseInt(at.getValue()))));
+    }
 
     if (embed != null) {
       for (String s : embed) {
@@ -236,9 +256,9 @@ public class ApprovalsBuilder {
     List<ApproverModel> approverModels = new ArrayList<>(1);
     Set<ApproverQueue> approverQueueSet = approval.getApprovers();
     for (ApproverQueue queue : approverQueueSet) {
-
       ApproverModel model = new ApproverModel();
       model.setApproverType(queue.getType());
+      model.setApproverStatus(queue.getApproverStatus());
       try {
         userBuilder.buildUserContactModel(queue.getUserId(), model);
       } catch (ObjectNotFoundException e) {

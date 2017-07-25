@@ -1,10 +1,10 @@
 <div class="modal-header ws">
-    <h3 class="modal-title" ng-show="action == 'rq'">Request approval for {{resourceBundle['order']}}: {{orderId}}</h3>
-    <h3 class="modal-title" ng-show="action == 'cn'">Cancel approval for {{resourceBundle['order']}}: {{orderId}}</h3>
-    <h3 class="modal-title" ng-show="action == 'ap'">Approve approval for {{resourceBundle['order']}}: {{orderId}}</h3>
-    <h3 class="modal-title" ng-show="action == 'rj'">Reject approval for {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'rq'">{{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'cn'">{{resourceBundle['approvals.cancel']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'ap'">{{resourceBundle['approvals.approve']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'rj'">{{resourceBundle['approvals.reject']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
     <span ng-show="action == 'rq'">
-        Approvers:
+        {{resourceBundle['approvals.approver']}}(s):
           <span ng-repeat="item in approval.approvers" style="display:inline-block;">
             <a ng-hide="$index == approval.approvers.length - 1"
                href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
@@ -17,9 +17,9 @@
     <textarea id="aprvmsg" ng-model="approval.msg" placeholder ="Comments" maxlength="5000" rows="10" style="height:auto;width:100%"></textarea>
 </div>
 <div class="modal-footer ws">
-    <button class="btn btn-primary" ng-click="proceed('rq')" ng-show="action == 'rq'">Request</button>
-    <button class="btn btn-primary" ng-click="proceed('cn')" ng-show="action == 'cn'">Cancel</button>
-    <button class="btn btn-primary" ng-click="proceed('ap')" ng-show="action == 'ap'">Approve</button>
-    <button class="btn btn-primary" ng-click="proceed('rj')" ng-show="action == 'rj'">Reject</button>
-    <button class="btn btn-default" ng-click="cancel()">Close</button>
+    <button class="btn btn-primary" ng-click="proceed('rq')" ng-show="action == 'rq'">{{resourceBundle['approvals.request']}}</button>
+    <button class="btn btn-primary" ng-click="proceed('cn')" ng-show="action == 'cn'">{{resourceBundle['approvals.cancel']}}</button>
+    <button class="btn btn-primary" ng-click="proceed('ap')" ng-show="action == 'ap'">{{resourceBundle['approvals.approve']}}</button>
+    <button class="btn btn-primary" ng-click="proceed('rj')" ng-show="action == 'rj'">{{resourceBundle['approvals.reject']}}</button>
+    <button class="btn btn-default" ng-click="cancel()">{{resourceBundle['close']}}</button>
 </div>
