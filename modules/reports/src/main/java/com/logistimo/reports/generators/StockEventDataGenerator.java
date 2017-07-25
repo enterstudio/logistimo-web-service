@@ -356,7 +356,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
       filterStr
           .append(" AND DATE(INVLOG.SD) > ")
           .append(CharacterConstants.SINGLE_QUOTES)
-          .append(new SimpleDateFormat(Constants.DATE_FORMAT_CSV).format(from))
+          .append(new SimpleDateFormat(Constants.DATETIME_CSV_FORMAT).format(from))
           .append(CharacterConstants.SINGLE_QUOTES);
     }
     // Add until date, if needed
@@ -365,7 +365,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
       filterStr
           .append(" AND DATE(INVLOG.SD) < ")
           .append(CharacterConstants.SINGLE_QUOTES)
-          .append(new SimpleDateFormat(Constants.DATE_FORMAT_CSV).format(abnormalBeforeDate))
+          .append(new SimpleDateFormat(Constants.DATETIME_CSV_FORMAT).format(abnormalBeforeDate))
           .append(CharacterConstants.SINGLE_QUOTES);
     } else if (outstandingEvents) {
       filterStr.append(" AND INVLOG.ED IS NULL");
@@ -373,7 +373,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
       filterStr
           .append(" AND DATE(INVLOG.SD) < ")
           .append(CharacterConstants.SINGLE_QUOTES)
-          .append(new SimpleDateFormat(Constants.DATE_FORMAT_CSV).format(until))
+          .append(new SimpleDateFormat(Constants.DATETIME_CSV_FORMAT).format(until))
           .append(CharacterConstants.SINGLE_QUOTES);
     }
     if((location != null && location.isNotEmpty())){

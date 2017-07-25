@@ -27,7 +27,9 @@ import com.google.common.collect.TreeBasedTable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.entities.entity.IKiosk;
@@ -51,6 +53,7 @@ import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
@@ -477,12 +480,15 @@ public class ReportServiceUtil {
   }
 
   protected Long getMillisInPeriod(String time, String periodicity) {
-    Long totalMillis = 0L;
+    Long totalMillis;
+    DateTimeZone timezone = DateTimeZone.forID(
+        DomainConfig.getInstance(SecurityUtils.getCurrentDomainId()).getTimezone());
     DateTime currentDateTime = new DateTime();
     DateTime from;
     switch (periodicity) {
       case QueryHelper.MONTH:
-        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH).parseDateTime(time);
+        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_MONTH).withZone(timezone)
+                .parseDateTime(time);
         if (currentDateTime.isAfter(from) && currentDateTime.isBefore(from.plusMonths(1))) {
           Period p = new Period(
                   from, from.plusDays(Days.daysBetween(from,currentDateTime).getDays() + 1),
@@ -495,7 +501,8 @@ public class ReportServiceUtil {
         }
         break;
       case QueryHelper.WEEK:
-        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).parseDateTime(time);
+        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).withZone(timezone)
+                .parseDateTime(time);
         if (currentDateTime.isAfter(from) && currentDateTime.isBefore(from.plusWeeks(1))) {
           Period p = new Period(
                   from, from.plusDays(Days.daysBetween(from, currentDateTime).getDays() + 1),
@@ -506,7 +513,8 @@ public class ReportServiceUtil {
         }
         break;
       case QueryHelper.DAY:
-        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).parseDateTime(time);
+        from = DateTimeFormat.forPattern(QueryHelper.DATE_FORMAT_DAILY).withZone(timezone)
+                .parseDateTime(time);
         if(currentDateTime.isAfter(from) && currentDateTime.isBefore(from.plusDays(1))){
           Period p =
               new Period(from, from.plusDays(Days.daysBetween(from, currentDateTime).getDays() + 1),
@@ -517,7 +525,7 @@ public class ReportServiceUtil {
         }
         break;
       default:
-        totalMillis = LocalDateUtil.MILLISECS_PER_DAY;
+        totalMillis = 0L;
     }
     return totalMillis;
   }
