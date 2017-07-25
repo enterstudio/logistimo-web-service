@@ -79,7 +79,7 @@ public class ApprovalsDao implements IApprovalsDao {
       IOrder order = oms.getOrder(Long.parseLong(approvalResponse.getTypeId()));
       if (approvalType.equals(IOrder.PURCHASE_ORDER)) {
         kioskId = order.getKioskId();
-      } else if (approvalType.equals(IOrder.SALES_ORDER)) {
+      } else {
         kioskId = order.getServicingKiosk();
       }
       orderApprovalMapping =
