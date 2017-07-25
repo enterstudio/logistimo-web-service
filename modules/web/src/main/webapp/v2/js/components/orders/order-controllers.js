@@ -2805,7 +2805,7 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
     };
 
     $scope.saveBatchTrans = function () {
-
+        var tempBatchDet = angular.copy($scope.batchDet);
         var isBatchIdRepeated = false;
         var isInvalid = $scope.newBatchDet.some(function (newBItem) {
 
@@ -2815,24 +2815,13 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
                 return true;
             }
 
-            if(newBItem.q == 0) {
-                $scope.showWarning("Quantity cannot be zero for new batch.");
-                return true;
-            }
-
-            var status = $scope.tm ? $scope.tempmatstatus : $scope.matstatus;
-            if(newBItem.q > 0 && checkNullEmpty(newBItem.fmst) && $scope.msm && checkNotNullEmpty(status)) {
-                $scope.showWarning($scope.resourceBundle['status.required']);
-                return true;
-            }
-
             isBatchIdRepeated = $scope.validateBatchId(newBItem);
 
             if (newBItem.uie != null && newBItem.q != null ) {
                 newBItem.bmfdt = newBItem.uibmfdt ? formatDate(newBItem.uibmfdt) : "";
                 newBItem.e = formatDate(newBItem.uie);
                 newBItem.added = true;
-                $scope.batchDet.push(newBItem);
+                tempBatchDet.push(newBItem);
             }
         });
 
@@ -2842,18 +2831,35 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
 
         if($scope.type !== 'p') {
             var index = 0;
-            var invalidQuantity = $scope.batchDet.some(function (det) {
+            var invalidQuantity = tempBatchDet.some(function (det) {
                 if(checkNotNullEmpty(det.q)) {
                     if ($scope.huQty && det.q % $scope.huQty != 0) {
                         return true;
                     }
                 }
-                if(!$scope.validateBatch(det,index,'r')) {
-                    return true;
-                }
+
                 if(checkNotNullEmpty(det.q) && checkNullEmpty(det.fmst)) {
                     det.isVisitedStatus = true;
-                    if(!$scope.validateBatch(det, index, $scope.tm ? "smt" : "sm")) {
+                    if(index < $scope.batchDet.length){
+                        $scope.batchDet[index].isVisitedStatus = true;
+                        if(!$scope.validateBatch($scope.batchDet[index],index,$scope.tm ? "smt" : "sm")) {
+                            return true;
+                        }
+                    } else {
+                        newIndex = index - $scope.batchDet.length;
+                        $scope.newBatchDet[newIndex].isVisitedStatus = true;
+                        if (!$scope.validateBatch($scope.newBatchDet[newIndex], newIndex, $scope.tm ? "nsmt" : "nsm")) {
+                            return true;
+                        }
+                    }
+                }
+                if(index < $scope.batchDet.length){
+                    if(!$scope.validateBatch($scope.batchDet[index],index,'r')) {
+                        return true;
+                    }
+                } else {
+                    var newIndex = index - $scope.batchDet.length;
+                    if(!$scope.validateBatch($scope.newBatchDet[newIndex],newIndex,'n')) {
                         return true;
                     }
                 }
@@ -2865,7 +2871,7 @@ ordControllers.controller('FulfilBatchTransactionCtrl', ['$scope', '$timeout', f
         }
         var newBatches = [];
         var allocated = 0;
-        $scope.batchDet.forEach(function (bItem) {
+        tempBatchDet.forEach(function (bItem) {
             var batchData = {};
             batchData.e = bItem.e;
             batchData.bmfdt = bItem.bmfdt;
