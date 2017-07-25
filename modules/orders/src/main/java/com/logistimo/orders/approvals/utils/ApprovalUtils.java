@@ -24,7 +24,6 @@
 package com.logistimo.orders.approvals.utils;
 
 import com.logistimo.approvals.client.models.Approver;
-import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.entity.IApprovers;
@@ -83,7 +82,7 @@ public class ApprovalUtils {
         orderConfig = DomainConfig.getInstance(kiosk.getDomainId()).getApprovalsConfig().getOrderConfig();
         expiry = orderConfig.getExpiry(order.getOrderType());
         if (!orderConfig.isPurchaseApprovalEnabled(kiosk.getTags())) {
-          throw new ValidationException("OA013", SecurityUtils.getLocale(), kiosk.getName());
+          throw new ValidationException("OA013", kiosk.getName());
         }
       } else {
         type = IApprovers.SALES_ORDER;

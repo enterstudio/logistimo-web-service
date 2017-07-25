@@ -33,8 +33,6 @@ import com.logistimo.services.ServiceException;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Locale;
-
 /**
  * Created by charan on 22/06/17.
  */
@@ -42,7 +40,7 @@ import java.util.Locale;
 public class ApprovalRequesterValidator {
 
   public void validate(ApprovalRequestModel approvalRequestModel, IOrder order,
-                       String userId, Locale locale) throws ValidationException {
+                       String userId) throws ValidationException {
 
     if (!approvalRequestModel.getRequesterId().equals(userId)) {
       throw new ValidationException("OA005", approvalRequestModel.getRequesterId(), userId);
@@ -59,13 +57,13 @@ public class ApprovalRequesterValidator {
       }
       if (approvalRequestModel.getApprovalType().equals(ApprovalType.TRANSFERS) && !(
           hasAccessToCustomer && hasAccessToVendor)) {
-        throw new ValidationException("OA006", locale, userId);
+        throw new ValidationException("OA006", userId);
       } else if (approvalRequestModel.getApprovalType().equals(ApprovalType.SALES_ORDER)
           && !hasAccessToVendor) {
-        throw new ValidationException("OA007", locale, userId);
+        throw new ValidationException("OA007", userId);
       } else if (approvalRequestModel.getApprovalType().equals(ApprovalType.PURCHASE_ORDER)
           && !hasAccessToCustomer) {
-        throw new ValidationException("OA008", locale, userId);
+        throw new ValidationException("OA008", userId);
       }
     } catch (ServiceException e) {
       throw new ValidationException(e);

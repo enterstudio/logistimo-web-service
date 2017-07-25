@@ -131,9 +131,8 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
         };
         $scope.fetchApproval();
 
-        $scope.openApproval = function (data, type) {
+        $scope.openApproval = function (data) {
             $scope.action = data;
-            $scope.type = type;
             $scope.modalInstance = $uibModal.open({
                 templateUrl: 'views/orders/approval-request.html',
                 scope: $scope,

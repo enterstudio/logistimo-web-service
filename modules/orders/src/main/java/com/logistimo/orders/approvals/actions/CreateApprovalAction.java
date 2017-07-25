@@ -101,7 +101,7 @@ public class CreateApprovalAction {
                                        Locale locale) throws ValidationException {
     createApprovalValidator.validate(approvalRequest);
     approvalRequesterValidator.validate(approvalRequest, order,
-        SecurityUtils.getUserDetails().getUsername(), locale);
+        SecurityUtils.getUserDetails().getUsername());
     orderApprovalStatusValidator.validate(approvalRequest, order, locale);
   }
 

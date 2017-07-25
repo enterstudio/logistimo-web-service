@@ -52,7 +52,7 @@ public class ApprovalStatusUpdateRequesterValidator {
         Long kioskId = orderApprovalMapping.getKioskId();
       try {
         if(!EntityAuthoriser.authoriseEntity(userDetails, kioskId)){
-          throw new ValidationException("OA015", userDetails.getLocale(), kioskId);
+          throw new ValidationException("OA015", kioskId);
         }
       } catch (ServiceException e) {
         throw new SystemException(e, "OA020");
