@@ -50,6 +50,12 @@ public class MobileApprovalResponse {
   //expiry time in milliseconds
   private Long expt;
 
+  //requested time in milliseconds
+  private Long reqrt;
+
+  //Active approval type
+  private String actappr;
+
   public String getApprid() {
     return apprid;
   }
@@ -110,7 +116,16 @@ public class MobileApprovalResponse {
     return expt;
   }
 
+  public String getActappr() {return actappr;}
+
+  public void setActappr(String actappr) {this.actappr = actappr;}
+
   public void setExpt(Long expt) {
     this.expt = expt;
   }
+
+  public Long getReqrt() {return reqrt;}
+
+  public void setReqrt(Long reqrt) {this.reqrt = reqrt;}
+
 }

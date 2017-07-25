@@ -26,11 +26,10 @@ package com.logistimo.api.servlets.mobile.builders;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.orders.approvals.actions.GetOrderApprovalAction;
-import com.logistimo.orders.approvals.service.IOrderApprovalsService;
+import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.proto.MobileApprovalResponse;
-import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
@@ -51,12 +50,12 @@ public class MobileApprovalResponseBuilder {
    * @param o Order
    * @return Approval response
    */
-  public MobileApprovalResponse buildApprovalResponse(IOrder o) throws ObjectNotFoundException {
-    List<IOrderApprovalMapping> orderApprovalMappings = getOrderApprovalMappings(o);
-    if (orderApprovalMappings == null || orderApprovalMappings.isEmpty()) {
+  public MobileApprovalResponse buildApprovalResponse(IOrder o) {
+
+    IOrderApprovalMapping orderApprovalMapping = getOrderApprovalMapping(o);
+    if(orderApprovalMapping==null){
       return null;
     }
-    IOrderApprovalMapping orderApprovalMapping = orderApprovalMappings.get(0);
     CreateApprovalResponse
         createApprovalResponse =
         getCreateApprovalResponse(orderApprovalMapping.getApprovalId());
@@ -74,6 +73,14 @@ public class MobileApprovalResponseBuilder {
     if (createApprovalResponse.getUpdatedAt() != null) {
       response.setT(createApprovalResponse.getUpdatedAt().getTime());
     }
+
+    //Requested time as created time for the approval
+    if (createApprovalResponse.getCreatedAt() != null) {
+      response.setReqrt(createApprovalResponse.getCreatedAt().getTime());
+    }
+
+    //set the approval type
+    response.setActappr(createApprovalResponse.getActiveApproverType());
     return response;
   }
 
@@ -81,13 +88,10 @@ public class MobileApprovalResponseBuilder {
    * Get the approval details for the given order
    *
    * @param o order
-   * @return List of approval mappings
+   * @return  approval mappings
    */
-  private List<IOrderApprovalMapping> getOrderApprovalMappings(IOrder o) {
-    Set<Long> orderIdSet = new HashSet<>(1);
-    orderIdSet.add(o.getOrderId());
-    return StaticApplicationContext.getBean(IOrderApprovalsService.class)
-        .getOrdersApprovalMapping(orderIdSet, o.getOrderType());
+  private IOrderApprovalMapping getOrderApprovalMapping(IOrder o) {
+    return StaticApplicationContext.getBean(IApprovalsDao.class).getOrderApprovalMapping(o.getOrderId());
   }
 
   /**
@@ -97,7 +101,7 @@ public class MobileApprovalResponseBuilder {
    * @return response
    */
   private CreateApprovalResponse getCreateApprovalResponse(String approvalId)
-      throws ObjectNotFoundException {
+       {
     return ((GetOrderApprovalAction) StaticApplicationContext.getApplicationContext()
         .getBean(GET_ORDER_APPROVAL_ACTION))
         .invoke(approvalId);
