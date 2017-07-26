@@ -295,7 +295,7 @@
                                 </tr>
                                 <tr>
                                     <td class="col-sm-2 vmiddle">{{resourceBundle['primary']}}</td>
-                                    <td class="col-sm-2 br1">
+                                    <td class="col-sm-2 br1 vmiddle">
                                         <div class="col-sm-12" style="top:8px;padding-left: 0;">
                                             <user-select users-model="pUser" on-select="getUser(data, 'p')"
                                                          blur-callback="checkAdminUser(pUser,'p')"
@@ -308,11 +308,11 @@
                                         {{pUser.text}}
                                     </td>
                                     <td class="col-sm-2 vmiddle">{{cnf.adminContact.primary.phnm}}</td>
-                                    <td class="col-sm-2 vmiddle">{{cnf.adminContact.primary.em}}</td>
+                                    <td class="col-sm-2 vmiddle word-break">{{cnf.adminContact.primary.em}}</td>
                                 </tr>
                                 <tr ng-if="cnf.adminContact.primary">
                                     <td class="col-sm-2 vmiddle">{{resourceBundle['secondary']}}</td>
-                                    <td class="col-sm-2 br1">
+                                    <td class="col-sm-2 br1 vmiddle">
                                         <div class="col-sm-12" style="top:8px;padding-left: 0;">
                                             <user-select users-model="sUser" on-select="getUser(data, 's')"
                                                          blur-callback="checkAdminUser(sUser,'s')"
@@ -325,7 +325,7 @@
                                         {{sUser.text}}
                                     </td>
                                     <td class="col-sm-2 vmiddle">{{cnf.adminContact.secondary.phnm}}</td>
-                                    <td class="col-sm-2 vmiddle">{{cnf.adminContact.secondary.em}}</td>
+                                    <td class="col-sm-2 vmiddle word-break">{{cnf.adminContact.secondary.em}}</td>
                                 </tr>
                                 </tbody>
                             </table>
