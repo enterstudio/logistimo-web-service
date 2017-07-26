@@ -1823,6 +1823,7 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
             $scope.showErrorMsg(msg);
         }).finally(function(){
             searchCount = 0;
+            $scope.searchRelations = true;
             $scope.hideLoading();
         });
     };
@@ -1835,6 +1836,7 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
             $scope.showErrorMsg(msg);
         }).finally(function(){
             searchCount = 0;
+            $scope.searchRelations = true;
             $scope.hideLoading();
         });
     };
@@ -1864,6 +1866,10 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
             } else {
                 $scope.setOriginalCopy($scope.rData);
             }
+            $scope.getFilteredData();
+        } else {
+            $scope.filtered = undefined;
+            $scope.setResults(null);
         }
     }
     function appendOriginalCopy(data) {
@@ -1913,6 +1919,18 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
                 $scope.countTags[rt] = $scope.countTags[rt] + 1;
             }
         });
+        if($scope.countTags['--notag--'] > 0){
+            $scope.tag = '--notag--';
+        } else {
+            if(checkNotNullEmpty($scope.allRTags)) {
+                $scope.allRTags.some(function (rt) {
+                    if (checkNotNullEmpty($scope.countTags[rt])) {
+                        $scope.tag = rt;
+                        return true;
+                    }
+                });
+            }
+        }
     }
     $scope.init = function (isFirstInit) {
         $scope.vw = requestContext.getParam("vw") || 't';
@@ -1962,15 +1980,17 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
     $scope.resetFetch = function(){
         $scope.rData = undefined;
         $scope.mOffset = 0;
+        $scope.filtered = [];
+        $scope.ent = $scope.linkedEntityId = undefined;
+        $scope.eTag = $scope.entityTag = undefined;
         if ($scope.offset == 0) {
             $scope.fetch();
         }
         $scope.offset = 0;
         offset = 0;
-        $scope.ent = $scope.linkedEntityId = undefined;
-        $scope.eTag = $scope.entityTag = undefined;
     };
     $scope.fetch = function() {
+        searchCount++;
         $scope.hideDeleteRel = false;
         if ($scope.linkType === "c") {
             $scope.getCustomers();
@@ -1987,6 +2007,7 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
                 }
             }
         }
+        $scope.getKioskLinkCounts();
     };
     $scope.fetchLinks = function (type) {
         if($scope.linkType != type) {
@@ -2049,7 +2070,8 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
                 $scope.linkedEntityId = newVal.id;
                 $scope.eTag = $scope.entityTag = undefined;
             }
-            searchCustomerVendor();
+            searchCount++;
+            $scope.searchEntity();
         }
     });
     $scope.$watch("eTag", function(newVal, oldVal) {
@@ -2061,13 +2083,16 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
                 $scope.entityTag = newVal;
                 $scope.ent = $scope.linkedEntityId = undefined;
             }
-            searchCustomerVendor();
+            searchCount++;
+            $scope.searchEntity();
         }
     });
-    function searchCustomerVendor(){
-        searchCount++;
-        $scope.searchEntity();
-    }
+    $scope.$watch("tag", function(newVal, oldVal) {
+        if(newVal != oldVal) {
+            $scope.getFilteredData();
+        }
+    });
+
     $scope.searchEntity = function() {
         $scope.rData = undefined;
         if ( checkNullEmpty($scope.searchkey) ) {
@@ -2087,6 +2112,18 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
     };
     $scope.goToDetail = function(nv){
         $window.open("#/setup/entities/detail/" + nv.id,'_blank');
+    };
+    $scope.filtered = [];
+
+    $scope.getFilteredData= function () {
+        $scope.filtered = [];
+        angular.forEach($scope.rData,function(data){
+            if(data.rt == $scope.tag) {
+                $scope.filtered.push(data);
+            }
+        });
+        sortByKey($scope.filtered,'osno');
+        $scope.numFound = $scope.filtered.length;
     };
 }]);
 
@@ -2209,7 +2246,6 @@ entityControllers.controller('RelationPermissionController',['$scope','entitySer
     }
 ]);
 entityControllers.controller('RelationListTableController', ['$rootScope','$scope', 'entityService', function ($rootScope,$scope, entityService) {
-    $scope.filtered = [];
     $scope.selectAll = function (newVal) {
         if(checkNotNullEmpty($scope.filtered)) {
             $scope.filtered.forEach(function (item) {

@@ -105,7 +105,7 @@
                                 <th ng-show="(isUndef(allRTags)|| tag != '--notag--') && isUndef(hideReorder)" class="col-sm-0-2 text-center">{{resourceBundle['move']}}</th>
                                 <th ng-show="(isUndef(allRTags)|| tag != '--notag--') && isUndef(hideReorder)" class="col-sm-0-5 text-center">{{resourceBundle['reorder']}}</th>
                             </tr>
-                            <tr ng-class="{'reorderbg' : item.rhc}" ng-repeat="item in filtered = (rData | filter:{rt:tag} | orderBy:'osno')">
+                            <tr ng-class="{'reorderbg' : item.rhc}" ng-repeat="item in filtered">
                                 <td><span class="glyphicons glyphicons-bring-to-front tglyph" ng-if="currentDomain != item.sdid" ng-click="switchDomain(item.sdid,item.sdname)" uib-tooltip="{{item.sdname}}"></span></td>
                                 <td class="text-center"><input type="checkbox" ng-model="item.selected"/></td>
                                 <td class="text-center">{{item.sno}}</td>

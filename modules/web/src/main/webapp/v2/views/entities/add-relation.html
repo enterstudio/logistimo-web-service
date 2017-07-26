@@ -78,26 +78,26 @@
         <h5>{{resourceBundle['relationship.relatedkiosk']}}</h5>
         <hr/>
         <div ng-hide="loading">
-            <div ng-show="isDef(filtered)">
-                <div class="filter-box filter-box-fit">
-                    <div class="row">
-                        <div class="col-sm-1 cbx">
-                            <span class="filter-label">{{resourceBundle.kiosk}}</span>
-                        </div>
-                        <div class="col-sm-3">
-                            <entity-select ent-model="enm" classes="form-control"
-                                           place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
-                            </entity-select>
-                        </div>
-                        <div class="col-sm-3 cbx">
-                            <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
-                            <tag-filter ng-model="eTag" tag-type="entity"></tag-filter>
-                        </div>
-                        <div class="pull-right">
-                            <button type="button" class="btn btn-sm btn-default" ng-click="resetFilter()">{{resourceBundle['reset']}}</button>
-                        </div>
+            <div class="filter-box filter-box-fit">
+                <div class="row">
+                    <div class="col-sm-1 cbx">
+                        <span class="filter-label">{{resourceBundle.kiosk}}</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <entity-select ent-model="enm" classes="form-control"
+                                       place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
+                        </entity-select>
+                    </div>
+                    <div class="col-sm-3 cbx">
+                        <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
+                        <tag-filter ng-model="eTag" tag-type="entity"></tag-filter>
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-sm btn-default" ng-click="resetFilter()">{{resourceBundle['reset']}}</button>
                     </div>
                 </div>
+            </div>
+            <div ng-show="isDef(filtered)">
                 <div class="row">
                     <div class="col-sm-3 col-sm-offset-9">
                         <div class="pull-right">
