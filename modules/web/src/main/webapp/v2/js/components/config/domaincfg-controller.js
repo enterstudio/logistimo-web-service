@@ -74,16 +74,20 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         CurrencyController.call(this, $scope, configService);
         LocationController.call(this, $scope, configService);
         $scope.setGeneralConfig = function () {
+            if($scope.pUser.id == $scope.sUser.id){
+                $scope.showWarning($scope.resourceBundle['same.admincontacts.warning']);
+                return;
+            }
             if ($scope.pUser)
-            $scope.continue = true;
-            if($scope.cnf.snh && checkNullEmpty($scope.cnf.nhn)){
+                $scope.continue = true;
+            if ($scope.cnf.snh && checkNullEmpty($scope.cnf.nhn)) {
                 $scope.showWarning($scope.resourceBundle['enternewhostnamemsg']);
-            }else{
+            } else {
                 $scope.loading = true;
                 $scope.showLoading();
                 $scope.getFilteredUserId($scope.cnf.support);
                 $scope.getFilteredSupportConfig($scope.cnf.support);
-                if($scope.continue){
+                if ($scope.continue) {
                     domainCfgService.setGeneralCfg($scope.cnf).then(function (data) {
                         $scope.showSuccess(data.data);
                         $scope.setOCEnabled($scope.cnf.sc);
@@ -91,12 +95,12 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                         $scope.refreshDomainConfig();
                     }).catch(function error(msg) {
                         $scope.showErrorMsg(msg, true);
-                    }).finally(function (){
+                    }).finally(function () {
                         $scope.loading = false;
                         $scope.hideLoading();
                         $scope.getGeneralConfiguration();
                     });
-                }else{
+                } else {
                     $scope.hideLoading();
                     return false;
                 }
