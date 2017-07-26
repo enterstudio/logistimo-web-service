@@ -28,7 +28,6 @@ package com.logistimo.config.models;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import com.logistimo.AppFactory;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
@@ -41,18 +40,12 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.utils.StringUtil;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -157,6 +150,9 @@ public class DomainConfig implements ILocation, Serializable {
   private static final long serialVersionUID = 4047681117629775550L;
   //Mobile GUI Theme
   public static final String STORE_APP_THEME = "storeAppTheme";
+
+  private static final String NOT_SUPPORTED = "Not supported";
+
   // Logger
   private static final XLog xLogger = XLog.getLog(DomainConfig.class);
   // Properties
@@ -1737,7 +1733,7 @@ public class DomainConfig implements ILocation, Serializable {
   }
 
   public String getDistrictId() {
-    return districtId;
+    return this.districtId;
   }
 
   public void setDistrictId(String districtId) {
@@ -1755,7 +1751,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setLatitude(double latitude) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1765,7 +1761,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setLongitude(double longitude) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1775,7 +1771,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setStreet(String street) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1785,7 +1781,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setCity(String city) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1795,7 +1791,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setTaluk(String taluk) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1805,7 +1801,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setPinCode(String pinCode) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1815,7 +1811,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setTalukId(String talukId) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
@@ -1825,7 +1821,7 @@ public class DomainConfig implements ILocation, Serializable {
 
   @Override
   public void setCityId(String cityId) {
-
+    throw new UnsupportedOperationException(NOT_SUPPORTED);
   }
 
   @Override
