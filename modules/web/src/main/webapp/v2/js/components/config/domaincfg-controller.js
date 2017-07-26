@@ -76,33 +76,33 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         $scope.setGeneralConfig = function () {
             if($scope.pUser.id == $scope.sUser.id){
                 $scope.showWarning($scope.resourceBundle['same.admincontacts.warning']);
-            }else {
-                if ($scope.pUser)
-                    $scope.continue = true;
-                if ($scope.cnf.snh && checkNullEmpty($scope.cnf.nhn)) {
-                    $scope.showWarning($scope.resourceBundle['enternewhostnamemsg']);
-                } else {
-                    $scope.loading = true;
-                    $scope.showLoading();
-                    $scope.getFilteredUserId($scope.cnf.support);
-                    $scope.getFilteredSupportConfig($scope.cnf.support);
-                    if ($scope.continue) {
-                        domainCfgService.setGeneralCfg($scope.cnf).then(function (data) {
-                            $scope.showSuccess(data.data);
-                            $scope.setOCEnabled($scope.cnf.sc);
-                            $scope.setDefaultCurrency($scope.cnf.cur);
-                            $scope.refreshDomainConfig();
-                        }).catch(function error(msg) {
-                            $scope.showErrorMsg(msg, true);
-                        }).finally(function () {
-                            $scope.loading = false;
-                            $scope.hideLoading();
-                            $scope.getGeneralConfiguration();
-                        });
-                    } else {
+                return;
+            }
+            if ($scope.pUser)
+                $scope.continue = true;
+            if ($scope.cnf.snh && checkNullEmpty($scope.cnf.nhn)) {
+                $scope.showWarning($scope.resourceBundle['enternewhostnamemsg']);
+            } else {
+                $scope.loading = true;
+                $scope.showLoading();
+                $scope.getFilteredUserId($scope.cnf.support);
+                $scope.getFilteredSupportConfig($scope.cnf.support);
+                if ($scope.continue) {
+                    domainCfgService.setGeneralCfg($scope.cnf).then(function (data) {
+                        $scope.showSuccess(data.data);
+                        $scope.setOCEnabled($scope.cnf.sc);
+                        $scope.setDefaultCurrency($scope.cnf.cur);
+                        $scope.refreshDomainConfig();
+                    }).catch(function error(msg) {
+                        $scope.showErrorMsg(msg, true);
+                    }).finally(function () {
+                        $scope.loading = false;
                         $scope.hideLoading();
-                        return false;
-                    }
+                        $scope.getGeneralConfiguration();
+                    });
+                } else {
+                    $scope.hideLoading();
+                    return false;
                 }
             }
         };
