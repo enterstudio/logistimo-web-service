@@ -46,8 +46,10 @@ public class DomainLocIDConfigMigrator {
 
   private static final XLog xlogger = XLog.getLog(DomainLocIDConfigMigrator.class);
 
+  private static final String USER = "migrator-user";
+
   /**
-   * Migrate the events config
+   * Migrate the domain config to update loc ids
    */
   public void updateDomainLocConfig() throws ServiceException {
     DomainsService ds = Services.getService(DomainsServiceImpl.class);
@@ -69,7 +71,7 @@ public class DomainLocIDConfigMigrator {
         k += plimit;
         limit += plimit;
         try {
-          Thread.sleep(5000l);
+          Thread.sleep(500l);
         } catch (InterruptedException e) {
           xlogger.warn("Issue with domain location config update {}", e);
         }
@@ -92,6 +94,7 @@ public class DomainLocIDConfigMigrator {
 
   private void updateLocId(IDomain domain) throws ServiceException {
     DomainConfig domainConfig = DomainConfig.getInstance(domain.getId());
+    domainConfig.setUser(USER);
     LocationClient client = StaticApplicationContext.getBean(LocationClient.class);
     try {
       LocationResponseModel response = client.getLocationIds(domainConfig);
