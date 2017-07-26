@@ -105,15 +105,15 @@ public class OrderApprovalsServiceImpl implements IOrderApprovalsService {
     List<IOrderApprovalMapping> results = null;
     try {
 
-      StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER_APPROVAL_MAPPING` ");
-      queryBuilder.append("WHERE ORDER_ID IN (");
+      StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER_APPROVAL_MAPPING`");
+      queryBuilder.append(" WHERE ORDER_ID IN (");
       for (Long orderId : orderIds) {
         queryBuilder.append(orderId).append(CharacterConstants.COMMA);
       }
       queryBuilder.setLength(queryBuilder.length() - 1);
       queryBuilder.append(" )");
       queryBuilder.append(" AND APPROVAL_TYPE=").append(orderAppprovalType);
-      queryBuilder.append(" ORDER BY ORDER_ID ASC");
+      queryBuilder.append(" AND LATEST=1 ORDER BY ORDER_ID ASC");
       query = pm.newQuery("javax.jdo.query.SQL", queryBuilder.toString());
       query.setClass(OrderApprovalMapping.class);
       results = (List<IOrderApprovalMapping>) query.execute();

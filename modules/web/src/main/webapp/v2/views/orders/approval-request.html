@@ -1,6 +1,7 @@
 <div class="modal-header ws">
-    <h3 class="modal-title" ng-show="action == 'rq' && type != '0'">{{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
-    <h3 class="modal-title" ng-show="action == 'rq' && type == '0'">{{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} Transfer: {{orderId}}</h3>
+    <h3 class="modal-title" ng-show="action == 'rq'">{{resourceBundle['approvals.request']}}
+        {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}:
+        {{orderId}}</h3>
     <h3 class="modal-title" ng-show="action == 'cn'">{{resourceBundle['approvals.cancel']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
     <h3 class="modal-title" ng-show="action == 'ap'">{{resourceBundle['approvals.approve']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
     <h3 class="modal-title" ng-show="action == 'rj'">{{resourceBundle['approvals.reject']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['for.lowercase']}} {{resourceBundle['order']}}: {{orderId}}</h3>
