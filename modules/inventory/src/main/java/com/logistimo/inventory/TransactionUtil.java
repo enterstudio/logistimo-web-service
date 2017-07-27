@@ -613,7 +613,8 @@ public class TransactionUtil {
                 trans.getType(), index);
             throw new LogiException("M010", (Object[]) null);
           }
-          if (BigUtil.equals(trans.getQuantity(),BigDecimal.ZERO)) {
+          if (!ITransaction.TYPE_PHYSICALCOUNT.equals(trans.getType()) && BigUtil.equals(
+              trans.getQuantity(), BigDecimal.ZERO)) {
             xLogger.warn("Missing or invalid quantity at index {0}", index);
             throw new LogiException("M010", (Object[]) null);
           }
