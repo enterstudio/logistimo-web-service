@@ -65,7 +65,8 @@
                         <td class="text-center">
                             {{$index + 1 + offset }}
                         </td>
-                        <td class="text-left" ng-if="activeMetric == 'kt'"><a href="#/setup/entities/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}} </a>
+                        <td class="text-left" ng-if="activeMetric == 'kt'">
+                            <a href="#/setup/entities/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}} </a>
                             <span class="litetext">{{
                                 key.split('|')[2] +
                                 (key.split('|')[2] ? ', ':'') + key.split('|')[3] +
@@ -73,9 +74,19 @@
                                 (key.split('|')[4] ? ', ':'') + key.split('|')[5]
                                 }}</span>
                         </td>
-                        <td class="text-left" ng-if="activeMetric == 'at'">{{key.split('_').splice(1,key.split('_').length).join()}} </a>
+                        <td ng-init="sId = key.split('_').splice(1,key.split('_').length).join().split('|||')[0];
+                                vId = key.split('|||')[1];
+                                metadata = key.substring(key.split('|||')[0].length+'|||'.length).split('|||');"
+                            class="text-left" ng-if="activeMetric == 'at'">
+                            <a href="#/assets/detail/{{key.split('_')[0]}}/{{encodeURIParam(sId)}}" target="_blank">{{sId}} </a>
+                            {{' - ' + metadata[1] + ' (' + vId + ')'}}
+                            <span class="litetext">
+                                <a href="#/setup/entities/detail/{{metadata[2]}}" target="_blank">{{metadata[3]}}</a>
+                                {{(metadata[3] ? ', ':'') + metadata[4]}}
+                            </span>
                         </td>
-                        <td class="text-left" ng-if="activeMetric == 'mt'"><a href="#/setup/materials/all/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}}</a>
+                        <td class="text-left" ng-if="activeMetric == 'mt'">
+                            <a href="#/setup/materials/all/detail/{{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}}</a>
                         </td>
                         <td ng-if="activeMetric != 'mt' && activeMetric != 'kt' && activeMetric != 'at'" class="text-left">{{key}}</td>
                         <td class="text-center" ng-class="{'codegray':isUndef(val[tableSeriesNo].value * 1)}" tooltip-enable="val[tableSeriesNo].num" uib-tooltip="{{val[tableSeriesNo].num}} / {{val[tableSeriesNo].den}}" tooltip-append-to-body="true" ng-repeat="val in value track by $index">{{(val[tableSeriesNo].value)}}</td>

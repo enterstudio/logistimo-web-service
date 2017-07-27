@@ -23,6 +23,7 @@
 
 package com.logistimo.reports.plugins.internal;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +32,9 @@ import java.util.Map;
 public class QueryRequestModel {
   public String userId = "logistimo";
   public String queryId;
+  public String derivedResultsId;
   public Map<String, String> filters;
+  public List<String> rowHeadings;
   public Integer size;
   public Integer offset;
 }
