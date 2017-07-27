@@ -28,6 +28,7 @@ function AssetReportController(s, timeout, getData) {
     s.showLoading = s.$parent.$parent.showLoading;
     s.hideLoading = s.$parent.$parent.hideLoading;
     s.exportAsCSV = s.$parent.$parent.exportAsCSV;
+    s.encodeURIParam = s.$parent.$parent.encodeURIParam;
 
     s.MAX_MONTHS = 11;
     s.MAX_WEEKS = 15;

@@ -1074,3 +1074,4 @@ approvals.primary.approvers=Approbateurs primaires
 approvals.secondary.approvers=Approuvants secondaires
 order.sales.lowercase=Ventes
 approvals.approvers.none=Aucun
+same.admincontacts.warning=Les contacts administratifs primaires et secondaires ne doivent pas être identiques

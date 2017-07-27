@@ -46,10 +46,10 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -143,8 +143,13 @@ public class ReportPluginService implements Service {
           + QueryHelper.getQueryID(model.filters, type);
       if (viewType.toString().equals(ReportViewType.BY_ASSET.toString())) {
         model.queryId = "DID_DVID";
+        model.derivedResultsId = "ATE_DID_DVID";
+        String[] arr = StringUtils.split(model.filters.get(QueryHelper.TOKEN + QueryHelper.QUERY_DVID),',');
+        for(int i=0;i<arr.length;i++){
+          arr[i] = arr[i].substring(1,arr[i].length()-1);
+        }
+        model.rowHeadings = Arrays.asList(arr);
       }
-
       finaliseFilters(viewType, model, retainFilters);
 
       ExternalServiceClient externalServiceClient = ExternalServiceClient.getNewInstance();

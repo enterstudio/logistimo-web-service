@@ -71,8 +71,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -299,6 +301,7 @@ public class ReportServiceUtil {
     TreeBasedTable<String, String, List<String>> treeBasedTable = TreeBasedTable.create();
     int dataSize = jsonObject.getJSONArray(HEADINGS).length() - 2;
     SimpleDateFormat labelDateFormat = new SimpleDateFormat(QueryHelper.DATE_FORMAT_DAILY);
+    Set<String> rowKeySet = new HashSet<>();
     if (jsonObject.has(ROWS)) {
       JSONArray rowsJson = jsonObject.getJSONArray(ROWS);
       for (int i = 0; i < rowsJson.length(); i++) {
@@ -309,24 +312,23 @@ public class ReportServiceUtil {
                   ? rowsJson.getJSONArray(i).getString(j + 2)
                   : ZERO);
         }
+        rowKeySet.add(rowsJson.getJSONArray(i).getString(0));
         String date = rowsJson.getJSONArray(i).getString(1);
-        if(QueryHelper.MONTH.equals(model.filters.get(QueryHelper.TOKEN_PERIODICITY))) {
-          SimpleDateFormat dateFormat = new SimpleDateFormat(QueryHelper.DATE_FORMAT_MONTH);
-          date = labelDateFormat.format(dateFormat.parse(date));
+        if(StringUtils.isNotEmpty(date)){
+          if (QueryHelper.MONTH.equals(model.filters.get(QueryHelper.TOKEN_PERIODICITY))) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(QueryHelper.DATE_FORMAT_MONTH);
+            date = labelDateFormat.format(dateFormat.parse(date));
+          }
+          treeBasedTable.put(rowsJson.getJSONArray(i).getString(0), date, data);
         }
-        treeBasedTable.put(
-            rowsJson.getJSONArray(i).getString(0), date, data);
       }
     }
     JSONArray rowHeadings = null;
     if (jsonObject.has(ROW_HEADINGS)) {
       rowHeadings = jsonObject.getJSONArray(ROW_HEADINGS);
-    }else if(deviceIdCheck && viewType == ReportViewType.BY_ASSET){
-      String[] arr = StringUtils.split(model.filters.get(QueryHelper.TOKEN + QueryHelper.QUERY_DVID),',');
-      for(int i=0;i<arr.length;i++){
-        arr[i] = arr[i].substring(1,arr[i].length()-1);
+      if (deviceIdCheck && viewType == ReportViewType.BY_ASSET) {
+        rowHeadings = new JSONArray(rowKeySet);
       }
-      rowHeadings = new JSONArray(arr);
     }
     treeBasedTable = fillTable(treeBasedTable, model.filters, rowHeadings, dataSize);
     List<String> headers = new ArrayList<>(treeBasedTable.columnKeySet().size() + 1);
