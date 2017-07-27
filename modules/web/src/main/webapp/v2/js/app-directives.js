@@ -314,7 +314,6 @@ logistimoApp.directive('multipleTagsFilter', function () {
                 })
                     : null;
             }
-
             setTags();
             $scope.$watch('inTags', function (newVal, oldVal) {
                 if (newVal != oldVal) {
@@ -330,7 +329,11 @@ logistimoApp.directive('multipleTagsFilter', function () {
                     }
                 }
             });
-
+            $scope.$watch('includedTags', function(newVal, oldVal) {
+                if(newVal != oldVal){
+                    setTags();
+                }
+            });
             $scope.toggleFilter = function (cancel) {
                 var d = document.getElementById($scope.type + '-filter');
                 if (cancel != undefined) {

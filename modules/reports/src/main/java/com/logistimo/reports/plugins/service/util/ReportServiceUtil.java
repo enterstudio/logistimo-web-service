@@ -483,8 +483,8 @@ public class ReportServiceUtil {
 
   protected Long getMillisInPeriod(String time, String periodicity) {
     Long totalMillis;
-    DateTimeZone timezone = DateTimeZone.forID(
-        DomainConfig.getInstance(SecurityUtils.getCurrentDomainId()).getTimezone());
+    String tz = DomainConfig.getInstance(SecurityUtils.getCurrentDomainId()).getTimezone();
+    DateTimeZone timezone = StringUtils.isNotEmpty(tz) ? DateTimeZone.forID(tz) : DateTimeZone.UTC;
     DateTime currentDateTime = new DateTime();
     DateTime from;
     switch (periodicity) {
