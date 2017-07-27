@@ -119,6 +119,7 @@ public class UserBuilder {
     } catch (Exception e) {
       xLogger.warn("Unable to fetch the domain details", e);
     }
+    model.per = user.getPermission();
     return model;
   }
 
