@@ -26,6 +26,7 @@ package com.logistimo.api.builders;
 import com.logistimo.api.constants.ConfigConstants;
 import com.logistimo.api.models.MenuStatsModel;
 import com.logistimo.api.models.configuration.AccountingConfigModel;
+import com.logistimo.api.models.configuration.AdminContactConfigModel;
 import com.logistimo.api.models.configuration.ApprovalsConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.api.models.configuration.CapabilitiesConfigModel;
@@ -43,6 +44,7 @@ import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.models.AccountingConfig;
 import com.logistimo.config.models.ActualTransConfig;
+import com.logistimo.config.models.AdminContactConfig;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.AssetConfig;
 import com.logistimo.config.models.AssetSystemConfig;
@@ -378,7 +380,33 @@ public class ConfigurationModelsBuilder {
     model.snh = dc.isEnableSwitchToNewHost();
     model.nhn = dc.getNewHostName();
     model.support = buildAllSupportConfigModels(dc);
-    model.adminContact = dc.getAdminContactConfigMap();
+    model.adminContact = buildAllAdminContactConfigModel(dc.getAdminContactConfig());
+    return model;
+  }
+
+  public Map<String, AdminContactConfigModel> buildAllAdminContactConfigModel(AdminContactConfig config)
+      throws ObjectNotFoundException {
+    Map<String, AdminContactConfigModel> model = new HashMap<>();
+    AdminContactConfigModel adminContactModel;
+    adminContactModel = buildAdminContactModel(config.getPrimaryAdminContact());
+    model.put(AdminContactConfig.PRIMARY_ADMIN_CONTACT, adminContactModel);
+    adminContactModel = buildAdminContactModel(config.getSecondaryAdminContact());
+    model.put(AdminContactConfig.SECONDARY_ADMIN_CONTACT, adminContactModel);
+    return model;
+  }
+  public AdminContactConfigModel buildAdminContactModel(String userId)
+      throws ObjectNotFoundException {
+    AdminContactConfigModel model = new AdminContactConfigModel();
+    if(StringUtils.isNotEmpty(userId)) {
+      UsersService as = Services.getService(UsersServiceImpl.class);
+      IUserAccount userAccount = as.getUserAccount(userId);
+      if(userAccount != null) {
+        model.userId = userId;
+        model.email = userAccount.getEmail();
+        model.phn = userAccount.getMobilePhoneNumber();
+        model.userNm = userAccount.getFullName();
+      }
+    }
     return model;
   }
 

@@ -24,11 +24,35 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.AppFactory;
-import com.logistimo.api.builders.*;
+import com.logistimo.api.builders.BulletinBoardBuilder;
+import com.logistimo.api.builders.ConfigurationModelsBuilder;
+import com.logistimo.api.builders.CurrentUserBuilder;
+import com.logistimo.api.builders.CustomReportsBuilder;
+import com.logistimo.api.builders.InventoryBuilder;
+import com.logistimo.api.builders.NotificationBuilder;
+import com.logistimo.api.builders.UserBuilder;
+import com.logistimo.api.builders.UserMessageBuilder;
 import com.logistimo.api.constants.ConfigConstants;
 import com.logistimo.api.migrators.CRConfigMigrator;
-import com.logistimo.api.models.*;
-import com.logistimo.api.models.configuration.*;
+import com.logistimo.api.models.AccessLogModel;
+import com.logistimo.api.models.CurrentUserModel;
+import com.logistimo.api.models.MenuStatsModel;
+import com.logistimo.api.models.TagsModel;
+import com.logistimo.api.models.UserMessageModel;
+import com.logistimo.api.models.configuration.AccountingConfigModel;
+import com.logistimo.api.models.configuration.ApprovalsConfigModel;
+import com.logistimo.api.models.configuration.AssetConfigModel;
+import com.logistimo.api.models.configuration.BulletinBoardConfigModel;
+import com.logistimo.api.models.configuration.CapabilitiesConfigModel;
+import com.logistimo.api.models.configuration.CustomReportsConfigModel;
+import com.logistimo.api.models.configuration.DashboardConfigModel;
+import com.logistimo.api.models.configuration.GeneralConfigModel;
+import com.logistimo.api.models.configuration.InventoryConfigModel;
+import com.logistimo.api.models.configuration.NotificationsConfigModel;
+import com.logistimo.api.models.configuration.NotificationsModel;
+import com.logistimo.api.models.configuration.OrdersConfigModel;
+import com.logistimo.api.models.configuration.SupportConfigModel;
+import com.logistimo.api.models.configuration.TagsConfigModel;
 import com.logistimo.api.request.AddCustomReportRequestObj;
 import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.auth.SecurityMgr;
@@ -36,16 +60,46 @@ import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.config.entity.IConfig;
-import com.logistimo.config.models.*;
+import com.logistimo.config.models.AccountingConfig;
+import com.logistimo.config.models.ActualTransConfig;
+import com.logistimo.config.models.AdminContactConfig;
+import com.logistimo.config.models.ApprovalsConfig;
+import com.logistimo.config.models.AssetConfig;
+import com.logistimo.config.models.AssetSystemConfig;
+import com.logistimo.config.models.BBoardConfig;
+import com.logistimo.config.models.CapabilityConfig;
+import com.logistimo.config.models.ConfigurationException;
+import com.logistimo.config.models.CustomReportsConfig;
+import com.logistimo.config.models.DashboardConfig;
+import com.logistimo.config.models.DemandBoardConfig;
+import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.EventsConfig;
+import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.config.models.LeadTimeAvgConfig;
+import com.logistimo.config.models.MatStatusConfig;
+import com.logistimo.config.models.OptimizerConfig;
+import com.logistimo.config.models.OrdersConfig;
+import com.logistimo.config.models.ReportsConfig;
+import com.logistimo.config.models.SupportConfig;
+import com.logistimo.config.models.SyncConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
-import com.logistimo.entity.*;
+import com.logistimo.entity.IALog;
+import com.logistimo.entity.IBBoard;
+import com.logistimo.entity.IJobStatus;
+import com.logistimo.entity.IMessageLog;
+import com.logistimo.entity.IUploaded;
 import com.logistimo.events.handlers.BBHandler;
-import com.logistimo.exception.*;
+import com.logistimo.exception.BadRequestException;
+import com.logistimo.exception.ConfigurationServiceException;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.InvalidTaskException;
+import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.exception.UnauthorizedException;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.logger.XLog;
 import com.logistimo.pagination.Navigator;
@@ -65,16 +119,37 @@ import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.*;
+import com.logistimo.utils.JobUtil;
+import com.logistimo.utils.LocalDateUtil;
+import com.logistimo.utils.MessageUtil;
+import com.logistimo.utils.QueryUtil;
+import com.logistimo.utils.StringUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
 @Controller
 @RequestMapping("/config/domain")
@@ -718,7 +793,14 @@ public class DomainConfigController {
         cc.dc.getAssetConfig().getConfiguration().getLocale()
             .setTz(AssetConfig.getTimezoneOffset(model.tz));
       }
-      cc.dc.setAdminContactConfigMap(model.adminContact);
+      AdminContactConfig adminContactConfig = cc.dc.getAdminContactConfig();
+//      if(model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId != null) {
+        adminContactConfig.setPrimaryAdminContact(model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId);
+//      }
+//      if(model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId != null) {
+        adminContactConfig.setSecondaryAdminContact(model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId);
+//      }
+      cc.dc.setAdminContactConfigMap(adminContactConfig);
       cc.dc.setEnableSwitchToNewHost(model.snh);
       cc.dc.setNewHostName(model.nhn);
 

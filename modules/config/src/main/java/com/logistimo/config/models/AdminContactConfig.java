@@ -27,152 +27,59 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 
 public class AdminContactConfig implements Serializable {
 
-  public static final String ADMIN_USER_ROLE = "role";
-  public static final String ADMIN_USER = "usrid";
-  public static final String ADMIN_USER_NAME = "usrname";
-  public static final String ADMIN_EMAIL = "em";
-  public static final String ADMIN_PHONE = "phnm";
+  public static final String PRIMARY_ADMIN_CONTACT = "pac";
+  public static final String SECONDARY_ADMIN_CONTACT = "sac";
   protected static final long serialVersionUID = 1l;
-  private String usrid;
 
-  private String usrname;
+  private String pac;
 
-  private String role;
-
-  private String em;
-
-  private String phnm;
-
+  private String sac;
 
   public AdminContactConfig() {
   }
 
   public AdminContactConfig(JSONObject json) {
     try {
-      usrid = json.getString(ADMIN_USER);
+      pac = json.getString(PRIMARY_ADMIN_CONTACT);
     } catch (JSONException e) {
       // do nothing
     }
     try {
-      usrname = json.getString(ADMIN_USER_NAME);
-    } catch (JSONException e) {
-      // do nothing
-    }
-    try {
-      role = json.getString(ADMIN_USER_ROLE);
-    } catch (JSONException e) {
-      // do nothing
-    }
-    try {
-      em = json.getString(ADMIN_EMAIL);
-    } catch (JSONException e) {
-      // do nothing
-    }
-    try {
-      phnm = json.getString(ADMIN_PHONE);
+      sac = json.getString(SECONDARY_ADMIN_CONTACT);
     } catch (JSONException e) {
       // do nothing
     }
   }
 
-  @SuppressWarnings("rawtypes")
-  public static Map<String, AdminContactConfig> getAdminContactMap(JSONObject json) {
-    Map<String, AdminContactConfig> map = new HashMap<>();
-    // Get the roles
-    Iterator keys = json.keys();
-    while (keys.hasNext()) {
-      String key = (String) keys.next();
-      try {
-        map.put(key, new AdminContactConfig(json.getJSONObject(key)));
-      } catch (Exception e) {
-        // do nothing
-      }
-    }
-    return map;
+  public String getPrimaryAdminContact() {
+    return pac;
   }
 
-  public static JSONObject getAdminContactJSON(Map<String, AdminContactConfig> map) {
-    if (map == null || map.isEmpty()) {
-      return null;
-    }
-    JSONObject json = new JSONObject();
-    Iterator<String> it = map.keySet().iterator();
-    while (it.hasNext()) {
-      String key = it.next();
-      try {
-        json.put(key, map.get(key).toJSONObject());
-      } catch (Exception e) {
-        // do nothing
-      }
-    }
-    return json;
+  public void setPrimaryAdminContact(String pac) {
+    this.pac = pac;
   }
 
-  public String getUsrid() {
-    return usrid;
+  public String getSecondaryAdminContact() {
+    return sac;
   }
 
-  public void setUsrid(String usrid) {
-    this.usrid = usrid;
-  }
-
-  public String getUsrname() {
-    return usrname;
-  }
-
-  public void setUsrname(String usrname) {
-    this.usrname = usrname;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(String role) {
-    this.role = role;
-  }
-
-  public String getEm() {
-    return em;
-  }
-
-  public void setEm(String em) {
-    this.em = em;
-  }
-
-  public String getPhnm() {
-    return phnm;
-  }
-
-  public void setPhnm(String phnm) {
-    this.phnm = phnm;
+  public void setSecondaryAdminContact(String sac) {
+    this.sac = sac;
   }
 
   public Object toJSONObject() throws ConfigurationException {
     JSONObject json = null;
     try {
       json = new JSONObject();
-      if (usrid != null) {
-        json.put(ADMIN_USER, usrid);
+      if (pac != null) {
+        json.put(PRIMARY_ADMIN_CONTACT, pac);
       }
-      if (usrname != null) {
-        json.put(ADMIN_USER_NAME, usrid);
-      }
-      if (role != null) {
-        json.put(ADMIN_USER_ROLE, role);
-      }
-      if (em != null) {
-        json.put(ADMIN_EMAIL, em);
-      }
-      if (phnm != null) {
-        json.put(ADMIN_PHONE, phnm);
+      if (sac != null) {
+        json.put(SECONDARY_ADMIN_CONTACT, sac);
       }
     } catch (JSONException e) {
       throw new ConfigurationException(e.getMessage());
