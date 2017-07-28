@@ -104,6 +104,8 @@ public class Report {
   public Long tec;
   public Long trc;
   public Float trq;
+  public Float troiq;
+  public Float trorq;
   public Long tuc;
   public Long uc;
   public Long wc;
@@ -598,6 +600,14 @@ public class Report {
 
   public Float getTransfersQuantity() {
     return trq == null ? 0 : trq;
+  }
+
+  public Float getTransferOrderIssueQuantity() {
+    return troiq == null ? 0 : troiq;
+  }
+
+  public Float getTransferOrderReceiptQuantity() {
+    return trorq == null ? 0 : trorq;
   }
 
   public Long getTransactionUserCount() {
