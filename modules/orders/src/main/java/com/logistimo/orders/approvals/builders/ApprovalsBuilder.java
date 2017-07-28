@@ -259,6 +259,8 @@ public class ApprovalsBuilder {
       ApproverModel model = new ApproverModel();
       model.setApproverType(queue.getType());
       model.setApproverStatus(queue.getApproverStatus());
+      model.setExpiresAt(queue.getEndTime());
+      model.setStartsAt(queue.getStartTime());
       try {
         userBuilder.buildUserContactModel(queue.getUserId(), model);
       } catch (ObjectNotFoundException e) {
@@ -301,6 +303,8 @@ public class ApprovalsBuilder {
           model.setName(userAccount.getFullName());
           model.setPhone(userAccount.getMobilePhoneNumber());
           model.setUserId(userAccount.getUserId());
+          model.setExpiresAt(approverResponse.getEndTime());
+          model.setStartsAt(approverResponse.getStartTime());
           models.add(model);
         }
       }
