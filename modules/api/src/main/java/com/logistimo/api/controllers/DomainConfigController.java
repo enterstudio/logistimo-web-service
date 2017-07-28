@@ -794,12 +794,8 @@ public class DomainConfigController {
             .setTz(AssetConfig.getTimezoneOffset(model.tz));
       }
       AdminContactConfig adminContactConfig = cc.dc.getAdminContactConfig();
-//      if(model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId != null) {
-        adminContactConfig.setPrimaryAdminContact(model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId);
-//      }
-//      if(model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId != null) {
-        adminContactConfig.setSecondaryAdminContact(model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId);
-//      }
+      adminContactConfig.setPrimaryAdminContact(model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId);
+      adminContactConfig.setSecondaryAdminContact(model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId);
       cc.dc.setAdminContactConfigMap(adminContactConfig);
       cc.dc.setEnableSwitchToNewHost(model.snh);
       cc.dc.setNewHostName(model.nhn);
