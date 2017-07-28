@@ -27,6 +27,8 @@ import com.google.gson.annotations.SerializedName;
 
 import com.logistimo.users.models.UserContactModel;
 
+import java.util.Date;
+
 /**
  * Created by naveensnair on 22/06/17.
  */
@@ -37,6 +39,12 @@ public class ApproverModel extends UserContactModel {
 
   @SerializedName("approver_status")
   private String approverStatus;
+
+  @SerializedName("expires_at")
+  private Date expiresAt;
+
+  @SerializedName("starts_at")
+  private Date startsAt;
 
   public String getApproverType() {
     return approverType;
@@ -52,6 +60,22 @@ public class ApproverModel extends UserContactModel {
 
   public void setApproverStatus(String approverStatus) {
     this.approverStatus = approverStatus;
+  }
+
+  public Date getExpiresAt() {
+    return expiresAt;
+  }
+
+  public void setExpiresAt(Date expiresAt) {
+    this.expiresAt = expiresAt;
+  }
+
+  public Date getStartsAt() {
+    return startsAt;
+  }
+
+  public void setStartsAt(Date startsAt) {
+    this.startsAt = startsAt;
   }
 
 }

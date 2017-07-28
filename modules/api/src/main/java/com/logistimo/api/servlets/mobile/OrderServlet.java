@@ -744,10 +744,11 @@ public class OrderServlet extends JsonRestServlet {
           DomainConfig dc = DomainConfig.getInstance(domainId);
 
           Boolean isSalesOrder = false;
+          int tOrNt = IOrder.PURCHASE_ORDER;
           if (uoReq.oty != null && uoReq.oty.equals(IOrder.TYPE_SALE)) {
             isSalesOrder = true;
+            tOrNt = IOrder.SALES_ORDER;
           }
-          int tOrNt = IOrder.NONTRANSFER;
           if (!(disableCreateTransfer && RestConstantsZ.TYPE_ORDER.equals(type)) && uoReq.trf != null
               && uoReq.trf.equals(IOrder.TRANSFER)) {
             tOrNt = uoReq.trf;
