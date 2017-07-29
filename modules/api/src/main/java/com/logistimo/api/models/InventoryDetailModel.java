@@ -97,4 +97,8 @@ public class InventoryDetailModel {
    * Stock Availability Days
    */
   public BigDecimal sad;
+  /**
+   * Stock availability period
+   */
+  public String sap;
 }

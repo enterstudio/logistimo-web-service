@@ -222,6 +222,7 @@ public class InventoryBuilder {
     model.as = invntry.getAllocatedStock();
     model.ls = invntry.getPredictedDaysOfStock();
     model.sad = ims.getStockAvailabilityPeriod(invntry, domainConfig);
+    model.sap = domainConfig.getInventoryConfig().getDisplayCRFreq();
 
     IInvntryEvntLog lastEventLog = invDao.getInvntryEvntLog(invntry);
 
