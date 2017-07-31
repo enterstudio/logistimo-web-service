@@ -46,6 +46,7 @@ import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
+import com.logistimo.entities.actions.UpdateApproversAction;
 import com.logistimo.entities.dao.EntityDao;
 import com.logistimo.entities.dao.IEntityDao;
 import com.logistimo.entities.entity.IApprovers;
@@ -104,7 +105,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jdo.JDOException;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -242,123 +242,16 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
   /**
    * Add approvers for a given kiosk id
    * @param kioskId
-   * @param approversModel
+   * @param newApprovers
    * @param userName
    * @throws ServiceException
    */
-  public void addApprovers(Long kioskId, List<IApprovers> approversModel, String userName) throws ServiceException {
-    xLogger.fine("Entering addApprover: kiosk = {0}, approvers = {1}", kioskId);
-    if(kioskId == null) {
-      throw new ServiceException("Invalid parameters for Approvers");
-    }
-    PersistenceManager pm = PMF.get().getPersistenceManager();
-    List<IApprovers> primaryApproversList = getApprovers(kioskId, IApprovers.PRIMARY_APPROVER);
-    List<IApprovers> secondaryApproversList = getApprovers(kioskId, IApprovers.SECONDARY_APPROVER);
-    List<IApprovers> primaryApproversModel = getApproversList(kioskId, approversModel, IApprovers.PRIMARY_APPROVER);
-    List<IApprovers> secondaryApproversModel = getApproversList(kioskId, approversModel, IApprovers.SECONDARY_APPROVER);
-    try {
-      deleteApprovers(primaryApproversList, primaryApproversModel, pm);
-      deleteApprovers(secondaryApproversList, secondaryApproversModel, pm);
-      persistApprovers(primaryApproversList, primaryApproversModel, pm, userName);
-      persistApprovers(secondaryApproversList, secondaryApproversModel, pm, userName);
-    } catch (JDOException e) {
-      xLogger.fine("Could not persist approver for entity {0}", kioskId);
-    } finally {
-      pm.close();
-    }
+  public void addApprovers(Long kioskId, List<IApprovers> newApprovers, String userName) {
+    StaticApplicationContext.getBean(UpdateApproversAction.class)
+        .invoke(kioskId, newApprovers, userName);
   }
 
-  /**
-   * Get the list of approvers for a given type PRIMARY OR SECONDARY
-   * @param approversList
-   * @param type
-   * @return
-   */
-  private List<IApprovers> getApproversList(Long kioskId, List<IApprovers> approversList, int type){
-    List<IApprovers> approvers = null;
-    if(approversList != null && approversList.size() > 0) {
-      approvers = new ArrayList<>();
-      for (IApprovers apr : approversList) {
-        if (apr.getType().equals(type)) {
-          apr.setKioskId(kioskId);
-          approvers.add(apr);
-        }
-      }
-    }
-    return approvers;
-  }
 
-  /**
-   * Delete the approvers from db which are not in the model.
-   * @param approvers
-   * @param approversModel
-   * @param pm
-   */
-  public void deleteApprovers(List<IApprovers> approvers, List<IApprovers> approversModel, PersistenceManager pm) {
-    List<IApprovers> deleteList = new ArrayList<>();
-    if(approvers != null && !approvers.isEmpty()) {
-      if(approversModel != null && !approversModel.isEmpty()) {
-        for(IApprovers apr : approvers) {
-          boolean found = false;
-          for(IApprovers aprm : approversModel) {
-            if(aprm.getUserId().equals(apr.getUserId())) {
-              found = true;
-              break;
-            }
-          }
-          if(!found) {
-            deleteList.add(apr);
-          }
-        }
-
-      } else {
-        deleteList = approvers;
-      }
-      pm.deletePersistentAll(deleteList);
-    }
-  }
-
-  /**
-   * Persist the approvers which are new and update the one which already exists
-   * @param approvers
-   * @param approversModel
-   * @param pm
-   * @param userName
-   */
-  public void persistApprovers(List<IApprovers> approvers, List<IApprovers> approversModel, PersistenceManager pm, String userName) {
-    List<IApprovers> persistList = new ArrayList<>();
-    if(approversModel != null && !approversModel.isEmpty()) {
-      if(approvers != null && !approvers.isEmpty()) {
-        for(IApprovers appr: approversModel) {
-          boolean found = false;
-          for(IApprovers apr : approvers) {
-            if(appr.getUserId().equals(apr.getUserId()) && appr.getType().equals(apr.getType())
-                && appr.getOrderType().equals(apr.getOrderType())) {
-              apr.setType(appr.getType());
-              apr.setUpdatedBy(userName);
-              apr.setUpdatedOn(new Date());
-              apr.setSourceDomainId(appr.getSourceDomainId());
-              persistList.add(apr);
-              found = true;
-              break;
-            }
-          }
-          if(!found) {
-            appr.setCreatedBy(userName);
-            appr.setCreatedOn(new Date());
-            persistList.add(appr);
-          }
-        }
-      } else {
-        for(IApprovers appr: approversModel) {
-          appr.setCreatedBy(userName);
-          appr.setCreatedOn(new Date());
-          persistList.add(appr);
-        }
-      }
-      pm.makePersistentAll(persistList);
-    }
-  }
 
   /**
    * Checks whether a given user is an approver for purchase/sales/transfer orders in a given domain
@@ -401,24 +294,30 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return true;
   }
 
+  public List<IApprovers> getApprovers(Long kioskId) {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    try {
+      return getApprovers(kioskId, pm);
+    } finally {
+      pm.close();
+    }
+  }
+
   /**
    * Get the list of approvers for a given kiosk id
    * @param kioskId
    * @return
    */
-  public List<IApprovers> getApprovers(Long kioskId) {
-    List<IApprovers> appList = null;
+  @Override
+  public List<IApprovers> getApprovers(Long kioskId, PersistenceManager pm) {
     if(kioskId != null) {
-      PersistenceManager pm = null;
       Query query = null;
       try {
-        pm = PMF.get().getPersistenceManager();
-        Map<String, Object> params = new HashMap<>();
         query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
         query.setFilter("kid == kioskIdParam");
         query.declareParameters("Long kioskIdParam");
         List<IApprovers> approversList = (List<IApprovers>) query.execute(kioskId);
-        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+        return (List<IApprovers>) pm.detachCopyAll(approversList);
       } catch (Exception e) {
         xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
       } finally {
@@ -429,12 +328,9 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
             xLogger.warn("Exception while closing query", ignored);
           }
         }
-        if (pm != null) {
-          pm.close();
-        }
       }
     }
-    return appList;
+    return Collections.emptyList();
 
   }
 
