@@ -448,9 +448,8 @@ public class EntityBuilder {
   }
 
   public List<IApprovers> buildApprovers(EntityApproversModel model, String username, Long domainId) {
-    List<IApprovers> approvers = null;
+    List<IApprovers> approvers = new ArrayList<>();
     if(model != null) {
-      approvers = new ArrayList<>();
       if(model.pap != null && !model.pap.isEmpty()) {
         for(UserModel um : model.pap) {
           IApprovers primaryApprover = JDOUtils.createInstance(IApprovers.class);

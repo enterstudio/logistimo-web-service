@@ -360,7 +360,7 @@ public interface EntitiesService extends Service {
    * @param approvers
    * @return
    */
-  void addApprovers(Long kioskId, List<IApprovers> approvers, String userName) throws ServiceException;
+  void addApprovers(Long kioskId, List<IApprovers> approvers, String userName);
 
   /**
    * Get the list of approvers for a given kioskId and approver type
@@ -375,6 +375,8 @@ public interface EntitiesService extends Service {
    * @return
    */
   List<IApprovers> getApprovers(Long kioskId);
+
+  List<IApprovers> getApprovers(Long kioskId, PersistenceManager pm);
 
   /**
    * Get the list of approvers for a given kioskId and orderType
