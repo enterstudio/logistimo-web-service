@@ -122,6 +122,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
 
+
 /**
  * @author arun, juhee
  */
@@ -902,109 +903,80 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   public void updateInventory(List<IInvntry> items, String user, PersistenceManager pm,
                               boolean closePM) throws ServiceException {
     xLogger.fine("Entering updateInventory - num. of items = {0}", items.size());
-
-    if (items == null || items.size() == 0) {
-      throw new ServiceException("Invalid inventory object"); // nothing to remove
+    if (items == null || items.isEmpty()) {
+      // nothing to remove
+      throw new ServiceException("No inventory items to update");
     }
-
-    // Get the persistence manager
-
-    List<IInvntry> updatedItems = new ArrayList<>();
-    List<IInvntry> mmUpdatedItems = new ArrayList<>();
-    Iterator<IInvntry> it = items.iterator();
-    while (it.hasNext()) {
-      IInvntry inventory = it.next();
-      // Get the data store object
-      IInvntry in = invntryDao.getDBInvntry(inventory, pm);
-      in = pm.detachCopy(in);
-      if (in == null) {
-        xLogger.warn("Unable to find inventory with key {0}", inventory.getKeyString());
-        continue;
-      }
-      if (BigUtil.notEquals(inventory.getReorderLevel(), in.getReorderLevel()) ||
-          BigUtil.notEquals(inventory.getMaxStock(), in.getMaxStock()) ||
-          BigUtil.notEquals(inventory.getMaxDuration(), in.getMaxDuration()) ||
-          BigUtil.notEquals(inventory.getMinDuration(), in.getMinDuration())) {
-        mmUpdatedItems.add(in);
-      }
-      // Change the fields
-      in.setInventoryModel(inventory.getInventoryModel());
-      in.setServiceLevel(inventory.getServiceLevel());
-            /*boolean stockChanged = BigUtil.notEquals(in.getStock(), inventory.getStock());
-            in.setStock(inventory.getStock());*/
-            /*if (stockChanged)
-                in.setTimestamp(inventory.getTimestamp());*/
-      in.setLeadTime(inventory.getLeadTime());
-      in.setLeadTimeDemand(inventory.getLeadTimeDemand());
-      in.setRevPeriodDemand(inventory.getRevPeriodDemand());
-      in.setSafetyStock(inventory.getSafetyStock());
-      in.setStdevRevPeriodDemand(inventory.getStdevRevPeriodDemand());
-      in.setOrderPeriodicity(inventory.getOrderPeriodicity());
-      in.setKioskName(inventory.getKioskName());
-      in.setMaterialName(inventory.getMaterialName());
-      in.setReorderLevel(inventory.getReorderLevel());
-      in.setMaxStock(inventory.getMaxStock());
-      in.setMinDuration(inventory.getMinDuration());
-      in.setMaxDuration(inventory.getMaxDuration());
-      in.setConsumptionRateManual(inventory.getConsumptionRateManual());
-      // Prices
-      in.setRetailerPrice(inventory.getRetailerPrice());
-      in.setTax(inventory.getTax());
-      // Optimization parameters
-      in.setConsumptionRateDaily(inventory.getConsumptionRateDaily());
-      in.setEconomicOrderQuantity(inventory.getEconomicOrderQuantity());
-      in.setPSTimestamp(inventory.getPSTimestamp());
-      in.setDQTimestamp(inventory.getDQTimestamp());
-      in.setOptMessage(inventory.getOptMessage());
-      in.setTgs(tagDao.getTagsByNames(inventory.getTags(TagUtil.TYPE_MATERIAL), ITag.MATERIAL_TAG),
-          TagUtil.TYPE_MATERIAL);
-      in.setTgs(tagDao.getTagsByNames(inventory.getTags(TagUtil.TYPE_ENTITY), ITag.KIOSK_TAG),
-          TagUtil.TYPE_ENTITY);
-      if (user != null) {
-        in.setUpdatedBy(user);
-      }
-      updatedItems.add(in);
-    }
-
+    Map<Long, LockUtil.LockStatus> kidLockStatusMap = new HashMap<>();
     try {
-      // Persist changes
-      pm.makePersistentAll(updatedItems);
-
-      persistMinMaxLog(mmUpdatedItems);
-
-      updatedItems = (List<IInvntry>) pm.detachCopyAll(updatedItems);
-      Long domainId = updatedItems.get(0).getDomainId();
-      // Generate events for all items, as needed
-      Iterator<IInvntry> it2 = updatedItems.iterator();
-      while (it2.hasNext()) {
-        IInvntry inv = it2.next();
-        try {
-          EventPublisher.generate(domainId, IEvent.MODIFIED, null,
-              JDOUtils.getImplClass(IInvntry.class).getName(), invntryDao.getInvKeyAsString(inv),
-              null);
-        } catch (EventGenerationException e) {
-          xLogger.warn(
-              "Exception when generating inventory-updation event for material-kiosk {0}:{1} in domain {2}: {3}",
-              inv.getMaterialId(), inv.getKioskId(), domainId, e.getMessage());
+      List<IInvntry> updatedItems = new ArrayList<>();
+      List<IInvntry> mmUpdatedItems = new ArrayList<>();
+      for (IInvntry inventory : items) {
+        Long kioskId = inventory.getKioskId();
+        if (!kidLockStatusMap.containsKey(String.valueOf(kioskId))) {
+        LockUtil.LockStatus lockStatus =
+              LockUtil.lock(String.valueOf(kioskId), LOCK_RETRY_COUNT,
+                  LOCK_RETRY_DELAY_IN_MILLISECONDS);
+          if (!LockUtil.isLocked(lockStatus)) {
+            throw new ServiceException(backendMessages.getString("lockinventory.failed"));
+          }
+          kidLockStatusMap.put(kioskId,lockStatus);
+        }
+        // Get the data store object
+        IInvntry in = invntryDao.getDBInvntry(inventory, pm);
+        in = pm.detachCopy(in);
+        if (in == null) {
+          xLogger.warn("Unable to find inventory with key {0}", inventory.getKeyString());
+          continue;
+        }
+        if (BigUtil.notEquals(inventory.getReorderLevel(), in.getReorderLevel()) ||
+            BigUtil.notEquals(inventory.getMaxStock(), in.getMaxStock()) ||
+            BigUtil.notEquals(inventory.getMaxDuration(), in.getMaxDuration()) ||
+            BigUtil.notEquals(inventory.getMinDuration(), in.getMinDuration())) {
+          mmUpdatedItems.add(in);
+        }
+        // Update the fields
+        setInventoryFields(in, inventory, user);
+        updatedItems.add(in);
+      }
+      try {
+        // Persist changes
+        pm.makePersistentAll(updatedItems);
+        persistMinMaxLog(mmUpdatedItems);
+        updatedItems = (List<IInvntry>) pm.detachCopyAll(updatedItems);
+        Long domainId = updatedItems.get(0).getDomainId();
+        // Generate events for all items, as needed
+        updatedItems.stream().forEach(inv -> {
+          try {
+            EventPublisher.generate(domainId, IEvent.MODIFIED, null,
+                JDOUtils.getImplClass(IInvntry.class).getName(), invntryDao.getInvKeyAsString(inv),
+                null);
+          } catch (EventGenerationException e) {
+            xLogger.warn(
+                "Exception when generating inventory-updation event for material-kiosk {0}:{1} in domain {2}: {3}",
+                inv.getMaterialId(), inv.getKioskId(), domainId, e.getMessage());
+          }
+          updateStockEventLog(inv.getStock(), inv, pm, IInvntryEvntLog.SOURCE_MINMAXUPDATE,
+              domainId);
+        });
+      } catch (Exception e) {
+        xLogger.severe("Exception: {0}: {1}", e.getClass().getName(), e);
+        throw new ServiceException(e);
+      } finally {
+        if (closePM) {
+          // Close the persistence manager
+          pm.close();
         }
       }
-      // Iterate through the updated Invntry objects. Update InvntryEventLog table accordingly.
-      it2 = updatedItems.iterator();
-      while (it2.hasNext()) {
-        IInvntry inv = it2.next();
-        updateStockEventLog(inv.getStock(), inv, pm, IInvntryEvntLog.SOURCE_MINMAXUPDATE,
-            domainId); // Passing oldStock as current stock (instead of 0), will not make a difference (note: it's not used in the called method updateStockEventLog as of this time - Sep 10, 2015).
-      }
     } catch (Exception e) {
-      xLogger.severe("Exception: {0}: {1}", e.getClass().getName(), e);
+      xLogger.severe("Exception: ", e);
       throw new ServiceException(e);
     } finally {
-      if (closePM) {
-        // Close the persistence manager
-        pm.close();
+      // Release locks
+      if (kidLockStatusMap != null && !kidLockStatusMap.isEmpty()) {
+        LockUtil.releaseLocks(kidLockStatusMap, CharacterConstants.EMPTY);
       }
     }
-
     xLogger.fine("Exiting updateInventory");
   }
 
@@ -1019,7 +991,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     if (locale == null) {
       locale = new Locale(Constants.LANG_DEFAULT, Constants.COUNTRY_DEFAULT);
     }
-    String timezone = dc.getTimezone();
     Iterator<Long> it = materialIds.iterator();
     while (it.hasNext()) {
       Long materialId = it.next();
@@ -3714,7 +3685,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         Long kioskId = transaction.getKioskId();
         Long materialId = transaction.getMaterialId();
         Set<Long> kiosksToLock = getKioskIdsToLock(transactions);
-        Map<Long,LockUtil.LockStatus> kidLockStatusMap = lockKiosks(kiosksToLock);
+        Map<Long,LockUtil.LockStatus> kidLockStatusMap = LockUtil
+            .lock(kiosksToLock, Constants.TX, LOCK_RETRY_COUNT, LOCK_RETRY_DELAY_IN_MILLISECONDS);
         locks = new HashMap<>(kiosksToLock.size());
         for(Map.Entry<Long,LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()){
           if (!locks.containsKey(entry.getKey())) {
@@ -3804,7 +3776,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         tx.rollback();
       }
       if (locks != null) {
-        releaseAllLocks(locks);
+        LockUtil.releaseLocks(locks, Constants.TX);
       }
       if (!pm.isClosed()) {
         pm.close();
@@ -3834,15 +3806,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     }
     midFailedFromPositionMap.put(mid, failedFromPosition);
     updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M012", failedFromPosition);
-  }
-
-  private void releaseAllLocks(Map<Long,LockUtil.LockStatus> kidLockStatusMap) {
-    for (Map.Entry<Long, LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()) {
-      String key = Constants.TX + entry.getKey();
-      if (LockUtil.shouldReleaseLock(entry.getValue())) {
-        LockUtil.release(key);
-      }
-    }
   }
 
   public ITransaction getLastWebTransaction(Long kid, Long mid, String bid) throws ServiceException{
@@ -3889,22 +3852,11 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return kidsToLock;
   }
 
-  // Lock the kiosks and return a map of the kiosk id and the lock status
-  private Map<Long,LockUtil.LockStatus> lockKiosks(Set<Long> kioskIds) {
-    Map<Long,LockUtil.LockStatus> kidLockStatusMap = new HashMap<>(kioskIds.size());
-    for (Long kioskId : kioskIds) {
-      String key = Constants.TX + kioskId;
-      LockUtil.LockStatus lockStatus = LockUtil.lock(key,LOCK_RETRY_COUNT,LOCK_RETRY_DELAY_IN_MILLISECONDS);
-      kidLockStatusMap.put(kioskId, lockStatus);
-    }
-    return kidLockStatusMap;
-  }
-
   private Map<String,List<ITransaction>> getBatchIdFirstTransactionMap(List<ITransaction> transactions) {
     // Iterate through transactions and form a map of bid and first transaction for that batch
     Map<String,List<ITransaction>> bidFirstTransactionMap = new HashMap<>();
     transactions.stream().filter(transaction -> !bidFirstTransactionMap.containsKey(transaction.getBatchId()))
-        .forEach((transaction) -> bidFirstTransactionMap.put(transaction.getBatchId(),
+        .forEach(transaction -> bidFirstTransactionMap.put(transaction.getBatchId(),
             new ArrayList<>(Arrays.asList(transaction))));
     return bidFirstTransactionMap;
   }
@@ -4065,6 +4017,39 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return count;
   }
 
+  private void setInventoryFields(IInvntry in, IInvntry inventory, String user) {
+    in.setInventoryModel(inventory.getInventoryModel());
+    in.setServiceLevel(inventory.getServiceLevel());
+    in.setLeadTime(inventory.getLeadTime());
+    in.setLeadTimeDemand(inventory.getLeadTimeDemand());
+    in.setRevPeriodDemand(inventory.getRevPeriodDemand());
+    in.setSafetyStock(inventory.getSafetyStock());
+    in.setStdevRevPeriodDemand(inventory.getStdevRevPeriodDemand());
+    in.setOrderPeriodicity(inventory.getOrderPeriodicity());
+    in.setKioskName(inventory.getKioskName());
+    in.setMaterialName(inventory.getMaterialName());
+    in.setReorderLevel(inventory.getReorderLevel());
+    in.setMaxStock(inventory.getMaxStock());
+    in.setMinDuration(inventory.getMinDuration());
+    in.setMaxDuration(inventory.getMaxDuration());
+    in.setConsumptionRateManual(inventory.getConsumptionRateManual());
+    // Prices
+    in.setRetailerPrice(inventory.getRetailerPrice());
+    in.setTax(inventory.getTax());
+    // Optimization parameters
+    in.setConsumptionRateDaily(inventory.getConsumptionRateDaily());
+    in.setEconomicOrderQuantity(inventory.getEconomicOrderQuantity());
+    in.setPSTimestamp(inventory.getPSTimestamp());
+    in.setDQTimestamp(inventory.getDQTimestamp());
+    in.setOptMessage(inventory.getOptMessage());
+    in.setTgs(tagDao.getTagsByNames(inventory.getTags(TagUtil.TYPE_MATERIAL), ITag.MATERIAL_TAG),
+        TagUtil.TYPE_MATERIAL);
+    in.setTgs(tagDao.getTagsByNames(inventory.getTags(TagUtil.TYPE_ENTITY), ITag.KIOSK_TAG),
+        TagUtil.TYPE_ENTITY);
+    if (user != null) {
+      in.setUpdatedBy(user);
+    }
+  }
   public class EntryTimeComparator implements Comparator<ITransaction> {
     @Override
     public int compare(ITransaction o1, ITransaction o2) {

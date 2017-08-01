@@ -2031,21 +2031,7 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
         }
         $scope.showLoading();
         entityService.removeEntityRelation(linkIds).then(function (data) {
-            var ind = 0;
-            while(ind<$scope.rData.length){
-                if ($scope.rData[ind].selected && linkIds.indexOf($scope.rData[ind].lid) >= 0) {
-                    $scope.rData.splice(ind, 1);
-                    if ($scope.linkType == 'c') {
-                        $scope.customerCount--;
-                    } else if ($scope.linkType == 'v') {
-                        $scope.vendorCount--;
-                    }
-                } else {
-                    ind++;
-                }
-            }
-            addOrderSno($scope.rData);
-            $scope.setOriginalCopy($scope.rData);
+            $scope.resetFetch();
             $scope.showSuccess(data.data);
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
