@@ -187,7 +187,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
             if(checkNotNullEmpty(data)){
                 userService.getUser(data).then(function(data){
                     $scope.user = data.data;
-                    $scope.cnf.support[index].usrname = $scope.user.fnm + ' ' + $scope.user.lnm;
+                    $scope.cnf.support[index].usrname = $scope.user.fnm + ' ' + ($scope.user.lnm ? $scope.user.lnm : '');
                     $scope.cnf.support[index].phnm = $scope.user.phm;
                     $scope.cnf.support[index].em = $scope.user.em;
                     $scope.cnf.support[index].userpopulate = true;
