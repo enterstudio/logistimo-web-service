@@ -114,23 +114,23 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         $scope.getUser = function (data, uType) {
             if (checkNotNullEmpty(data)) {
                 userService.getUser(data).then(function (data) {
-                    if (uType == 'p') {
-                        $scope.pUser = {};
-                        $scope.pUser.id = data.data.id;
-                        $scope.pUser.usrname = data.data.fnm + ' ' + data.data.lnm;
-                        $scope.pUser.phnm = data.data.phm;
-                        $scope.pUser.em = data.data.em;
-                    } else {
-                        $scope.sUser = {};
-                        $scope.sUser.id = data.data.id;
-                        $scope.sUser.usrname = data.data.fnm + ' ' + data.data.lnm;
-                        $scope.sUser.phnm = data.data.phm;
-                        $scope.sUser.em = data.data.em;
-                    }
+                    getAdminContactUser(data, uType);
                     updateAdminContacts();
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
                 })
+            }
+        }
+        function getAdminContactUser(data,t){
+            var user = {};
+            user.id = data.data.id;
+            user.usrname = data.data.fnm + ' ' + data.data.lnm;
+            user.phnm = data.data.phm;
+            user.em = data.data.em;
+            if(t=='p'){
+                $scope.pUser = user;
+            }else{
+                $scope.sUser = user;
             }
         }
         function updateAdminContacts() {
@@ -141,22 +141,26 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 $scope.cnf.adminContact.sac = {userId:$scope.sUser.id};
             }
         }
+        function setAdminContactUser(data,t) {
+            var user = {};
+            user.id = data.userId;
+            user.usrname = data.userNm;
+            user.phnm = data.phn;
+            user.em = data.email;
+            if (t == 'p') {
+                $scope.pUser = user;
+            } else {
+                $scope.sUser = user;
+            }
+        }
 
         function updatePSUser() {
             if(checkNotNullEmpty($scope.cnf.adminContact)) {
                 if (!checkNullEmptyObject($scope.cnf.adminContact.pac)) {
-                    $scope.pUser = {};
-                    $scope.pUser.id = $scope.cnf.adminContact.pac.userId;
-                    $scope.pUser.usrname = $scope.cnf.adminContact.pac.userNm;
-                    $scope.pUser.phnm = $scope.cnf.adminContact.pac.phn;
-                    $scope.pUser.em = $scope.cnf.adminContact.pac.email;
+                    setAdminContactUser($scope.cnf.adminContact.pac,'p');
                 }
                 if (!checkNullEmptyObject($scope.cnf.adminContact.sac)) {
-                    $scope.sUser = {};
-                    $scope.sUser.id = $scope.cnf.adminContact.sac.userId;
-                    $scope.sUser.usrname = $scope.cnf.adminContact.sac.userNm;
-                    $scope.sUser.phnm = $scope.cnf.adminContact.sac.phn;
-                    $scope.sUser.em = $scope.cnf.adminContact.sac.email;
+                    setAdminContactUser($scope.cnf.adminContact.sac,'s');
                 }
             }
         }
@@ -183,7 +187,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
             if(checkNotNullEmpty(data)){
                 userService.getUser(data).then(function(data){
                     $scope.user = data.data;
-                    $scope.cnf.support[index].usrname = $scope.user.fnm + '' + $scope.user.lnm;
+                    $scope.cnf.support[index].usrname = $scope.user.fnm + ' ' + $scope.user.lnm;
                     $scope.cnf.support[index].phnm = $scope.user.phm;
                     $scope.cnf.support[index].em = $scope.user.em;
                     $scope.cnf.support[index].userpopulate = true;
@@ -277,7 +281,6 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         $scope.validateEmail = function(email) {
             return checkEmail(email);
         }
-
     }
 ]);
 domainCfgControllers.controller('CapabilitiesConfigurationController', ['$scope', 'domainCfgService',
