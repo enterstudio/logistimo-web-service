@@ -1311,6 +1311,7 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                 mtReq = true;
             } else {
                 $scope.asset = undefined;
+                $scope.assetText = undefined;
             }
             var loadDash = true;
             // WARNING: make sure this is checked at last
