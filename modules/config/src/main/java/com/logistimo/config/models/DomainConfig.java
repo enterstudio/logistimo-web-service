@@ -249,6 +249,7 @@ public class DomainConfig implements ILocation, Serializable {
   private AssetConfig assetConfig = null;
   // DashboardConfig
   private DashboardConfig dashboardConfig = null;
+
   // UI Preference for the domain - true indicates domain's ui preference is new UI. false indicates preference is old UI
   private boolean uiPref = false;
   // Flag that indicates domains created with no option to switch back to old UI
@@ -256,7 +257,7 @@ public class DomainConfig implements ILocation, Serializable {
   // Role specific Support configuration
   private Map<String, SupportConfig> supportConfigMap = null;
   //Admin contact configuration
-  private Map<String, AdminContactConfig> adminContactConfigMap = null;
+  private AdminContactConfig adminContactConfig = null;
   // Disable shipping on mobile
   private boolean enableShippingOnMobile = false;
   // Enable switching to new host
@@ -285,7 +286,7 @@ public class DomainConfig implements ILocation, Serializable {
     inventoryConfig = new InventoryConfig();
     approvalsConfig = new ApprovalsConfig();
     ordersConfig = new OrdersConfig();
-    capabilityMap = new HashMap<String, CapabilityConfig>();
+    capabilityMap = new HashMap<>();
     accountingConfig = new AccountingConfig();
     eventsConfig = new EventsConfig();
     bbConfig = new BBoardConfig();
@@ -294,8 +295,8 @@ public class DomainConfig implements ILocation, Serializable {
     paymentsConfig = new PaymentsConfig();
     assetConfig = new AssetConfig();
     dashboardConfig = new DashboardConfig();
-    supportConfigMap = new HashMap<String, SupportConfig>();
-    adminContactConfigMap = new HashMap<>();
+    supportConfigMap = new HashMap<>();
+    adminContactConfig = new AdminContactConfig();
     syncConfig = new SyncConfig();
   }
 
@@ -685,10 +686,9 @@ public class DomainConfig implements ILocation, Serializable {
       }
       //administrative contacts
       try {
-        this.adminContactConfigMap =
-            AdminContactConfig.getAdminContactMap(json.getJSONObject(ADMIN_CONTACT));
+        this.adminContactConfig = new AdminContactConfig(json.getJSONObject(ADMIN_CONTACT));
       } catch (JSONException e) {
-        this.adminContactConfigMap = new HashMap<String, AdminContactConfig>();
+        this.adminContactConfig = new AdminContactConfig();
       }
 
       try {
@@ -977,8 +977,8 @@ public class DomainConfig implements ILocation, Serializable {
       if (supportConfigMap != null && !supportConfigMap.isEmpty()) {
         json.put(SUPPORT_BY_ROLE, SupportConfig.getSupportJSON(supportConfigMap));
       }
-      if (adminContactConfigMap != null && !adminContactConfigMap.isEmpty()) {
-        json.put(ADMIN_CONTACT, AdminContactConfig.getAdminContactJSON(adminContactConfigMap));
+      if (adminContactConfig != null) {
+        json.put(ADMIN_CONTACT, adminContactConfig.toJSONObject());
       }
 
       json.put(CapabilityConfig.ENABLE_SHIPPING_ON_MOBILE, enableShippingOnMobile);
@@ -1636,20 +1636,13 @@ public class DomainConfig implements ILocation, Serializable {
     supportConfigMap.put(role, sc);
   }
 
-  public void setAdminContactByType(String ty, AdminContactConfig ac) {
-    if (adminContactConfigMap == null) {
-      adminContactConfigMap = new HashMap<>();
-    }
-    adminContactConfigMap.put(ty, ac);
+
+  public AdminContactConfig getAdminContactConfig() {
+    return adminContactConfig;
   }
 
-  public Map<String, AdminContactConfig> getAdminContactConfigMap() {
-    return adminContactConfigMap;
-  }
-
-  public void setAdminContactConfigMap(
-      Map<String, AdminContactConfig> adminContactConfigMap) {
-    this.adminContactConfigMap = adminContactConfigMap;
+  public void setAdminContactConfigMap(AdminContactConfig adminContactConfig) {
+    this.adminContactConfig = adminContactConfig;
   }
 
   public boolean isEnableShippingOnMobile() {

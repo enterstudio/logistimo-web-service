@@ -22,28 +22,12 @@
  */
 
 package com.logistimo.api.models.configuration;
-
-import java.util.List;
-import java.util.Map;
-
 /**
- * Created by mohan raja.
+ * Created by yuva on 27/07/17.
  */
-public class GeneralConfigModel {
-  public Long domainId;
-  public String cnt;
-  public String st;
-  public String ds;
-  public String lng;
-  public String tz;
-  public String cur;
-  public String pgh;
-  public boolean sc;
-  public String createdBy;
-  public String lastUpdated;
-  public String fn;
-  public List<SupportConfigModel> support;
-  public boolean snh; // Enable switch to new host
-  public String nhn; // New host name
-  public Map<String, AdminContactConfigModel> adminContact;
+public class AdminContactConfigModel {
+  public String userId;
+  public String email;
+  public String phn;
+  public String userNm;
 }

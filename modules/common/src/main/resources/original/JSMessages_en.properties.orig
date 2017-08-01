@@ -1076,3 +1076,4 @@ approvals.secondary.approvers=Secondary approvers
 order.sales.lowercase=sales
 approvals.approvers.none=None
 same.admincontacts.warning=Primary and Secondary administrative contacts should not be same
+primary.admincontact.mandatory=Primary administrative contact cannot be empty

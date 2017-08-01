@@ -26,6 +26,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
     function ($scope, domainCfgService, configService, userService) {
         $scope.cnf = {};
         $scope.cnf.support = [];
+        $scope.cnf.adminContact = {};
         $scope.exRow = [];
         $scope.cnf.support.push({"role":"","usrid":"","usrname":"","phm":"","em":""});
         $scope.cnf.lng = "en";
@@ -74,7 +75,11 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         CurrencyController.call(this, $scope, configService);
         LocationController.call(this, $scope, configService);
         $scope.setGeneralConfig = function () {
-            if($scope.pUser.id == $scope.sUser.id){
+            if(checkNullEmpty($scope.pUser) && checkNotNullEmpty($scope.sUser)){
+                $scope.showWarning($scope.resourceBundle['primary.admincontact.mandatory']);
+                return;
+            }
+            if(checkNotNullEmpty($scope.pUser) && checkNotNullEmpty($scope.sUser) && $scope.pUser.id == $scope.sUser.id){
                 $scope.showWarning($scope.resourceBundle['same.admincontacts.warning']);
                 return;
             }
@@ -109,59 +114,63 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         $scope.getUser = function (data, uType) {
             if (checkNotNullEmpty(data)) {
                 userService.getUser(data).then(function (data) {
-                    if (uType == 'p') {
-                        $scope.pUser = data.data;
-                    } else {
-                        $scope.sUser = data.data;
-                    }
+                    getAdminContactUser(data, uType);
                     updateAdminContacts();
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
                 })
             }
         }
+        function getAdminContactUser(data,t){
+            var user = {};
+            user.id = data.data.id;
+            user.usrname = data.data.fnm + ' ' + data.data.lnm;
+            user.phnm = data.data.phm;
+            user.em = data.data.em;
+            if(t=='p'){
+                $scope.pUser = user;
+            }else{
+                $scope.sUser = user;
+            }
+        }
         function updateAdminContacts() {
             if ($scope.pUser) {
-                $scope.cnf.adminContact.primary = {};
-                $scope.cnf.adminContact.primary.usrid = $scope.pUser.id;
-                $scope.cnf.adminContact.primary.usrname = $scope.pUser.fnm + ' ' + $scope.pUser.lnm;
-                $scope.cnf.adminContact.primary.em = $scope.pUser.em;
-                $scope.cnf.adminContact.primary.phnm = $scope.pUser.phm;
-                $scope.cnf.adminContact.primary.role = $scope.pUser.ro;
+                $scope.cnf.adminContact.pac = {userId:$scope.pUser.id};
             }
             if ($scope.sUser) {
-                $scope.cnf.adminContact.secondary = {};
-                $scope.cnf.adminContact.secondary.usrid = $scope.sUser.id;
-                $scope.cnf.adminContact.secondary.usrname = $scope.sUser.fnm + ' ' + $scope.sUser.lnm;
-                $scope.cnf.adminContact.secondary.em = $scope.sUser.em;
-                $scope.cnf.adminContact.secondary.phnm = $scope.sUser.phm;
-                $scope.cnf.adminContact.secondary.role = $scope.sUser.ro;
+                $scope.cnf.adminContact.sac = {userId:$scope.sUser.id};
+            }
+        }
+        function setAdminContactUser(data,t) {
+            var user = {};
+            user.id = data.userId;
+            user.usrname = data.userNm;
+            user.phnm = data.phn;
+            user.em = data.email;
+            if (t == 'p') {
+                $scope.pUser = user;
+            } else {
+                $scope.sUser = user;
             }
         }
 
         function updatePSUser() {
-            if ($scope.cnf.adminContact.primary) {
-                $scope.pUser = {};
-                $scope.pUser.id = $scope.cnf.adminContact.primary.usrid;
-                $scope.pUser.em = $scope.cnf.adminContact.primary.em;
-                $scope.pUser.phm = $scope.cnf.adminContact.primary.phnm;
-                $scope.pUser.ro = $scope.cnf.adminContact.primary.role;
-            }
-            if ($scope.cnf.adminContact.secondary) {
-                $scope.sUser = {};
-                $scope.sUser.id = $scope.cnf.adminContact.secondary.usrid;
-                $scope.sUser.em = $scope.cnf.adminContact.secondary.em;
-                $scope.sUser.phm = $scope.cnf.adminContact.secondary.phnm;
-                $scope.sUser.ro = $scope.cnf.adminContact.secondary.role;
+            if(checkNotNullEmpty($scope.cnf.adminContact)) {
+                if (!checkNullEmptyObject($scope.cnf.adminContact.pac)) {
+                    setAdminContactUser($scope.cnf.adminContact.pac,'p');
+                }
+                if (!checkNullEmptyObject($scope.cnf.adminContact.sac)) {
+                    setAdminContactUser($scope.cnf.adminContact.sac,'s');
+                }
             }
         }
 
         $scope.checkAdminUser = function (usr, r) {
             if (checkNullEmpty(usr)) {
                 if (r == 'p') {
-                    $scope.cnf.adminContact.primary = undefined;
+                    $scope.cnf.adminContact.pac = {};
                 } else {
-                    $scope.cnf.adminContact.secondary = undefined;
+                    $scope.cnf.adminContact.sac = {};
                 }
             }
         };
@@ -178,7 +187,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
             if(checkNotNullEmpty(data)){
                 userService.getUser(data).then(function(data){
                     $scope.user = data.data;
-                    $scope.cnf.support[index].usrname = $scope.user.fnm;
+                    $scope.cnf.support[index].usrname = $scope.user.fnm + ' ' + $scope.user.lnm;
                     $scope.cnf.support[index].phnm = $scope.user.phm;
                     $scope.cnf.support[index].em = $scope.user.em;
                     $scope.cnf.support[index].userpopulate = true;
@@ -272,7 +281,6 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         $scope.validateEmail = function(email) {
             return checkEmail(email);
         }
-
     }
 ]);
 domainCfgControllers.controller('CapabilitiesConfigurationController', ['$scope', 'domainCfgService',
