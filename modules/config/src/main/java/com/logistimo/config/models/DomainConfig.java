@@ -28,6 +28,7 @@ package com.logistimo.config.models;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import com.logistimo.AppFactory;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
@@ -40,12 +41,18 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.utils.StringUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 
 /**
@@ -147,6 +154,10 @@ public class DomainConfig implements ILocation, Serializable {
   public static final String COUNTRY_ID = "cntid";
   public static final String STATE_ID = "stateid";
   public static final String DISTRICT_ID = "districtid";
+
+  //event summary key
+  public static final String EVENT_SUMMARY_KEY="eventSummary";
+
   private static final long serialVersionUID = 4047681117629775550L;
   //Mobile GUI Theme
   public static final String STORE_APP_THEME = "storeAppTheme";
@@ -281,6 +292,8 @@ public class DomainConfig implements ILocation, Serializable {
 
   private String user;
 
+  private EventSummaryConfigModel eventSummaryConfig;
+
   public DomainConfig() {
     optimizerConfig = new OptimizerConfig();
     inventoryConfig = new InventoryConfig();
@@ -298,6 +311,7 @@ public class DomainConfig implements ILocation, Serializable {
     supportConfigMap = new HashMap<>();
     adminContactConfig = new AdminContactConfig();
     syncConfig = new SyncConfig();
+    eventSummaryConfig=new EventSummaryConfigModel();
   }
 
   public DomainConfig(String configString) throws ConfigurationException {
@@ -399,19 +413,27 @@ public class DomainConfig implements ILocation, Serializable {
       // Get the tax
       try {
         this.tax = Float.parseFloat((String) json.get(TAX));
-      } catch (JSONException e) {
+      } catch (JSONException | NumberFormatException e) {
         // do nothing
-      } catch (NumberFormatException e) {
-        // ignore
       }
       // Get the demand board config
       try {
         this.dbc = new DemandBoardConfig((String) json.get(DEMANDBOARD));
-      } catch (JSONException e) {
-        // do nothing
-      } catch (ConfigurationException e) {
+      } catch (JSONException | ConfigurationException e) {
         // do nothing
       }
+
+      //Get event summary model from json
+      try {
+        if (json.get(EVENT_SUMMARY_KEY) != null) {
+          this.eventSummaryConfig =
+              new Gson()
+                  .fromJson((String) json.get(EVENT_SUMMARY_KEY), EventSummaryConfigModel.class);
+        }
+      } catch (JSONException e) {
+        // do nothing
+      }
+
       // Get the material tags
       try {
         this.tags = (String) json.get(TAGS_MATERIAL);
@@ -922,6 +944,12 @@ public class DomainConfig implements ILocation, Serializable {
       if (accountingConfig != null) {
         json.put(ACCOUNTING, accountingConfig.toJSONObject());
       }
+
+      //Store Event summary model as a json
+      if(eventSummaryConfig!=null){
+        json.put(EVENT_SUMMARY_KEY, new Gson().toJson(eventSummaryConfig));
+      }
+
       // Inventory config.
       if (inventoryConfig != null) {
         json.put(INVENTORY, inventoryConfig.toJSONObject());
@@ -1736,6 +1764,15 @@ public class DomainConfig implements ILocation, Serializable {
   public int getStoreAppTheme() { return storeAppTheme; }
 
   public void setStoreAppTheme(int storeAppTheme) { this.storeAppTheme = storeAppTheme; }
+
+  public EventSummaryConfigModel getEventSummaryConfig() {
+    return eventSummaryConfig;
+  }
+
+  public void setEventSummaryConfig(EventSummaryConfigModel eventSummaryConfig) {
+    this.eventSummaryConfig = eventSummaryConfig;
+  }
+
 
   @Override
   public double getLatitude() {

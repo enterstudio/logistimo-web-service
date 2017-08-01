@@ -234,6 +234,10 @@ logistimoApp.config(function ($routeProvider) {
         action: "configuration.notifications.accesslogs"
     }).when("/configuration/options", {
        action: "configuration.options.all.push"
+    }).when('/configuration/summarisation', {
+        action: "configuration.summarisation"
+    }).when('/configuration/summarisation/:esId', {
+        action: "configuration.summarisation"
     }). when("/accounts/", {
         action: "accounts.receivable"
     }).when("/accounts/receivable", {

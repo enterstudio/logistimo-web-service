@@ -52,6 +52,9 @@
             <li ng-if="hasChild && (iSU || dp.ce)" ng-class="{ enable: subview == 'options'}">
                 <a href="#/configuration/options/">{{resourceBundle['configuration.options']}}</a>
             </li>
+            <li ng-class="{ enable: subview == 'summarisation'}">
+                <a href="#/configuration/summarisation/">{{resourceBundle['event.summary']}}</a>
+            </li>
         </ul>
         <!--<span class="pull-right" ng-class="{ enable: subview == 'push'}">
             <a href="#/configuration/push" class="btn btn-sm btn-primary pull-right">{{resourceBundle['push']}} {{resourceBundle['configuration']}}</a></span>-->
@@ -92,6 +95,9 @@
         </div>
         <div ng-switch-when="approvals">
             <div ng-include="'views/configuration/approvals.html'"></div>
+        </div>
+        <div ng-switch-when="summarisation">
+            <div ng-include="'views/configuration/eventdistribution/summarisation.html'"></div>
         </div>
     </div>
 </div>
