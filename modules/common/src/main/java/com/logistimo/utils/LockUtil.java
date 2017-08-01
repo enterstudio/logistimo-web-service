@@ -24,11 +24,16 @@
 package com.logistimo.utils;
 
 import com.logistimo.AppFactory;
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.services.cache.MemcacheService;
 
-import com.logistimo.constants.Constants;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mohan Raja
@@ -68,6 +73,7 @@ public class LockUtil {
         try {
           Thread.sleep(retryDelayInMillis);
         } catch (InterruptedException ignored) {
+          // ignored
         }
       }
     }
@@ -100,10 +106,54 @@ public class LockUtil {
         try {
           Thread.sleep(retryDelayInMillis);
         } catch (InterruptedException ignored) {
+          // ignored
         }
       }
     }
     return LockStatus.FAILED_TO_LOCK;
+  }
+
+  /**
+   * Locks the objects specified by the object ids
+   * @param objectIds
+   * @param prefix
+   * @param retryCount
+   * @param retryDelayInMillis
+   * @return Map of the object id and the lock status
+   */
+  public static Map<Long, LockUtil.LockStatus> lock(Set<Long> objectIds, String prefix,
+                                                     int retryCount, int retryDelayInMillis) {
+    if (objectIds == null) {
+      return null;
+    }
+    Map<Long, LockStatus> objIdLockStatusMap = new HashMap<>(objectIds.size());
+    objectIds.stream().forEach(objectId -> {
+          String key = (StringUtils.isNotEmpty(prefix) ? prefix : CharacterConstants.EMPTY) + objectId;
+          LockStatus lockStatus = lock(key, retryCount, retryDelayInMillis);
+          objIdLockStatusMap.put(objectId, lockStatus);
+        }
+    );
+    return objIdLockStatusMap;
+  }
+
+  /**
+   * Release the locks on the object ids specified
+   * @param objectIdLockStatusMap
+   * @param prefix
+   */
+  public static void releaseLocks(Map<Long, LockUtil.LockStatus> objectIdLockStatusMap,
+                                  String prefix) {
+    if (objectIdLockStatusMap == null || objectIdLockStatusMap.isEmpty()) {
+      return;
+    }
+    objectIdLockStatusMap.forEach((objectId, lockStatus) -> {
+      if (shouldReleaseLock(lockStatus)) {
+        String
+            key =
+            (StringUtils.isNotEmpty(prefix) ? prefix : CharacterConstants.EMPTY) + objectId;
+        release(key);
+      }
+    });
   }
 
   public enum LockStatus {
