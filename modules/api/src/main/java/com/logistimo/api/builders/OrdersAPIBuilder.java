@@ -177,6 +177,7 @@ public class OrdersAPIBuilder {
       model.cdt = LocalDateUtil.format(o.getCreatedOn(), locale, timezone);
       model.ubid = o.getUpdatedBy();
       model.src = o.getSrc();
+      model.rid = o.getReferenceID();
       if (o.getUpdatedBy() != null) {
         try {
           model.uby = as.getUserAccount(o.getUpdatedBy()).getFullName();
