@@ -1,0 +1,124 @@
+{
+  "events": [
+    {
+      "event_type": "stock_outs",
+      "category": "inventory",
+      "thresholds": [
+        {
+          "conditions": [
+            {
+              "name": "duration",
+              "oper":">=",
+              "units": "days"
+            },
+            {
+              "name": "include_material_tags"
+            },
+            {
+              "name": "exclude_material_tags"
+            },
+            {
+              "name": "include_entity_tags"
+            },
+            {
+              "name": "exclude_entity_tags"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "event_type": "stock_expiry",
+      "category": "inventory",
+      "thresholds": [
+        {
+          "conditions": [
+            {
+              "name": "stock_availability_period",
+              "oper":">=",
+              "units": "days"
+            },
+            {
+              "name": "duration",
+              "oper":"<=",
+              "units": "days"
+            },
+            {
+              "name": "include_material_tags"
+            },
+            {
+              "name": "exclude_material_tags"
+            },
+            {
+              "name": "include_entity_tags"
+            },
+            {
+              "name": "exclude_entity_tags"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "event_type": "heating",
+      "category": "assets",
+      "thresholds": [
+        {
+          "conditions": [
+            {
+              "name": "cumulative_heat_exposure",
+              "oper":">=",
+              "units": "hours"
+            },
+            {
+              "name": "duration",
+              "oper":"<=",
+              "units": "days"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "event_type": "freezing",
+      "category": "assets",
+      "thresholds": [
+        {
+          "conditions": [
+            {
+              "name": "cumulative_freezing_exposure",
+              "oper":">=",
+              "units": "hours"
+            },
+            {
+              "name": "duration",
+              "oper":"<=",
+              "units": "days"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "event_type": "login",
+      "category": "activity",
+      "thresholds": [
+        {
+          "conditions": [
+            {
+              "name": "duration_not_logged_in",
+              "oper":">=",
+              "units": "days"
+            },
+            {
+              "name": "include_user_tags"
+            },
+            {
+              "name": "exclude_user_tags"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

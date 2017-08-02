@@ -32,6 +32,7 @@ cmnControllers.controller('SimpleMenuController', ['$scope', 'requestContext','$
             $scope.userId = requestContext.getParam("userId");
             $scope.dbid = requestContext.getParam("dbid");
             $scope.rptid = requestContext.getParam("rptid");
+            $scope.esId = requestContext.getParam("esId");
             $scope.subview = renderContext.getNextSection();
             $scope.$on("requestContextChanged", function () {
                 if (!renderContext.isChangeRelevant()) {

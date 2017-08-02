@@ -68,7 +68,9 @@ module.exports = function(grunt, ref) {
                     '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/BackendMessages_en.properties target/grunt/resources/BackendMessages_en.properties',
                     '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/BackendMessages_fr.properties target/grunt/resources/BackendMessages_fr.properties',
                     '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/HelpMessages_en.properties target/grunt/resources/HelpMessages_en.properties',
-                    '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/HelpMessages_fr.properties target/grunt/resources/HelpMessages_fr.properties'
+                    '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/HelpMessages_fr.properties target/grunt/resources/HelpMessages_fr.properties',
+                    '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/ConfigMessages_en.properties target/grunt/resources/ConfigMessages_en.properties',
+                    '/usr/bin/native2ascii -encoding UTF-8 target/grunt/resources/ConfigMessages_fr.properties target/grunt/resources/ConfigMessages_fr.properties'
                 ].join('&&')
             }
         },
@@ -142,7 +144,8 @@ module.exports = function(grunt, ref) {
                     {src: ['target/grunt/resources/BackendMessages_en.properties.orig'], dest: 'target/grunt/resources/BackendMessages_en.properties'},
                     {src: ['target/grunt/resources/HelpMessages_en.properties.orig'], dest: 'target/grunt/resources/HelpMessages_en.properties'},
                     {src: ['target/grunt/resources/Messages_en.properties.orig'], dest: 'target/grunt/resources/Messages_en.properties'},
-                    {src: ['target/grunt/resources/JSMessages_en.properties.orig'], dest: 'target/grunt/resources/JSMessages_en.properties'}
+                    {src: ['target/grunt/resources/JSMessages_en.properties.orig'], dest: 'target/grunt/resources/JSMessages_en.properties'},
+                    {src: ['target/grunt/resources/ConfigMessages_en.properties.orig'], dest: 'target/grunt/resources/ConfigMessages_en.properties'}
                 ]
             },
             fr: {
@@ -150,7 +153,8 @@ module.exports = function(grunt, ref) {
                     {src: ['target/grunt/resources/BackendMessages_fr.properties.orig'], dest: 'target/grunt/resources/BackendMessages_fr.properties'},
                     {src: ['target/grunt/resources/HelpMessages_fr.properties.orig'], dest: 'target/grunt/resources/HelpMessages_fr.properties'},
                     {src: ['target/grunt/resources/Messages_fr.properties.orig'], dest: 'target/grunt/resources/Messages_fr.properties'},
-                    {src: ['target/grunt/resources/JSMessages_fr.properties.orig'], dest: 'target/grunt/resources/JSMessages_fr.properties'}
+                    {src: ['target/grunt/resources/JSMessages_fr.properties.orig'], dest: 'target/grunt/resources/JSMessages_fr.properties'},
+                    {src: ['target/grunt/resources/ConfigMessages_fr.properties.orig'], dest: 'target/grunt/resources/ConfigMessages_fr.properties'}
                 ]
             },
             resource : {
@@ -385,7 +389,7 @@ module.exports = function(grunt, ref) {
                     type: 'props'
                 },
                 files: {
-                    'prop': ['target/grunt/resources/BackendMessages_en.properties', 'target/grunt/resources/Messages_en.properties', 'target/grunt/resources/errors_en.properties', 'target/grunt/resources/JSMessages_en.properties']
+                    'prop': ['target/grunt/resources/BackendMessages_en.properties', 'target/grunt/resources/Messages_en.properties', 'target/grunt/resources/errors_en.properties', 'target/grunt/resources/JSMessages_en.properties', 'target/grunt/resources/ConfigMessages_en.properties']
                 }
             }
         },

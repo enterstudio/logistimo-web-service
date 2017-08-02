@@ -147,6 +147,7 @@
                         <li><a ng-show="iSU || (iAdm && dp.av)" href="#/configuration/asset/">{{resourceBundle['assets']}}</a></li>
                         <li><a ng-hide="isTempMonOnly" href="#/configuration/dashboard/">{{resourceBundle['dashboard']}}</a></li>
                         <li><a ng-if="hasChild && (iAdm || dp.ce)" href="#/configuration/options/">{{resourceBundle['configuration.options']}}</a></li>
+                        <li><a href="#/configuration/summarisation/">{{resourceBundle['event.summary']}}</a></li>
                     </ul>
                 </li>
                 <li ng-class="{active:subview == 'setup'}" ng-if="((iSU || dp.uv || dp.mv || dp.ev || dp.egv || dp.iv) && !tempOnlyAU) || (tempOnlyAU && tempEnabled)"><a

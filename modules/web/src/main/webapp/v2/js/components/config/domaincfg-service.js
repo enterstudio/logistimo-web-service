@@ -31,6 +31,9 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         fetchP: function (data, urlStr) {
             var promise = $http({method: 'POST', data: data, url: urlStr});
             return promise;
+        },fetchPut: function (data, urlStr) {
+            var promise = $http({method: 'PUT', data: data, url: urlStr});
+            return promise;
         },
         getMaterialTagsCfg: function () {
             return this.fetch('/s2/api/config/domain/tags/materials');
@@ -219,6 +222,14 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         },
         getApprovalsConfig : function() {
             return this.fetch("/s2/api/config/domain/approvals");
+        },
+        getEventSummaryConfig : function() {
+            return this.fetch("/s2/api/config/domain/event-summary");
+        },
+        setEventSummaryConfig : function(data) {
+            return this.fetchPut(data,"/s2/api/config/domain/event-summary");
         }
+
+
     }
 }]);

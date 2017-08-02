@@ -2067,10 +2067,6 @@ domainControllers.controller('MainDashboardController', ['$scope', '$timeout', '
                 d.style.zIndex = '-1';
             }
         };
-
-
-
-
         $scope.setShowMap = function(value) {
             $scope.showMap = value;
         }

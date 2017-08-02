@@ -73,6 +73,7 @@ import com.logistimo.config.models.CustomReportsConfig;
 import com.logistimo.config.models.DashboardConfig;
 import com.logistimo.config.models.DemandBoardConfig;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.EventSummaryConfigModel;
 import com.logistimo.config.models.EventsConfig;
 import com.logistimo.config.models.InventoryConfig;
 import com.logistimo.config.models.LeadTimeAvgConfig;
@@ -84,6 +85,7 @@ import com.logistimo.config.models.SupportConfig;
 import com.logistimo.config.models.SyncConfig;
 import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
+import com.logistimo.config.utils.eventsummary.EventSummaryTemplateLoader;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
@@ -267,8 +269,8 @@ public class DomainConfigController {
     return new TagsModel(StringUtil.getList(tags), allowUserDef);
   }
 
-  private List generateUpdateList(String uId) {
-    List<String> list = new ArrayList<>();
+  private List<String> generateUpdateList(String uId) {
+    List<String> list = new ArrayList<>(2);
     list.add(uId);
     list.add(String.valueOf(System.currentTimeMillis()));
     return list;
@@ -2488,6 +2490,89 @@ public class DomainConfigController {
     }
 
   }
+
+  /**
+   * Get the event summary configurations
+   */
+  @RequestMapping(value = "/event-summary", method = RequestMethod.GET)
+  public @ResponseBody
+  EventSummaryConfigModel getEventSummaryConfig() {
+    EventSummaryConfigModel model = null;
+    //Get the configuration for the domain
+    DomainConfig dc = DomainConfig.getInstance(SecurityUtils.getCurrentDomainId());
+    if (dc != null) {
+      model = dc.getEventSummaryConfig();
+    }
+    //Get the template
+    EventSummaryConfigModel templateModel = EventSummaryTemplateLoader.getDefaultTemplate();
+    if (templateModel != null) {
+      if (model == null || model.getEvents().isEmpty()) {
+        return templateModel;
+      } else {
+        model.buildEvents(templateModel.getEvents());
+      }
+    }
+    return model;
+  }
+
+  /**
+   * Update the event summary configuration
+   * @param configModel configuration model
+   * @return
+   */
+  @RequestMapping(value = "/event-summary", method = RequestMethod.PUT)
+  public @ResponseBody
+  String updateEventSummary(@RequestBody EventSummaryConfigModel configModel) {
+    //Get logged in user's details
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
+    ResourceBundle
+        backendMessages =
+        Resources.get().getBundle("BackendMessages", sUser.getLocale());
+
+    String responseMsg;
+    try {
+      ConfigContainer
+          cc =
+          getDomainConfig(SecurityUtils.getCurrentDomainId(), sUser.getUsername(),
+              sUser.getLocale());
+      EventSummaryConfigModel
+          eventSummaryConfigModel =
+          cc.dc.getEventSummaryConfig() != null ? cc.dc.getEventSummaryConfig()
+              : new EventSummaryConfigModel();
+      //if event summary is configured, remove the events with specified category
+      if (configModel.getEvents() != null && !configModel.getEvents().isEmpty()) {
+        //remove the events from template, with the category same as in the request
+        eventSummaryConfigModel
+            .removeEventsByCategory(configModel.getEvents().get(0).getCategory());
+
+        // generate unique id for each thresholds
+        configModel.setUniqueIdentifier();
+        //add the event for the category
+        eventSummaryConfigModel.addEvents(configModel.getEvents());
+
+
+      }
+
+      //Add tag distribution details
+      if (configModel.getTagDistribution() != null ) {
+        eventSummaryConfigModel.setTagDistribution(configModel.getTagDistribution());
+      }
+      //update configuration
+      cc.dc.setEventSummaryConfig(eventSummaryConfigModel);
+      cc.dc.addDomainData(ConfigConstants.EVENT_SUMMARY_INVENTORY,
+          generateUpdateList(sUser.getUsername()));
+      saveDomainConfig(sUser.getLocale(), sUser.getDomainId(), cc, backendMessages);
+      responseMsg = backendMessages.getString("event.summary.update.success");
+    } catch (ServiceException e) {
+      xLogger.severe("Error in updating Event Summary", e);
+      throw new InvalidServiceException(backendMessages.getString("event.summary.update.error"));
+    } catch (Exception e) {
+      xLogger.warn("Configuration exception", e);
+      throw new InvalidServiceException(backendMessages.getString("event.summary.update.error"));
+    }
+    return responseMsg;
+  }
+
 
   @RequestMapping(value = "/dashboard", method = RequestMethod.POST)
   public
