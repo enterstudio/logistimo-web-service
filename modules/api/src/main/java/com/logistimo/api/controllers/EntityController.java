@@ -227,7 +227,7 @@ public class EntityController {
     try{
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
       IKiosk kiosk = as.getKiosk(kioskId);
-      List<IApprovers> approversList = builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId());
+      List<IApprovers> approversList = builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId(), kioskId);
       as.addApprovers(kioskId, approversList, sUser.getUsername());
       } catch (ServiceException se) {
       xLogger.warn("Error fetching Entity details for " + model.entityId, se);

@@ -447,13 +447,13 @@ public class EntityBuilder {
         isAdd);
   }
 
-  public List<IApprovers> buildApprovers(EntityApproversModel model, String username, Long domainId) {
+  public List<IApprovers> buildApprovers(EntityApproversModel model, String username, Long domainId, Long kioskId) {
     List<IApprovers> approvers = new ArrayList<>();
     if(model != null) {
       if(model.pap != null && !model.pap.isEmpty()) {
         for(UserModel um : model.pap) {
           IApprovers primaryApprover = JDOUtils.createInstance(IApprovers.class);
-          primaryApprover.setKioskId(model.entityId);
+          primaryApprover.setKioskId(kioskId);
           primaryApprover.setUserId(um.id);
           primaryApprover.setType(IApprovers.PRIMARY_APPROVER);
           primaryApprover.setOrderType(IApprovers.PURCHASE_ORDER);
@@ -466,7 +466,7 @@ public class EntityBuilder {
       if(model.sap != null && !model.sap.isEmpty()) {
         for(UserModel um : model.sap) {
           IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
-          secondaryApprover.setKioskId(model.entityId);
+          secondaryApprover.setKioskId(kioskId);
           secondaryApprover.setUserId(um.id);
           secondaryApprover.setType(IApprovers.SECONDARY_APPROVER);
           secondaryApprover.setOrderType(IApprovers.PURCHASE_ORDER);
@@ -479,7 +479,7 @@ public class EntityBuilder {
       if(model.pas != null && !model.pas.isEmpty()) {
         for(UserModel um : model.pas) {
           IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
-          secondaryApprover.setKioskId(model.entityId);
+          secondaryApprover.setKioskId(kioskId);
           secondaryApprover.setUserId(um.id);
           secondaryApprover.setType(IApprovers.PRIMARY_APPROVER);
           secondaryApprover.setOrderType(IApprovers.SALES_ORDER);
@@ -492,7 +492,7 @@ public class EntityBuilder {
       if(model.sas != null && !model.sas.isEmpty()) {
         for(UserModel um : model.sas) {
           IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
-          secondaryApprover.setKioskId(model.entityId);
+          secondaryApprover.setKioskId(kioskId);
           secondaryApprover.setUserId(um.id);
           secondaryApprover.setType(IApprovers.SECONDARY_APPROVER);
           secondaryApprover.setOrderType(IApprovers.SALES_ORDER);
@@ -545,7 +545,7 @@ public class EntityBuilder {
         model.pas =
             userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true);
       }
-      if(!sap.isEmpty()) {
+      if(!sas.isEmpty()) {
         model.sas =
             userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true);
       }
