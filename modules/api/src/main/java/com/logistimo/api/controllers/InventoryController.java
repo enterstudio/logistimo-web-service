@@ -808,6 +808,7 @@ public class InventoryController {
       @PathVariable Long entityId,
       @PathVariable Long materialId) throws ServiceException, ObjectNotFoundException {
 
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     Long domainId = SecurityUtils.getCurrentDomainId();
     InventoryManagementService
         ims =
@@ -820,6 +821,6 @@ public class InventoryController {
       throw new ObjectNotFoundException("Inventory not found");
     }
     return builder
-        .buildMInventoryDetail((IInvntry) results.getResults().get(0), domainId, entityId);
+        .buildMInventoryDetail((IInvntry) results.getResults().get(0), domainId, entityId, sUser);
   }
 }

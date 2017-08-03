@@ -112,4 +112,5 @@ public class InventoryModel {
   public BigDecimal pdos; // Predicted days of stock
   public int matType = 0; // All
   public boolean onlyNZStk = false;
+  public EntityModel em;
 }

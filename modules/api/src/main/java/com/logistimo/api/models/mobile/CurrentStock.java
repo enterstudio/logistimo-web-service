@@ -30,6 +30,6 @@ import java.math.BigDecimal;
  */
 public class CurrentStock {
   public BigDecimal count = BigDecimal.ZERO;
-  public long date = 0;
+  public String date;
 
 }
