@@ -23,7 +23,7 @@
 
 package com.logistimo.api.servlets.mobile.builders;
 
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.proto.MobileApproversModel;
 import com.logistimo.proto.MobileEntityApproversModel;
 import com.logistimo.services.Services;
@@ -43,7 +43,7 @@ public class MobileEntityBuilder {
   /**
    * Builds a list of approver models for an entity as required by the mobile from a list of IApporver objects
    */
-  public MobileEntityApproversModel buildApproversModel(List<IApprovers> approversList) {
+  public MobileEntityApproversModel buildApproversModel(List<IApprover> approversList) {
     if (approversList == null || approversList.isEmpty()) {
       return null;
     }
@@ -51,16 +51,16 @@ public class MobileEntityBuilder {
     List<String> sap = new ArrayList<>();
     List<String> pas = new ArrayList<>();
     List<String> sas = new ArrayList<>();
-    for (IApprovers apr : approversList) {
+    for (IApprover apr : approversList) {
       if (StringUtils.isNotEmpty(apr.getUserId())) {
-        if (apr.getType().equals(IApprovers.PRIMARY_APPROVER)) {
-          if (apr.getOrderType().equals(IApprovers.PURCHASE_ORDER)) {
+        if (apr.getType().equals(IApprover.PRIMARY_APPROVER)) {
+          if (apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
             pap.add(apr.getUserId());
           } else {
             pas.add(apr.getUserId());
           }
         } else {
-          if (apr.getOrderType().equals(IApprovers.PURCHASE_ORDER)) {
+          if (apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
             sap.add(apr.getUserId());
           } else {
             sas.add(apr.getUserId());

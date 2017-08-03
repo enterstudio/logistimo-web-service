@@ -23,7 +23,7 @@
 
 package com.logistimo.entities.actions;
 
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.exception.SystemException;
 import com.logistimo.services.impl.PMF;
@@ -50,15 +50,14 @@ public class UpdateApproversAction {
   public UpdateApproversAction(EntitiesService entitiesService){
     this.entitiesService = entitiesService;
   }
-
-  public void invoke(Long kioskId, List<IApprovers> newApprovers, String userName) {
+  public void invoke(Long kioskId, List<IApprover> newApprovers, String userName) {
     if (kioskId == null || newApprovers == null) {
-      throw new IllegalArgumentException("Invalid parameters for adding Approvers");
+      throw new IllegalArgumentException("Invalid parameters for adding Approver");
     }
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    List<IApprovers> approvers = entitiesService.getApprovers(kioskId, pm);
-    List<IApprovers> deleteApproversList = getDeleteApproversList(approvers, newApprovers);
-    List<IApprovers> persistApproversList = getPersistApproversList(approvers, newApprovers);
+    List<IApprover> approvers = entitiesService.getApprovers(kioskId, pm);
+    List<IApprover> deleteApproversList = getDeleteApproversList(approvers, newApprovers);
+    List<IApprover> persistApproversList = getPersistApproversList(approvers, newApprovers);
     try {
       deleteApprovers(deleteApproversList, pm);
       persistApprovers(persistApproversList, pm, userName);
@@ -80,8 +79,8 @@ public class UpdateApproversAction {
    * @param newApprovers
    * @return
    */
-  private List<IApprovers> getDeleteApproversList(List<IApprovers> existingApprovers,
-                                                  List<IApprovers> newApprovers) {
+  private List<IApprover> getDeleteApproversList(List<IApprover> existingApprovers,
+                                                  List<IApprover> newApprovers) {
     return existingApprovers.stream()
         .filter(approver -> !newApprovers.stream().anyMatch(
             newApprover -> approver.getUserId().equals(newApprover.getUserId()) && approver
@@ -95,7 +94,7 @@ public class UpdateApproversAction {
    * @param approvers
    * @param pm
    */
-  public void deleteApprovers(List<IApprovers> approvers, PersistenceManager pm) {
+  public void deleteApprovers(List<IApprover> approvers, PersistenceManager pm) {
     if(!approvers.isEmpty()) {
       pm.deletePersistentAll(approvers);
     }
@@ -107,7 +106,7 @@ public class UpdateApproversAction {
    * @param pm
    * @param userName
    */
-  public void persistApprovers(List<IApprovers> approvers, PersistenceManager pm, String userName) {
+  public void persistApprovers(List<IApprover> approvers, PersistenceManager pm, String userName) {
     if(!approvers.isEmpty()) {
       pm.makePersistentAll(approvers.stream()
           .map(apr -> {
@@ -125,8 +124,8 @@ public class UpdateApproversAction {
    * @param newApprovers
    * @return
    */
-  private List<IApprovers> getPersistApproversList(List<IApprovers> existingApprovers,
-                                                   List<IApprovers> newApprovers) {
+  private List<IApprover> getPersistApproversList(List<IApprover> existingApprovers,
+                                                   List<IApprover> newApprovers) {
     return newApprovers.stream()
         .filter(approver -> !existingApprovers.stream().anyMatch(
             existingApprover -> approver.getUserId().equals(existingApprover.getUserId()) && approver

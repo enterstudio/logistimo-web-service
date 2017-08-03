@@ -26,7 +26,7 @@ package com.logistimo.entities.service;
 
 import com.logistimo.assets.entity.IAsset;
 import com.logistimo.domains.entity.IDomain;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.entity.IPoolGroup;
@@ -360,23 +360,23 @@ public interface EntitiesService extends Service {
    * @param approvers
    * @return
    */
-  void addApprovers(Long kioskId, List<IApprovers> approvers, String userName);
+  void addApprovers(Long kioskId, List<IApprover> approvers, String userName);
 
   /**
    * Get the list of approvers for a given kioskId and approver type
    * @param kioskId
    * @return
    */
-  List<IApprovers> getApprovers(Long kioskId, int type);
+  List<IApprover> getApprovers(Long kioskId, int type);
 
   /**
    * Get the list of approvers for a given kioskId
    * @param kioskId
    * @return
    */
-  List<IApprovers> getApprovers(Long kioskId);
+  List<IApprover> getApprovers(Long kioskId);
 
-  List<IApprovers> getApprovers(Long kioskId, PersistenceManager pm);
+  List<IApprover> getApprovers(Long kioskId, PersistenceManager pm);
 
   /**
    * Get the list of approvers for a given kioskId and orderType
@@ -384,7 +384,7 @@ public interface EntitiesService extends Service {
    * @param orderType
    * @return
    */
-  List<IApprovers> getApprovers(Long kioskId, String orderType);
+  List<IApprover> getApprovers(Long kioskId, String orderType);
 
   /**
    * Get the list of approvers for a given kioskId and orderType and approverType
@@ -393,7 +393,7 @@ public interface EntitiesService extends Service {
    * @param orderType
    * @return
    */
-  List<IApprovers> getApprovers(Long kioskId, int type, String orderType);
+  List<IApprover> getApprovers(Long kioskId, int type, String orderType);
 
   /**
    * Checks whether an user is an approver for purchase/sales/transfer order in that domain

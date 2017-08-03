@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * Created by naveensnair on 19/05/17.
  */
-public interface IApprovers {
+public interface IApprover {
 
   int PRIMARY_APPROVER = 0;
   int SECONDARY_APPROVER = 1;
@@ -61,10 +61,6 @@ public interface IApprovers {
   String getCreatedBy();
 
   void setCreatedBy(String cby);
-
-  Date getUpdatedOn();
-
-  void setUpdatedOn(Date uon);
 
   String getUpdatedBy();
 

@@ -59,7 +59,7 @@ import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.auth.EntityAuthoriser;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.UserEntitiesModel;
@@ -1083,7 +1083,7 @@ public class RESTUtil {
       // Add approvers if configured for the kiosk.
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
       MobileEntityBuilder mobileEntityBuilder = new MobileEntityBuilder();
-      List<IApprovers> approversList = as.getApprovers(k.getKioskId());
+      List<IApprover> approversList = as.getApprovers(k.getKioskId());
       if (approversList != null && !approversList.isEmpty()) {
         kioskData.put(JsonTagsZ.APPROVERS,
             mobileEntityBuilder.buildApproversModel(approversList));

@@ -36,8 +36,8 @@ import javax.jdo.annotations.PrimaryKey;
 /**
  * Created by naveensnair on 19/05/17.
  */
-@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
-public class Approvers implements IApprovers{
+@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true", table = "APPROVERS")
+public class Approver implements IApprover{
 
   @NotPersistent
   List<String> pa;
@@ -58,8 +58,6 @@ public class Approvers implements IApprovers{
   private Date con;
   @Persistent
   private String cby;
-  @Persistent
-  private Date uon;
   @Persistent
   private String uby;
   @Persistent
@@ -115,14 +113,6 @@ public class Approvers implements IApprovers{
 
   public void setCreatedBy(String cby) {
     this.cby = cby;
-  }
-
-  public Date getUpdatedOn() {
-    return uon;
-  }
-
-  public void setUpdatedOn(Date uon) {
-    this.uon = uon;
   }
 
   public String getUpdatedBy() {

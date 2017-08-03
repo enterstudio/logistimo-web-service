@@ -68,7 +68,7 @@ import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.auth.EntityAuthoriser;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.EntityLinkModel;
@@ -219,22 +219,21 @@ public class EntityController {
   @RequestMapping(value = "/approvers", method = RequestMethod.POST)
   public
   @ResponseBody
-  String setApprovers(@RequestBody EntityApproversModel model, @RequestParam Long kioskId, HttpServletRequest request)
+  String setApprovers(@RequestBody EntityApproversModel model, HttpServletRequest request)
       throws ServiceException {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try{
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
-      IKiosk kiosk = as.getKiosk(kioskId);
-      List<IApprovers> approversList = builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId(), kioskId);
-      as.addApprovers(kioskId, approversList, sUser.getUsername());
+      IKiosk kiosk = as.getKiosk(model.entityId);
+      List<IApprover> approversList = builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId());
+      as.addApprovers(model.entityId, approversList, sUser.getUsername());
       } catch (ServiceException se) {
-      xLogger.warn("Error fetching Entity details for " + model.entityId, se);
     throw new InvalidServiceException(
-        backendMessages.getString("kiosk.detail.fetch.error") + " " + model.entityId);
+        backendMessages.getString("kiosk.detail.fetch.error") + " " + model.entityId, se);
   }
-    return "Approvers are updated successfully";
+    return backendMessages.getString("approvers.update.success");
   }
 
   @RequestMapping(value = "/approvers", method = RequestMethod.GET)
@@ -246,7 +245,7 @@ public class EntityController {
     EntityApproversModel model = null;
     EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
     UsersService us = Services.getService(UsersServiceImpl.class, locale);
-    List<IApprovers> approversList = as.getApprovers(kioskId);
+    List<IApprover> approversList = as.getApprovers(kioskId);
     if (approversList != null && approversList.size() > 0) {
       model = builder.buildApprovalsModel(approversList, us, locale, sUser.getTimezone());
 
