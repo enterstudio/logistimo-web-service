@@ -122,7 +122,6 @@ public class MobileTransactionsBuilder {
     us = Services.getService(UsersServiceImpl.class);
     mcs = Services.getService(MaterialCatalogServiceImpl.class);
     for (ITransaction transaction : transactions) {
-
       IMaterial m;
       try {
         m = mcs.getMaterial(transaction.getMaterialId());
@@ -135,7 +134,6 @@ public class MobileTransactionsBuilder {
       if (!RESTUtil.materialExistsInKiosk(transaction.getKioskId(), transaction.getMaterialId())) {
         mtm.mnm = m.getName();
       }
-
       mtm.mid = transaction.getMaterialId();
       mtm.ty = transaction.getType();
       mtm.q = transaction.getQuantity();
@@ -193,10 +191,8 @@ public class MobileTransactionsBuilder {
       }
       List<String> mTags = transaction.getTags(TagUtil.TYPE_MATERIAL);
       mtm.tg = StringUtil.getCSV(mTags);
-
-      if (transaction.getEntryTime() != null) {
-        mtm.svtm = transaction.getEntryTime().getTime();
-      }
+      // If entry time is null set the svtm field to transaction timestamp
+      mtm.svtm = transaction.getEntryTime() != null ? transaction.getEntryTime().getTime() : transaction.getTimestamp().getTime();
       // Add mtm to mtmList
       mtmList.add(mtm);
     }

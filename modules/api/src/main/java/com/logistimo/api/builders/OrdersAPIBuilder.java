@@ -45,7 +45,7 @@ import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.entities.auth.EntityAuthoriser;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -355,18 +355,18 @@ public class OrdersAPIBuilder {
       prApprovers = DomainConfig.getInstance(order.getDomainId()).getApprovalsConfig()
           .getOrderConfig().getPrimaryApprovers();
     } else {
-      List<IApprovers> primaryApprovers;
+      List<IApprover> primaryApprovers;
       if (IOrder.PURCHASE_ORDER == approvalType) {
         primaryApprovers =
-            entitiesService.getApprovers(order.getKioskId(), IApprovers.PRIMARY_APPROVER,
-                IApprovers.PURCHASE_ORDER);
+            entitiesService.getApprovers(order.getKioskId(), IApprover.PRIMARY_APPROVER,
+                IApprover.PURCHASE_ORDER);
       } else {
         primaryApprovers =
-            entitiesService.getApprovers(order.getServicingKiosk(), IApprovers.PRIMARY_APPROVER,
-                IApprovers.SALES_ORDER);
+            entitiesService.getApprovers(order.getServicingKiosk(), IApprover.PRIMARY_APPROVER,
+                IApprover.SALES_ORDER);
       }
       if (primaryApprovers != null) {
-        for (IApprovers apr : primaryApprovers) {
+        for (IApprover apr : primaryApprovers) {
           prApprovers.add(apr.getUserId());
         }
       }
@@ -1119,7 +1119,7 @@ public class OrdersAPIBuilder {
           for (String s : orderConfig.getPrimaryApprovers()) {
             if (s.equals(userId)) {
               orderApproverModel = new OrderApproverModel();
-              orderApproverModel.setApproverType(IApprovers.PRIMARY_APPROVER);
+              orderApproverModel.setApproverType(IApprover.PRIMARY_APPROVER);
               orderApproverModel.setOrderType("t");
 
             }
@@ -1130,7 +1130,7 @@ public class OrdersAPIBuilder {
           for (String s : orderConfig.getSecondaryApprovers()) {
             if (s.equals(userId)) {
               orderApproverModel = new OrderApproverModel();
-              orderApproverModel.setApproverType(IApprovers.SECONDARY_APPROVER);
+              orderApproverModel.setApproverType(IApprover.SECONDARY_APPROVER);
               orderApproverModel.setOrderType("t");
             }
           }
@@ -1147,15 +1147,15 @@ public class OrdersAPIBuilder {
         oty = "s";
       }
       if (kioskId != null) {
-        List<IApprovers> approvers = entitiesService.getApprovers(kioskId);
+        List<IApprover> approvers = entitiesService.getApprovers(kioskId);
         if (approvers != null && !approvers.isEmpty()) {
-          for (IApprovers apr : approvers) {
+          for (IApprover apr : approvers) {
             if (userId.equals(apr.getUserId()) && apr.getOrderType().equals(oty)) {
               orderApproverModel = new OrderApproverModel();
               orderApproverModel.setApproverType(apr.getType());
-              if (IApprovers.PURCHASE_ORDER.equals(apr.getOrderType())) {
+              if (IApprover.PURCHASE_ORDER.equals(apr.getOrderType())) {
                 orderApproverModel.setOrderType(apr.getOrderType());
-              } else if (IApprovers.SALES_ORDER.equals(apr.getOrderType())) {
+              } else if (IApprover.SALES_ORDER.equals(apr.getOrderType())) {
                 orderApproverModel.setOrderType(apr.getOrderType());
               }
             }

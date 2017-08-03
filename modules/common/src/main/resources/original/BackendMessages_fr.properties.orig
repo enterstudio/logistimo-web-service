@@ -489,4 +489,5 @@ transactions.processing.inprogress=Transactions en cours, essayez à nouveau apr
 openingstock.mismatch=Le stock d'ouverture ne s'est pas associé
 lockinventory.failed=Impossible de verrouiller l'inventaire. Veuillez réessayer après un certain temps
 filter=filtre
+approvers.update.success=Les correcteurs sont mis à jour avec succès.
 

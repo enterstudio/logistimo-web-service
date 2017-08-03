@@ -487,3 +487,4 @@ transactions.processing.inprogress=Transactions processing in progress, please t
 openingstock.mismatch=Opening stock did not match
 lockinventory.failed=Unable to lock inventory. Please retry after sometime
 filter=Filter
+approvers.update.success=Approvers are updated successfully.

@@ -26,7 +26,7 @@ package com.logistimo.orders.approvals.utils;
 import com.logistimo.approvals.client.models.Approver;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -71,7 +71,7 @@ public class ApprovalUtils {
       EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
 
       if (ApprovalType.PURCHASE_ORDER.equals(approvalType)) {
-        type = IApprovers.PURCHASE_ORDER;
+        type = IApprover.PURCHASE_ORDER;
         kioskId = order.getKioskId();
         IKiosk kiosk;
         try {
@@ -85,7 +85,7 @@ public class ApprovalUtils {
           throw new ValidationException("OA013", kiosk.getName());
         }
       } else {
-        type = IApprovers.SALES_ORDER;
+        type = IApprover.SALES_ORDER;
         kioskId = order.getServicingKiosk();
         IKiosk kiosk;
         try {
@@ -101,14 +101,14 @@ public class ApprovalUtils {
       }
 
       primaryApprovers =
-          entitiesService.getApprovers(kioskId, IApprovers.PRIMARY_APPROVER, type)
+          entitiesService.getApprovers(kioskId, IApprover.PRIMARY_APPROVER, type)
               .stream()
-              .map(IApprovers::getUserId)
+              .map(IApprover::getUserId)
               .collect(Collectors.toList());
       secondaryApprovers =
-          entitiesService.getApprovers(kioskId, IApprovers.SECONDARY_APPROVER, type)
+          entitiesService.getApprovers(kioskId, IApprover.SECONDARY_APPROVER, type)
               .stream()
-              .map(IApprovers::getUserId)
+              .map(IApprover::getUserId)
               .collect(Collectors.toList());
     }
 

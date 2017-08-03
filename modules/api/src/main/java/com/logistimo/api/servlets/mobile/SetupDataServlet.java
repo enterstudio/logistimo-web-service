@@ -1234,6 +1234,12 @@ public class SetupDataServlet extends JsonRestServlet {
       csv += '"' + value + '"';
     }
     csv += ",";
+    // Entity tags is optional
+    value = ht.get(JsonTagsZ.ENTITY_TAG);
+    if (StringUtils.isNotEmpty(value)) {
+      csv += CharacterConstants.DOUBLE_QUOTES + value + CharacterConstants.DOUBLE_QUOTES;
+    }
+    csv += CharacterConstants.COMMA;
     return csv;
   }
 

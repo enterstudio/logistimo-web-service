@@ -144,7 +144,7 @@ public class UserBuilder {
           StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().exet));
       model.config.dboard.extstts = StringUtil.getList(
           StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().exts));
-      model.config.dboard.extstts = StringUtil.getList(
+      model.config.dboard.dutgs = StringUtil.getList(
           StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().dutg));
       model.config.adboard = dc.getAssetConfig();
       model.config.adboard.setConfiguration(null);

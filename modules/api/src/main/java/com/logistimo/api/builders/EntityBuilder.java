@@ -39,7 +39,7 @@ import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.entities.auth.EntityAuthoriser;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.EntityLinkModel;
@@ -447,67 +447,53 @@ public class EntityBuilder {
         isAdd);
   }
 
-  public List<IApprovers> buildApprovers(EntityApproversModel model, String username, Long domainId) {
-    List<IApprovers> approvers = new ArrayList<>();
-    if(model != null) {
-      if(model.pap != null && !model.pap.isEmpty()) {
-        for(UserModel um : model.pap) {
-          IApprovers primaryApprover = JDOUtils.createInstance(IApprovers.class);
-          primaryApprover.setKioskId(model.entityId);
-          primaryApprover.setUserId(um.id);
-          primaryApprover.setType(IApprovers.PRIMARY_APPROVER);
-          primaryApprover.setOrderType(IApprovers.PURCHASE_ORDER);
-          primaryApprover.setCreatedBy(username);
-          primaryApprover.setCreatedOn(new Date());
-          primaryApprover.setSourceDomainId(domainId);
-          approvers.add(primaryApprover);
-        }
+  public List<IApprover> buildApprovers(EntityApproversModel model, String username,
+                                        Long domainId) {
+    List<IApprover> approvers = new ArrayList<>();
+    if (model != null) {
+      if (model.pap != null && !model.pap.isEmpty()) {
+        approvers.addAll(
+            populateApprovers(model.pap, IApprover.PRIMARY_APPROVER, IApprover.PURCHASE_ORDER,
+                model.entityId, username, domainId));
       }
-      if(model.sap != null && !model.sap.isEmpty()) {
-        for(UserModel um : model.sap) {
-          IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
-          secondaryApprover.setKioskId(model.entityId);
-          secondaryApprover.setUserId(um.id);
-          secondaryApprover.setType(IApprovers.SECONDARY_APPROVER);
-          secondaryApprover.setOrderType(IApprovers.PURCHASE_ORDER);
-          secondaryApprover.setCreatedBy(username);
-          secondaryApprover.setCreatedOn(new Date());
-          secondaryApprover.setSourceDomainId(domainId);
-          approvers.add(secondaryApprover);
-        }
+      if (model.sap != null && !model.sap.isEmpty()) {
+        approvers.addAll(
+            populateApprovers(model.sap, IApprover.SECONDARY_APPROVER, IApprover.PURCHASE_ORDER,
+                model.entityId, username, domainId));
       }
-      if(model.pas != null && !model.pas.isEmpty()) {
-        for(UserModel um : model.pas) {
-          IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
-          secondaryApprover.setKioskId(model.entityId);
-          secondaryApprover.setUserId(um.id);
-          secondaryApprover.setType(IApprovers.PRIMARY_APPROVER);
-          secondaryApprover.setOrderType(IApprovers.SALES_ORDER);
-          secondaryApprover.setCreatedBy(username);
-          secondaryApprover.setCreatedOn(new Date());
-          secondaryApprover.setSourceDomainId(domainId);
-          approvers.add(secondaryApprover);
-        }
+      if (model.pas != null && !model.pas.isEmpty()) {
+        approvers.addAll(
+            populateApprovers(model.pas, IApprover.PRIMARY_APPROVER, IApprover.SALES_ORDER,
+                model.entityId, username, domainId));
       }
-      if(model.sas != null && !model.sas.isEmpty()) {
-        for(UserModel um : model.sas) {
-          IApprovers secondaryApprover = JDOUtils.createInstance(IApprovers.class);
-          secondaryApprover.setKioskId(model.entityId);
-          secondaryApprover.setUserId(um.id);
-          secondaryApprover.setType(IApprovers.SECONDARY_APPROVER);
-          secondaryApprover.setOrderType(IApprovers.SALES_ORDER);
-          secondaryApprover.setCreatedBy(username);
-          secondaryApprover.setCreatedOn(new Date());
-          secondaryApprover.setSourceDomainId(domainId);
-          approvers.add(secondaryApprover);
-        }
+      if (model.sas != null && !model.sas.isEmpty()) {
+        approvers.addAll(
+            populateApprovers(model.sas, IApprover.SECONDARY_APPROVER, IApprover.SALES_ORDER,
+                model.entityId, username, domainId));
       }
-
     }
     return approvers;
   }
 
-  public EntityApproversModel buildApprovalsModel(List<IApprovers> approvers, UsersService as, Locale locale,
+  private List<IApprover> populateApprovers(List<UserModel> userModels, Integer approverType,
+                                            String orderType, Long kioskId, String userName,
+                                            Long domainId) {
+    List<IApprover> approvers = new ArrayList<>(1);
+    for (UserModel model : userModels) {
+      IApprover approver = JDOUtils.createInstance(IApprover.class);
+      approver.setKioskId(kioskId);
+      approver.setUserId(model.id);
+      approver.setType(approverType);
+      approver.setOrderType(orderType);
+      approver.setCreatedBy(userName);
+      approver.setCreatedOn(new Date());
+      approver.setSourceDomainId(domainId);
+      approvers.add(approver);
+    }
+    return approvers;
+  }
+
+  public EntityApproversModel buildApprovalsModel(List<IApprover> approvers, UsersService as, Locale locale,
                                                   String timezone) {
     EntityApproversModel model = new EntityApproversModel();
     if(approvers != null && !approvers.isEmpty()) {
@@ -516,16 +502,16 @@ public class EntityBuilder {
       List<String> pas = new ArrayList<>();
       List<String> sas = new ArrayList<>();
       UserBuilder userBuilder = new UserBuilder();
-      for(IApprovers apr : approvers) {
+      for(IApprover apr : approvers) {
         if(StringUtils.isNotEmpty(apr.getUserId())) {
-          if(apr.getType().equals(IApprovers.PRIMARY_APPROVER)) {
-            if(apr.getOrderType().equals(IApprovers.PURCHASE_ORDER)) {
+          if(apr.getType().equals(IApprover.PRIMARY_APPROVER)) {
+            if(apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
               pap.add(apr.getUserId());
             } else {
               pas.add(apr.getUserId());
             }
           } else {
-            if(apr.getOrderType().equals(IApprovers.PURCHASE_ORDER)) {
+            if(apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
               sap.add(apr.getUserId());
             } else {
               sas.add(apr.getUserId());
@@ -545,12 +531,12 @@ public class EntityBuilder {
         model.pas =
             userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true);
       }
-      if(!sap.isEmpty()) {
+      if(!sas.isEmpty()) {
         model.sas =
             userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true);
       }
       model.createdBy = approvers.get(0).getCreatedBy();
-      model.lastUpdated = approvers.get(0).getUpdatedOn();
+      model.lastUpdated = approvers.get(0).getCreatedOn();
       model.entityId = approvers.get(0).getKioskId();
     }
 

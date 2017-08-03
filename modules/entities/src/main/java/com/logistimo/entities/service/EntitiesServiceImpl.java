@@ -49,7 +49,7 @@ import com.logistimo.domains.utils.EntityRemover;
 import com.logistimo.entities.actions.UpdateApproversAction;
 import com.logistimo.entities.dao.EntityDao;
 import com.logistimo.entities.dao.IEntityDao;
-import com.logistimo.entities.entity.IApprovers;
+import com.logistimo.entities.entity.IApprover;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.entity.IKioskToPoolGroup;
@@ -246,7 +246,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    * @param userName
    * @throws ServiceException
    */
-  public void addApprovers(Long kioskId, List<IApprovers> newApprovers, String userName) {
+  public void addApprovers(Long kioskId, List<IApprover> newApprovers, String userName) {
     StaticApplicationContext.getBean(UpdateApproversAction.class)
         .invoke(kioskId, newApprovers, userName);
   }
@@ -266,12 +266,12 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
       try {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
-        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query = pm.newQuery(JDOUtils.getImplClass(IApprover.class));
         query.setFilter("uid == userIdParam && sdid == domainIdParam");
         query.declareParameters("String userIdParam, Long domainIdParam");
         params.put("userIdParam", userId);
         params.put("domainIdParam", domainId);
-        IApprovers approvers = (IApprovers) query.executeWithMap(params);
+        IApprover approvers = (IApprover) query.executeWithMap(params);
         if(approvers != null) {
           return true;
         }
@@ -294,7 +294,7 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
     return true;
   }
 
-  public List<IApprovers> getApprovers(Long kioskId) {
+  public List<IApprover> getApprovers(Long kioskId) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
       return getApprovers(kioskId, pm);
@@ -309,15 +309,15 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    * @return
    */
   @Override
-  public List<IApprovers> getApprovers(Long kioskId, PersistenceManager pm) {
+  public List<IApprover> getApprovers(Long kioskId, PersistenceManager pm) {
     if(kioskId != null) {
       Query query = null;
       try {
-        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query = pm.newQuery(JDOUtils.getImplClass(IApprover.class));
         query.setFilter("kid == kioskIdParam");
         query.declareParameters("Long kioskIdParam");
-        List<IApprovers> approversList = (List<IApprovers>) query.execute(kioskId);
-        return (List<IApprovers>) pm.detachCopyAll(approversList);
+        List<IApprover> approversList = (List<IApprover>) query.execute(kioskId);
+        return (List<IApprover>) pm.detachCopyAll(approversList);
       } catch (Exception e) {
         xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
       } finally {
@@ -340,21 +340,21 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    * @param orderType
    * @return
    */
-  public List<IApprovers> getApprovers(Long kioskId, String orderType) {
-    List<IApprovers> appList = null;
+  public List<IApprover> getApprovers(Long kioskId, String orderType) {
+    List<IApprover> appList = null;
     if(kioskId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
-        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query = pm.newQuery(JDOUtils.getImplClass(IApprover.class));
         query.setFilter("kid == kioskIdParam && otype == orderTypeParam");
         query.declareParameters("Long kioskIdParam, String orderTypeParam");
         params.put("kioskIdParam", kioskId);
         params.put("orderTypeParam", orderType);
-        List<IApprovers> approversList = (List<IApprovers>) query.executeWithMap(params);
-        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+        List<IApprover> approversList = (List<IApprover>) query.executeWithMap(params);
+        appList = (List<IApprover>) pm.detachCopyAll(approversList);
       } catch (Exception e) {
         xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
       } finally {
@@ -380,22 +380,22 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    * @param orderType
    * @return
    */
-  public List<IApprovers> getApprovers(Long kioskId, int type, String orderType) {
-    List<IApprovers> appList = null;
+  public List<IApprover> getApprovers(Long kioskId, int type, String orderType) {
+    List<IApprover> appList = null;
     if(kioskId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
-        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query = pm.newQuery(JDOUtils.getImplClass(IApprover.class));
         query.setFilter("kid == kioskIdParam && type == typeParam && otype == orderTypeParam");
         query.declareParameters("Long kioskIdParam, int typeParam, String orderTypeParam");
         params.put("kioskIdParam", kioskId);
         params.put("typeParam", type);
         params.put("orderTypeParam", orderType);
-        List<IApprovers> approversList = (List<IApprovers>) query.executeWithMap(params);
-        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+        List<IApprover> approversList = (List<IApprover>) query.executeWithMap(params);
+        appList = (List<IApprover>) pm.detachCopyAll(approversList);
       } catch (Exception e) {
         xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
       } finally {
@@ -420,21 +420,21 @@ public class EntitiesServiceImpl extends ServiceImpl implements EntitiesService 
    * @param kioskId
    * @return
    */
-  public List<IApprovers> getApprovers(Long kioskId, int type) {
-    List<IApprovers> appList = null;
+  public List<IApprover> getApprovers(Long kioskId, int type) {
+    List<IApprover> appList = null;
     if(kioskId != null) {
       PersistenceManager pm = null;
       Query query = null;
       try {
         pm = PMF.get().getPersistenceManager();
         Map<String, Object> params = new HashMap<>();
-        query = pm.newQuery(JDOUtils.getImplClass(IApprovers.class));
+        query = pm.newQuery(JDOUtils.getImplClass(IApprover.class));
         query.setFilter("kid == kioskIdParam && type == typeParam");
         query.declareParameters("Long kioskIdParam, int typeParam");
         params.put("kioskIdParam", kioskId);
         params.put("typeParam", type);
-        List<IApprovers> approversList = (List<IApprovers>) query.executeWithMap(params);
-        appList = (List<IApprovers>) pm.detachCopyAll(approversList);
+        List<IApprover> approversList = (List<IApprover>) query.executeWithMap(params);
+        appList = (List<IApprover>) pm.detachCopyAll(approversList);
       } catch (Exception e) {
         xLogger.warn("Failed to get approvers for Entity: {0}", kioskId, e);
       } finally {

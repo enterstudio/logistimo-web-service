@@ -35,6 +35,8 @@ import com.google.gson.reflect.TypeToken;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.lang.reflect.Type;
 import java.util.Hashtable;
 
@@ -49,7 +51,6 @@ public class SetupDataInputDeserializer implements JsonDeserializer<SetupDataInp
                                     final JsonDeserializationContext context)
       throws JsonParseException {
     final JsonObject jsonObject = json.getAsJsonObject();
-
     final SetupDataInput setupDataInput = new SetupDataInput();
     if (jsonObject.get(JsonTagsZ.TYPE) != null) {
       setupDataInput.setType(jsonObject.get(JsonTagsZ.TYPE).getAsString());
@@ -104,14 +105,21 @@ public class SetupDataInputDeserializer implements JsonDeserializer<SetupDataInp
           jsonObjectKiosk.addProperty(JsonTagsZ.VENDORS, str4);
         }
       }
-
+      if (jsonObjectKiosk.has(JsonTagsZ.ENTITY_TAG)
+          && jsonObjectKiosk.get(JsonTagsZ.ENTITY_TAG) != null) {
+        String eTagsString = jsonObjectKiosk.getAsJsonArray(JsonTagsZ.ENTITY_TAG).toString();
+        if (StringUtils.isNotEmpty(eTagsString)) {
+          jsonObjectKiosk.addProperty(JsonTagsZ.ENTITY_TAG, eTagsString.replace("\"", CharacterConstants.EMPTY)
+              .replace(CharacterConstants.COMMA, CharacterConstants.SEMICOLON)
+              .replace(CharacterConstants.O_SBRACKET, CharacterConstants.EMPTY)
+              .replace(CharacterConstants.C_SBRACKET, CharacterConstants.EMPTY));
+        }
+      }
       String kioskString = gson.toJson(jsonObjectKiosk);
       if (kioskString != null) {
         Hashtable kiosk = gson.fromJson(kioskString, new TypeToken<Hashtable<String, String>>() {
         }.getType());
-
         setupDataInput.setKiosk(kiosk);
-
       }
     }
     return setupDataInput;
