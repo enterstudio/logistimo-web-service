@@ -2081,7 +2081,6 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
         $scope.period = "0";
         $scope.updInvType = $scope.invType = {'text': 'Normal', 'id': 'n'};
         $scope.invByMatEmpty = false;
-
         domainCfgService.getDashboardCfg().then(function (data) {
             if (checkNotNullEmpty(data.data.dmtg)) {
                 $scope.fvmtag = [];
@@ -2089,7 +2088,7 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
                     $scope.fvmtag.push({'text': data, 'id': data});
                 });
             }
-            $scope.fetchDashboardData();
+            $scope.hardRefreshDashboard(true, true); 
         });
 
         var events = ['n', 'oos', 'os', 'us'];
@@ -2112,12 +2111,15 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
 
         LocationController.call(this, $scope, configService);
 
+        $scope.showLoading();
         matService.getDomainMaterials(null, null, 0, 300).then(function (data) {
             $scope.materials = data.data;
             $scope.getFilteredMaterials();
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
             $scope.loading = false;
+        }).finally(function(){
+            $scope.hideLoading();
         });
 
         $scope.init();
@@ -2279,7 +2281,6 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
                 $scope.hideLoading();
             });
         }
-
         $scope.fetchDashboardData = function (init,skipCache) {
             $scope.showLoading();
             $scope.dbdata = undefined;
@@ -2298,12 +2299,10 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
                 fetchDBData(skipCache);
             }
         };
-
-        $scope.hardRefreshDashboard = function(){
-            $scope.fetchDashboardData(false,true);
+        $scope.hardRefreshDashboard = function(init, useCache){
+            $scope.fetchDashboardData(init,!useCache);
         }
 
-        $scope.fetchDashboardData(true);
 
 
         $scope.getFiltered = function () {
