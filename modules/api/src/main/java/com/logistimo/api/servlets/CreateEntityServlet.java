@@ -1093,7 +1093,6 @@ public class CreateEntityServlet extends SgServlet {
     xLogger.fine("Entered removeMaterials");
     Map<String, String[]> materialDetails = req.getParameterMap();
     materialDetails = cleanMap(materialDetails);
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(req.getSession());
     // Get domain Id
     String domainIdStr = req.getParameter(DOMAINID);
     Long domainId = null;
@@ -1101,16 +1100,17 @@ public class CreateEntityServlet extends SgServlet {
       domainId = Long.valueOf(domainIdStr);
     }
     boolean execute = req.getParameter("execute") != null;
-    String message = "";
-    if (materialDetails.containsKey("materialids")) {
+    String message;
+    if (materialDetails != null && materialDetails.containsKey("materialids")) {
       String[] matIDArr = req.getParameterValues("materialids");
       if (!execute) { // schedule
         // Schedule a separate task for deletion of each material (given its associated entities also have to be removed)
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put(SecurityFilter.ACTION, REMOVE);
         params.put("type", MATERIALS);
         params.put(DOMAINID, domainIdStr);
         params.put("execute", "true"); // now add the "execute" indicator here
+        SecureUserDetails sUser = SecurityUtils.getUserDetails();
         for (int i = 0; i < matIDArr.length; i++) {
           params.put("materialids", matIDArr[i]);
           try {
@@ -1132,7 +1132,7 @@ public class CreateEntityServlet extends SgServlet {
         writeToSetupScreen(req, resp, message, Constants.VIEW_MATERIALS);
         return;
       }
-      ArrayList<Long> materialIDs = new ArrayList<Long>();
+      List<Long> materialIDs = new ArrayList<>();
       for (String s : matIDArr) {
         Long l = Long.parseLong(s);
         materialIDs.add(l);
@@ -1547,7 +1547,7 @@ public class CreateEntityServlet extends SgServlet {
         // Reset the user password
         as.changePassword(userId, null, newPassword);
         xLogger.info("Password for user " + userId + " reset to "
-            + newPassword); // TODO: later remove this; this is for initial stages of evaluation
+            + newPassword);
         // Send message to user
         MessageService
             ms =
