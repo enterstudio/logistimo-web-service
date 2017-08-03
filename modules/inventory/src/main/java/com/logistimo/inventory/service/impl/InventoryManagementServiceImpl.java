@@ -37,7 +37,6 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.utils.DomainsUtil;
 import com.logistimo.domains.utils.EntityRemover;
 import com.logistimo.entities.entity.IKiosk;
-import com.logistimo.entities.entity.IKioskLink;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -1458,15 +1457,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                   getInventoryBatch(trans.getLinkedKioskId(), materialId, trans.getBatchId(), pm);
             }
           }
-          try {
-            checkLinkExists(trans);
-          } catch (LogiException e) {
-            trans.setMsgCode(e.getCode());
-            trans.setMessage(e.getMessage());
-            errors.add(trans);
-            continue;
-          }
-
           if (!trans.useCustomTimestamp()) {
             trans.setTimestamp(timestamp);
             if (trans.getEntryTime() != null && trans.getEntryTime().getTime() > timestamp.getTime()) {
@@ -3819,25 +3809,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       lastWebTrans = (ITransaction) results.getResults().get(0);
     }
     return lastWebTrans;
-  }
-
-  private void checkLinkExists(ITransaction trans) throws LogiException {
-    if (ITransaction.TYPE_RECEIPT.equals(trans.getType()) || ITransaction.TYPE_ISSUE
-        .equals(trans.getType())) {
-      if (trans.getLinkedKioskId() != null) {
-        EntitiesService es =
-            Services.getService(EntitiesServiceImpl.class);
-        String linkType;
-        if (ITransaction.TYPE_RECEIPT.equals(trans.getType())) {
-          linkType = IKioskLink.TYPE_VENDOR;
-        } else {
-          linkType = IKioskLink.TYPE_CUSTOMER;
-        }
-        if (!es.hasKioskLink(trans.getKioskId(), linkType, trans.getLinkedKioskId())) {
-          throw new LogiException("M030", (Object[]) null);
-        }
-      }
-    }
   }
 
   // Get the unique list of kiosk ids to lock. This includes kid and lkid (in case the transaction type is transfer)
