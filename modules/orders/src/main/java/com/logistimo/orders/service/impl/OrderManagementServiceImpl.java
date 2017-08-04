@@ -1213,6 +1213,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           o.computeTotalPrice()); // NOTE: price computation is always taken from this function to ensure correct computations (even at cost of minor inefficiency)
       o.setReferenceID(referenceId);
     }
+    o.setDomainId(domainId);
     // Update other order metadata
     updateOrderMetadata(o, utcEstimatedFulfillmentTimeRangesCSV, utcConfirmedFulfillmentTimeRange,
         payment, paymentOption, packageSize);
