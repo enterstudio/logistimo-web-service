@@ -285,6 +285,17 @@
                 });
             };
 
+            $scope.getAdminConfig = function() {
+                $scope.showLoading();
+                domainCfgService.getAdminCfg().then(function(data){
+                    $scope.adminConfig = data.data;
+                }).catch(function error(msg) {
+                    $scope.showErrorMsg(msg);
+                }).finally(function () {
+                    $scope.hideLoading();
+                });
+            };
+
             $scope.generateAssetFilters = function(){
                 $scope.assetFilters = [{"value": "0", "dV": "All"}];
                 for(var i in $scope.assetConfig.assets){
@@ -385,6 +396,7 @@
                     $scope.iOCEnabled = data.data.iOCEnabled;
                     $scope.onlyNewUI = data.data.onlyNewUI;
                     $scope.support = data.data.support;
+                    $scope.admin = data.data.admin;
                     $scope.mxE = data.data.mxE;
                     $scope.accd = data.data.accd;
                     $scope.assetConfig = data.data.ac;
@@ -421,6 +433,7 @@
                     $scope.getDashboardConfig();
                     //$scope.getSessionDetails(deferred);
                     $scope.getSupportConfig();
+                    $scope.getAdminConfig();
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
                     deferred.reject(msg);

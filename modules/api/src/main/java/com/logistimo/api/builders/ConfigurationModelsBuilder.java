@@ -116,7 +116,7 @@ public class ConfigurationModelsBuilder {
 
   public MenuStatsModel buildMenuStats(SecureUserDetails user, DomainConfig config, Locale locale,
                                        String timezone, HttpServletRequest request)
-      throws ServiceException {
+      throws ServiceException, ObjectNotFoundException {
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     MenuStatsModel model = new MenuStatsModel();
     model.iAccTbEn = config.isAccountingEnabled();
@@ -196,6 +196,7 @@ public class ConfigurationModelsBuilder {
     boolean isForceNewUI = ConfigUtil.getBoolean("force.newui", false);
     model.onlyNewUI = isForceNewUI || config.isOnlyNewUIEnabled();
     model.support = buildAllSupportConfigModels(config);
+    model.admin = buildAllAdminContactConfigModel(config.getAdminContactConfig());
     model.iPredEnabled =
         config.getInventoryConfig() != null && config.getInventoryConfig().showPredictions();
     model.mmt =

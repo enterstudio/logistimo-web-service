@@ -23,6 +23,7 @@
 
 package com.logistimo.api.builders;
 
+import com.logistimo.api.models.EntityModel;
 import com.logistimo.api.models.InventoryAbnStockModel;
 import com.logistimo.api.models.InventoryBatchMaterialModel;
 import com.logistimo.api.models.InventoryDetail;
@@ -146,7 +147,7 @@ public class InventoryBuilder {
   }
 
   public InventoryDetailModel buildMInventoryDetail(IInvntry inventory,
-                                                    Long domainId, Long entityId)
+                                                    Long domainId, Long entityId, SecureUserDetails sUser)
       throws ServiceException {
     InventoryDetailModel inventoryDetailModel = new InventoryDetailModel();
     Map<Long, String> domainNames = new HashMap<>(1);
@@ -166,7 +167,7 @@ public class InventoryBuilder {
     IKiosk ki = accountsService.getKiosk(entityId, false);
     return buildMInventoryDetailModel(inventory,
         domainConfig, accountsService, mCatalogService, ims, ki, 1,
-        domainNames);
+        domainNames, sUser);
   }
 
   public InventoryDetailModel buildMInventoryDetailModel(IInvntry invntry,
@@ -176,7 +177,7 @@ public class InventoryBuilder {
                                                          InventoryManagementService ims,
                                                          IKiosk kiosk,
                                                          int itemCount,
-                                                         Map<Long, String> domainNames) {
+                                                         Map<Long, String> domainNames, SecureUserDetails sUser) {
     InventoryDetailModel model = new InventoryDetailModel();
     model.mId = invntry.getMaterialId();
     model.eId = invntry.getKioskId();
@@ -213,9 +214,21 @@ public class InventoryBuilder {
         return null;
       }
     }
+
+    model.loc = new EntityModel();
+    model.loc.ct = kiosk.getCity();
+    model.loc.ctid = kiosk.getCityId();
+    model.loc.st = kiosk.getState();
+    model.loc.stid = kiosk.getStateId();
+    model.loc.ctr = kiosk.getCountry();
+    model.loc.ctrid = kiosk.getCountryId();
+    model.loc.ds = kiosk.getDistrict();
+    model.loc.dsid = kiosk.getDistrictId();
+    model.loc.tlk = kiosk.getTaluk();
+
     model.currentStock = new CurrentStock();
     model.currentStock.count = invntry.getStock();
-    model.currentStock.date = new Date().getTime();
+    model.currentStock.date = LocalDateUtil.format(invntry.getTimestamp(), sUser.getLocale(), sUser.getTimezone());
     model.min = invntry.getNormalizedSafetyStock();
     model.max = invntry.getMaxStock();
     model.it = invntry.getInTransitStock();
@@ -347,6 +360,16 @@ public class InventoryBuilder {
       model.lt = kiosk.getLatitude();
       model.ln = kiosk.getLongitude();
       model.add = CommonUtils.getAddress(kiosk.getCity(), kiosk.getTaluk(), kiosk.getDistrict(), kiosk.getState());
+      model.em = new EntityModel();
+      model.em.ct = kiosk.getCity();
+      model.em.ctid = kiosk.getCityId();
+      model.em.st = kiosk.getState();
+      model.em.stid = kiosk.getStateId();
+      model.em.ctr = kiosk.getCountry();
+      model.em.ctrid = kiosk.getCountryId();
+      model.em.ds = kiosk.getDistrict();
+      model.em.dsid = kiosk.getDistrictId();
+      model.em.tlk = kiosk.getTaluk();
     }
     model.mnm = material.getName();
     model.b = material.getType();
@@ -457,6 +480,7 @@ public class InventoryBuilder {
     model.atpstk = invntry.getAvailableStock();
     model.tstk = invntry.getInTransitStock();
     model.astk = invntry.getAllocatedStock();
+
     return model;
   }
 

@@ -101,4 +101,5 @@ public class InventoryDetailModel {
    * Stock availability period
    */
   public String sap;
+  public EntityModel loc;
 }

@@ -214,6 +214,9 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         getSupportCfg : function() {
             return this.fetch('/s2/api/config/domain/support');
         },
+        getAdminCfg : function() {
+            return this.fetch('/s2/api/config/domain/admin');
+        },
         getUniqueTransReasons : function(){
             return this.fetch('/s2/api/config/domain/inventory/transReasons');
         },
