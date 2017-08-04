@@ -386,7 +386,7 @@ public interface InventoryManagementService extends Service {
 
   void allocateAutomatically(Long kid, Long mid, IInvAllocation.Type type, String typeId,
                              String tag,
-                             BigDecimal quantity, String userId, PersistenceManager pm)
+                             BigDecimal quantity, String userId, boolean autoAssignStatus, PersistenceManager pm)
       throws ServiceException;
 
   void clearAllocation(Long kid, Long mid, IInvAllocation.Type type, String typeId)

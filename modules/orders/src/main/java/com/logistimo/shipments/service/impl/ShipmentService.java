@@ -187,10 +187,11 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       StaticApplicationContext.getBean(CreateShipmentValidator.class).validate(
           model);
       DomainsUtil.addToDomain(shipment, model.sdid, null);
-      DomainConfig dc = DomainConfig.getInstance(model.sdid);
-      InventoryManagementService
-          ims =
-          Services.getService(InventoryManagementServiceImpl.class);
+
+      EntitiesService ems = Services.getService(EntitiesServiceImpl.class);
+      IKiosk vendor = ems.getKiosk(model.vendorId, false);
+      DomainConfig dc = DomainConfig.getInstance(vendor.getDomainId());
+      InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
       for (ShipmentItemModel item : model.items) {
         if (dc.autoGI() && item.afo) {
           BigDecimal transferQuantity = item.q;
@@ -248,12 +249,21 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         }
       }
       pm.makePersistent(shipment);
+
+      final boolean isDirectShipOrFulfil = model.status != null && !model.status.equals(ShipmentStatus.OPEN);
+      String tempSensitiveStatus = null;
+      String materialStatus = null;
+      if(dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation()) {
+        tempSensitiveStatus = dc.getInventoryConfig().getFirstMaterialStatus(true);
+        materialStatus = dc.getInventoryConfig().getFirstMaterialStatus(false);
+      }
       List<IShipmentItem> items = new ArrayList<>(model.items.size());
       for (ShipmentItemModel item : model.items) {
         item.kid = model.customerId;
         item.uid = model.userID;
         item.sid = shipment.getShipmentId();
         item.sdid = model.sdid;
+        setMaterialStatus(model, isDirectShipOrFulfil, tempSensitiveStatus, materialStatus, item);
         IShipmentItem sItem = createShipmentItem(item);
         items.add(sItem);
       }
@@ -292,7 +302,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       updateMessageAndHistory(shipment.getShipmentId(), model.comment, model.userID, model.orderId,
           model.sdid, null, ShipmentStatus.OPEN, pm);
       // if both conversation and activity returns success, proceed to commit changes
-      if (model.status != null && !model.status.equals(ShipmentStatus.OPEN)) {
+      if (isDirectShipOrFulfil) {
         updateShipmentStatus(shipment.getShipmentId(), model.status, null, model.userID, pm, null,
             shipment, source);
       }
@@ -315,6 +325,25 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       if (LockUtil.shouldReleaseLock(lockStatus) && !LockUtil
           .release(Constants.TX_O + model.orderId)) {
         xLogger.warn("Unable to release lock for key {0}", Constants.TX_O + model.orderId);
+      }
+    }
+  }
+
+  private void setMaterialStatus(ShipmentModel model, boolean isDirectShipOrFulfil,
+                                 String tempSensitiveStatus, String materialStatus,
+                                 ShipmentItemModel item) throws ServiceException {
+    if(isDirectShipOrFulfil && item.bq == null &&
+        StringUtils.isEmpty(item.smst) &&
+        (StringUtils.isNotBlank(tempSensitiveStatus) || StringUtils.isNotBlank(materialStatus))) {
+      MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
+      IMaterial material = mcs.getMaterial(item.mId);
+      if(material.isTemperatureSensitive()){
+        item.smst = tempSensitiveStatus;
+      } else {
+        item.smst = materialStatus;
+      }
+      if(model.status.equals(ShipmentStatus.FULFILLED)) {
+        item.fmst = item.smst;
       }
     }
   }
@@ -394,6 +423,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
     sItem.setKioskId(item.kid);
     sItem.setShipmentId(item.sid);
     sItem.setShippedMaterialStatus(item.smst);
+    sItem.setFulfilledMaterialStatus(item.fmst);
     DomainsUtil.addToDomain(sItem, item.sdid, null);
     return sItem;
   }
@@ -707,7 +737,6 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
     EntitiesService as = Services.getService(EntitiesServiceImpl.class);
     boolean checkBatch = true;
     for (IShipmentItem shipmentItem : shipment.getShipmentItems()) {
-      ITransaction t = JDOUtils.createInstance(ITransaction.class);
       IInvntry inv = ims.getInventory(shipment.getKioskId(), shipmentItem.getMaterialId(), pm);
       IInvntry
           vndInv =
@@ -726,6 +755,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
             shipmentItem.getMaterialId(), shipment.getKioskId(), shipment.getShipmentId());
         continue;
       }
+      ITransaction t = JDOUtils.createInstance(ITransaction.class);
       if (ShipmentStatus.SHIPPED.equals(shipment.getStatus()) || (
           prevStatus != ShipmentStatus.SHIPPED &&
               ShipmentStatus.FULFILLED.equals(shipment.getStatus()))) {
