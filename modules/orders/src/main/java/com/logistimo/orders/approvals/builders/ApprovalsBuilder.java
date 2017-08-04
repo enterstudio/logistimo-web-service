@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by naveensnair on 13/06/17.
@@ -127,8 +128,29 @@ public class ApprovalsBuilder {
     request.setAttributes(attributes);
     request.setMessage(msg);
     request.setRequesterId(userId);
-    request.setApprovers(approverList);
+    request.setApprovers(populateApprovers(approverList, userId));
     return request;
+  }
+
+  /**
+   * Remove the requester from approvers list
+   * @param approvers
+   * @param requester
+   * @return
+   */
+  public List<Approver> populateApprovers(List<Approver> approvers, String requester) {
+    List<Approver> approversList = new ArrayList<>(1);
+    for(Approver apr : approvers) {
+      Approver approver = new Approver();
+      List<String> userIds = new ArrayList<>(1);
+      userIds.addAll(apr.getUserIds().stream().filter(user -> !requester.equals(user))
+          .collect(Collectors.toList()));
+      approver.setExpiry(apr.getExpiry());
+      approver.setType(apr.getType());
+      approver.setUserIds(userIds);
+      approversList.add(approver);
+    }
+    return approversList;
   }
 
   public RestResponsePage<ApprovalModel> buildApprovalsModel(RestResponsePage<Approval> response,

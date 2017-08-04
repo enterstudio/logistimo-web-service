@@ -500,6 +500,7 @@ public class OrdersAPIBuilder {
               || ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
             permissions.add(PermissionConstants.EDIT);
             permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.ALLOCATE);
 
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
             if (orderModel.atv) {
@@ -512,6 +513,7 @@ public class OrdersAPIBuilder {
         } else {
           permissions.add(PermissionConstants.CANCEL);
           permissions.add(PermissionConstants.EDIT);
+          permissions.add(PermissionConstants.ALLOCATE);
         }
       }
     } else {

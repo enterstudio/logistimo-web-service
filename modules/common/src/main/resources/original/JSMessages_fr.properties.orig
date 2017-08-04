@@ -1078,3 +1078,7 @@ order.sales.lowercase=Ventes
 approvals.approvers.none=Aucun
 same.admincontacts.warning=Les contacts administratifs primaires et secondaires ne doivent pas être identiques
 primary.admincontact.mandatory=Le contact administratif principal ne peut pas être vide
+approval.invalid.transition.cancel=Cette commande ne peut pas être annulée car son statut a été modifié.
+approval.invalid.transition.reject=Cette commande ne peut pas être rejetée car son statut a été modifié.
+approval.invalid.transition.approve=Cette commande ne peut pas être approuvée car son statut a été modifié.
+order.refresh=Veuillez actualiser cette commande pour voir le nouveau statut.
