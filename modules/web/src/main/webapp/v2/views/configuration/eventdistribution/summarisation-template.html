@@ -41,11 +41,11 @@
                             </div>
 
 
-                            <div ng-if="!config[subview][type]['editData']">
+                            <div class="table-container" ng-if="!config[subview][type]['editData']">
                                 <table class="table table-condensed table-hover table-logistimo" ng-if="config[subview][type]['rows'].length > 0">
                                     <thead>
                                     <tr>
-                                        <th class="col-sm-1 text-center">S.No</th>
+                                        <th class="col-sm-1 text-center">Sl.No</th>
                                         <th ng-repeat="heading in config[subview][type]['heading']">{{resourceBundle['es.'+subview+'.'+type+'.'+heading]}}
                                             <span ng-show="isDef(config[subview][type]['units'][$index])"> ({{config[subview][type]['units'][$index]}})</span>
                                         </th>
@@ -62,7 +62,6 @@
                                             <span class="glyphicons glyphicons-edit paddinglr5" ng-click="edit(type,$index)"></span>
                                         </td>
                                     </tr>
-                                    <tr></tr>
                                     </tbody>
                                 </table>
                                 <div class="codegray padding5" ng-if="config[subview][type]['rows'].length == 0">{{resourceBundle['error.no.config.available']}}

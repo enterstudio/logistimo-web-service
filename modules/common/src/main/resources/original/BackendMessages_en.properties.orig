@@ -489,3 +489,4 @@ openingstock.mismatch=Opening stock did not match
 lockinventory.failed=Unable to lock inventory. Please retry after sometime
 filter=Filter
 approvers.update.success=Approvers are updated successfully.
+error.fetch.event.summary=Error fetching event summary configuration

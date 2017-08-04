@@ -491,4 +491,4 @@ openingstock.mismatch=Le stock d'ouverture ne s'est pas associé
 lockinventory.failed=Impossible de verrouiller l'inventaire. Veuillez réessayer après un certain temps
 filter=filtre
 approvers.update.success=Les correcteurs sont mis à jour avec succès.
-
+error.fetch.event.summary=Erreur lors de la récupération de la configuration du résumé d'événement
