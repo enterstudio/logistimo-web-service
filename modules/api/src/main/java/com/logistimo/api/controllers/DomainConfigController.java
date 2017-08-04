@@ -40,6 +40,7 @@ import com.logistimo.api.models.MenuStatsModel;
 import com.logistimo.api.models.TagsModel;
 import com.logistimo.api.models.UserMessageModel;
 import com.logistimo.api.models.configuration.AccountingConfigModel;
+import com.logistimo.api.models.configuration.AdminContactConfigModel;
 import com.logistimo.api.models.configuration.ApprovalsConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.api.models.configuration.BulletinBoardConfigModel;
@@ -316,7 +317,7 @@ public class DomainConfigController {
     if (config != null) {
       try {
         return builder.buildMenuStats(user, config, locale, user.getTimezone(), request);
-      } catch (ServiceException e) {
+      } catch (ServiceException | ObjectNotFoundException e) {
         throw new InvalidServiceException(backendMessages.getString("menustats.fetch.error"));
       }
     } else {
@@ -368,6 +369,20 @@ public class DomainConfigController {
       xLogger.severe("Error in fetching support configuration for the domain", e);
       throw new InvalidServiceException(
           backendMessages.getString("general.support.config.fetch.error"));
+    }
+  }
+
+  @RequestMapping(value = "/admin", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  AdminContactConfigModel getAdminConfig() {
+    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", SecurityUtils.getLocale());
+    try {
+      return builder.buildAdminContactModel(SecurityUtils.getUsername());
+    } catch (ObjectNotFoundException e) {
+      xLogger.severe("Error in fetching administrative contact configuration for the domain", e);
+      throw new InvalidServiceException(
+          backendMessages.getString("general.admin.config.fetch.error"));
     }
   }
 

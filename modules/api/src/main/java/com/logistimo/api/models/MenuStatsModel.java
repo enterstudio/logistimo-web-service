@@ -23,12 +23,14 @@
 
 package com.logistimo.api.models;
 
+import com.logistimo.api.models.configuration.AdminContactConfigModel;
 import com.logistimo.api.models.configuration.ApprovalsConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.api.models.configuration.SupportConfigModel;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Mohan Raja on 09/03/15.
@@ -73,6 +75,7 @@ public class MenuStatsModel {
    */
   public String cur;
   public List<SupportConfigModel> support;
+  public Map<String, AdminContactConfigModel> admin;
   /**
    * Manager has more than max allowed entities
    */
