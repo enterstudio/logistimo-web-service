@@ -245,6 +245,7 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
     function ($scope, approvalService, ordService, userService, entityService, requestContext, $location) {
         $scope.wparams = [["eid", "entity.id"], ["oid", "ordId"], ["rs", "reqStatus"], ["exp", "exp"], ["rt", "reqType"], ["req", "reqId"], ["apr", "aprId"], ["s", "size"], ["o", "offset"]];
         $scope.localFilters = ['entity', 'orderId', 'reqStatus', 'reqType', 'reqId', 'aprId', 'exp'];
+        $scope.filterMethods = ['applyFilter'];
         ListingController.call(this, $scope, requestContext, $location);
         $scope.init = function (firstTimeInit) {
             $scope.ordApr = {entity: "", orderId: "", reqType: "", reqStatus: "", reqId: "", aprId: ""};
@@ -322,18 +323,24 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
         };
         $scope.goToRequester = function (requester) {
             if (checkNotNullEmpty(requester)) {
-                $scope.reqId = requester;
+                $scope.tempReqId = requester;
             }
         };
         $scope.goToApprover = function (approver) {
             if (checkNotNullEmpty(approver)) {
-                $scope.aprId = approver;
+                $scope.tempAprId = approver;
             }
         };
         $scope.showOrder = function (orderId) {
             if (checkNotNullEmpty(orderId)) {
-                $scope.ordId = orderId;
+                $scope.tempOrdId = orderId;
             }
+        };
+
+        $scope.applyFilter = function(){
+            $scope.aprId = $scope.tempAprId;
+            $scope.reqId = $scope.tempReqId;
+            $scope.ordId = $scope.tempOrdId;
         };
         $scope.getFilteredApprovers = function (userId) {
             return ordService.fetchApprovers(userId).then(function (data) {
