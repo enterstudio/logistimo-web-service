@@ -2079,6 +2079,7 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
         $scope.fvmtag = null;
         $scope.filteredMaterials = [];
         $scope.period = "0";
+        var loadingCount = 0;
         $scope.updInvType = $scope.invType = {'text': 'Normal', 'id': 'n'};
         $scope.invByMatEmpty = false;
         domainCfgService.getDashboardCfg().then(function (data) {
@@ -2112,6 +2113,7 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
         LocationController.call(this, $scope, configService);
 
         $scope.showLoading();
+        incrementLoadingCounter();
         matService.getDomainMaterials(null, null, 0, 300).then(function (data) {
             $scope.materials = data.data;
             $scope.getFilteredMaterials();
@@ -2120,7 +2122,17 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
             $scope.loading = false;
         }).finally(function(){
             $scope.hideLoading();
+            decrementLoadingCounter();
         });
+        function decrementLoadingCounter() {
+            if(--loadingCount == 0) {
+                $scope.iLoading = false;
+            }
+        }
+        function incrementLoadingCounter() {
+            loadingCount++;
+            $scope.iLoading = true;
+        }
 
         $scope.init();
 
@@ -2279,11 +2291,13 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
                 $scope.showErrorMsg(msg);
             }).finally(function () {
                 $scope.hideLoading();
+                decrementLoadingCounter();
             });
         }
         $scope.fetchDashboardData = function (init,skipCache) {
             $scope.showLoading();
             $scope.dbdata = undefined;
+            incrementLoadingCounter();
             $('#runGrid').scrollLeft(0);
             if (init) {
                 domainCfgService.getSystemDashboardConfig().then(function (data) {
