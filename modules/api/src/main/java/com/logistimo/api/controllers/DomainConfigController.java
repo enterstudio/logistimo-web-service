@@ -131,6 +131,7 @@ import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -168,6 +169,9 @@ public class DomainConfigController {
   private ConfigurationModelsBuilder builder = new ConfigurationModelsBuilder();
   private CustomReportsBuilder crBuilder = new CustomReportsBuilder();
   private UserBuilder userBuilder = new UserBuilder();
+
+  @Autowired
+  UsersService usersService;
 
   @RequestMapping(value = "/config/migrator/")
   public
@@ -340,17 +344,19 @@ public class DomainConfigController {
   @RequestMapping(value = "/general", method = RequestMethod.GET)
   public
   @ResponseBody
-  GeneralConfigModel getGeneralConfig(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  GeneralConfigModel getGeneralConfig(@RequestParam(name = "domain_id",required = false)Long domainId,
+                                      HttpServletRequest request) throws ServiceException, ObjectNotFoundException {
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!GenericAuthoriser.authoriseAdmin(request)) {
-      throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-    }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long dId = (null == domainId) ? SessionMgr.getCurrentDomain(request.getSession(),userId): domainId;
+    if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
+        xLogger.warn("User {0} does not have access to domain id {1}" ,sUser.getUsername(), domainId);
+        throw new InvalidDataException("User does not have access to domain");
+    }
     try {
-      return builder.buildGeneralConfigModel(domainId, locale, sUser.getTimezone());
+      return builder.buildGeneralConfigModel(dId, locale, sUser.getTimezone());
     } catch (ServiceException | ObjectNotFoundException | ConfigurationException e) {
       xLogger.severe("Error in fetching general configuration", e);
       throw new InvalidServiceException(backendMessages.getString("general.config.fetch.error"));
@@ -2522,7 +2528,6 @@ public class DomainConfigController {
       if (domainId == null) {
         domainId = SecurityUtils.getCurrentDomainId();
       } else {
-        UsersService usersService = Services.getService(UsersServiceImpl.class);
         if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
           xLogger.warn("User {0} does not have access to domain id {1}" ,sUser.getUsername(), domainId);
           throw new InvalidDataException("User does not have access to domain");

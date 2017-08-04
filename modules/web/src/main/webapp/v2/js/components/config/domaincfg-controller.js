@@ -124,7 +124,7 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         function getAdminContactUser(data,t){
             var user = {};
             user.id = data.data.id;
-            user.usrname = data.data.fnm + ' ' + data.data.lnm;
+            user.usrname = data.data.fnm + ' ' + (data.data.lnm ? data.data.lnm : '');
             user.phnm = data.data.phm;
             user.em = data.data.em;
             if(t=='p'){
