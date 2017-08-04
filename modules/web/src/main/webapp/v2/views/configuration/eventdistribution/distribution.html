@@ -23,36 +23,51 @@
   -->
 
 <div class="box topbox">
-  <div class="bizinfo bizinfo-last">
-    <div ng-controller="SummarisationConfigurationController">
-    <form class="form-horizontal" role="form">
-      <div class="panel-container bgr">
-        <div class="row">
-          <div class="col-sm-12">
-            <div class="title-heading">
-              <div class="capitalize">{{resourceBundle['tag.distribution']}}</div>
-            </div>
-          </div>
+    <div class="bizinfo bizinfo-last">
+        <div ng-controller="SummarisationConfigurationController">
+            <form class="form-horizontal" role="form">
+
+                <div class="panel-container bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                <div class="capitalize">{{resourceBundle['es.tag']}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 litetext">{{resourceBundle['description.tag']}}
+                        </div>
+                        <div class="col-sm-6 mt5 mb5 ml5">
+                            <input type="text" class="form-control" autocomplete="off"
+                                   ng-model="config.ttag" maxlength="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-container bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                <div class="capitalize">{{resourceBundle['tag.distribution']}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 litetext">
+                            {{resourceBundle['description.tag.distribution']}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mt5 mb5 ml5">
+                            <multi-select ng-model="config.eventdistribution"></multi-select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <button type="button" ng-click="updateConfig()" class="btn btn-primary">{{resourceBundle['save']}}
+                    </button>
+                </div>
+            </form>
         </div>
-      <div class="row">
-        <div class="col-sm-12 litetext">
-          {{resourceBundle['description.tag.distribution']}}
-        </div>
-      </div>
-        <div class="row">
-      <div class="col-sm-6 mt5 mb5 ml5">
-
-            <multi-select ng-model="config.eventdistribution"></multi-select>
-      </div>
-      </div>
-
-      </div>
-
-      <div class="col-sm-12">
-        <button type="button" ng-click="updateConfig()" class="btn btn-primary">{{resourceBundle['save']}}</button>
-      </div>
-    </form>
     </div>
-
-  </div>
 </div>

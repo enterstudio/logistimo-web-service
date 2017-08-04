@@ -99,6 +99,7 @@ import com.logistimo.entity.IUploaded;
 import com.logistimo.events.handlers.BBHandler;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.ConfigurationServiceException;
+import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.InvalidTaskException;
 import com.logistimo.exception.TaskSchedulingException;
@@ -2511,21 +2512,41 @@ public class DomainConfigController {
    */
   @RequestMapping(value = "/event-summary", method = RequestMethod.GET)
   public @ResponseBody
-  EventSummaryConfigModel getEventSummaryConfig() {
+  EventSummaryConfigModel getEventSummaryConfig(@RequestParam(required = false) Long domainId) {
     EventSummaryConfigModel model = null;
-    //Get the configuration for the domain
-    DomainConfig dc = DomainConfig.getInstance(SecurityUtils.getCurrentDomainId());
-    if (dc != null) {
-      model = dc.getEventSummaryConfig();
-    }
-    //Get the template
-    EventSummaryConfigModel templateModel = EventSummaryTemplateLoader.getDefaultTemplate();
-    if (templateModel != null) {
-      if (model == null || model.getEvents().isEmpty()) {
-        return templateModel;
-      } else {
-        model.buildEvents(templateModel.getEvents());
+    SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
+    try {
+      if (sUser == null) {
+        throw new UnauthorizedException("User is not authorized");
       }
+      if (domainId == null) {
+        domainId = SecurityUtils.getCurrentDomainId();
+      } else {
+        UsersService usersService = Services.getService(UsersServiceImpl.class);
+        if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
+          xLogger.warn("User {0} does not have access to domain id {1}" ,sUser.getUsername(), domainId);
+          throw new InvalidDataException("User does not have access to domain");
+        }
+      }
+      //Get the configuration for the domain
+      DomainConfig dc = DomainConfig.getInstance(domainId);
+      if (dc != null) {
+        model = dc.getEventSummaryConfig();
+      }
+      //Get the template
+      EventSummaryConfigModel templateModel = EventSummaryTemplateLoader.getDefaultTemplate();
+      if (templateModel != null) {
+        if (model == null || model.getEvents().isEmpty()) {
+          return templateModel;
+        } else {
+          model.buildEvents(templateModel.getEvents());
+          xLogger.info(" Event summary events built based on template");
+        }
+      }
+    } catch (Exception e) {
+      xLogger.warn("Exception fetching event summary configuration", e);
+      ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", sUser == null? Locale.ENGLISH : sUser.getLocale());
+      throw new BadRequestException(backendMessages.getString("error.fetch.event.summary"));
     }
     return model;
   }
@@ -2572,11 +2593,14 @@ public class DomainConfigController {
       if (configModel.getTagDistribution() != null ) {
         eventSummaryConfigModel.setTagDistribution(configModel.getTagDistribution());
       }
+      eventSummaryConfigModel.setTag(configModel.getTag());
+
       //update configuration
       cc.dc.setEventSummaryConfig(eventSummaryConfigModel);
       cc.dc.addDomainData(ConfigConstants.EVENT_SUMMARY_INVENTORY,
           generateUpdateList(sUser.getUsername()));
-      saveDomainConfig(sUser.getLocale(), sUser.getDomainId(), cc, backendMessages);
+      saveDomainConfig(sUser.getLocale(), SecurityUtils.getCurrentDomainId(), cc, backendMessages);
+      xLogger.info("Event summary configured for the domain"+SecurityUtils.getCurrentDomainId());
       responseMsg = backendMessages.getString("event.summary.update.success");
     } catch (ServiceException e) {
       xLogger.severe("Error in updating Event Summary", e);

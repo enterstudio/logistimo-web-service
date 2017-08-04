@@ -46,6 +46,8 @@ public class EventSummaryConfigModel implements Serializable {
   @SerializedName(value = "tag_distribution")
   private List<String> tagDistribution;
 
+  private String tag;
+
   private List<Events> events;
 
   public List<Events> getEvents() {
@@ -55,6 +57,13 @@ public class EventSummaryConfigModel implements Serializable {
     return events;
   }
 
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
 
   public List<String> getTagDistribution() {
     return tagDistribution;
