@@ -2544,6 +2544,11 @@ date-picker[noclear] .btn-group>.btn:first-child:not(:last-child):not(.dropdown-
     max-height: 300px;
     overflow-y: scroll;
 }
+
+.open>.dropdown-menu.main-menu {
+    max-height: none;
+    overflow-y: auto;
+}
 .domain-bread-crumb{
     padding-top: 10px !important;
     padding-bottom: 10px !important;

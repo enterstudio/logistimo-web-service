@@ -29,6 +29,8 @@ package com.logistimo.inventory.service.impl;
 import com.logistimo.AppFactory;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
+import com.logistimo.config.models.MatStatusConfig;
+import com.logistimo.config.models.OrdersConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.QueryConstants;
@@ -170,7 +172,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     }
     String transType = trans.getType();
     // Form the parameters
-    Map<String, String> params = new HashMap<String, String>();
+    Map<String, String> params = new HashMap<>();
     params.put("action", "transcommit");
     params.put("domainid", domainId.toString());
     params.put("transtype", transType);
@@ -3036,7 +3038,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   @Override
   public void allocateAutomatically(Long kid, Long mid, IInvAllocation.Type type, String typeId,
                                     String tag,
-                                    BigDecimal quantity, String userId, PersistenceManager pm)
+                                    BigDecimal quantity, String userId, boolean autoAssignStatus, PersistenceManager pm)
       throws ServiceException {
     boolean useLocalPM = pm == null;
 
@@ -3054,9 +3056,22 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         tx = pm.currentTransaction();
         tx.begin();
       }
-      Results rs = getBatches(mid, kid, null);
-      List<IInvntryBatch> batches = (List<IInvntryBatch>) rs.getResults();
-      if (batches != null && batches.size() > 0) {
+
+      MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
+      final IMaterial material = mcs.getMaterial(mid);
+
+      boolean isBatch = material.isBatchEnabled();
+
+      if(isBatch) {
+        EntitiesService es = Services.getService(EntitiesServiceImpl.class);
+        isBatch = es.getKiosk(kid).isBatchMgmtEnabled();
+      }
+      String matStatus = null;
+      if(autoAssignStatus) {
+        DomainConfig dc = DomainConfig.getInstance(inv.getDomainId());
+        matStatus = dc.getInventoryConfig().getFirstMaterialStatus(material.isTemperatureSensitive());
+      }
+      if (isBatch) {
         List<IInvAllocation> bAllocations = getAllocations(kid, mid, type, typeId, tag);
         BigDecimal existingAllocation = BigDecimal.ZERO;
         Map<String, IInvAllocation> ba = new HashMap<>(bAllocations.size());
@@ -3066,6 +3081,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         }
         quantity = quantity.subtract(existingAllocation);
         List<ShipmentItemBatchModel> shipmentModel = new ArrayList<>(1);
+
+        Results rs = getBatches(mid, kid, null);
+        List<IInvntryBatch> batches = (List<IInvntryBatch>) rs.getResults();
         for (IInvntryBatch ib : batches) {
           ShipmentItemBatchModel model = new ShipmentItemBatchModel();
           model.id = ib.getBatchId();
@@ -3077,6 +3095,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           quantity = quantity.subtract(model.q);
           if (ba.containsKey(model.id)) {
             model.q = model.q.add(ba.get(model.id).getQuantity());
+            model.smst = ba.get(model.id).getMaterialStatus();
+          } else if(autoAssignStatus) {
+            model.smst = matStatus;
           }
           shipmentModel.add(model);
           if (BigUtil.equalsZero(quantity)) {
@@ -3087,7 +3108,13 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           allocate(kid, mid, type, typeId, tag, null, shipmentModel, userId, pm);
         }
       } else {
-        allocate(kid, mid, type, typeId, tag, quantity, null, userId, pm);
+        if(autoAssignStatus) {
+          IInvAllocation allocation = getInvAllocation(kid, mid, null, type, typeId, pm);
+          if (allocation != null) {
+            matStatus = allocation.getMaterialStatus();
+          }
+        }
+        allocate(kid, mid, type, typeId, tag, quantity, null, userId, pm, matStatus);
       }
       if (useLocalPM) {
         tx.commit();

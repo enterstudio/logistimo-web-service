@@ -371,11 +371,12 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
       } else if (newStatus.equals(IOrder.CONFIRMED) && dc.autoGI() && dc.getOrdersConfig()
           .allocateStockOnConfirmation()) {
+        boolean autoAssignStatus = dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation();
         for (IDemandItem d : demandList) {
           try {
             ims.allocateAutomatically(o.getServicingKiosk(), d.getMaterialId(),
                 IInvAllocation.Type.ORDER,
-                String.valueOf(d.getOrderId()), tag, d.getQuantity(), d.getUserId(), pm);
+                String.valueOf(d.getOrderId()), tag, d.getQuantity(), d.getUserId(), autoAssignStatus, pm);
           } catch (InventoryAllocationException ie) {
             xLogger.warn("Unable to auto allocate for order {0}, k: {1}, m: {2}, q: {3}"
                 , o.getOrderId(), d.getMaterialId(), d.getQuantity(), ie);
@@ -1062,13 +1063,14 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
               .allowSalesOrderAsConfirmed()) {
             o.setStatus(IOrder.CONFIRMED);
             if (dc.autoGI() && dc.getOrdersConfig().allocateStockOnConfirmation()) {
+              boolean autoAssignStatus = dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation();
               for (IDemandItem d : demandList) {
                 String tag = IInvAllocation.Type.ORDER.toString().concat(":")
                     .concat(String.valueOf(d.getOrderId()));
                 try {
                   ims.allocateAutomatically(o.getServicingKiosk(), d.getMaterialId(),
                       IInvAllocation.Type.ORDER, String.valueOf(d.getOrderId()), tag,
-                      d.getOriginalQuantity(), d.getUserId(), pm);
+                      d.getOriginalQuantity(), d.getUserId(), autoAssignStatus, pm);
                   d.setStatus(IOrder.CONFIRMED);
                 } catch (InventoryAllocationException invException) {
                   xLogger.warn("Could not allocate fully to Order for k: {0}, m: {1}, q: {2}",
@@ -1213,6 +1215,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           o.computeTotalPrice()); // NOTE: price computation is always taken from this function to ensure correct computations (even at cost of minor inefficiency)
       o.setReferenceID(referenceId);
     }
+    o.setDomainId(domainId);
     // Update other order metadata
     updateOrderMetadata(o, utcEstimatedFulfillmentTimeRangesCSV, utcConfirmedFulfillmentTimeRange,
         payment, paymentOption, packageSize);

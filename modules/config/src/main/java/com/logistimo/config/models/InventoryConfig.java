@@ -23,8 +23,11 @@
 
 package com.logistimo.config.models;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.logistimo.constants.CharacterConstants;
 import com.logistimo.services.Resources;
 import com.logistimo.constants.Constants;
 import com.logistimo.utils.StringUtil;
@@ -816,6 +819,15 @@ public class InventoryConfig implements Serializable {
     } catch (Exception e) {
       throw new ConfigurationException(e.getMessage());
     }
+  }
+
+  public String getFirstMaterialStatus(boolean isTempSensitive) {
+    MatStatusConfig msConfig = getMatStatusConfigByType("i");
+    String matStatus = isTempSensitive ? msConfig.getEtsm() : msConfig.getDf();
+    if (StringUtils.isNotBlank(matStatus)) {
+      matStatus = matStatus.split(CharacterConstants.COMMA,2)[0];
+    }
+    return matStatus;
   }
 
   public static class Permissions implements Serializable {

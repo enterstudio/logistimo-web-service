@@ -179,6 +179,17 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
                 approvalService.updateApprovalStatus($scope.id, $scope.approval).then(function (data) {
                     $scope.approval = data.data;
                 }).catch(function error(msg) {
+                    if(checkNotNullEmpty(msg.data.code) && msg.data.code == "AS007") {
+                        var message = "";
+                        if(status == APPROVAL.CANCELLED) {
+                            message = $scope.resourceBundle['approval.invalid.transition.cancel']
+                        } else if(status == APPROVAL.REJECTED) {
+                            message = $scope.resourceBundle['approval.invalid.transition.reject']
+                        } else if(status == APPROVAL.APPROVED) {
+                            message = $scope.resourceBundle['approval.invalid.transition.approve']
+                        }
+                        msg.data.message = message + " " + $scope.resourceBundle['order.refresh']
+                    }
                     $scope.showErrorMsg(msg);
                 }).finally(function () {
                     if(checkNotNullEmpty($scope.order.id)) {

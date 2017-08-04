@@ -590,7 +590,10 @@ logistimoApp.constant('APPROVAL', {
 	'SHOW_HISTORY': 'history',
 	'APPROVE' : 'approve',
 	'REJECT' : 'reject',
-	'CANCEL' : 'cancel'
+	'CANCEL' : 'cancel',
+	'CANCELLED' : 'cn',
+	'APPROVED' : 'ap',
+	'REJECTED' : 'rj'
 });
 logistimoApp.constant('PATTERNS', {
 	'LATITUDE':'^-?(([0-8])?((([0-9])(\\.\\d{1,8})?)|(90(\\.[0]{0,8})?)))$',

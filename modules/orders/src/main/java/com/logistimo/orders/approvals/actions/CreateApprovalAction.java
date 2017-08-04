@@ -35,6 +35,7 @@ import com.logistimo.orders.approvals.builders.ApprovalsBuilder;
 import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.approvals.models.ApprovalRequestModel;
 import com.logistimo.orders.approvals.utils.ApprovalUtils;
+import com.logistimo.orders.approvals.validations.ApprovalApproversValidator;
 import com.logistimo.orders.approvals.validations.ApprovalRequesterValidator;
 import com.logistimo.orders.approvals.validations.CreateApprovalValidator;
 import com.logistimo.orders.approvals.validations.OrderApprovalStatusValidator;
@@ -77,6 +78,9 @@ public class CreateApprovalAction {
   @Autowired
   private CreateApprovalValidator createApprovalValidator;
 
+  @Autowired
+  private ApprovalApproversValidator approvalApproversValidator;
+
   public CreateApprovalResponse invoke(ApprovalRequestModel approvalRequestModel)
       throws ServiceException, ObjectNotFoundException, ValidationException {
 
@@ -84,10 +88,10 @@ public class CreateApprovalAction {
 
     IOrder order = oms.getOrder(approvalRequestModel.getOrderId());
 
-    validateApprovalRequest(approvalRequestModel, order, locale);
-
     List<Approver> approvers =
         ApprovalUtils.getApproversForOrderType(order, approvalRequestModel.getApprovalType());
+
+    validateApprovalRequest(approvalRequestModel, order, locale, approvers);
 
     CreateApprovalRequest approvalRequest = builder.buildApprovalRequest(order,
         approvalRequestModel.getMessage(), approvalRequestModel.getRequesterId(), approvers,
@@ -98,11 +102,12 @@ public class CreateApprovalAction {
   }
 
   private void validateApprovalRequest(ApprovalRequestModel approvalRequest, IOrder order,
-                                       Locale locale) throws ValidationException {
+                                       Locale locale, List<Approver> approvers) throws ValidationException {
     createApprovalValidator.validate(approvalRequest);
     approvalRequesterValidator.validate(approvalRequest, order,
         SecurityUtils.getUserDetails().getUsername());
     orderApprovalStatusValidator.validate(approvalRequest, order, locale);
+    approvalApproversValidator.validate(approvalRequest, approvers);
   }
 
   private CreateApprovalResponse createApproval(CreateApprovalRequest approvalRequest,
