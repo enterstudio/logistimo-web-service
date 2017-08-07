@@ -60,11 +60,35 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
             assetWidgets = angular.copy(reportWidgets['Assets']);
         }
         domainCfgService.getAssetCfg().then(function(data){
-            if(data.data.enable == 0) {
-                delete reportWidgets['Assets'];
-            } else if(checkNullEmpty(reportWidgets['Assets'])) {
-                reportWidgets['Assets'] = angular.copy(assetWidgets);
-                reportWidgets = sortObject(reportWidgets);
+            switch (data.data.enable) {
+                case 0:
+                    delete reportWidgets['Assets'];
+                    break;
+                case 1:
+                    for (var w in reportWidgets) {
+                        switch(w) {
+                            case 'Assets':
+                                break;
+                            case 'Activity':
+                                // Remove all reports other than Domain activity
+                                for (var i = reportWidgets[w].length - 1; i >= 0; i--) {
+                                    if (reportWidgets[w][i].subReport !== 'Domain activity') {
+                                        reportWidgets[w].splice(i,1);
+                                    }
+                                }
+                                break;
+                            default:
+                                delete reportWidgets[w];
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    if(checkNullEmpty(reportWidgets['Assets'])) {
+                        reportWidgets['Assets'] = angular.copy(assetWidgets);
+                        reportWidgets = sortObject(reportWidgets);
+                    }
+                    break;
             }
         }).finally(function() {
             $scope.loadingConfig = false;
