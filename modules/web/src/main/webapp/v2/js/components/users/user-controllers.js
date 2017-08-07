@@ -131,26 +131,30 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                     }
                 }
             }
-            function validateAdminUser(user) {
-                if (!checkNullEmptyObject(user)) {
-                    if (user.userId == usersList[i]) {
-                        $scope.showWarning($scope.resourceBundle["auser.delete.warning"] + "<br/> -" + user.userId);
-                        return;
+            function validateAdminUser(adminUser, user) {
+                if (!checkNullEmptyObject(adminUser)) {
+                    if (adminUser.userId == user) {
+                        $scope.showWarning($scope.resourceBundle["auser.delete.warning"] + "<br/> -" + adminUser.userId);
+                        return false;
                     }
                 }
             }
 
             function checkAdminUsers() {
                 var usersList = users.split(',');
-                if (!checkNullEmptyObject($scope.admin)) {
-                    for (i = 0; i < usersList.length; i++) {
-                        validateAdminUser($scope.admin.pac);
-                        validateAdminUser($scope.admin.sac);
+                for (var i = 0; i < usersList.length; i++) {
+                    var isValid = validateAdminUser($scope.admin.pac, usersList[i]) &&
+                    validateAdminUser($scope.admin.sac, usersList[i]);
+                    if(!isValid) {
+                        return false;
                     }
                 }
+                return true;
             }
 
-            checkAdminUsers();
+            if(!checkAdminUsers()){
+                return;
+            }
             $scope.showLoading();
             userService.deleteUsers(users).then(function (data) {
                 $scope.fetch();
