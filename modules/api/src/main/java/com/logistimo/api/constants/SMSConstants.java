@@ -30,6 +30,8 @@ public class SMSConstants {
   public static final String TOKEN = "O";
   public static final String TRANSACTION_TYPE = "T";
   public static final String INVENTORY = "I";
+  public static final String VERSION = "V";
+  public static final String V2 = "2";
   public static final String PARTIAL_ID = "P";
   public static final String SAVE_TIMESTAMP = "S";
   public static final String ACTUAL_TIMESTAMP = "A";

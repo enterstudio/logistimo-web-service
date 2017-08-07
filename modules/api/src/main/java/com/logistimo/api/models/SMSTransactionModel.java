@@ -26,6 +26,7 @@ package com.logistimo.api.models;
 import java.util.List;
 
 public class SMSTransactionModel {
+  private String version;
   private Long sendTime;
   private Long actualTransactionDate;
   private String userId;
@@ -91,4 +92,11 @@ public class SMSTransactionModel {
   }
 
 
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
 }

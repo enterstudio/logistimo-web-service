@@ -85,6 +85,8 @@ import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.MsgUtil;
 import com.logistimo.utils.StringUtil;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -173,7 +175,7 @@ public class CreateEntityServlet extends SgServlet {
 
   // Get a stock count transaction
   private static ITransaction getStockCountTrans(Long domainId, Long kioskId, Long materialId,
-                                                 BigDecimal stock, Date t, String userId) {
+                                                 BigDecimal stock, Date t, String userId, int source) {
     ITransaction trans = JDOUtils.createInstance(ITransaction.class);
     trans.setDomainId(domainId);
     trans.setKioskId(kioskId);
@@ -182,6 +184,7 @@ public class CreateEntityServlet extends SgServlet {
     trans.setSourceUserId(userId);
     trans.setTimestamp(t);
     trans.setType(ITransaction.TYPE_PHYSICALCOUNT);
+    trans.setSrc(source);
     transDao.setKey(trans);
     return trans;
   }
@@ -374,6 +377,7 @@ public class CreateEntityServlet extends SgServlet {
     Long kioskId = null;
     // Get initial stock level, if any, and kioskId
     BigDecimal stock = BigDecimal.ZERO;
+    int source = SourceConstants.UPLOAD;
     try {
       kioskId = Long.valueOf(kioskIdStr);
       if (kioskName == null) {
@@ -381,6 +385,11 @@ public class CreateEntityServlet extends SgServlet {
       }
       if (stockStr != null && !stockStr.isEmpty()) {
         stock = new BigDecimal(stockStr);
+      }
+      // Get the source from which the inventory is added to the kiosk.
+      String sourceStr = req.getParameter("source");
+      if (StringUtils.isNotEmpty(sourceStr)) {
+        source = Integer.parseInt(sourceStr);
       }
     } catch (NumberFormatException e) {
       xLogger.severe(
@@ -533,7 +542,7 @@ public class CreateEntityServlet extends SgServlet {
           // Add a stock count transaction, if needed
           if (hasInitialStock) {
             stockCountTransactions
-                .add(getStockCountTrans(domainId, kioskId, materialId, stock, now, suId));
+                .add(getStockCountTrans(domainId, kioskId, materialId, stock, now, suId, source));
           }
         } catch (NumberFormatException e) {
           xLogger.warn("Invalid number format: ", e);

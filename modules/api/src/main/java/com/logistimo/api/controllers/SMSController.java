@@ -26,8 +26,8 @@ package com.logistimo.api.controllers;
 import com.google.gson.Gson;
 
 import com.logistimo.api.builders.SMSBuilder;
+import com.logistimo.api.constants.SMSConstants;
 import com.logistimo.api.models.InventoryTransactions;
-import com.logistimo.api.models.SMSModel;
 import com.logistimo.api.models.SMSRequestModel;
 import com.logistimo.api.models.SMSTransactionModel;
 import com.logistimo.api.servlets.mobile.builders.MobileTransactionsBuilder;
@@ -57,8 +57,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -74,110 +72,12 @@ public class SMSController {
   private static final XLog xLogger = XLog.getLog(SMSController.class);
   private SMSBuilder builder = new SMSBuilder();
 
-  @RequestMapping(value = {"", "/"}, method = {RequestMethod.GET, RequestMethod.POST})
-  public
-  @ResponseBody
-  void updateInventoryTransactions(HttpServletRequest request) {
-
-    SMSRequestModel smsReqModel = null;
-    IUserAccount ua = null;
-    SMSModel model = null;
-
-    try {
-      smsReqModel = SMSUtil.processMessage(request);
-      if (StringUtils.isBlank(smsReqModel.getMessage())) {
-        xLogger.warn("Empty SMS received from {0} on {1}", smsReqModel.getAddress(),
-            smsReqModel.getReceivedOn());
-        return;
-      }
-      model = builder.constructSMSModel(smsReqModel.getMessage());
-
-      if (model == null) {
-        xLogger
-            .severe("Invalid sms format. Not all required fields available. From: {0} Message: {1}",
-                smsReqModel.getAddress(), smsReqModel.getMessage());
-        return;
-      }
-      UsersService as = Services.getService(UsersServiceImpl.class);
-      ua = as.getUserAccount(model.userId);
-      model.domainId = ua.getDomainId();
-
-      model.actualTS = SMSUtil.populateActualTransactionDate(ua.getDomainId(), model.actualTD);
-
-      if (!GenericAuthoriser
-          .authoriseSMS(smsReqModel.getAddress(), ua.getMobilePhoneNumber(), model.userId,
-              model.token)) {
-        xLogger.warn("SMS authentication failed. Mobile: {0}, User Mobile: {1}, Message: {2}",
-            smsReqModel.getAddress(), ua.getMobilePhoneNumber(), smsReqModel.getMessage());
-        return;
-      }
-
-      Map<Long, String> errorCodes = new HashMap<>(0);
-      if (model.actualTS != null && SMSUtil
-          .isDuplicateMsg(model.saveTS.getTime(), model.userId, model.kioskId, model.partialId)) {
-        xLogger
-            .info("Duplicate transaction found while processing SMS {0}", smsReqModel.getMessage());
-      } else {
-        List<ITransaction> transactions = builder.buildInventoryTransactions(model);
-        List<ITransaction> tempErrorTrans = null;
-        Iterator<ITransaction> i = transactions.iterator();
-        while (i.hasNext()) {
-          ITransaction t = i.next();
-          if (t.getMsgCode() != null) {
-            if (tempErrorTrans == null) {
-              tempErrorTrans = new ArrayList<>(1);
-            }
-            tempErrorTrans.add(t);
-            i.remove();
-          }
-        }
-        InventoryManagementService
-            ims =
-            Services.getService(InventoryManagementServiceImpl.class);
-        List<ITransaction> errorTrans;
-        if (tempErrorTrans != null
-            && transactions.size() == 0) { // All transactions are error transactions
-          errorTrans = new ArrayList<>(1);
-        } else {
-          errorTrans = ims.updateInventoryTransactions(model.domainId, transactions, true);
-        }
-        errorCodes = new HashMap<>(errorTrans.size());
-        for (ITransaction errorTran : errorTrans) {
-          errorCodes.put(errorTran.getMaterialId(), errorTran.getMsgCode());
-        }
-        if (tempErrorTrans != null) {
-          for (ITransaction errorTran : tempErrorTrans) {
-            errorCodes.put(errorTran.getMaterialId(), errorTran.getMsgCode());
-          }
-        }
-      }
-      String smsMessage = builder.constructSMS(model, errorCodes);
-      MessageService ms = MessageService.getInstance(MessageService.SMS, ua.getCountry());
-      ms.send(ua, smsMessage, MessageService.NORMAL, null, null, null);
-    } catch (UnsupportedEncodingException e) {
-      xLogger.warn("SMS Encoding issue received  {0} , error e: {1}", smsReqModel.getMessage(), e);
-    } catch (Exception e) {
-      xLogger
-          .severe("Error in processing SMS {0} from {1} on {2}", smsReqModel.getMessage(),
-              smsReqModel.getAddress(), smsReqModel.getReceivedOn(),
-              e);
-      try {
-        if (ua != null) {
-          MessageService ms = MessageService.getInstance(MessageService.SMS, ua.getCountry());
-          ms.send(ua, builder.constructSMS(model, "M004"), MessageService.NORMAL, null, null, null);
-        }
-      } catch (Exception ignored) {
-        // ignore
-      }
-    }
-  }
-
   /**
    * Method to process transaction
    *
    * @param request http request
    */
-  @RequestMapping(value = "/updateTransaction", method = {RequestMethod.GET, RequestMethod.POST})
+  @RequestMapping(value = {"", "/"}, method = {RequestMethod.GET, RequestMethod.POST})
   public @ResponseBody
   void updateTransactions(HttpServletRequest request) {
     IUserAccount ua = null;
@@ -198,6 +98,10 @@ public class SMSController {
       //populate model
       model = builder.buildSMSModel(smsMessage.getMessage());
       //Get user details
+      if (!SMSConstants.V2.equals(model.getVersion())) {
+        xLogger.severe("V=" + model.getVersion() + " version is not supported");
+        return;
+      }
       UsersService as = Services.getService(UsersServiceImpl.class);
       ua = as.getUserAccount(model.getUserId());
       //authorise user
@@ -214,12 +118,13 @@ public class SMSController {
               model.getPartialId());
       //check if duplicate transaction
       if (isDuplicate) {
-        xLogger
-            .info("Duplicate transaction found while processing SMS {0}", smsMessage.getMessage());
-
+        xLogger.info("Duplicate transaction found while processing SMS {0}",
+            smsMessage.getMessage());
       } else {
         Map<Long, List<ITransaction>> transactionMap = builder.buildTransaction(model);
-        InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
+        InventoryManagementService
+            ims =
+            Services.getService(InventoryManagementServiceImpl.class);
         midErrorDetailModelsMap =
             ims.updateMultipleInventoryTransactions(transactionMap, ua.getDomainId(),
                 ua.getUserId());
@@ -236,8 +141,7 @@ public class SMSController {
     } catch (InvalidDataException e) {
       xLogger.warn("Error in processing SMS.", e);
       sendErrorResponse(smsMessage, ua, "M013", model);
-    } catch
-        (Exception e) {
+    } catch (Exception e) {
       xLogger.warn("Exception in processing SMS.", e);
       sendErrorResponse(smsMessage, ua, "M004", model);
     }
