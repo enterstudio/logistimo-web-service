@@ -142,9 +142,11 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
 
             function checkAdminUsers() {
                 var usersList = users.split(',');
-                for (i = 0; i < usersList.length; i++) {
-                    validateAdminUser($scope.admin.pac);
-                    validateAdminUser($scope.admin.sac);
+                if (!checkNullEmptyObject($scope.admin)) {
+                    for (i = 0; i < usersList.length; i++) {
+                        validateAdminUser($scope.admin.pac);
+                        validateAdminUser($scope.admin.sac);
+                    }
                 }
             }
 

@@ -388,6 +388,9 @@ public class ConfigurationModelsBuilder {
   public Map<String, AdminContactConfigModel> buildAllAdminContactConfigModel(
       AdminContactConfig config)
       throws ObjectNotFoundException {
+    if(config == null) {
+      return null;
+    }
     Map<String, AdminContactConfigModel> model = new HashMap<>(2);
     model.put(AdminContactConfig.PRIMARY_ADMIN_CONTACT,
         buildAdminContactModel(config.getPrimaryAdminContact()));
