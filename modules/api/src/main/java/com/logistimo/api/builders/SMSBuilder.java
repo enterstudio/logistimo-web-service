@@ -165,6 +165,9 @@ public class SMSBuilder {
           case SMSConstants.PARTIAL_ID:
             model.setPartialId(keyValue[1]);
             break;
+          case SMSConstants.VERSION:
+            model.setVersion(keyValue[1]);
+            break;
           case SMSConstants.SAVE_TIMESTAMP:
             setSendTime(model, keyValue[1]);
             break;
