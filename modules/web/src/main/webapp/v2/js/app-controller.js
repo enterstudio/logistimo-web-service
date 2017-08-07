@@ -285,9 +285,9 @@
                 });
             };
 
-            $scope.getAdminConfig = function() {
+            $scope.getAdminConfig = function () {
                 $scope.showLoading();
-                domainCfgService.getAdminCfg().then(function(data){
+                domainCfgService.getAdminCfg().then(function (data) {
                     $scope.adminConfig = data.data;
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);

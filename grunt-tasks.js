@@ -144,8 +144,14 @@ module.exports = function(grunt, ref) {
                     {src: ['target/grunt/resources/BackendMessages_en.properties.orig'], dest: 'target/grunt/resources/BackendMessages_en.properties'},
                     {src: ['target/grunt/resources/HelpMessages_en.properties.orig'], dest: 'target/grunt/resources/HelpMessages_en.properties'},
                     {src: ['target/grunt/resources/Messages_en.properties.orig'], dest: 'target/grunt/resources/Messages_en.properties'},
-                    {src: ['target/grunt/resources/JSMessages_en.properties.orig'], dest: 'target/grunt/resources/JSMessages_en.properties'},
-                    {src: ['target/grunt/resources/ConfigMessages_en.properties.orig'], dest: 'target/grunt/resources/ConfigMessages_en.properties'}
+                    {
+                        src: ['target/grunt/resources/JSMessages_en.properties.orig'],
+                        dest: 'target/grunt/resources/JSMessages_en.properties'
+                    },
+                    {
+                        src: ['target/grunt/resources/ConfigMessages_en.properties.orig'],
+                        dest: 'target/grunt/resources/ConfigMessages_en.properties'
+                    }
                 ]
             },
             fr: {
@@ -153,8 +159,14 @@ module.exports = function(grunt, ref) {
                     {src: ['target/grunt/resources/BackendMessages_fr.properties.orig'], dest: 'target/grunt/resources/BackendMessages_fr.properties'},
                     {src: ['target/grunt/resources/HelpMessages_fr.properties.orig'], dest: 'target/grunt/resources/HelpMessages_fr.properties'},
                     {src: ['target/grunt/resources/Messages_fr.properties.orig'], dest: 'target/grunt/resources/Messages_fr.properties'},
-                    {src: ['target/grunt/resources/JSMessages_fr.properties.orig'], dest: 'target/grunt/resources/JSMessages_fr.properties'},
-                    {src: ['target/grunt/resources/ConfigMessages_fr.properties.orig'], dest: 'target/grunt/resources/ConfigMessages_fr.properties'}
+                    {
+                        src: ['target/grunt/resources/JSMessages_fr.properties.orig'],
+                        dest: 'target/grunt/resources/JSMessages_fr.properties'
+                    },
+                    {
+                        src: ['target/grunt/resources/ConfigMessages_fr.properties.orig'],
+                        dest: 'target/grunt/resources/ConfigMessages_fr.properties'
+                    }
                 ]
             },
             resource : {

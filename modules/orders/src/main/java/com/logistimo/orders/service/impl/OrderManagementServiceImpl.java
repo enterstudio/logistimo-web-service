@@ -376,7 +376,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           try {
             ims.allocateAutomatically(o.getServicingKiosk(), d.getMaterialId(),
                 IInvAllocation.Type.ORDER,
-                String.valueOf(d.getOrderId()), tag, d.getQuantity(), d.getUserId(), autoAssignStatus, pm);
+                String.valueOf(d.getOrderId()), tag, d.getQuantity(), d.getUserId(),
+                autoAssignStatus, pm);
           } catch (InventoryAllocationException ie) {
             xLogger.warn("Unable to auto allocate for order {0}, k: {1}, m: {2}, q: {3}"
                 , o.getOrderId(), d.getMaterialId(), d.getQuantity(), ie);
@@ -582,6 +583,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     return getOrders(filters, pageParams);
   }
 
+  @Override
   public Results getOrders(OrderFilters orderFilters, PageParams pageParams) {
     return StaticApplicationContext.getBean(GetFilteredOrdersAction.class)
         .invoke(orderFilters, pageParams);
@@ -1380,7 +1382,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   }
 
-  private BigDecimal computeRecommendedOrderQuantity(IInvntry invntry) {
+  @Override
+  public BigDecimal computeRecommendedOrderQuantity(IInvntry invntry) {
     BigDecimal roq = new BigDecimal(-1);
     BigDecimal huQty;
     if (IInvntry.MODEL_SQ.equals(invntry.getInventoryModel())) {
@@ -1478,17 +1481,26 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   public List<IDemandItem> getDemandItemByStatus(Long kioskId, Long materialId,
                                                  Collection<String> status)
       throws ServiceException {
-    if (kioskId == null || materialId == null || status == null) {
-      throw new ServiceException("KioskId, MaterialId and status are mandatory");
+    if (kioskId == null && materialId == null || status == null) {
+      throw new ServiceException("One of KioskId and MaterialId along with status are mandatory");
     }
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Query q = pm.newQuery(JDOUtils.getImplClass(IDemandItem.class));
-    String filter = "kId == kIdParam && mId == mIdParam && ost.contains(st)";
-    String declaration = "Long kIdParam, Long mIdParam, java.util.Collection ost";
     Map<String, Object> paramMap = new HashMap<>(3);
-    paramMap.put("kIdParam", kioskId);
-    paramMap.put("mIdParam", materialId);
     paramMap.put("ost", status);
+    String filter = "ost.contains(st)";
+    String declaration = "java.util.Collection ost";
+    if (kioskId != null) {
+      filter += " && kId == kIdParam";
+      paramMap.put("kIdParam", kioskId);
+      declaration += ", Long kIdParam";
+    }
+    if (materialId != null) {
+      filter += " && mId == mIdParam";
+      paramMap.put("mIdParam", materialId);
+      declaration += ", Long mIdParam";
+    }
+
     try {
       q.setFilter(filter);
       q.declareParameters(declaration);

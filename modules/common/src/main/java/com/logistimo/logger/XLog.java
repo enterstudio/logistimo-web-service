@@ -24,9 +24,7 @@
 package com.logistimo.logger;
 
 import com.ibm.icu.util.Calendar;
-import com.logistimo.AppFactory;
 import com.logistimo.dao.JDOUtils;
-
 import com.logistimo.entity.IALog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -51,7 +49,7 @@ public class XLog {
   }
 
   public static XLog getLog(String name) {
-    return new XLog(AppFactory.get().getLogger(name));
+    return new XLog(new LogiLogger(name));
   }
 
   @SuppressWarnings("rawtypes")

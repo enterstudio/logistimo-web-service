@@ -27,10 +27,12 @@ import com.logistimo.config.models.LeadTimeAvgConfig;
 import com.logistimo.conversations.entity.IMessage;
 import com.logistimo.exception.LogiException;
 import com.logistimo.exception.ValidationException;
+import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -220,6 +222,8 @@ public interface OrderManagementService extends Service {
                    PersistenceManager pm) throws ServiceException;
 
 
+  BigDecimal computeRecommendedOrderQuantity(IInvntry invntry);
+
   List<IDemandItem> getDemandItemByStatus(Long kioskId, Long materialId, Collection<String> status)
       throws ServiceException;
 
@@ -239,6 +243,8 @@ public interface OrderManagementService extends Service {
   BigDecimal getLeadTime(Long kid, Long mid, float orderPeriodicityInConfig, LeadTimeAvgConfig leadTimeAvgConfig, float leadTimeDefaultInConfig) throws ServiceException;
 
   void updateOrderMetadata(Long orderId, String updatedBy, PersistenceManager pm);
+
+  Results getOrders(OrderFilters orderFilters, PageParams pageParams);
 
   List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams, String orderType,
                          boolean isTransfer)

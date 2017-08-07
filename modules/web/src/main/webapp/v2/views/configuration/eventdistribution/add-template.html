@@ -27,10 +27,13 @@
         <div class="row" ng-repeat="field in configFields">
             <div class="col-sm-8">
                 <div class="form-group">
-                    <label class="col-sm-4 control-label">{{resourceBundle['es.'+subview+'.'+type+'.'+field]}} {{editData[field]['oper']}}</label>
+                    <label class="col-sm-4 control-label">{{resourceBundle['es.'+subview+'.'+type+'.'+field]}}
+                        {{editData[field]['oper']}}</label>
+
                     <div class="col-sm-5 noleftpad">
                         <div ng-if="editData[field]['units'] == 'hours' || editData[field]['units'] == 'days'">
-                            <input only-digits allow-decimal type="text" class="form-control" autocomplete="off" ng-if="!isTagField(field)"
+                            <input only-digits allow-decimal type="text" class="form-control" autocomplete="off"
+                                   ng-if="!isTagField(field)"
                                    ng-model="editData[field]['value']" maxlength="10">
                         </div>
                         <div ng-if="editData[field]['units'] != 'hours' && editData[field]['units'] != 'days'">
@@ -38,7 +41,8 @@
                                    ng-model="editData[field]['value']" maxlength="100">
                         </div>
 
-                        <tag-select  tags-model="editData[field]['values']" type="getTagType(field)" ng-if="isTagField(field)" force-no-udf="true"></tag-select>
+                        <tag-select tags-model="editData[field]['values']" type="getTagType(field)"
+                                    ng-if="isTagField(field)" force-no-udf="true"></tag-select>
 
                     </div>
                     <label class="col-sm-2 codegray cbx noleftpad">{{editData[field]['units']}}</label>

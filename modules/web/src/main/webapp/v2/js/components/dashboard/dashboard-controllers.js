@@ -2120,15 +2120,16 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
             $scope.loading = false;
-        }).finally(function(){
+        }).finally(function () {
             $scope.hideLoading();
             decrementLoadingCounter();
         });
         function decrementLoadingCounter() {
-            if(--loadingCount == 0) {
+            if (--loadingCount == 0) {
                 $scope.iLoading = false;
             }
         }
+
         function incrementLoadingCounter() {
             loadingCount++;
             $scope.iLoading = true;
@@ -2313,8 +2314,8 @@ domainControllers.controller('InvntryDashboardCtrl', ['$scope', 'invService', 'm
                 fetchDBData(skipCache);
             }
         };
-        $scope.hardRefreshDashboard = function(init, useCache){
-            $scope.fetchDashboardData(init,!useCache);
+        $scope.hardRefreshDashboard = function (init, useCache) {
+            $scope.fetchDashboardData(init, !useCache);
         }
 
 

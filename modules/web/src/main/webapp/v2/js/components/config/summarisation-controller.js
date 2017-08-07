@@ -44,8 +44,8 @@ domainCfgControllers.controller('SummarisationMenuController', ['$scope', 'domai
 
             if (checkNotNullEmpty(esConfig)) {
                 $scope.config.eventdistribution = [];
-                $scope.config.ttag=esConfig.tag;
-                $scope.config.tag=esConfig.tag;
+                $scope.config.ttag = esConfig.tag;
+                $scope.config.tag = esConfig.tag;
                 if (checkNotNullEmpty(esConfig.tag_distribution)) {
                     angular.forEach(esConfig.tag_distribution, function (tag) {
                         $scope.config.eventdistribution.push({text: tag, id: tag});
@@ -220,11 +220,11 @@ domainCfgControllers.controller('SummarisationConfigurationController', ['$scope
             }
             $scope.showLoading();
             $scope.masterData[$scope.subview] = angular.copy($scope.config[$scope.subview]);
-            $scope.masterData.tag=angular.copy($scope.config.ttag);
+            $scope.masterData.tag = angular.copy($scope.config.ttag);
             domainCfgService.setEventSummaryConfig({
                 events: events,
                 tag_distribution: tagDistribution,
-                tag:$scope.config.ttag
+                tag: $scope.config.ttag
             }).then(function (data) {
                 $scope.showSuccess(data.data);
             }).catch(function error(msg) {

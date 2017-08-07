@@ -192,7 +192,9 @@ public class MobileTransactionsBuilder {
       List<String> mTags = transaction.getTags(TagUtil.TYPE_MATERIAL);
       mtm.tg = StringUtil.getCSV(mTags);
       // If entry time is null set the svtm field to transaction timestamp
-      mtm.svtm = transaction.getEntryTime() != null ? transaction.getEntryTime().getTime() : transaction.getTimestamp().getTime();
+      mtm.svtm =
+          transaction.getEntryTime() != null ? transaction.getEntryTime().getTime()
+              : transaction.getTimestamp().getTime();
       // Add mtm to mtmList
       mtmList.add(mtm);
     }

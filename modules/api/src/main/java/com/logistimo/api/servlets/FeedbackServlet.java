@@ -26,14 +26,26 @@ package com.logistimo.api.servlets;
 import com.logistimo.AppFactory;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
+import com.logistimo.communications.service.EmailService;
+import com.logistimo.config.models.GeneralConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.domains.service.DomainsService;
 import com.logistimo.domains.service.impl.DomainsServiceImpl;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
+import com.logistimo.proto.RestConstantsZ;
+import com.logistimo.services.ServiceException;
+import com.logistimo.services.Services;
 import com.logistimo.services.taskqueue.ITaskService;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -41,19 +53,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.NullLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import com.logistimo.communications.service.EmailService;
-import com.logistimo.config.models.GeneralConfig;
-import com.logistimo.services.ServiceException;
-import com.logistimo.services.Services;
-import com.logistimo.proto.RestConstantsZ;
-import com.logistimo.constants.Constants;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidServiceException;
-import com.logistimo.exception.UnauthorizedException;
-import com.logistimo.users.entity.IUserAccount;
-import com.logistimo.users.service.UsersService;
-import com.logistimo.users.service.impl.UsersServiceImpl;
-
 
 import java.io.StringWriter;
 import java.util.Collections;
@@ -107,6 +106,8 @@ public class FeedbackServlet extends HttpServlet {
       ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
       ve.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, NullLogChute.class.getName());
       ve.setProperty("runtime.log.logsystem.log4j.logger", _LOGGER);
+      ve.setProperty("input.encoding", "UTF-8");
+      ve.setProperty("output.encoding", "UTF-8");
       ve.init();
 
       String eName = null;
@@ -165,7 +166,7 @@ public class FeedbackServlet extends HttpServlet {
       }
       StringWriter out = new StringWriter();
 
-      Template template = ve.getTemplate(VELOCITY_TEMPLATE_PATH);
+      Template template = ve.getTemplate(VELOCITY_TEMPLATE_PATH, "UTF-8");
       template.merge(vc, out);
 
       EmailService svc = EmailService.getInstance();

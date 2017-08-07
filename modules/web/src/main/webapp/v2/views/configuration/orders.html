@@ -411,6 +411,62 @@
                         </div>
                     </div>
                 </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['automate.purchase.order']}}
+                            </div>
+                            <p class="litetext">
+                                {{resourceBundle['automate.purchase.order.desc']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{resourceBundle['enable.purchase.order.automation']}}</label>
+                                <div class="col-sm-8 cbx">
+                                    <input type="checkbox" class="cbx" ng-model="orders.autoCreate" ng-change="setAutoCreateParams()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-disabled="!orders.autoCreate">
+                        <div class="row">
+                            <div class="col-sm-11">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">{{resourceBundle['kiosk']}} {{resourceBundle['tags.lower']}}</label>
+                                    <div class="col-sm-8" ng-disabled="!orders.autoCreate">
+                                        <tag-select tags-model="etags" disabled="!orders.autoCreate" type="'entity'" force-no-udf="'true'"></tag-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-11">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">{{resourceBundle['material']}} {{resourceBundle['tags.lower']}}</label>
+                                    <div class="col-sm-8" ng-disabled="orders.autoCreate">
+                                        <tag-select tags-model="mtags" disabled="!orders.autoCreate" type="'material'" force-no-udf="'true'"></tag-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-11">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">{{resourceBundle['purchase.order.creation']}}</label>
+                                    <div class="col-sm-8">
+                                        <input type="radio" ng-model="autoCreateOnPdos" value="m" ng-disabled="!orders.autoCreate"> {{resourceBundle['automate.order.min']}}<br/>
+                                        <input type="radio" ng-model="autoCreateOnPdos" value="s" ng-disabled="!orders.autoCreate"> {{resourceBundle['automate.order.likely.stockout']}} <br/>
+                                        <span ng-show="autoCreateOnPdos == 's'" class="ml10">in &lt;= <input type="text" class="form-control wd30" ng-model="orders.pdos"> {{resourceBundle['config.days']}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt10" ng-if="iSU || dp.ce">
                     <div class="col-sm-12  ml5">
                         <button type="button" ng-click="setOrders()" class="btn btn-primary">{{resourceBundle['save']}}</button>

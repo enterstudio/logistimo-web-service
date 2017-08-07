@@ -1077,6 +1077,13 @@ approvals.secondary.approvers=Approuvants secondaires
 order.sales.lowercase=Ventes
 approvals.approvers.none=Aucun
 same.admincontacts.warning=Les contacts administratifs primaires et secondaires ne doivent pas être identiques
+purchase.order.creation=Déclencheurs pour la création d'un ordre d'achat
+automate.order.min=Créer une commande lorsque l'élément atteint une minute. Niveau de stock
+automate.order.likely.stockout=Créer une commande lorsque l'article est susceptible de stocker
+enable.purchase.order.automation=Activer l'automatisation du bon de commande
+automate.purchase.order=Automatiser la création d'un ordre d'achat
+automate.purchase.order.desc=Spécifiez la configuration pour automatiser la création de bons de commande
+days.of.stockout.mandatory=Entrez le nombre de jours de stockout, avant que le bon de commande ne soit créé.same.admincontacts.warning=Les contacts administratifs primaires et secondaires ne doivent pas être identiques
 primary.admincontact.mandatory=Le contact administratif principal ne peut pas être vide
 approval.invalid.transition.cancel=Cette commande ne peut pas être annulée car son statut a été modifié.
 approval.invalid.transition.reject=Cette commande ne peut pas être rejetée car son statut a été modifié.

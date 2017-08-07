@@ -20,6 +20,7 @@
  * You can be released from the requirements of the license by purchasing a commercial license. To know more about
  * the commercial license, please contact us at opensource@logistimo.com
  */
+
 package com.logistimo.orders.actions;
 
 import com.logistimo.auth.SecurityConstants;
@@ -75,6 +76,8 @@ public class GetFilteredOrdersQueryAction {
       }
     }
 
+    applyLinkedKioskFilter(filterQuery, parameters, filters);
+
     applyStatusFilters(filterQuery, parameters, filters);
 
     applyTagFilters(filterQuery, parameters, filters);
@@ -94,6 +97,14 @@ public class GetFilteredOrdersQueryAction {
 
   }
 
+  private void applyLinkedKioskFilter(StringBuilder filterQuery, List<String> parameters,
+                                      OrderFilters filters) {
+    if (filters.getLinkedKioskId() != null) {
+      filterQuery.append(" AND SKID = ?");
+      parameters.add(String.valueOf(filters.getLinkedKioskId()));
+    }
+  }
+
   private boolean isAdmin(String userId) {
     try {
       return SecurityUtil.compareRoles(usersService.getUserAccount(userId).getRole(),
@@ -105,7 +116,7 @@ public class GetFilteredOrdersQueryAction {
 
   private void applyUserAccessibleKiosks(StringBuilder filterQuery, List<String> parameters,
                                          OrderFilters filters) {
-    filterQuery.append(getKioskFiled(filters))
+    filterQuery.append(getKioskField(filters))
         .append(" IN (SELECT KIOSKID FROM USERTOKIOSK WHERE USERID = ?)").append(" AND ")
         .append(getVisibilityField(filters)).append(" = 1");
     parameters.add(filters.getUserId());
@@ -204,12 +215,12 @@ public class GetFilteredOrdersQueryAction {
 
   private void applyKioskFilter(StringBuilder sqlQuery, List<String> parameters,
                                 OrderFilters filters) {
-    sqlQuery.append(getKioskFiled(filters)).append(" = ?").append(" AND ")
+    sqlQuery.append(getKioskField(filters)).append(" = ?").append(" AND ")
         .append(getVisibilityField(filters)).append(" = 1");
     parameters.add(String.valueOf(filters.getKioskId()));
   }
 
-  private String getKioskFiled(OrderFilters filters) {
+  private String getKioskField(OrderFilters filters) {
     return IOrder.TYPE_SALE.equals(filters.getOtype()) ? "SKID" : "KID";
   }
 
@@ -219,7 +230,7 @@ public class GetFilteredOrdersQueryAction {
 
   private void applyKioskIdsFilter(StringBuilder sqlQuery, List<String> parameters,
                                    OrderFilters filters) {
-    sqlQuery.append(getKioskFiled(filters)).append(" IN (");
+    sqlQuery.append(getKioskField(filters)).append(" IN (");
     for (Long id : filters.getKioskIds()) {
       sqlQuery.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
       parameters.add(String.valueOf(id));

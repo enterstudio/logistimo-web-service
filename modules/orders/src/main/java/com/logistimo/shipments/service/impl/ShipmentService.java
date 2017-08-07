@@ -250,10 +250,12 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       }
       pm.makePersistent(shipment);
 
-      final boolean isDirectShipOrFulfil = model.status != null && !model.status.equals(ShipmentStatus.OPEN);
+      final boolean
+          isDirectShipOrFulfil =
+          model.status != null && !model.status.equals(ShipmentStatus.OPEN);
       String tempSensitiveStatus = null;
       String materialStatus = null;
-      if(dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation()) {
+      if (dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation()) {
         tempSensitiveStatus = dc.getInventoryConfig().getFirstMaterialStatus(true);
         materialStatus = dc.getInventoryConfig().getFirstMaterialStatus(false);
       }
@@ -332,17 +334,17 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   private void setMaterialStatus(ShipmentModel model, boolean isDirectShipOrFulfil,
                                  String tempSensitiveStatus, String materialStatus,
                                  ShipmentItemModel item) throws ServiceException {
-    if(isDirectShipOrFulfil && item.bq == null &&
+    if (isDirectShipOrFulfil && item.bq == null &&
         StringUtils.isEmpty(item.smst) &&
         (StringUtils.isNotBlank(tempSensitiveStatus) || StringUtils.isNotBlank(materialStatus))) {
       MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
       IMaterial material = mcs.getMaterial(item.mId);
-      if(material.isTemperatureSensitive()){
+      if (material.isTemperatureSensitive()) {
         item.smst = tempSensitiveStatus;
       } else {
         item.smst = materialStatus;
       }
-      if(model.status.equals(ShipmentStatus.FULFILLED)) {
+      if (model.status.equals(ShipmentStatus.FULFILLED)) {
         item.fmst = item.smst;
       }
     }

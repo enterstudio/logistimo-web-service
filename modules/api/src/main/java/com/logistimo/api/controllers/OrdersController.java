@@ -67,6 +67,8 @@ import com.logistimo.logger.XLog;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
+import com.logistimo.orders.actions.OrderAutomationAction;
+import com.logistimo.orders.actions.ScheduleOrderAutomationAction;
 import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
@@ -127,16 +129,40 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/orders")
 public class OrdersController {
 
-
-  public static final String WARN_PREFIX = "w:";
   private static final XLog xLogger = XLog.getLog(OrdersController.class);
   private static final String CACHE_KEY = "order";
 
-  @Autowired
-  OrdersAPIBuilder builder;
+  private OrdersAPIBuilder builder;
+
+  private IOrderApprovalsService orderApprovalsService;
+
+  private OrderAutomationAction orderAutomationAction;
+
+  private ScheduleOrderAutomationAction scheduleOrderAutomation;
 
   @Autowired
-  IOrderApprovalsService orderApprovalsService;
+  public void setBuilder(OrdersAPIBuilder builder) {
+    this.builder = builder;
+  }
+
+  @Autowired
+  public void setOrderApprovalsService(
+      IOrderApprovalsService orderApprovalsService) {
+    this.orderApprovalsService = orderApprovalsService;
+  }
+
+  @Autowired
+  public void setOrderAutomationAction(
+      OrderAutomationAction orderAutomationAction) {
+    this.orderAutomationAction = orderAutomationAction;
+  }
+
+  @Autowired
+  public OrdersController setScheduleOrderAutomation(
+      ScheduleOrderAutomationAction scheduleOrderAutomation) {
+    this.scheduleOrderAutomation = scheduleOrderAutomation;
+    return this;
+  }
 
   @RequestMapping("/order/{orderId}")
   public
@@ -433,10 +459,12 @@ public class OrdersController {
       order.setItems(dms.getDemandItems(orderId));
       List<ITransaction> transactions = builder.buildTransactionsForNewItems(order, model.items);
       if (transactions != null && !transactions.isEmpty()) {
-        oms.modifyOrder(order, user.getUsername(), transactions, new Date(), domainId,
-            ITransaction.TYPE_REORDER, model.msg, null, null, BigDecimal.ZERO, null, null,
-            dc.allowEmptyOrders(), order.getTags(TagUtil.TYPE_ORDER), order.getOrderType(),
-            order.getReferenceID());
+        oms.
+
+            modifyOrder(order, user.getUsername(), transactions, new Date(), domainId,
+                ITransaction.TYPE_REORDER, model.msg, null, null, BigDecimal.ZERO, null, null,
+                dc.allowEmptyOrders(), order.getTags(TagUtil.TYPE_ORDER), order.getOrderType(),
+                order.getReferenceID());
       }
       order = builder.buildOrderMaterials(order, model.items);
       //TODO use OrderManagementServiceImpl updateOrderWithAllocations
@@ -933,4 +961,18 @@ public class OrdersController {
     return null;
   }
 
+  @RequestMapping(value = "/automate", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  void automateOrders(@RequestParam(value = "domain_id") Long domainId) throws ServiceException {
+    //automate order creation for inventory items that hit min or less
+    orderAutomationAction.invoke(domainId);
+  }
+
+  @RequestMapping(value = "/schedule-automation", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  void scheduleOrderAutomation() throws ServiceException {
+    scheduleOrderAutomation.invoke();
+  }
 }

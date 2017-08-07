@@ -8,7 +8,7 @@
           "conditions": [
             {
               "name": "duration",
-              "oper":">=",
+              "oper": ">=",
               "units": "days"
             },
             {
@@ -35,12 +35,12 @@
           "conditions": [
             {
               "name": "stock_availability_period",
-              "oper":">=",
+              "oper": ">=",
               "units": "days"
             },
             {
               "name": "duration",
-              "oper":"<=",
+              "oper": "<=",
               "units": "days"
             },
             {
@@ -67,12 +67,12 @@
           "conditions": [
             {
               "name": "cumulative_heat_exposure",
-              "oper":">=",
+              "oper": ">=",
               "units": "hours"
             },
             {
               "name": "duration",
-              "oper":"<=",
+              "oper": "<=",
               "units": "days"
             }
           ]
@@ -87,12 +87,12 @@
           "conditions": [
             {
               "name": "cumulative_freezing_exposure",
-              "oper":">=",
+              "oper": ">=",
               "units": "hours"
             },
             {
               "name": "duration",
-              "oper":"<=",
+              "oper": "<=",
               "units": "days"
             }
           ]
@@ -107,7 +107,7 @@
           "conditions": [
             {
               "name": "duration_not_logged_in",
-              "oper":">=",
+              "oper": ">=",
               "units": "days"
             },
             {

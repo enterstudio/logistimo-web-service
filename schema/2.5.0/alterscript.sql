@@ -106,6 +106,9 @@ ADD COLUMN `VTV` tinyint(1) NOT NULL DEFAULT '1',ADD COLUMN `SRC` int(3);
 
 ALTER TABLE SHIPMENT ADD SRC int(3);
 
+INSERT INTO `useraccount` VALUES ('system',0,'y',NULL,NULL,NULL,NULL,'IN',1343724,NULL,'support@logistimo.com','327b683f2ef410391d7e5347039a1d4a','System','m',NULL,NULL,'',NULL,'en',NULL,'',NULL,'2017-08-01 09:27:36','+91 99','system',NULL,NULL,NULL,NULL,NULL,NULL,'superuser','ROLE_su','\0',NULL,'Karnataka',NULL,NULL,'Asia/Kolkata','\0','superuser','2017-08-01 09:27:36',NULL,NULL,NULL,NULL,-1,0,'d',NULL,NULL,NULL,NULL,NULL,NULL,NULL,-1);
+INSERT INTO `useraccount_domains` VALUES ('system',1,0);
+
 -- Non prod (Interim) - alters introduced during the release.
 
 ALTER TABLE `ORDER_APPROVAL_MAPPING` ADD COLUMN `LATEST` tinyint(1) DEFAULT 1;

@@ -71,4 +71,24 @@ public class OrdersConfigModel {
   public boolean corm; // Mark cancelling order reasons mandatory
   public boolean acs; // Allow creating shipments
   public boolean aafmsc; // Auto assign first material status to items, when order is confirmed
+  /**
+   * Create order automatically, when min is hit or prediction less than some days
+   */
+  public boolean autoCreate;
+  /**
+   * Create orders, when inventory hits min
+   */
+  public boolean autoCreateOnMin;
+  /**
+   * Create orders only for these material tags
+   */
+  public List<String> autoCreateMaterialTags;
+  /**
+   * Create orders with predicted days of stock <= this value.
+   */
+  public int pdos;
+  /**
+   * Create orders only for these store types
+   */
+  public List<String> autoCreateEntityTags;
 }

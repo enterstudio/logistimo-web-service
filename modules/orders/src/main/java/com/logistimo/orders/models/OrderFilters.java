@@ -58,6 +58,7 @@ public class OrderFilters {
   private String approvalStatus;
   boolean withDemand;
   private String userId;
+  private Long linkedKioskId;
 
   public Long getDomainId() {
     return domainId;
@@ -185,5 +186,14 @@ public class OrderFilters {
 
   public String getUserId() {
     return userId;
+  }
+
+  public OrderFilters setLinkedKioskId(Long linkedKioskId) {
+    this.linkedKioskId = linkedKioskId;
+    return this;
+  }
+
+  public Long getLinkedKioskId() {
+    return linkedKioskId;
   }
 }

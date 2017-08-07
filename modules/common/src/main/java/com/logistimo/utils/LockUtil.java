@@ -115,20 +115,19 @@ public class LockUtil {
 
   /**
    * Locks the objects specified by the object ids
-   * @param objectIds
-   * @param prefix
-   * @param retryCount
-   * @param retryDelayInMillis
+   *
    * @return Map of the object id and the lock status
    */
   public static Map<Long, LockUtil.LockStatus> lock(Set<Long> objectIds, String prefix,
-                                                     int retryCount, int retryDelayInMillis) {
+                                                    int retryCount, int retryDelayInMillis) {
     if (objectIds == null) {
       return null;
     }
     Map<Long, LockStatus> objIdLockStatusMap = new HashMap<>(objectIds.size());
     objectIds.stream().forEach(objectId -> {
-          String key = (StringUtils.isNotEmpty(prefix) ? prefix : CharacterConstants.EMPTY) + objectId;
+          String
+              key =
+              (StringUtils.isNotEmpty(prefix) ? prefix : CharacterConstants.EMPTY) + objectId;
           LockStatus lockStatus = lock(key, retryCount, retryDelayInMillis);
           objIdLockStatusMap.put(objectId, lockStatus);
         }
@@ -138,8 +137,6 @@ public class LockUtil {
 
   /**
    * Release the locks on the object ids specified
-   * @param objectIdLockStatusMap
-   * @param prefix
    */
   public static void releaseLocks(Map<Long, LockUtil.LockStatus> objectIdLockStatusMap,
                                   String prefix) {

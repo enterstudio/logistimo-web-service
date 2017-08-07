@@ -225,6 +225,8 @@ public final class Constants {
   public static final int GUI_THEME_RED = 1;
   public static final String JAVAX_JDO_QUERY_SQL = "javax.jdo.query.SQL";
 
+  public static final String SYSTEM_USER_ID = "system";
+
 
   public static String getVerticalDisplay(String vertical) {
     String verticalDisplay = "Default";

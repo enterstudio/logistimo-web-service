@@ -2545,7 +2545,7 @@ date-picker[noclear] .btn-group>.btn:first-child:not(:last-child):not(.dropdown-
     overflow-y: scroll;
 }
 
-.open>.dropdown-menu.main-menu {
+.open > .dropdown-menu.main-menu {
     max-height: none;
     overflow-y: auto;
 }

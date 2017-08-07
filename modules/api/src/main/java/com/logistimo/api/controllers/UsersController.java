@@ -415,7 +415,7 @@ public class UsersController {
         throw new InvalidDataException(backendMessages.getString("user.id.none"));
       }
     } catch (ServiceException e) {
-      xLogger.warn("Error creating User for " + ua.getDomainId());
+      xLogger.warn("Error creating User for " + ua.getDomainId(), e);
       throw new InvalidServiceException(
           backendMessages.getString("user.create.error") + " " + ua.getDomainId());
     }

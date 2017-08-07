@@ -153,6 +153,8 @@ public class EventPublisher {
         return "device disconnected";
       case IEvent.DEVICE_CONNECTION_NORMAL:
         return "device connected";
+      case IEvent.COMMENTED:
+        return "comment";
       default:
         return "Unknown";
     }

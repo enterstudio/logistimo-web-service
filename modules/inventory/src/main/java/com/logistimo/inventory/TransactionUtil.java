@@ -200,7 +200,7 @@ public class TransactionUtil {
       return false;
     }
     OptimizerConfig oc = dc.getOptimizerConfig();
-    return (oc != null && !(oc.getCompute() == OptimizerConfig.COMPUTE_FORECASTEDDEMAND
+    return (oc != null && (oc.getCompute() == OptimizerConfig.COMPUTE_FORECASTEDDEMAND
         || oc.getCompute() == OptimizerConfig.COMPUTE_EOQ));
   }
 
@@ -351,8 +351,11 @@ public class TransactionUtil {
         kioskId, vendorId);
     // Get the service
     EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-    if (domainId == null || kioskId == null) {
+    if (kioskId == null) {
       return null;
+    }
+    if (domainId == null) {
+      domainId = as.getKiosk(kioskId, false).getDomainId();
     }
     DomainConfig dc = DomainConfig.getInstance(domainId);
     // If vendorId is null, if the kiosk has only one vendor, return that vendor Id as default.

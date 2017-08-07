@@ -131,7 +131,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                     }
                 }
             }
-            function validateAdminUser(user){
+            function validateAdminUser(user) {
                 if (!checkNullEmptyObject(user)) {
                     if (user.userId == usersList[i]) {
                         $scope.showWarning($scope.resourceBundle["auser.delete.warning"] + "<br/> -" + user.userId);
@@ -139,6 +139,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                     }
                 }
             }
+
             function checkAdminUsers() {
                 var usersList = users.split(',');
                 for (i = 0; i < usersList.length; i++) {
@@ -146,6 +147,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                     validateAdminUser($scope.admin.sac);
                 }
             }
+
             checkAdminUsers();
             $scope.showLoading();
             userService.deleteUsers(users).then(function (data) {
@@ -599,7 +601,7 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
                     }
                 }
             }
-            function validateAdminUser(user){
+            function validateAdminUser(user) {
                 if (!checkNullEmptyObject(user) && action == 'd') {
                     if (user.userId == $scope.userId) {
                         $scope.showWarning($scope.resourceBundle["auser.disable.warning"] + "<br/> -" + user.userId);
@@ -608,12 +610,14 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
                     }
                 }
             }
+
             function checkAdminUsers() {
-                    validateAdminUser($scope.admin.pac);
-                    validateAdminUser($scope.admin.sac);
+                validateAdminUser($scope.admin.pac);
+                validateAdminUser($scope.admin.sac);
             }
+
             checkAdminUsers();
-            if(!isSupport && !isAdmin){
+            if (!isSupport && !isAdmin) {
                 userService.enableDisableUser($scope.userId, action).then(function (data) {
                     $scope.showSuccess(data.data);
                 }).catch(function error(msg) {

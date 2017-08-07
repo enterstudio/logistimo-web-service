@@ -35,8 +35,8 @@ import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.entity.IInvntryLog;
 import com.logistimo.inventory.entity.Invntry;
 import com.logistimo.inventory.entity.InvntryEvntLog;
+import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.logger.XLog;
-import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
@@ -49,7 +49,6 @@ import com.logistimo.utils.LocalDateUtil;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -360,65 +359,68 @@ public class InvntryDao implements IInvntryDao {
   }
 
   @Override
-  public QueryParams buildInventoryQuery(Long kioskId, Long materialId, List<String> kioskTags,
-                                         List<String> excludedKioskTags,
-                                         String materialTags, List<Long> kioskIds,
-                                         PageParams pageParams, Long domainId,
-                                         String materialNameStartsWith, int matType,
-                                         boolean onlyNonZeroStock, LocationSuggestionModel location,
-                                         boolean countQuery, String pdos)
+  public QueryParams buildInventoryQuery(InventoryFilters filters, boolean countQuery)
       throws InvalidDataException {
-    StringBuilder queryBuilder = new StringBuilder("SELECT I.`KEY` AS `KEY`, I.* FROM INVNTRY I, KIOSK K, MATERIAL M "
-        + "WHERE I.KID = K.KIOSKID AND I.MID = M.MATERIALID ");
+    StringBuilder
+        queryBuilder =
+        new StringBuilder("SELECT I.`KEY` AS `KEY`, I.* FROM INVNTRY I, KIOSK K, MATERIAL M");
+    if (!filters.getEventTypes().isEmpty()) {
+      queryBuilder.append(", INVNTRYEVNTLOG IE");
+    }
+    queryBuilder.append(" WHERE I.KID = K.KIOSKID AND I.MID = M.MATERIALID");
+    if (!filters.getEventTypes().isEmpty()) {
+      queryBuilder.append(" AND I.LSEV = IE.`KEY`");
+    }
     List<String> params = new ArrayList<>();
 
-    if (kioskId != null) {
+    if (filters.getKioskId() != null) {
       queryBuilder.append(" AND I.KID = ?");
-      params.add(String.valueOf(kioskId));
-    } else if (kioskTags != null && !kioskTags.isEmpty()) {
+      params.add(String.valueOf(filters.getKioskId()));
+    } else if (filters.getKioskTags() != null && !filters.getKioskTags().isEmpty()) {
       queryBuilder.append(" AND I.KID in (SELECT KIOSKID from KIOSK_TAGS where ID in (");
-      for(String tag:kioskTags){
+      for (String tag : filters.getKioskTags()) {
         queryBuilder.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
         params.add(String.valueOf(tagDao.getTagFilter(tag, ITag.KIOSK_TAG)));
       }
       queryBuilder.setLength(queryBuilder.length() - 1);
       queryBuilder.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET);
-    } else if (excludedKioskTags != null && !excludedKioskTags.isEmpty()) {
+    } else if (filters.getExcludedKioskTags() != null && !filters.getExcludedKioskTags()
+        .isEmpty()) {
       queryBuilder.append(" AND I.KID NOT in (SELECT KIOSKID from KIOSK_TAGS where ID in (");
-      for(String tag:excludedKioskTags){
+      for (String tag : filters.getExcludedKioskTags()) {
         queryBuilder.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
         params.add(String.valueOf(tagDao.getTagFilter(tag, ITag.KIOSK_TAG)));
       }
       queryBuilder.setLength(queryBuilder.length() - 1);
       queryBuilder.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET);
-    } else if (kioskIds !=null && !kioskIds.isEmpty()){
+    } else if (filters.getKioskIds() != null && !filters.getKioskIds().isEmpty()) {
       queryBuilder.append(" AND I.KID in (");
-      for (Long id : kioskIds) {
+      for (Long id : filters.getKioskIds()) {
         queryBuilder.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
         params.add(String.valueOf(id));
       }
       queryBuilder.setLength(queryBuilder.length() - 1);
       queryBuilder.append(CharacterConstants.C_BRACKET);
     }
-    if (matType != IInvntry.ALL && (matType == IInvntry.BATCH_ENABLED || matType == IInvntry.BATCH_DISABLED)) {
+    if (filters.getMatType() != IInvntry.ALL && (filters.getMatType() == IInvntry.BATCH_ENABLED
+        || filters.getMatType() == IInvntry.BATCH_DISABLED)) {
       queryBuilder.append(" AND MID IN (SELECT MATERIALID FROM MATERIAL WHERE BM = ").append(CharacterConstants.QUESTION);
-      if (matType == IInvntry.BATCH_ENABLED ) {
-        params.add(String.valueOf(matType));
+      if (filters.getMatType() == IInvntry.BATCH_ENABLED) {
+        params.add(String.valueOf(filters.getMatType()));
       } else {
         params.add(String.valueOf(IInvntry.ALL));
       }
       queryBuilder.append(CharacterConstants.C_BRACKET);
     }
     // Add the materialId param, if present
-    if (materialId != null) {
+    if (filters.getMaterialId() != null) {
       queryBuilder.append(" AND I.MID = ?");
-      params.add(String.valueOf(materialId));
+      params.add(String.valueOf(filters.getMaterialId()));
     } else {
-      if (StringUtils.isNotEmpty(materialTags)) {
-        String[] mTags = StringUtils.split(materialTags,CharacterConstants.COMMA);
+      if (filters.getMaterialTags() != null && !filters.getMaterialTags().isEmpty()) {
         queryBuilder.append(" AND I.MID in (SELECT MATERIALID from MATERIAL_TAGS where (");
-        for (int i = 0; i < mTags.length; i++) {
-          String tag = mTags[i];
+        for (int i = 0; i < filters.getMaterialTags().size(); i++) {
+          String tag = filters.getMaterialTags().get(i);
           if(i>0){
             queryBuilder.append(" OR ");
           }
@@ -427,16 +429,20 @@ public class InvntryDao implements IInvntryDao {
         }
         queryBuilder.append(CharacterConstants.C_BRACKET).append(CharacterConstants.C_BRACKET);
       }
-      if (! StringUtils.isEmpty(materialNameStartsWith)) {
+      if (!StringUtils.isEmpty(filters.getMaterialNameStartsWith())) {
         queryBuilder.append(" AND M.UNAME LIKE ?");
-        params.add(materialNameStartsWith+CharacterConstants.PERCENT);
+        params.add(filters.getMaterialNameStartsWith() + CharacterConstants.PERCENT);
       }
     }
 
-    if (domainId != null) {
+    if (filters.getDomainId() != null) {
       queryBuilder.append(" AND KID IN (SELECT KIOSKID_OID FROM KIOSK_DOMAINS WHERE DOMAIN_ID= ? )");
-      params.add(String.valueOf(domainId));
+      params.add(String.valueOf(filters.getDomainId()));
+    } else if (filters.getSourceDomainId() != null) {
+      queryBuilder.append(" AND K.SDID = ?");
+      params.add(String.valueOf(filters.getSourceDomainId()));
     }
+    LocationSuggestionModel location = filters.getLocation();
     if(location != null && location.isNotEmpty()){
       if(StringUtils.isNotEmpty(location.state)){
         queryBuilder.append(" AND K.STATE = ? ");
@@ -451,16 +457,24 @@ public class InvntryDao implements IInvntryDao {
         params.add(location.taluk);
       }
     }
-    if (onlyNonZeroStock) {
+    if (filters.isOnlyNonZeroStk()) {
       queryBuilder.append(" AND I.STK > 0");
     }
-    if(StringUtils.isNotEmpty(pdos)) {
-      try {
-        int predDOS = Integer.parseInt(pdos);
-        queryBuilder.append(" AND I.PDOS <=").append(predDOS);
-      } catch (Exception e) {
-        xLogger.warn("Invalid predicted days of stock", pdos);
+    if (StringUtils.isNotEmpty(filters.getPdos())) {
+      queryBuilder.append(" AND I.PDOS <=").append(CharacterConstants.QUESTION);
+      params.add(filters.getPdos());
+    }
+    if (!filters.getEventTypes().isEmpty()) {
+      queryBuilder.append(" AND IE.ED IS NULL AND IE.TY in (");
+      for (Integer id : filters.getEventTypes()) {
+        queryBuilder.append(CharacterConstants.QUESTION).append(CharacterConstants.COMMA);
+        params.add(String.valueOf(id));
       }
+      queryBuilder.setLength(queryBuilder.length() - 1);
+      queryBuilder.append(CharacterConstants.C_BRACKET);
+    }
+    if (filters.isNoInTransitStock()) {
+      queryBuilder.append(" AND (I.TSTK <= 0 OR I.TSTK IS NULL)");
     }
 
     String orderByStr = " ORDER BY K.NAME ASC, M.NAME ASC";
@@ -468,9 +482,9 @@ public class InvntryDao implements IInvntryDao {
 
     // Add pagination, if needed
     String limitStr = null;
-    if (pageParams != null) {
-      limitStr = " LIMIT " + pageParams.getOffset() + CharacterConstants.COMMA
-          + pageParams.getSize();
+    if (filters.getPageParams() != null) {
+      limitStr = " LIMIT " + filters.getPageParams().getOffset() + CharacterConstants.COMMA
+          + filters.getPageParams().getSize();
       queryBuilder.append(limitStr);
     }
     if (countQuery) {
@@ -490,35 +504,21 @@ public class InvntryDao implements IInvntryDao {
 
 
   @Override
-  public Results getInventory(Long kioskId, Long materialId, String kioskTags,
-                              String excludedKioskTags, String materialTag, List<Long> kioskIds,
-                              PageParams pageParams, PersistenceManager pm, Long domainId,
-                              String materialNameStartsWith, int matType, boolean onlyNonZeroStock,
-                              LocationSuggestionModel location, String pdos)
+  public Results getInventory(InventoryFilters inventoryFilters, PersistenceManager pm)
       throws ServiceException {
     Query query = null;
     Query cntQuery = null;
     List<Invntry> inventoryList = null;
     int count = 0;
-    List<String> kTags = null;
-    List<String> excludedKTags = null;
-    if(StringUtils.isNotEmpty(excludedKioskTags)){
-      excludedKTags = Arrays.asList(excludedKioskTags.split(CharacterConstants.COMMA));
-    }else if (StringUtils.isNotEmpty(kioskTags)) {
-      kTags = Arrays.asList(kioskTags.split(CharacterConstants.COMMA));
-    }
     try {
       QueryParams
-          sqlQueryModel = buildInventoryQuery(kioskId, materialId, kTags,excludedKTags, materialTag, kioskIds,
-          pageParams, domainId, materialNameStartsWith, matType, onlyNonZeroStock,location,false,
-          pdos);
+          sqlQueryModel = buildInventoryQuery(inventoryFilters, false);
       query = pm.newQuery("javax.jdo.query.SQL", sqlQueryModel.query);
       query.setClass(Invntry.class);
       inventoryList = (List<Invntry>) query.executeWithArray(
           sqlQueryModel.listParams.toArray());
       inventoryList = (List<Invntry>) pm.detachCopyAll(inventoryList);
-      QueryParams cntSqlQueryModel = buildInventoryQuery(kioskId, materialId, kTags, excludedKTags, materialTag, kioskIds,
-          pageParams, domainId, materialNameStartsWith, matType, onlyNonZeroStock, location, true, pdos);
+      QueryParams cntSqlQueryModel = buildInventoryQuery(inventoryFilters, true);
       cntQuery = pm.newQuery("javax.jdo.query.SQL", cntSqlQueryModel.query);
       count =
           ((Long) ((List) cntQuery.executeWithArray(cntSqlQueryModel.listParams.toArray())).iterator().next())
@@ -534,7 +534,9 @@ public class InvntryDao implements IInvntryDao {
         cntQuery.closeAll();
       }
     }
-    return new Results(inventoryList, null, count, pageParams == null ? 0 : pageParams.getOffset());
+    return new Results(inventoryList, null, count,
+        inventoryFilters.getPageParams() == null ? 0 : inventoryFilters
+            .getPageParams().getOffset());
   }
 
   @Override

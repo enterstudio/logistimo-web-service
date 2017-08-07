@@ -121,7 +121,7 @@ logistimoApp.constant('NOTIFICATIONS', {
 		"%customerCity%": {"key": "variable.customercity", "size": "15"},
 		"%requiredByDate%": {"key": "requiredByDate", "size": "20"},
 		"%estimatedDateOfArrival%": {"key": "estimatedDateOfArrival", "size": "20"},
-		"%comment%": {"key": "comment", "size": "20"},
+        "%comment%": {"key": "comment", "size": "100"},
 		"%commentedOn%": {"key": "commentedOn", "size": "20"},
 		"%commentedBy%": {"key": "commentedBy", "size": "20"},
 		"%materials%": {"key": "variable.materials", "size": "0"},
@@ -590,10 +590,10 @@ logistimoApp.constant('APPROVAL', {
 	'SHOW_HISTORY': 'history',
 	'APPROVE' : 'approve',
 	'REJECT' : 'reject',
-	'CANCEL' : 'cancel',
-	'CANCELLED' : 'cn',
-	'APPROVED' : 'ap',
-	'REJECTED' : 'rj'
+    'CANCEL': 'cancel',
+    'CANCELLED': 'cn',
+    'APPROVED': 'ap',
+    'REJECTED': 'rj'
 });
 logistimoApp.constant('PATTERNS', {
 	'LATITUDE':'^-?(([0-8])?((([0-9])(\\.\\d{1,8})?)|(90(\\.[0]{0,8})?)))$',

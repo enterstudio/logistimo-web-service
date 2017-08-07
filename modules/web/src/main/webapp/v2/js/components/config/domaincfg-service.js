@@ -31,7 +31,7 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         fetchP: function (data, urlStr) {
             var promise = $http({method: 'POST', data: data, url: urlStr});
             return promise;
-        },fetchPut: function (data, urlStr) {
+        }, fetchPut: function (data, urlStr) {
             var promise = $http({method: 'PUT', data: data, url: urlStr});
             return promise;
         },
@@ -108,6 +108,7 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
             return this.fetchP(inventory,'/s2/api/config/domain/inventory');
         },
         getOrdersCfg : function(){
+
             return this.fetch('/s2/api/config/domain/orders');
         },
         setOrdersCfg : function(orders){
@@ -214,7 +215,7 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         getSupportCfg : function() {
             return this.fetch('/s2/api/config/domain/support');
         },
-        getAdminCfg : function() {
+        getAdminCfg: function () {
             return this.fetch('/s2/api/config/domain/admin');
         },
         getUniqueTransReasons : function(){
@@ -226,11 +227,11 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         getApprovalsConfig : function() {
             return this.fetch("/s2/api/config/domain/approvals");
         },
-        getEventSummaryConfig : function() {
+        getEventSummaryConfig: function () {
             return this.fetch("/s2/api/config/domain/event-summary");
         },
-        setEventSummaryConfig : function(data) {
-            return this.fetchPut(data,"/s2/api/config/domain/event-summary");
+        setEventSummaryConfig: function (data) {
+            return this.fetchPut(data, "/s2/api/config/domain/event-summary");
         }
 
 
