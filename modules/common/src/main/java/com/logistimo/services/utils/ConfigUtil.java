@@ -25,9 +25,10 @@ package com.logistimo.services.utils;
 
 import com.logistimo.constants.Constants;
 import com.logistimo.exception.SystemException;
-import com.logistimo.logger.XLog;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -38,11 +39,10 @@ import java.util.Properties;
 public class ConfigUtil {
 
   private static final Properties properties;
-  private static final XLog xLogger;
+  private static final Logger xLogger = LoggerFactory.getLogger(ConfigUtil.class);
 
   static {
     properties = new Properties();
-    xLogger = XLog.getLog(ConfigUtil.class);
     try {
       properties.load(Thread.currentThread().getContextClassLoader()
           .getResourceAsStream("samaanguru.properties"));

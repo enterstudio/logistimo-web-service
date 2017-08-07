@@ -27,15 +27,17 @@ import com.google.gson.Gson;
 
 import com.logistimo.AppFactory;
 import com.logistimo.dao.JDOUtils;
-import com.logistimo.domains.service.DomainsService;
-import com.logistimo.services.taskqueue.ITaskService;
-
 import com.logistimo.domains.CopyConfigModel;
 import com.logistimo.domains.IMultiDomain;
 import com.logistimo.domains.ObjectsToDomainModel;
 import com.logistimo.domains.entity.IDomain;
 import com.logistimo.domains.entity.IDomainLink;
 import com.logistimo.domains.entity.IDomainPermission;
+import com.logistimo.domains.service.DomainsService;
+import com.logistimo.domains.utils.EntityRemover;
+import com.logistimo.exception.InvalidServiceException;
+import com.logistimo.exception.TaskSchedulingException;
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
@@ -44,11 +46,8 @@ import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.services.impl.ServiceImpl;
-import com.logistimo.domains.utils.EntityRemover;
+import com.logistimo.services.taskqueue.ITaskService;
 import com.logistimo.utils.QueryUtil;
-import com.logistimo.exception.TaskSchedulingException;
-import com.logistimo.logger.XLog;
-import com.logistimo.exception.InvalidServiceException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,6 +60,7 @@ import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
+@org.springframework.stereotype.Service
 public class DomainsServiceImpl extends ServiceImpl implements DomainsService {
 
   private static final XLog xLogger = XLog.getLog(DomainsServiceImpl.class);

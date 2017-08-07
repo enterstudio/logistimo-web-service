@@ -134,13 +134,10 @@ public class ApprovalsBuilder {
 
   /**
    * Remove the requester from approvers list
-   * @param approvers
-   * @param requester
-   * @return
    */
   public List<Approver> populateApprovers(List<Approver> approvers, String requester) {
     List<Approver> approversList = new ArrayList<>(1);
-    for(Approver apr : approvers) {
+    for (Approver apr : approvers) {
       Approver approver = new Approver();
       List<String> userIds = new ArrayList<>(1);
       userIds.addAll(apr.getUserIds().stream().filter(user -> !requester.equals(user))

@@ -75,11 +75,11 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         CurrencyController.call(this, $scope, configService);
         LocationController.call(this, $scope, configService);
         $scope.setGeneralConfig = function () {
-            if(checkNullEmpty($scope.pUser) && checkNotNullEmpty($scope.sUser)){
+            if (checkNullEmpty($scope.pUser) && checkNotNullEmpty($scope.sUser)) {
                 $scope.showWarning($scope.resourceBundle['primary.admincontact.mandatory']);
                 return;
             }
-            if(checkNotNullEmpty($scope.pUser) && checkNotNullEmpty($scope.sUser) && $scope.pUser.id == $scope.sUser.id){
+            if (checkNotNullEmpty($scope.pUser) && checkNotNullEmpty($scope.sUser) && $scope.pUser.id == $scope.sUser.id) {
                 $scope.showWarning($scope.resourceBundle['same.admincontacts.warning']);
                 return;
             }
@@ -121,27 +121,28 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
                 })
             }
         }
-        function getAdminContactUser(data,t){
+        function getAdminContactUser(data, t) {
             var user = {};
             user.id = data.data.id;
-            user.usrname = data.data.fnm + ' ' + data.data.lnm;
+            user.usrname = data.data.fnm + ' ' + (data.data.lnm ? data.data.lnm : '');
             user.phnm = data.data.phm;
             user.em = data.data.em;
-            if(t=='p'){
+            if (t == 'p') {
                 $scope.pUser = user;
-            }else{
+            } else {
                 $scope.sUser = user;
             }
         }
         function updateAdminContacts() {
             if ($scope.pUser) {
-                $scope.cnf.adminContact.pac = {userId:$scope.pUser.id};
+                $scope.cnf.adminContact.pac = {userId: $scope.pUser.id};
             }
             if ($scope.sUser) {
-                $scope.cnf.adminContact.sac = {userId:$scope.sUser.id};
+                $scope.cnf.adminContact.sac = {userId: $scope.sUser.id};
             }
         }
-        function setAdminContactUser(data,t) {
+
+        function setAdminContactUser(data, t) {
             var user = {};
             user.id = data.userId;
             user.usrname = data.userNm;
@@ -155,12 +156,12 @@ domainCfgControllers.controller('GeneralConfigurationController', ['$scope', 'do
         }
 
         function updatePSUser() {
-            if(checkNotNullEmpty($scope.cnf.adminContact)) {
+            if (checkNotNullEmpty($scope.cnf.adminContact)) {
                 if (!checkNullEmptyObject($scope.cnf.adminContact.pac)) {
-                    setAdminContactUser($scope.cnf.adminContact.pac,'p');
+                    setAdminContactUser($scope.cnf.adminContact.pac, 'p');
                 }
                 if (!checkNullEmptyObject($scope.cnf.adminContact.sac)) {
-                    setAdminContactUser($scope.cnf.adminContact.sac,'s');
+                    setAdminContactUser($scope.cnf.adminContact.sac, 's');
                 }
             }
         }
@@ -1818,6 +1819,7 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
         $scope.change = false;
         $scope.loading = false;
         $scope.dmntz = 'UTC';
+        $scope.autoCreateOnPdos = undefined;
         TimezonesControllerKVReversed.call(this, $scope, configService);
 
         $scope.getGeneralConfiguration = function() {
@@ -1882,12 +1884,25 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
 
         }
 
+        function getTags(tags) {
+            var configTags = [];
+            if(checkNotNullEmpty(tags)) {
+                tags.forEach(function (tag) {
+                    configTags.push({'text': tag, 'data': tag})
+                });
+            }
+            return configTags;
+        }
+
         $scope.getOrders = function () {
             $scope.loading = true;
             $scope.showLoading();
             $scope.orders.uTgs = [];
             domainCfgService.getOrdersCfg().then(function (data) {
                 $scope.orders = data.data;
+                $scope.setAutoCreateParams();
+                $scope.etags = getTags($scope.orders.autoCreateEntityTags);
+                $scope.mtags = getTags($scope.orders.autoCreateMaterialTags);
                 constructReasonsModel();
                 if (checkNotNullEmpty(data.data.vid)) {
                     entityService.get(data.data.vid).then(function (data) {
@@ -1992,6 +2007,28 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
                 $scope.orders.disable.type = true;
             }
         };
+        $scope.$watch("autoCreateOnPdos", function(newVal, oldVal) {
+           if(newVal != oldVal) {
+               $scope.setAutoCreateParams();
+           }
+        });
+        $scope.setAutoCreateParams = function() {
+            if($scope.orders.autoCreate) {
+                if($scope.autoCreateOnPdos == 'm') {
+                    $scope.orders.pdos = 0;
+                } else if(checkNotNullEmpty($scope.orders.pdos)) {
+                    $scope.autoCreateOnPdos = 's';
+                } else if(checkNullEmpty($scope.autoCreateOnPdos)){
+                    $scope.autoCreateOnPdos = 'm';
+                    $scope.orders.pdos = 0;
+                }
+            } else {
+                $scope.autoCreateOnPdos = $scope.orders.autoCreateOnMin = undefined;
+                $scope.orders.pdos = 0;
+                $scope.etags = $scope.mtags = undefined;
+                $scope.autoCreateEntityTags = $scope.autoCreateMaterialTags = undefined;
+            }
+        };
         $scope.getOrders();
         $scope.setOrders = function () {
             var localOrderCfg = angular.copy($scope.orders);
@@ -2021,6 +2058,29 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
                 }
                 if(checkNotNullEmpty(an))
                     localOrderCfg.an = an.join();
+            }
+            if($scope.orders.autoCreate) {
+                if($scope.autoCreateOnPdos == 's' && (checkNullEmpty(localOrderCfg.pdos) ||  localOrderCfg.pdos== 0)) {
+                    $scope.showWarning($scope.resourceBundle['days.of.stockout.mandatory']);
+                    return;
+                }
+                localOrderCfg.autoCreateMaterialTags = [];
+                if (!checkNullEmptyObject($scope.mtags)) {
+                    $scope.mtags.forEach(function (tag) {
+                        localOrderCfg.autoCreateMaterialTags.push(tag.text);
+                    });
+                }
+                localOrderCfg.autoCreateEntityTags = [];
+                if (!checkNullEmptyObject($scope.etags)) {
+                    $scope.etags.forEach(function (tag) {
+                        localOrderCfg.autoCreateEntityTags.push(tag.text);
+                    });
+                }
+                localOrderCfg.autoCreateOnMin = $scope.autoCreateOnPdos == 'm';
+                if(localOrderCfg.autoCreateOnMin) {
+                    localOrderCfg.pdos = 0;
+                }
+
             }
             $scope.loading = true;
             $scope.showLoading();

@@ -47,9 +47,10 @@ public class UpdateApproversAction {
   private EntitiesService entitiesService;
 
   @Autowired
-  public UpdateApproversAction(EntitiesService entitiesService){
+  public UpdateApproversAction(EntitiesService entitiesService) {
     this.entitiesService = entitiesService;
   }
+
   public void invoke(Long kioskId, List<IApprover> newApprovers, String userName) {
     if (kioskId == null || newApprovers == null) {
       throw new IllegalArgumentException("Invalid parameters for adding Approver");
@@ -75,12 +76,9 @@ public class UpdateApproversAction {
 
   /**
    * Returns the list of approvers to be deleted
-   * @param existingApprovers
-   * @param newApprovers
-   * @return
    */
   private List<IApprover> getDeleteApproversList(List<IApprover> existingApprovers,
-                                                  List<IApprover> newApprovers) {
+                                                 List<IApprover> newApprovers) {
     return existingApprovers.stream()
         .filter(approver -> !newApprovers.stream().anyMatch(
             newApprover -> approver.getUserId().equals(newApprover.getUserId()) && approver
@@ -91,23 +89,18 @@ public class UpdateApproversAction {
 
   /**
    * Delete the approvers from db which are not in the model.
-   * @param approvers
-   * @param pm
    */
   public void deleteApprovers(List<IApprover> approvers, PersistenceManager pm) {
-    if(!approvers.isEmpty()) {
+    if (!approvers.isEmpty()) {
       pm.deletePersistentAll(approvers);
     }
   }
 
   /**
    * Persist the approvers which are new and update the one which already exists
-   * @param approvers
-   * @param pm
-   * @param userName
    */
   public void persistApprovers(List<IApprover> approvers, PersistenceManager pm, String userName) {
-    if(!approvers.isEmpty()) {
+    if (!approvers.isEmpty()) {
       pm.makePersistentAll(approvers.stream()
           .map(apr -> {
             apr.setUpdatedBy(userName);
@@ -120,15 +113,13 @@ public class UpdateApproversAction {
 
   /**
    * Get the list of approvers to be persisted in db
-   * @param existingApprovers
-   * @param newApprovers
-   * @return
    */
   private List<IApprover> getPersistApproversList(List<IApprover> existingApprovers,
-                                                   List<IApprover> newApprovers) {
+                                                  List<IApprover> newApprovers) {
     return newApprovers.stream()
         .filter(approver -> !existingApprovers.stream().anyMatch(
-            existingApprover -> approver.getUserId().equals(existingApprover.getUserId()) && approver
+            existingApprover -> approver.getUserId().equals(existingApprover.getUserId())
+                && approver
                 .getType().equals(existingApprover.getType())
                 && approver.getOrderType().equals(existingApprover.getOrderType())))
         .collect(Collectors.toList());

@@ -29,8 +29,6 @@ package com.logistimo.inventory.service.impl;
 import com.logistimo.AppFactory;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.config.models.MatStatusConfig;
-import com.logistimo.config.models.OrdersConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.QueryConstants;
@@ -65,6 +63,7 @@ import com.logistimo.inventory.entity.IInvntryLog;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
 import com.logistimo.inventory.models.ErrorDetailModel;
+import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.logger.XLog;
 import com.logistimo.materials.entity.IHandlingUnit;
@@ -117,6 +116,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
@@ -177,24 +177,16 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     params.put("domainid", domainId.toString());
     params.put("transtype", transType);
     // Add optimization parameters
-    if (optimize && toBeOptimized != null && !toBeOptimized.isEmpty()) {
-      Iterator<IInvntry> it = toBeOptimized.iterator();
-      String invIdsCSV = "";
-      while (it.hasNext()) {
-        if (!invIdsCSV.isEmpty()) {
-          invIdsCSV += ",";
-        }
-        invIdsCSV += it.next().getKeyString();
-      }
-      params.put("inventoryids", invIdsCSV);
+    String invIdsCSV = StringUtil
+        .getCSV(toBeOptimized.stream().map(IInvntry::getKeyString).collect(Collectors.toList()));
+    params.put("inventoryids", invIdsCSV);
 
-    }
     xLogger
         .info("SCHEDULING: url = {0}, params = {1}", TransactionUtil.POSTTRANSCOMMIT_URL, params);
     try {
       taskService
-          .schedule(taskService.QUEUE_MESSAGE, TransactionUtil.POSTTRANSCOMMIT_URL, params, null,
-              taskService.METHOD_POST, domainId, trans.getSourceUserId(), "POST_TRANSACTION");
+          .schedule(ITaskService.QUEUE_OPTIMZER, TransactionUtil.POSTTRANSCOMMIT_URL, params, null,
+              ITaskService.METHOD_POST, domainId, trans.getSourceUserId(), "POST_TRANSACTION");
     } catch (Exception e) {
       xLogger.severe(
           "{0} when scheduling task to notify inventroy update by user {1} in domain {2}: {3}",
@@ -309,8 +301,11 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(kioskId, null, null, null, materialTag, null, params, pm, null,
-              nameStartsWith,IInvntry.ALL,false,null, null);
+          invntryDao.getInventory(
+              new InventoryFilters().withKioskId(kioskId)
+                  .withMaterialTags(materialTag)
+                  .withMaterialNameStartsWith(nameStartsWith)
+                  .withPageParams(params), pm);
     } finally {
       pm.close();
     }
@@ -336,8 +331,14 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(null, materialId, kioskTag, null, null, kioskIds, params, pm,
-              domainId, null, IInvntry.ALL, false, null, null);
+          invntryDao.getInventory(
+              new InventoryFilters().withMaterialId(materialId)
+                  .withKioskTags(kioskTag)
+                  .withKioskIds(kioskIds)
+                  .withPageParams(params)
+                  .withDomainId(domainId), pm);
+      //null, materialId, kioskTag, null, null, kioskIds, params, pm,
+      //           domainId, null, IInvntry.ALL, false, null, null, null));
     } finally {
       pm.close();
     }
@@ -915,13 +916,13 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       for (IInvntry inventory : items) {
         Long kioskId = inventory.getKioskId();
         if (!kidLockStatusMap.containsKey(String.valueOf(kioskId))) {
-        LockUtil.LockStatus lockStatus =
+          LockUtil.LockStatus lockStatus =
               LockUtil.lock(String.valueOf(kioskId), LOCK_RETRY_COUNT,
                   LOCK_RETRY_DELAY_IN_MILLISECONDS);
           if (!LockUtil.isLocked(lockStatus)) {
             throw new ServiceException(backendMessages.getString("lockinventory.failed"));
           }
-          kidLockStatusMap.put(kioskId,lockStatus);
+          kidLockStatusMap.put(kioskId, lockStatus);
         }
         // Get the data store object
         IInvntry in = invntryDao.getDBInvntry(inventory, pm);
@@ -1323,12 +1324,10 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       pm = PMF.get().getPersistenceManager();
     }
 
-    List<ITransaction> errors = new ArrayList<ITransaction>(1); // holds transactions in error
+    List<ITransaction> errors = new ArrayList<>(1); // holds transactions in error
     Iterator<ITransaction> it = inventoryTransactions.iterator();
-    //Date now = new Date(); // timestamp for transactions
-    List<String> uniqueReasons = new ArrayList<String>(1);
-    List<ITransaction> committedTransList = new ArrayList<ITransaction>(1);
-    List<IInvntry> toBeOptimized = new ArrayList<IInvntry>(1);
+    List<ITransaction> committedTransList = new ArrayList<>(1);
+    List<IInvntry> toBeOptimized = new ArrayList<>(1);
     List<IInvntry> toBePredicted = new ArrayList<>(inventoryTransactions.size());
     String timeZone = DomainConfig.getInstance(domainId).getTimezone();
     //todo: Get time is using timezone. Need to check against user timezone for actual transaction date check.
@@ -1546,11 +1545,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           if (!skipPred) {
             toBePredicted.add(in);
           }
-          // Accumulate unique reasons
-          String reason = trans.getReason();
-          if (reason != null && !uniqueReasons.contains(reason)) {
-            uniqueReasons.add(reason);
-          }
           // Generate the necessary events
           generateEvents(trans, in, stockOnHandTotal, linkedKioskInv, linkedKioskStockOnHand,
               isStockUpdatedFirstTime, domainId);
@@ -1576,32 +1570,36 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       }
 
     }
-    if (!committedTransList.isEmpty()) {
-
+    if (!toBeOptimized.isEmpty()) {
       // Invoke the post-transaction commit hook, as required
       doPostTransactionCommitHook(committedTransList, toBeOptimized);
     }
-    if (!skipPred) {
-      DomainConfig dc = DomainConfig.getInstance(domainId);
-      if (dc.getInventoryConfig().isCREnabled()) {
-        Map<String, String> params = new HashMap<>(1);
-        for (IInvntry iInvntry : toBePredicted) {
-          try {
-            params.put("invId", iInvntry.getKeyString());
-            //Added 30 sec delay to let update inventory during post transaction
-            taskService.schedule(ITaskService.QUEUE_OPTIMZER, UPDATE_PREDICTION_TASK, params,
-                null, ITaskService.METHOD_POST, System.currentTimeMillis() + 30000);
-          } catch (TaskSchedulingException e) {
-            xLogger.warn(
-                "Error while scheduling prediction update during transaction for inventory {0}",
-                iInvntry.getKeyString(), e);
-          }
-        }
-      }
+    if (!toBePredicted.isEmpty()) {
+      doPostTransactionPredictions(domainId, toBePredicted);
     }
+
     xLogger.fine("Exiting updateInventoryTransactions");
 
     return errors;
+  }
+
+  private void doPostTransactionPredictions(Long domainId, List<IInvntry> toBePredicted) {
+    DomainConfig dc = DomainConfig.getInstance(domainId);
+    if (dc.getInventoryConfig().isCREnabled()) {
+      Map<String, String> params = new HashMap<>(1);
+      for (IInvntry iInvntry : toBePredicted) {
+        try {
+          params.put("invId", iInvntry.getKeyString());
+          //Added 30 sec delay to let update inventory during post transaction
+          taskService.schedule(ITaskService.QUEUE_OPTIMZER, UPDATE_PREDICTION_TASK, params,
+              null, ITaskService.METHOD_POST, System.currentTimeMillis() + 30000);
+        } catch (TaskSchedulingException e) {
+          xLogger.warn(
+              "Error while scheduling prediction update during transaction for inventory {0}",
+              iInvntry.getKeyString(), e);
+        }
+      }
+    }
   }
 
   private void checkHandlinkUnitErrors(ITransaction trans) throws LogiException {
@@ -1872,8 +1870,13 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                                     String materialTag, List<Long> kioskIds, PageParams pageParams,
                                     PersistenceManager pm) throws ServiceException {
     return invntryDao
-        .getInventory(kioskId, materialId, kioskTag, null, materialTag, kioskIds, pageParams,
-        pm, null, null,IInvntry.ALL,false,null, null);
+        .getInventory(
+            new InventoryFilters().withKioskId(kioskId)
+                .withMaterialId(materialId)
+                .withKioskTags(kioskTag)
+                .withMaterialTags(materialTag)
+                .withKioskIds(kioskIds)
+                .withPageParams(pageParams), pm);
   }
 
   public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location,
@@ -1883,9 +1886,14 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
       return invntryDao
-          .getInventory(null, null, kioskTags, excludedKioskTags, materialTags, null, params, pm,
-              domainId,
-                        null,IInvntry.ALL,false,location, pdos);
+          .getInventory(
+              new InventoryFilters().withKioskTags(kioskTags)
+                  .withExcludedKioskTags(excludedKioskTags)
+                  .withMaterialTags(materialTags)
+                  .withPageParams(params)
+                  .withDomainId(domainId)
+                  .withLocation(location)
+                  .withPdos(pdos), pm);
     } finally {
       pm.close();
     }
@@ -3038,7 +3046,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   @Override
   public void allocateAutomatically(Long kid, Long mid, IInvAllocation.Type type, String typeId,
                                     String tag,
-                                    BigDecimal quantity, String userId, boolean autoAssignStatus, PersistenceManager pm)
+                                    BigDecimal quantity, String userId, boolean autoAssignStatus,
+                                    PersistenceManager pm)
       throws ServiceException {
     boolean useLocalPM = pm == null;
 
@@ -3062,14 +3071,15 @@ public class InventoryManagementServiceImpl extends ServiceImpl
 
       boolean isBatch = material.isBatchEnabled();
 
-      if(isBatch) {
+      if (isBatch) {
         EntitiesService es = Services.getService(EntitiesServiceImpl.class);
         isBatch = es.getKiosk(kid).isBatchMgmtEnabled();
       }
       String matStatus = null;
-      if(autoAssignStatus) {
+      if (autoAssignStatus) {
         DomainConfig dc = DomainConfig.getInstance(inv.getDomainId());
-        matStatus = dc.getInventoryConfig().getFirstMaterialStatus(material.isTemperatureSensitive());
+        matStatus =
+            dc.getInventoryConfig().getFirstMaterialStatus(material.isTemperatureSensitive());
       }
       if (isBatch) {
         List<IInvAllocation> bAllocations = getAllocations(kid, mid, type, typeId, tag);
@@ -3096,7 +3106,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           if (ba.containsKey(model.id)) {
             model.q = model.q.add(ba.get(model.id).getQuantity());
             model.smst = ba.get(model.id).getMaterialStatus();
-          } else if(autoAssignStatus) {
+          } else if (autoAssignStatus) {
             model.smst = matStatus;
           }
           shipmentModel.add(model);
@@ -3108,7 +3118,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           allocate(kid, mid, type, typeId, tag, null, shipmentModel, userId, pm);
         }
       } else {
-        if(autoAssignStatus) {
+        if (autoAssignStatus) {
           IInvAllocation allocation = getInvAllocation(kid, mid, null, type, typeId, pm);
           if (allocation != null) {
             matStatus = allocation.getMaterialStatus();
@@ -3644,9 +3654,31 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(kioskId, materialId, kioskTags, excludedKioskTags, materialTag,
-              kioskIds, params, pm, domainId,
-              null,matType,onlyNonZeroStk,location, pdos);
+          invntryDao.getInventory(new InventoryFilters().withDomainId(domainId)
+              .withKioskId(kioskId)
+              .withKioskIds(kioskIds)
+              .withKioskTags(kioskTags)
+              .withExcludedKioskTags(excludedKioskTags)
+              .withMaterialId(materialId)
+              .withMaterialTags(materialTag)
+              .withMatType(matType)
+              .withOnlyNonZeroStk(onlyNonZeroStk)
+              .withPdos(pdos)
+              .withLocation(location)
+              .withPageParams(params), pm);
+    } finally {
+      pm.close();
+    }
+    return results;
+  }
+
+  @Override
+  public Results getInventory(InventoryFilters filters) throws ServiceException {
+    PersistenceManager pm = PMF.get().getPersistenceManager();
+    Results results = null;
+    try {
+      results =
+          invntryDao.getInventory(filters, pm);
     } finally {
       pm.close();
     }
@@ -3702,7 +3734,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         Long kioskId = transaction.getKioskId();
         Long materialId = transaction.getMaterialId();
         Set<Long> kiosksToLock = getKioskIdsToLock(transactions);
-        Map<Long,LockUtil.LockStatus> kidLockStatusMap = LockUtil
+        Map<Long, LockUtil.LockStatus> kidLockStatusMap = LockUtil
             .lock(kiosksToLock, Constants.TX, LOCK_RETRY_COUNT, LOCK_RETRY_DELAY_IN_MILLISECONDS);
         locks = new HashMap<>(kiosksToLock.size());
         for(Map.Entry<Long,LockUtil.LockStatus> entry : kidLockStatusMap.entrySet()){

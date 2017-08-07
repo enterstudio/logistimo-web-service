@@ -230,7 +230,7 @@ entityServices.factory('entityService', ['$http', function ($http) {
             }
             return this.fetch(urlStr);
         },
-        setApprovers: function(data) {
+        setApprovers: function (data) {
             return this.fetchP(data, '/s2/api/entities/approvers');
         },
         getApprovers: function(kioskId) {

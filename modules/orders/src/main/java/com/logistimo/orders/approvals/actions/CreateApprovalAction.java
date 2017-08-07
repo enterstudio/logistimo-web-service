@@ -102,7 +102,8 @@ public class CreateApprovalAction {
   }
 
   private void validateApprovalRequest(ApprovalRequestModel approvalRequest, IOrder order,
-                                       Locale locale, List<Approver> approvers) throws ValidationException {
+                                       Locale locale, List<Approver> approvers)
+      throws ValidationException {
     createApprovalValidator.validate(approvalRequest);
     approvalRequesterValidator.validate(approvalRequest, order,
         SecurityUtils.getUserDetails().getUsername());

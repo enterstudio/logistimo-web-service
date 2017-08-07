@@ -385,20 +385,24 @@ public class ConfigurationModelsBuilder {
     return model;
   }
 
-  public Map<String, AdminContactConfigModel> buildAllAdminContactConfigModel(AdminContactConfig config)
+  public Map<String, AdminContactConfigModel> buildAllAdminContactConfigModel(
+      AdminContactConfig config)
       throws ObjectNotFoundException {
     Map<String, AdminContactConfigModel> model = new HashMap<>(2);
-    model.put(AdminContactConfig.PRIMARY_ADMIN_CONTACT, buildAdminContactModel(config.getPrimaryAdminContact()));
-    model.put(AdminContactConfig.SECONDARY_ADMIN_CONTACT, buildAdminContactModel(config.getSecondaryAdminContact()));
+    model.put(AdminContactConfig.PRIMARY_ADMIN_CONTACT,
+        buildAdminContactModel(config.getPrimaryAdminContact()));
+    model.put(AdminContactConfig.SECONDARY_ADMIN_CONTACT,
+        buildAdminContactModel(config.getSecondaryAdminContact()));
     return model;
   }
+
   public AdminContactConfigModel buildAdminContactModel(String userId)
       throws ObjectNotFoundException {
     AdminContactConfigModel model = new AdminContactConfigModel();
-    if(StringUtils.isNotEmpty(userId)) {
+    if (StringUtils.isNotEmpty(userId)) {
       UsersService as = Services.getService(UsersServiceImpl.class);
       IUserAccount userAccount = as.getUserAccount(userId);
-      if(userAccount != null) {
+      if (userAccount != null) {
         model.userId = userId;
         model.email = userAccount.getEmail();
         model.phn = userAccount.getMobilePhoneNumber();
@@ -1209,6 +1213,11 @@ public class ConfigurationModelsBuilder {
                 model.an = oc.getExportUserIds();
             }*/
       model.aafmsc = oc.autoAssignFirstMatStOnConfirmation();
+      model.autoCreate = oc.isCreationAutomated();
+      model.autoCreateOnMin = oc.isAutoCreateOnMin();
+      model.pdos = oc.getAutoCreatePdos();
+      model.autoCreateEntityTags = oc.getAutoCreateEntityTags();
+      model.autoCreateMaterialTags = oc.getAutoCreateMaterialTags();
     }
     if (dbc != null) {
       if (dbc.isPublic()) {

@@ -32,14 +32,14 @@
         <tr>
             <th class="text-center" rowspan="2">{{resourceBundle['domain']}}</th>
             <th class="text-center" rowspan="2">{{resourceBundle['users']}}</th>
-            <th class="text-center" colspan="3">{{resourceBundle['kiosks']}}</th>
+            <th class="text-center" colspan="{{kiosksColSpan}}" rowSpan="{{kiosksRowSpan}}">{{resourceBundle['kiosks']}}</th>
             <th class="text-center" ng-show="tempEnabled" colspan="3">{{resourceBundle['da.monitored.assets']}}</th>
             <th class="text-center" ng-show="tempEnabled" rowspan="2">{{resourceBundle['da.monitoring.assets']}}</th>
         </tr>
         <tr>
-            <th class="text-center">{{resourceBundle['kiosks']}}</th>
-            <th class="text-center">{{resourceBundle['da.live']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.live']}}"></span></th>
-            <th class="text-center">{{resourceBundle['da.active']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.active']}}"></span></th>
+            <th class="text-center" ng-show="!tempEnabled || isTempMonWLg">{{resourceBundle['kiosks']}}</th>
+            <th class="text-center" ng-show="!tempEnabled || isTempMonWLg">{{resourceBundle['da.live']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.live']}}"></span></th>
+            <th class="text-center" ng-show="!tempEnabled || isTempMonWLg">{{resourceBundle['da.active']}}&nbsp;<span class="glyphicons glyphicons-info-sign click-element expand-collapse-btn" uib-tooltip="{{resourceBundle['kiosks']}} {{resourceBundle['da.entity.active']}}"></span></th>
             <th class="text-center" ng-show="tempEnabled">{{resourceBundle['assets']}}</th>
             <th class="text-center" ng-show="tempEnabled">{{resourceBundle['da.live']}}&nbsp;<span
                     class="glyphicons glyphicons-info-sign click-element expand-collapse-btn"
@@ -64,13 +64,13 @@
             </td>
             <td class="text-center">{{item.uc}}</td>
             <td class="text-center"><span  id="b{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('b',$index)" uib-tooltip-html="item.toolText['kc']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.kc, 'ktag', 'kc','b',$index)">{{item.kc}}</span></td>
-            <td class="text-center">
+            <td class="text-center" ng-show="!tempEnabled || isTempMonWLg">
                 <span id="c{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('c',$index)" uib-tooltip-html="item.toolText['lkc']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.lkc, 'ktag', 'lkc','c',$index)">
                     {{item.lkc}}
                 </span>
                 <div class="litetext">{{item.lkcp}}%</div>
             </td>
-            <td class="text-center">
+            <td class="text-center" ng-show="!tempEnabled || isTempMonWLg">
                 <span id="d{{$index}}" tooltip-trigger='hclick' tooltip-append-to-body="true" ng-mouseleave="isDisplaying && closeTooltip('d',$index)" uib-tooltip-html="item.toolText['akc']" ng-mouseover="!isDisplaying && fetchTagsBasedCount(item.did, item.akc, 'ktag', 'akc','d', $index)">
                     {{item.akc}}
                 </span>

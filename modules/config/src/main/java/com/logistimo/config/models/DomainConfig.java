@@ -156,7 +156,7 @@ public class DomainConfig implements ILocation, Serializable {
   public static final String DISTRICT_ID = "districtid";
 
   //event summary key
-  public static final String EVENT_SUMMARY_KEY="eventSummary";
+  public static final String EVENT_SUMMARY_KEY = "eventSummary";
 
   private static final long serialVersionUID = 4047681117629775550L;
   //Mobile GUI Theme
@@ -311,7 +311,7 @@ public class DomainConfig implements ILocation, Serializable {
     supportConfigMap = new HashMap<>();
     adminContactConfig = new AdminContactConfig();
     syncConfig = new SyncConfig();
-    eventSummaryConfig=new EventSummaryConfigModel();
+    eventSummaryConfig = new EventSummaryConfigModel();
   }
 
   public DomainConfig(String configString) throws ConfigurationException {
@@ -946,7 +946,7 @@ public class DomainConfig implements ILocation, Serializable {
       }
 
       //Store Event summary model as a json
-      if(eventSummaryConfig!=null){
+      if (eventSummaryConfig != null) {
         json.put(EVENT_SUMMARY_KEY, new Gson().toJson(eventSummaryConfig));
       }
 

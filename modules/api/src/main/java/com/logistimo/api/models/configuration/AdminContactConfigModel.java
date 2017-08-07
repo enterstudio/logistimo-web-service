@@ -22,6 +22,7 @@
  */
 
 package com.logistimo.api.models.configuration;
+
 /**
  * Created by yuva on 27/07/17.
  */

@@ -285,9 +285,9 @@
                 });
             };
 
-            $scope.getAdminConfig = function() {
+            $scope.getAdminConfig = function () {
                 $scope.showLoading();
-                domainCfgService.getAdminCfg().then(function(data){
+                domainCfgService.getAdminCfg().then(function (data) {
                     $scope.adminConfig = data.data;
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
@@ -382,7 +382,7 @@
                     $scope.accountTabEnabled = data.data.iAccTbEn && !$scope.tempOnlyAU;
                     $scope.ordersTabEnabled = data.data.iOrdTbEn && !$scope.tempOnlyAU;
                     $scope.configTabEnabled = data.data.iConfTbEn;
-                    $scope.repTabEnabled = data.data.iRepTbEn && !$scope.tempOnlyAU;
+                    $scope.repTabEnabled = data.data.iRepTbEn && !$scope.iAU;
                     $scope.invTabEnabled = !$scope.tempOnlyAU;
                     $scope.iAdm = data.data.iAdm;
                     $scope.iSU = data.data.iSU;

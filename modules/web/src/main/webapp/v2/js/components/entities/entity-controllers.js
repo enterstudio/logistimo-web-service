@@ -2190,7 +2190,7 @@ entityControllers.controller('EntityApproversController',['$scope','entityServic
                 if($scope.continue) {
                     $scope.eapr.entityId = $scope.entityId;
                     $scope.showLoading();
-                    entityService.setApprovers($scope.eapr).then(function(data) {
+                    entityService.setApprovers($scope.eapr).then(function (data) {
                         $scope.showSuccess(data.data);
                     }).catch(function error(msg) {
                         $scope.showErrorMsg(msg);

@@ -46,6 +46,7 @@ import com.logistimo.inventory.dao.impl.TransDao;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
+import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.inventory.models.InvntryWithBatchInfo;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
@@ -93,7 +94,6 @@ import org.json.JSONObject;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -323,15 +323,14 @@ public class BulkExportMgr {
     } else if (TYPE_INVENTORY.equals(type) || (TYPE_INVENTORYBATCH.equals(type))) {
       IInvntryDao invntryDao = new InvntryDao();
       return invntryDao.buildInventoryQuery(
-          kioskId,
-          materialId,
-          eTags != null ? Arrays.asList(eTags.split(CharacterConstants.COMMA)) : null,
-          eeTags != null ? Arrays.asList(eeTags.split(CharacterConstants.COMMA)) : null,
-          mTag,
-          null,
-          null,
-          domainId,
-          null, IInvntry.ALL, false, location, false, pdos);
+          new InventoryFilters().withKioskId(kioskId).
+              withMaterialId(materialId)
+              .withKioskTags(eTags)
+              .withExcludedKioskTags(eeTags)
+              .withMaterialTags(mTag)
+              .withDomainId(domainId)
+              .withLocation(location)
+              .withPdos(pdos), false);
     } else if (TYPE_TRANSACTIONS.equals(type)) {
       ITransDao transDao = new TransDao();
       return transDao.buildTransactionsQuery(from, to, domainId, kioskId, materialId,

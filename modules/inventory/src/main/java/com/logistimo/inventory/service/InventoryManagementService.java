@@ -32,6 +32,7 @@ import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.models.ErrorDetailModel;
+import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
@@ -386,7 +387,8 @@ public interface InventoryManagementService extends Service {
 
   void allocateAutomatically(Long kid, Long mid, IInvAllocation.Type type, String typeId,
                              String tag,
-                             BigDecimal quantity, String userId, boolean autoAssignStatus, PersistenceManager pm)
+                             BigDecimal quantity, String userId, boolean autoAssignStatus,
+                             PersistenceManager pm)
       throws ServiceException;
 
   void clearAllocation(Long kid, Long mid, IInvAllocation.Type type, String typeId)
@@ -442,6 +444,8 @@ public interface InventoryManagementService extends Service {
   Results getInventory(Long domainId, Long kioskId, List<Long> kioskIds, String kioskTags, String excludedKioskTags,
                               Long materialId, String materialTag, int batchEnabled,
                               boolean onlyNZInv, String pdos, LocationSuggestionModel location, PageParams pageParams) throws ServiceException;
+
+  Results getInventory(InventoryFilters filters) throws ServiceException;
 
   boolean validateEntityBatchManagementUpdate(Long kioskId) throws ServiceException;
   boolean validateMaterialBatchManagementUpdate(Long materialId) throws ServiceException;

@@ -493,7 +493,8 @@ public class EntityBuilder {
     return approvers;
   }
 
-  public EntityApproversModel buildApprovalsModel(List<IApprover> approvers, UsersService as, Locale locale,
+  public EntityApproversModel buildApprovalsModel(List<IApprover> approvers, UsersService as,
+                                                  Locale locale,
                                                   String timezone) {
     EntityApproversModel model = new EntityApproversModel();
     if(approvers != null && !approvers.isEmpty()) {
@@ -502,16 +503,16 @@ public class EntityBuilder {
       List<String> pas = new ArrayList<>();
       List<String> sas = new ArrayList<>();
       UserBuilder userBuilder = new UserBuilder();
-      for(IApprover apr : approvers) {
+      for (IApprover apr : approvers) {
         if(StringUtils.isNotEmpty(apr.getUserId())) {
-          if(apr.getType().equals(IApprover.PRIMARY_APPROVER)) {
-            if(apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
+          if (apr.getType().equals(IApprover.PRIMARY_APPROVER)) {
+            if (apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
               pap.add(apr.getUserId());
             } else {
               pas.add(apr.getUserId());
             }
           } else {
-            if(apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
+            if (apr.getOrderType().equals(IApprover.PURCHASE_ORDER)) {
               sap.add(apr.getUserId());
             } else {
               sas.add(apr.getUserId());
@@ -531,7 +532,7 @@ public class EntityBuilder {
         model.pas =
             userBuilder.buildUserModels(constructUserAccount(as, pas), locale, timezone, true);
       }
-      if(!sas.isEmpty()) {
+      if (!sas.isEmpty()) {
         model.sas =
             userBuilder.buildUserModels(constructUserAccount(as, sas), locale, timezone, true);
       }

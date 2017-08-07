@@ -131,6 +131,7 @@ import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -168,6 +169,9 @@ public class DomainConfigController {
   private ConfigurationModelsBuilder builder = new ConfigurationModelsBuilder();
   private CustomReportsBuilder crBuilder = new CustomReportsBuilder();
   private UserBuilder userBuilder = new UserBuilder();
+
+  @Autowired
+  UsersService usersService;
 
   @RequestMapping(value = "/config/migrator/")
   public
@@ -340,17 +344,22 @@ public class DomainConfigController {
   @RequestMapping(value = "/general", method = RequestMethod.GET)
   public
   @ResponseBody
-  GeneralConfigModel getGeneralConfig(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  GeneralConfigModel getGeneralConfig(
+      @RequestParam(name = "domain_id", required = false) Long domainId,
+      HttpServletRequest request) throws ServiceException, ObjectNotFoundException {
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    if (!GenericAuthoriser.authoriseAdmin(request)) {
-      throw new UnauthorizedException(backendMessages.getString("permission.denied"));
-    }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long
+        dId =
+        (null == domainId) ? SessionMgr.getCurrentDomain(request.getSession(), userId) : domainId;
+    if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
+      xLogger.warn("User {0} does not have access to domain id {1}", sUser.getUsername(), domainId);
+      throw new InvalidDataException("User does not have access to domain");
+    }
     try {
-      return builder.buildGeneralConfigModel(domainId, locale, sUser.getTimezone());
+      return builder.buildGeneralConfigModel(dId, locale, sUser.getTimezone());
     } catch (ServiceException | ObjectNotFoundException | ConfigurationException e) {
       xLogger.severe("Error in fetching general configuration", e);
       throw new InvalidServiceException(backendMessages.getString("general.config.fetch.error"));
@@ -377,7 +386,9 @@ public class DomainConfigController {
   public
   @ResponseBody
   AdminContactConfigModel getAdminConfig() {
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", SecurityUtils.getLocale());
+    ResourceBundle
+        backendMessages =
+        Resources.get().getBundle("BackendMessages", SecurityUtils.getLocale());
     try {
       return builder.buildAdminContactModel(SecurityUtils.getUsername());
     } catch (ObjectNotFoundException e) {
@@ -812,8 +823,10 @@ public class DomainConfigController {
             .setTz(AssetConfig.getTimezoneOffset(model.tz));
       }
       AdminContactConfig adminContactConfig = cc.dc.getAdminContactConfig();
-      adminContactConfig.setPrimaryAdminContact(model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId);
-      adminContactConfig.setSecondaryAdminContact(model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId);
+      adminContactConfig.setPrimaryAdminContact(
+          model.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId);
+      adminContactConfig.setSecondaryAdminContact(
+          model.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId);
       cc.dc.setAdminContactConfigMap(adminContactConfig);
       cc.dc.setEnableSwitchToNewHost(model.snh);
       cc.dc.setNewHostName(model.nhn);
@@ -1519,6 +1532,11 @@ public class DomainConfigController {
       oc.setPartialFulfillmentReasonsMandatory(model.pfrm);
       oc.setCancellingOrderReasons(model.cor);
       oc.setCancellingOrderReasonsMandatory(model.corm);
+      oc.setCreationAutomated(model.autoCreate);
+      oc.setAutoCreateOnMin(model.autoCreateOnMin);
+      oc.setAutoCreateMaterialTags(model.autoCreateMaterialTags);
+      oc.setAutoCreatePdos(model.pdos);
+      oc.setAutoCreateEntityTags(model.autoCreateEntityTags);
       //oc.setAllowCreatingShipments(model.acs);
       oc.setAutoAssignFirstMaterialStatusOnConfirmation(model.aafmsc);
 
@@ -2511,7 +2529,8 @@ public class DomainConfigController {
    * Get the event summary configurations
    */
   @RequestMapping(value = "/event-summary", method = RequestMethod.GET)
-  public @ResponseBody
+  public
+  @ResponseBody
   EventSummaryConfigModel getEventSummaryConfig(@RequestParam(required = false) Long domainId) {
     EventSummaryConfigModel model = null;
     SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
@@ -2522,9 +2541,9 @@ public class DomainConfigController {
       if (domainId == null) {
         domainId = SecurityUtils.getCurrentDomainId();
       } else {
-        UsersService usersService = Services.getService(UsersServiceImpl.class);
         if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
-          xLogger.warn("User {0} does not have access to domain id {1}" ,sUser.getUsername(), domainId);
+          xLogger.warn("User {0} does not have access to domain id {1}", sUser.getUsername(),
+              domainId);
           throw new InvalidDataException("User does not have access to domain");
         }
       }
@@ -2545,7 +2564,10 @@ public class DomainConfigController {
       }
     } catch (Exception e) {
       xLogger.warn("Exception fetching event summary configuration", e);
-      ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", sUser == null? Locale.ENGLISH : sUser.getLocale());
+      ResourceBundle
+          backendMessages =
+          Resources.get()
+              .getBundle("BackendMessages", sUser == null ? Locale.ENGLISH : sUser.getLocale());
       throw new BadRequestException(backendMessages.getString("error.fetch.event.summary"));
     }
     return model;
@@ -2553,11 +2575,12 @@ public class DomainConfigController {
 
   /**
    * Update the event summary configuration
+   *
    * @param configModel configuration model
-   * @return
    */
   @RequestMapping(value = "/event-summary", method = RequestMethod.PUT)
-  public @ResponseBody
+  public
+  @ResponseBody
   String updateEventSummary(@RequestBody EventSummaryConfigModel configModel) {
     //Get logged in user's details
     SecureUserDetails sUser = SecurityUtils.getUserDetails();
@@ -2590,7 +2613,7 @@ public class DomainConfigController {
       }
 
       //Add tag distribution details
-      if (configModel.getTagDistribution() != null ) {
+      if (configModel.getTagDistribution() != null) {
         eventSummaryConfigModel.setTagDistribution(configModel.getTagDistribution());
       }
       eventSummaryConfigModel.setTag(configModel.getTag());
@@ -2600,7 +2623,7 @@ public class DomainConfigController {
       cc.dc.addDomainData(ConfigConstants.EVENT_SUMMARY_INVENTORY,
           generateUpdateList(sUser.getUsername()));
       saveDomainConfig(sUser.getLocale(), SecurityUtils.getCurrentDomainId(), cc, backendMessages);
-      xLogger.info("Event summary configured for the domain"+SecurityUtils.getCurrentDomainId());
+      xLogger.info("Event summary configured for the domain" + SecurityUtils.getCurrentDomainId());
       responseMsg = backendMessages.getString("event.summary.update.success");
     } catch (ServiceException e) {
       xLogger.severe("Error in updating Event Summary", e);

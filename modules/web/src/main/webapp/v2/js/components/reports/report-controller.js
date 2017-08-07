@@ -1120,6 +1120,8 @@ reportControllers.controller('DomainHierarchyController', ['$scope', 'reportServ
         $scope.tags = {};
         $scope.hierarchyData = [];
         $scope.isDisplaying = false;
+        $scope.kiosksColSpan = (!$scope.tempEnabled || $scope.isTempMonWLg) ? '3': '1';
+        $scope.kiosksRowSpan = (!$scope.tempEnabled || $scope.isTempMonWLg)? '1': '2';
         $scope.fetchHistoricalData = function(domainId) {
           $scope.showLoading();
           reportService.getHistoricalData(domainId).then(function(data){

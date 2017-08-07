@@ -53,12 +53,13 @@ public class EventSummaryTemplateLoader {
    * @return json string
    */
   public static EventSummaryConfigModel getDefaultTemplate() {
-    if (eventSummaryConfigModel==null) {
+    if (eventSummaryConfigModel == null) {
       //load the template json file
-      try(InputStream inputStream=
-              Thread.currentThread().getContextClassLoader()
-                  .getResourceAsStream(EVENT_SUMMARY_TEMPLATE_FILENAME)) {
-        eventSummaryConfigModel=new Gson().fromJson(IOUtils.toString(inputStream),EventSummaryConfigModel.class);
+      try (InputStream inputStream =
+               Thread.currentThread().getContextClassLoader()
+                   .getResourceAsStream(EVENT_SUMMARY_TEMPLATE_FILENAME)) {
+        eventSummaryConfigModel =
+            new Gson().fromJson(IOUtils.toString(inputStream), EventSummaryConfigModel.class);
       } catch (IOException e) {
         xLogger.warn("Exception loading the template", e);
       }

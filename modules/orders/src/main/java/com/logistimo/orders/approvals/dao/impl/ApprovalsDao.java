@@ -133,7 +133,7 @@ public class ApprovalsDao implements IApprovalsDao {
       approvalMapping.setUpdatedBy(userId);
       pm.makePersistent(approvalMapping);
     } catch (Exception e) {
-      xLogger.fine("Failed to get order approval mapping for approval: {0} with status: {1}",
+      xLogger.warn("Failed to get order approval mapping for approval: {0} with status: {1}",
           approvalId, model.getStatus(), e);
     } finally {
       if (pm != null) {
@@ -159,7 +159,7 @@ public class ApprovalsDao implements IApprovalsDao {
         orderApprovalMapping = (IOrderApprovalMapping) query.executeWithMap(params);
         orderApprovalMapping = pm.detachCopy(orderApprovalMapping);
       } catch (Exception e) {
-        xLogger.fine("Failed to get order approval mapping for order: {0} with status: {1}",
+        xLogger.warn("Failed to get order approval mapping for order: {0} with status: {1}",
             orderApprovalMapping, status, e);
       } finally {
         if (query != null) {
@@ -235,7 +235,7 @@ public class ApprovalsDao implements IApprovalsDao {
         results = (List<IOrderApprovalMapping>) query.executeWithMap(params);
         results = (List<IOrderApprovalMapping>) pm.detachCopyAll(results);
       } catch (Exception e) {
-        xLogger.fine("Failed to get order approval mapping for order: {0}",
+        xLogger.warn("Failed to get order approval mapping for order: {0}",
             orderId, e);
       } finally {
         if (query != null) {
@@ -273,7 +273,7 @@ public class ApprovalsDao implements IApprovalsDao {
           orderApprovalMapping = results.get(0);
         }
       } catch (Exception e) {
-        xLogger.fine("Failed to get order approval mapping for order: {0}",
+        xLogger.warn("Failed to get order approval mapping for order: {0}",
             orderId, e);
       } finally {
         if (query != null) {
@@ -309,7 +309,7 @@ public class ApprovalsDao implements IApprovalsDao {
         orderApprovalMapping = (IOrderApprovalMapping) query.executeWithMap(params);
         orderApprovalMapping = pm.detachCopy(orderApprovalMapping);
       } catch (Exception e) {
-        xLogger.fine("Failed to get order approval mapping for approval: {0} with status: {1}",
+        xLogger.warn("Failed to get order approval mapping for approval: {0} with status: {1}",
             approvalId, status, e);
       } finally {
         if (query != null) {
@@ -382,7 +382,7 @@ public class ApprovalsDao implements IApprovalsDao {
           pm.makePersistent(orderApprovalMapping);
         }
       } catch (Exception e) {
-        xLogger.fine("Failed to get order approval mapping for order: {0} with approval: {1}",
+        xLogger.warn("Failed to get order approval mapping for order: {0} with approval: {1}",
             orderId, approvalId, e);
       } finally {
         if (query != null) {
@@ -422,7 +422,7 @@ public class ApprovalsDao implements IApprovalsDao {
         }
       } catch (Exception e) {
         xLogger
-            .fine("Failed to get order approval mapping for order: {0} with approval: {1}",
+            .warn("Failed to get order approval mapping for order: {0} with approval: {1}",
                 orderId,
                 approvalId, e);
       } finally {

@@ -109,10 +109,11 @@ public class SetupDataInputDeserializer implements JsonDeserializer<SetupDataInp
           && jsonObjectKiosk.get(JsonTagsZ.ENTITY_TAG) != null) {
         String eTagsString = jsonObjectKiosk.getAsJsonArray(JsonTagsZ.ENTITY_TAG).toString();
         if (StringUtils.isNotEmpty(eTagsString)) {
-          jsonObjectKiosk.addProperty(JsonTagsZ.ENTITY_TAG, eTagsString.replace("\"", CharacterConstants.EMPTY)
-              .replace(CharacterConstants.COMMA, CharacterConstants.SEMICOLON)
-              .replace(CharacterConstants.O_SBRACKET, CharacterConstants.EMPTY)
-              .replace(CharacterConstants.C_SBRACKET, CharacterConstants.EMPTY));
+          jsonObjectKiosk
+              .addProperty(JsonTagsZ.ENTITY_TAG, eTagsString.replace("\"", CharacterConstants.EMPTY)
+                  .replace(CharacterConstants.COMMA, CharacterConstants.SEMICOLON)
+                  .replace(CharacterConstants.O_SBRACKET, CharacterConstants.EMPTY)
+                  .replace(CharacterConstants.C_SBRACKET, CharacterConstants.EMPTY));
         }
       }
       String kioskString = gson.toJson(jsonObjectKiosk);

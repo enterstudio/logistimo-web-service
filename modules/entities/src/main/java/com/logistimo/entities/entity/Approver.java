@@ -37,7 +37,7 @@ import javax.jdo.annotations.PrimaryKey;
  * Created by naveensnair on 19/05/17.
  */
 @PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true", table = "APPROVERS")
-public class Approver implements IApprover{
+public class Approver implements IApprover {
 
   @NotPersistent
   List<String> pa;

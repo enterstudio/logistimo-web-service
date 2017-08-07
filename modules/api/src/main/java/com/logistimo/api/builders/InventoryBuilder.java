@@ -147,7 +147,8 @@ public class InventoryBuilder {
   }
 
   public InventoryDetailModel buildMInventoryDetail(IInvntry inventory,
-                                                    Long domainId, Long entityId, SecureUserDetails sUser)
+                                                    Long domainId, Long entityId,
+                                                    SecureUserDetails sUser)
       throws ServiceException {
     InventoryDetailModel inventoryDetailModel = new InventoryDetailModel();
     Map<Long, String> domainNames = new HashMap<>(1);
@@ -177,7 +178,8 @@ public class InventoryBuilder {
                                                          InventoryManagementService ims,
                                                          IKiosk kiosk,
                                                          int itemCount,
-                                                         Map<Long, String> domainNames, SecureUserDetails sUser) {
+                                                         Map<Long, String> domainNames,
+                                                         SecureUserDetails sUser) {
     InventoryDetailModel model = new InventoryDetailModel();
     model.mId = invntry.getMaterialId();
     model.eId = invntry.getKioskId();
@@ -228,7 +230,8 @@ public class InventoryBuilder {
 
     model.currentStock = new CurrentStock();
     model.currentStock.count = invntry.getStock();
-    model.currentStock.date = LocalDateUtil.format(invntry.getTimestamp(), sUser.getLocale(), sUser.getTimezone());
+    model.currentStock.date =
+        LocalDateUtil.format(invntry.getTimestamp(), sUser.getLocale(), sUser.getTimezone());
     model.min = invntry.getNormalizedSafetyStock();
     model.max = invntry.getMaxStock();
     model.it = invntry.getInTransitStock();

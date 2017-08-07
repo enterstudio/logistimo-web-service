@@ -24,14 +24,13 @@
 package com.logistimo.inventory.dao;
 
 
-import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.entity.IInvntryLog;
+import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.pagination.QueryParams;
-import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
 
@@ -152,40 +151,17 @@ public interface IInvntryDao {
   List<IInvntryEvntLog> removeInvEventLogs(Long kioskId, Long materialId, Date start, Date end,
                                            PersistenceManager pm);
 
-  QueryParams buildInventoryQuery(Long kioskId, Long materialId, List<String> kioskTags,
-                                  List<String> excludedKioskTags,
-                                  String materialTag, List<Long> kioskIds,
-                                  PageParams pageParams, Long domainId,
-                                  String materialNameStartsWith, int matType,
-                                  boolean onlyNonZeroStock, LocationSuggestionModel location,
-                                  boolean countQuery, String pdos)
+  QueryParams buildInventoryQuery(InventoryFilters inventoryFilters, boolean countQuery)
       throws InvalidDataException;
 
 
   /**
    * Get Inventory using the filters
-   * @param kioskId - Entity Id
-   * @param materialId - Material Id
-   * @param kioskTag - Entity tags
-   * @param excludedKioskTag - Excluded Entity tags, Mutually exclusive with kioskTag
-   * @param materialTag - Material tag
-   * @param kioskIds - List of Entity ids
-   * @param pageParams - Page params to limit offset
-   * @param pm - Persistence Manager instance
-   * @param domainId - Domain Id
-   * @param materialNameStartsWith - Material name should start with.
-   * @param matType - Type of inventory 0 if both batch enabled and batch disabled, 1 if batch disabled, 2 if batch disabled
-   * @param onlyNonZeroStk - true if only non zero and false if all inventory items are to be returned
-   * @param location - location filter data, e.g. state, district, taluk
-   * @param pdos - predicted days of stock
+   * @param inventoryFilters
    * @return Inventory objects
    * @throws ServiceException
    */
-  Results getInventory(Long kioskId, Long materialId, String kioskTag, String excludedKioskTag,
-                       String materialTag, List<Long> kioskIds,
-                       PageParams pageParams, PersistenceManager pm, Long domainId,
-                       String materialNameStartsWith, int matType, boolean onlyNonZeroStk,
-                       LocationSuggestionModel location, String pdos)
+  Results getInventory(InventoryFilters inventoryFilters, PersistenceManager pm)
       throws ServiceException;
 
   /**

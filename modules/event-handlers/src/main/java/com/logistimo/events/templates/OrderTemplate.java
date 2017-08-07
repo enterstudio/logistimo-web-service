@@ -89,8 +89,8 @@ public class OrderTemplate implements ITemplate {
       ConversationService cs = Services.getService(ConversationServiceImpl.class, locale);
       IMessage msg = cs.getLastMessage(null, "ORDER", order.getOrderId().toString()); //conversationId is optional
       if (msg != null && msg.getMessage() != null && (excludeVars == null || !excludeVars.contains(EventsConfig.VAR_COMMENT))) {
-        if(msg.getMessage().length()>20){
-          varMap.put(EventsConfig.VAR_COMMENT, "("+msg.getMessage().substring(0,30)+"..)");
+        if (msg.getMessage().length() > 100) {
+          varMap.put(EventsConfig.VAR_COMMENT, "(" + msg.getMessage().substring(0, 98) + "..)");
         }else{
           varMap.put(EventsConfig.VAR_COMMENT, "("+msg.getMessage()+")");
         }

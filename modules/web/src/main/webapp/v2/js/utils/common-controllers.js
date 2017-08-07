@@ -674,7 +674,7 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
         angular.forEach($scope.filterMethods, function (fn) {
             $scope[fn]();
         });
-        if(checkNotNullEmpty($scope.$parent.filters)) {
+        if (checkNotNullEmpty($scope.$parent.filters)) {
             $scope.$parent.filters.changed = true;
         }
     };

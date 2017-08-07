@@ -227,7 +227,9 @@ public class EntityController {
     try{
       EntitiesService as = Services.getService(EntitiesServiceImpl.class, locale);
       IKiosk kiosk = as.getKiosk(model.entityId);
-      List<IApprover> approversList = builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId());
+      List<IApprover>
+          approversList =
+          builder.buildApprovers(model, sUser.getUsername(), kiosk.getDomainId());
       as.addApprovers(model.entityId, approversList, sUser.getUsername());
       } catch (ServiceException se) {
     throw new InvalidServiceException(

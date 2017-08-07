@@ -23,14 +23,14 @@
 
 package com.logistimo.config.models;
 
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.services.Resources;
+import com.logistimo.utils.StringUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.services.Resources;
-import com.logistimo.constants.Constants;
-import com.logistimo.utils.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -825,7 +825,7 @@ public class InventoryConfig implements Serializable {
     MatStatusConfig msConfig = getMatStatusConfigByType("i");
     String matStatus = isTempSensitive ? msConfig.getEtsm() : msConfig.getDf();
     if (StringUtils.isNotBlank(matStatus)) {
-      matStatus = matStatus.split(CharacterConstants.COMMA,2)[0];
+      matStatus = matStatus.split(CharacterConstants.COMMA, 2)[0];
     }
     return matStatus;
   }

@@ -26,11 +26,13 @@
  */
 package com.logistimo.config.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.logistimo.utils.StringUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +68,11 @@ public class OrdersConfig implements Serializable {
   private static final String CANCELLING_ORDER_REASONS_MANDATORY = "corm";
   private static final String ALLOW_CREATING_SHIPMENTS = "asc";
   private static final String AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION = "aafmsc";
+  private static final String CREATION_AUTOMATED = "auto_create";
+  private static final String AUTO_CREATE_ON_MIN = "ac_on_min";
+  private static final String AUTO_CREATE_PDOS = "ac_pdos";
+  private static final String AUTO_CREATE_MTAGS = "ac_mtags";
+  private static final String AUTO_CREATE_ETAGS = "ac_etags";
 
   String sourceUserId = null; // user who last created the export specification
   private boolean exportEnabled = false;
@@ -90,6 +97,11 @@ public class OrdersConfig implements Serializable {
   private boolean coReasonsMandatory;
   private boolean allowCreatingShipments;
   private boolean autoAssignFirstMatStOnConfirmation;
+  private boolean creationAutomated = false;
+  private boolean autoCreateOnMin = false;
+  private int autoCreatePdos = 0;
+  private List<String> autoCreateMaterialTags = new ArrayList<>(1);
+  private List<String> autoCreateEntityTags = new ArrayList<>(1);
 
   public OrdersConfig() {
   }
@@ -210,6 +222,34 @@ public class OrdersConfig implements Serializable {
     } catch (JSONException e) {
       // ignore
     }
+    try {
+      creationAutomated = json.getBoolean(CREATION_AUTOMATED);
+    } catch (JSONException e) {
+      //ignore
+    }
+    try {
+      autoCreateOnMin = json.getBoolean(AUTO_CREATE_ON_MIN);
+    } catch (JSONException e) {
+      //ignore
+    }
+    try {
+      autoCreatePdos = json.getInt(AUTO_CREATE_PDOS);
+    } catch (JSONException e) {
+      //ignore
+    }
+
+    try {
+      autoCreateMaterialTags = StringUtil.getList(json.getString(AUTO_CREATE_MTAGS));
+    } catch (JSONException e) {
+      autoCreateMaterialTags = new ArrayList<>(1);
+    }
+
+    try {
+      autoCreateEntityTags = StringUtil.getList(json.getString(AUTO_CREATE_ETAGS));
+    } catch (JSONException e) {
+      autoCreateEntityTags = new ArrayList<>(1);
+    }
+
   }
 
   public JSONObject toJSONObject() throws ConfigurationException {
@@ -259,6 +299,11 @@ public class OrdersConfig implements Serializable {
       json.put(TRANSFER_RELEASE, transferRelease);
       json.put(ALLOW_CREATING_SHIPMENTS, allowCreatingShipments);
       json.put(AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION, autoAssignFirstMatStOnConfirmation);
+      json.put(CREATION_AUTOMATED, creationAutomated);
+      json.put(AUTO_CREATE_ON_MIN, autoCreateOnMin);
+      json.put(AUTO_CREATE_PDOS, autoCreatePdos);
+      json.put(AUTO_CREATE_ETAGS, StringUtil.getCSV(autoCreateEntityTags));
+      json.put(AUTO_CREATE_MTAGS, StringUtil.getCSV(autoCreateMaterialTags));
       return json;
     } catch (JSONException e) {
       throw new ConfigurationException(e.getMessage());
@@ -447,5 +492,45 @@ public class OrdersConfig implements Serializable {
 
   public void setAutoAssignFirstMaterialStatusOnConfirmation(boolean assignMatStatus) {
     autoAssignFirstMatStOnConfirmation = assignMatStatus;
+  }
+
+  public boolean isCreationAutomated() {
+    return creationAutomated;
+  }
+
+  public void setCreationAutomated(boolean creationAutomated) {
+    this.creationAutomated = creationAutomated;
+  }
+
+  public boolean isAutoCreateOnMin() {
+    return autoCreateOnMin;
+  }
+
+  public void setAutoCreateOnMin(boolean autoCreateOnMin) {
+    this.autoCreateOnMin = autoCreateOnMin;
+  }
+
+  public int getAutoCreatePdos() {
+    return autoCreatePdos;
+  }
+
+  public void setAutoCreatePdos(int autoCreatePdos) {
+    this.autoCreatePdos = autoCreatePdos;
+  }
+
+  public List<String> getAutoCreateMaterialTags() {
+    return autoCreateMaterialTags;
+  }
+
+  public void setAutoCreateMaterialTags(List<String> autoCreateMaterialTags) {
+    this.autoCreateMaterialTags = autoCreateMaterialTags;
+  }
+
+  public List<String> getAutoCreateEntityTags() {
+    return autoCreateEntityTags;
+  }
+
+  public void setAutoCreateEntityTags(List<String> autoCreateEntityTags) {
+    this.autoCreateEntityTags = autoCreateEntityTags;
   }
 }

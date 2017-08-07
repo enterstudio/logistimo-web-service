@@ -480,8 +480,6 @@ ship.package.size.update.error=Erreur lors de la mise à jour du format du paque
 userdevice.create.error=Erreur lors de la création du périphérique utilisateur
 userdevice.not.created=Données invalides. Le périphérique utilisateur ne peut pas être créé.
 invalid.req.data=Données de requêtes non valides.
-
-
 transaction.rejected=Transaction rejetée en raison d'une transaction plus récente sur le Web.
 error.invaliduserid=Identifiant invalide
 error.invaliddomainid=ID de domaine non valide
@@ -492,3 +490,7 @@ lockinventory.failed=Impossible de verrouiller l'inventaire. Veuillez réessayer
 filter=filtre
 approvers.update.success=Les correcteurs sont mis à jour avec succès.
 error.fetch.event.summary=Erreur lors de la récupération de la configuration du résumé d'événement
+orders.item.likely.stockout=Probablement stocker en {0} jours
+orders.item.reached.min=Le stock a atteint le niveau minimum
+orders.items.added=Les éléments {0} ont été ajoutés à cette commande.
+orders.created.by.system=Le système a créé cette commande.
