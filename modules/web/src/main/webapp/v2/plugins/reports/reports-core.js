@@ -133,23 +133,38 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
             var nl = "\r\n";
             var csvHeading = angular.copy(heading);
             var isKiosk = false;
+            var isAsset = false;
             if(csvHeading[0] == $scope.resourceBundle['kiosk']) {
                 csvHeading.splice(1, 0, $scope.resourceBundle['state']);
                 csvHeading.splice(1, 0, $scope.resourceBundle['district']);
                 csvHeading.splice(1, 0, $scope.resourceBundle['taluk']);
                 csvHeading.splice(1, 0, $scope.resourceBundle['city']);
                 isKiosk = true;
+            }else if(csvHeading[0] == $scope.resourceBundle['asset.serial.number']){
+                isAsset = true;
             }
-            var csvData = csvHeading.join(comma);
+            if(isAsset){
+                var csvData = getAssetColumns(csvHeading);
+            }else{
+                csvData = csvHeading.join(comma);
+            }
             csvData += nl;
             for(var key in data) {
                 var location = key.split("|");
-                csvData += location[0];
                 if(isKiosk) {
+                    csvData += location[0];
                     csvData += comma + location[2];
                     csvData += comma + location[3];
                     csvData += comma + location[4];
                     csvData += comma + location[5];
+                }else if(isAsset){
+                    var assetMetaData = key.split("|||");
+                    var vid_sid = assetMetaData[0].split('_');
+                    csvData += vid_sid.splice(1).join() + comma;
+                    csvData += assetMetaData[2] + comma + assetMetaData[1] + comma + assetMetaData[4]
+                        + comma + "\""+assetMetaData[5]+ "\"";
+                }else {
+                    csvData += location[0];
                 }
                 for (var j = 0; j < heading.length-1; j++) {
                     csvData += comma + data[key][j][tableSeriesNo].value || 0;
@@ -157,6 +172,12 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
                 csvData += nl;
             }
             return csvData;
+        }
+
+        function getAssetColumns(csvHeading){
+            return csvHeading[0] + ',' + $scope.resourceBundle['assetModel'] + ','
+                + $scope.resourceBundle['manufacturer'] + ',' + $scope.resourceBundle['kiosk']
+                + ',' + $scope.resourceBundle['location'] + ',' + csvHeading.splice(1).join(',');
         }
 
         $scope.exportAsCSV = function (data, headings, fileName, tableSeriesNo) {
