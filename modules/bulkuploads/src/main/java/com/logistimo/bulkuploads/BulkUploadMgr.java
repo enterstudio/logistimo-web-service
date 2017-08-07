@@ -52,6 +52,7 @@ import com.logistimo.config.service.ConfigurationMgmtService;
 import com.logistimo.config.service.impl.ConfigurationMgmtServiceImpl;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomainPermission;
 import com.logistimo.domains.service.DomainsService;
@@ -318,9 +319,8 @@ public class BulkUploadMgr {
     return header.getUploadableCSVHeader(locale, type);
   }
 
-  // Get the Entity for a given CSV record of a given type
   public static EntityContainer processEntity(String type, String csvLine, Long domainId,
-                                              String sourceUserId) {
+                                              String sourceUserId, int source) {
     xLogger.fine("Entered BulkUploadMgr.processEntity");
     if (type == null || csvLine == null || csvLine.isEmpty()) {
       return null;
@@ -332,7 +332,7 @@ public class BulkUploadMgr {
     } else if (TYPE_MATERIALS.equals(type)) {
       entityContainer = processMaterialEntity(tokens, domainId, sourceUserId);
     } else if (TYPE_KIOSKS.equals(type)) {
-      entityContainer = processKioskEntity(tokens, domainId, sourceUserId);
+      entityContainer = processKioskEntity(tokens, domainId, sourceUserId, source);
     } else if (TYPE_INVENTORY.equals(type)) {
       entityContainer = processInventoryEntity(tokens, domainId, sourceUserId);
     } else if (TYPE_ASSETS.equals(type)) {
@@ -344,6 +344,12 @@ public class BulkUploadMgr {
 
     xLogger.fine("Exiting BulkUploadMgr.processEntity");
     return entityContainer;
+  }
+
+  // Get the Entity for a given CSV record of a given type
+  public static EntityContainer processEntity(String type, String csvLine, Long domainId,
+                                              String sourceUserId) {
+    return processEntity(type, csvLine, domainId, sourceUserId, SourceConstants.UPLOAD);
   }
 
   private static EntityContainer processAssetEntity(String[] tokens, Long domainId,
@@ -2007,7 +2013,7 @@ public class BulkUploadMgr {
 
   // Get the kiosk entity from a set of tokens
   private static EntityContainer processKioskEntity(String[] tokens, Long domainId,
-                                                    String sourceUserId) {
+                                                    String sourceUserId, int source) {
     xLogger.fine("Entered processKioskEntity");
     ResourceBundle backendMessages;
     EntityContainer ec = new EntityContainer();
@@ -2612,7 +2618,11 @@ public class BulkUploadMgr {
 
       if (addMaterialsToKiosk) {
         addMaterialsToKiosk(domainId, kioskId, name, materialNamesStr, stockStr, sourceUserId,
+            source,
             ec, backendMessages);
+        if (ec.hasErrors()) {
+          return ec;
+        }
       }
       if (addVendorLinks) {
         addKioskLinks(domainId, kioskId, vendorNamesStr, IKioskLink.TYPE_VENDOR, sourceUserId, es,
@@ -2710,10 +2720,18 @@ public class BulkUploadMgr {
   @SuppressWarnings("unchecked")
   private static void addMaterialsToKiosk(Long domainId, Long kioskId, String kioskName,
                                           String materialNamesStr, String stockStr,
-                                          String sourceUserId,
+                                          String sourceUserId, int source,
                                           EntityContainer ec, ResourceBundle backendMessages)
       throws ServiceException, TaskSchedulingException {
     xLogger.fine("Entered addMaterialsToKiosk");
+    try {
+      if (StringUtils.isNotEmpty(stockStr)) {
+        Integer.parseInt(stockStr);
+      }
+    } catch (NumberFormatException e) {
+      ec.messages.add("Cannot add materials to specified entity. Invalid value for initial stock");
+      return;
+    }
     String idsCSV = "";
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
@@ -2775,10 +2793,11 @@ public class BulkUploadMgr {
     if (stockStr != null && !stockStr.isEmpty()) {
       params.put("stock", stockStr);
     }
+    params.put("source", String.valueOf(source));
     if (sourceUserId != null && !sourceUserId.isEmpty()) {
       params.put("sourceuserid", sourceUserId);
     }
-    List<String> multiValueParams = new ArrayList<String>();
+    List<String> multiValueParams = new ArrayList<>();
     multiValueParams.add("materialid");
     // Schedule task immediately to add materials to kiosk
     taskService.schedule(ITaskService.QUEUE_DEFAULT, url, params, multiValueParams, null,
