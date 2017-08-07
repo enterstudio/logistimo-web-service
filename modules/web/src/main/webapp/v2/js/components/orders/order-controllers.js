@@ -398,6 +398,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 $scope.editPermission = false;
                 $scope.confirmPermission = false;
                 $scope.allocatePermission = false;
+                $scope.reOpenPermission = false;
                 if ($scope.lMap) {
                     $timeout(function () {
                         $scope.dispMap = true;
@@ -638,6 +639,9 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                             $scope.statusList.splice(i, 1);
                         }
                         if($scope.statusList[i] == ORDER.CONFIRMED && !$scope.confirmPermission) {
+                            $scope.statusList.splice(i, 1);
+                        }
+                        if($scope.statusList[i] == ORDER.PENDING && !$scope.reOpenPermission) {
                             $scope.statusList.splice(i, 1);
                         }
 
@@ -1110,6 +1114,9 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         if(data == 'edit') {
                             $scope.editPermission = true;
                         }
+                        if(data == 'reopen') {
+                            $scope.reOpenPermission = true;
+                        }
                     });
                 } else {
                     $scope.cancelPermission = false;
@@ -1118,6 +1125,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     $scope.editPermission = false;
                     $scope.confirmPermission = false;
                     $scope.allocatePermission = false;
+                    $scope.reOpenPermission = false;
                 }
             };
 

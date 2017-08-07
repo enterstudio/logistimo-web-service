@@ -36,6 +36,7 @@ public final class PermissionConstants {
   public static final String CANCEL = "cancel";
   public static final String CREATE_SHIPMENT = "create_shipment";
   public static final String CONFIRM = "confirm";
+  public static final String REOPEN = "reopen";
   public static final String APPROVAL_REQUIRED = "required";
 
   //Approval constants
