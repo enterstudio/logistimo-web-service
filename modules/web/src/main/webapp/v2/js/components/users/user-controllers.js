@@ -620,8 +620,10 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
             }
 
             function checkAdminUsers() {
-                validateAdminUser($scope.admin.pac);
-                validateAdminUser($scope.admin.sac);
+                if (!checkNullEmptyObject($scope.admin)) {
+                    validateAdminUser($scope.admin.pac);
+                    validateAdminUser($scope.admin.sac);
+                }
             }
 
             checkAdminUsers();
