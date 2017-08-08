@@ -138,6 +138,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                         return false;
                     }
                 }
+                return true;
             }
 
             function checkAdminUsers() {
@@ -599,7 +600,6 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
         $scope.enableDisableUser = function (action) {
             $scope.user.en = action == 'e';
             var isSupport = false;
-            var isAdmin = false;
             if(checkNotNullEmpty($scope.support) && action == 'd'){
                 for(var i=0; i<$scope.support.length; i++){
                     if($scope.support[i].usrid == $scope.userId){
@@ -613,21 +613,26 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
                 if (!checkNullEmptyObject(user) && action == 'd') {
                     if (user.userId == $scope.userId) {
                         $scope.showWarning($scope.resourceBundle["auser.disable.warning"] + "<br/> -" + user.userId);
-                        isAdmin = true;
-                        return;
+                        return false;
                     }
                 }
             }
 
             function checkAdminUsers() {
                 if (!checkNullEmptyObject($scope.admin)) {
-                    validateAdminUser($scope.admin.pac);
-                    validateAdminUser($scope.admin.sac);
+                        var isValid = validateAdminUser($scope.admin.pac) &&
+                            validateAdminUser($scope.admin.sac);
+                        if (!isValid) {
+                            return false;
+                        }
                 }
+                return true;
             }
 
-            checkAdminUsers();
-            if (!isSupport && !isAdmin) {
+            if(!checkAdminUsers()){
+                return;
+            }
+            if (!isSupport) {
                 userService.enableDisableUser($scope.userId, action).then(function (data) {
                     $scope.showSuccess(data.data);
                 }).catch(function error(msg) {
