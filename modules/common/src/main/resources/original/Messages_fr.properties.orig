@@ -1210,3 +1210,6 @@ shipment.yes=Oui, expédiez maintenant
 shipment.no=Non, créez cet envoi
 ship=Navire
 fulfill=Remplir
+user.tag=Étiquette utilisateur
+user.activity.by.user=Par utilisateur
+user.activity.by.users=Par les utilisateurs

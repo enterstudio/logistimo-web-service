@@ -345,16 +345,15 @@ public class DomainConfigController {
   public
   @ResponseBody
   GeneralConfigModel getGeneralConfig(
-      @RequestParam(name = "domain_id", required = false) Long domainId,
-      HttpServletRequest request) throws ServiceException, ObjectNotFoundException {
+      @RequestParam(name = "domain_id", required = false) Long domainId)
+      throws ServiceException, ObjectNotFoundException {
     SecureUserDetails sUser = SecurityUtils.getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
     Long
         dId =
-        (null == domainId) ? SessionMgr.getCurrentDomain(request.getSession(), userId) : domainId;
-    if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
+        (null == domainId) ? SecurityUtils.getCurrentDomainId() : domainId;
+    if (!usersService.hasAccessToDomain(sUser.getUsername(), dId)) {
       xLogger.warn("User {0} does not have access to domain id {1}", sUser.getUsername(), domainId);
       throw new InvalidDataException("User does not have access to domain");
     }

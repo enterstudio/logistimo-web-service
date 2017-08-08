@@ -169,6 +169,21 @@ public class ReportPluginService implements Service {
       case BY_ENTITY:
         finaliseFilterByEntity(model, retainFilters);
         break;
+      case BY_USER:
+        model.filters.remove(QueryHelper.TOKEN + QueryHelper.QUERY_USER);
+        if(retainFilters.containsKey(QueryHelper.TOKEN + QueryHelper.QUERY_USER_TAG)) {
+          model.filters.put(QueryHelper.TOKEN + QueryHelper.QUERY_USER
+                  + CharacterConstants.UNDERSCORE + QueryHelper.QUERY,
+              QueryHelper.QUERY_USER + CharacterConstants.UNDERSCORE + QueryHelper.QUERY_USER_TAG
+                  + CharacterConstants.UNDERSCORE + QueryHelper.QUERY);
+          model.filters.put(QueryHelper.TOKEN + QueryHelper.QUERY_USER_TAG,
+              retainFilters.get(QueryHelper.TOKEN + QueryHelper.QUERY_USER_TAG));
+        } else {
+          model.filters.put(QueryHelper.TOKEN + QueryHelper.QUERY_USER
+                  + CharacterConstants.UNDERSCORE + QueryHelper.QUERY,
+              QueryHelper.QUERY_USER + CharacterConstants.UNDERSCORE + QueryHelper.QUERY);
+        }
+        break;
       case BY_ENTITY_TAGS:
         model.filters.remove(QueryHelper.TOKEN + QueryHelper.QUERY_ENTITY_TAG);
         break;
@@ -284,6 +299,9 @@ public class ReportPluginService implements Service {
             as.getVendorIdsForReports(
                 model.filters.get(QueryHelper.TOKEN + QueryHelper.QUERY_DOMAIN)));
         break;
+      case BY_USER:
+        prepareFiltersByUser(model,retainFilters);
+        break;
       case BY_ASSET_TYPE:
         model.filters.remove(QueryHelper.TOKEN + QueryHelper.QUERY_MTYPE);
         as = Services.getService(AssetManagementServiceImpl.class);
@@ -350,6 +368,14 @@ public class ReportPluginService implements Service {
     if (model.filters.containsKey(QueryHelper.TOKEN + QueryHelper.QUERY_CITY)) {
       retainFilters.put(QueryHelper.TOKEN + QueryHelper.QUERY_CITY,
           model.filters.remove(QueryHelper.TOKEN + QueryHelper.QUERY_CITY));
+    }
+  }
+
+  private void prepareFiltersByUser(QueryRequestModel model,Map<String,String> retainFilters){
+    model.filters.put(QueryHelper.TOKEN + QueryHelper.QUERY_USER, null);
+    if (model.filters.containsKey(QueryHelper.TOKEN + QueryHelper.QUERY_USER_TAG)) {
+      retainFilters.put(QueryHelper.TOKEN + QueryHelper.QUERY_USER_TAG,
+          model.filters.remove(QueryHelper.TOKEN + QueryHelper.QUERY_USER_TAG));
     }
   }
 
