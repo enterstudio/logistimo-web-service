@@ -25,6 +25,8 @@ package com.logistimo.orders.approvals.actions;
 
 import com.logistimo.approvals.client.IApprovalsClient;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
+import com.logistimo.orders.approvals.dao.IApprovalsDao;
+import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +40,13 @@ public class GetOrderApprovalAction {
   @Autowired
   IApprovalsClient approvalsClient;
 
+  @Autowired
+  IApprovalsDao approvalsDao;
+
   public CreateApprovalResponse invoke(String approvalId) {
-    return approvalsClient.getApproval(approvalId);
+    CreateApprovalResponse response = approvalsClient.getApproval(approvalId);
+    IOrderApprovalMapping approvalMapping = approvalsDao.getOrderApprovalMapping(response.getApprovalId());
+    response.setLatest(approvalMapping.isLatest());
+    return response;
   }
 }

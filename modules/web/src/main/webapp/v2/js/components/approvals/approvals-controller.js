@@ -37,6 +37,7 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
             $scope.reject = false;
             $scope.approve = false;
             $scope.isApprover = false;
+            $scope.latest = false;
         };
         $scope.init();
 
@@ -116,6 +117,7 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
                     if($scope.request == true) {
                         $scope.fetchApproverDetails();
                     }
+                    $scope.latest = $scope.approval.latest;
                 }).catch(function (errorMsg) {
                     $scope.showErrorMsg(errorMsg);
                 }).finally(function () {

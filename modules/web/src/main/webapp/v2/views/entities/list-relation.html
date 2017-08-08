@@ -53,15 +53,23 @@
                 <span class="filter-label">{{resourceBundle.kiosk}}</span>
             </div>
             <div class="col-sm-3">
-                <entity-select ent-model="ent" classes="form-control"
-                               place-holder="{{resourceBundle.filterby}} {{resourceBundle['kiosks.lower']}}">
-                </entity-select>
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="searchkey" name="search.key" maxlength="50"
+                           placeholder="{{resourceBundle['filterby']}} {{resourceBundle['kiosks.kiosks.lower']}}" ng-enter="searchData()">
+                    <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click="searchData()" type="button"
+                                    ng-disabled="(search.key == null && search.key == '')"
+                                    uib-tooltip="{{resourceBundle['search']}}">
+                                <span class="glyphicons glyphicons-search"></span>
+                            </button>
+                        </span>
+                </div>
             </div>
             <div class="col-sm-3 cbx">
                 <span class="filter-label">{{resourceBundle['kiosk']}} {{resourceBundle['tag.lower']}}:</span>
                 <tag-filter ng-model="eTag" tag-type="entity"></tag-filter>
             </div>
-            <div class="pull-right">
+            <div class="pull-right mr10">
                 <button type="button" class="btn btn-sm btn-default" ng-click="resetFetch()">{{resourceBundle['reset']}}</button>
             </div>
         </div>

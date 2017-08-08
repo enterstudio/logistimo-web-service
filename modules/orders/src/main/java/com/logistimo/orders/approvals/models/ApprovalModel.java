@@ -71,6 +71,8 @@ public class ApprovalModel {
   @SerializedName("active_approver_type")
   private String activeApproverType;
 
+  private boolean latest;
+
   public String getId() {
     return id;
   }
@@ -166,5 +168,13 @@ public class ApprovalModel {
 
   public void setActiveApproverType(String activeApproverType) {
     this.activeApproverType = activeApproverType;
+  }
+
+  public boolean isLatest() {
+    return latest;
+  }
+
+  public void setLatest(boolean latest) {
+    this.latest = latest;
   }
 }

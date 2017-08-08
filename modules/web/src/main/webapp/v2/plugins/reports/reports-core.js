@@ -848,7 +848,8 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
             scope: {
                 filterType: '=',
                 filterModel: '=',
-                placeHolder: '@'
+                placeHolder: '@',
+                ngDisabled:'='
             },
             controller: ManufacturerFilterController,
             templateUrl: 'plugins/reports/filters/manufacturer-filter.html'
