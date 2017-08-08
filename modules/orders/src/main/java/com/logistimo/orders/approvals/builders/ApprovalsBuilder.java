@@ -191,6 +191,7 @@ public class ApprovalsBuilder {
     model.setConversationId(approvalResponse.getConversationId());
     model.setStatusUpdatedBy(buildRequestorModel(approvalResponse.getUpdatedBy(), approvalResponse.getApprovalId()));
     model.setRequester(buildRequestorModel(approvalResponse.getRequesterId(), approvalResponse.getApprovalId()));
+    model.setLatest(approvalResponse.isLatest());
     if (embed != null) {
       for (String s : embed) {
         if (EmbedConstants.ORDER.equals(s)) {

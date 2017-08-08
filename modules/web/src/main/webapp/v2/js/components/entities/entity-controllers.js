@@ -1960,10 +1960,10 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
         $scope.showLoading();
         entityService.getLinksCount($scope.entityId,$scope.searchkey,$scope.linkedEntityId,$scope.entityTag).then(function (data) {
             var counts = data.data.replace(/"/g, "").split(",");
-            if(checkNullEmpty($scope.entityTag) && checkNullEmpty($scope.linkedEntityId)) {
+            if(checkNullEmpty($scope.entityTag) && checkNullEmpty($scope.searchkey)) {
                 $scope.customerCount = counts[0];
                 $scope.vendorCount = counts[1];
-            } else if(checkNotNullEmpty($scope.linkedEntityId) || checkNotNullEmpty($scope.entityTag)) {
+            } else if(checkNotNullEmpty($scope.searchkey) || checkNotNullEmpty($scope.entityTag)) {
                 if($scope.linkType == 'c') {
                     $scope.customerCount = counts[0];
                 } else if($scope.linkType == 'v') {
@@ -1981,8 +1981,7 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
         $scope.rData = undefined;
         $scope.mOffset = 0;
         $scope.filtered = [];
-        $scope.ent = $scope.linkedEntityId = undefined;
-        $scope.eTag = $scope.entityTag = undefined;
+        $scope.eTag = $scope.entityTag = $scope.searchkey = undefined;
         if ($scope.offset == 0) {
             $scope.fetch();
         }
@@ -2047,19 +2046,16 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
         }
     };
     var searchCount = 0;
-    $scope.$watch("ent", function(newVal, oldVal) {
-        if(newVal != oldVal) {
-            if(checkNullEmpty(newVal)) {
-                $scope.linkedEntityId = undefined;
-                offset = 0;
-            } else {
-                $scope.linkedEntityId = newVal.id;
-                $scope.eTag = $scope.entityTag = undefined;
-            }
-            searchCount++;
-            $scope.searchEntity();
-        }
-    });
+    $scope.searchData = function() {
+       if(checkNotNullEmpty($scope.searchkey)) {
+           $scope.eTag = $scope.entityTag = undefined;
+       } else {
+           $scope.searchkey = undefined;
+           offset = 0;
+       }
+        searchCount++;
+        $scope.searchEntity();
+    };
     $scope.$watch("eTag", function(newVal, oldVal) {
         if(newVal != oldVal) {
             if(checkNullEmpty(newVal)) {
@@ -2067,7 +2063,7 @@ entityControllers.controller('RelationListController', ['$rootScope','$scope', '
                 offset = 0;
             } else {
                 $scope.entityTag = newVal;
-                $scope.ent = $scope.linkedEntityId = undefined;
+                $scope.searchkey = undefined;
             }
             searchCount++;
             $scope.searchEntity();

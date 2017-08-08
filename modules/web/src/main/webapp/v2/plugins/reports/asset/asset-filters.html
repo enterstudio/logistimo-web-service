@@ -58,7 +58,7 @@
                         <span ng-class="{'active':cards.mc == undefined}" ng-click="changeSubHeading('m')">By monitoring type</span>
                         <span ng-class="{'active':cards.mc == 't'}" ng-click="changeSubHeading('m','t')">By asset type</span>
                     </div>
-                    <rpt-monitor-type-filter filter-model="filter.mt" ng-disabled="disableMonitor" ng-if="cards.mc == undefined"></rpt-monitor-type-filter>
+                    <rpt-monitor-type-filter filter-model="filter.mt" ng-disabled="disableMonitor || ((filter.entity || filter.etag) && filter.mf)" ng-if="cards.mc == undefined"></rpt-monitor-type-filter>
                     <rpt-asset-filter filter-model="filter.at" filter-type="{{disableMonitor ? defaultAssetType : 'all'}}" ng-if="cards.mc == 't'"></rpt-asset-filter>
                 </div>
                 <div class="filter-card" ng-if="!disableManufacturer">
@@ -67,7 +67,7 @@
                         <span ng-class="{'active':cards.mfc == undefined}" ng-click="changeSubHeading('mf')">By manufacturer</span>
                         <span ng-class="{'active':cards.mfc == 'm'}" ng-click="changeSubHeading('mf','m')">By model</span>
                     </div>
-                    <rpt-manufacturer-filter filter-model="filter.mf" filter-type="filter.mt" ng-if="cards.mfc == undefined"></rpt-manufacturer-filter>
+                    <rpt-manufacturer-filter filter-model="filter.mf" ng-disabled="filter.mt && (filter.entity || filter.etag)" filter-type="filter.mt" ng-if="cards.mfc == undefined"></rpt-manufacturer-filter>
                     <rpt-model-filter filter-model="filter.mm" ng-if="cards.mfc == 'm'"></rpt-model-filter>
                     <div class="filter-sub-heading pt10">
                         <span class="active">By manufacturing year</span>
@@ -83,9 +83,9 @@
                         <span ng-class="{'active':cards.ec == 'i'}" ng-click="changeSubHeading('e','i')">By name</span>
                     </div>
                     <rpt-tag-filter place-holder="Select {{resourceBundle['kiosk.lowercase']}} tag"
-                                    filter-model="filter.etag" filter-type="entity"
+                                    filter-model="filter.etag" ng-disabled="filter.mt && filter.mf" filter-type="entity"
                                     ng-if="cards.ec == undefined"></rpt-tag-filter>
-                    <rpt-entity-filter ng-disabled="filter.st || filter.dis || filter.tlk || filter.cty"
+                    <rpt-entity-filter ng-disabled="filter.st || filter.dis || filter.tlk || filter.cty || (filter.mt && filter.mf)"
                                        place-holder="Select {{resourceBundle['kiosk.lowercase']}}" filter-model="filter.entity"
                                        ng-if="cards.ec == 'i'"></rpt-entity-filter>
                     <span ng-show="(filter.st || filter.dis || filter.tlk || filter.cty) && cards.ec == 'i'"

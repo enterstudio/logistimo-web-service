@@ -2554,9 +2554,13 @@ public class DomainConfigController {
       //Get the template
       EventSummaryConfigModel templateModel = EventSummaryTemplateLoader.getDefaultTemplate();
       if (templateModel != null) {
-        if (model == null || model.getEvents().isEmpty()) {
+        if (model == null ) {
+            return templateModel;
+        } else if(model.getEvents().isEmpty()) {
+          templateModel.setTagDistribution(model.getTagDistribution());
+          templateModel.setTag(model.getTag());
           return templateModel;
-        } else {
+        } else{
           model.buildEvents(templateModel.getEvents());
           xLogger.info(" Event summary events built based on template");
         }
