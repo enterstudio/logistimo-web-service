@@ -177,26 +177,30 @@ domainCfgControllers.controller('SummarisationConfigurationController', ['$scope
                     var conditions = [];
                     angular.forEach(type.heading, function (heading) {
                         var rowCopy = angular.copy(rows[heading]);
+                        var copy = true;
                         if (rows[heading].values instanceof Array) {
                             if (checkNotNullEmpty(rowCopy.values)) {
-                                var includeTags = [];
+                                var values = [];
                                 angular.forEach(rowCopy.values, function (tag) {
-                                    includeTags.push(tag['id']);
+                                    values.push(tag['id']);
                                 });
-                                rowCopy.values = includeTags;
+                                rowCopy.values = values;
+                            } else {
+                                copy = false;
+                            }
+                        } else {
+                            if(checkNullEmpty(rowCopy.value)) {
+                                copy = false;
                             }
                         }
-                        conditions.push(rowCopy);
+                        if(copy) {
+                            conditions.push(rowCopy);
+                        }
                     });
                     thresholds.push({conditions: conditions});
                 });
-            }
-            else {
-                var conditions = [];
-                angular.forEach(type.heading, function (heading) {
-                    conditions.push(type.template[heading]);
-                });
-                thresholds.push({conditions: conditions});
+            } else {
+                thresholds.push({conditions: []});
             }
             event.category = $scope.subview;
             event.event_type = th;

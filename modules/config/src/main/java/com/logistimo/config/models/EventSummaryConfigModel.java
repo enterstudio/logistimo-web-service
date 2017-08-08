@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -300,7 +301,7 @@ public class EventSummaryConfigModel implements Serializable {
       //form a key of the map by appending category,$ and type
       Threshold threshold = event.getThresholds().get(0);
       //for a nested map with conditions names and the conditions object
-      Map<String, Condition> thresholdMap = new HashMap<>(threshold.getConditions().size());
+      Map<String, Condition> thresholdMap = new LinkedHashMap<>(threshold.getConditions().size());
       for (Condition condition : threshold.getConditions()) {
         thresholdMap.put(condition.getName(), condition);
       }
@@ -338,55 +339,30 @@ public class EventSummaryConfigModel implements Serializable {
     }
   }
 
-  private void updateThresholds(Events event,
-                                Map<String, Condition> thresholdMap) {
-    Set<String> thresholdNameKeySet = new HashSet<>(thresholdMap.keySet());
+  private void updateThresholds(Events event, Map<String, Condition> templateConditionMap) {
     for (Threshold threshold : event.getThresholds()) {
-      List<Condition> newConditionList = new ArrayList<>();
-      List<Condition> conditionList = threshold.getConditions();
-      updateConditions(conditionList, thresholdNameKeySet, thresholdMap, newConditionList);
-      //Add the new threshold present in the template to the list
-      if (!thresholdNameKeySet.isEmpty()) {
-        for (String s : thresholdNameKeySet) {
-          Condition
-              addCondition =
-              new Condition(s, thresholdMap.get(s).getUnits(), thresholdMap.get(s).getOper());
-          newConditionList.add(addCondition);
+      List<Condition> allConditions = new ArrayList<>(templateConditionMap.size());
+      for (Map.Entry<String, Condition> templateConditionEntry : templateConditionMap.entrySet()) {
+        Iterator<Condition> dbConditionIterator = threshold.getConditions().iterator();
+        boolean isNew = true;
+        while (dbConditionIterator.hasNext()) {
+          Condition condition = dbConditionIterator.next();
+          if (templateConditionEntry.getKey().equals(condition.getName())) {
+            isNew = false;
+            Condition value = templateConditionEntry.getValue();
+            condition.setUnits(value.getUnits() != null ? value.getUnits() : StringUtils.EMPTY);
+            condition.setOper(value.getOper() != null ? value.getOper() : StringUtils.EMPTY);
+            allConditions.add(condition);
+            dbConditionIterator.remove();
+            break;
+          }
         }
-        conditionList.addAll(newConditionList);
-      }
-    }
-  }
-
-  /**
-   * Update the thresholds
-   *
-   * @param conditionList       list of thresholds
-   * @param thresholdNameKeySet set with conditions names
-   * @param thresholdMap        map with template thresholds
-   * @param newConditionList    newly added conditions list
-   */
-  private void updateConditions(List<Condition> conditionList, Set<String> thresholdNameKeySet,
-                                Map<String, Condition> thresholdMap,
-                                List<Condition> newConditionList) {
-    Iterator<Condition> thresholdIterator = conditionList.iterator();
-    while (thresholdIterator.hasNext()) {
-      Condition condition = thresholdIterator.next();
-      //if the conditions name is not present, remove it
-      if (!thresholdMap.containsKey(condition.getName())) {
-        thresholdIterator.remove();
-      } else {
-        Condition templateCondition = thresholdMap.get(condition.getName());
-        // For the first row iteration,remove the conditions names from the conditions name key set.
-        if (newConditionList.isEmpty()) {
-          thresholdNameKeySet.remove(condition.getName());
+        if (isNew) {
+          Condition value = templateConditionEntry.getValue();
+          allConditions.add(new Condition(value.getName(), value.getUnits(), value.getOper()));
         }
-        //Replace the units and operations from the conditions
-        condition.setUnits(templateCondition.getUnits() != null ? templateCondition.getUnits()
-            : StringUtils.EMPTY);
-        condition.setOper(
-            templateCondition.getOper() != null ? templateCondition.getOper() : StringUtils.EMPTY);
       }
+      threshold.setConditions(allConditions);
     }
   }
 
