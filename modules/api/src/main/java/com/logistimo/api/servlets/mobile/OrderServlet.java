@@ -642,11 +642,16 @@ public class OrderServlet extends JsonRestServlet {
         DomainConfig dc = DomainConfig.getInstance(order.getDomainId());
         boolean isAccounting = dc.isAccountingEnabled();
         MobileOrderBuilder mob = new MobileOrderBuilder();
-        EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-        IKiosk k = as.getKiosk(order.getKioskId(), false);
+
+        boolean isBatchEnabled=false;
+        if(kioskId==order.getServicingKiosk()){
+          EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
+          IKiosk k = entitiesService.getKiosk(kioskId, false);
+          isBatchEnabled=k.isBatchMgmtEnabled();
+        }
+
         mom =
-            mob.build(order, locale, timezone, true, isAccounting, incShpItems,
-                k.isBatchMgmtEnabled());
+            mob.build(order, locale, timezone, true, isAccounting, incShpItems,isBatchEnabled);
       }
       String
           jsonOutput =
