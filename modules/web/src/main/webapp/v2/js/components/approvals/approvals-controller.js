@@ -125,6 +125,7 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
                 });
             } else {
                 $scope.request = true;
+                $scope.latest = true;
                 $scope.fetchApproverDetails();
                 if(checkNotNullEmpty($scope.order.approver)) {
                     $scope.isApprover = true;
@@ -292,6 +293,7 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
 
         $scope.setActiveApprovers = function () {
             if (checkNotNullEmpty($scope.filtered)) {
+                var expires_at = "";
                 $scope.filtered.forEach(function (data) {
                     if (data.status.status == 'pn') {
                         if (checkNotNullEmpty(data.approvers)) {
@@ -299,9 +301,15 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
                             data.approvers.forEach(function (approver) {
                                 if (approver.approver_status == 'ac') {
                                     activeApprovers.push(approver);
+                                    if(checkNullEmpty(expires_at) && approver.user_id == $scope.curUser) {
+                                        expires_at = approver.expires_at;
+                                    }
                                 }
                             });
                             data.approvers = activeApprovers;
+                            if(checkNotNullEmpty(expires_at)) {
+                                data.expires_at = expires_at;
+                            }
                         }
                     }
                 });
