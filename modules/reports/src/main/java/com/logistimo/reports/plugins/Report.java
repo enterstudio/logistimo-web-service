@@ -31,7 +31,7 @@ public class Report {
   public Long mid;
   public Long kid;
   public Long lkid;
-  public Long uid;
+  public String uid;
   public Long mtag;
   public Long ktag;
   public Long utag;
@@ -226,7 +226,7 @@ public class Report {
     return lkid;
   }
 
-  public Long getUserId() {
+  public String getUserId() {
     return uid;
   }
 
