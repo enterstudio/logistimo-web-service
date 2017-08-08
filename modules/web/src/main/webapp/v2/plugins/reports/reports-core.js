@@ -237,6 +237,7 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
     reportsPluginCore.directive('rptLocationFilter', locationFilter);
     reportsPluginCore.directive('rptMaterialFilter', materialFilter);
     reportsPluginCore.directive('rptEntityFilter', entityFilter);
+    reportsPluginCore.directive('rptUserFilter', userFilter);
     reportsPluginCore.directive('rptEntityRelationFilter', entityRelationFilter);
     reportsPluginCore.directive('rptTagFilter', tagFilter);
     reportsPluginCore.directive('rptDateFilter', dateFilter);
@@ -288,6 +289,7 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
             }
         };
     }
+
 
     function locationFilter() {
         return {
@@ -344,6 +346,43 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
                 return d;
             });
         };
+    }
+    function userFilter() {
+        return {
+            restrict: 'E',
+            scope: {
+                filterModel: '=',
+                placeHolder: '@',
+                limit: '@',
+                preSelected:'=',
+                ngDisabled: '='
+            },
+            controller: UserFilterController,
+            templateUrl: function(elem, attr) {
+                    return 'plugins/reports/filters/user-filter.html';
+            }
+        }
+    }
+    function UserFilterController($scope, $q, userService) {
+
+
+
+        $scope.query = function (term) {
+            $scope.loadingData = true;
+            var deferred = $q.defer();
+            userService.getDomainUsers(term, $scope.offset, $scope.size, undefined, false, true).then(function (data) {
+                for (var i in data.data.results) {
+                    data.data.results[i].text=data.data.results[i].fnm + ' [' + data.data.results[i].id + ']';
+                }
+                deferred.resolve(data.data.results);
+            }).catch(function error(msg) {
+                deferred.reject(msg);
+            }).finally(function(){
+                $scope.loadingData = false;
+            });
+            return deferred.promise;
+        };
+
     }
 
     function materialFilter() {

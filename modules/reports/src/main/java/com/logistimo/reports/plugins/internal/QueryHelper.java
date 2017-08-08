@@ -78,8 +78,8 @@ public class QueryHelper {
   /** Query Id */
   public static final String QUERY_DOMAIN = "DID";
 
-  private static final String QUERY_USER = "UID";
-  private static final String QUERY_USER_TAG = "UTAG";
+  public static final String QUERY_USER = "UID";
+  public static final String QUERY_USER_TAG = "UTAG";
   public static final String QUERY_ENTITY_TAG = "KTAG";
   public static final String QUERY_MATERIAL_TAG = "MTAG";
   private static final String QUERY_SIZE = "SIZE";
@@ -153,7 +153,7 @@ public class QueryHelper {
     QUERY_CITY
   };
 
-  private static final List<String> NUMERIC_FIELDS = Arrays.asList(MATERIAL, ENTITY, SIZE, OFFSET, MYEAR, LKID);
+  private static final List<String> NUMERIC_FIELDS = Arrays.asList(MATERIAL, ENTITY, SIZE, OFFSET, MYEAR, LKID,USER);
 
   static {
     OPTIONAL_FILTER_MAP = new HashMap<>(18);

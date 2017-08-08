@@ -451,6 +451,7 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.EDIT);
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.CANCEL);
+              permissions.add(PermissionConstants.REOPEN);
             }
           }
         } else {
@@ -473,6 +474,7 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.CANCEL);
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.EDIT);
+              permissions.add(PermissionConstants.REOPEN);
             }
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
             if (orderModel.atv) {
@@ -480,6 +482,7 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.SHIP);
               permissions.add(PermissionConstants.CREATE_SHIPMENT);
               permissions.add(PermissionConstants.CONFIRM);
+              permissions.add(PermissionConstants.CANCEL);
             }
           }
         } else {
@@ -488,6 +491,7 @@ public class OrdersAPIBuilder {
             permissions.add(PermissionConstants.CONFIRM);
             permissions.add(PermissionConstants.ALLOCATE);
             permissions.add(PermissionConstants.EDIT);
+            permissions.add(PermissionConstants.REOPEN);
           }
         }
       } else if (IOrder.TRANSFER_ORDER == approvalType) {
@@ -501,6 +505,7 @@ public class OrdersAPIBuilder {
             permissions.add(PermissionConstants.EDIT);
             permissions.add(PermissionConstants.CANCEL);
             permissions.add(PermissionConstants.ALLOCATE);
+            permissions.add(PermissionConstants.REOPEN);
 
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
             if (orderModel.atv) {
@@ -514,6 +519,7 @@ public class OrdersAPIBuilder {
           permissions.add(PermissionConstants.CANCEL);
           permissions.add(PermissionConstants.EDIT);
           permissions.add(PermissionConstants.ALLOCATE);
+          permissions.add(PermissionConstants.REOPEN);
         }
       }
     } else {
@@ -523,6 +529,7 @@ public class OrdersAPIBuilder {
       permissions.add(PermissionConstants.EDIT);
       permissions.add(PermissionConstants.SHIP);
       permissions.add(PermissionConstants.CREATE_SHIPMENT);
+      permissions.add(PermissionConstants.REOPEN);
     }
     model.setPermissions(permissions);
     return model;
