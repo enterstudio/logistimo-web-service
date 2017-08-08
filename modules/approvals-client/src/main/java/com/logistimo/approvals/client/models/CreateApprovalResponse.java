@@ -79,6 +79,8 @@ public class CreateApprovalResponse {
   @SerializedName("updated_by")
   private String updatedBy;
 
+  private boolean latest;
+
   public String getApprovalId() {
     return approvalId;
   }
@@ -197,5 +199,13 @@ public class CreateApprovalResponse {
 
   public void setUpdatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
+  }
+
+  public boolean isLatest() {
+    return latest;
+  }
+
+  public void setLatest(boolean latest) {
+    this.latest = latest;
   }
 }

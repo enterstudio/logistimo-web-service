@@ -67,11 +67,11 @@
                 <div class="col-sm-3">
                     <div class="pull-right">
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && !isApprover && isUndef(approval.approvers)" disabled>{{resourceBundle['approvals.request']}}
+                                ng-show="request == true && !isApprover && isUndef(approval.approvers) && latest" disabled>{{resourceBundle['approvals.request']}}
                             {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && isDef(approval.approvers)">
+                                ng-show="request == true && isDef(approval.approvers) && latest">
                             {{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('cn')"
@@ -85,7 +85,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-sm-12" ng-show="request">
+                <div class="col-sm-12 pt5" ng-show="request">
                     <span ng-show="cancelled && !isApprover">{{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lowercase']}}</span>
                     <span ng-show="approved && !isApprover">{{resourceBundle['approvals.approved']}} {{resourceBundle['on.lowercase']}}</span>
                     <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lowercase']}}</span>
