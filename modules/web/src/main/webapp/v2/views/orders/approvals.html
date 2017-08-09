@@ -172,14 +172,19 @@
                         <td ng-click="toggle($index)"><a href="#/setup/entities/detail/{{item.order.vendor.id}}/"
                                                          target="_blank">{{item.order.vendor.name}}</a><span
                                 class="litetext">{{item.order.vendor.address}}</span></td>
-                        <td ng-click="toggle($index)"><span ng-show="item.status.status == 'pn'">{{resourceBundle['approvals.pending']}}</span>
+                        <td ng-click="toggle($index)">
+                            <span ng-show="item.status.status == 'pn'">{{resourceBundle['approvals.pending']}}</span>
                             <span ng-show="item.status.status == 'rj'">{{resourceBundle['approvals.rejected']}}</span>
                             <span ng-show="item.status.status == 'cn'">{{resourceBundle['approvals.cancelled']}}</span>
                             <span ng-show="item.status.status == 'ap'">{{resourceBundle['approvals.approved']}}</span>
                             <span ng-show="item.status.status == 'ex'">{{resourceBundle['approvals.expired']}}</span>
+                            <span class="litetext" ng-show="item.status.status == 'cn'">
+                                <a href="#/setup/users/all/details?userId={{item.status.updated_by}}">{{item.status.name}}</a>
+                            </span>
                             <span class="litetext">{{item.status.updated_at | formatDate:this }}</span>
                                 <span class="litetext" ng-if="item.status.status == 'pn'">{{resourceBundle['approvals.expiry']}}: <span
-                                        class="c-red">{{item.expires_at | fromNow:this}}</span></span></td>
+                                        class="c-red">{{item.expires_at | fromNow:this}}</span></span>
+                        </td>
                         <td ng-click="toggle($index)"><a
                                 ng-href="#/setup/users/all/details?userId={{item.requester.user_id}}" target="_blank">{{item.requester.name}}</a>
                             <span class="litetext">{{item.created_at | formatDate:this}}</span></td>
@@ -193,10 +198,10 @@
                                         </span>
                                     </span>
                                 </span>
-                                <span ng-show="item.status.status == 'ex'">
+                                <span ng-show="item.status.status == 'ex' || item.status.status == 'cn'">
                                     {{resourceBundle['approvals.approvers.none']}}
                                 </span>
-                                <span ng-show="item.status.status == 'rj' || item.status.status == 'cn' ||  item.status.status == 'ap'">
+                                <span ng-show="item.status.status == 'rj' || item.status.status == 'ap'">
                                     <a href="#/setup/users/all/details?userId={{item.status.updated_by}}">{{item.status.name}}</a>
                                 </span>
                         </td>
