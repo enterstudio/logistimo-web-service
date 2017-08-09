@@ -138,15 +138,18 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                         return false;
                     }
                 }
+                return true;
             }
 
             function checkAdminUsers() {
                 var usersList = users.split(',');
-                for (var i = 0; i < usersList.length; i++) {
-                    var isValid = validateAdminUser($scope.admin.pac, usersList[i]) &&
-                    validateAdminUser($scope.admin.sac, usersList[i]);
-                    if(!isValid) {
-                        return false;
+                if (!checkNullEmptyObject($scope.admin)) {
+                    for (var i = 0; i < usersList.length; i++) {
+                        var isValid = validateAdminUser($scope.admin.pac, usersList[i]) &&
+                            validateAdminUser($scope.admin.sac, usersList[i]);
+                        if (!isValid) {
+                            return false;
+                        }
                     }
                 }
                 return true;
@@ -597,7 +600,6 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
         $scope.enableDisableUser = function (action) {
             $scope.user.en = action == 'e';
             var isSupport = false;
-            var isAdmin = false;
             if(checkNotNullEmpty($scope.support) && action == 'd'){
                 for(var i=0; i<$scope.support.length; i++){
                     if($scope.support[i].usrid == $scope.userId){
@@ -611,19 +613,27 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
                 if (!checkNullEmptyObject(user) && action == 'd') {
                     if (user.userId == $scope.userId) {
                         $scope.showWarning($scope.resourceBundle["auser.disable.warning"] + "<br/> -" + user.userId);
-                        isAdmin = true;
-                        return;
+                        return false;
                     }
                 }
+                return true;
             }
 
             function checkAdminUsers() {
-                validateAdminUser($scope.admin.pac);
-                validateAdminUser($scope.admin.sac);
+                if (!checkNullEmptyObject($scope.admin)) {
+                        var isValid = validateAdminUser($scope.admin.pac) &&
+                            validateAdminUser($scope.admin.sac);
+                        if (!isValid) {
+                            return false;
+                        }
+                }
+                return true;
             }
 
-            checkAdminUsers();
-            if (!isSupport && !isAdmin) {
+            if(!checkAdminUsers()){
+                return;
+            }
+            if (!isSupport) {
                 userService.enableDisableUser($scope.userId, action).then(function (data) {
                     $scope.showSuccess(data.data);
                 }).catch(function error(msg) {
