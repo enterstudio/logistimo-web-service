@@ -29,10 +29,10 @@ domainCfgControllers.controller('SummarisationMenuController', ['$scope', 'domai
     function ($scope, domainCfgService) {
         $scope.$on("$routeChangeSuccess", function (event, current, previous) {
             if (current.params.esId != previous.params.esId) {
-                $scope.subview = current.params.esId;
                 $scope.editCounter.value = 0;
                 $scope.config[$scope.subview] = angular.copy($scope.masterData[$scope.subview]);
-                $scope.config.ttag = angular.copy($scope.masterData.tag);
+                $scope.tags = angular.copy($scope.masterData.tags);
+                $scope.subview = current.params.esId || Object.keys($scope.config)[0];
             }
         });
         $scope.editCounter = {};
@@ -44,8 +44,10 @@ domainCfgControllers.controller('SummarisationMenuController', ['$scope', 'domai
 
             if (checkNotNullEmpty(esConfig)) {
                 $scope.config.eventdistribution = [];
-                $scope.config.ttag = esConfig.tag;
-                $scope.config.tag = esConfig.tag;
+                checkNotNullEmpty(esConfig.tag) ? $scope.tags = {
+                    ttag: esConfig.tag,
+                    tag: esConfig.tag
+                } : $scope.tags = {};
                 if (checkNotNullEmpty(esConfig.tag_distribution)) {
                     angular.forEach(esConfig.tag_distribution, function (tag) {
                         $scope.config.eventdistribution.push({text: tag, id: tag});
@@ -58,6 +60,7 @@ domainCfgControllers.controller('SummarisationMenuController', ['$scope', 'domai
             }
             $scope.subview = $scope.esId || Object.keys($scope.config)[0];
             $scope.masterData = angular.copy($scope.config);
+            $scope.masterData.tags = angular.copy($scope.tags);
         }).catch(function error(msg) {
             $scope.showErrorMsg(msg);
         }).finally(function () {
@@ -189,11 +192,11 @@ domainCfgControllers.controller('SummarisationConfigurationController', ['$scope
                                 copy = false;
                             }
                         } else {
-                            if(checkNullEmpty(rowCopy.value)) {
+                            if (checkNullEmpty(rowCopy.value)) {
                                 copy = false;
                             }
                         }
-                        if(copy) {
+                        if (copy) {
                             conditions.push(rowCopy);
                         }
                     });
@@ -211,7 +214,6 @@ domainCfgControllers.controller('SummarisationConfigurationController', ['$scope
         $scope.updateConfig = function () {
             var events = [];
             if ($scope.subview == 'eventdistribution') {
-                //tag
                 var tagDistribution = [];
                 angular.forEach($scope.config.eventdistribution, function (d) {
                     tagDistribution.push(d['text']);
@@ -224,11 +226,11 @@ domainCfgControllers.controller('SummarisationConfigurationController', ['$scope
             }
             $scope.showLoading();
             $scope.masterData[$scope.subview] = angular.copy($scope.config[$scope.subview]);
-            $scope.masterData.tag = angular.copy($scope.config.ttag);
+            $scope.masterData.tags = {tag: $scope.tags.ttag, ttag: $scope.tags.ttag};
             domainCfgService.setEventSummaryConfig({
                 events: events,
                 tag_distribution: tagDistribution,
-                tag: $scope.config.ttag
+                tag: $scope.tags.ttag
             }).then(function (data) {
                 $scope.showSuccess(data.data);
             }).catch(function error(msg) {
