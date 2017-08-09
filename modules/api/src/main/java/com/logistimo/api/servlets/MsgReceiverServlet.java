@@ -76,9 +76,9 @@ public class MsgReceiverServlet extends HttpServlet {
       String jobIdParam = smsService.getParameterName(SMSService.PARAM_JOBID);
       String mobileNoParam = smsService.getParameterName(SMSService.PARAM_MOBILENO);
       String messageParam = smsService.getParameterName(SMSService.PARAM_MESSAGE);
-      ;
+
       String recdOnParam = smsService.getParameterName(SMSService.PARAM_RECEIVEDON);
-      ;
+
       // Get the jobId, if present
       String jobId = request.getParameter(jobIdParam);
       String mobileNo = request.getParameter(mobileNoParam); // from the provider
