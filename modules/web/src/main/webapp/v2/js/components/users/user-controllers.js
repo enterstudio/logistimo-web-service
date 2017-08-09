@@ -616,6 +616,7 @@ userControllers.controller('UserDetailsController', ['$scope', 'userService', 'c
                         return false;
                     }
                 }
+                return true;
             }
 
             function checkAdminUsers() {
