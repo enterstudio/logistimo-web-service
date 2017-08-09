@@ -72,9 +72,12 @@ public class Report {
   public Long lmec;
   public Long lnc;
   public Long mac;
+  public Long mla;
+  public Long masc_brac;
   public Long mawa;
   public Long mc;
   public Long miac;
+  public Long miasc_brac;
   public Long mlwa;
   public Long mwa;
   public Long oc;
@@ -426,6 +429,15 @@ public class Report {
 
   public Long getMonitoredAssetCount() {
     return mac == null ? 0 : mac;
+  }
+  public Long getMonitoredLinkedAssetCount() {
+    return mla == null ? 0 : mla;
+  }
+  public Long getMonitoredAssetByStatusCount() {
+    return masc_brac == null ? 0 : masc_brac;
+  }
+  public Long getMonitoringAssetByStatusCount() {
+    return miasc_brac == null ? 0 : miasc_brac;
   }
 
   public Long getMonitoredActiveWorkingAsset() {
