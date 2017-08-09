@@ -32,6 +32,7 @@ import com.logistimo.approvals.client.models.CreateApprovalRequest;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.approvals.client.models.RestResponsePage;
 import com.logistimo.approvals.client.models.UpdateApprovalRequest;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.constants.EmbedConstants;
 import com.logistimo.logger.XLog;
 import com.logistimo.models.StatusModel;
@@ -220,7 +221,6 @@ public class ApprovalsBuilder {
     model.setId(approval.getId());
     model.setOrderId(Long.parseLong(approval.getTypeId()));
     model.setCreatedAt(approval.getCreatedAt());
-    model.setExpiresAt(approval.getExpireAt());
     model.setApprovers(buildApprovers(approval));
     model.setConversationId(approval.getConversationId());
     StatusModel statusModel = new StatusModel();
@@ -232,6 +232,7 @@ public class ApprovalsBuilder {
     }
     model.setStatus(statusModel);
     model.setRequester(buildRequestorModel(approval.getRequesterId(), approval.getId()));
+    model.setExpiresAt(approval.getExpireAt());
     if(approval.getAttributes() != null && !approval.getAttributes().isEmpty()) {
       approval.getAttributes().stream()
           .filter(at -> at.getKey().equals(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE))
