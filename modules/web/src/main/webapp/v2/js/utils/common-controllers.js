@@ -659,6 +659,7 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
     $scope.localFilters.forEach(function (filter) {
         addwatch(filter);
         $scope[filter] = angular.copy($scope[filter]);
+        callParentWatches(filter);
     });
     function addwatch(filter) {
         $scope.$parent.$watch(filter, function (newValue, oldValue) {
@@ -667,6 +668,21 @@ cmnControllers.controller('ResetController', ['$scope', function ($scope) {
             }
         })
     }
+
+    function callParentWatches(filter) {
+        if ($scope.localFilterWatches) {
+            if (checkNotNullEmpty($scope.localFilterWatches[filter])) {
+                $scope.$watch(filter, function (newValue, oldValue) {
+                    $scope.localFilterWatches[filter](newValue, oldValue, setFilter);
+                })
+            }
+        }
+    }
+
+    function setFilter(name, value) {
+        $scope[name] = value;
+    }
+
     $scope.applyFilters = function () {
         angular.forEach($scope.localFilters, function (filter) {
             $scope.$parent[filter] = angular.copy($scope[filter]);

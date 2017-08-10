@@ -171,13 +171,14 @@ invServices.factory('invService', ['$http', function ($http) {
             size = typeof size !== 'undefined' ? size : 50;
             var url = "/s2/api/inventory/abnormalstock/?offset=" + offset + "&size=" + size;
             if (checkNotNullEmpty(data.tt)) {
-                url = url + "&ttype=" + data.tt;
+                if(data.tt == 'en') {
+                    url = url + "&etag=" + data.t;
+                } else {
+                    url = url + "&mtag=" + data.t;
+                }
             }
             if (checkNotNullEmpty(data.et)) {
                 url = url + "&eventType=" + data.et;
-            }
-            if (checkNotNullEmpty(data.t)) {
-                url = url + "&tag=" + data.t;
             }
             return this.fetch(url);
         },

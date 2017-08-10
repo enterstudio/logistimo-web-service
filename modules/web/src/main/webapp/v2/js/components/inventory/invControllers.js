@@ -1337,16 +1337,24 @@ invControllers.controller('AbnormalStockCtrl', ['$scope', 'invService', 'domainC
             $scope.select(index);
         };
 
-        $scope.$watch("etag",function(){
-            if(checkNotNullEmpty($scope.etag)){
-                $scope.mtag = null;
+        function watchETag(newValue, oldValue, callback) {
+            if (checkNotNullEmpty(newValue)) {
+                if (callback) {
+                    callback('mtag', null);
+                }
             }
-        });
-        $scope.$watch("mtag",function(){
-            if(checkNotNullEmpty($scope.mtag)){
-                $scope.etag = null;
+        }
+
+        function watchMTag(newValue, oldValue, callback) {
+            if (checkNotNullEmpty(newValue)) {
+                if (callback) {
+                    callback('etag', null);
+                }
             }
-        });
+        }
+
+        $scope.localFilterWatches = {etag: watchETag, mtag: watchMTag};
+
         $scope.$on('$destroy', function cleanup() {
             $scope.stopInvFetch = true;
         });
