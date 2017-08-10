@@ -1385,7 +1385,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   @Override
   public BigDecimal computeRecommendedOrderQuantity(IInvntry invntry) {
     BigDecimal roq = new BigDecimal(-1);
-    BigDecimal huQty;
     if (IInvntry.MODEL_SQ.equals(invntry.getInventoryModel())) {
       roq =
           BigUtil.lesserThanZero(invntry.getEconomicOrderQuantity()) ? BigDecimal.ZERO
@@ -1398,20 +1397,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
                 .subtract(invntry.getInTransitStock());
       } else {
         roq = BigDecimal.ZERO;
-      }
-    }
-    if(BigUtil.notEqualsZero(roq)) {
-      try {
-        IHandlingUnitService hus = Services.getService(HandlingUnitServiceImpl.class);
-        Map<String, String> hu = hus.getHandlingUnitDataByMaterialId(invntry.getMaterialId());
-        if (hu != null) {
-          huQty = new BigDecimal(hu.get(IHandlingUnit.QUANTITY));
-          roq = roq.divide(huQty, 0, RoundingMode.CEILING).multiply(huQty);
-        } else {
-          roq = roq.setScale(0, BigDecimal.ROUND_UP);
-        }
-      } catch (Exception e) {
-        xLogger.warn("Error while fetching Handling Unit {0}", invntry.getMaterialId(), e);
       }
     }
     return roq;

@@ -1384,7 +1384,6 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         opoq = material.max - material.stk - material.tstk;
                     }
                 }
-                opoq = Math.ceil(opoq/material.huQty)*material.huQty;
                 return opoq;
             }
 
@@ -2444,7 +2443,6 @@ ordControllers.controller('order.MaterialController', ['$scope',
                     opoq.toFixed(1);
                 }
             }
-            opoq = Math.ceil(opoq/name.huQty)*name.huQty;
             return opoq.toFixed(0);
         };
         $scope.$watch('material.name', function (name, oldVal) {
