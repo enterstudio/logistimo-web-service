@@ -761,7 +761,8 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     return false;
                 }
                 var enforceCreditCheck = false;
-                if (checkNotNullEmpty($scope.aCfg.en) && ( ( $scope.aCfg.en == $scope.newStatus.st ) || ( $scope.aCfg.en == ORDER.CONFIRMED && $scope.newStatus.st == ORDER.COMPLETED ) ))
+                if (checkNullEmpty($scope.oCfg.dop) && checkNotNullEmpty($scope.aCfg.ea) && checkNotNullEmpty($scope.aCfg.en) &&
+                    ( ( $scope.aCfg.en == $scope.newStatus.st ) || ( $scope.aCfg.en == ORDER.CONFIRMED && $scope.newStatus.st == ORDER.COMPLETED ) ))
                     enforceCreditCheck = true;
                 if (enforceCreditCheck && $scope.order.tp > $scope.order.avc) {
                     $scope.showWarning($scope.resourceBundle.ordercannotbe + ' ' + ORDER.statusTxt[$scope.newStatus.st].toLowerCase() + '. ' + $scope.resourceBundle.ordercostexceedscredit + ' ' + $scope.order.cur + ' ' + $scope.order.avc);
@@ -904,7 +905,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         $scope.cancel();
                         $scope.newStatus = {};
                         var accountUpdatedMsg;
-                        if ($scope.aCfg && $scope.aCfg.ea && $scope.order.st == "cm" && $scope.order.tp > 0) {
+                        if (checkNullEmpty($scope.oCfg.dop) && $scope.aCfg && $scope.aCfg.ea && $scope.order.st == "cm" && $scope.order.tp > 0) {
                             accountUpdatedMsg = $scope.resourceBundle["accountupdatedmsg"] + " <b>" + $scope.order.pst + "</b>";
                             if (refreshMsg)
                                 accountUpdatedMsg += "<br/><br/><b>" + refreshMsg + "<b>";
