@@ -1424,9 +1424,8 @@ logistimoApp.directive('contact', function () {
                     }
                     return digits;
                 }
-                return undefined;
+                return '';
             }
-
             ctrl.$parsers.push(inputValue);
         }
     };
@@ -1445,7 +1444,7 @@ logistimoApp.directive('userId', function () {
                     }
                     return digits;
                 }
-                return undefined;
+                return '';
             }
 
             ctrl.$parsers.push(inputValue);
@@ -1466,7 +1465,7 @@ logistimoApp.directive('zipCode', function () {
                     }
                     return digits;
                 }
-                return undefined;
+                return '';
             }
 
             ctrl.$parsers.push(inputValue);
@@ -3191,7 +3190,7 @@ logistimoApp.directive('noDoubleQuotes', function() {
         link: function(scope, element, attrs, modelCtrl) {
             modelCtrl.$parsers.push(function(inputValue) {
                 if (inputValue == undefined)
-                    return ''
+                    return '';
                 var cleanInputValue = inputValue.replace(/["]+/g, '');
                 if (cleanInputValue != inputValue) {
                     modelCtrl.$setViewValue(cleanInputValue);

@@ -402,15 +402,14 @@ userControllers.controller('AddUserController', ['$scope', 'userService', 'confi
             }
         };
 
-        $scope.validateMobilePhone= function (ll) {
-            if(ll){
-                $scope.invalidPhl = validateMobile($scope.user.phl);
-            }
+        $scope.validateMobilePhone= function () {
+            $scope.invalidPhl = $scope.user.phl ? validateMobile($scope.user.phl) : undefined;
             $scope.invalidPhm = validateMobile($scope.user.phm);
         };
 
         $scope.validate = function () {
-            var valid = !($scope.uPasswordInvalid || checkNotNullEmpty($scope.invalidPhm) || $scope.uidStatus
+            var valid = !($scope.uPasswordInvalid || checkNotNullEmpty($scope.invalidPhm)
+            || checkNotNullEmpty($scope.invalidPhl) || $scope.uidStatus
             || $scope.ucidStatus || !$scope.uidLengthVerified || ($scope.user.age == 0 && $scope.user.age != '') || checkNullEmpty($scope.user.ro)
             || checkNullEmpty($scope.user.fnm) || checkNullEmpty($scope.user.cnt) || checkNullEmpty($scope.user.st)
             || checkNullEmpty($scope.user.lng) || checkNullEmpty($scope.user.tz) || addUserForm.em.className.indexOf('ng-invalid-email') > -1);
@@ -420,7 +419,7 @@ userControllers.controller('AddUserController', ['$scope', 'userService', 'confi
             return valid;
         };
         $scope.validateUpdate = function(){
-            var valid = !(checkNotNullEmpty($scope.invalidPhm) || $scope.ucidStatus || ($scope.user.age == 0 && $scope.user.age!=''));
+            var valid = !(checkNotNullEmpty($scope.invalidPhm) || checkNotNullEmpty($scope.invalidPhl) || $scope.ucidStatus || ($scope.user.age == 0 && $scope.user.age!=''));
             if(!valid) {
                 $scope.showErrorMsg($scope.resourceBundle['form.error']);
             }

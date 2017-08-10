@@ -49,7 +49,7 @@
                            user-id
                            placeholder="{{resourceBundle['user.id']}}"
                            ng-focus="uidCheck = false"
-                           ng-class="{'c-visited' : uVisited.id, 'u-na' : uVisited.id && (!uidLengthVerified || uidVerified && uidStatus)}"
+                           ng-class="{'c-visited' : uVisited.id, 'u-na' : !edit && uVisited.id && (!uidLengthVerified || uidVerified && uidStatus)}"
                            ng-blur="uVisited.id = true; uidCheck = true; checkUserAvailability(user.id); checkUserSize()" maxlength="20" required>
                 </div>
             </div>
@@ -356,9 +356,9 @@
                            name="phl"
                            maxlength="20"
                            placeholder="{{resourceBundle['user.landline']}}"
-                           ng-class="{'c-visited' : uVisited.phl}"
+                           ng-class="{'c-visited' : uVisited.phl, 'u-na':invalidPhl}"
                            contact
-                           ng-blur="uVisited.phl = true; validateMobilePhone('LL')">
+                           ng-blur="uVisited.phl = true; validateMobilePhone()">
                     <span class="litetext">+&lt;{{resourceBundle['country']}}-{{resourceBundle['code']}}&gt; &lt;{{resourceBundle['user.mobile']}}&gt;<br/>{{resourceBundle['eg']}} +91 08023418743 [{{resourceBundle['india']}}], +1 5105015555 [{{resourceBundle['usa']}}]</span>
                 </div>
             </div>
