@@ -494,3 +494,4 @@ orders.item.likely.stockout=Probablement stocker en {0} jours
 orders.item.reached.min=Le stock a atteint le niveau minimum
 orders.items.added=Les éléments {0} ont été ajoutés à cette commande.
 orders.created.by.system=Le système a créé cette commande.
+upgrade.app.message=L'approbation de la commande est activée, ce qui nécessite une mise à niveau vers votre application mobile. Veuillez mettre à niveau l'application mobile pour continuer à utiliser les fonctionnalités de gestion des commandes.

@@ -136,7 +136,7 @@ public class OrderServlet extends JsonRestServlet {
           messages); // TODO: NOTE: CancelOrder is retrained here for backward compatibility
     } else if (RestConstantsZ.ACTION_UPDATEORDER_OLD.equals(action)) {
       createOrUpdateOrder(req, resp, backendMessages, messages, true);
-    } else if (RestConstantsZ.ACTION_UPDATEORDERSTATUS.equals(action)) {
+    } else if (RestConstantsZ.ACTION_UPDATEORDERSTATUS_OLD.equals(action)) {
       updateOrderStatusOld(req, resp, backendMessages, messages);
     } else if (RestConstantsZ.ACTION_EXPORT.equals(action)) {
       scheduleExport(req, resp, backendMessages, messages);
@@ -151,8 +151,10 @@ public class OrderServlet extends JsonRestServlet {
                           ResourceBundle backendMessages, ResourceBundle messages)
       throws IOException, ServiceException, ValidationException {
     String action = req.getParameter(RestConstantsZ.ACTION);
-    if (RestConstantsZ.ACTION_UPDATEORDERSTATUS.equals(action)) {
-      updateOrderStatus(req, resp, backendMessages, messages);
+    if (RestConstantsZ.ACTION_UPDATEORDERSTATUS_OLD.equals(action)) {
+      updateOrderStatus(req, resp, backendMessages, messages, true);
+    } else if (RestConstantsZ.ACTION_UPDATEORDERSTATUS.equals(action)) {
+      updateOrderStatus(req, resp, backendMessages, messages, false);
     } else {
       processGet(req, resp, backendMessages, messages);
     }
@@ -455,7 +457,7 @@ public class OrderServlet extends JsonRestServlet {
             backendMessages.getString("error.noorders")
                 + " [2]"; // [2] is marker for error position in code
       }
-    } // end if ( status )
+    }
 
     MobileOrdersModel mom = null;
     if (status) {
@@ -679,7 +681,7 @@ public class OrderServlet extends JsonRestServlet {
   // Create or update a given order
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void createOrUpdateOrder(HttpServletRequest req, HttpServletResponse resp,
-                                   ResourceBundle backendMessages, ResourceBundle messages, boolean disableCreateTransfer)
+                                   ResourceBundle backendMessages, ResourceBundle messages, boolean isOldRequest)
       throws IOException {
     xLogger.fine("Entered createOrUpdateOrder");
     // Get the type
@@ -744,17 +746,24 @@ public class OrderServlet extends JsonRestServlet {
           status = false;
           statusCode = HttpServletResponse.SC_UNAUTHORIZED;
         }
+        DomainConfig dc = null;
         if (status) {
           // Get config.
-          DomainConfig dc = DomainConfig.getInstance(domainId);
-
+          dc = DomainConfig.getInstance(domainId);
+          if (isOldRequest && dc.getApprovalsConfig() != null) {
+            status = false;
+            message =
+                backendMessages.getString("upgrade.app.message");
+          }
+        }
+        if (status) {
           Boolean isSalesOrder = false;
           int tOrNt = IOrder.PURCHASE_ORDER;
           if (uoReq.oty != null && uoReq.oty.equals(IOrder.TYPE_SALE)) {
             isSalesOrder = true;
             tOrNt = IOrder.SALES_ORDER;
           }
-          if (!(disableCreateTransfer && RestConstantsZ.TYPE_ORDER.equals(type)) && uoReq.trf != null
+          if (!(isOldRequest && RestConstantsZ.TYPE_ORDER.equals(type)) && uoReq.trf != null
               && uoReq.trf.equals(IOrder.TRANSFER)) {
             tOrNt = uoReq.trf;
           }
@@ -1180,7 +1189,7 @@ public class OrderServlet extends JsonRestServlet {
         message = backendMessages.getString("error.systemerror");
         setSignatureAndStatus(cache, signature, IJobStatus.FAILED);
       }
-    } // end if ( status )
+    }
     // Get the locale string
     String localeStr = Constants.LANG_DEFAULT;
     if (locale != null) {
@@ -1210,9 +1219,6 @@ public class OrderServlet extends JsonRestServlet {
       status = false;
       message = backendMessages.getString("error.systemerror");
       try {
-        // Send error output as JSON
-        //OrderOutput json = new OrderOutput( false, null, message, localeStr, RESTUtil.VERSION_01 );
-        //sendJsonResponse( resp, statusCode, json.toJSONString() );
         String
             json =
             GsonUtil.orderOutputToJson(false, null, message, localeStr, RESTUtil.VERSION_01);
@@ -1228,7 +1234,7 @@ public class OrderServlet extends JsonRestServlet {
 
   @SuppressWarnings("rawtypes")
   private void updateOrderStatus(HttpServletRequest req, HttpServletResponse resp,
-                                 ResourceBundle backendMessages, ResourceBundle messages)
+                                 ResourceBundle backendMessages, ResourceBundle messages, boolean doApprovalConfigCheck)
       throws IOException, ServiceException {
     xLogger.fine("Entered updateOrderStatus");
     String password = req.getParameter(RestConstantsZ.PASSWORD); // sent when SMS message is sent
@@ -1270,6 +1276,11 @@ public class OrderServlet extends JsonRestServlet {
         locale = u.getLocale();
         // Get domain config
         dc = DomainConfig.getInstance(u.getDomainId());
+        if (doApprovalConfigCheck && dc.getApprovalsConfig() != null) {
+          status = false;
+          message =
+              backendMessages.getString("upgrade.app.message");
+        }
       }
     } catch (ServiceException e) {
       status = false;
@@ -1388,7 +1399,7 @@ public class OrderServlet extends JsonRestServlet {
       } else {
         order = getOrder(uosReq.tid);
       }
-    } // end if ( status )
+    }
 
     // For the JSON output and send
     try {
