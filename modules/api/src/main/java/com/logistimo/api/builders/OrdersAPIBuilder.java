@@ -33,6 +33,7 @@ import com.logistimo.api.models.OrderResponseModel;
 import com.logistimo.api.models.Permissions;
 import com.logistimo.api.models.UserContactModel;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.auth.SecurityUtil;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
@@ -423,7 +424,7 @@ public class OrdersAPIBuilder {
    * Returns the permission to be restricted
    */
   public Permissions buildPermissionModel(IOrder order, OrderModel orderModel, Integer approvalType,
-                                          boolean isApprovalRequired) {
+                                          boolean isApprovalRequired, String userName) {
     Permissions model = new Permissions();
     List<String> permissions = new ArrayList<>(1);
     ApprovalsDao approvalsDao = new ApprovalsDao();
@@ -504,10 +505,10 @@ public class OrdersAPIBuilder {
               || ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
             permissions.add(PermissionConstants.EDIT);
             permissions.add(PermissionConstants.CANCEL);
-            permissions.add(PermissionConstants.ALLOCATE);
-            permissions.add(PermissionConstants.REOPEN);
-
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
+            if (userName.equals(approvalMapping.getCreatedBy())) {
+              permissions.add(PermissionConstants.CANCEL);
+            }
             if (orderModel.atv) {
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.ALLOCATE);
@@ -518,8 +519,6 @@ public class OrdersAPIBuilder {
         } else {
           permissions.add(PermissionConstants.CANCEL);
           permissions.add(PermissionConstants.EDIT);
-          permissions.add(PermissionConstants.ALLOCATE);
-          permissions.add(PermissionConstants.REOPEN);
         }
       }
     } else {
@@ -540,7 +539,8 @@ public class OrdersAPIBuilder {
    * Gives the types of approval to be shown to the user
    */
   public List<OrderApprovalTypesModel> buildOrderApprovalTypesModel(OrderModel orderModel,
-                                                                    OrderManagementService oms)
+                                                                    OrderManagementService oms,
+                                                                    SecureUserDetails user)
       throws ServiceException, ObjectNotFoundException {
     List<OrderApprovalTypesModel> models = new ArrayList<>(1);
     boolean isPurchaseApprovalRequired = false;
@@ -548,8 +548,9 @@ public class OrdersAPIBuilder {
     boolean isTransferApprovalRequired = false;
     ApprovalsDao approvalsDao = new ApprovalsDao();
     IOrder order = oms.getOrder(orderModel.id);
-    if (IOrder.TRANSFER_ORDER == order.getOrderType() && !orderModel.isVisibleToCustomer()
-        && !orderModel.isVisibleToVendor()) {
+    if (IOrder.TRANSFER_ORDER == order.getOrderType() && (!(orderModel.isVisibleToCustomer()
+        && orderModel.isVisibleToVendor()) || (SecurityUtil.compareRoles(user.getRole(),
+        SecurityConstants.ROLE_DOMAINOWNER) >= 0) || user.getUsername().equals(order.getUserId())))  {
       isTransferApprovalRequired = orderApprovalsService.isApprovalRequired(order,
           IOrder.TRANSFER_ORDER);
     } else {
@@ -630,7 +631,7 @@ public class OrdersAPIBuilder {
                                 Long domainId, boolean includePermissions)
       throws ServiceException, ObjectNotFoundException {
     model.setApprovalTypesModels(buildOrderApprovalTypesModel(model,
-        Services.getService(OrderManagementServiceImpl.class, SecurityUtils.getLocale())));
+        Services.getService(OrderManagementServiceImpl.class, SecurityUtils.getLocale()), user));
     Integer approvalType = orderApprovalsService.getApprovalType(order);
     boolean isApprovalRequired = false;
     if (approvalType != null) {
@@ -641,7 +642,7 @@ public class OrdersAPIBuilder {
     if (includePermissions) {
       Permissions
           permissions =
-          buildPermissionModel(order, model, approvalType, isApprovalRequired);
+          buildPermissionModel(order, model, approvalType, isApprovalRequired, user.getUsername());
       model.setPermissions(permissions);
     }
   }
