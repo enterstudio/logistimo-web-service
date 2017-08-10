@@ -601,6 +601,7 @@ switch.newhost=Passer au nouvel hôte
 newhostname=Nouveau nom d'hôte
 enternewhostnamemsg=S'il vous plaît entrez le nouveau nom d'hôte
 support.info=Informations de contact de soutien peut être configuré par rôle . Il peut y avoir une personne de soutien différent ou un numéro pour les opérateurs, les gestionnaires ou administrateurs . Informations de support peut être spécifiée soit en sélectionnant un utilisateur ( dans la colonne de l'utilisateur ) , ou en entrant explicitement un nom , numéro de téléphone ou e-mail . Sélection d'un utilisateur existant passera automatiquement les informations de contact du support de nom, le numéro et votre email téléphone de l'utilisateur .
+admin.contact.info=Les contacts administratifs sont généralement des administrateurs ou des superviseurs dans le domaine et apparaîtront partout où d'autres doivent les contacter (par exemple, dans la application de surveillance). Deux types de contacts administratifs peuvent être configurés - primaire et secondaire. Cela fournira des options pour les utilisateurs de contacter les contacts primaires ou secondaires. Les informations de contact administratif peuvent être spécifiées en sélectionnant un utilisateur (dans la colonne Utilisateur). La sélection d'un utilisateur remplit automatiquement les coordonnées administratives telles que le nom, le numéro de téléphone et le courrier électronique.
 support.role=rôle
 support.user=utilisateur
 support.user.name=nom

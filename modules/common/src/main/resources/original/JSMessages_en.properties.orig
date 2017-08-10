@@ -599,6 +599,7 @@ enternewhostnamemsg=Please enter the new host name
 createdby=Created by
 registeredby=Registered by
 support.info=Support contact information can be configured per role. There can be a different support person or number for operators, managers or administrators. Support information can be either specified by selecting a user (in the User column), or by explicitly entering a name, phone number or email. Selecting an existing user will automatically default the support contact information to the user's name, phone number and email.
+admin.contact.info=Administrative contacts are typically administrators or supervisors in the domain and will appear wherever others have to contact them (e.g. in the monitoring application). Two types of administrative contacts can be configured - primary and secondary. This will provide options for users to contact either the primary or secondary contacts. Administrative contact information can be specified by selecting a user (in the User column). Selecting a user will automatically fill the Administrative contact details such as name, phone number, and email.
 support.info.note=NOTE: Phone number is mandatory. If you do not select an existing user, then phone number has to be entered. Name and email are optional.
 support.role=Role
 support.user=User
