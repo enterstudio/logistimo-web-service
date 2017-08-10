@@ -1536,7 +1536,11 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           }
       }
     if (oty != null) {
-      sqlQuery.append(" AND OTY = ").append(oty);
+      if (oty == IOrder.PURCHASE_ORDER) {
+        sqlQuery.append(" AND OTY IN (").append(IOrder.PURCHASE_ORDER).append(CharacterConstants.COMMA).append(IOrder.SALES_ORDER).append(")");
+      } else {
+        sqlQuery.append(" AND OTY = ").append(oty);
+      }
     }
     if (kioskIds != null && !kioskIds.isEmpty()) {
       sqlQuery.append(" AND ((KID IN(");
