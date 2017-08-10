@@ -62,6 +62,7 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -324,7 +325,9 @@ public class SMSBuilder {
     mobileTransModel.lkid =
         (transactionDet.length > 5 && transactionDet[5] != null && !transactionDet[5]
             .equalsIgnoreCase(CharacterConstants.EMPTY)) ? Long.parseLong(transactionDet[5]) : null;
-    mobileTransModel.atd = sdf.format(new Date(actualTransactionDate));
+    if(actualTransactionDate!=null){
+      mobileTransModel.atd = sdf.format(new Date(actualTransactionDate));
+    }
     return mobileTransModel;
   }
 

@@ -23,7 +23,7 @@
   -->
 
 <div>
-    <label class="cbx filter-label ml10">`{{$parent.resourceBundle[name] + ' ' + $parent.resourceBundle['tags.lower'] + ':'}}</label>
+    <label class="cbx filter-label ml10">{{$parent.resourceBundle[name] + ' ' + $parent.resourceBundle['tags.lower'] + ':'}}</label>
     <span ng-show="$parent.isDef(includedTags)"><span ng-repeat="tag in includedTags.split(',') track by $index"
                                                       class="label label-default mt5 dinline" style="padding:.2em;">{{tag}}</span></span>
     <span ng-show="$parent.isUndef(includedTags)" class="cbx" style="margin-top: 20px">All</span>
