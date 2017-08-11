@@ -36,7 +36,7 @@
                         <table class="table table-striped table-condensed table-bordered">
                             <thead>
                             <tr>
-                                <th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
+                                <th class="text-center">{{resourceBundle['serialnum']}}</th>
                                 <th class="col-sm-2 required">{{resourceBundle['batchid']}}</th>
                                 <th class="col-sm-2">{{resourceBundle['manufactured']}} (dd/mm/yyyy)</th>
                                 <th class="col-sm-2 required">{{resourceBundle['manufacturer']}}</th>
@@ -45,10 +45,10 @@
                                     {{resourceBundle['material.stockonhand']}}
                                 </th>
                                 <th class="text-center" ng-show="ordersTabEnabled && allocate"> {{resourceBundle['allocated']}}</th>
-                                <th class="col-sm-1 text-center" ng-if="ordersTabEnabled">
+                                <th class="text-center" ng-if="ordersTabEnabled">
                                     {{resourceBundle['available.stock']}}
                                 </th>
-                                <th class="col-sm-1 required">{{resourceBundle['quantity']}}</th>
+                                <th class="col-sm-2 required">{{resourceBundle['quantity']}}</th>
                                 <th></th>
                             </tr>
                             </thead>

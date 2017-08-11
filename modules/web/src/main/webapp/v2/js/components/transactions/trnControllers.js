@@ -1411,7 +1411,7 @@ trnControllers.controller('AddBatchTransactionCtrl', ['$scope','$timeout',
                 if(!skipTrigger) {
                     source = source || "b";
                     $timeout(function () {
-                        $("[id='"+ source + $scope.mid + index + "']").trigger('showpopup');
+                        $("[id='"+ source + $scope.mid + index + "']").trigger(eventName);
                     }, 0);
                 }
             }, 0);
