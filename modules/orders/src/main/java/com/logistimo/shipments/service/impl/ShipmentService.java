@@ -1338,7 +1338,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
                   throw new IllegalArgumentException(
                       backendMessages.getString("shipment.fulfill.error") + " " + model.sId +
                           ", " + backendMessages.getString("materials.batch.empty") + " "
-                          + item.mId);
+                          + item.mnm);
                 }
                 BigDecimal totalFQ = BigDecimal.ZERO;
                 BigDecimal totalDQ = BigDecimal.ZERO;
