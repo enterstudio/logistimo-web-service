@@ -123,7 +123,7 @@ public class UserExportHandler implements IExportHandler {
         .append(CharacterConstants.COMMA)
         .append(user.getLanguage() != null ? StringEscapeUtils.escapeCsv(user.getLanguage()) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
-        .append(StringEscapeUtils.escapeCsv(timezone)).append(CharacterConstants.COMMA)
+        .append(StringEscapeUtils.escapeCsv(user.getTimezone())).append(CharacterConstants.COMMA)
         .append(user.getGender() != null ? user.getGender() : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
         .append(user.getAge()).append(CharacterConstants.COMMA)
         .append(
@@ -132,7 +132,8 @@ public class UserExportHandler implements IExportHandler {
         .append(
             user.getPhoneBrand() != null ? StringEscapeUtils.escapeCsv(user.getPhoneBrand()) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
-        .append(user.getPhoneModelNumber() != null ? StringEscapeUtils.escapeCsv(user.getPhoneModelNumber())
+        .append(user.getPhoneModelNumber() != null ? StringEscapeUtils
+            .escapeCsv(user.getPhoneModelNumber())
             : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
         .append(user.getImei() != null ? StringEscapeUtils.escapeCsv(user.getImei()) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
@@ -140,7 +141,8 @@ public class UserExportHandler implements IExportHandler {
             : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
         .append(user.getSimId() != null ? StringEscapeUtils.escapeCsv(user.getSimId()) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
-        .append(user.getPrimaryKiosk() != null ? user.getPrimaryKiosk() : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
+        .append(user.getPrimaryKiosk() != null ? user.getPrimaryKiosk() : CharacterConstants.EMPTY).append(
+        CharacterConstants.COMMA)
         .append(
             pkCustomId != null ? StringEscapeUtils.escapeCsv(pkCustomId) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
@@ -152,7 +154,8 @@ public class UserExportHandler implements IExportHandler {
             .formatCustom(user.getLastLogin(), Constants.DATETIME_CSV_FORMAT, timezone)
             : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
         .append(
-            user.getLastMobileAccessed() != null ? LocalDateUtil.formatCustom(user.getLastMobileAccessed(), Constants.DATETIME_CSV_FORMAT, timezone)
+            user.getLastMobileAccessed() != null ? LocalDateUtil.formatCustom(
+                user.getLastMobileAccessed(), Constants.DATETIME_CSV_FORMAT, timezone)
                 : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
         .append(user.getRegisteredBy() != null ? user.getRegisteredBy() : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
