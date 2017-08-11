@@ -1134,8 +1134,18 @@ reportControllers.controller('DomainHierarchyController', ['$scope', 'reportServ
           });
         };
         if(checkNullEmpty($scope.domainId)){
-            $scope.fetchHistoricalData($scope.currentDomain);
-        }else{
+            var repeatCount = 10;
+            function checkAndCall() {
+                if(checkNotNullEmpty($scope.currentDomain)) {
+                    $scope.fetchHistoricalData($scope.currentDomain);
+                } else {
+                    if (--repeatCount > 0) {
+                        $timeout(checkAndCall, 500);
+                    }
+                }
+            }
+            checkAndCall();
+        } else {
             $scope.fetchHistoricalData($scope.domainId);
         }
 
