@@ -2130,9 +2130,12 @@ ordControllers.controller('OrdersFormCtrl', ['$scope', 'ordService', 'invService
                         $scope.showSuccess(data.data.msg);
 
                         if (checkNotNullEmpty(data.data.orderId)) {
-                            $location.path('/orders/detail/' + data.data.orderId);
+                            if ($scope.ordType == 'trn') {
+                                $location.path('/orders/transfers/detail/' + data.data.orderId);
+                            } else {
+                                $location.path('/orders/detail/' + data.data.orderId);
+                            }
                         }
-
                     } else {
                         $scope.orderTable = data.data.items;
                         $scope.modalInstance = $uibModal.open({
