@@ -161,7 +161,7 @@ public class DashboardBuilder {
                                           String filterCol, String addColumn, boolean isSameData)
       throws SQLException {
     Map<String, Long> overAllData = new HashMap<>();
-   if (data == null ) {
+    if (data == null || res == null) {
       return overAllData;
     }
     Map<String, Long> subDataCounts = new HashMap<>();
