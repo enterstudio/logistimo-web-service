@@ -1671,7 +1671,7 @@ public class MnlTransactionUtil {
       params += "Date sinceDateParam";
       query.declareImports("import java.util.Date");
       paramsMap.put("sinceDateParam", LocalDateUtil.getOffsetDate(sinceDate, -1,
-          Calendar.MILLISECOND)); // we reduce this date by 1 millisec, so that we can avoid a >= query on time (more efficient to do a single comparator in GAE)
+          Calendar.DATE)); // we reduce this date by 1 date, so that we can avoid a >= query on time
     }
     if (untilDate != null) {
       if (!filter.isEmpty()) {
