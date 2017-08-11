@@ -448,7 +448,7 @@ public class LocalDateUtil {
 
   // Get file name from date
   public static String getNameWithDate(String name, Date date, Locale locale, String timezone) {
-    Calendar cal = null;
+    Calendar cal;
     if (locale != null && timezone != null) {
       cal = GregorianCalendar.getInstance(TimeZone.getTimeZone(timezone), locale);
     } else if (locale != null) {
@@ -476,7 +476,7 @@ public class LocalDateUtil {
       minute = "0" + minute;
     }
     return name + "_" + day + "_" + month + "_" + cal.get(Calendar.YEAR) + "_" +
-        hour + "_" + minute + "_" +
+        hour + "_" + minute + "_" + cal.get(Calendar.SECOND) + "_" +
         (cal.get(Calendar.AM_PM) == Calendar.AM ? "AM" : "PM");
   }
 
