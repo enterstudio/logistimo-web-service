@@ -39,6 +39,7 @@ import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.constants.SourceConstants;
+import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -60,8 +61,10 @@ import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
+import com.logistimo.orders.actions.GetFilteredOrdersAction;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
@@ -218,10 +221,14 @@ public class OrderServlet extends JsonRestServlet {
       boolean isTransfer = OrderUtils.isTransfer(transfers);
 
       //Get orders for specified entity, status, order type and transfers
-      OrderManagementService
-          oms =
-          Services.getService(OrderManagementServiceImpl.class, u.getLocale());
-      List<IOrder> ordersList = oms.getOrders(kioskId, status, pageParams, otype, isTransfer);
+      List<IOrder> ordersList = StaticApplicationContext.getBean(GetFilteredOrdersAction.class)
+          .invoke(new OrderFilters()
+                  .setKioskId(kioskId)
+                  .setStatus(status)
+                  .setOtype(otype)
+                  .setOrderType(isTransfer ? IOrder.TRANSFER : IOrder.NONTRANSFER)
+              ,pageParams
+          ).getResults();
       if (ordersList == null || ordersList.isEmpty()) {
         message = backendMessages.getString("error.noorders");
       } else {
