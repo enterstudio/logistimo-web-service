@@ -34,6 +34,7 @@ import com.logistimo.api.util.GsonUtil;
 import com.logistimo.api.util.RESTUtil;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
+import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
@@ -750,7 +751,7 @@ public class OrderServlet extends JsonRestServlet {
         if (status) {
           // Get config.
           dc = DomainConfig.getInstance(domainId);
-          if (isOldRequest && dc.getApprovalsConfig() != null) {
+          if (isOldRequest && isApprovalConfigEnabled(dc.getApprovalsConfig())) {
             status = false;
             message =
                 backendMessages.getString("upgrade.app.message");
@@ -1276,11 +1277,11 @@ public class OrderServlet extends JsonRestServlet {
         locale = u.getLocale();
         // Get domain config
         dc = DomainConfig.getInstance(u.getDomainId());
-        /*if (doApprovalConfigCheck && dc.getApprovalsConfig() != null) {
+        if (doApprovalConfigCheck && isApprovalConfigEnabled(dc.getApprovalsConfig())) {
           status = false;
           message =
               backendMessages.getString("upgrade.app.message");
-        }*/ // Commented as a quick fix for demo
+        }
       }
     } catch (ServiceException e) {
       status = false;
@@ -1500,6 +1501,11 @@ public class OrderServlet extends JsonRestServlet {
     if (signature != null && cache != null) {
       cache.put(signature, status, CACHE_EXPIRY);
     }
+  }
+
+  // Check if approval configuration is enabled
+  private boolean isApprovalConfigEnabled(ApprovalsConfig ac) {
+    return (ac != null && ac.getOrderConfig() != null && (!ac.getOrderConfig().getPurchaseSalesOrderApproval().isEmpty() || ac.getOrderConfig().isTransferApprovalEnabled()));
   }
 
 }
