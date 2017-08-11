@@ -1276,11 +1276,11 @@ public class OrderServlet extends JsonRestServlet {
         locale = u.getLocale();
         // Get domain config
         dc = DomainConfig.getInstance(u.getDomainId());
-        if (doApprovalConfigCheck && dc.getApprovalsConfig() != null) {
+        /*if (doApprovalConfigCheck && dc.getApprovalsConfig() != null) {
           status = false;
           message =
               backendMessages.getString("upgrade.app.message");
-        }
+        }*/ // Commented as a quick fix for demo
       }
     } catch (ServiceException e) {
       status = false;
