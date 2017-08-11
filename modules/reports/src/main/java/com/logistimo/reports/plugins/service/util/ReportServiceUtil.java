@@ -45,12 +45,15 @@ import com.logistimo.reports.plugins.Report;
 import com.logistimo.reports.plugins.internal.QueryHelper;
 import com.logistimo.reports.plugins.internal.QueryRequestModel;
 import com.logistimo.reports.plugins.models.ReportChartModel;
+import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.entity.ITag;
+import com.logistimo.users.entity.IUserAccount;
+import com.logistimo.users.service.UsersService;
+import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -449,6 +452,9 @@ public class ReportServiceUtil {
       case BY_ENTITY_TAGS:
         key = TagUtil.getTagById(Long.valueOf(id), ITag.KIOSK_TAG);
         break;
+      case BY_USER:
+        key = getUserDetailsById(id);
+          break;
       case BY_MANUFACTURER:
         key = StringUtils.capitalize(id);
         break;
@@ -479,6 +485,19 @@ public class ReportServiceUtil {
         CharacterConstants.PIPE + (StringUtils.isEmpty(k.getDistrict())? CharacterConstants.EMPTY : k.getDistrict()) +
         CharacterConstants.PIPE + (StringUtils.isEmpty(k.getState())? CharacterConstants.EMPTY : k.getState());
     return key;
+  }
+
+  /**
+   * Mehtod to get user details based on ID and form the report table data
+   * @param userId
+   * @return
+   * @throws ServiceException
+   * @throws ObjectNotFoundException
+   */
+  private String getUserDetailsById(String userId) throws ServiceException,ObjectNotFoundException {
+    UsersService us = Services.getService(UsersServiceImpl.class);
+    IUserAccount userAccount=us.getUserAccount(userId);
+    return userAccount.getFullName() + CharacterConstants.PIPE + userId;
   }
 
   protected Long getMillisInPeriod(String time, String periodicity) {
