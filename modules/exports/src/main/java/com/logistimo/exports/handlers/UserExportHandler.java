@@ -67,19 +67,23 @@ public class UserExportHandler implements IExportHandler {
 
     try {
       UsersService as = Services.getService(UsersServiceImpl.class);
-      try {
-        IUserAccount ubUser = as.getUserAccount(user.getUpdatedBy());
-        ubUserName = ubUser.getFullName();
-        ubUserCustomId = ubUser.getCustomId();
-      } catch (ObjectNotFoundException e) {
-        ubUserName = Constants.UNKNOWN;
+      if (user.getUpdatedBy() != null) {
+        try {
+          IUserAccount ubUser = as.getUserAccount(user.getUpdatedBy());
+          ubUserName = ubUser.getFullName();
+          ubUserCustomId = ubUser.getCustomId();
+        } catch (ObjectNotFoundException e) {
+          ubUserName = Constants.UNKNOWN;
+        }
       }
-      try {
-        IUserAccount cbUser = as.getUserAccount(user.getRegisteredBy());
-        cbUserName = cbUser.getFullName();
-        cbUserCustomId = cbUser.getCustomId();
-      } catch (ObjectNotFoundException e) {
-        cbUserName = Constants.UNKNOWN;
+      if (user.getRegisteredBy() != null) {
+        try {
+          IUserAccount cbUser = as.getUserAccount(user.getRegisteredBy());
+          cbUserName = cbUser.getFullName();
+          cbUserCustomId = cbUser.getCustomId();
+        } catch (ObjectNotFoundException e) {
+          cbUserName = Constants.UNKNOWN;
+        }
       }
       if (user.getPrimaryKiosk() != null) {
         EntitiesService es = Services.getService(EntitiesServiceImpl.class);

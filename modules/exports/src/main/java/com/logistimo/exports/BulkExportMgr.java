@@ -705,13 +705,13 @@ public class BulkExportMgr {
     DomainConfig dc = DomainConfig.getInstance(domainId);
     Map<String, Object> filterParams = new HashMap<>();
     String nNameStr = req.getParameter("nname");
-    try {
-      nNameStr = URLDecoder.decode(nNameStr, Constants.UTF8);
-    } catch (Exception e) {
-      xLogger.warn("Exception when parsing from nname {0}", nNameStr, e);
-    }
     if (StringUtils.isNotEmpty(nNameStr)) {
-      filterParams.put("nName", nNameStr);
+      try {
+        nNameStr = URLDecoder.decode(nNameStr, Constants.UTF8);
+        filterParams.put("nName", nNameStr);
+      } catch (Exception e) {
+        xLogger.warn("Exception when parsing from nname {0}", nNameStr, e);
+      }
     }
     String mobilePhoneNumberStr = req.getParameter("mobilephonenumber");
     if (StringUtils.isNotEmpty(mobilePhoneNumberStr)) {
