@@ -101,12 +101,13 @@ public class ShipmentBuilder {
           Services.getService(InventoryManagementServiceImpl.class);
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class);
       ShipmentModel model = new ShipmentModel();
-      IOrder order = null;
+      IOrder order;
       try {
         order = oms.getOrder(s.getOrderId());
         model.oty = order.getOrderType();
       } catch (Exception e) {
         xLogger.warn("Order not available for shipment.", e);
+        return null;
       }
       model.sId = s.getShipmentId();
       model.status = s.getStatus() == ShipmentStatus.OPEN ? ShipmentStatus.PENDING : s.getStatus();
