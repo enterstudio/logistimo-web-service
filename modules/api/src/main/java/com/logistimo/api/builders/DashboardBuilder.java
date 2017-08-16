@@ -161,7 +161,7 @@ public class DashboardBuilder {
                                           String filterCol, String addColumn, boolean isSameData)
       throws SQLException {
     Map<String, Long> overAllData = new HashMap<>();
-    if (data == null || res == null) {
+    if (data == null) {
       return overAllData;
     }
     Map<String, Long> subDataCounts = new HashMap<>();
@@ -169,7 +169,7 @@ public class DashboardBuilder {
     Map<String, Long> subDataID = new HashMap<>();
     Map<String, Long> matIDs = new HashMap<>();
     long allTotal = 0;
-    if (!isSameData) {
+    if (!isSameData && res != null) {
       ResultSetMetaData metaData = res.getMetaData();
       List<String> columns = new ArrayList<>(metaData.getColumnCount());
       for(int i= 0; i< metaData.getColumnCount(); i++) {
