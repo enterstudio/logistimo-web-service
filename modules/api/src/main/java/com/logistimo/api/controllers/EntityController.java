@@ -297,7 +297,7 @@ public class EntityController {
   @RequestMapping(value = "/entity/{entityId}", method = RequestMethod.GET)
   public
   @ResponseBody
-  EntityModel getEntityById(@PathVariable Long entityId, HttpServletRequest request) {
+  EntityModel getEntityById(@PathVariable Long entityId, @RequestParam(required = false) Boolean skipAuthCheck, HttpServletRequest request) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
@@ -308,7 +308,7 @@ public class EntityController {
       as = Services.getService(EntitiesServiceImpl.class, locale);
       usersService = Services.getService(UsersServiceImpl.class, locale);
       Integer permission = EntityAuthoriser.authoriseEntityPerm(sUser, entityId);
-      if (GenericAuthoriser.NO_ACCESS.equals(permission)) {
+      if ((skipAuthCheck == null || !skipAuthCheck) && GenericAuthoriser.NO_ACCESS.equals(permission)) {
         throw new UnauthorizedException(backendMessages.getString("permission.denied"));
       }
       IKiosk k = as.getKiosk(entityId);
@@ -317,7 +317,7 @@ public class EntityController {
       boolean found = false;
       boolean isPa = false;
       boolean isSa = false;
-      ApprovalsConfig.OrderConfig orderConfig = null;
+      ApprovalsConfig.OrderConfig orderConfig;
       if (k != null) {
         try {
           u = usersService.getUserAccount(k.getRegisteredBy());

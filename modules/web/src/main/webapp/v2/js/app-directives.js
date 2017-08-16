@@ -1636,7 +1636,7 @@ logistimoApp.directive('entitySelect', function () {
                                         $scope.vendors = [];
                                         if (checkNotNullEmpty(data.data.vid) && data.data.vid != $scope.entId) {
                                             $scope.defVLoading = true;
-                                            entityService.get(data.data.vid).then(function (data) {
+                                            entityService.get(data.data.vid, true).then(function (data) {
                                                 if (checkNotNullEmpty(data.data)) {
                                                     $scope.vendors.push(data.data);
                                                     $scope.entModel = data.data;

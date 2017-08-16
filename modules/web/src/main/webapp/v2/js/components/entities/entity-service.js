@@ -32,8 +32,12 @@ entityServices.factory('entityService', ['$http', function ($http) {
             var promise = $http({method: 'POST', data: data, url: urlStr});
             return promise;
         },
-        get: function (entityId) {
-            return this.fetch('/s2/api/entities/entity/' + entityId);
+        get: function (entityId,skipAuthCheck) {
+            var oParams = "";
+            if (typeof(skipAuthCheck) !== 'undefined') {
+                oParams += "?skipAuthCheck=" + skipAuthCheck;
+            }
+            return this.fetch('/s2/api/entities/entity/' + entityId + oParams);
         },
         getLinksCount: function (entityId,searchkey,linkedEntityId,entityTag) {
             var oParams = "";
