@@ -654,7 +654,7 @@ public class OrderServlet extends JsonRestServlet {
         MobileOrderBuilder mob = new MobileOrderBuilder();
 
         boolean isBatchEnabled=false;
-        if(kioskId==order.getServicingKiosk()){
+        if(kioskId != null && kioskId.equals(order.getServicingKiosk())){
           EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
           IKiosk k = entitiesService.getKiosk(kioskId, false);
           isBatchEnabled=k.isBatchMgmtEnabled();
