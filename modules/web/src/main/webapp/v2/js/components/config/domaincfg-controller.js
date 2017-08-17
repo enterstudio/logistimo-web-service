@@ -2081,6 +2081,8 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
                     localOrderCfg.pdos = 0;
                 }
 
+            } else {
+                localOrderCfg.autoCreateEntityTags = localOrderCfg.autoCreateMaterialTags = undefined;
             }
             $scope.loading = true;
             $scope.showLoading();
