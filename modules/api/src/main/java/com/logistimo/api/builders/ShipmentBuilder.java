@@ -85,7 +85,7 @@ public class ShipmentBuilder {
     for (IShipment s : shipmentList) {
       ShipmentModel shipmentModel = buildShipmentModel(s, user, false);
       if (shipmentModel == null) {
-        return null;
+        continue;
       }
       smList.add(shipmentModel);
     }
@@ -395,7 +395,7 @@ public class ShipmentBuilder {
         }
       }
     } catch (Exception e) {
-      xLogger.warn("Error while fetching Handling Unit {0}", batch.getMaterialId(), e);
+      xLogger.warn("Error while fetching Handling Unit {0}", materialId, e);
     }
     return sibm;
   }
