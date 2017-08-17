@@ -132,10 +132,12 @@ public class SMSController {
       MobileUpdateInvTransResponse
           mobileUpdateInvTransResponse =
           createResponse(model, midErrorDetailModelsMap, ua.getDomainId(), isDuplicate);
-      //send SMS
-      responseMsg = builder.buildResponse(model, mobileUpdateInvTransResponse, null);
-      MessageService ms = MessageService.getInstance(MessageService.SMS, ua.getCountry());
-      ms.send(ua, responseMsg, MessageService.NORMAL, null, null, null);
+      if (mobileUpdateInvTransResponse != null) {
+        //send SMS
+        responseMsg = builder.buildResponse(model, mobileUpdateInvTransResponse, null);
+        MessageService ms = MessageService.getInstance(MessageService.SMS, ua.getCountry());
+        ms.send(ua, responseMsg, MessageService.NORMAL, null, null, null);
+      }
     } catch (UnsupportedEncodingException e) {
       xLogger.severe("Error in Decoding SMS.", e);
     } catch (InvalidDataException e) {

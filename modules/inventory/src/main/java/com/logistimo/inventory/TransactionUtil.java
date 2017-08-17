@@ -494,10 +494,14 @@ public class TransactionUtil {
       MemcacheService cache = AppFactory.get().getMemcacheService();
       if (cache != null) {
         String cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
-        MobileTransactionCacheModel cacheModel = (MobileTransactionCacheModel) cache.get(cacheKey);
-        if (cacheModel == null) {
+        MobileTransactionCacheModel cacheModel = null;
+        Object value = cache.get(cacheKey);
+        if (value == null) {
           cacheKey = createKey(timestampSendMillis, userId, kioskId, null);
-          cacheModel = (MobileTransactionCacheModel) cache.get(cacheKey);
+          value = cache.get(cacheKey);
+        }
+        if (value instanceof MobileTransactionCacheModel) {
+          cacheModel = (MobileTransactionCacheModel) value;
         }
         return cacheModel;
       }
