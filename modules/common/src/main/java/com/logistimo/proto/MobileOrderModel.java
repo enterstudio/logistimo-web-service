@@ -23,6 +23,7 @@
 
 package com.logistimo.proto;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 

@@ -47,6 +47,8 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
 import com.logistimo.pagination.Results;
+import com.logistimo.proto.ApprovalResponse;
+import com.logistimo.proto.MobileApprovalResponse;
 import com.logistimo.proto.MobileConversationModel;
 import com.logistimo.proto.MobileDemandItemModel;
 import com.logistimo.proto.MobileOrderModel;
@@ -261,7 +263,19 @@ public class MobileOrderBuilder {
 
     /* Get approval details for the order */
     try {
-      mom.apprvl = new MobileApprovalResponseBuilder().buildApprovalResponse(o);
+      mom.apprvl = new MobileApprovalResponse();
+      ApprovalResponse
+          purchaseApproval =
+          new MobileApprovalResponseBuilder().buildApprovalResponse(o, IOrder.PURCHASE_ORDER);
+      if (purchaseApproval != null) {
+        mom.apprvl.prc = purchaseApproval;
+      }
+      ApprovalResponse
+          salesApproval =
+          new MobileApprovalResponseBuilder().buildApprovalResponse(o, IOrder.SALES_ORDER);
+      if (salesApproval != null) {
+        mom.apprvl.sle = salesApproval;
+      }
     } catch (Exception e) {
       xLogger.warn("Exception fetching approval details", e);
     }

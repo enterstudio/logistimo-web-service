@@ -23,12 +23,14 @@
 
 package com.logistimo.api.servlets.mobile.builders;
 
+import com.logistimo.approvals.client.models.ApproverResponse;
 import com.logistimo.approvals.client.models.CreateApprovalResponse;
 import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.orders.approvals.actions.GetOrderApprovalAction;
 import com.logistimo.orders.approvals.dao.IApprovalsDao;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.approvals.IOrderApprovalMapping;
+import com.logistimo.proto.ApprovalResponse;
 import com.logistimo.proto.MobileApprovalResponse;
 import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
@@ -50,9 +52,9 @@ public class MobileApprovalResponseBuilder {
    * @param o Order
    * @return Approval response
    */
-  public MobileApprovalResponse buildApprovalResponse(IOrder o) {
+  public ApprovalResponse buildApprovalResponse(IOrder o, Integer approvalType) {
 
-    IOrderApprovalMapping orderApprovalMapping = getOrderApprovalMapping(o);
+    IOrderApprovalMapping orderApprovalMapping = getOrderApprovalMapping(o, approvalType);
     if(orderApprovalMapping==null){
       return null;
     }
@@ -62,7 +64,7 @@ public class MobileApprovalResponseBuilder {
     if (createApprovalResponse == null) {
       return null;
     }
-    MobileApprovalResponse response = new MobileApprovalResponse();
+    ApprovalResponse response = new ApprovalResponse();
     setUserDetails(orderApprovalMapping.getUpdatedBy(), createApprovalResponse.getRequesterId(),
         response);
     response.setApprid(createApprovalResponse.getApprovalId());
@@ -90,8 +92,8 @@ public class MobileApprovalResponseBuilder {
    * @param o order
    * @return  approval mappings
    */
-  private IOrderApprovalMapping getOrderApprovalMapping(IOrder o) {
-    return StaticApplicationContext.getBean(IApprovalsDao.class).getOrderApprovalMapping(o.getOrderId());
+  private IOrderApprovalMapping getOrderApprovalMapping(IOrder o, Integer apprpovalType) {
+    return StaticApplicationContext.getBean(IApprovalsDao.class).getOrderApprovalMapping(o.getOrderId(), apprpovalType);
   }
 
   /**
@@ -115,7 +117,7 @@ public class MobileApprovalResponseBuilder {
    * @param response    Populated response
    */
   private void setUserDetails(String approverId, String requesterId,
-                              MobileApprovalResponse response) {
+                              ApprovalResponse response) {
     UsersService usersService = Services.getService(UsersServiceImpl.class);
     Set<String> userIds = new HashSet<>(2);
     userIds.add(approverId);
