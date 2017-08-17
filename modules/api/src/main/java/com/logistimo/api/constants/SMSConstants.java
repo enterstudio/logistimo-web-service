@@ -42,8 +42,8 @@ public class SMSConstants {
   public static final String FIELD_SEPARATOR = ":";
   public static final String MATERIAL_SEPARATOR = "_";
   public static final String ENTRY_TIME_SEPARATOR = ";";
-  public static final String MATERIAL_DETAIL_SEPARATOR = "\\|";
-  public static final String PIPE_SEPARATOR = "|";
+  public static final String REGEX_MATERIAL_DETAIL_SEPARATOR = "\\*";
+  public static final String STAR_SEPARATOR = "*";
   public static final String TRANSACTION_SEPARATOR = "_";
   public static final String SUCCESS_INVENTORY = "SI";
   public static final String FAIL_INVENTORY = "FI";
