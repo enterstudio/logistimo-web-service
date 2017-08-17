@@ -242,7 +242,7 @@ public class SMSBuilder {
     //Split based on | for materials
     List<String>
         materialsList =
-        Arrays.asList(inventoryDetails.split(SMSConstants.MATERIAL_DETAIL_SEPARATOR));
+        Arrays.asList(inventoryDetails.split(SMSConstants.REGEX_MATERIAL_DETAIL_SEPARATOR));
     List<InventoryTransactions> inventoryTransactionsList = new ArrayList<>(materialsList.size());
     for (String material : materialsList) {
       InventoryTransactions
@@ -439,9 +439,9 @@ public class SMSBuilder {
 
             matDetails.setLength(matDetails.length() - 1);
             failResp.append(matDetails)
-                .append(SMSConstants.PIPE_SEPARATOR);
+                .append(SMSConstants.STAR_SEPARATOR);
           } else {
-            sucResp.append(matDetails).append(SMSConstants.PIPE_SEPARATOR);
+            sucResp.append(matDetails).append(SMSConstants.STAR_SEPARATOR);
           }
         }
         if (sucResp.length() > 0) {
