@@ -126,7 +126,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                     for(var j=0; j<usersList.length; j++){
                         if($scope.support[i].usrid == usersList[j]){
                             $scope.showWarning($scope.resourceBundle["user.delete.warning"] +"<br/> -"+ $scope.support[i].usrid);
-                            return;
+                            isSupport = true;
                         }
                     }
                 }
@@ -155,7 +155,7 @@ userControllers.controller('UsersListController', ['$scope', 'userService', 'req
                 return true;
             }
 
-            if(!checkAdminUsers()){
+            if(!checkAdminUsers() || isSupport){
                 return;
             }
             $scope.showLoading();
