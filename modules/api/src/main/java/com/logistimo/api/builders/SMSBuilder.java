@@ -53,7 +53,6 @@ import com.logistimo.proto.MobileTransErrModel;
 import com.logistimo.proto.MobileTransErrorDetailModel;
 import com.logistimo.proto.MobileTransModel;
 import com.logistimo.proto.MobileUpdateInvTransResponse;
-import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
@@ -62,6 +61,8 @@ import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 
+
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -142,10 +143,9 @@ public class SMSBuilder {
    * @param message request message
    * @return Transaction Model
    * @throws ServiceException        from service layer
-   * @throws ObjectNotFoundException when user, kiosk not found
    */
   public SMSTransactionModel buildSMSModel(String message)
-      throws ServiceException, ObjectNotFoundException {
+      throws ServiceException {
 
     SMSTransactionModel model = new SMSTransactionModel();
     try {
@@ -406,20 +406,21 @@ public class SMSBuilder {
    * @param errorMsg       Error message
    * @return Response String
    * @throws ServiceException        from service layer
-   * @throws ObjectNotFoundException when material, kiosk, user not found
    */
   public String buildResponse(SMSTransactionModel model,
                               MobileUpdateInvTransResponse mobileResponse, String errorMsg)
-      throws ServiceException, ObjectNotFoundException {
+      throws ServiceException {
     StringBuilder response = new StringBuilder();
     StringBuilder failResp = null;
 
     if (model != null) {
       //Append the kiosk and part ID to response
       response.append(SMSConstants.KIOSK_ID).append(SMSConstants.KEY_SEPARATOR)
-          .append(model.getKioskId()).append(SMSConstants.FIELD_SEPARATOR).
-          append(SMSConstants.PARTIAL_ID).append(SMSConstants.KEY_SEPARATOR)
-          .append(model.getPartialId()).append(SMSConstants.FIELD_SEPARATOR);
+          .append(model.getKioskId()).append(SMSConstants.FIELD_SEPARATOR);
+      if(StringUtils.isNotBlank(model.getPartialId())) {
+        response.append(SMSConstants.PARTIAL_ID).append(SMSConstants.KEY_SEPARATOR)
+            .append(model.getPartialId()).append(SMSConstants.FIELD_SEPARATOR);
+      }
       if (errorMsg == null) {
         StringBuilder sucResp = new StringBuilder();
         Map<Long, List<MobileTransErrorDetailModel>> errorMap = populateErrorMap(mobileResponse);
@@ -696,12 +697,11 @@ public class SMSBuilder {
    * @return ITransaction
    * @throws ParseException          when unable to parse date
    * @throws ServiceException        Exception thrown from Service Layer
-   * @throws ObjectNotFoundException When kiosk not found
    */
   private ITransaction setTransactionDetails(MobileTransModel mobileTransModel, IUserAccount ua,
                                              Long kioskId, Long actualTransactionDate,
                                              Long materialId) throws
-      ParseException, ServiceException, ObjectNotFoundException {
+      ParseException, ServiceException {
     Calendar calendar = Calendar.getInstance();
     TimeZone timeZone = SMSUtil.getUserTimeZone(ua);
     if (timeZone != null) {
