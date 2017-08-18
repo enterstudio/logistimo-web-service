@@ -46,4 +46,5 @@ public class GeneralConfigModel {
   public boolean snh; // Enable switch to new host
   public String nhn; // New host name
   public Map<String, AdminContactConfigModel> adminContact;
+  public String lp;
 }

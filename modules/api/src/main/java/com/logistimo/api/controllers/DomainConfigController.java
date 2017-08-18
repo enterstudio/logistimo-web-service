@@ -760,6 +760,7 @@ public class DomainConfigController {
       cc.dc.setTimezone(model.tz);
       cc.dc.setCurrency(model.cur);
       cc.dc.setPageHeader(model.pgh);
+      cc.dc.setLangPreference(model.lp);
       if (model.sc) {
         cc.dc.setUiPreference(false);
       } else {

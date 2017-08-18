@@ -161,6 +161,7 @@ public class DomainConfig implements ILocation, Serializable {
   private static final long serialVersionUID = 4047681117629775550L;
   //Mobile GUI Theme
   public static final String STORE_APP_THEME = "storeAppTheme";
+  public static final String LANGUAGE_PREFERENCE = "lp";
 
   private static final String NOT_SUPPORTED = "Not supported";
 
@@ -291,6 +292,7 @@ public class DomainConfig implements ILocation, Serializable {
   private int storeAppTheme = Constants.GUI_THEME_BLACK;
 
   private String user;
+  private String langPreference = "en";
 
   private EventSummaryConfigModel eventSummaryConfig;
 
@@ -769,6 +771,11 @@ public class DomainConfig implements ILocation, Serializable {
       } catch (JSONException e) {
         //do nothing
       }
+      try {
+        this.langPreference = json.getString(LANGUAGE_PREFERENCE);
+      } catch (JSONException e) {
+        //do nothing
+      }
     } catch (JSONException e) {
       throw new ConfigurationException(e.getMessage());
     }
@@ -1007,6 +1014,10 @@ public class DomainConfig implements ILocation, Serializable {
       }
       if (adminContactConfig != null) {
         json.put(ADMIN_CONTACT, adminContactConfig.toJSONObject());
+      }
+
+      if (langPreference != null) {
+        json.put(LANGUAGE_PREFERENCE, langPreference);
       }
 
       json.put(CapabilityConfig.ENABLE_SHIPPING_ON_MOBILE, enableShippingOnMobile);
@@ -1861,5 +1872,13 @@ public class DomainConfig implements ILocation, Serializable {
 
   public void setUser(String user) {
     this.user = user;
+  }
+
+  public String getLangPreference() {
+    return langPreference;
+  }
+
+  public void setLangPreference(String langPreference) {
+    this.langPreference = langPreference;
   }
 }

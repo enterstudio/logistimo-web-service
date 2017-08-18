@@ -328,6 +328,38 @@
                     </div>
                 </div>
                 <!-- Adminstrative Contacts Ends-->
+
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['general.notif']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <p class="litetext">
+                                {{resourceBundle['general.notif.desc']}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="cnfSt" class="col-sm-4 control-label">{{resourceBundle['general.notif.langPref']}}</label>
+
+                                <div class="col-sm-8">
+                                    <select ng-model="cnf.lp" class="form-control">
+                                        <option value="en">English</option>
+                                        <option value="hi">हिंदी (Hindi)</option>
+                                        <option value="fr">Française (French)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt10" ng-if="iSU || dp.ce">
                     <div class="col-sm-6  ml5">
                         <button type="button" ng-click="setGeneralConfig()" class="btn btn-primary">{{resourceBundle['save']}}</button>

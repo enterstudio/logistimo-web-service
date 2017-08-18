@@ -60,3 +60,6 @@ description.activity.login=Spécifiez les seuils pour aucun événement d'activi
 description.tagDistribution=Spécifiez les marques de domaine par lesquelles les résumés des événements doivent être affichés
 es.tag=Tag
 description.tag=Specify tag to identify the domain level
+general.notif=Notifications à l'échelle du système
+general.notif.desc=Sélectionnez la langue dans laquelle les notifications à l'échelle du système doivent être envoyées aux utilisateurs de ce domaine.
+general.notif.langPref=Préférence de langue

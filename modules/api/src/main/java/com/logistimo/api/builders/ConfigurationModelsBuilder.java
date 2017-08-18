@@ -388,6 +388,7 @@ public class ConfigurationModelsBuilder {
     model.nhn = dc.getNewHostName();
     model.support = buildAllSupportConfigModels(dc);
     model.adminContact = buildAllAdminContactConfigModel(dc.getAdminContactConfig());
+    model.lp = dc.getLangPreference();
     return model;
   }
 
