@@ -380,12 +380,12 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
 
         $scope.resetFilters = function () {
             $scope.entity = undefined;
-            $scope.ordId = $scope.orderId = undefined;
+            $scope.ordId = $scope.orderId = $scope.tempOrdId = undefined;
             $scope.reqStatus = "";
             $scope.exp = undefined;
             $scope.reqType = "";
-            $scope.reqId = undefined;
-            $scope.aprId = undefined;
+            $scope.reqId = $scope.tempReqId = undefined;
+            $scope.aprId = $scope.tempAprId = undefined;
 
         };
 
