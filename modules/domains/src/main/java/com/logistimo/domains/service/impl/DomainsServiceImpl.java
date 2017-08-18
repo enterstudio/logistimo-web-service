@@ -325,6 +325,12 @@ public class DomainsServiceImpl extends ServiceImpl implements DomainsService {
           domainPermission.setCopyConfiguration(permission.isCopyConfiguration());
           domainPermission.setConfigurationEdit(permission.isConfigurationEdit());
           domainPermission.setConfigurationView(permission.isConfigurationView());
+
+          //Adding the configuration for asset
+          domainPermission.setAssetAdd(permission.isAssetAdd());
+          domainPermission.setAssetEdit(permission.isAssetEdit());
+          domainPermission.setAssetRemove(permission.isAssetRemove());
+          domainPermission.setAssetView(permission.isAssetView());
           if (persist) {
             pm.makePersistent(domainPermission);
           }
