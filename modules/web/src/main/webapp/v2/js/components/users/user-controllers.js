@@ -1285,15 +1285,14 @@ userControllers.controller('ManagedEntityRouteMapCtrl', ['$scope', 'mapService',
             });
             $scope.mrData = lmrData;
         }
-
+        var lineSymbol = undefined;
+        var lineCoordinates = [];
+        var lineCoordinatesIndex = [];
         function initMap() {
             $scope.mrData = angular.copy($scope.orData);
             $scope.lmap = angular.copy($scope.map);
             $scope.lmap.options = {scrollwheel: false};
             $scope.lmap.control = {};
-            var lineCoordinates = [];
-            var lineCoordinatesIndex = [];
-            var lineSymbol = undefined;
             $scope.today = new Date();
             trimNoGeoEntity();
         }
