@@ -1096,3 +1096,4 @@ invoice.logo=Logo
 invoice.upper.case=Facture d'achat
 invoice.image.upload.warn=Sélectionnez uniquement les fichiers jpeg ou png.
 invoice.xml.upload.warn=Sélectionnez uniquement les fichiers xml.
+invoice.info=Spécifiez les modèles pour la facture d'ordre et le document / bon de livraison. Ces modèles doivent figurer dans le format de modèle JasperReports (.jrxml). Si vous souhaitez uniquement modifier le logo dans les modèles par défaut, téléchargez le fichier logo jpeg ou png (l'image ne doit pas dépasser une hauteur de 90 pixels et une largeur de 500 pixels).
