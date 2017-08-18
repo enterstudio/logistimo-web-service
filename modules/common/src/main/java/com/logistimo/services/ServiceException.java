@@ -55,7 +55,8 @@ public class ServiceException extends LogiException {
   }
 
   public ServiceException(Throwable t) {
-    super(t);
+    super(t.getMessage(), t);
+
   }
 
   /**

@@ -6,6 +6,7 @@
               name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20"
               topMargin="20" bottomMargin="20" uuid="0db01461-a5fc-42fe-b803-df63a8b10c3d">
     <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+    <property name="net.sf.jasperreports.awt.ignore.missing.font" value="true"/>
     <parameter name="VendorName" class="java.lang.String"/>
     <parameter name="VendorAddress" class="java.lang.String"/>
     <parameter name="VendorPhone" class="java.lang.String"/>
@@ -79,7 +80,7 @@
                         <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                     </box>
                     <textElement textAlignment="Center" verticalAlignment="Middle">
-                        <font fontName="Arial" size="8"/>
+                        <font fontName="Roboto" size="8"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{sno}]]></textFieldExpression>
                 </textField>
@@ -97,7 +98,7 @@
                         <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                     </box>
                     <textElement verticalAlignment="Middle">
-                        <font fontName="Arial" size="8"/>
+                        <font fontName="Roboto" size="8"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{item}]]></textFieldExpression>
                 </textField>
@@ -115,7 +116,7 @@
                         <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                     </box>
                     <textElement textAlignment="Right" verticalAlignment="Middle">
-                        <font fontName="Arial" size="8"/>
+                        <font fontName="Roboto" size="8"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
                 </textField>
@@ -133,7 +134,7 @@
                         <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                     </box>
                     <textElement textAlignment="Right" verticalAlignment="Middle">
-                        <font fontName="Arial" size="8"/>
+                        <font fontName="Roboto" size="8"/>
                     </textElement>
                     <textFieldExpression><![CDATA[$F{recommended}]]></textFieldExpression>
                 </textField>
@@ -151,7 +152,7 @@
                         <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
                     </box>
                     <textElement verticalAlignment="Middle">
-                        <font fontName="Arial" size="6"/>
+                        <font fontName="Roboto" size="6"/>
                     </textElement>
                     <textFieldExpression ><![CDATA[$F{remarks}]]></textFieldExpression>
                 </textField>
@@ -178,7 +179,7 @@
                 </reportElement>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="10"/>
+                    <font fontName="Roboto" size="10"/>
                 </textElement>
                 <text><![CDATA[From]]></text>
             </staticText>
@@ -190,7 +191,7 @@
                 </reportElement>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="10"/>
+                    <font fontName="Roboto" size="10"/>
                 </textElement>
                 <text><![CDATA[To]]></text>
             </staticText>
@@ -310,7 +311,7 @@
                 </reportElement>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <text><![CDATA[Invoice date]]></text>
             </staticText>
@@ -319,7 +320,7 @@
                                uuid="12b8c35b-ab3b-41db-91cd-f7ce96304a9c"/>
                 <box padding="1"/>
                 <textElement>
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{InvoiceDate}]]></textFieldExpression>
             </textField>
@@ -328,7 +329,7 @@
                                backcolor="#FFFFFF" uuid="a253076e-30a9-474f-847d-99e9269a3784"/>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <text><![CDATA[Order #]]></text>
             </staticText>
@@ -337,7 +338,7 @@
                                backcolor="#FFFFFF" uuid="5f12ec12-af7e-47d5-a13f-dfe1b4e76cfc"/>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <text><![CDATA[Reference #]]></text>
             </staticText>
@@ -346,7 +347,7 @@
                                uuid="c77b81c1-8d6f-4252-8ede-4220c762e019"/>
                 <box padding="1"/>
                 <textElement>
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{OrderNumber}]]></textFieldExpression>
             </textField>
@@ -355,7 +356,7 @@
                                uuid="f129c9d3-198a-4297-afb3-d44b9ecdf481"/>
                 <box padding="1"/>
                 <textElement>
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{ReferenceNumber}]]></textFieldExpression>
             </textField>
@@ -364,7 +365,7 @@
                                backcolor="#FFFFFF" uuid="b0687c6d-c00d-4982-9d9b-f33d5d08ec93"/>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <text><![CDATA[Date of supply]]></text>
             </staticText>
@@ -373,7 +374,7 @@
                                uuid="4fd30726-3238-4fe8-9436-1f9db55f084c"/>
                 <box padding="1"/>
                 <textElement>
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{DateOfSupply}]]></textFieldExpression>
             </textField>
@@ -382,7 +383,7 @@
                                backcolor="#FFFFFF" uuid="38f26f1c-6065-47d8-a7d4-0ea0cdb3031b"/>
                 <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
                 <textElement textAlignment="Right">
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <text><![CDATA[Date of Receipt]]></text>
             </staticText>
@@ -391,7 +392,7 @@
                                uuid="c240080b-ec7e-4fd6-acf2-645c6f5600ad"/>
                 <box padding="1"/>
                 <textElement>
-                    <font fontName="Arial" size="8"/>
+                    <font fontName="Roboto" size="8"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{DateOfReceipt}]]></textFieldExpression>
             </textField>
