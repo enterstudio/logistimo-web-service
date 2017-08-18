@@ -27,6 +27,7 @@ package com.logistimo.services.blobstore;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingInputStream;
 
+import com.logistimo.logger.XLog;
 import com.logistimo.services.files.AppEngineFile;
 import com.logistimo.services.files.FileService;
 import com.logistimo.services.files.FileServiceFactory;
@@ -41,7 +42,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import com.logistimo.logger.XLog;
+import org.springframework.stereotype.Component;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -57,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Created by charan on 01/10/14.
  */
+@Component
 public class HDFSBlobStoreService extends CommonBlobStoreService {
 
   public static final String
@@ -97,11 +99,21 @@ public class HDFSBlobStoreService extends CommonBlobStoreService {
   }
 
   public byte[] fetchFull(String blobKey) {
+    InputStream inputStream = null;
     try {
-      return IOUtils.toByteArray(getInputStream(blobKey));
+      inputStream = getInputStream(blobKey);
+      return IOUtils.toByteArray(inputStream);
     } catch (IOException e) {
       LOGGER.severe("Failed to read data for blobkey {0}", blobKey, e);
       throw new BlobStoreServiceException(e);
+    } finally {
+      if (inputStream != null) {
+        try {
+          inputStream.close();
+        } catch (IOException e) {
+          //ignored
+        }
+      }
     }
   }
 
@@ -259,31 +271,7 @@ public class HDFSBlobStoreService extends CommonBlobStoreService {
   }
 
   public byte[] read(String blobKey) {
-    LOGGER.fine("Entering getBytes");
-    // Create a blobKey object from the blobKey String
-
-    BlobInfo bInfo = getBlobInfo(blobKey);
-    if (bInfo == null) {
-      return null;
-    }
-    byte[] bytes = new byte[(int) bInfo.getSize()];
-    try {
-      long size = bInfo.getSize();
-      long startIndex = 0;
-      while (size > 0) {
-        long readSize = Math.min(BlobstoreService.MAX_BLOB_FETCH_SIZE - 1, size);
-        byte[] chunk = fetchData(blobKey, startIndex, startIndex + readSize - 1);
-        bytes = ArrayUtils.addAll(bytes, chunk);
-        size -= readSize;
-        startIndex += readSize;
-      }
-    } catch (Exception e) {
-      LOGGER
-          .severe("Exception when getting data from blobstore for blobkey {0}: {1} : {2}", blobKey,
-              e.getClass().getName(), e.getMessage());
-    }
-    LOGGER.fine("Exiting getBytes");
-    return bytes;
+    return fetchFull(blobKey);
   }
 
   // Write bytes into Blobstore with the specified filename and MIME type; returns the blob key as a String

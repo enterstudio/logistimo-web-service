@@ -29,13 +29,16 @@ import com.logistimo.exception.ValidationException;
 import com.logistimo.models.ResponseModel;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
 import com.logistimo.models.shipments.ShipmentModel;
+import com.logistimo.orders.models.InvoiceResponseModel;
 import com.logistimo.pagination.Results;
+import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.shipments.ShipmentStatus;
 import com.logistimo.shipments.entity.IShipment;
 import com.logistimo.shipments.entity.IShipmentItem;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -133,4 +136,10 @@ public interface IShipmentService extends Service {
                                            Locale locale, String timezone);
 
   public void checkShipmentRequest(Long customerKioskId,Long vendorKioskId,List itemList) throws ServiceException;
+
+  /**
+   * Generate shipment voucher
+   */
+  InvoiceResponseModel generateShipmentVoucher(String shipmentId)
+      throws ServiceException, ObjectNotFoundException, IOException, ValidationException;
 }

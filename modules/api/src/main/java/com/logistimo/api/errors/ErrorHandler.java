@@ -75,7 +75,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     ErrorResource error = new ErrorResource("[Internal Server Error]", e.getMessage());
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    return handleExceptionInternal(e, error, headers, HttpStatus.BAD_REQUEST, request);
+    return handleExceptionInternal(e, error, headers, HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 
   @ExceptionHandler({UnauthorizedException.class})

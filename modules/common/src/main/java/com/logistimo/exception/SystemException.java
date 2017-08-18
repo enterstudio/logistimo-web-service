@@ -30,21 +30,17 @@ import java.util.Locale;
  */
 public class SystemException extends RuntimeException implements ExceptionWithCodes {
 
-  private final Object[] arguments;
+  private final transient Object[] arguments;
+  private final String code;
 
   public String getCode() {
     return code;
   }
 
-  public void setCode(String code) {
-    this.code = code;
-  }
-
-  private String code;
-
   public SystemException(Exception e) {
     super(e);
     this.arguments = new Object[0];
+    this.code = null;
   }
 
   public SystemException(Exception e, String code, Object... arguments) {
@@ -55,14 +51,17 @@ public class SystemException extends RuntimeException implements ExceptionWithCo
 
   public SystemException(String message) {
     super(message);
+    this.code = null;
     this.arguments = new Object[0];
   }
 
-  public SystemException(String message, Exception e) {
+  public SystemException(String message, Throwable e) {
     super(message, e);
+    this.code = null;
     this.arguments = new Object[0];
   }
 
+  @Override
   public String getMessage() {
     return ExceptionUtils.constructMessage(code, Locale.getDefault(), arguments);
   }

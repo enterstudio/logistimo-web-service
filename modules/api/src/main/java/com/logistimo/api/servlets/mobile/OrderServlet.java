@@ -227,7 +227,7 @@ public class OrderServlet extends JsonRestServlet {
                   .setStatus(status)
                   .setOtype(otype)
                   .setOrderType(isTransfer ? IOrder.TRANSFER : IOrder.NONTRANSFER)
-              ,pageParams
+              , pageParams
           ).getResults();
       if (ordersList == null || ordersList.isEmpty()) {
         message = backendMessages.getString("error.noorders");
@@ -689,7 +689,8 @@ public class OrderServlet extends JsonRestServlet {
   // Create or update a given order
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void createOrUpdateOrder(HttpServletRequest req, HttpServletResponse resp,
-                                   ResourceBundle backendMessages, ResourceBundle messages, boolean isOldRequest)
+                                   ResourceBundle backendMessages, ResourceBundle messages,
+                                   boolean isOldRequest)
       throws IOException {
     xLogger.fine("Entered createOrUpdateOrder");
     // Get the type
@@ -1242,7 +1243,8 @@ public class OrderServlet extends JsonRestServlet {
 
   @SuppressWarnings("rawtypes")
   private void updateOrderStatus(HttpServletRequest req, HttpServletResponse resp,
-                                 ResourceBundle backendMessages, ResourceBundle messages, boolean doApprovalConfigCheck)
+                                 ResourceBundle backendMessages, ResourceBundle messages,
+                                 boolean doApprovalConfigCheck)
       throws IOException, ServiceException {
     xLogger.fine("Entered updateOrderStatus");
     String password = req.getParameter(RestConstantsZ.PASSWORD); // sent when SMS message is sent
@@ -1512,7 +1514,9 @@ public class OrderServlet extends JsonRestServlet {
 
   // Check if approval configuration is enabled
   private boolean isApprovalConfigEnabled(ApprovalsConfig ac) {
-    return (ac != null && ac.getOrderConfig() != null && (!ac.getOrderConfig().getPurchaseSalesOrderApproval().isEmpty() || ac.getOrderConfig().isTransferApprovalEnabled()));
+    return (ac != null && ac.getOrderConfig() != null && (
+        !ac.getOrderConfig().getPurchaseSalesOrderApproval().isEmpty() || ac.getOrderConfig()
+            .isTransferApprovalEnabled()));
   }
 
 }

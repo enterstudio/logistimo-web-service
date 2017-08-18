@@ -23,6 +23,7 @@
 
 package com.logistimo.api.builders;
 
+import com.logistimo.AppFactory;
 import com.logistimo.api.constants.ConfigConstants;
 import com.logistimo.api.models.MenuStatsModel;
 import com.logistimo.api.models.configuration.AccountingConfigModel;
@@ -81,6 +82,7 @@ import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.storage.StorageUtil;
 import com.logistimo.services.utils.ConfigUtil;
 import com.logistimo.tags.TagUtil;
 import com.logistimo.users.entity.IUserAccount;
@@ -113,6 +115,10 @@ import javax.servlet.http.HttpServletRequest;
 public class ConfigurationModelsBuilder {
   private static final XLog xLogger = XLog.getLog(ConfigurationModelsBuilder.class);
   private static final int GAE_MAX_ENTITIES = 30;
+  private static final String UPLOADS = "uploads";
+  private static final String LOGO = "logo.png";
+  private static final String INVOICE_TEMPLATE = "logistimo_invoice.jrxml";
+  private static final String SHIPMENT_TEMPLATE = "logistimo_shipment.jrxml";
 
   public MenuStatsModel buildMenuStats(SecureUserDetails user, DomainConfig config, Locale locale,
                                        String timezone, HttpServletRequest request)
@@ -451,15 +457,15 @@ public class ConfigurationModelsBuilder {
             model.userpopulate = true;
             model.usrname = userAccount.getFullName();
           }
-        } catch (SystemException e) {
-          xLogger.severe("Error in fetching user details", e);
-          throw new InvalidServiceException("Unable to fetch user details for " + model.usrid);
         } catch (ObjectNotFoundException e) {
           xLogger
               .warn("Configured support user {0} for role {1} no longer exists",
                   model.usrid, role,
                   e);
           model.usrid = null;
+        } catch (SystemException e) {
+          xLogger.severe("Error in fetching user details", e);
+          throw new InvalidServiceException("Unable to fetch user details for " + model.usrid);
         }
       } else {
         model.phnm = config.getSupportPhone();
@@ -1136,6 +1142,7 @@ public class ConfigurationModelsBuilder {
       throws ConfigurationException, ServiceException, ObjectNotFoundException {
     DomainConfig dc = DomainConfig.getInstance(domainId);
     OrdersConfigModel model = new OrdersConfigModel();
+    StorageUtil storageUtil = AppFactory.get().getStorageUtil();
     if (dc == null) {
       throw new ConfigurationException();
     }
@@ -1221,6 +1228,16 @@ public class ConfigurationModelsBuilder {
       model.pdos = oc.getAutoCreatePdos();
       model.autoCreateEntityTags = oc.getAutoCreateEntityTags();
       model.autoCreateMaterialTags = oc.getAutoCreateMaterialTags();
+      model.setLogo(oc.getInvoiceLogo());
+      model.setLogoName(oc.getInvoiceLogoName() != null ? oc.getInvoiceLogoName() : LOGO);
+      model.setInvoiceTemplate(oc.getInvoiceTemplate());
+      model.setInvoiceTemplateName(oc.getInvoiceTemplateName() != null ? oc.getInvoiceTemplateName() : INVOICE_TEMPLATE);
+      model.setShipmentTemplate(oc.getShipmentTemplate());
+      model.setShipmentTemplateName(oc.getShipmentTemplateName() != null ? oc.getShipmentTemplateName() : SHIPMENT_TEMPLATE);
+      model.setLogoDownloadLink(storageUtil.getExternalUrl(UPLOADS, oc.getInvoiceLogoName() != null ? oc.getInvoiceLogoName() : LOGO));
+      model.setInvoiceTemplateDownloadLink(storageUtil.getExternalUrl(UPLOADS, oc.getInvoiceTemplateName() != null ? oc.getInvoiceTemplateName() : INVOICE_TEMPLATE));
+      model.setShipmentTemplateDownloadLink(
+          storageUtil.getExternalUrl(UPLOADS, oc.getShipmentTemplateName() != null ? oc.getShipmentTemplateName() : SHIPMENT_TEMPLATE));
     }
     if (dbc != null) {
       if (dbc.isPublic()) {

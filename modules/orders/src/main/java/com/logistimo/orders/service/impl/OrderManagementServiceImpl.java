@@ -28,6 +28,7 @@ import com.logistimo.AppFactory;
 import com.logistimo.activity.entity.IActivity;
 import com.logistimo.activity.service.ActivityService;
 import com.logistimo.activity.service.impl.ActivityServiceImpl;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventSpec;
 import com.logistimo.config.models.LeadTimeAvgConfig;
@@ -68,6 +69,7 @@ import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.OrderUtils;
 import com.logistimo.orders.actions.GenerateOrderEventsAction;
+import com.logistimo.orders.actions.GenerateOrderInvoiceAction;
 import com.logistimo.orders.actions.GetFilteredOrdersAction;
 import com.logistimo.orders.approvals.actions.OrderVisibilityAction;
 import com.logistimo.orders.dao.IOrderDao;
@@ -77,6 +79,7 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.Order;
+import com.logistimo.orders.models.InvoiceResponseModel;
 import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
@@ -84,6 +87,7 @@ import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.validators.UpdateOrderStatusValidator;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
+import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
@@ -107,6 +111,7 @@ import com.logistimo.utils.QueryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -142,7 +147,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   // Get a demand item with same material ID
   private static IDemandItem getDemandItemByMaterial(List<IDemandItem> demandList,
-                                                     Long materialId) {
+      Long materialId) {
     if (demandList == null || demandList.isEmpty()) {
       return null;
     }
@@ -203,12 +208,12 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
    * Update an order, and post inventory issues/receipts, if needed.
    */
   public UpdatedOrder updateOrder(IOrder order, int source, boolean isLocked, boolean validateHU,
-                                  String userId) throws LogiException {
+      String userId) throws LogiException {
     return updateOrder(order, source, isLocked, validateHU, userId, null);
   }
 
   public UpdatedOrder updateOrder(IOrder order, int source, boolean isLocked, boolean validateHU,
-                                  String userId, PersistenceManager pm) throws LogiException {
+      String userId, PersistenceManager pm) throws LogiException {
     xLogger.fine("Entered updateOrder");
     if (order == null) {
       throw new ServiceException("Invalid order");
@@ -307,8 +312,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   public UpdatedOrder updateOrderStatus(Long orderId, String newStatus, String updatingUserId,
-                                        String message, List<String> userIdsToBeNotified,
-                                        int source) throws ServiceException {
+      String message, List<String> userIdsToBeNotified,
+      int source) throws ServiceException {
     return updateOrderStatus(orderId, newStatus, updatingUserId, message, userIdsToBeNotified,
         source, null, null);
   }
@@ -317,8 +322,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
    * Update an order's status, and post inventory issues/receipts, if needed.
    */
   public UpdatedOrder updateOrderStatus(Long orderId, String newStatus, String updatingUserId,
-                                        String message, List<String> userIdsToBeNotified,
-                                        int source, PersistenceManager pm, String crsn)
+      String message, List<String> userIdsToBeNotified,
+      int source, PersistenceManager pm, String crsn)
       throws ServiceException {
 
     boolean isLocalPM = pm == null;
@@ -413,7 +418,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   private UpdatedOrder updateOrderStatus(IOrder o, String newStatus, String updatingUserId,
-                                         String message, PersistenceManager pm)
+      String message, PersistenceManager pm)
       throws ServiceException {
     xLogger.fine("Entered updateOrderStatus");
     if (o == null || newStatus == null || newStatus.isEmpty() || o.isStatus(newStatus)) {
@@ -455,7 +460,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   @Override
   public String shipNow(IOrder order, String transporter, String trackingId, String reason,
-                        Date expectedFulfilmentDate, String userId, String ps, int source)
+      Date expectedFulfilmentDate, String userId, String ps, int source)
       throws ServiceException, ObjectNotFoundException, ValidationException {
     IShipmentService
         shipmentService =
@@ -498,8 +503,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   private IMessage addMessageToOrder(Long orderId, Long domainId, String message,
-                                     String updatingUserId,
-                                     PersistenceManager pm) throws ServiceException {
+      String updatingUserId,
+      PersistenceManager pm) throws ServiceException {
     ConversationService cs =
         Services.getService(ConversationServiceImpl.class, this.getLocale());
     IMessage
@@ -515,8 +520,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   // Generate shipment events, if configured
   @Override
   public void generateOrderCommentEvent(Long domainId, int eventId, String objectType,
-                                        String objectId, String message,
-                                        List<String> userIds) {
+      String objectId, String message,
+      List<String> userIds) {
     try {
       // Custom options
       CustomOptions customOptions = new CustomOptions();
@@ -538,8 +543,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   private void addStatusHistory(Long orderId, String oldStatus, String newStatus, Long domainId,
-                                IMessage iMessage,
-                                String userId, PersistenceManager pm) {
+      IMessage iMessage,
+      String userId, PersistenceManager pm) {
     ActivityService
         activityService =
         Services.getService(ActivityServiceImpl.class, this.getLocale());
@@ -555,17 +560,17 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
    */
   @SuppressWarnings("unchecked")
   public Results getOrders(Long domainId, Long kioskId, String status, Date since, Date until,
-                           String otype, String tagType, String tag, List<Long> kioskIds,
-                           PageParams pageParams, Integer orderType, String referenceId, String approvalStatus)
+      String otype, String tagType, String tag, List<Long> kioskIds,
+      PageParams pageParams, Integer orderType, String referenceId, String approvalStatus)
       throws ServiceException {
     return getOrders(domainId, kioskId, status, since, until, otype, tagType, tag, kioskIds,
         pageParams, orderType, referenceId, approvalStatus, false);
   }
 
   public Results getOrders(Long domainId, Long kioskId, String status, Date since, Date until,
-                           String otype, String tagType, String tag, List<Long> kioskIds,
-                           PageParams pageParams, Integer orderType, String referenceId,
-                           String approvalStatus, boolean withDemand) {
+      String otype, String tagType, String tag, List<Long> kioskIds,
+      PageParams pageParams, Integer orderType, String referenceId,
+      String approvalStatus, boolean withDemand) {
     OrderFilters filters = new OrderFilters().setDomainId(domainId)
         .setKioskId(kioskId)
         .setStatus(status)
@@ -591,16 +596,16 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   /**
    * Get orders based on kiosk,status,ordertype
    *
-   * @param kioskId    - Kiosk ID
-   * @param status     -Order status
+   * @param kioskId - Kiosk ID
+   * @param status -Order status
    * @param pageParams -Page params with max results and offset
-   * @param orderType  -Order type sle for sales and prc for purchase
+   * @param orderType -Order type sle for sales and prc for purchase
    * @param isTransfer - True for transfers, false if it is sales/purchase
    * @return List of IOrder
    * @throws ServiceException from service layer
    */
   public List<IOrder> getOrders(Long kioskId, String status, PageParams pageParams,
-                                String orderType, boolean isTransfer) throws ServiceException {
+      String orderType, boolean isTransfer) throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     List<String> parameters = new ArrayList<>(1);
     StringBuilder queryBuilder = new StringBuilder("SELECT * FROM `ORDER` ");
@@ -706,12 +711,13 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   /**
-   * Get demand items according to specified criteria (returns only unfulfilled demand)
-   * NOTE: domainId is the mandatory attribute, all others are optional; either kiosk or material id can be specified, but NOT both
+   * Get demand items according to specified criteria (returns only unfulfilled demand) NOTE:
+   * domainId is the mandatory attribute, all others are optional; either kiosk or material id can
+   * be specified, but NOT both
    */
   @SuppressWarnings("unchecked")
   public Results getDemandItems(Long domainId, Long kioskId, Long materialId, String kioskTag,
-                                String materialTag, Date since, PageParams pageParams)
+      String materialTag, Date since, PageParams pageParams)
       throws ServiceException {
     xLogger.fine("Entered getDemandItems");
     if (domainId == null && kioskId == null && materialId == null) {
@@ -843,13 +849,13 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       Double geoAccuracy, String geoErrorCode,
       String utcExpectedFulfillmentTimeRangesCSV, String utcConfirmedFulfillmentTimeRange,
       BigDecimal payment, String paymentOption, String packageSize,
-      boolean allowEmptyOrders,int src) throws ServiceException {
+      boolean allowEmptyOrders, int src) throws ServiceException {
 
     return updateOrderTransactions(domainId, userId, transType, inventoryTransactions, kioskId,
         trackingId, message, createOrder, servicingKioskId, latitude, longitude,
         geoAccuracy, geoErrorCode, utcExpectedFulfillmentTimeRangesCSV,
         utcConfirmedFulfillmentTimeRange, payment, paymentOption,
-        packageSize, allowEmptyOrders, null, null, null, null, null, null,src);
+        packageSize, allowEmptyOrders, null, null, null, null, null, null, src);
   }
 
   @Override
@@ -862,7 +868,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       String utcConfirmedFulfillmentTimeRange, BigDecimal payment, String paymentOption,
       String packageSize,
       boolean allowEmptyOrders, List<String> orderTags, Integer orderType, Boolean isSalesOrder,
-      String referenceId, Date reqByDate, Date eta,int src) throws ServiceException {
+      String referenceId, Date reqByDate, Date eta, int src) throws ServiceException {
     return updateOrderTransactions(domainId, userId, transType, inventoryTransactions, kioskId,
         trackingId, message,
         createOrder, servicingKioskId, latitude, longitude, geoAccuracy, geoErrorCode,
@@ -1224,11 +1230,11 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   @Override
   public void modifyOrder(IOrder o, String userId, List<ITransaction> transactions, Date timestamp,
-                          Long domainId, String transType, String message,
-                          String utcEstimatedFulfillmentTimeRanges,
-                          String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
-                          String paymentOption, String packageSize, boolean allowEmptyOrders,
-                          List<String> orderTags, Integer orderType, String referenceId)
+      Long domainId, String transType, String message,
+      String utcEstimatedFulfillmentTimeRanges,
+      String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
+      String paymentOption, String packageSize, boolean allowEmptyOrders,
+      List<String> orderTags, Integer orderType, String referenceId)
       throws ServiceException {
     modifyOrder(o, userId, transactions, timestamp, domainId, transType, message,
         utcEstimatedFulfillmentTimeRanges, utcConfirmedFulfillmentTimeRange, payment, paymentOption,
@@ -1238,14 +1244,14 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   @Override
   // Modify order status and its items
   public void modifyOrder(IOrder o, String userId, List<ITransaction> transactions, Date timestamp,
-                          Long domainId,
-                          String transType, String message,
-                          String utcEstimatedFulfillmentTimeRanges,
-                          String utcConfirmedFulfillmentTimeRange,
-                          BigDecimal payment, String paymentOption, String packageSize,
-                          boolean allowEmptyOrders,
-                          List<String> orderTags, Integer orderType, String referenceId,
-                          PersistenceManager pm) throws ServiceException {
+      Long domainId,
+      String transType, String message,
+      String utcEstimatedFulfillmentTimeRanges,
+      String utcConfirmedFulfillmentTimeRange,
+      BigDecimal payment, String paymentOption, String packageSize,
+      boolean allowEmptyOrders,
+      List<String> orderTags, Integer orderType, String referenceId,
+      PersistenceManager pm) throws ServiceException {
     Date t = null;
     MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
     InventoryManagementService
@@ -1359,8 +1365,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   // Update other order metadata (fulfillment times, payment options, package size, etc.)
   private void updateOrderMetadata(IOrder o, String utcEstimatedFulfillmentTimeRangesCSV,
-                                   String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
-                                   String paymentOption, String packageSize) {
+      String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
+      String paymentOption, String packageSize) {
     // Update estimated fulfillment time ranges
     if (utcEstimatedFulfillmentTimeRangesCSV != null) {
       o.setExpectedFulfillmentTimeRangesCSV(utcEstimatedFulfillmentTimeRangesCSV);
@@ -1403,7 +1409,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   // Get a demand item, given a transaction
   private IDemandItem getDemandItem(ITransaction trans, IMaterial m, IInvntry inv,
-                                    InventoryManagementService ims) {
+      InventoryManagementService ims) {
     IDemandItem di = JDOUtils.createInstance(IDemandItem.class);
     di.setDomainId(trans.getDomainId());
     di.setKioskId(trans.getKioskId());
@@ -1456,14 +1462,14 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   // Generate order events, if configured
   private void generateEvent(Long domainId, int eventId, IOrder o, String message,
-                             List<String> userIds) {
+      List<String> userIds) {
     StaticApplicationContext.getBean(GenerateOrderEventsAction.class)
         .invoke(domainId, eventId, o.getOrderId(), o.getStatus(), message, userIds);
   }
 
   @Override
   public List<IDemandItem> getDemandItemByStatus(Long kioskId, Long materialId,
-                                                 Collection<String> status)
+      Collection<String> status)
       throws ServiceException {
     if (kioskId == null && materialId == null || status == null) {
       throw new ServiceException("One of KioskId and MaterialId along with status are mandatory");
@@ -1506,22 +1512,23 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
 
   public List<String> getIdSuggestions(Long domainId, String id, String type, Integer oty,
-                                       List<Long> kioskIds) throws ServiceException {
+      List<Long> kioskIds) throws ServiceException {
     List<String> filterIds = new ArrayList<>();
     String filterQuery = "SELECT ID_OID FROM ORDER_DOMAINS WHERE DOMAIN_ID = " + domainId;
     StringBuilder sqlQuery = new StringBuilder();
-      if(StringUtils.isNotEmpty(type)) {
-          if ("rid".equals(type)) {
-              sqlQuery.append("SELECT DISTINCT RID FROM `ORDER` WHERE ID IN (").append(filterQuery)
-                      .append(") AND RID LIKE '").append(id).append("%' ");
-          } else if ("oid".equals(type)) {
-            sqlQuery.append("SELECT ID FROM `ORDER` WHERE ID IN (");
-              sqlQuery.append(filterQuery).append(" AND ID_OID LIKE '").append(id).append("%')");
-          }
+    if (StringUtils.isNotEmpty(type)) {
+      if ("rid".equals(type)) {
+        sqlQuery.append("SELECT DISTINCT RID FROM `ORDER` WHERE ID IN (").append(filterQuery)
+            .append(") AND RID LIKE '").append(id).append("%' ");
+      } else if ("oid".equals(type)) {
+        sqlQuery.append("SELECT ID FROM `ORDER` WHERE ID IN (");
+        sqlQuery.append(filterQuery).append(" AND ID_OID LIKE '").append(id).append("%')");
       }
+    }
     if (oty != null) {
       if (oty == IOrder.PURCHASE_ORDER) {
-        sqlQuery.append(" AND OTY IN (").append(IOrder.PURCHASE_ORDER).append(CharacterConstants.COMMA).append(IOrder.SALES_ORDER).append(")");
+        sqlQuery.append(" AND OTY IN (").append(IOrder.PURCHASE_ORDER)
+            .append(CharacterConstants.COMMA).append(IOrder.SALES_ORDER).append(")");
       } else {
         sqlQuery.append(" AND OTY = ").append(oty);
       }
@@ -1562,7 +1569,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   public BigDecimal getLeadTime(Long kid, Long mid, float orderPeriodicityInConfig,
-                                LeadTimeAvgConfig leadTimeAvgConfig, float leadTimeDefaultInConfig)
+      LeadTimeAvgConfig leadTimeAvgConfig, float leadTimeDefaultInConfig)
       throws ServiceException {
     BigDecimal avgLeadTime = BigDecimal.ZERO;
     if (kid == null || mid == null) {
@@ -1649,7 +1656,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
   @Override
   public void updateOrderMetadata(Long orderId, String updatedBy,
-                                  PersistenceManager persistenceManager) {
+      PersistenceManager persistenceManager) {
     Boolean isLocalPersistentManager = Boolean.FALSE;
     if (persistenceManager == null) {
       persistenceManager = PMF.get().getPersistenceManager();
@@ -1702,5 +1709,12 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     return allQtyZero;
   }
 
+  @Override
+  public InvoiceResponseModel generateInvoiceForOrder(Long orderId)
+      throws ServiceException, IOException, ValidationException, ObjectNotFoundException {
+    IOrder order = getOrder(orderId, true);
+    SecureUserDetails user = SecurityUtils.getUserDetails();
+    return StaticApplicationContext.getBean(GenerateOrderInvoiceAction.class).invoke(order, user);
+  }
 
 }

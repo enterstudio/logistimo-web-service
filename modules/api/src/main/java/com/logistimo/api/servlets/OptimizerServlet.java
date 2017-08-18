@@ -23,21 +23,19 @@
 
 package com.logistimo.api.servlets;
 
-import com.logistimo.dao.JDOUtils;
-import com.logistimo.inventory.entity.IInvntry;
-
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.InventoryConfig;
-import com.logistimo.pagination.PageParams;
-import com.logistimo.pagination.PagedExec;
-import com.logistimo.pagination.QueryParams;
+import com.logistimo.context.StaticApplicationContext;
+import com.logistimo.inventory.dao.impl.InvntryDao;
+import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.inventory.optimization.pagination.processor.InvOptimizationDQProcessor;
 import com.logistimo.inventory.optimization.pagination.processor.InvOptimizationPSProcessor;
 import com.logistimo.logger.XLog;
+import com.logistimo.pagination.PageParams;
+import com.logistimo.pagination.PagedExec;
+import com.logistimo.pagination.QueryParams;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
@@ -100,28 +98,20 @@ public class OptimizerServlet extends JsonRestServlet {
         xLogger.info("No optimization required for domain {0}", domainId);
         return;
       }
+      InvntryDao
+          invntryDao =
+          StaticApplicationContext.getApplicationContext().getBean(InvntryDao.class);
+      InventoryFilters filters = new InventoryFilters();
       // Form query and query params
-      String query = null;
-      Map<String, Object> queryParams = new HashMap<String, Object>();
       if (kioskId != null) {
-        query =
-            "SELECT FROM " + JDOUtils.getImplClass(IInvntry.class).getName()
-                + " WHERE kId == kioskIdParam";
-        String declaration = " PARAMETERS Long kioskIdParam";
-        queryParams.put("kioskIdParam", kioskId);
+        filters.withKioskId(kioskId);
         if (materialId != null) {
-          query += " && mId == materialIdParam";
-          declaration += ", Long materialIdParam";
-          queryParams.put("materialIdParam", materialId);
+          filters.withMaterialId(materialId);
         }
-        query += declaration;
       } else {
-        query =
-            "SELECT FROM " + JDOUtils.getImplClass(IInvntry.class).getName()
-                + " WHERE dId.contains(dIdParam) PARAMETERS Long dIdParam";
-        queryParams.put("dIdParam", domainId);
+        filters.withSourceDomainId(domainId);
       }
-      QueryParams qp = new QueryParams(query, queryParams);
+      QueryParams qp = invntryDao.buildInventoryQuery(filters, false);
       // Get page params
       PageParams pageParams = new PageParams(null, MAX_ENTITIES_PER_TASK);
       // Get the processor

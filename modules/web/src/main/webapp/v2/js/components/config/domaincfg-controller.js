@@ -1813,9 +1813,93 @@ domainCfgControllers.controller('TagsConfigurationController', ['$scope', 'domai
         };
     }
 ]);
+domainCfgControllers.controller('InvoiceConfigurationController', ['$scope', 'domainCfgService',
+function($scope, domainCfgService) {
+
+    $scope.init = function() {
+        $scope.invoice = {logo: {}, invoiceTemplate: {}, shipmentTemplate: {}};
+        $scope.editLogo = false;
+        $scope.editInvoiceTemplate = false;
+        $scope.editShipmentTemplate = false;
+        if(checkNotNullEmpty($scope.orders.logo)) {
+            $scope.invoice.logo.name = $scope.orders.logoName;
+        }
+        if(checkNotNullEmpty($scope.orders.invoiceTemplate)) {
+            $scope.invoice.invoiceTemplate.name = $scope.orders.invoiceTemplateName;
+        }
+        if(checkNotNullEmpty($scope.orders.shipmentTemplate)) {
+            $scope.invoice.shipmentTemplate.name = $scope.orders.shipmentTemplateName;
+        }
+    };
+    $scope.init();
+
+
+    $scope.saveLogo = function() {
+        if(checkNullEmpty($scope.invoice.logo)) {
+            $scope.showWarning("Please select a file to upload.");
+            return;
+        }
+        var filename = $scope.invoice.logo.name.split(".");
+        var ext = filename[filename.length - 1];
+        if (ext != 'jpeg' && ext != 'png' && ext != 'jpg') {
+            $scope.showWarning($scope.resourceBundle['invoice.image.upload.warn']);
+            return false;
+        }
+        $scope.showLoading();
+        domainCfgService.uploadFile($scope.invoice.logo).then(function(data){
+            $scope.updateInvoice('logo', data.data.data, data.data.file);
+            $scope.editLogo = !$scope.editLogo;
+        }).finally(function(){
+            $scope.hideLoading();
+        });
+    };
+
+    $scope.cancelLogo = function() {
+        $scope.editLogo = !$scope.editLogo;
+    };
+
+    $scope.cancelTemplate = function(text) {
+        if(checkNotNullEmpty(text)) {
+            if(text == 'invoice') {
+                $scope.editInvoiceTemplate = !$scope.editInvoiceTemplate;
+            } else {
+                $scope.editShipmentTemplate = !$scope.editShipmentTemplate;
+            }
+        }
+    };
+
+    $scope.saveTemplate = function(temp) {
+        if(checkNotNullEmpty(temp)) {
+            var file = "";
+            if(temp == 'invoice') {
+                file = $scope.invoice.invoiceTemplate;
+            } else {
+                file = $scope.invoice.shipmentTemplate;
+            }
+            var filename = file.name.split(".");
+            var ext = filename[filename.length - 1];
+            if(ext != 'jrxml') {
+                $scope.showWarning($scope.resourceBundle['invoice.xml.upload.warn']);
+                return false;
+            }
+            $scope.showLoading();
+            domainCfgService.uploadFile(file).then(function(data) {
+                if(temp == 'invoice') {
+                    $scope.updateInvoice('invoice', data.data.data, data.data.file);
+                    $scope.editInvoiceTemplate = !$scope.editInvoiceTemplate;
+                } else {
+                    $scope.updateInvoice('shipment', data.data.data, data.data.file);
+                    $scope.editShipmentTemplate = !$scope.editShipmentTemplate;
+                }
+            }).finally(function() {
+                $scope.hideLoading();
+            });
+        }
+    };
+}]);
 domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'domainCfgService', 'requestContext', 'entityService', 'configService',
     function ($scope, domainCfgService, requestContext, entityService, configService) {
-        $scope.orders = {};
+        $scope.orders = {logo: "", invoiceTemplate: "", shipmentTemplate: "", logoName: "", shipmentTemplateName: "", invoiceTemplateName: ""};
         $scope.change = false;
         $scope.loading = false;
         $scope.dmntz = 'UTC';
@@ -1838,6 +1922,19 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
             });
         };
         $scope.getGeneralConfiguration();
+
+        $scope.updateInvoice = function(type, data, name) {
+            if(type == 'logo') {
+                $scope.orders.logo = data;
+                $scope.orders.logoName = name;
+            } else if(type == 'invoice') {
+                $scope.orders.invoiceTemplate = data;
+                $scope.orders.invoiceTemplateName = name;
+            } else {
+                $scope.orders.shipmentTemplate = data;
+                $scope.orders.shipmentTemplateName = name;
+            }
+        };
 
         function constructReasonsModel() {
             if (checkNotNullEmpty($scope.orders) && checkNotNullEmpty($scope.orders.orr)) {
@@ -1893,6 +1990,7 @@ domainCfgControllers.controller('OrdersConfigurationController', ['$scope', 'dom
             }
             return configTags;
         }
+
 
         $scope.getOrders = function () {
             $scope.loading = true;

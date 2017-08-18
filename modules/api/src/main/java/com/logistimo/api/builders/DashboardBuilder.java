@@ -34,7 +34,6 @@ import com.logistimo.dao.JDOUtils;
 import com.logistimo.dashboards.entity.IDashboard;
 import com.logistimo.events.entity.IEvent;
 import com.logistimo.exception.SystemException;
-import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Services;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
@@ -97,7 +96,7 @@ public class DashboardBuilder {
         model.cBy = db.getCreatedBy();
         model.cOn = db.getCreatedOn();
         model.desc = db.getDesc();
-      } catch (SystemException | ObjectNotFoundException ignored) {
+      } catch (SystemException ignored) {
       }
     }
     return model;

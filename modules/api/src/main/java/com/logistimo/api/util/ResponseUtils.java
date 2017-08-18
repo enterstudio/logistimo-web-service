@@ -21,32 +21,23 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
+package com.logistimo.api.util;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 /**
- *
+ * Created by charan on 16/08/17.
  */
-package com.logistimo.services;
+public class ResponseUtils {
 
-import com.logistimo.exception.SystemException;
-
-/**
- * @author arun
- */
-@SuppressWarnings("serial")
-public class ObjectNotFoundException extends SystemException {
-
-  public ObjectNotFoundException(String message) {
-    super(message);
-  }
-
-  public ObjectNotFoundException(String message, Throwable t) {
-    super(message, t);
-  }
-
-  public ObjectNotFoundException(String code, Object... arguments) {
-    super(null, code, arguments);
-  }
-
-  public ObjectNotFoundException(Exception e) {
-    super(e);
+  public static void serveInlineFile(HttpServletResponse response, String fileName,
+                                     String contentType,
+                                     byte[] bytes) throws IOException {
+    response.setContentType(contentType);
+    response.setContentLength(bytes.length);
+    response.setHeader("Content-disposition", "inline; filename=" + fileName);
+    response.getOutputStream().write(bytes);
   }
 }

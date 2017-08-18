@@ -467,6 +467,19 @@
                         </div>
                     </div>
                 </div>
+                <div class="bgr">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="title-heading">
+                                {{resourceBundle['invoice.upper.case']}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div ng-include="'views/configuration/invoice.html'"></div>
+                    </div>
+                    <div class="row"></div>
+                </div>
                 <div class="row mt10" ng-if="iSU || dp.ce">
                     <div class="col-sm-12  ml5">
                         <button type="button" ng-click="setOrders()" class="btn btn-primary">{{resourceBundle['save']}}</button>

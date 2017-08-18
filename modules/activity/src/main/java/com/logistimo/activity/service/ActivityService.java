@@ -42,17 +42,16 @@ public interface ActivityService extends Service {
   IActivity createActivity(IActivity activity) throws ServiceException;
 
   Results getActivity(String objectId, String objectType, Date fromDate, Date toDate, String userId,
-                      String tag,
-                      PageParams pageParams) throws ServiceException;
+      String tag, PageParams pageParams) throws ServiceException;
+
+  IActivity getLatestActivityWithStatus(String objectType, String objectId, String newValue)
+      throws ServiceException;
 
   IActivity createActivity(String objectType, String objectId, String field, String oldStatus,
-                           String newStatus,
-                           String updatingUserId, Long domainId, String messageId, String tag,
-                           PersistenceManager pm);
+      String newStatus, String updatingUserId, Long domainId, String messageId, String tag,
+      PersistenceManager pm);
 
   IActivity createActivity(String objectType, String objectId, String field, String prevValue,
-                           String newValue,
-                           String updatingUserId, Long domainId, String messageId, String tag,
-                           Date date,
-                           PersistenceManager pm);
+      String newValue, String updatingUserId, Long domainId, String messageId, String tag,
+      Date date, PersistenceManager pm);
 }

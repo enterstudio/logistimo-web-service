@@ -21,32 +21,25 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-/**
- *
- */
-package com.logistimo.services;
-
-import com.logistimo.exception.SystemException;
+package com.logistimo.orders.models;
 
 /**
- * @author arun
+ * Created by charan on 16/08/17.
  */
-@SuppressWarnings("serial")
-public class ObjectNotFoundException extends SystemException {
+public class InvoiceResponseModel {
+  private final String fileName;
+  private final byte[] bytes;
 
-  public ObjectNotFoundException(String message) {
-    super(message);
+  public InvoiceResponseModel(String fileName, byte[] bytes) {
+    this.fileName = fileName;
+    this.bytes = bytes;
   }
 
-  public ObjectNotFoundException(String message, Throwable t) {
-    super(message, t);
+  public byte[] getBytes() {
+    return bytes;
   }
 
-  public ObjectNotFoundException(String code, Object... arguments) {
-    super(null, code, arguments);
-  }
-
-  public ObjectNotFoundException(Exception e) {
-    super(e);
+  public String getFileName() {
+    return fileName;
   }
 }

@@ -209,12 +209,12 @@ public class LinkedDomainController {
       return domainBuilder
           .buildDomain(domain, userDomainPermission, permission, dc, action, viewPermission,
               assetPermission, iMan);
-    } catch (SystemException e) {
-      xLogger.severe("Unable to fetch the domain permission for current domain", e);
-      throw new InvalidServiceException("Unable to fetch the domain permission for current domain");
     } catch (ObjectNotFoundException e) {
       xLogger.severe("Unable to fetch the user details for {0}", sUser.getUsername(), e);
       throw new InvalidServiceException("Unable to fetch user details for " + sUser.getUsername());
+    } catch (SystemException e) {
+      xLogger.severe("Unable to fetch the domain permission for current domain", e);
+      throw new InvalidServiceException("Unable to fetch the domain permission for current domain");
     }
   }
 

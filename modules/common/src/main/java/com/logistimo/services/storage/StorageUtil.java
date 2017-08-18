@@ -80,4 +80,6 @@ public interface StorageUtil {
   void append(String bucketName, String filename, byte[] data) throws IOException;
 
   byte[] readFile(String bucketName, String fileName) throws IOException, ClassNotFoundException;
+
+  String getExternalUrl(String bucketName, String fileName);
 }

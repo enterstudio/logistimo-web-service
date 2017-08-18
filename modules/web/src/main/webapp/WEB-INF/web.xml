@@ -59,6 +59,12 @@
 		<servlet-name>Reports</servlet-name>
 		<servlet-class>com.logistimo.api.servlets.ReportsServlet</servlet-class>
 	</servlet>
+    <servlet>
+        <description></description>
+        <display-name>HystrixMetricsStreamServlet</display-name>
+        <servlet-name>HystrixMetricsStreamServlet</servlet-name>
+        <servlet-class>com.netflix.hystrix.contrib.metrics.eventstream.HystrixMetricsStreamServlet</servlet-class>
+    </servlet>
 
 
 	<!-- Used as a task for transaction/other data generation/simulation -->
@@ -169,6 +175,10 @@
         <servlet-name>FileUploadServlet</servlet-name>
         <servlet-class>com.logistimo.api.servlets.FileUploadServlet</servlet-class>
     </servlet>
+	<servlet>
+		<servlet-name>DirectFileUploadServlet</servlet-name>
+		<servlet-class>com.logistimo.api.servlets.DirectFileUploadServlet</servlet-class>
+	</servlet>
 	<servlet>
 		<servlet-name>MobileLogServlet</servlet-name>
 		<servlet-class>com.logistimo.api.servlets.MobileLogServlet</servlet-class>
@@ -344,10 +354,18 @@
         <url-pattern>/s/fileupload</url-pattern>
     </servlet-mapping>
 	<servlet-mapping>
+		<servlet-name>DirectFileUploadServlet</servlet-name>
+		<url-pattern>/s/direct-upload</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
 		<servlet-name>DomainsServlet</servlet-name>
 		<url-pattern>/s/domains</url-pattern>
 		<url-pattern>/task/domains</url-pattern>
 	</servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>HystrixMetricsStreamServlet</servlet-name>
+        <url-pattern>/hystrix/hystrix.stream</url-pattern>
+    </servlet-mapping>
 	<!-- Security Filter -->
 	<filter>
   		<filter-name>securityFilterChain</filter-name>

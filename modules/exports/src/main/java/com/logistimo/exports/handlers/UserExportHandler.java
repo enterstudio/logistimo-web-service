@@ -141,8 +141,9 @@ public class UserExportHandler implements IExportHandler {
             : CharacterConstants.EMPTY).append(CharacterConstants.COMMA)
         .append(user.getSimId() != null ? StringEscapeUtils.escapeCsv(user.getSimId()) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
-        .append(user.getPrimaryKiosk() != null ? user.getPrimaryKiosk() : CharacterConstants.EMPTY).append(
-        CharacterConstants.COMMA)
+        .append(user.getPrimaryKiosk() != null ? user.getPrimaryKiosk() : CharacterConstants.EMPTY)
+        .append(
+            CharacterConstants.COMMA)
         .append(
             pkCustomId != null ? StringEscapeUtils.escapeCsv(pkCustomId) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)

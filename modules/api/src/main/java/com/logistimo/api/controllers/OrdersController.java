@@ -38,6 +38,7 @@ import com.logistimo.api.models.OrderUpdateModel;
 import com.logistimo.api.models.PaymentModel;
 import com.logistimo.api.models.UserContactModel;
 import com.logistimo.api.util.DedupUtil;
+import com.logistimo.api.util.ResponseUtils;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SecurityUtils;
@@ -58,6 +59,7 @@ import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.LogiException;
 import com.logistimo.exception.UnauthorizedException;
+import com.logistimo.exception.ValidationException;
 import com.logistimo.inventory.entity.IInvAllocation;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.exceptions.InventoryAllocationException;
@@ -72,6 +74,7 @@ import com.logistimo.orders.actions.ScheduleOrderAutomationAction;
 import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.InvoiceResponseModel;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
@@ -85,6 +88,7 @@ import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.services.blobstore.BlobstoreService;
 import com.logistimo.services.cache.MemcacheService;
 import com.logistimo.services.impl.PMF;
 import com.logistimo.shipments.entity.IShipment;
@@ -111,6 +115,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -124,6 +129,7 @@ import java.util.ResourceBundle;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/orders")
@@ -139,6 +145,8 @@ public class OrdersController {
   private OrderAutomationAction orderAutomationAction;
 
   private ScheduleOrderAutomationAction scheduleOrderAutomation;
+
+  private BlobstoreService blobstoreService;
 
   @Autowired
   public void setBuilder(OrdersAPIBuilder builder) {
@@ -161,6 +169,13 @@ public class OrdersController {
   public OrdersController setScheduleOrderAutomation(
       ScheduleOrderAutomationAction scheduleOrderAutomation) {
     this.scheduleOrderAutomation = scheduleOrderAutomation;
+    return this;
+  }
+
+  @Autowired
+  public OrdersController setBlobstoreService(
+      BlobstoreService blobstoreService) {
+    this.blobstoreService = blobstoreService;
     return this;
   }
 
@@ -250,12 +265,31 @@ public class OrdersController {
         null, null, null, request);
   }
 
+  @RequestMapping(value = "/order/{orderId}/invoice", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  void generateInvoice(@PathVariable Long orderId, HttpServletRequest request,
+                       HttpServletResponse response)
+      throws ServiceException, IOException, ValidationException, ObjectNotFoundException {
+    SecureUserDetails user = SecurityUtils.getUserDetails(request);
+    Locale locale = user.getLocale();
+    OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
+
+    InvoiceResponseModel
+        invoiceModel =
+        oms.generateInvoiceForOrder(orderId);
+    ResponseUtils.serveInlineFile(response, invoiceModel.getFileName(), "application/pdf",
+        invoiceModel.getBytes());
+  }
+
   @RequestMapping(value = "/order/{orderId}/transporter", method = RequestMethod.POST)
   public
   @ResponseBody
-  OrderResponseModel updateTransporter(@PathVariable Long orderId, @RequestBody OrderUpdateModel model,
+  OrderResponseModel updateTransporter(@PathVariable Long orderId,
+                                       @RequestBody OrderUpdateModel model,
                                        HttpServletRequest request) {
-    return updateOrder("trans", orderId, model.orderUpdatedAt, null, null, null, model.updateValue, null, request);
+    return updateOrder("trans", orderId, model.orderUpdatedAt, null, null, null, model.updateValue,
+        null, request);
   }
 
   @RequestMapping(value = "/order/{orderId}/status", method = RequestMethod.POST)
@@ -270,10 +304,11 @@ public class OrdersController {
     try {
       UpdatedOrder updOrder;
       OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
-      IOrder o = oms.getOrder(orderId,true);
+      IOrder o = oms.getOrder(orderId, true);
       if (status.orderUpdatedAt != null && !status.orderUpdatedAt
           .equals(LocalDateUtil.formatCustom(o.getUpdatedOn(), Constants.DATETIME_FORMAT, null))) {
-        throw new LogiException("O004", user.getUsername(), LocalDateUtil.format(o.getUpdatedOn(), user.getLocale(), user.getTimezone()));
+        throw new LogiException("O004", user.getUsername(),
+            LocalDateUtil.format(o.getUpdatedOn(), user.getLocale(), user.getTimezone()));
       }
       if (IOrder.COMPLETED.equals(status.st) || IOrder.FULFILLED.equals(status.st)) {
         SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_CSV);
@@ -302,7 +337,7 @@ public class OrdersController {
             .isStatus(IOrder.FULFILLED)) {
           shipmentId =
               oms.shipNow(o, status.t, status.tid, status.cdrsn, efd, user.getUsername(),
-                  status.ps,SourceConstants.WEB);
+                  status.ps, SourceConstants.WEB);
         } else if (o.isStatus(IOrder.COMPLETED)) {
           if (shipments == null || shipments.size() > 1) {
             xLogger.warn("Invalid order {0} ({1}) cannot fulfill, already has more shipments or " +
@@ -317,7 +352,7 @@ public class OrdersController {
 
         if (IOrder.FULFILLED.equals(status.st)) {
           if (shipmentId != null) {
-            shipmentService.fulfillShipment(shipmentId, user.getUsername(),SourceConstants.WEB);
+            shipmentService.fulfillShipment(shipmentId, user.getUsername(), SourceConstants.WEB);
           } else {
             xLogger.warn("Invalid order {0} status ({1}) cannot fulfill ", orderId, o.getStatus());
             throw new BadRequestException(backendMessages.getString("error.unabletofulfilorder"));
@@ -479,16 +514,16 @@ public class OrdersController {
         String tag = IInvAllocation.Type.ORDER.toString() + CharacterConstants.COLON + oIdStr;
         for (DemandModel item : model.items) {
           List<ShipmentItemBatchModel> batchDetails = null;
-          List<IInvAllocation> invAllocations = ims.getAllocationsByTagMaterial(item.id,tag);
+          List<IInvAllocation> invAllocations = ims.getAllocationsByTagMaterial(item.id, tag);
           BigDecimal totalShipmentAllocation = BigDecimal.ZERO;
-          for(IInvAllocation invAllocation : invAllocations) {
-            if(IInvAllocation.Type.SHIPMENT.toString().equals(invAllocation.getType())) {
+          for (IInvAllocation invAllocation : invAllocations) {
+            if (IInvAllocation.Type.SHIPMENT.toString().equals(invAllocation.getType())) {
               totalShipmentAllocation = totalShipmentAllocation
                   .add(invAllocation.getQuantity());
             }
           }
           IDemandItem demandItem = order.getItem(item.id);
-          if(item.astk != null && BigUtil.greaterThan(item.astk, item.q.subtract(
+          if (item.astk != null && BigUtil.greaterThan(item.astk, item.q.subtract(
               demandItem.getShippedQuantity().add(totalShipmentAllocation)))) {
             throw new ServiceException(backendMessages.getString("allocated.qty.greater"));
           }
@@ -642,7 +677,8 @@ public class OrdersController {
 
   public Results getOrders(Long entityId, int offset, int size,
                            String status, String from, String until, String otype, String tgType,
-                           String tag, Integer oty, String rid, String approvalStatus, HttpServletRequest request) {
+                           String tag, Integer oty, String rid, String approvalStatus,
+                           HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
@@ -656,8 +692,7 @@ public class OrdersController {
         startDate = LocalDateUtil.parseCustom(from, Constants.DATE_FORMAT, dc.getTimezone());
       }
       if (until != null && !until.isEmpty()) {
-        endDate = LocalDateUtil.getOffsetDate(
-            LocalDateUtil.parseCustom(until, Constants.DATE_FORMAT, dc.getTimezone()), 1);
+        endDate = LocalDateUtil.parseCustom(until, Constants.DATE_FORMAT, dc.getTimezone());
       }
       oty = oty == null ? IOrder.NONTRANSFER : oty;
       Navigator
@@ -796,7 +831,7 @@ public class OrdersController {
                 null, null,
                 null, null, null, BigDecimal.ZERO, null, null, dc.allowEmptyOrders(), oTag, oType,
                 oType == 2,
-                referenceId, edd, efd,SourceConstants.WEB);
+                referenceId, edd, efd, SourceConstants.WEB);
         IOrder order = orderResults.getOrder();
 //            String strPrice = null; // get price statement
 //            if ( order != null && BigUtil.greaterThanZero(order.getTotalPrice()))
@@ -809,7 +844,7 @@ public class OrdersController {
             prefix = messages.getString("transactions.transfer.upper") + CharacterConstants.SPACE;
           }
         }
-        model.orderId=order.getOrderId();
+        model.orderId = order.getOrderId();
         model.msg =
             prefix + backendMessages.getString("order.lowercase") + " <b>" + order.getOrderId()
                 + "</b> " + backendMessages.getString("created.successwith") + " <b>" + order.size()
@@ -928,7 +963,8 @@ public class OrdersController {
   @RequestMapping(value = "/filter", method = RequestMethod.GET)
   public
   @ResponseBody
-  List<String> getIdSuggestions(@RequestParam String id, @RequestParam(required = false) String type,
+  List<String> getIdSuggestions(@RequestParam String id,
+                                @RequestParam(required = false) String type,
                                 @RequestParam(required = false) Integer oty,
                                 HttpServletRequest request) {
     List<String> rid;

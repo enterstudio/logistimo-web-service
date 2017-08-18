@@ -72,17 +72,22 @@ public class ActivityServiceImpl extends ServiceImpl implements ActivityService 
   }
 
   public Results getActivity(String objectId, String objectType, Date fromDate, Date toDate,
-                             String userId, String tag, PageParams pageParams)
+      String userId, String tag, PageParams pageParams)
       throws ServiceException {
     return activityDao.getActivity(objectId, objectType, fromDate, toDate, userId, tag, pageParams);
   }
 
+  public IActivity getLatestActivityWithStatus(String objectType, String objectId,
+      String newValue) throws ServiceException {
+    return activityDao.getLatestActivityByStatus(objectType, objectId, newValue);
+  }
+
   @Override
   public IActivity createActivity(String objectType, String objectId, String field,
-                                  String prevValue, String newValue,
-                                  String updatingUserId, Long domainId, String messageId,
-                                  String tag,
-                                  PersistenceManager pm) {
+      String prevValue, String newValue,
+      String updatingUserId, Long domainId, String messageId,
+      String tag,
+      PersistenceManager pm) {
     return createActivity(objectType, objectId, field, prevValue, newValue, updatingUserId,
         domainId, messageId, tag, null, pm);
   }
@@ -90,10 +95,10 @@ public class ActivityServiceImpl extends ServiceImpl implements ActivityService 
 
   @Override
   public IActivity createActivity(String objectType, String objectId, String field,
-                                  String prevValue, String newValue,
-                                  String updatingUserId, Long domainId, String messageId,
-                                  String tag, Date date,
-                                  PersistenceManager pm) {
+      String prevValue, String newValue,
+      String updatingUserId, Long domainId, String messageId,
+      String tag, Date date,
+      PersistenceManager pm) {
     IActivity activity = JDOUtils.createInstance(IActivity.class);
     activity.setObjectType(objectType);
     activity.setObjectId(objectId);

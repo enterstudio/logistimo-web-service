@@ -171,7 +171,7 @@ invServices.factory('invService', ['$http', function ($http) {
             size = typeof size !== 'undefined' ? size : 50;
             var url = "/s2/api/inventory/abnormalstock/?offset=" + offset + "&size=" + size;
             if (checkNotNullEmpty(data.tt)) {
-                if(data.tt == 'en') {
+                if (data.tt == 'en') {
                     url = url + "&etag=" + data.t;
                 } else {
                     url = url + "&mtag=" + data.t;

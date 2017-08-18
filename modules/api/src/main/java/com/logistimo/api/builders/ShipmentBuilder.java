@@ -243,7 +243,7 @@ public class ShipmentBuilder {
                     allocation.getQuantity());
               }
             }
-            if(availableQuantity.get(allocation.getMaterialId()) != null) {
+            if (availableQuantity.get(allocation.getMaterialId()) != null) {
               availableQuantity.put(allocation.getMaterialId(),
                   availableQuantity.get(allocation.getMaterialId())
                       .subtract(allocation.getQuantity()));

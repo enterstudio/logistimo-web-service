@@ -39,8 +39,8 @@ public interface IActivityDao {
   IActivity createActivity(IActivity activity) throws ServiceException;
 
   Results getActivity(String objectId, String objectType, Date fromDate, Date toDate, String userId,
-                      String tag,
-                      PageParams pageParams) throws ServiceException;
+      String tag, PageParams pageParams) throws ServiceException;
 
-
+  IActivity getLatestActivityByStatus(String objectType, String objectId, String newValue)
+      throws ServiceException;
 }

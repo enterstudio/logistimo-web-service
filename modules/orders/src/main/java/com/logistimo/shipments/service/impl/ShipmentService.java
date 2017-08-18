@@ -30,6 +30,7 @@ import com.logistimo.activity.service.ActivityService;
 import com.logistimo.activity.service.impl.ActivityServiceImpl;
 import com.logistimo.auth.SecurityConstants;
 import com.logistimo.auth.SecurityUtil;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.config.models.EventSpec;
 import com.logistimo.constants.CharacterConstants;
@@ -69,14 +70,17 @@ import com.logistimo.models.shipments.ShipmentItemBatchModel;
 import com.logistimo.models.shipments.ShipmentItemModel;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
 import com.logistimo.models.shipments.ShipmentModel;
+import com.logistimo.orders.actions.GenerateShipmentVoucherAction;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
+import com.logistimo.orders.models.InvoiceResponseModel;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.Results;
 import com.logistimo.proto.JsonTagsZ;
+import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
@@ -102,6 +106,7 @@ import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -114,6 +119,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
@@ -1610,6 +1616,8 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
       return getShipmentById(shipId, true, pm);
+    } catch (JDOObjectNotFoundException e) {
+      throw new ObjectNotFoundException("Shipment not found : " + shipId);
     } finally {
       pm.close();
     }
@@ -2363,6 +2371,18 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       }
 
     }
+  }
+
+  @Override
+  public InvoiceResponseModel generateShipmentVoucher(String shipmentId)
+      throws ServiceException, ObjectNotFoundException, IOException, ValidationException {
+    OrderManagementService oms = StaticApplicationContext.getBean(OrderManagementService.class);
+    IOrder order = oms.getOrder(extractOrderId(shipmentId), true);
+    IShipment shipment = getShipment(shipmentId);
+    includeShipmentItems(shipment);
+    SecureUserDetails user = SecurityUtils.getUserDetails();
+    return StaticApplicationContext.getBean(GenerateShipmentVoucherAction.class)
+        .invoke(order, shipment, user);
   }
 
 }

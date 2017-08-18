@@ -71,6 +71,15 @@ public class OrdersConfigModel {
   public boolean corm; // Mark cancelling order reasons mandatory
   public boolean acs; // Allow creating shipments
   public boolean aafmsc; // Auto assign first material status to items, when order is confirmed
+  private String logo;
+  private String logoName;
+  private String invoiceTemplate;
+  private String invoiceTemplateName;
+  private String shipmentTemplate;
+  private String shipmentTemplateName;
+  private String logoDownloadLink;
+  private String invoiceTemplateDownloadLink;
+  private String shipmentTemplateDownloadLink;
   /**
    * Create order automatically, when min is hit or prediction less than some days
    */
@@ -91,4 +100,76 @@ public class OrdersConfigModel {
    * Create orders only for these store types
    */
   public List<String> autoCreateEntityTags;
+
+  public String getLogo() {
+    return logo;
+  }
+
+  public void setLogo(String logo) {
+    this.logo = logo;
+  }
+
+  public String getLogoName() {
+    return logoName;
+  }
+
+  public void setLogoName(String logoName) {
+    this.logoName = logoName;
+  }
+
+  public String getInvoiceTemplate() {
+    return invoiceTemplate;
+  }
+
+  public void setInvoiceTemplate(String invoiceTemplate) {
+    this.invoiceTemplate = invoiceTemplate;
+  }
+
+  public String getInvoiceTemplateName() {
+    return invoiceTemplateName;
+  }
+
+  public void setInvoiceTemplateName(String invoiceTemplateName) {
+    this.invoiceTemplateName = invoiceTemplateName;
+  }
+
+  public String getShipmentTemplate() {
+    return shipmentTemplate;
+  }
+
+  public void setShipmentTemplate(String shipmentTemplate) {
+    this.shipmentTemplate = shipmentTemplate;
+  }
+
+  public String getShipmentTemplateName() {
+    return shipmentTemplateName;
+  }
+
+  public void setShipmentTemplateName(String shipmentTemplateName) {
+    this.shipmentTemplateName = shipmentTemplateName;
+  }
+
+  public String getLogoDownloadLink() {
+    return logoDownloadLink;
+  }
+
+  public void setLogoDownloadLink(String logoDownloadLink) {
+    this.logoDownloadLink = logoDownloadLink;
+  }
+
+  public String getInvoiceTemplateDownloadLink() {
+    return invoiceTemplateDownloadLink;
+  }
+
+  public void setInvoiceTemplateDownloadLink(String invoiceTemplateDownloadLink) {
+    this.invoiceTemplateDownloadLink = invoiceTemplateDownloadLink;
+  }
+
+  public String getShipmentTemplateDownloadLink() {
+    return shipmentTemplateDownloadLink;
+  }
+
+  public void setShipmentTemplateDownloadLink(String shipmentTemplateDownloadLink) {
+    this.shipmentTemplateDownloadLink = shipmentTemplateDownloadLink;
+  }
 }

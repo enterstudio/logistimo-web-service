@@ -1039,13 +1039,13 @@ public class UsersController {
                   .bold(userAccount.getFullName()) + " " + backendMessages
                   .getString("user.login.warn");
         }
-      } catch (SystemException e) {
-        msg = backendMessages.getString("user.logout.system.error") + " " + userId;
       } catch (ObjectNotFoundException e) {
         xLogger.warn("UserId not found" + userId, e);
         msg =
             backendMessages.getString("user.id") + " " + MsgUtil.bold(userId) + " "
                 + backendMessages.getString("user.not.found") + ".";
+      } catch (SystemException e) {
+        msg = backendMessages.getString("user.logout.system.error") + " " + userId;
       }
     } else {
       xLogger.warn("UserId not found" + userId);

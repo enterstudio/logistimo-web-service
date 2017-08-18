@@ -43,11 +43,17 @@
 
                 </div>
                 <div class="col-sm-4">
+                    <a class="pull-right" ng-href="/s2/api/shipment/{{shipment.sId}}/invoice" target="_new"
+                       uib-tooltip="{{resourceBundle['invoice']}}" tooltip-append-to-body="true"><span
+                            class="glyphicons glyphicons-print tglyph"></span></a>
+
+                    <div class="col-sm-12 paddinglr5 mt5">
                     <div class="pull-right">
                         <span ng-if="shipment.src === 1"  class="glyphicons glyphicons-display" uib-tooltip="{{resourceBundle['web']}}" tooltip-append-to-body="true" ></span>
                         <span ng-if="shipment.src === 2" class="glyphicons glyphicons-iphone" uib-tooltip="{{resourceBundle['mob']}}" tooltip-append-to-body="true"></span>
                         <span ng-if="shipment.src === 3" class="glyphicons glyphicons-cloud-upload" uib-tooltip="{{resourceBundle['upl']}}" tooltip-append-to-body="true"></span>
                         <span ng-if="shipment.src === 4" class="glyphicons glyphicons-sms" uib-tooltip="{{resourceBundle['sms']}}" tooltip-append-to-body="true"></span>
+                    </div>
                     </div>
                 </div>
             </div>

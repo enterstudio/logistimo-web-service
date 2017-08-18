@@ -160,6 +160,16 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
             });
             return promise;
         },
+        uploadFile : function(file) {
+            var url = '/s/direct-upload';
+            var fd = new FormData();
+            fd.append('data',file);
+            return $http.post(url,fd,{
+                transformRequest: angular.identity,
+                headers : { 'Content-Type' : undefined},
+                url : url
+            });
+        },
         setCustomReports : function(customReport, config){
             return this.fetchP({customReport: customReport, config: config},'/s2/api/config/domain/customreport/add');
         },

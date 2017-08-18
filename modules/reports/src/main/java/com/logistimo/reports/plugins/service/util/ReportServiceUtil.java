@@ -54,6 +54,7 @@ import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
 import com.logistimo.utils.LocalDateUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -454,7 +455,7 @@ public class ReportServiceUtil {
         break;
       case BY_USER:
         key = getUserDetailsById(id);
-          break;
+        break;
       case BY_MANUFACTURER:
         key = StringUtils.capitalize(id);
         break;
@@ -489,14 +490,11 @@ public class ReportServiceUtil {
 
   /**
    * Mehtod to get user details based on ID and form the report table data
-   * @param userId
-   * @return
-   * @throws ServiceException
-   * @throws ObjectNotFoundException
    */
-  private String getUserDetailsById(String userId) throws ServiceException,ObjectNotFoundException {
+  private String getUserDetailsById(String userId)
+      throws ServiceException, ObjectNotFoundException {
     UsersService us = Services.getService(UsersServiceImpl.class);
-    IUserAccount userAccount=us.getUserAccount(userId);
+    IUserAccount userAccount = us.getUserAccount(userId);
     return userAccount.getFullName() + CharacterConstants.PIPE + userId;
   }
 

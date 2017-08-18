@@ -28,6 +28,7 @@ package com.logistimo.config.models;
 
 import com.logistimo.utils.StringUtil;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,6 +74,12 @@ public class OrdersConfig implements Serializable {
   private static final String AUTO_CREATE_PDOS = "ac_pdos";
   private static final String AUTO_CREATE_MTAGS = "ac_mtags";
   private static final String AUTO_CREATE_ETAGS = "ac_etags";
+  private static final String INVOICE_TEMPLATE = "template";
+  private static final String INVOICE_LOGO = "logo";
+  private static final String SHIPMENT_TEMPLATE = "shipment_template";
+  private static final String INVOICE_TEMPLATE_NAME = "invoice_template_name";
+  private static final String SHIPMENT_TEMPLATE_NAME = "shipment_template_name";
+  private static final String INVOICE_LOGO_NAME = "invoice_logo_name";
 
   String sourceUserId = null; // user who last created the export specification
   private boolean exportEnabled = false;
@@ -102,6 +109,13 @@ public class OrdersConfig implements Serializable {
   private int autoCreatePdos = 0;
   private List<String> autoCreateMaterialTags = new ArrayList<>(1);
   private List<String> autoCreateEntityTags = new ArrayList<>(1);
+  private String invoiceTemplate;
+  private String invoiceLogo;
+  private String shipmentTemplate;
+  private String invoiceLogoName;
+  private String invoiceTemplateName;
+  private String shipmentTemplateName;
+
 
   public OrdersConfig() {
   }
@@ -250,6 +264,60 @@ public class OrdersConfig implements Serializable {
       autoCreateEntityTags = new ArrayList<>(1);
     }
 
+    try {
+      String template = json.getString(INVOICE_TEMPLATE);
+      if (StringUtils.isNotEmpty(template)) {
+        invoiceTemplate = template;
+      }
+    } catch (JSONException e) {
+      //ignore
+    }
+
+    try {
+      String template = json.getString(INVOICE_LOGO);
+      if (StringUtils.isNotEmpty(template)) {
+        invoiceLogo = template;
+      }
+    } catch (JSONException e) {
+      //ignored
+    }
+
+    try {
+      String template = json.getString(SHIPMENT_TEMPLATE);
+      if (StringUtils.isNotEmpty(template)) {
+        shipmentTemplate = template;
+      }
+    } catch (JSONException e) {
+      //ignore
+    }
+
+    try {
+      String invTempName = json.getString(INVOICE_TEMPLATE_NAME);
+      if(StringUtils.isNotEmpty(invTempName)) {
+        invoiceTemplateName = invTempName;
+      }
+    } catch (JSONException e) {
+      //ignored
+    }
+
+    try {
+      String shipTempName = json.getString(SHIPMENT_TEMPLATE_NAME);
+      if(StringUtils.isNotEmpty(shipTempName)) {
+        shipmentTemplateName = shipTempName;
+      }
+    } catch (JSONException e) {
+      //ignored
+    }
+
+    try {
+      String invLogoName = json.getString(INVOICE_LOGO_NAME);
+      if(StringUtils.isNotEmpty(invLogoName)) {
+        invoiceLogoName = invLogoName;
+      }
+    } catch (JSONException e) {
+      //ignored
+    }
+
   }
 
   public JSONObject toJSONObject() throws ConfigurationException {
@@ -304,6 +372,12 @@ public class OrdersConfig implements Serializable {
       json.put(AUTO_CREATE_PDOS, autoCreatePdos);
       json.put(AUTO_CREATE_ETAGS, StringUtil.getCSV(autoCreateEntityTags));
       json.put(AUTO_CREATE_MTAGS, StringUtil.getCSV(autoCreateMaterialTags));
+      json.put(INVOICE_TEMPLATE, invoiceTemplate);
+      json.put(INVOICE_LOGO, invoiceLogo);
+      json.put(SHIPMENT_TEMPLATE, shipmentTemplate);
+      json.put(INVOICE_LOGO_NAME, invoiceLogoName);
+      json.put(INVOICE_TEMPLATE_NAME, invoiceTemplateName);
+      json.put(SHIPMENT_TEMPLATE_NAME, shipmentTemplateName);
       return json;
     } catch (JSONException e) {
       throw new ConfigurationException(e.getMessage());
@@ -532,5 +606,56 @@ public class OrdersConfig implements Serializable {
 
   public void setAutoCreateEntityTags(List<String> autoCreateEntityTags) {
     this.autoCreateEntityTags = autoCreateEntityTags;
+  }
+
+  public String getInvoiceTemplate() {
+    return invoiceTemplate;
+  }
+
+  public OrdersConfig setInvoiceTemplate(String invoiceTemplate) {
+    this.invoiceTemplate = invoiceTemplate;
+    return this;
+  }
+
+  public String getInvoiceLogo() {
+    return invoiceLogo;
+  }
+
+  public OrdersConfig setInvoiceLogo(String invoiceLogo) {
+    this.invoiceLogo = invoiceLogo;
+    return this;
+  }
+
+  public OrdersConfig setShipmentTemplate(String shipmentTemplate) {
+    this.shipmentTemplate = shipmentTemplate;
+    return this;
+  }
+
+  public String getShipmentTemplate() {
+    return shipmentTemplate;
+  }
+
+  public String getInvoiceLogoName() {
+    return invoiceLogoName;
+  }
+
+  public void setInvoiceLogoName(String invoiceLogoName) {
+    this.invoiceLogoName = invoiceLogoName;
+  }
+
+  public String getInvoiceTemplateName() {
+    return invoiceTemplateName;
+  }
+
+  public void setInvoiceTemplateName(String invoiceTemplateName) {
+    this.invoiceTemplateName = invoiceTemplateName;
+  }
+
+  public String getShipmentTemplateName() {
+    return shipmentTemplateName;
+  }
+
+  public void setShipmentTemplateName(String shipmentTemplateName) {
+    this.shipmentTemplateName = shipmentTemplateName;
   }
 }

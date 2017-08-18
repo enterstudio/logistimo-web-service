@@ -24,6 +24,7 @@
 package com.logistimo.services.storage;
 
 import com.logistimo.AppFactory;
+import com.logistimo.logger.XLog;
 import com.logistimo.services.blobstore.BlobKey;
 import com.logistimo.services.blobstore.BlobStoreServiceException;
 import com.logistimo.services.blobstore.BlobstoreService;
@@ -34,7 +35,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import com.logistimo.logger.XLog;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +45,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Created by charan on 02/10/14.
  */
+@Component
 public class HDFSStorageUtil implements StorageUtil {
 
   public static final String
@@ -245,6 +247,16 @@ public class HDFSStorageUtil implements StorageUtil {
     }
     LOGGER.warn("Store file in bucket {0} with name {1} not found", bucketName, fileName);
     return null;
+  }
+
+  @Override
+  public String getExternalUrl(String bucketName, String fileName) {
+    String host = ConfigUtil.get("logi.host.server");
+    String path = host == null ? "http://localhost:50070/webhdfs/v1" : "/media";
+    String localStr = host == null ? "?op=OPEN" : "";
+    return
+        (host == null ? "" : "https://" + host) + path + "/user/logistimoapp/" + bucketName
+            + "/" + fileName + localStr;
   }
 
   @Override

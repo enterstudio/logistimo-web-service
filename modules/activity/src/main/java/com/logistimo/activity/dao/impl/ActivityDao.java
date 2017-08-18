@@ -28,14 +28,14 @@ import com.logistimo.activity.dao.IActivityDao;
 import com.logistimo.activity.entity.Activity;
 import com.logistimo.activity.entity.IActivity;
 import com.logistimo.activity.models.ActivityModel;
-
+import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.QueryConstants;
+import com.logistimo.logger.XLog;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.impl.PMF;
-import com.logistimo.constants.CharacterConstants;
-import com.logistimo.constants.QueryConstants;
-import com.logistimo.logger.XLog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +51,7 @@ import javax.jdo.Query;
 public class ActivityDao implements IActivityDao {
 
   private static final XLog xLogger = XLog.getLog(ActivityDao.class);
+  private static final String AND_OBJECT_TYPE = " AND objectType = ";
 
   private ActivityBuilder activityBuilder = new ActivityBuilder();
 
@@ -59,7 +60,7 @@ public class ActivityDao implements IActivityDao {
     try {
       pm = PMF.get().getPersistenceManager();
       pm.makePersistent(activity);
-      activity = pm.detachCopy(activity);
+      return pm.detachCopy(activity);
     } catch (Exception e) {
       xLogger.severe("{0} while creating activity {1}", e.getMessage(), activity, e);
       throw new ServiceException(e);
@@ -68,12 +69,63 @@ public class ActivityDao implements IActivityDao {
         pm.close();
       }
     }
+  }
+
+  public IActivity getLatestActivityByStatus(String objectType, String objectId, String newValue)
+      throws ServiceException {
+
+    PersistenceManager pm = null;
+    Query query = null;
+    List<String> parameters = new ArrayList<>(3);
+    List<IActivity> activities;
+    IActivity activity = null;
+
+    try {
+      pm = PMF.get().getPersistenceManager();
+      StringBuilder builder = new StringBuilder("SELECT * FROM ACTIVITY ");
+      if (null != objectId) {
+        builder.append(" WHERE objectId = ").append(CharacterConstants.QUESTION);
+        parameters.add(objectId);
+        if (null != objectType) {
+          builder.append(AND_OBJECT_TYPE).append(CharacterConstants.QUESTION);
+          parameters.add(objectType);
+        }
+        if (null != newValue) {
+          builder.append(" AND newValue = ").append(CharacterConstants.QUESTION);
+          parameters.add(newValue);
+        }
+      }
+
+      builder.append(" ORDER BY CREATEDATE DESC LIMIT 1");
+
+      query = pm.newQuery(Constants.JAVAX_JDO_QUERY_SQL, builder.toString());
+      query.setClass(Activity.class);
+      activities = (List<IActivity>) query.executeWithArray(parameters.toArray());
+      activities = (List<IActivity>) pm.detachCopyAll(activities);
+      if (!activities.isEmpty()) {
+        activity = activities.get(0);
+      }
+    } catch (Exception e) {
+      xLogger.severe("{0} while getting activity {1}", e.getMessage(), objectId, true, e);
+      throw new ServiceException(e);
+    } finally {
+      if (query != null) {
+        try {
+          query.closeAll();
+        } catch (Exception ignored) {
+          xLogger.warn("Exception while closing query", ignored);
+        }
+      }
+
+      if (pm != null) {
+        pm.close();
+      }
+    }
     return activity;
   }
 
   public Results getActivity(String objectId, String objectType, Date fromDate, Date toDate,
-                             String userId, String tag,
-                             PageParams pageParams) throws ServiceException {
+      String userId, String tag, PageParams pageParams) throws ServiceException {
     PersistenceManager pm = null;
     Query query = null;
     Query cntQuery = null;
@@ -90,7 +142,7 @@ public class ActivityDao implements IActivityDao {
         builder.append(" WHERE objectId = ").append(CharacterConstants.QUESTION);
         parameters.add(objectId);
         if (null != objectType) {
-          builder.append(" AND objectType = ").append(CharacterConstants.QUESTION);
+          builder.append(AND_OBJECT_TYPE).append(CharacterConstants.QUESTION);
           parameters.add(objectType);
         }
         if (null != tag) {
@@ -100,12 +152,8 @@ public class ActivityDao implements IActivityDao {
       } else if (null != tag) {
         builder.append(" WHERE tag = ").append(CharacterConstants.QUESTION);
         parameters.add(tag);
-        if (null != objectId) {
-          builder.append(" AND objectId = ").append(CharacterConstants.QUESTION);
-          parameters.add(String.valueOf(objectId));
-        }
         if (null != objectType) {
-          builder.append(" AND objectType = ").append(CharacterConstants.QUESTION);
+          builder.append(AND_OBJECT_TYPE).append(CharacterConstants.QUESTION);
           parameters.add(objectType);
         }
       }
@@ -133,7 +181,7 @@ public class ActivityDao implements IActivityDao {
           " LIMIT " + pageParams.getOffset() + CharacterConstants.COMMA + pageParams.getSize();
       builder.append(limitStr);
 
-      query = pm.newQuery("javax.jdo.query.SQL", builder.toString());
+      query = pm.newQuery(Constants.JAVAX_JDO_QUERY_SQL, builder.toString());
       query.setClass(Activity.class);
       List<IActivity> activities = (List<IActivity>) query.executeWithArray(parameters.toArray());
       activities = (List<IActivity>) pm.detachCopyAll(activities);
@@ -144,7 +192,7 @@ public class ActivityDao implements IActivityDao {
               .replace(orderBy, CharacterConstants.EMPTY);
       cntQueryStr = cntQueryStr.replace(limitStr, CharacterConstants.EMPTY);
 
-      cntQuery = pm.newQuery("javax.jdo.query.SQL", cntQueryStr);
+      cntQuery = pm.newQuery(Constants.JAVAX_JDO_QUERY_SQL, cntQueryStr);
       int
           count =
           ((Long) ((List) cntQuery.executeWithArray(parameters.toArray())).iterator().next())

@@ -58,7 +58,6 @@ import com.logistimo.api.request.AddCustomReportRequestObj;
 import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SecurityUtils;
-import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.config.entity.IConfig;
 import com.logistimo.config.models.AccountingConfig;
@@ -156,6 +155,8 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.http.HttpServletRequest;
 
+import static com.logistimo.auth.utils.SecurityUtils.getUserDetails;
+
 @Controller
 @RequestMapping("/config/domain")
 public class DomainConfigController {
@@ -214,43 +215,42 @@ public class DomainConfigController {
   @RequestMapping(value = "/tags/materials", method = RequestMethod.GET)
   public
   @ResponseBody
-  TagsModel getMaterialTags(HttpServletRequest request) {
-    return getTags(MATERIAL, request);
+  TagsModel getMaterialTags() {
+    return getTags(MATERIAL);
   }
 
   @RequestMapping(value = "/tags/route", method = RequestMethod.GET)
   public
   @ResponseBody
-  TagsModel getRouteTags(HttpServletRequest request) {
-    return getTags(ROUTE, request);
+  TagsModel getRouteTags() {
+    return getTags(ROUTE);
   }
 
   @RequestMapping(value = "/tags/order", method = RequestMethod.GET)
   public
   @ResponseBody
-  TagsModel getOrderTags(HttpServletRequest request) {
-    return getTags(ORDER, request);
+  TagsModel getOrderTags() {
+    return getTags(ORDER);
   }
 
   @RequestMapping(value = "/tags/entities", method = RequestMethod.GET)
   public
   @ResponseBody
-  TagsModel getEntityTags(HttpServletRequest request) {
-    return getTags(ENTITY, request);
+  TagsModel getEntityTags() {
+    return getTags(ENTITY);
   }
 
   @RequestMapping(value = "/tags/user", method = RequestMethod.GET)
   public
   @ResponseBody
-  TagsModel getUserTags(HttpServletRequest request) {
-    return getTags(USER, request);
+  TagsModel getUserTags() {
+    return getTags(USER);
   }
 
-  private TagsModel getTags(int type, HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+  private TagsModel getTags(int type) {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
-    String tags = null;
+    String tags;
     boolean allowUserDef = false;
     switch (type) {
       case ENTITY:
@@ -271,6 +271,9 @@ public class DomainConfigController {
       case USER:
         tags = dc.getUserTags();
         allowUserDef = !dc.forceTagsUser();
+        break;
+      default:
+        throw new InvalidServiceException("Unrecognised tag type:" + type);
     }
     return new TagsModel(StringUtil.getList(tags), allowUserDef);
   }
@@ -285,9 +288,8 @@ public class DomainConfigController {
   @RequestMapping(value = "/country", method = RequestMethod.GET)
   public
   @ResponseBody
-  List<String> getCountries(HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+  List<String> getCountries() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     return StringUtil.getList(dc.getCountry());
   }
@@ -295,18 +297,16 @@ public class DomainConfigController {
   @RequestMapping(value = "/artype", method = RequestMethod.GET)
   public
   @ResponseBody
-  String getActualRouteType(HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+  String getActualRouteType() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     return DomainConfig.getInstance(domainId).getRouteBy();
   }
 
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public
   @ResponseBody
-  DomainConfig getDomainConfig(HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+  DomainConfig getDomainConfig() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     return DomainConfig.getInstance(domainId);
   }
 
@@ -314,10 +314,10 @@ public class DomainConfigController {
   public
   @ResponseBody
   MenuStatsModel getDomainConfigMenuStats(HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
+    SecureUserDetails user = getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig config = DomainConfig.getInstance(domainId);
     if (config != null) {
       try {
@@ -334,9 +334,8 @@ public class DomainConfigController {
   @RequestMapping(value = "/optimizer", method = RequestMethod.GET)
   public
   @ResponseBody
-  OptimizerConfig getOptimizerConfig(HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
+  OptimizerConfig getOptimizerConfig() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     return dc.getOptimizerConfig();
   }
@@ -346,8 +345,8 @@ public class DomainConfigController {
   @ResponseBody
   GeneralConfigModel getGeneralConfig(
       @RequestParam(name = "domain_id", required = false) Long domainId)
-      throws ServiceException, ObjectNotFoundException {
-    SecureUserDetails sUser = SecurityUtils.getUserDetails();
+      throws ServiceException {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     Long
@@ -359,7 +358,7 @@ public class DomainConfigController {
     }
     try {
       return builder.buildGeneralConfigModel(dId, locale, sUser.getTimezone());
-    } catch (ServiceException | ObjectNotFoundException | ConfigurationException e) {
+    } catch (ServiceException | ConfigurationException e) {
       xLogger.severe("Error in fetching general configuration", e);
       throw new InvalidServiceException(backendMessages.getString("general.config.fetch.error"));
     }
@@ -369,7 +368,7 @@ public class DomainConfigController {
   public
   @ResponseBody
   SupportConfigModel getSupportConfig(HttpServletRequest request) {
-    SecureUserDetails user = SecurityUtils.getUserDetails(request);
+    SecureUserDetails user = getUserDetails(request);
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -401,9 +400,8 @@ public class DomainConfigController {
   public
   @ResponseBody
   AccountingConfigModel getAccountingConfig(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    SecureUserDetails sUser = getUserDetails(request);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -417,12 +415,11 @@ public class DomainConfigController {
   @RequestMapping(value = "/tags", method = RequestMethod.GET)
   public
   @ResponseBody
-  TagsConfigModel getTags(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  TagsConfigModel getTags() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       if (domainId == null) {
         throw new InvalidServiceException(backendMessages.getString("tags.config.fetch.error"));
@@ -439,14 +436,14 @@ public class DomainConfigController {
   public
   @ResponseBody
   String setTags(@RequestBody TagsConfigModel model, HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (model == null) {
       throw new BadRequestException(backendMessages.getString("tags.config.update.error"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       if (domainId == null) {
         xLogger.severe("Error in updating tags configuration");
@@ -522,10 +519,8 @@ public class DomainConfigController {
   @RequestMapping(value = "/map/locations", method = RequestMethod.GET)
   public
   @ResponseBody
-  String getConfiguredMapLocations(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+  String getConfiguredMapLocations() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
 
     try {
       ConfigurationMgmtService cms = Services.getService(ConfigurationMgmtServiceImpl.class);
@@ -542,10 +537,8 @@ public class DomainConfigController {
   @RequestMapping(value = "/dashboards", method = RequestMethod.GET)
   public
   @ResponseBody
-  String getSystemDashboardConfig(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+  String getSystemDashboardConfig() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       ConfigurationMgmtService cms = Services.getService(ConfigurationMgmtServiceImpl.class);
       IConfig c = cms.getConfiguration(IConfig.DASHBOARDCONFIG);
@@ -561,11 +554,10 @@ public class DomainConfigController {
   @RequestMapping(value = "/asset", method = RequestMethod.GET)
   public
   @ResponseBody
-  AssetConfigModel getAssetConfig(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
+  AssetConfigModel getAssetConfig() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     try {
       return builder.buildAssetConfigModel(dc, locale, sUser.getTimezone());
@@ -575,34 +567,6 @@ public class DomainConfigController {
 
     return null;
   }
-
-/*    @RequestMapping(value = "/temperature/vendors", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    Map<String, String> getConfiguredTempVendors(HttpServletRequest request) {
-        SecureUserDetails sUser = SecurityManager.getUserDetails(request.getSession());
-        Locale locale = sUser.getLocale();
-        ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-        String userId = sUser.getUsername();
-        Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
-        DomainConfig dc = DomainConfig.getInstance(domainId);
-        AssetConfig tc = dc.getAssetConfig();
-        try {
-            AssetSystemConfig tsc = AssetSystemConfig.getInstance();
-            Map<String, String> returnVal = new LinkedHashMap<String, String>();
-
-            if(tc != null && tsc != null){
-                List<String> cfgVendorIds = tc.getVendorIds();
-                for (String vId : cfgVendorIds) {
-                    returnVal.put(vId, tsc.getVendorName(vId));
-                }
-            }
-            return returnVal;
-        } catch (ConfigurationException e) {
-            xLogger.severe("Error in fetching temperature vendors");
-            throw new ConfigurationServiceException(backendMessages.getString("temp.vendors.fetch.error"));
-        }
-    }*/
 
   @RequestMapping(value = "/assetconfig", method = RequestMethod.GET)
   public
@@ -648,7 +612,7 @@ public class DomainConfigController {
   @ResponseBody
   String updateAssetConfig(@RequestBody AssetConfigModel assetConfigModel,
                            HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
+    SecureUserDetails sUser = getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -661,7 +625,7 @@ public class DomainConfigController {
     }
     try {
       String userId = sUser.getUsername();
-      Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+      Long domainId = SecurityUtils.getCurrentDomainId();
 
       List<String> cfgVals = new ArrayList<String>(1), modelVals = new ArrayList<>(1),
           dSnsVals =
@@ -727,7 +691,7 @@ public class DomainConfigController {
       xLogger.severe("Error in updating temperature configuration", e);
       throw new BadRequestException(backendMessages.getString("temp.config.update.error"));
     } catch (ConfigurationException e) {
-      e.printStackTrace();
+      xLogger.severe("Error while saving asset configuration", e);
     }
     return backendMessages.getString("temp.config.update.success");
   }
@@ -737,7 +701,7 @@ public class DomainConfigController {
   @ResponseBody
   String updateAccountingConfig(@RequestBody AccountingConfigModel model,
                                 HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
+    SecureUserDetails sUser = getUserDetails(request);
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -748,7 +712,7 @@ public class DomainConfigController {
       throw new BadRequestException(backendMessages.getString("account.config.update.error"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
       AccountingConfig ac = new AccountingConfig();
@@ -769,7 +733,7 @@ public class DomainConfigController {
       xLogger.severe("Error in updating Accounting configuration", e);
       throw new InvalidServiceException(backendMessages.getString("account.config.update.error"));
     } catch (ConfigurationException e) {
-      e.printStackTrace();
+      xLogger.severe("Error while saving accounting configuration", e);
     }
     return backendMessages.getString("account.config.update.success");
   }
@@ -778,14 +742,14 @@ public class DomainConfigController {
   public
   @ResponseBody
   String updateGeneralConfig(@RequestBody GeneralConfigModel model, HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
       cc.dc.addDomainData(ConfigConstants.GENERAL, generateUpdateList(userId));
@@ -846,13 +810,9 @@ public class DomainConfigController {
   @RequestMapping(value = "/capabilities", method = RequestMethod.GET)
   public
   @ResponseBody
-  CapabilitiesConfigModel getCapabilitiesConfig(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+  CapabilitiesConfigModel getCapabilitiesConfig() {
+    SecureUserDetails sUser = getUserDetails();
+    Long domainId = SecurityUtils.getCurrentDomainId();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -873,13 +833,9 @@ public class DomainConfigController {
   @RequestMapping(value = "/rolecapabs", method = RequestMethod.GET)
   public
   @ResponseBody
-  CapabilitiesConfigModel getRoleCapabilitiesConfig(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+  CapabilitiesConfigModel getRoleCapabilitiesConfig() {
+    SecureUserDetails sUser = getUserDetails();
+    Long domainId = SecurityUtils.getCurrentDomainId();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -903,7 +859,7 @@ public class DomainConfigController {
   @ResponseBody
   List<String> updateCapabilitiesConfig(@RequestBody CapabilitiesConfigModel model,
                                         HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     String timezone = sUser.getTimezone();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
@@ -911,7 +867,7 @@ public class DomainConfigController {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
       cc.dc.addDomainData(ConfigConstants.CAPABILITIES, generateUpdateList(userId));
@@ -990,7 +946,7 @@ public class DomainConfigController {
         String discardTags = TagUtil.getCleanTags(StringUtils.join(model.hiw, ','), true);
         String transferTags = TagUtil.getCleanTags(StringUtils.join(model.hit, ','), true);
 
-        Map<String, String> tagInvByOperation = new HashMap<String, String>();
+        Map<String, String> tagInvByOperation = new HashMap<>();
         tagInvByOperation.put(ITransaction.TYPE_ISSUE, issueTags);
         tagInvByOperation.put(ITransaction.TYPE_RECEIPT, receiptsTags);
         tagInvByOperation.put(ITransaction.TYPE_PHYSICALCOUNT, stockTags);
@@ -1016,14 +972,10 @@ public class DomainConfigController {
   @RequestMapping(value = "/inventory", method = RequestMethod.GET)
   public
   @ResponseBody
-  InventoryConfigModel getInventoryConfiguration(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
+  InventoryConfigModel getInventoryConfiguration() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -1042,14 +994,10 @@ public class DomainConfigController {
   @RequestMapping(value = "/inventory/transReasons", method = RequestMethod.GET)
   public
   @ResponseBody
-  Collection<String> getICTransactionReasons(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
+  Collection<String> getICTransactionReasons() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -1068,12 +1016,11 @@ public class DomainConfigController {
   @RequestMapping(value = "/getactualtrans", method = RequestMethod.GET)
   public
   @ResponseBody
-  boolean getActualTransDateCheck(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
+  boolean getActualTransDateCheck() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
-    boolean hasAtd = false;
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    boolean hasAtd;
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (domainId == null) {
       xLogger.severe("Error in fetching Inventory configuration");
@@ -1116,14 +1063,14 @@ public class DomainConfigController {
   @ResponseBody
   String updateInventoryConfig(@RequestBody InventoryConfigModel model,
                                HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     InventoryBuilder inventoryBuilder = new InventoryBuilder();
     try {
       if (domainId == null) {
@@ -1149,7 +1096,7 @@ public class DomainConfigController {
       // Form object
       InventoryConfig inventoryConfig = new InventoryConfig();
       // Set reasons
-      Map<String, String> transReasons = new HashMap<String, String>();
+      Map<String, String> transReasons = new HashMap<>();
       transReasons.put(ITransaction.TYPE_ISSUE, issueReasons);
       transReasons.put(ITransaction.TYPE_RECEIPT, receiptReasons);
       transReasons.put(ITransaction.TYPE_PHYSICALCOUNT, stockCountReasons);
@@ -1162,7 +1109,7 @@ public class DomainConfigController {
       boolean icmt = model.cimt;
       if (icmt) {
         inventoryConfig.setCimt(icmt);
-        Map<String, String> imTransResons = new HashMap<String, String>();
+        Map<String, String> imTransResons = new HashMap<>();
         if (model.imt != null) {
           for (InventoryConfigModel.MTagReason mTagReason : model.imt) {
             imTransResons.put(mTagReason.mtg, inventoryBuilder.trimReasons(mTagReason.rsn));
@@ -1173,7 +1120,7 @@ public class DomainConfigController {
       boolean crmt = model.crmt;
       if (crmt) {
         inventoryConfig.setCrmt(crmt);
-        Map<String, String> rmTransReasons = new HashMap<String, String>();
+        Map<String, String> rmTransReasons = new HashMap<>();
         if (model.rmt != null) {
           for (InventoryConfigModel.MTagReason mTagReason : model.rmt) {
             rmTransReasons.put(mTagReason.mtg, inventoryBuilder.trimReasons(mTagReason.rsn));
@@ -1184,7 +1131,7 @@ public class DomainConfigController {
       boolean csmt = model.csmt;
       if (csmt) {
         inventoryConfig.setCsmt(csmt);
-        Map<String, String> smTransReasons = new HashMap<String, String>();
+        Map<String, String> smTransReasons = new HashMap<>();
         if (model.smt != null) {
           for (InventoryConfigModel.MTagReason mTagReason : model.smt) {
             smTransReasons.put(mTagReason.mtg, inventoryBuilder.trimReasons(mTagReason.rsn));
@@ -1195,7 +1142,7 @@ public class DomainConfigController {
       boolean ctmt = model.ctmt;
       if (ctmt) {
         inventoryConfig.setCtmt(ctmt);
-        Map<String, String> tmTransReasons = new HashMap<String, String>();
+        Map<String, String> tmTransReasons = new HashMap<>();
         if (model.tmt != null) {
           for (InventoryConfigModel.MTagReason mTagReason : model.tmt) {
             tmTransReasons.put(mTagReason.mtg, inventoryBuilder.trimReasons(mTagReason.rsn));
@@ -1206,7 +1153,7 @@ public class DomainConfigController {
       boolean cdmt = model.cdmt;
       if (cdmt) {
         inventoryConfig.setCdmt(cdmt);
-        Map<String, String> dmTransReasons = new HashMap<String, String>();
+        Map<String, String> dmTransReasons = new HashMap<>();
         if (model.dmt != null) {
           for (InventoryConfigModel.MTagReason mTagReason : model.dmt) {
             dmTransReasons.put(mTagReason.mtg, inventoryBuilder.trimReasons(mTagReason.rsn));
@@ -1434,14 +1381,10 @@ public class DomainConfigController {
   public
   @ResponseBody
   OrdersConfigModel getOrdersConfig(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       if (domainId == null) {
         xLogger.severe("Error in fetching Inventory configuration");
@@ -1459,14 +1402,15 @@ public class DomainConfigController {
   public
   @ResponseBody
   String updateOrdersConfig(@RequestBody OrdersConfigModel model, HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
+    BlobstoreService blobstoreService = AppFactory.get().getBlobstoreService();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       if (domainId == null) {
         xLogger.severe("Error in updating Orders configuration");
@@ -1536,8 +1480,31 @@ public class DomainConfigController {
       oc.setAutoCreateMaterialTags(model.autoCreateMaterialTags);
       oc.setAutoCreatePdos(model.pdos);
       oc.setAutoCreateEntityTags(model.autoCreateEntityTags);
-      //oc.setAllowCreatingShipments(model.acs);
       oc.setAutoAssignFirstMaterialStatusOnConfirmation(model.aafmsc);
+      if (model.getLogo() != null) {
+        if (oc.getInvoiceLogo() != null && !oc.getInvoiceLogo().equals(model.getLogo())) {
+          blobstoreService.remove(oc.getInvoiceLogo());
+
+        }
+        oc.setInvoiceLogo(model.getLogo());
+        oc.setInvoiceLogoName(model.getLogoName());
+      }
+      if (model.getInvoiceTemplate() != null) {
+        if (oc.getInvoiceTemplate() != null && !oc.getInvoiceTemplate()
+            .equals(model.getInvoiceTemplate())) {
+          blobstoreService.remove(oc.getInvoiceTemplate());
+        }
+        oc.setInvoiceTemplate(model.getInvoiceTemplate());
+        oc.setInvoiceTemplateName(model.getInvoiceTemplateName());
+      }
+      if (model.getShipmentTemplate() != null) {
+        if (oc.getShipmentTemplate() != null && !oc.getShipmentTemplate()
+            .equals(model.getShipmentTemplate())) {
+          blobstoreService.remove(oc.getShipmentTemplate());
+        }
+        oc.setShipmentTemplate(model.getShipmentTemplate());
+        oc.setShipmentTemplateName(model.getShipmentTemplateName());
+      }
 
       if (model.et != null && !model.et.trim().isEmpty()) {
         List<String> times = StringUtil.getList(model.et.trim());
@@ -1585,14 +1552,14 @@ public class DomainConfigController {
   @ResponseBody
   String updateNotificationsConfig(@RequestBody NotificationsConfigModel model,
                                    HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       if (domainId == null) {
         xLogger.severe("Error in updating Notification configuration");
@@ -1654,15 +1621,11 @@ public class DomainConfigController {
   public
   @ResponseBody
   NotificationsModel getNotificationsConfig(
-      @RequestParam String t, HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+      @RequestParam String t) {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     if (dc == null) {
       xLogger.severe("Error in fetching Notification configuration");
@@ -1690,14 +1653,14 @@ public class DomainConfigController {
   @ResponseBody
   String deleteNotification(@RequestBody NotificationsConfigModel model,
                             HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     String key = IConfig.CONFIG_PREFIX + domainId;
     IConfig c;
     DomainConfig dc;
@@ -1772,9 +1735,9 @@ public class DomainConfigController {
       @RequestParam(required = false, defaultValue = "") String end,
       HttpServletRequest request) {
 
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     Navigator
         navigator =
@@ -1834,7 +1797,7 @@ public class DomainConfigController {
   @ResponseBody
   String updateBulletinBoardConfig(@RequestBody BulletinBoardConfigModel model,
                                    HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -1845,7 +1808,7 @@ public class DomainConfigController {
       throw new BadRequestException(backendMessages.getString("bulletin.config.update.error"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in updating bulletin board configuration");
       throw new InvalidServiceException(backendMessages.getString("bulletin.config.update.error"));
@@ -1872,13 +1835,11 @@ public class DomainConfigController {
   @RequestMapping(value = "/bulletinboard", method = RequestMethod.GET)
   public
   @ResponseBody
-  BulletinBoardConfigModel getBulletinBoardConfig(HttpServletRequest request) {
-//        if (Authoriser.authoriseAdmin(request)) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  BulletinBoardConfigModel getBulletinBoardConfig() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     BulletinBoardBuilder boardBuilder = new BulletinBoardBuilder();
     if (dc == null) {
@@ -1891,7 +1852,6 @@ public class DomainConfigController {
     if (config != null) {
       model = boardBuilder.buildModel(config);
     }
-//            model.ien = dc.isBBoardEnabled();
     model.did = Long.toString(domainId);
     List<String> val = dc.getDomainData(ConfigConstants.BULLETIN_BOARD);
     if (val != null) {
@@ -1912,14 +1872,14 @@ public class DomainConfigController {
   public
   @ResponseBody
   String setMessageToBoard(@RequestBody String msg, HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in posting message to board");
       throw new InvalidServiceException(backendMessages.getString("message.post.error"));
@@ -1945,14 +1905,13 @@ public class DomainConfigController {
                         @RequestParam(defaultValue = "1") int o,
                         @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int s,
                         HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in fetching Access log");
       throw new InvalidServiceException(backendMessages.getString("accesslog.fetch.error"));
@@ -2006,7 +1965,7 @@ public class DomainConfigController {
   public
   @ResponseBody
   String upload(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -2026,14 +1985,10 @@ public class DomainConfigController {
   CustomReportsConfig.Config getConfig(@RequestParam String templateName, @RequestParam String edit,
                                        @RequestParam String templateKey,
                                        HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (StringUtils.isEmpty(templateName)) {
       xLogger.severe("Error in fetching configuration");
       throw new BadRequestException(backendMessages.getString("config.fetch.error"));
@@ -2063,7 +2018,7 @@ public class DomainConfigController {
   @ResponseBody
   String setCustomReports(@RequestBody AddCustomReportRequestObj addCustomReportRequestObj,
                           HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -2074,7 +2029,7 @@ public class DomainConfigController {
       throw new BadRequestException(backendMessages.getString("customreports.update.error"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in updating Custom Reports");
       throw new InvalidServiceException(backendMessages.getString("customreports.update.error"));
@@ -2110,15 +2065,11 @@ public class DomainConfigController {
   @RequestMapping(value = "/customreport", method = RequestMethod.GET)
   public
   @ResponseBody
-  NotificationsModel getCustomReports(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  NotificationsModel getCustomReports() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in fetching list of Custom Reports");
       throw new InvalidServiceException(
@@ -2145,14 +2096,14 @@ public class DomainConfigController {
   public
   @ResponseBody
   String deleteCustomReport(@RequestBody String name, HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in deleting Custom Reports");
       throw new InvalidServiceException(backendMessages.getString("customreports.delete.error"));
@@ -2204,15 +2155,11 @@ public class DomainConfigController {
   @RequestMapping(value = "/customreport/fetch", method = RequestMethod.GET)
   public
   @ResponseBody
-  NotificationsModel getCustomReport(@RequestParam String n, HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  NotificationsModel getCustomReport(@RequestParam String n) {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in fetching Custom Report");
       throw new InvalidServiceException(backendMessages.getString("customreports.fetch.error"));
@@ -2274,7 +2221,7 @@ public class DomainConfigController {
   @ResponseBody
   String updateCustomReport(@RequestBody CustomReportsConfigModel model,
                             HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -2284,7 +2231,7 @@ public class DomainConfigController {
       throw new BadRequestException("Error in updating Custom Report");
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       xLogger.severe("Error in updating Custom Report");
       throw new BadRequestException(backendMessages.getString("customreport.update.error"));
@@ -2306,7 +2253,7 @@ public class DomainConfigController {
       xLogger.severe("Error in updating Custom Report", e);
       throw new InvalidServiceException(backendMessages.getString("customreport.update.error"));
     } catch (ConfigurationException e) {
-      e.printStackTrace();
+      xLogger.severe("Error while saving Custom reports configuration", e);
     }
     return "Custom Report updated successfully";
   }
@@ -2314,12 +2261,11 @@ public class DomainConfigController {
   @RequestMapping(value = "/customreport/export", method = RequestMethod.POST)
   public
   @ResponseBody
-  String exportReport(@RequestBody String name, HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  String exportReport(@RequestBody String name) {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     if (domainId == null) {
       throw new InvalidServiceException(backendMessages.getString("report.export.error"));
     }
@@ -2358,12 +2304,10 @@ public class DomainConfigController {
   @RequestMapping(value = "/report/filters", method = RequestMethod.GET)
   public
   @ResponseBody
-  Map<String, List<String>> getReportFilters(HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+  Map<String, List<String>> getReportFilters() {
+    Long domainId = SecurityUtils.getCurrentDomainId();
     ReportsConfig rConfig = ReportsConfig.getInstance(domainId);
-    Map<String, List<String>> filters = new HashMap<String, List<String>>(6);
+    Map<String, List<String>> filters = new HashMap<>(6);
     filters.put(ReportsConstants.FILTER_COUNTRY,
         rConfig.getFilterValues(ReportsConstants.FILTER_COUNTRY));
     filters
@@ -2412,7 +2356,7 @@ public class DomainConfigController {
       QueryUtil.setPageParams(query, pageParams);
     }
     List<IDomain> domains = null;
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
@@ -2450,49 +2394,37 @@ public class DomainConfigController {
   public
   @ResponseBody
   String updateApprovalsConfig(@RequestBody ApprovalsConfigModel model,
-                               HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+                               HttpServletRequest request)
+      throws ServiceException, ConfigurationException {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
       throw new UnauthorizedException(backendMessages.getString("permission.denied"));
     }
     String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
-    try {
-      if (domainId == null) {
-        xLogger.severe("Error in updating Approvals configuration");
-        throw new InvalidServiceException(
-            "Error in updating Approvals configuration");
-      }
-      ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
-      ApprovalsConfig.OrderConfig orderConfig = builder.buildApprovalsOrderConfig(model);
-      ApprovalsConfig approvalsConfig = new ApprovalsConfig();
-      approvalsConfig.setOrderConfig(orderConfig);
-      cc.dc.setApprovalsConfig(approvalsConfig);
-      cc.dc.addDomainData(ConfigConstants.APPROVALS, generateUpdateList(userId));
-      saveDomainConfig(sUser.getLocale(), domainId, cc, backendMessages);
-      xLogger.info("AUDITLOG \t {0} \t {1} \t CONFIGURATION \t " +
-          "UPDATE APPROVALS", domainId, sUser.getUsername());
-      xLogger.info(cc.dc.toJSONSring());
-    } catch (ServiceException | ConfigurationException e) {
-      xLogger.severe("Error in updating Approvals configuration");
-      throw new InvalidServiceException("Error in updating Approvals configuration");
-    }
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    ConfigContainer cc = getDomainConfig(domainId, userId, sUser.getLocale());
+    ApprovalsConfig.OrderConfig orderConfig = builder.buildApprovalsOrderConfig(model);
+    ApprovalsConfig approvalsConfig = new ApprovalsConfig();
+    approvalsConfig.setOrderConfig(orderConfig);
+    cc.dc.setApprovalsConfig(approvalsConfig);
+    cc.dc.addDomainData(ConfigConstants.APPROVALS, generateUpdateList(userId));
+    saveDomainConfig(sUser.getLocale(), domainId, cc, backendMessages);
+    xLogger.info("AUDITLOG \t {0} \t {1} \t CONFIGURATION \t " +
+        "UPDATE APPROVALS", domainId, sUser.getUsername());
+    xLogger.info(cc.dc.toJSONSring());
+
     return "Approvals config updated successfully";
   }
 
   @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
   public
   @ResponseBody
-  DashboardConfigModel getDashboardConfig(HttpServletRequest request) {
-        /*if (!Authoriser.authoriseAdmin(request)) {
-            throw new UnauthorizedException("Permission Denied");
-        }*/
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  DashboardConfigModel getDashboardConfig() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     DashboardConfig dbc = dc.getDashboardConfig();
     try {
@@ -2506,12 +2438,10 @@ public class DomainConfigController {
   @RequestMapping(value = "/approvals", method = RequestMethod.GET)
   public
   @ResponseBody
-  ApprovalsConfigModel getApprovalsConfig(HttpServletRequest request)
-      throws ServiceException, ConfigurationException {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+  ApprovalsConfigModel getApprovalsConfig() {
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
-    String userId = sUser.getUsername();
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+    Long domainId = SecurityUtils.getCurrentDomainId();
     DomainConfig dc = DomainConfig.getInstance(domainId);
     ApprovalsConfig ac = dc.getApprovalsConfig();
     UsersService as = Services.getService(UsersServiceImpl.class, locale);
@@ -2586,7 +2516,7 @@ public class DomainConfigController {
   @ResponseBody
   String updateEventSummary(@RequestBody EventSummaryConfigModel configModel) {
     //Get logged in user's details
-    SecureUserDetails sUser = SecurityUtils.getUserDetails();
+    SecureUserDetails sUser = getUserDetails();
     ResourceBundle
         backendMessages =
         Resources.get().getBundle("BackendMessages", sUser.getLocale());
@@ -2644,7 +2574,7 @@ public class DomainConfigController {
   @ResponseBody
   String updateDashboardConfig(@RequestBody DashboardConfigModel model,
                                HttpServletRequest request) {
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+    SecureUserDetails sUser = getUserDetails();
     Locale locale = sUser.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     if (!GenericAuthoriser.authoriseAdmin(request)) {
@@ -2652,7 +2582,7 @@ public class DomainConfigController {
     }
     try {
       String userId = sUser.getUsername();
-      Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
+      Long domainId = SecurityUtils.getCurrentDomainId();
       DashboardConfig dashboardConfig = new DashboardConfig();
 
       DashboardConfig.ActivityPanelConfig
@@ -2732,7 +2662,7 @@ public class DomainConfigController {
 
   private void saveDomainConfig(Locale locale, Long domainId, ConfigContainer cc,
                                 ResourceBundle backendMessages)
-      throws ConfigurationServiceException, ServiceException {
+      throws ServiceException {
     ConfigurationMgmtService
         cms =
         Services.getService(ConfigurationMgmtServiceImpl.class, locale);
@@ -2740,7 +2670,7 @@ public class DomainConfigController {
       cc.c.setConfig(cc.dc.toJSONSring());
       //added to send user
       if (StringUtils.isEmpty(cc.c.getUserId())) {
-        cc.c.setUserId(SecurityUtils.getUserDetails().getUsername());
+        cc.c.setUserId(getUserDetails().getUsername());
       }
       if (cc.add) {
         cms.addConfiguration(cc.c.getKey(), cc.c);

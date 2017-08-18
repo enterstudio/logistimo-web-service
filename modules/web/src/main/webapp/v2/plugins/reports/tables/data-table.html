@@ -90,7 +90,9 @@
                         <td class="text-left" ng-if="activeMetric == 'ut'">
                             <a href="#/setup/users/all/details?userId={{key.split('|')[1]}}" target="_blank">{{key.split('|')[0]}}</a>
                         </td>
-                        <td ng-if="activeMetric != 'mt' && activeMetric != 'kt' && activeMetric != 'at' && activeMetric!= 'ut'" class="text-left">{{key}}</td>
+                        <td ng-if="activeMetric != 'mt' && activeMetric != 'kt' && activeMetric != 'at' && activeMetric!= 'ut'"
+                            class="text-left">{{key}}
+                        </td>
                         <td class="text-center" ng-class="{'codegray':isUndef(val[tableSeriesNo].value * 1)}" tooltip-enable="val[tableSeriesNo].num" uib-tooltip="{{val[tableSeriesNo].num}} / {{val[tableSeriesNo].den}}" tooltip-append-to-body="true" ng-repeat="val in value track by $index">{{(val[tableSeriesNo].value)}}</td>
                     </tr>
                     </tbody>

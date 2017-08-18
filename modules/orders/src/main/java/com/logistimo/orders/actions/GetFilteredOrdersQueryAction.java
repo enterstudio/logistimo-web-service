@@ -34,6 +34,7 @@ import com.logistimo.tags.TagUtil;
 import com.logistimo.tags.dao.ITagDao;
 import com.logistimo.tags.entity.ITag;
 import com.logistimo.users.service.UsersService;
+import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,8 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -168,13 +171,17 @@ public class GetFilteredOrdersQueryAction {
                                 OrderFilters filters) {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     if (filters.getSince() != null) {
       sqlQuery.append(" AND CON >= ?");
       parameters.add(sdf.format(filters.getSince()));
     }
     if (filters.getUntil() != null) {
+      Date
+          untilDate =
+          LocalDateUtil.getOffsetDate(filters.getUntil(), 1, Calendar.DAY_OF_MONTH);
       sqlQuery.append(" AND CON < ?");
-      parameters.add(sdf.format(filters.getSince()));
+      parameters.add(sdf.format(untilDate));
     }
   }
 

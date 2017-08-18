@@ -1600,9 +1600,6 @@ public class RESTUtil {
             xLogger
                 .warn("ServiceException when getting support user with id {0}: {1}", supportUserId,
                     se.getMessage());
-          } catch (ObjectNotFoundException onfe) {
-            xLogger.warn("ObjectNotFoundException when getting support user with id {0}: {1}",
-                supportUserId, onfe.getMessage());
           }
         } else {
           supportPhone = supportConfig.getSupportPhone();

@@ -1135,8 +1135,9 @@ reportControllers.controller('DomainHierarchyController', ['$scope', 'reportServ
         };
         if(checkNullEmpty($scope.domainId)){
             var repeatCount = 10;
+
             function checkAndCall() {
-                if(checkNotNullEmpty($scope.currentDomain)) {
+                if (checkNotNullEmpty($scope.currentDomain)) {
                     $scope.fetchHistoricalData($scope.currentDomain);
                 } else {
                     if (--repeatCount > 0) {
@@ -1144,6 +1145,7 @@ reportControllers.controller('DomainHierarchyController', ['$scope', 'reportServ
                     }
                 }
             }
+
             checkAndCall();
         } else {
             $scope.fetchHistoricalData($scope.domainId);

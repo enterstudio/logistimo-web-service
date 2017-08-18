@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright © 2017 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+<div ng-controller="InvoiceConfigurationController">
+    <div class="col-sm-12 pt10">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{resourceBundle['invoice.logo']}}</label>
+            <div class="col-sm-9 pt7" ng-show="!editLogo">
+                <a href="{{orders.logoDownloadLink}}">{{orders.logoName}}</a>
+                <span class="glyphicons glyphicons-edit lPad10" ng-click="editLogo = !editLogo"></span>
+            </div>
+            <div class="col-sm-9" ng-show="editLogo">
+                <input class="col-sm-3" type="file" file-model="invoice.logo"/>
+                <div class="col-sm-3">
+                    <button ng-show="invoice.logo.name" class="btn btn-sm btn-primary" ng-click="saveLogo()">{{resourceBundle['upload']}}</button>
+                    <button ng-show="isDef(invoice.logo.name) && isDef(orders.logoName)" class="btn btn-sm btn-default" ng-click="cancelLogo()">{{resourceBundle['cancel']}}</button>
+                </div>
+                <span class="litetext col-sm-12">{{resourceBundle['upload']}} <b>.jpeg or .png </b> {{resourceBundle['files.only']}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 pt10">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{resourceBundle['invoice.template']}}</label>
+            <div class="col-sm-9 pt7" ng-show="!editInvoiceTemplate">
+                <a href="{{orders.invoiceTemplateDownloadLink}}">{{orders.invoiceTemplateName}}</a>
+                <span class="glyphicons glyphicons-edit lPad10" ng-click="editInvoiceTemplate = !editInvoiceTemplate"></span>
+            </div>
+            <div class="col-sm-9" ng-show="editInvoiceTemplate">
+                <input class="col-sm-3" type="file" file-model="invoice.invoiceTemplate"/>
+                <div class="col-sm-3">
+                    <button ng-show="invoice.invoiceTemplate.name" class="btn btn-sm btn-primary" ng-click="saveTemplate('invoice')">{{resourceBundle['upload']}}</button>
+                    <button ng-show="isDef(invoice.invoiceTemplate.name) && isDef(orders.invoiceTemplateName)" class="btn btn-sm btn-default" ng-click="cancelTemplate('invoice')">{{resourceBundle['cancel']}}</button>
+                </div>
+                <span class="litetext col-sm-12">{{resourceBundle['upload']}} <b>.jrxml</b> {{resourceBundle['files.only']}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 pt10">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{resourceBundle['shipment.template']}}</label>
+            <div class="col-sm-9 pt7" ng-show="!editShipmentTemplate">
+                <a href="{{orders.shipmentTemplateDownloadLink}}">{{orders.shipmentTemplateName}}</a>
+                <span class="glyphicons glyphicons-edit lPad10" ng-click="editShipmentTemplate = !editShipmentTemplate"></span>
+            </div>
+            <div class="col-sm-9" ng-show="editShipmentTemplate">
+                <input class="col-sm-3" type="file" file-model="invoice.shipmentTemplate"/>
+                <div class="col-sm-3">
+                    <button ng-show="invoice.shipmentTemplate.name" class="btn btn-sm btn-primary" ng-click="saveTemplate('shipment')">{{resourceBundle['upload']}}</button>
+                    <button ng-show="isDef(invoice.shipmentTemplate.name) && isDef(orders.shipmentTemplateName)" class="btn btn-sm btn-default" ng-click="cancelTemplate('shipment')">{{resourceBundle['cancel']}}</button>
+                </div>
+                <span class="litetext col-sm-12">{{resourceBundle['upload']}} <b>.jrxml</b> {{resourceBundle['files.only']}}</span>
+            </div>
+        </div>
+    </div>
+</div>
