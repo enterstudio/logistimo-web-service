@@ -304,6 +304,13 @@ public class ApprovalsBuilder {
     model.setStatus(
         buildStatusModel(response.getRequesterId(), response.getStatus(), response.getUpdatedAt()));
     model.setConversationId(response.getConversationId());
+    String
+        approvalType =
+        response.getAttributes().get(ApprovalConstants.ATTRIBUTE_APPROVAL_TYPE);
+    if (approvalType != null) {
+      model.setApprovalType(ApprovalType.get(
+          Integer.parseInt(approvalType)));
+    }
     List<ApproverModel> approverModelList = buildApproversModel(response, usersService);
     model.setApprovers(approverModelList);
     return model;

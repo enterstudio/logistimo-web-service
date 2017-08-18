@@ -26,6 +26,7 @@ package com.logistimo.orders.approvals.models;
 import com.google.gson.annotations.SerializedName;
 
 import com.logistimo.models.StatusModel;
+import com.logistimo.orders.approvals.ApprovalType;
 import com.logistimo.users.models.UserContactModel;
 
 import java.util.Date;
@@ -59,6 +60,9 @@ public class CreateApprovalResponseModel {
 
   @SerializedName("conversation_id")
   private String conversationId;
+
+  @SerializedName("approval_type")
+  private ApprovalType approvalType;
 
   public String getId() {
     return id;
@@ -123,6 +127,14 @@ public class CreateApprovalResponseModel {
 
   public void setStatus(StatusModel status) {
     this.status = status;
+  }
+
+  public ApprovalType getApprovalType() {
+    return approvalType;
+  }
+
+  public void setApprovalType(ApprovalType approvalType) {
+    this.approvalType = approvalType;
   }
 
 }

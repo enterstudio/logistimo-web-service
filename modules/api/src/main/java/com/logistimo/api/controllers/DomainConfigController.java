@@ -2416,7 +2416,7 @@ public class DomainConfigController {
         "UPDATE APPROVALS", domainId, sUser.getUsername());
     xLogger.info(cc.dc.toJSONSring());
 
-    return "Approvals config updated successfully";
+    return backendMessages.getString("approvals.config.update.success");
   }
 
   @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
