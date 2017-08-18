@@ -435,11 +435,7 @@ public class OrdersAPIBuilder {
 
       if (IOrder.PURCHASE_ORDER == approvalType) {
         if (approvalMapping != null) {
-          if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
-            if (orderModel.atc) {
-              //permissions.add(PermissionConstants.CANCEL);
-            }
-          } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
+          if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
             if (orderModel.atc) {
@@ -543,80 +539,92 @@ public class OrdersAPIBuilder {
                                                                     SecureUserDetails user)
       throws ServiceException, ObjectNotFoundException {
     List<OrderApprovalTypesModel> models = new ArrayList<>(1);
-    boolean isPurchaseApprovalRequired = false;
-    boolean isSalesApprovalRequired = false;
-    boolean isTransferApprovalRequired = false;
     ApprovalsDao approvalsDao = new ApprovalsDao();
     IOrder order = oms.getOrder(orderModel.id);
-    if (IOrder.TRANSFER_ORDER == order.getOrderType() && (!(orderModel.isVisibleToCustomer()
-        && orderModel.isVisibleToVendor()) || (SecurityUtil.compareRoles(user.getRole(),
-        SecurityConstants.ROLE_DOMAINOWNER) >= 0) || user.getUsername().equals(order.getUserId())))  {
-      isTransferApprovalRequired = orderApprovalsService.isApprovalRequired(order,
-          IOrder.TRANSFER_ORDER);
+    if (IOrder.TRANSFER_ORDER == order.getOrderType() &&
+        (!(orderModel.isVisibleToCustomer() && orderModel.isVisibleToVendor()) ||
+            (SecurityUtil.compareRoles(user.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) ||
+            user.getUsername().equals(order.getUserId()))
+        && orderApprovalsService.isApprovalRequired(order, IOrder.TRANSFER_ORDER))  {
+      buildTransferApprovalTypeModel(models, approvalsDao, order);
     } else {
-      if (IOrder.PURCHASE_ORDER == order.getOrderType() && orderModel.isVisibleToCustomer()
-          && orderModel.atc) {
-        isPurchaseApprovalRequired =
-            orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER);
+      if (IOrder.PURCHASE_ORDER == order.getOrderType() && orderModel.isVisibleToCustomer() &&
+          orderModel.atc &&
+          orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER)) {
+        buildPurchaseApprovalTypeModel(models, approvalsDao, order);
       }
-      if (IOrder.TRANSFER_ORDER != order.getOrderType() && orderModel.isVisibleToVendor() && orderModel.atv) {
-        isSalesApprovalRequired =
-            orderApprovalsService.isApprovalRequired(order, IOrder.SALES_ORDER);
-      }
-    }
-    if (isTransferApprovalRequired) {
-      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
-      model.setType(ApprovalConstants.TRANSFER);
-      IOrderApprovalMapping
-          orderApprovalMapping =
-          approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.TRANSFER_ORDER);
-      if (orderApprovalMapping != null) {
-        model.setId(orderApprovalMapping.getApprovalId());
-        List<IOrderApprovalMapping>
-            approvalMappings =
-            approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
-        if (approvalMappings != null && !approvalMappings.isEmpty()) {
-          model.setCount(approvalMappings.size());
-        }
-      }
-      models.add(model);
-    } else {
-      if (isPurchaseApprovalRequired) {
-        OrderApprovalTypesModel model = new OrderApprovalTypesModel();
-        model.setType(ApprovalConstants.PURCHASE);
-        IOrderApprovalMapping
-            orderApprovalMapping =
-            approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.PURCHASE_ORDER);
-        if (orderApprovalMapping != null) {
-          model.setId(orderApprovalMapping.getApprovalId());
-          List<IOrderApprovalMapping>
-              approvalMappings =
-              approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
-          if (approvalMappings != null && !approvalMappings.isEmpty()) {
-            model.setCount(approvalMappings.size());
-          }
-        }
-        models.add(model);
-      }
-      if (isSalesApprovalRequired) {
-        OrderApprovalTypesModel model = new OrderApprovalTypesModel();
-        model.setType(ApprovalConstants.SALES);
-        IOrderApprovalMapping
-            orderApprovalMapping =
-            approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.SALES_ORDER);
-        if (orderApprovalMapping != null) {
-          model.setId(orderApprovalMapping.getApprovalId());
-          List<IOrderApprovalMapping>
-              approvalMappings =
-              approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
-          if (approvalMappings != null && !approvalMappings.isEmpty()) {
-            model.setCount(approvalMappings.size());
-          }
-        }
-        models.add(model);
+      if (IOrder.TRANSFER_ORDER != order.getOrderType() && orderModel.isVisibleToVendor() &&
+          orderModel.atv &&
+          orderApprovalsService.isApprovalRequired(order, IOrder.SALES_ORDER)) {
+        buildSalesApprovalTypeModel(models, approvalsDao, order);
       }
     }
     return models;
+  }
+
+  private void buildSalesApprovalTypeModel(List<OrderApprovalTypesModel> models,
+                                           ApprovalsDao approvalsDao, IOrder order) {
+    OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+    model.setType(ApprovalConstants.SALES);
+    IOrderApprovalMapping
+        orderApprovalMapping =
+        approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.SALES_ORDER);
+    if (orderApprovalMapping != null) {
+      model.setId(orderApprovalMapping.getApprovalId());
+      List<IOrderApprovalMapping>
+          approvalMappings =
+          approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
+      if (approvalMappings != null && !approvalMappings.isEmpty()) {
+        model.setCount(approvalMappings.size());
+      }
+    }
+    models.add(model);
+  }
+
+  private void buildPurchaseApprovalTypeModel(List<OrderApprovalTypesModel> models,
+                                              ApprovalsDao approvalsDao, IOrder order) {
+    IOrderApprovalMapping
+        orderApprovalMapping =
+        approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.PURCHASE_ORDER);
+    if (orderApprovalMapping != null) {
+      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+      model.setType(ApprovalConstants.PURCHASE);
+      model.setId(orderApprovalMapping.getApprovalId());
+      List<IOrderApprovalMapping>
+          approvalMappings =
+          approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
+      if (approvalMappings != null && !approvalMappings.isEmpty()) {
+        model.setCount(approvalMappings.size());
+      }
+      models.add(model);
+    } else if(!order.isVisibleToVendor()){
+      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+      model.setType(ApprovalConstants.PURCHASE);
+      models.add(model);
+    }
+  }
+
+  private void buildTransferApprovalTypeModel(List<OrderApprovalTypesModel> models,
+                                              ApprovalsDao approvalsDao, IOrder order) {
+    IOrderApprovalMapping
+        orderApprovalMapping =
+        approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.TRANSFER_ORDER);
+    if (orderApprovalMapping != null) {
+      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+      model.setType(ApprovalConstants.TRANSFER);
+      model.setId(orderApprovalMapping.getApprovalId());
+      List<IOrderApprovalMapping>
+          approvalMappings =
+          approvalsDao.getTotalOrderApprovalMapping(order.getOrderId());
+      if (approvalMappings != null && !approvalMappings.isEmpty()) {
+        model.setCount(approvalMappings.size());
+      }
+      models.add(model);
+    } else if(!order.isVisibleToVendor() || !order.isVisibleToCustomer()) {
+      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+      model.setType(ApprovalConstants.TRANSFER);
+      models.add(model);
+    }
   }
 
   public OrderModel buildFullOrderModel(IOrder order, SecureUserDetails user,
