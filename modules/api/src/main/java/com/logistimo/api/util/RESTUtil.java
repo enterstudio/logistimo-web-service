@@ -1909,8 +1909,10 @@ public class RESTUtil {
         transaction.put(JsonTagsZ.ACTUAL_TRANSACTION_DATE,
             LocalDateUtil.formatCustom(atd, Constants.DATE_FORMAT, null));
       }
-      transaction.put(JsonTagsZ.TAGS, StringUtil.getCSV(trans.getTags(TagUtil.TYPE_MATERIAL)));
-
+      String mTags = StringUtil.getCSV(trans.getTags(TagUtil.TYPE_MATERIAL));
+      if (StringUtils.isNotEmpty(mTags)) {
+        transaction.put(JsonTagsZ.TAGS, mTags);
+      }
       transData.add(transaction);
     }
     return new Results(transData, cursor);

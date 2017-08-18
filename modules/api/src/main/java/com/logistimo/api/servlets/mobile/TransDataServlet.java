@@ -425,8 +425,6 @@ public class TransDataServlet extends JsonRestServlet {
     // Send the response
     try {
       // Get the json return object
-      //GetTransactionsOutput jsonOutput = new GetTransactionsOutput( status, ( kioskId != null ? kioskId.toString() : null ), transactionList, errMessage, locale.toString(), RESTUtil.VERSION_01 );
-      //sendJsonResponse( resp, statusCode, jsonOutput.toJSONString() );
       String
           jsonOutputString =
           GsonUtil
