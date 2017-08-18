@@ -31,6 +31,7 @@ import com.logistimo.api.models.UserDomainDetail;
 import com.logistimo.api.models.UserModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.auth.SecurityConstants;
+import com.logistimo.config.models.AdminContactConfig;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
@@ -210,6 +211,18 @@ public class UserBuilder {
       }
       model.config.isApprover = StaticApplicationContext.getBean(
           IOrderApprovalsService.class).isApprover(user.getUserId());
+      ConfigurationModelsBuilder builder = new ConfigurationModelsBuilder();
+      model.config.adminContact = builder.buildAllAdminContactConfigModel(dc.getAdminContactConfig());
+      if(model.config.adminContact != null) {
+        if (StringUtils.isEmpty(
+            model.config.adminContact.get(AdminContactConfig.PRIMARY_ADMIN_CONTACT).userId)) {
+          model.config.adminContact.remove(AdminContactConfig.PRIMARY_ADMIN_CONTACT);
+        }
+        if (StringUtils.isEmpty(
+            model.config.adminContact.get(AdminContactConfig.SECONDARY_ADMIN_CONTACT).userId)) {
+          model.config.adminContact.remove(AdminContactConfig.SECONDARY_ADMIN_CONTACT);
+        }
+      }
     } catch (Exception e) {
       xLogger.warn("Unable to fetch the domain details", e);
     }
