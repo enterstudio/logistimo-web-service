@@ -44,7 +44,7 @@ import com.logistimo.models.ResponseModel;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
 import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.models.InvoiceResponseModel;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.PageParams;
@@ -464,9 +464,7 @@ public class ShipmentController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     IShipmentService shipmentService = Services.getService(ShipmentService.class, locale);
-    InvoiceResponseModel
-        invoiceModel =
-        shipmentService.generateShipmentVoucher(shipmentId);
+    PDFResponseModel invoiceModel = shipmentService.generateShipmentVoucher(shipmentId);
     ResponseUtils.serveInlineFile(response, invoiceModel.getFileName(), "application/pdf",
         invoiceModel.getBytes());
   }

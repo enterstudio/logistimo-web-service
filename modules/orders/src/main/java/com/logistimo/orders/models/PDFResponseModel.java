@@ -26,11 +26,12 @@ package com.logistimo.orders.models;
 /**
  * Created by charan on 16/08/17.
  */
-public class InvoiceResponseModel {
+
+public class PDFResponseModel {
   private final String fileName;
   private final byte[] bytes;
 
-  public InvoiceResponseModel(String fileName, byte[] bytes) {
+  public PDFResponseModel(String fileName, byte[] bytes) {
     this.fileName = fileName;
     this.bytes = bytes;
   }

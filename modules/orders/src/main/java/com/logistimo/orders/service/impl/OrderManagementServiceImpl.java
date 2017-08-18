@@ -79,7 +79,7 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IDemandItemBatch;
 import com.logistimo.orders.entity.IOrder;
 import com.logistimo.orders.entity.Order;
-import com.logistimo.orders.models.InvoiceResponseModel;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
@@ -1710,7 +1710,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   }
 
   @Override
-  public InvoiceResponseModel generateInvoiceForOrder(Long orderId)
+  public PDFResponseModel generateInvoiceForOrder(Long orderId)
       throws ServiceException, IOException, ValidationException, ObjectNotFoundException {
     IOrder order = getOrder(orderId, true);
     SecureUserDetails user = SecurityUtils.getUserDetails();

@@ -28,27 +28,17 @@ import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.models.InvoiceResponseModel;
-import com.logistimo.orders.service.impl.InvoiceItem;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.utils.InvoiceUtils;
+import com.logistimo.orders.utils.JasperClient;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ServiceException;
-import com.logistimo.services.storage.StorageUtil;
 import com.logistimo.shipments.entity.IShipment;
-
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by nitisha.khandelwal on 27/07/17.
@@ -61,15 +51,16 @@ public class GenerateShipmentVoucherAction {
   private static final String PREFIX = "Shipment-";
 
   private final InvoiceUtils invoiceUtils;
-  private final StorageUtil storageUtil;
+  private final JasperClient jasperClient;
+
 
   @Autowired
-  public GenerateShipmentVoucherAction(InvoiceUtils invoiceUtils, StorageUtil storageUtil) {
+  public GenerateShipmentVoucherAction(InvoiceUtils invoiceUtils, JasperClient jasperClient) {
     this.invoiceUtils = invoiceUtils;
-    this.storageUtil = storageUtil;
+    this.jasperClient = jasperClient;
   }
 
-  public InvoiceResponseModel invoke(IOrder order, IShipment shipment, SecureUserDetails user)
+  public PDFResponseModel invoke(IOrder order, IShipment shipment, SecureUserDetails user)
       throws ServiceException, IOException, ValidationException {
 
     if (!invoiceUtils.hasAccessToOrder(user, order)) {
@@ -78,31 +69,16 @@ public class GenerateShipmentVoucherAction {
       throw new InvalidDataException("User does not have access to domain");
     }
 
-    JasperPrint jasperPrint;
-    InputStream inputStream = null;
-
     try {
-
-      Map<String, Object> parameters = invoiceUtils.getParameters(user, order, shipment);
-      List<InvoiceItem> invoiceItems = invoiceUtils.getInvoiceItems(order, shipment);
-
-      JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(invoiceItems);
       String fileName = PREFIX + shipment.getShipmentId() + InvoiceUtils.DASH +
           invoiceUtils.getDateSuffix(user) + InvoiceUtils.PDF_EXTENSION;
-      inputStream = storageUtil.getInputStream(InvoiceUtils.UPLOADS,
-          getTemplate(user.getCurrentDomainId()));
-      jasperPrint = JasperFillManager.fillReport(JasperCompileManager
-          .compileReport(inputStream), parameters, beanColDataSource);
-      byte[] bytes = JasperExportManager.exportReportToPdf(jasperPrint);
-      return new InvoiceResponseModel(fileName, bytes);
+      return jasperClient.generatePDF(fileName, getTemplate(user.getCurrentDomainId()),
+          InvoiceUtils.UPLOADS, invoiceUtils.getInvoiceItems(order, shipment),
+          invoiceUtils.getParameters(user, order, shipment));
     } catch (Exception e) {
-      xLogger.severe("Failed to generate shipment voucher for Shipment {0}",
+      xLogger.severe("Failed to generate shipment voucher for Shipment {0} - ",
           shipment.getShipmentId(), e);
       throw new ServiceException(e);
-    } finally {
-      if (inputStream != null) {
-        inputStream.close();
-      }
     }
   }
 

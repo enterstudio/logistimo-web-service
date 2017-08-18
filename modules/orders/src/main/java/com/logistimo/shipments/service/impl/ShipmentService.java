@@ -73,7 +73,7 @@ import com.logistimo.models.shipments.ShipmentModel;
 import com.logistimo.orders.actions.GenerateShipmentVoucherAction;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.models.InvoiceResponseModel;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
 import com.logistimo.orders.service.impl.DemandService;
@@ -2374,7 +2374,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
   }
 
   @Override
-  public InvoiceResponseModel generateShipmentVoucher(String shipmentId)
+  public PDFResponseModel generateShipmentVoucher(String shipmentId)
       throws ServiceException, ObjectNotFoundException, IOException, ValidationException {
     OrderManagementService oms = StaticApplicationContext.getBean(OrderManagementService.class);
     IOrder order = oms.getOrder(extractOrderId(shipmentId), true);

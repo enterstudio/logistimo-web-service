@@ -28,26 +28,16 @@ import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.ValidationException;
 import com.logistimo.logger.XLog;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.models.InvoiceResponseModel;
-import com.logistimo.orders.service.impl.InvoiceItem;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.utils.InvoiceUtils;
+import com.logistimo.orders.utils.JasperClient;
 import com.logistimo.security.SecureUserDetails;
 import com.logistimo.services.ServiceException;
-import com.logistimo.services.storage.StorageUtil;
-
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by nitisha.khandelwal on 27/07/17.
@@ -61,15 +51,15 @@ public class GenerateOrderInvoiceAction {
   private static final String PREFIX = "Invoice-";
 
   private final InvoiceUtils invoiceUtils;
-  private final StorageUtil storageUtil;
+  private final JasperClient jasperClient;
 
   @Autowired
-  public GenerateOrderInvoiceAction(InvoiceUtils invoiceUtils, StorageUtil storageUtil) {
+  public GenerateOrderInvoiceAction(InvoiceUtils invoiceUtils, JasperClient jasperClient) {
+    this.jasperClient = jasperClient;
     this.invoiceUtils = invoiceUtils;
-    this.storageUtil = storageUtil;
   }
 
-  public InvoiceResponseModel invoke(IOrder order, SecureUserDetails user)
+  public PDFResponseModel invoke(IOrder order, SecureUserDetails user)
       throws ServiceException, IOException, ValidationException {
 
     if (!invoiceUtils.hasAccessToOrder(user, order)) {
@@ -78,33 +68,16 @@ public class GenerateOrderInvoiceAction {
       throw new InvalidDataException("User does not have access to domain");
     }
 
-    JasperPrint jasperPrint;
-    InputStream inputStream = null;
-
     try {
-
-      Map<String, Object> parameters = invoiceUtils.getParameters(user, order, null);
-      List<InvoiceItem> invoiceItems = invoiceUtils.getInvoiceItems(order, null);
-
-      JRBeanCollectionDataSource beanColDataSource = new JRBeanCollectionDataSource(invoiceItems);
       String fileName = PREFIX + order.getOrderId() + InvoiceUtils.DASH +
           invoiceUtils.getDateSuffix(user) + InvoiceUtils.PDF_EXTENSION;
-      inputStream = storageUtil.getInputStream(InvoiceUtils.UPLOADS,
-          getTemplate(user.getCurrentDomainId()));
-      jasperPrint = JasperFillManager
-          .fillReport(JasperCompileManager.compileReport(inputStream), parameters,
-              beanColDataSource);
-      byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
-      return new InvoiceResponseModel(fileName, pdfBytes);
+      return jasperClient.generatePDF(fileName, getTemplate(user.getCurrentDomainId()),
+          InvoiceUtils.UPLOADS, invoiceUtils.getInvoiceItems(order, null),
+          invoiceUtils.getParameters(user, order, null));
     } catch (Exception e) {
-      xLogger.severe("Failed to generate invoice for Order {0}", order.getOrderId(), e);
+      xLogger.severe("Failed to generate invoice for Order - {0}", order.getOrderId(), e);
       throw new ServiceException(e);
-    } finally {
-      if (inputStream != null) {
-        inputStream.close();
-      }
     }
-
   }
 
   private String getTemplate(Long domainId) {

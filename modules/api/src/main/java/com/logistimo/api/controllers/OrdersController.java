@@ -74,7 +74,7 @@ import com.logistimo.orders.actions.ScheduleOrderAutomationAction;
 import com.logistimo.orders.approvals.service.IOrderApprovalsService;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.models.InvoiceResponseModel;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.orders.service.IDemandService;
 import com.logistimo.orders.service.OrderManagementService;
@@ -274,10 +274,7 @@ public class OrdersController {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
     OrderManagementService oms = Services.getService(OrderManagementServiceImpl.class, locale);
-
-    InvoiceResponseModel
-        invoiceModel =
-        oms.generateInvoiceForOrder(orderId);
+    PDFResponseModel invoiceModel = oms.generateInvoiceForOrder(orderId);
     ResponseUtils.serveInlineFile(response, invoiceModel.getFileName(), "application/pdf",
         invoiceModel.getBytes());
   }
@@ -549,8 +546,7 @@ public class OrdersController {
           }
         }
       }
-      UpdatedOrder
-          updorder =
+      UpdatedOrder updorder =
           oms.updateOrder(order, SourceConstants.WEB, true, true, user.getUsername());
       tx.commit();
       return builder.buildOrderResponseModel(updorder, true, user, domainId, true,
@@ -596,8 +592,7 @@ public class OrdersController {
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     try {
       Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
-      OrderManagementService
-          oms =
+      OrderManagementService oms =
           Services.getService(OrderManagementServiceImpl.class, user.getLocale());
       IOrder order = oms.getOrder(orderId);
       boolean fullOrder = false;
@@ -695,8 +690,7 @@ public class OrdersController {
         endDate = LocalDateUtil.parseCustom(until, Constants.DATE_FORMAT, dc.getTimezone());
       }
       oty = oty == null ? IOrder.NONTRANSFER : oty;
-      Navigator
-          navigator =
+      Navigator navigator =
           new Navigator(request.getSession(), "OrdersController.getOrders", offset, size, "dummy",
               0);
       PageParams pageParams = new PageParams(navigator.getCursor(offset), offset, size);
@@ -984,8 +978,7 @@ public class OrdersController {
           }
         }
       }
-      OrderManagementService
-          oms =
+      OrderManagementService oms =
           Services.getService(OrderManagementServiceImpl.class, request.getLocale());
       rid = oms.getIdSuggestions(domainId, id, type, oty, kioskIds);
       return rid;

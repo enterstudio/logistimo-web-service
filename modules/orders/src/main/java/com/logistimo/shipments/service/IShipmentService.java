@@ -29,7 +29,7 @@ import com.logistimo.exception.ValidationException;
 import com.logistimo.models.ResponseModel;
 import com.logistimo.models.shipments.ShipmentMaterialsModel;
 import com.logistimo.models.shipments.ShipmentModel;
-import com.logistimo.orders.models.InvoiceResponseModel;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ObjectNotFoundException;
 import com.logistimo.services.Service;
@@ -140,6 +140,6 @@ public interface IShipmentService extends Service {
   /**
    * Generate shipment voucher
    */
-  InvoiceResponseModel generateShipmentVoucher(String shipmentId)
+  PDFResponseModel generateShipmentVoucher(String shipmentId)
       throws ServiceException, ObjectNotFoundException, IOException, ValidationException;
 }

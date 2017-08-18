@@ -32,7 +32,7 @@ import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.orders.OrderResults;
 import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.entity.IOrder;
-import com.logistimo.orders.models.InvoiceResponseModel;
+import com.logistimo.orders.models.PDFResponseModel;
 import com.logistimo.orders.models.OrderFilters;
 import com.logistimo.orders.models.UpdatedOrder;
 import com.logistimo.pagination.PageParams;
@@ -54,7 +54,7 @@ public interface OrderManagementService extends Service {
   /**
    * Generates invoice for a given order
    */
-  InvoiceResponseModel generateInvoiceForOrder(Long orderId)
+  PDFResponseModel generateInvoiceForOrder(Long orderId)
       throws ServiceException, IOException, ValidationException, ObjectNotFoundException;
 
   /**
