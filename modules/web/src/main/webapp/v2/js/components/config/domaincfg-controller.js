@@ -578,7 +578,7 @@ function($scope,domainCfgService){
     };
     $scope.addRow = function(){
         if(checkNullEmpty($scope.orderCfg.psoa)) {
-            $scope.orderCfg = {psoa : []};
+            $scope.orderCfg.psoa = [];
         }
         $scope.orderCfg.psoa.push({enTgs : [], poa: false, soa: false});
     };
