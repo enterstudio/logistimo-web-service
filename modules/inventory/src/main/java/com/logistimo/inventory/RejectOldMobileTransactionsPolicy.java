@@ -23,6 +23,8 @@
 
 package com.logistimo.inventory;
 
+import com.logistimo.constants.Constants;
+import com.logistimo.constants.SourceConstants;
 import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.logger.XLog;
@@ -97,6 +99,8 @@ public class RejectOldMobileTransactionsPolicy implements MobileTransactionsHand
       scTrans.setType(ITransaction.TYPE_PHYSICALCOUNT);
       scTrans.setReason(backendMessages.getString("openingstock.mismatch"));
       scTrans.setSystemCreated(true);
+      scTrans.setSourceUserId(Constants.SYSTEM_USER_ID);
+      scTrans.setSrc(SourceConstants.WEB);
       if (trans.hasBatch()) {
         scTrans.setQuantity(trans.getOpeningStockByBatch());
       } else {
