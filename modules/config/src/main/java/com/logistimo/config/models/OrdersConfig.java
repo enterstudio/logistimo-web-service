@@ -67,7 +67,7 @@ public class OrdersConfig implements Serializable {
   private static final String PARTIAL_FULFILLMENT_REASONS_MANDATORY = "pfrm";
   private static final String CANCELLING_ORDER_REASONS = "cor";
   private static final String CANCELLING_ORDER_REASONS_MANDATORY = "corm";
-  private static final String ALLOW_CREATING_SHIPMENTS = "asc";
+  private static final String ALLOW_CREATING_SHIPMENTS = "acs";
   private static final String AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION = "aafmsc";
   private static final String CREATION_AUTOMATED = "auto_create";
   private static final String AUTO_CREATE_ON_MIN = "ac_on_min";
