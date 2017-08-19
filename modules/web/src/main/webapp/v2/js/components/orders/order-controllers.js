@@ -933,6 +933,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                     updateOrderObj(data.data.order);
                     $scope.toggleEdit('vend');
                     $scope.showSuccess($scope.resourceBundle['order.upd.vendor.success']);
+                    $scope.updatePermissions();
                     $scope.checkStatusList();
                 }).catch(function error(msg) {
                     $scope.showErrorMsg(msg);
@@ -1095,9 +1096,15 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
             };
 
             $scope.updatePermissions = function() {
+                $scope.cancelPermission = false;
+                $scope.shipPermission = false;
+                $scope.createShipmentPermission = false;
+                $scope.editPermission = false;
+                $scope.confirmPermission = false;
+                $scope.allocatePermission = false;
+                $scope.reOpenPermission = false;
                 if (checkNotNullEmpty($scope.order.permissions) &&
                     checkNotNullEmpty($scope.order.permissions.permissions) && !$scope.dp.vp) {
-
                     $scope.order.permissions.permissions.forEach(function(data) {
                         if(data == 'cancel') {
                             $scope.cancelPermission = true;
@@ -1119,14 +1126,6 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                             $scope.reOpenPermission = true;
                         }
                     });
-                } else {
-                    $scope.cancelPermission = false;
-                    $scope.shipPermission = false;
-                    $scope.createShipmentPermission = false;
-                    $scope.editPermission = false;
-                    $scope.confirmPermission = false;
-                    $scope.allocatePermission = false;
-                    $scope.reOpenPermission = false;
                 }
             };
 
