@@ -29,6 +29,7 @@ import com.logistimo.exception.ConfigurationServiceException;
 import com.logistimo.exception.ErrorResource;
 import com.logistimo.exception.ExceptionUtils;
 import com.logistimo.exception.ExceptionWithCodes;
+import com.logistimo.exception.ForbiddenAccessException;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.InvalidTaskException;
@@ -93,6 +94,24 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     return handleExceptionInternal(e, error, headers, ((UnauthorizedException) e).getCode(),
         request);
   }
+
+  @ExceptionHandler({ForbiddenAccessException.class})
+  protected ResponseEntity<Object> handleForbiddenAccessException(ForbiddenAccessException e,
+                                                                  WebRequest request) {
+    logWarning(request, e);
+    String message = e.getMessage();
+    if (StringUtils.isBlank(message)) {
+      message = ExceptionUtils.constructMessage("G003",
+          getLocale(), null);
+    }
+    ErrorResource error = new ErrorResource(e.getCode(), message);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return handleExceptionInternal(e, error, headers, HttpStatus.FORBIDDEN,
+        request);
+  }
+
+
 
   @ExceptionHandler({InvalidDataException.class})
   protected ResponseEntity<Object> handleInvalidDataRequest(RuntimeException e,

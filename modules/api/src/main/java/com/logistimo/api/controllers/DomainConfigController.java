@@ -56,7 +56,6 @@ import com.logistimo.api.models.configuration.SupportConfigModel;
 import com.logistimo.api.models.configuration.TagsConfigModel;
 import com.logistimo.api.request.AddCustomReportRequestObj;
 import com.logistimo.auth.GenericAuthoriser;
-import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.config.entity.IConfig;
@@ -98,6 +97,7 @@ import com.logistimo.entity.IUploaded;
 import com.logistimo.events.handlers.BBHandler;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.ConfigurationServiceException;
+import com.logistimo.exception.ForbiddenAccessException;
 import com.logistimo.exception.InvalidDataException;
 import com.logistimo.exception.InvalidServiceException;
 import com.logistimo.exception.InvalidTaskException;
@@ -2463,22 +2463,19 @@ public class DomainConfigController {
   @ResponseBody
   EventSummaryConfigModel getEventSummaryConfig(@RequestParam(required = false) Long domainId) {
     EventSummaryConfigModel model = null;
-    SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
+    SecureUserDetails sUser = SecurityUtils.getUserDetails();
     try {
-      if (sUser == null) {
-        throw new UnauthorizedException("User is not authorized");
+      Long
+          dId =
+          (null == domainId) ? SecurityUtils.getCurrentDomainId() : domainId;
+      if (!usersService.hasAccessToDomain(sUser.getUsername(), dId)) {
+        xLogger.warn("User {0} does not have access to domain id {1}", sUser.getUsername(),
+            dId);
+        throw new ForbiddenAccessException("User does not have access to domain");
       }
-      if (domainId == null) {
-        domainId = SecurityUtils.getCurrentDomainId();
-      } else {
-        if (!usersService.hasAccessToDomain(sUser.getUsername(), domainId)) {
-          xLogger.warn("User {0} does not have access to domain id {1}", sUser.getUsername(),
-              domainId);
-          throw new InvalidDataException("User does not have access to domain");
-        }
-      }
+
       //Get the configuration for the domain
-      DomainConfig dc = DomainConfig.getInstance(domainId);
+      DomainConfig dc = DomainConfig.getInstance(dId);
       if (dc != null) {
         model = dc.getEventSummaryConfig();
       }

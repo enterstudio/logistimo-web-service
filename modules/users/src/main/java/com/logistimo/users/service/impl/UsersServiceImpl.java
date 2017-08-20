@@ -108,6 +108,8 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
 
   private ITagDao tagDao = new TagDao();
   private IUserDao userDao = new UserDao();
+  DomainsService domainsService = Services.getService(DomainsServiceImpl.class);
+
 
   /**
    * Check to see if a user id exists in the system or not.
@@ -631,7 +633,6 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
       throws ServiceException {
     PersistenceManager pm = null;
     try {
-      DomainsService ds = Services.getService(DomainsServiceImpl.class);
       IUserAccount ua = getUserAccount(userId);
       List<Long> uAccDids = ua.getAccessibleDomainIds();
       if (uAccDids == null || uAccDids.isEmpty()) {
@@ -652,7 +653,9 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
 
       Set<Long> allChildrenIds = new HashSet<>();
       for (Long uAccDid : uAccDids) {
-        List<IDomainLink> chldLnks = ds.getDomainLinks(uAccDid, IDomainLink.TYPE_CHILD, -1);
+        List<IDomainLink>
+            chldLnks =
+            domainsService.getDomainLinks(uAccDid, IDomainLink.TYPE_CHILD, -1);
         if (chldLnks != null && !chldLnks.isEmpty()) {
           for (IDomainLink chldLnk : chldLnks) {
             allChildrenIds.add(chldLnk.getLinkedDomainId());
@@ -1145,18 +1148,16 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     IUserAccount userAccount = getUserAccount(username);
     List<Long> accDomains = userAccount.getAccessibleDomainIds();
     if (SecurityUtil
-        .compareRoles(SecurityConstants.ROLE_SUPERUSER, userAccount.getRole()) == 0 ||
-        userAccount.getDomainId().equals(domainId) || accDomains != null && accDomains
-        .contains(domainId)) {
+        .compareRoles(SecurityConstants.ROLE_SUPERUSER, userAccount.getRole()) == 0
+        || userAccount.getDomainId().equals(domainId)
+        || accDomains != null && accDomains.contains(domainId)
+        || checkAccess(userAccount.getDomainId(), domainId)) {
       return true;
     }
-    DomainsService domainsService = Services.getService(DomainsServiceImpl.class);
-    if (checkAccess(domainsService, domainId)) {
-      return true;
-    }
+
     if (accDomains != null) {
       for (Long accDomainId : accDomains) {
-        if (checkAccess(domainsService, accDomainId)) {
+        if (checkAccess(accDomainId, domainId)) {
           return true;
         }
       }
@@ -1165,11 +1166,11 @@ public class UsersServiceImpl extends ServiceImpl implements UsersService {
     return false;
   }
 
-  private boolean checkAccess(DomainsService domainsService, Long domainId)
+  private boolean checkAccess(Long userDomainId, Long domainId)
       throws ServiceException {
     List<IDomainLink>
         domainLinks =
-        domainsService.getAllDomainLinks(domainId, IDomainLink.TYPE_CHILD);
+        domainsService.getAllDomainLinks(userDomainId, IDomainLink.TYPE_CHILD);
     if (domainLinks != null) {
       for (IDomainLink domainLink : domainLinks) {
         if (domainId.equals(domainLink.getLinkedDomainId())) {
