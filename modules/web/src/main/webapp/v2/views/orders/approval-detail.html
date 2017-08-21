@@ -45,7 +45,7 @@
                           ng-show="type == 't' && request == true || type == 't' && approve == true">{{resourceBundle['approvals.transfer.required']}}</span>
                     <span class="control-label" ng-show="approved == true"><span
                             class="glyphicons glyphicons-ok-circle c-green"></span> {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lowercase']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lowercase']}} <a
-                            href="#/setup/users/all/detail?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
+                            href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
                 <div class="col-sm-9" ng-show="cancelApproval">
                     <span ng-show="approval.status.status = 'pn'">{{resourceBundle['approvals.pending']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['by.lowercase']}}</span>
@@ -91,7 +91,7 @@
                     <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lowercase']}}</span>
                     <span ng-show="expired">{{resourceBundle['approvals.expired']}} {{resourceBundle['on.lowercase']}} {{approval.status.updated_at | fromNow:this }}</span>
                     <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lowercase']}} <a
-                            href="#/setup/users/all/detail?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
+                            href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
             </div>
             <div class="pt10">

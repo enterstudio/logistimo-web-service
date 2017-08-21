@@ -85,7 +85,7 @@ public class UpdateOrderStatusValidator {
   }
 
   public void checkTransferStatus(IOrder order) throws ValidationException {
-    if (order.isTransfer() && !orderApprovalsService.isTransferApprovalComplete(order)) {
+    if (order.isTransfer() && !orderApprovalsService.isTransferApprovalComplete(order) && !(order.isVisibleToCustomer() && order.isVisibleToVendor())) {
       throw new ValidationException("O008", new Object[0]);
     }
   }

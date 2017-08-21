@@ -513,8 +513,18 @@ public class OrdersAPIBuilder {
             }
           }
         } else {
-          permissions.add(PermissionConstants.CANCEL);
-          permissions.add(PermissionConstants.EDIT);
+          if (!(order.isVisibleToCustomer() && order.isVisibleToVendor())) {
+            permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.EDIT);
+          } else {
+            permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.CONFIRM);
+            permissions.add(PermissionConstants.ALLOCATE);
+            permissions.add(PermissionConstants.EDIT);
+            permissions.add(PermissionConstants.SHIP);
+            permissions.add(PermissionConstants.CREATE_SHIPMENT);
+            permissions.add(PermissionConstants.REOPEN);
+          }
         }
       }
     } else {
@@ -564,12 +574,12 @@ public class OrdersAPIBuilder {
 
   private void buildSalesApprovalTypeModel(List<OrderApprovalTypesModel> models,
                                            ApprovalsDao approvalsDao, IOrder order) {
-    OrderApprovalTypesModel model = new OrderApprovalTypesModel();
-    model.setType(ApprovalConstants.SALES);
     IOrderApprovalMapping
         orderApprovalMapping =
         approvalsDao.getOrderApprovalMapping(order.getOrderId(), IOrder.SALES_ORDER);
     if (orderApprovalMapping != null) {
+      OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+      model.setType(ApprovalConstants.SALES);
       model.setId(orderApprovalMapping.getApprovalId());
       List<IOrderApprovalMapping>
           approvalMappings =
@@ -577,8 +587,14 @@ public class OrdersAPIBuilder {
       if (approvalMappings != null && !approvalMappings.isEmpty()) {
         model.setCount(approvalMappings.size());
       }
+      models.add(model);
+    } else {
+      if(order.getStatus().equals(IOrder.PENDING) || order.getStatus().equals(IOrder.CONFIRMED)) {
+        OrderApprovalTypesModel model = new OrderApprovalTypesModel();
+        model.setType(ApprovalConstants.SALES);
+        models.add(model);
+      }
     }
-    models.add(model);
   }
 
   private void buildPurchaseApprovalTypeModel(List<OrderApprovalTypesModel> models,
