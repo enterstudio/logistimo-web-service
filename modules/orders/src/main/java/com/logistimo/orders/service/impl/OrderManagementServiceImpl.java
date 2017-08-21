@@ -394,6 +394,8 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         tx.commit();
       }
       uo.order = getDetached(o, pm);
+    } catch (ValidationException e) {
+      throw new ServiceException(e.getCode(), e.getArguments());
     } catch (ServiceException e) {
       throw e;
     } catch (Exception e) {
