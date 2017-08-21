@@ -279,7 +279,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
    * @throws InvalidDataException
    */
   @Override
-  public String generateOTP(String userId, int mode, String src, Long domainId, String hostUri)
+  public String generateOTP(String userId, int mode, String src, String hostUri)
       throws MessageHandlingException, IOException, ServiceException, ObjectNotFoundException,
       InvalidDataException {
     UsersService as = Services.getService(UsersServiceImpl.class, null);
@@ -348,7 +348,7 @@ public class AuthenticationServiceImpl extends ServiceImpl implements Authentica
       MessageService
           ms =
           MessageService
-              .getInstance("sms", account.getCountry(), true, domainId, account.getFirstName(),
+              .getInstance("sms", account.getCountry(), true, account.getDomainId(), account.getFirstName(),
                   null);
       ms.send(account, msg, MessageService.NORMAL, backendMessages.getString("password.updated"),
           null, logMsg);

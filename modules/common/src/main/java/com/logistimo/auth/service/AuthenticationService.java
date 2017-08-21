@@ -67,7 +67,7 @@ public interface AuthenticationService extends Service {
       throws ServiceException, ObjectNotFoundException, MessageHandlingException, IOException,
       InputMismatchException, ValidationException;
 
-  String generateOTP(String userId, int mode, String src, Long domainId, String hostUri)
+  String generateOTP(String userId, int mode, String src, String hostUri)
       throws MessageHandlingException, IOException, ServiceException, ObjectNotFoundException,
       InvalidDataException;
 

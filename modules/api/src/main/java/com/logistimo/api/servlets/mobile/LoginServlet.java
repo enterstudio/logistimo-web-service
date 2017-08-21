@@ -30,7 +30,6 @@ import com.logistimo.api.util.RESTUtil;
 import com.logistimo.auth.SecurityMgr;
 import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
-import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.Constants;
@@ -442,13 +441,12 @@ public class LoginServlet extends JsonRestServlet {
     if (userId != null) {
       try {
         AuthenticationService as = Services.getService(AuthenticationServiceImpl.class);
-        Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
         String successMsg = null;
         String host = request.getHeader("host");
         if (TYPE_EMAIL.equalsIgnoreCase(sendType)) {
-          successMsg = as.generateOTP(userId, 1, "m", domainId, host);
+          successMsg = as.generateOTP(userId, 1, "m", host);
         } else if (TYPE_MOBILE.equalsIgnoreCase(sendType)) {
-          successMsg = as.generateOTP(userId, 0, "m", domainId, host);
+          successMsg = as.generateOTP(userId, 0, "m", host);
         }
         if (StringUtils.isNotEmpty(successMsg)) {
           status = true;
