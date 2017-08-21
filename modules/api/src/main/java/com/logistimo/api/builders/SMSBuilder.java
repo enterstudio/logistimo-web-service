@@ -73,9 +73,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -430,7 +432,7 @@ public class SMSBuilder {
           Long materialId = transactions.getMaterialShortId();
           StringBuilder matDetails = new StringBuilder();
           MobileInvModel invModel = invModelHashMap.get(transactions.getMaterialShortId());
-          matDetails.append(updateMaterialDetails(invModel, materialId));
+          matDetails.append(updateMaterialDetails(invModel, materialId,transactions.getMobileTransModelList()));
           if (errorMap != null && errorMap.containsKey(materialId)) {
             if (failResp == null) {
               failResp = new StringBuilder();
@@ -491,18 +493,29 @@ public class SMSBuilder {
    * @param materialId Material Id
    * @return String Builder
    */
-  private StringBuilder updateMaterialDetails(MobileInvModel invModel, Long materialId) {
+  private StringBuilder updateMaterialDetails(MobileInvModel invModel, Long materialId,List<MobileTransModel> mobileTransModelList) {
     StringBuilder materialDetails = new StringBuilder();
     materialDetails.append(materialId)
         .append(SMSConstants.ENTRY_TIME_SEPARATOR);
     List<MobileInvBatchModel> invBatchModelList = invModel.bt != null ? invModel.bt : invModel.xbt;
     if (invBatchModelList != null && !invBatchModelList.isEmpty()) {
+
+      //Create a set with the batchid received in the request
+      Set<String> batchIdSet=new HashSet<>();
+      for(MobileTransModel transModel:mobileTransModelList){
+        if(StringUtils.isNotBlank(transModel.bid) && !batchIdSet.contains(transModel.bid)) {
+          batchIdSet.add(transModel.bid);
+        }
+      }
+      //append batch information only for the requested batches
       for (MobileInvBatchModel batchModel : invBatchModelList) {
-        //append inventory details
-        appendInventoryDetails(materialDetails, batchModel.q, batchModel.alq, invModel.itq);
-        //append batch Id
-        materialDetails.append(SMSConstants.COMMA_SEPARATOR).append(batchModel.bid)
-            .append(SMSConstants.COMMA_SEPARATOR);
+        if(batchIdSet.contains(batchModel.bid)){
+          //append inventory details
+          appendInventoryDetails(materialDetails, batchModel.q, batchModel.alq, invModel.itq);
+          //append batch Id
+          materialDetails.append(SMSConstants.COMMA_SEPARATOR).append(batchModel.bid)
+              .append(SMSConstants.COMMA_SEPARATOR);
+        }
       }
     } else {
       //append inventory details

@@ -73,7 +73,7 @@ public class GenericAuthoriser {
     //If token is present validate token else validate mobile number
     AuthenticationService as = Services.getService(AuthenticationServiceImpl.class);
     String token = as.getUserToken(userId);
-    if (token != null) {
+    if (token != null && tokenSuffix!=null) {
       isAuthorised = token.endsWith(tokenSuffix);
     } else {
       String tmpUserMobileNumber = userMobileNumber.replaceAll("[+ ]", "");
