@@ -302,9 +302,9 @@ approvalControllers.controller('ApprovalsCtrl', ['$scope', 'approvalService', 'o
 
         $scope.setActiveApprovers = function () {
             if (checkNotNullEmpty($scope.filtered)) {
-                var expires_at = "";
                 $scope.filtered.forEach(function (data) {
                     if (data.status.status == 'pn') {
+                        var expires_at = "";
                         if (checkNotNullEmpty(data.approvers)) {
                             var activeApprovers = [];
                             data.approvers.forEach(function (approver) {
