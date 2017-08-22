@@ -86,12 +86,6 @@
                                 <input type="text" class="form-control" ng-model="bno"
                                        placeholder=" " ng-disabled="isDef(ebf) || isDef(abntype)"
                                        upper-case>
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" ng-click="getData()" type="button" tooltip="{{resourceBundle['search']}}"
-                                                    ng-disabled="isDef(ebf) || bno == null || bno == '' || bno.length == 0">
-                                                <span class="glyphicons glyphicons-search"></span>
-                                            </button>
-                                        </span>
                             </div>
                         </div>
                         <div ng-show="(isDef(entity.id)) && isUndef(abntype) && isUndef(bno) && isUndef(ebf)" class="col-sm-3 mh25"> <!--isDef(material.mId)-->
