@@ -48,6 +48,7 @@ registerWidget('aas', 'rpt-asset-status', 'Assets', 'Asset status','asset/assets
         $scope.reportStartDate = new Date(2017, 5, 1);
 
         AssetReportController.call(this, $scope, $timeout, getData);
+        $scope.reportType=reportType;
 
         $scope.cType = "mscolumn2d";
         $scope.cOptions.exportFileName = "AssetStatus" + "_" + FormatDate_DD_MM_YYYY($scope.today);

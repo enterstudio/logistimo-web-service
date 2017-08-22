@@ -36,6 +36,11 @@
                     </ul>
                 </div>
                 <div ng-show="!loading && !noData">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <rpt-last-run-time report-type="reportType"></rpt-last-run-time>
+                        </div>
+                    </div>
                     <div class="row pt30">
                         <div class="col-sm-2">
                             <span class="form-label">{{resourceBundle['asset']}} {{resourceBundle['status.lower']}}</span>

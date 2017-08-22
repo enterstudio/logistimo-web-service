@@ -27,23 +27,29 @@ import com.logistimo.assets.service.AssetManagementService;
 import com.logistimo.assets.service.impl.AssetManagementServiceImpl;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
+import com.logistimo.constants.Constants;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.logger.XLog;
+import com.logistimo.reports.ReportsConstants;
 import com.logistimo.reports.constants.ReportCompareField;
+import com.logistimo.reports.constants.ReportType;
 import com.logistimo.reports.constants.ReportViewType;
 import com.logistimo.reports.plugins.internal.ExternalServiceClient;
 import com.logistimo.reports.plugins.internal.QueryHelper;
 import com.logistimo.reports.plugins.internal.QueryRequestModel;
 import com.logistimo.reports.plugins.models.ReportChartModel;
 import com.logistimo.reports.plugins.models.TableResponseModel;
+import com.logistimo.reports.utils.ReportsUtil;
 import com.logistimo.services.Service;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.Services;
+import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -51,6 +57,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -158,6 +165,48 @@ public class ReportPluginService implements Service {
     }catch (Exception e) {
       return null;
     }
+  }
+
+  /**
+   * Get the last aggregated time for each report based on the report type
+   * @param reportType Report type
+   * @return
+   */
+  public Date getLastAggregatedTime(String reportType){
+    if (StringUtils.isBlank(reportType)) {
+      xLogger.warn(
+          "Invalid report type received {0}", reportType);
+      throw new BadRequestException("Invalid request");
+    }
+    String aggregationRunTimeKey = ReportsUtil.getAggregationReportType(reportType);
+    if (StringUtils.isBlank(aggregationRunTimeKey)) {
+      xLogger.warn(
+          "report type not configured {0}", reportType);
+      throw new BadRequestException("Invalid request");
+    }
+    //Set the filters
+    QueryRequestModel model = new QueryRequestModel();
+    model.filters = new HashMap<>(1);
+    model.filters.put(QueryHelper.TOKEN_RUN_TIME, aggregationRunTimeKey);
+    model.queryId = QueryHelper.QUERY_LAST_RUN_TIME;
+    //Request callisto for data
+    ExternalServiceClient externalServiceClient = ExternalServiceClient.getNewInstance();
+    Response response = externalServiceClient.postRequest(model);
+    //parse response
+    if (response != null) {
+      JSONObject jsonObject = new JSONObject(response.readEntity(String.class));
+      JSONArray rows = jsonObject.getJSONArray(ReportsConstants.ROWS);
+      if (rows != null && !rows.isNull(0) && rows.getJSONArray(0).get(0) != null) {
+        try {
+          return LocalDateUtil
+              .parseCustom((String) rows.getJSONArray(0).get(0), Constants.ANALYTICS_DATE_FORMAT,
+                  null);
+        } catch (ParseException e) {
+          xLogger.warn("Exception parsing date", e);
+        }
+      }
+    }
+    return null;
   }
 
   private void finaliseFilters(ReportViewType viewType, QueryRequestModel model,

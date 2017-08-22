@@ -95,6 +95,8 @@ public class QueryHelper {
   public static final String QUERY_TALUK = "TALUK";
   public static final String QUERY_CITY = "CITY";
 
+  public static final String QUERY_LAST_RUN_TIME="LRES_QUERY";
+
   public static final String QUERY_MTYPE = "MTYPE"; //monitoring or monitored
   public static final String QUERY_ATYPE = "ATYPE"; //ILR, Freezer
   public static final String QUERY_VENDOR_ID = "VID";
@@ -106,6 +108,7 @@ public class QueryHelper {
   public static final String TOKEN_END_TIME = "TOKEN_END_TIME";
   public static final String TOKEN_PERIODICITY = "TOKEN_PERIODICITY";
   public static final String TOKEN_LOCATION = "TOKEN_LOCATION";
+  public static final String TOKEN_RUN_TIME = "TOKEN_APP_NAME";
 
   public static final String LOCATION_TALUK = "TALUK";
   public static final String LOCATION_DISTRICT = "DISTRICT";

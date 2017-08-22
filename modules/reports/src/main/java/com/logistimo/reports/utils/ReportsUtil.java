@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 
 import com.logistimo.config.models.ReportObjDimType;
 import com.logistimo.config.models.ReportObjDimValue;
+import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.domains.entity.IDomain;
@@ -46,6 +47,8 @@ import com.logistimo.materials.service.impl.MaterialCatalogServiceImpl;
 import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.reports.ReportsConstants;
+import com.logistimo.reports.constants.ReportAggregationConstants;
+import com.logistimo.reports.constants.ReportType;
 import com.logistimo.reports.entity.slices.IDaySlice;
 import com.logistimo.reports.entity.slices.IMonthSlice;
 import com.logistimo.reports.entity.slices.IReportsSlice;
@@ -831,6 +834,44 @@ public class ReportsUtil {
   public static IReportDataGeneratorFactory getReportDataGeneratorFactory()
       throws ServiceException {
     return ((ReportsService) Services.getService("reports")).getReportDataGeneratorFactory();
+  }
+
+  /**
+   * Get the aggregation report key based on the report type
+   * @param reportType report type
+   * @return String with aggregation key
+   */
+  public static String getAggregationReportType(String reportType){
+    // get the report type
+    ReportType rptType = ReportType.getReportType(reportType);
+    if (rptType == null) {
+      return CharacterConstants.EMPTY;
+    }
+    switch (rptType) {
+      case AS_ASSET_STATUS:
+      case AS_RESPONSE_TIME:
+      case AS_UP_TIME:
+        return ReportAggregationConstants.ASSET_AGGREGATION_KEY;
+      case INV_TRANSACTION_COUNT:
+      case INV_ABNORMAL_STOCK:
+      case INV_CONSUMPTION:
+      case INV_DISCARDS:
+      case INV_REPELISHMENT:
+      case INV_STOCK_AVAILABILITY:
+      case INV_STOCK_TREND:
+      case INV_SUPPLY:
+      case INV_UTILISATION:
+      case ACTIVITY_USER:
+        return ReportAggregationConstants.LOGISTIMO_AGGREGATION_KEY;
+      case AS_CAPACITY:
+      case AS_SICKNESS_RATE:
+        return ReportAggregationConstants.DEVICE_STATUS_AGGREGATION_KEY;
+      case AS_POWER_AVAILABILITY:
+      case AS_TEMPERATURE_EXCURSION:
+        return ReportAggregationConstants.ALARM_LOG_AGGREGATION_KEY;
+      default:
+        return CharacterConstants.EMPTY;
+    }
   }
 
 }

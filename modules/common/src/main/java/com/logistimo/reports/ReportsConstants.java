@@ -122,5 +122,7 @@ public interface ReportsConstants {
    * Sorting direction to be used in reporting.
    */
   String SORT_ASC = "sort_asc";
+
+  public static final String ROWS="rows";
   
 }

@@ -248,6 +248,7 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
     reportsPluginCore.directive('rptAgeFilter', ageFilter);
     reportsPluginCore.directive('rptModelFilter', modelFilter);
     reportsPluginCore.directive('rptWidgetBase', widgetBase);
+    reportsPluginCore.directive('rptLastRunTime', lastRunTime);
 
     LocationFilterController.$inject = ['$scope','entityService'];
     MaterialFilterController.$inject = ['$scope', '$q', 'matService'];
@@ -260,6 +261,7 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
     MonitorTypeFilterController.$inject = ['$scope'];
     ManufacturerFilterController.$inject = ['$scope','domainCfgService'];
     ModelFilterController.$inject = ['$scope','$q', 'assetService'];
+    AggregationLastRunTimeController.$inject = ['$scope','reportsServiceCore'];
 
     function ageFilter() {
         function getYears(offset){
@@ -290,6 +292,24 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
         };
     }
 
+    function lastRunTime() {
+        return {
+            restrict: 'E',
+            scope: {
+                reportType: '='
+            },
+            controller: AggregationLastRunTimeController,
+            template: '<div class="form-label gray-text">As of {{lastRuntime}}</div>'
+        };
+    }
+
+    function AggregationLastRunTimeController($scope, reportCoreService) {
+        reportCoreService.getAggregatedTime($scope.reportType).then(function (data) {
+            $scope.lastRuntime = data.data;
+        }).catch(function error() {
+            $scope.lastRuntime=undefined;
+        });
+    }
 
     function locationFilter() {
         return {
@@ -975,6 +995,8 @@ function reportCoreService() {
             },
             getReportBreakdownData: function (json) {
                 return this.fetch('/s2/api/plugins/report/breakdown?json=' + json);
+            },getAggregatedTime: function (reportType) {
+                return this.fetch('/s2/api/plugins/report/last-run-time?reportType=' + reportType);
             }
 
         }

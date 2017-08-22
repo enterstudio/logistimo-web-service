@@ -46,6 +46,8 @@ registerWidget('itc', 'rpt-transaction-counts', 'Activity', 'Transaction counts'
 
         InventoryReportController.call(this, $scope, $timeout, getData);
 
+        $scope.reportType=reportType;
+
         $scope.cOptions.showSum = "1";
         $scope.cOptions.exportFileName = "TransactionCounts" + "_" + FormatDate_DD_MM_YYYY($scope.today);
 

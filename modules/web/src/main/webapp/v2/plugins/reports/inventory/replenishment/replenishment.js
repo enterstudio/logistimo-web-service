@@ -46,6 +46,8 @@ registerWidget('ir', 'rpt-replenishment', 'Inventory', 'Replenishment response t
 
         InventoryReportController.call(this, $scope, $timeout, getData);
 
+        $scope.reportType=reportType;
+
         $scope.cType = "mscombi2d";
         $scope.cOptions.exportFileName = "Replenishment" + "_" + FormatDate_DD_MM_YYYY($scope.today);
 

@@ -46,6 +46,7 @@ registerWidget('ias', 'rpt-abnormal-stock', 'Inventory', 'Abnormal stock','inven
 
         InventoryReportController.call(this, $scope, $timeout, getData);
 
+        $scope.reportType=reportType;
         $scope.cType = "mscombi2d";
 
         $scope.cOptions.exportFileName = "Stocks" + "_" + FormatDate_DD_MM_YYYY($scope.today);

@@ -183,3 +183,9 @@
 .report-canvas {
     min-height: 600px;
 }
+
+.gray-text {
+    padding-top: 15px;
+    text-align: right;
+    font-size: 12px;
+}

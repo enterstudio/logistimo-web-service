@@ -24,13 +24,16 @@
 package com.logistimo.api.controllers;
 
 import com.logistimo.auth.SecurityMgr;
+import com.logistimo.auth.utils.SecurityUtils;
 import com.logistimo.auth.utils.SessionMgr;
+import com.logistimo.constants.CharacterConstants;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.logger.XLog;
 import com.logistimo.reports.plugins.models.ReportChartModel;
 import com.logistimo.reports.plugins.models.TableResponseModel;
 import com.logistimo.reports.plugins.service.ReportPluginService;
 import com.logistimo.security.SecureUserDetails;
+import com.logistimo.utils.LocalDateUtil;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -95,5 +99,27 @@ public class ReportPluginController {
       xLogger.severe("Error while getting the data", e);
       return null;
     }
+  }
+
+  /**
+   * Get the last aggregated time based on report type
+   * @param reportType
+   * @param request
+   * @return
+   */
+  @RequestMapping(value = "/last-run-time",method = RequestMethod.GET)
+  public @ResponseBody String getLastAggregatedTime(@RequestParam String reportType, HttpServletRequest request){
+    xLogger.fine("In getLastAggregatedTime");
+    try {
+      Date date = service.getLastAggregatedTime(reportType);
+      if (date != null) {
+        SecureUserDetails secureUserDetails = SecurityUtils.getUserDetails();
+        return LocalDateUtil.format(date,
+            secureUserDetails.getLocale(), secureUserDetails.getTimezone());
+      }
+    } catch (Exception e) {
+      xLogger.severe("Error while getting the data", e);
+    }
+    return CharacterConstants.EMPTY;
   }
 }
