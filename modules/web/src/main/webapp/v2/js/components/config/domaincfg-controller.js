@@ -2212,6 +2212,31 @@ domainCfgControllers.controller('NotifController',['$scope', function ($scope) {
     };
 }]);
 
+domainCfgControllers.controller('GeneralNotificationController',['$scope', 'domainCfgService', function($scope, domainCfgService) {
+    $scope.getGeneralNotificationsConfig = function() {
+        $scope.showLoading();
+        domainCfgService.getGeneralNotificationsConfig().then(function(data) {
+            $scope.language = data.data;
+        }).catch(function error() {
+            $scope.showErrorMsg("Error while fetching general notifications configuration", true);
+        }).finally(function() {
+            $scope.hideLoading();
+        });
+    };
+    $scope.updateGeneralNotificationsConfig = function() {
+        $scope.showLoading();
+        domainCfgService.updateGeneralNotificationsConfig($scope.language).then(function(data) {
+            $scope.showSuccess(data.data);
+            $scope.getGeneralNotificationsConfig();
+        }).catch(function error(msg){
+            $scope.showErrorMsg(msg);
+        }).finally(function() {
+            $scope.hideLoading();
+        });;
+    };
+    $scope.getGeneralNotificationsConfig();
+}]);
+
 domainCfgControllers.controller('NotificationsConfigurationController', ['$scope', 'domainCfgService', 'requestContext', 'NOTIFICATIONS', 'ORDER',
     function ($scope, domainCfgService, requestContext, NOTIFICATIONS, ORDER) {
         var status = "Status changed";
