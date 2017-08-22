@@ -1574,10 +1574,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                             }
                         }
                     }
-                    if (!$scope.validate(it, i, 's')) {
-                        return false;
-                    }
-                    if (!$scope.validate(it, i, 's', true)) {
+                    if (!$scope.validate(it, i, 's', $scope.isAllocating)) {
                         return false;
                     }
                     if(!it.isBa) {
@@ -1624,16 +1621,16 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         var nastk = material.nastk ? material.nastk * 1 : 0;
                         var allocStk = material.oastk - material.astk + nastk;
                         var isq = material.isq * 1;
-                        var maxQ = Math.max(allocStk, isq);
-                        if(material.q > 0 && material.q < maxQ){
-                            if(allocStk > isq) {
+                        if(material.q > 0) {
+                            if (allocStk + isq > material.q) {
                                 showPopup($scope, material, material.id, "Ordered quantity cannot be less than allocated quantity, " +
                                     "including allocations in shipments.", index, $timeout, allocate);
-                            } else {
+                                return false;
+                            } else if (material.q < isq) {
                                 showPopup($scope, material, material.id, "Ordered quantity cannot be less than quantities " +
                                     "already in shipments.", index, $timeout, allocate);
+                                return false;
                             }
-                            return false;
                         }
                     } else {
                         //Max: Lowest among “Yet to allocate” and “Available stock”. For Batch, overall have to match this condition.
