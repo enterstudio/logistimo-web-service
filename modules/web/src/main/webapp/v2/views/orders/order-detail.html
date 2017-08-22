@@ -127,7 +127,7 @@
             </div>
             <div class="row mt10" ng-repeat="item in order.approvalTypesModels">
                 <div class="col-sm-12">
-                    <div ng-init="order = order; type = item.type ; id = item.id; count = item.count"
+                    <div ng-init="order = order; type = item.type ; id = item.id; count = item.count; typeCount = order.approvalTypesModels.length"
                          ng-include="'views/orders/approval-detail.html'">
                     </div>
                 </div>

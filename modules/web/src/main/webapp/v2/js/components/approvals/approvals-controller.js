@@ -38,6 +38,11 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
             $scope.approve = false;
             $scope.isApprover = false;
             $scope.latest = false;
+            $scope.openApprovalDetail = true;
+            if(checkNotNullEmpty($scope.typeCount)) {
+                $scope.openApprovalDetail = false;
+            }
+
         };
         $scope.init();
 
@@ -242,6 +247,10 @@ approvalControllers.controller('ApprovalDetailCtrl', ['$scope', 'approvalService
             if (status == 'rq') {
                 $scope.requestApproval();
             } else {
+                if((status == 'cn' || status == 'rj') && checkNullEmpty($scope.approval.msg)) {
+                    $scope.showWarning($scope.resourceBundle['comment.required']);
+                    return;
+                }
                 $scope.updateApprovalStatus(status)
             }
             $scope.enableScroll();
