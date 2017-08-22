@@ -213,7 +213,7 @@ logistimoApp.config(function ($routeProvider) {
     }).when("/configuration/orders", {
         action: "configuration.orders"
     }).when("/configuration/notifications", {
-        action: "configuration.notifications.event.orders"
+        action: "configuration.notifications.generalnotification"
     }).when("/configuration/notifications/event", {
         action: "configuration.notifications.event.orders"
     }).when("/configuration/notifications/event/shipments",{

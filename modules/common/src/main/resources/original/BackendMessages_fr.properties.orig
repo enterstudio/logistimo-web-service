@@ -496,3 +496,4 @@ orders.items.added=Les éléments {0} ont été ajoutés à cette commande.
 orders.created.by.system=Le système a créé cette commande.
 upgrade.app.message=L'approbation de la commande est activée, ce qui nécessite une mise à niveau vers votre application mobile. Veuillez mettre à niveau l'application mobile pour continuer à utiliser les fonctionnalités de gestion des commandes.
 approvals.config.update.success=La configuration des approbations a été mise à jour avec succès.
+general.notification.update.success=Configuration des notifications mise à jour avec succès.

@@ -74,6 +74,12 @@
               "name": "duration",
               "oper": "<=",
               "units": "days"
+            },
+            {
+              "name": "include_entity_tags"
+            },
+            {
+              "name": "exclude_entity_tags"
             }
           ]
         }
@@ -94,6 +100,12 @@
               "name": "duration",
               "oper": "<=",
               "units": "days"
+            },
+            {
+              "name": "include_entity_tags"
+            },
+            {
+              "name": "exclude_entity_tags"
             }
           ]
         }

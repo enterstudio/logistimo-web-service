@@ -760,7 +760,6 @@ public class DomainConfigController {
       cc.dc.setTimezone(model.tz);
       cc.dc.setCurrency(model.cur);
       cc.dc.setPageHeader(model.pgh);
-      cc.dc.setLangPreference(model.lp);
       if (model.sc) {
         cc.dc.setUiPreference(false);
       } else {
@@ -2566,6 +2565,30 @@ public class DomainConfigController {
     return responseMsg;
   }
 
+  @RequestMapping(value="/general-notifications", method = RequestMethod.GET)
+  public
+  @ResponseBody
+  String getGeneralNotificationsConfig() {
+    return DomainConfig.getInstance(SecurityUtils.getCurrentDomainId()).getLangPreference();
+  }
+
+  @RequestMapping(value="general-notifications", method = RequestMethod.POST)
+  public
+  @ResponseBody
+  String updateGeneralNotificationsConfig(@RequestBody String language, HttpServletRequest request)
+      throws ServiceException, ConfigurationException {
+    SecureUserDetails sUser = getUserDetails();
+    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", sUser.getLocale());
+    if(!GenericAuthoriser.authoriseAdmin(request)) {
+      throw new UnauthorizedException(backendMessages.getString("permission.denied"));
+    }
+    Long domainId = SecurityUtils.getCurrentDomainId();
+    ConfigContainer cc = getDomainConfig(domainId, sUser.getUsername(), sUser.getLocale());
+    cc.dc.setLangPreference(language);
+    saveDomainConfig(sUser.getLocale(), domainId, cc, backendMessages);
+    xLogger.info("General notifications configuration updated successfully for domain " + domainId);
+    return backendMessages.getString("general.notifications.update.success");
+  }
 
   @RequestMapping(value = "/dashboard", method = RequestMethod.POST)
   public
