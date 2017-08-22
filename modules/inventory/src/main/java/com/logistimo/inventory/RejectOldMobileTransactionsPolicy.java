@@ -54,7 +54,9 @@ public class RejectOldMobileTransactionsPolicy implements MobileTransactionsHand
     int index = -1;
     ListIterator<ITransaction> transactionListIterator = transactions.listIterator();
     while(transactionListIterator.hasNext()){
-      if (lastWebTrans.getTimestamp().getTime() > transactionListIterator.next()
+      //Last transaction time is the entry time if last transaction is from mobile, for web it is the created time
+      Long lastTransactionTime=lastWebTrans.getEntryTime()!=null?lastWebTrans.getEntryTime().getTime():lastWebTrans.getTimestamp().getTime();
+      if (lastTransactionTime > transactionListIterator.next()
           .getEntryTime().getTime()) {
         transactionListIterator.remove();
         index++;
