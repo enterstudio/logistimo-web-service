@@ -299,7 +299,7 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
                 reportType: '='
             },
             controller: AggregationLastRunTimeController,
-            template: '<div class="form-label gray-text">As of {{lastRuntime}}</div>'
+            template: '<div ng-if="lastRuntime" class="form-label gray-text">As of {{lastRuntime}}</div>'
         };
     }
 
