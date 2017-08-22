@@ -33,6 +33,9 @@
         <div ng-controller="SimpleMenuController"
              ng-init="init('configuration.notifications')">
             <ul class="nav nav-tabs subnav-tabs">
+                <li ng-show="iSU || dp.cv" ng-class="{active: subview == 'generalnotification'}">
+                    <a href="#/configuration/notifications/">{{resourceBundle['general']}}</a>
+                </li>
                 <li ng-show="isTempMonOnly && (iSU || dp.cv)" ng-class="{active: subview == 'event'}"><a
                         href="#/configuration/notifications/event/assets">{{resourceBundle['event.notifications']}}</a></li>
                 <li ng-hide="isTempMonOnly || !(iSU || dp.cv)" ng-class="{active: subview == 'event'}"><a
@@ -45,6 +48,9 @@
                         href="#/configuration/notifications/notifstatus/"></span> {{resourceBundle['notifications.status']}}</a></li></li>
             </ul>
             <div ng-switch="subview">
+                <div class="tab-pane" ng-switch-when="generalnotification">
+                    <div ng-if="iSU || dp.cv" ng-include="'views/configuration/general-notification.html'"></div>
+                </div>
                 <div class="tab-pane" ng-switch-when="event">
                     <div ng-if="iSU || dp.cv" ng-include="'views/configuration/event.html'"></div>
                 </div>

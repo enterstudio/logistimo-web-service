@@ -242,8 +242,12 @@ domainCfgServices.factory('domainCfgService', ['$http', function ($http) {
         },
         setEventSummaryConfig: function (data) {
             return this.fetchPut(data, "/s2/api/config/domain/event-summary");
+        },
+        getGeneralNotificationsConfig: function() {
+            return this.fetch("/s2/api/config/domain/general-notifications");
+        },
+        updateGeneralNotificationsConfig: function(language) {
+            return this.fetchP(language,"/s2/api/config/domain/general-notifications");
         }
-
-
     }
 }]);
