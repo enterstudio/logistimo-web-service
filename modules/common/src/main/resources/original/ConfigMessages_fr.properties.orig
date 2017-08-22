@@ -24,8 +24,8 @@
 inventory=Inventaire
 assets=Les atouts
 activity=Activité
-eventdistribution=Distribution d'événements
-event.summary=La navigation
+eventdistribution=La navigation
+event.summary=Résumé de l'événement
 tag.distribution=Hiérarchie de navigation
 error.no.config.availablee=Aucune configuration disponible
 error.mandatory=Au moins un champ est requis pour sauvegarder la configuration.
