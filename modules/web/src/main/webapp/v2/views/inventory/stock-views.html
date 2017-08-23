@@ -60,12 +60,6 @@
                         <div class="input">
                             <input type="text" placeholder=">= days" class="form-control" ng-model="abndur"
                                    maxlength="5" only-digits ng-enter="onAbnDurationChanged()">
-                            <!--<span class="input-group-btn">
-                                <button class="btn btn-default" type="button" ng-click="onAbnDurationChanged()"
-                                        tooltip="{{resourceBundle['search']}}">
-                                    <span class="glyphicons glyphicons-search"></span>
-                                </button>
-                            </span>-->
                             </input>
                         </div>
                     </div>
@@ -98,19 +92,19 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-sm-3">
+                        <div ng-show="iAdm" class="col-sm-3">
                             <span class="filter-label">{{resourceBundle['state']}}</span>
                             <location-select ng-disabled="isDef(entity)" place-holder="{{resourceBundle['filterby']}} {{resourceBundle['state']}}"
                                              filter-model="loc" filter-type="state">
                             </location-select>
                         </div>
-                        <div class="col-sm-3">
+                        <div ng-show="iAdm" class="col-sm-3">
                             <span class="filter-label">{{resourceBundle['district']}}</span>
                             <location-select ng-disabled="isDef(entity)" place-holder="{{resourceBundle['filterby']}} {{resourceBundle['district']}}"
                                              filter-model="loc" filter-type="district">
                             </location-select>
                         </div>
-                        <div class="col-sm-3">
+                        <div ng-show="iAdm" class="col-sm-3">
                             <span class="filter-label">{{resourceBundle['taluk']}}</span>
                             <location-select ng-disabled="isDef(entity)" place-holder="{{resourceBundle['filterby']}} {{resourceBundle['taluk']}}"
                                              filter-model="loc" filter-type="taluk">
@@ -119,14 +113,9 @@
                         <div class="col-sm-2"
                              ng-show="isUndef(abntype) && isUndef(bno) && isUndef(ebf) &&
                              (isDef(entity) || isDef(material) || isDef(loc.state) || isDef(loc.district) || isDef(loc.taluk))">
-                            <span class="filter-label">Likely to stock out (days)</span>
+                            <span class="filter-label">{{resourceBundle['likelytostockout.days']}}</span>
                             <div class="input">
                                 <input only-digits max-length="5" type="text" class="form-control" ng-model="tpdos">
-                                <!--<span class="input-group-btn">
-                                    <button class="btn btn-default" ng-click="getPDOSData()" type="button" tooltip="{{resourceBundle['search']}}">
-                                        <span class="glyphicons glyphicons-search"></span>
-                                    </button>
-                                </span>-->
                             </div>
                         </div>
                     </div>
@@ -142,7 +131,7 @@
                 <fieldset ng-disabled="loading" ng-include="'views/common/reset-filters.html'"/>
             </div>
         </div>
-        <div ng-show="iAdm">
+        <div>
             <div class="row" ng-hide="showMore">
                 <div class="col-sm-12 ">
                     <span class="glyphicons  glyphicons-chevron-down medium filter-expand"  ng-click="setShowMore(true)" ></span>
