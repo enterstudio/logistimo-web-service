@@ -36,7 +36,7 @@
                     <span class="control-label"
                           ng-show="(type == 't' && request == true || type == 't' && approve == true) && !(cancelled || approved || rejected)"><span class="glyphicons glyphicons-exclamation-sign c-red" style="top:2px;"></span> {{resourceBundle['approvals.transfer.required']}}</span>
                     <span class="control-label" ng-show="approved == true"><span
-                            class="glyphicons glyphicons-ok-circle c-green" style="top:2px;"></span> {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lower']}} <a
+                            class="glyphicons glyphicons-ok-circle c-green" style="top:2px;"></span> {{resourceBundle['order']}} {{resourceBundle['approvals.approved.lower']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </span>
                 <span ng-show="cancelApproval">
@@ -52,11 +52,11 @@
                     </span>
                 </span>
                 <span ng-show="request">
-                    <span ng-show="cancelled && !isApprover"><span class="glyphicons glyphicons-remove-circle c-orange" style="top:2px;"></span> {{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="approved && !isApprover">{{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red" style="top:2px;"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="expired"><span class="glyphicons glyphicons-remove-circle c-grey" style="top:2px;"></span> {{resourceBundle['approvals.expired']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | fromNow:this }}</span>
-                    <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lower']}} <a
+                    <span ng-show="cancelled && !isApprover" class="control-label"><span class="glyphicons glyphicons-remove-circle c-orange" style="top:2px;"></span> {{resourceBundle['approval.request']}} {{resourceBundle['approvals.cancelled.lower']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="approved && !isApprover" class="control-label"> {{resourceBundle['order']}} {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="rejected" class="control-label"><span class="glyphicons glyphicons-remove-circle c-red" style="top:2px;"></span> {{resourceBundle['order']}} {{resourceBundle['approvals.rejected.lower']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="expired" class="control-label"><span class="glyphicons glyphicons-remove-circle c-grey" style="top:2px;"></span> {{resourceBundle['approval.request']}} {{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}</span>
+                    <span ng-show="cancelled || approved || rejected" class="control-label">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </span>
                 <span class="glyphicons glyphicons-expand" style="top:2px;" uib-tooltip="Expand" tooltip-placement="top"
@@ -136,7 +136,7 @@
                     <span ng-show="cancelled && !isApprover">{{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lower']}}</span>
                     <span ng-show="approved && !isApprover">{{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}}</span>
                     <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="expired">{{resourceBundle['approvals.expired']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | fromNow:this }}</span>
+                    <span ng-show="expired">{{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}</span>
                     <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
