@@ -23,7 +23,6 @@
 
 package com.logistimo.inventory;
 
-import com.logistimo.LgTestCase;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.entity.Transaction;
 
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.spy;
 /**
  * Created by vani on 16/05/17.
  */
-public class RejectOldMobileTransactionsPolicyTest extends LgTestCase {
+public class RejectOldMobileTransactionsPolicyTest {
   @Test
   public void testBuildStockCountTrans() {
     RejectOldMobileTransactionsPolicy policy = spy(RejectOldMobileTransactionsPolicy.class);
