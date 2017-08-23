@@ -653,10 +653,13 @@ public class OrderServlet extends JsonRestServlet {
         boolean isAccounting = dc.isAccountingEnabled();
         MobileOrderBuilder mob = new MobileOrderBuilder();
 
-        boolean isBatchEnabled=false;
-        if(kioskId != null && kioskId.equals(order.getServicingKiosk())){
-          EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
+        boolean isBatchEnabled;
+        EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
+        if(kioskId != null){
           IKiosk k = entitiesService.getKiosk(kioskId, false);
+          isBatchEnabled=k.isBatchMgmtEnabled();
+        } else {
+          IKiosk k = entitiesService.getKiosk(order.getKioskId(), false);
           isBatchEnabled=k.isBatchMgmtEnabled();
         }
 
