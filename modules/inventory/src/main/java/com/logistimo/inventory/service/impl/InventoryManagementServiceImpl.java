@@ -3092,7 +3092,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         quantity = quantity.subtract(existingAllocation);
         List<ShipmentItemBatchModel> shipmentModel = new ArrayList<>(1);
 
-        Results rs = getBatches(mid, kid, null);
+        Results rs = getValidBatches(mid, kid, null);
         List<IInvntryBatch> batches = (List<IInvntryBatch>) rs.getResults();
         for (IInvntryBatch ib : batches) {
           ShipmentItemBatchModel model = new ShipmentItemBatchModel();
