@@ -67,7 +67,6 @@ public class PagedExec {
   private static final XLog xLogger = XLog.getLog(PagedExec.class);
   // Task URL
   private static final String TASK_URL = "/task/pagedexec";
-  private static ITaskService taskService = AppFactory.get().getTaskService();
 
   // Execute a procedure on entities of class 'clazz' with filtering on key-values params.
   // NOTE: The key names in 'params' should be same as method names in the entity class 'clazz'; 'prevOutput' is the previous output of processor.process(), if any
@@ -165,11 +164,7 @@ public class PagedExec {
         List results = null;
         int size = 0;
         try {
-          if (qp.params != null && !qp.params.isEmpty() && QueryParams.QTYPE.JQL.equals(qp.qType)) {
-            results = (List) q.executeWithMap(qp.params);
-          } else {
-            results = (List) q.execute();
-          }
+          results = execute(qp, q);
           if (results != null) {
             size = results.size();
             if (incrementOffset) {
@@ -254,7 +249,7 @@ public class PagedExec {
           taskParams.put("taskinterval", String.valueOf(secondsBetweenTasks));
         }
         // Schedule next task
-        taskService
+        getTaskService()
             .schedule(proc.getQueueName(), TASK_URL, taskParams, null, ITaskService.METHOD_POST,
                 taskEta, domainId, null, "PAGED_EXEC");
       } catch (Exception e) {
@@ -268,6 +263,22 @@ public class PagedExec {
     }
 
     xLogger.fine("Exiting exec");
+  }
+
+  private static ITaskService getTaskService() {
+    return AppFactory.get().getTaskService();
+  }
+
+  protected static List execute(QueryParams qp, Query q) {
+    List results;
+    if (qp.params != null && !qp.params.isEmpty()) {
+      results = (List) q.executeWithMap(qp.params);
+    } else if (qp.listParams != null && !qp.listParams.isEmpty()) {
+      results = (List) q.executeWithArray(qp.listParams.toArray());
+    } else {
+      results = (List) q.execute();
+    }
+    return results;
   }
 
   // Finalize the task chain
@@ -288,7 +299,7 @@ public class PagedExec {
       }
       xLogger.info("Finalizing with URL {0} in queue {1} with params {2}", url, finalizer.queue,
           params);
-      taskService.schedule(finalizer.queue, url, params, ITaskService.METHOD_POST);
+      getTaskService().schedule(finalizer.queue, url, params, ITaskService.METHOD_POST);
     }
   }
 
