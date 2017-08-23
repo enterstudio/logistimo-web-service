@@ -47,6 +47,7 @@ import com.logistimo.tags.entity.ITag;
 import com.logistimo.utils.LocalDateUtil;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,6 +63,7 @@ import javax.jdo.Query;
 /**
  * Created by charan on 03/03/15.
  */
+@Component
 public class InvntryDao implements IInvntryDao {
 
   private static XLog xLogger = XLog.getLog(InvntryDao.class);
