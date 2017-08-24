@@ -99,9 +99,7 @@ public class ApprovalStatusUpdateEventProcessor {
 
         String resolvedMessage = getMessage(event, orderApprovalMapping, requester, kiosk);
 
-        if (!CANCELLED_STATUS.equalsIgnoreCase(event.getStatus())) {
-          messageService.send(requester, resolvedMessage, MessageService.NORMAL, null, null, null);
-        }
+        messageService.send(requester, resolvedMessage, MessageService.NORMAL, null, null, null);
 
         for (String approverId : event.getApproverIds()) {
           IUserAccount approver = usersService.getUserAccount(approverId);
