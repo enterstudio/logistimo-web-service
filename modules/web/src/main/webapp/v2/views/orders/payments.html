@@ -22,13 +22,13 @@
   -->
 
 <div class="panel panel-default">
-    <div class="panel-heading">Payments</div>
+    <div class="panel-heading">{{resourceBundle['payments']}}</div>
     <div class="panel-body">
         <div class="row">
             <div class="col-sm-12">
                 <div class="col-sm-6 lPad5" ng-hide="edit.pmt">
                     <span ng-show="order.pd != 0">{{order.cur}} {{order.pd | number : 2}} [{{order.po}}] </span>
-                    <span ng-show="order.pd >= order.tp" class="greentxt">Amount {{resourceBundle['paid']}}</span>
+                    <span ng-show="order.pd >= order.tp" class="greentxt">{{resourceBundle['amount']}} {{resourceBundle['paid']}}</span>
                     <span ng-show="order.pd < order.tp">
                         <br/>
                         {{resourceBundle['balance']}}: <span class="fc-color-red">{{order.cur}} {{(order.tp - order.pd) | number : 2}}</span>
@@ -37,27 +37,26 @@
                     </span>
                 </div>
 
-                <div ng-hide="edit.pmt" class="col-sm-6 pull-right nopad">
+                <div ng-hide="edit.pmt || !editPermission" class="col-sm-6 pull-right nopad">
                     <button ng-hide="dp.vp" ng-click="editPayment()"
-                            class="btn btn-sm btn-primary mb5 pull-right">Add
-                        payment
+                            class="btn btn-sm btn-primary mb5 pull-right">{{resourceBundle['payment.addpayment']}}
                     </button>
                 </div>
                 <div ng-hide="!edit.pmt" class="col-sm-6">
                     <form class="form-horizontal">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5>Add payment</h5>
+                                <h5>{{resourceBundle['payment.addpayment']}}</h5>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="form-group">
-                                        <label class="col-sm-4 control-label">Payment Option</label>
+                                        <label class="col-sm-4 control-label">{{resourceBundle['payment.paymentoption']}}</label>
 
                                         <div class="col-sm-7">
                                             <input ng-hide="payOpts.length > 0" class="form-control" type="text"
                                                    ng-model="pmt.po"
-                                                   placeholder="Payment Option"/>
+                                                   placeholder="{{resourceBundle['payment.paymentoption']}}"/>
 
                                             <select ng-hide="payOpts.length == 0" class="form-control"
                                                     ng-model="pmt.po">
@@ -68,11 +67,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="form-group">
-                                        <label class="col-sm-4 control-label">Enter Amount</label>
+                                        <label class="col-sm-4 control-label">{{resourceBundle['payment.enter.amount']}}</label>
 
                                         <div class="col-sm-7">
                                             <input type="text" ng-model="pmt.pay" class="form-control"
-                                                   placeholder="Enter Amount"/>
+                                                   placeholder="{{resourceBundle['payment.enter.amount']}}"/>
                                 <span class="litetext mt5">{{resourceBundle['payment.paidsofar']}}: {{order.cur}}
                                     {{order.pd}}</span>
                                         </div>
