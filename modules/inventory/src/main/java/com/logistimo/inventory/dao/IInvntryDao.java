@@ -30,6 +30,7 @@ import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.entity.IInvntryLog;
 import com.logistimo.inventory.models.InventoryFilters;
+import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
@@ -158,10 +159,12 @@ public interface IInvntryDao {
   /**
    * Get Inventory using the filters
    * @param inventoryFilters
+   * @param pageParams
    * @return Inventory objects
    * @throws ServiceException
    */
-  Results getInventory(InventoryFilters inventoryFilters, PersistenceManager pm)
+  Results getInventory(InventoryFilters inventoryFilters, PageParams pageParams,
+                       PersistenceManager pm)
       throws ServiceException;
 
   /**

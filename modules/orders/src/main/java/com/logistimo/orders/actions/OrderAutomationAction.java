@@ -110,8 +110,7 @@ public class OrderAutomationAction {
         .withSourceDomainId(domainId)
         .withMaterialTags(ordersConfig.getAutoCreateMaterialTags())
         .withKioskTags(ordersConfig.getAutoCreateEntityTags())
-        .withNoIntransitStock()
-        .withPageParams(null);
+        .withNoIntransitStock();
     if (ordersConfig.isAutoCreateOnMin()) {
       filters.withEventType(IEvent.UNDERSTOCK)
           .withEventType(IEvent.STOCKOUT);
@@ -120,7 +119,7 @@ public class OrderAutomationAction {
     }
     List<IInvntry>
         invntryList =
-        inventoryManagementService.getInventory(filters).getResults();
+        inventoryManagementService.getInventory(filters, null).getResults();
     if (invntryList == null || invntryList.isEmpty()) {
       return;
     }

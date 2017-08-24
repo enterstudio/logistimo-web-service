@@ -37,6 +37,7 @@ import com.logistimo.inventory.entity.Invntry;
 import com.logistimo.inventory.entity.InvntryEvntLog;
 import com.logistimo.inventory.models.InventoryFilters;
 import com.logistimo.logger.XLog;
+import com.logistimo.pagination.PageParams;
 import com.logistimo.pagination.QueryParams;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
@@ -278,7 +279,7 @@ public class InvntryDao implements IInvntryDao {
       xLogger.warn(
           "{0} when getting inv. event log for stock-replensishment event mid-kid {1}-{2} in domain {3} for key {4}: {5}",
           e.getClass().getName(), inv.getMaterialId(), inv.getKioskId(), inv.getDomainId(),
-          key.toString(), e.getMessage());
+          key.toString(), e);
     }
     return null;
   }
@@ -482,21 +483,11 @@ public class InvntryDao implements IInvntryDao {
     String orderByStr = " ORDER BY K.NAME ASC, M.NAME ASC";
     queryBuilder.append(orderByStr);
 
-    // Add pagination, if needed
-    String limitStr = null;
-    if (filters.getPageParams() != null) {
-      limitStr = " LIMIT " + filters.getPageParams().getOffset() + CharacterConstants.COMMA
-          + filters.getPageParams().getSize();
-      queryBuilder.append(limitStr);
-    }
     if (countQuery) {
       String
           cntQueryStr =
           queryBuilder.toString().replace("I.`KEY` AS `KEY`, I.*", QueryConstants.ROW_COUNT)
               .replace(orderByStr, CharacterConstants.EMPTY);
-      if (limitStr != null) {
-        cntQueryStr = cntQueryStr.replace(limitStr, CharacterConstants.EMPTY);
-      }
       return new QueryParams(cntQueryStr, params, QueryParams.QTYPE.SQL,
           IInvntry.class);
     }
@@ -506,7 +497,8 @@ public class InvntryDao implements IInvntryDao {
 
 
   @Override
-  public Results getInventory(InventoryFilters inventoryFilters, PersistenceManager pm)
+  public Results getInventory(InventoryFilters inventoryFilters, PageParams pageParams,
+                              PersistenceManager pm)
       throws ServiceException {
     Query query = null;
     Query cntQuery = null;
@@ -515,7 +507,12 @@ public class InvntryDao implements IInvntryDao {
     try {
       QueryParams
           sqlQueryModel = buildInventoryQuery(inventoryFilters, false);
-      query = pm.newQuery("javax.jdo.query.SQL", sqlQueryModel.query);
+      String executeQuery = sqlQueryModel.query;
+      if (pageParams != null) {
+        executeQuery += " LIMIT " + pageParams.getOffset() + CharacterConstants.COMMA
+            + pageParams.getSize();
+      }
+      query = pm.newQuery("javax.jdo.query.SQL", executeQuery);
       query.setClass(Invntry.class);
       inventoryList = (List<Invntry>) query.executeWithArray(
           sqlQueryModel.listParams.toArray());
@@ -537,8 +534,7 @@ public class InvntryDao implements IInvntryDao {
       }
     }
     return new Results(inventoryList, null, count,
-        inventoryFilters.getPageParams() == null ? 0 : inventoryFilters
-            .getPageParams().getOffset());
+        pageParams == null ? 0 : pageParams.getOffset());
   }
 
   @Override

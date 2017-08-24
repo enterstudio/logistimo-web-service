@@ -79,6 +79,7 @@ public class PagedExecServlet extends SgServlet {
     String incrementOffsetStr = request.getParameter("io");
     String prevOutput = request.getParameter("output");
     String paramsStr = request.getParameter("params");
+    String listParamsStr = request.getParameter("lParams");
     String finalizerUrl = request.getParameter("furl");
     String finalizerQueue = request.getParameter("fqueue");
     String taskIntervalSecondsStr = request.getParameter("taskinterval");
@@ -103,6 +104,9 @@ public class PagedExecServlet extends SgServlet {
     }
     if (paramsStr != null) {
       paramsStr = URLDecoder.decode(paramsStr, "UTF-8");
+    }
+    if (listParamsStr != null) {
+      listParamsStr = URLDecoder.decode(listParamsStr, "UTF-8");
     }
     if (domainIdStr != null && !domainIdStr.isEmpty()) {
       domainId = Long.valueOf(domainIdStr);
@@ -143,7 +147,7 @@ public class PagedExecServlet extends SgServlet {
       }
     }
     // Form the query params
-    QueryParams qp = new QueryParams(query, paramsStr, qType, qClazz);
+    QueryParams qp = new QueryParams(query, paramsStr, listParamsStr, qType, qClazz);
     xLogger.info("Params: {0}", qp.params);
     PageParams pageParams = new PageParams(cursor, offset, size);
     try {

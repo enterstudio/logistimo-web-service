@@ -305,7 +305,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
               new InventoryFilters().withKioskId(kioskId)
                   .withMaterialTags(materialTag)
                   .withMaterialNameStartsWith(nameStartsWith)
-                  .withPageParams(params), pm);
+              , params, pm);
     } finally {
       pm.close();
     }
@@ -335,8 +335,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
               new InventoryFilters().withMaterialId(materialId)
                   .withKioskTags(kioskTag)
                   .withKioskIds(kioskIds)
-                  .withPageParams(params)
-                  .withDomainId(domainId), pm);
+                  .withDomainId(domainId), params, pm);
       //null, materialId, kioskTag, null, null, kioskIds, params, pm,
       //           domainId, null, IInvntry.ALL, false, null, null, null));
     } finally {
@@ -1876,7 +1875,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
                 .withKioskTags(kioskTag)
                 .withMaterialTags(materialTag)
                 .withKioskIds(kioskIds)
-                .withPageParams(pageParams), pm);
+            , pageParams, pm);
   }
 
   public Results getInvntryByLocation(Long domainId, LocationSuggestionModel location,
@@ -1890,10 +1889,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
               new InventoryFilters().withKioskTags(kioskTags)
                   .withExcludedKioskTags(excludedKioskTags)
                   .withMaterialTags(materialTags)
-                  .withPageParams(params)
                   .withDomainId(domainId)
                   .withLocation(location)
-                  .withPdos(pdos), pm);
+                  .withPdos(pdos), params, pm);
     } finally {
       pm.close();
     }
@@ -3665,7 +3663,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
               .withOnlyNonZeroStk(onlyNonZeroStk)
               .withPdos(pdos)
               .withLocation(location)
-              .withPageParams(params), pm);
+              , params, pm);
     } finally {
       pm.close();
     }
@@ -3673,12 +3671,13 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
   @Override
-  public Results getInventory(InventoryFilters filters) throws ServiceException {
+  public Results getInventory(InventoryFilters filters, PageParams pageParams)
+      throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     Results results = null;
     try {
       results =
-          invntryDao.getInventory(filters, pm);
+          invntryDao.getInventory(filters, pageParams, pm);
     } finally {
       pm.close();
     }

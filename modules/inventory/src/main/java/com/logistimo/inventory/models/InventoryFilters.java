@@ -26,7 +26,6 @@ package com.logistimo.inventory.models;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.inventory.entity.IInvntry;
-import com.logistimo.pagination.PageParams;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -43,7 +42,6 @@ public class InventoryFilters {
   private List<String> excludedKioskTags;
   private List<String> materialTags;
   private List<Long> kioskIds;
-  private PageParams pageParams = new PageParams(0, 50);
   private Long domainId;
   private String materialNameStartsWith;
   private int matType = IInvntry.ALL;
@@ -76,10 +74,6 @@ public class InventoryFilters {
 
   public List<Long> getKioskIds() {
     return kioskIds;
-  }
-
-  public PageParams getPageParams() {
-    return pageParams;
   }
 
   public Long getDomainId() {
@@ -143,11 +137,6 @@ public class InventoryFilters {
 
   public InventoryFilters withKioskIds(List<Long> kioskIds) {
     this.kioskIds = kioskIds;
-    return this;
-  }
-
-  public InventoryFilters withPageParams(PageParams pageParams) {
-    this.pageParams = pageParams;
     return this;
   }
 

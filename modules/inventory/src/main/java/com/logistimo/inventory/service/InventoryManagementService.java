@@ -445,7 +445,7 @@ public interface InventoryManagementService extends Service {
                               Long materialId, String materialTag, int batchEnabled,
                               boolean onlyNZInv, String pdos, LocationSuggestionModel location, PageParams pageParams) throws ServiceException;
 
-  Results getInventory(InventoryFilters filters) throws ServiceException;
+  Results getInventory(InventoryFilters filters, PageParams pageParams) throws ServiceException;
 
   boolean validateEntityBatchManagementUpdate(Long kioskId) throws ServiceException;
   boolean validateMaterialBatchManagementUpdate(Long materialId) throws ServiceException;

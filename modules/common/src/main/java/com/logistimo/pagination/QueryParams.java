@@ -84,12 +84,33 @@ public class QueryParams {
     this.qClazz = qClazz;
   }
 
+  @SuppressWarnings("unchecked")
+  public QueryParams(String query, String paramsString, String listParamsString, QTYPE qType,
+                     Class qClazz) {
+    this.query = query;
+    if (paramsString != null && !paramsString.isEmpty()) {
+      this.params = (Map<String, Object>) PagedExec.deserialize(paramsString);
+    } else if (listParamsString != null && !listParamsString.isEmpty()) {
+      this.listParams = (List<String>) PagedExec.deserialize(listParamsString);
+    }
+    this.qType = qType;
+    this.qClazz = qClazz;
+  }
+
   // Get the parameters serialized string, given a param. map (a serialized base-64 string is returned)
   public String toParamsString() {
     if (params == null || params.isEmpty()) {
       return null;
     }
     return PagedExec.serialize(params);
+  }
+
+  // Get the parameters serialized string, given a param. list (a serialized base-64 string is returned)
+  public String toListParamsString() {
+    if (listParams == null || listParams.isEmpty()) {
+      return null;
+    }
+    return PagedExec.serialize(listParams);
   }
 
   public enum QTYPE {JQL, SQL, CQL}

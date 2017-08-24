@@ -237,6 +237,10 @@ public class PagedExec {
         if (paramsStr != null) {
           taskParams.put("params", URLEncoder.encode(paramsStr, "UTF-8"));
         }
+        String listParamsStr = qp.toListParamsString();
+        if (listParamsStr != null) {
+          taskParams.put("lParams", URLEncoder.encode(listParamsStr, "UTF-8"));
+        }
         if (finalizer != null) {
           taskParams.put("furl", URLEncoder.encode(finalizer.url, "UTF-8"));
           taskParams.put("fqueue", finalizer.queue);
