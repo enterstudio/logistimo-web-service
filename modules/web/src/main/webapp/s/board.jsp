@@ -48,7 +48,7 @@
 <fmt:bundle basename="Messages">
 <%
 	Long domainId = null;
-	SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
+	SecureUserDetails sUser = SecurityMgr.getUserDetailsIfPresent();
 	String errMsg = null;
 	try {
 		domainId = Long.valueOf( request.getParameter( "domainid" ) );
