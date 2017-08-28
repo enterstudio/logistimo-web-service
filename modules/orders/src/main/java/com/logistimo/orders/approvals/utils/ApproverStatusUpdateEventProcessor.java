@@ -26,6 +26,7 @@ package com.logistimo.orders.approvals.utils;
 import com.codahale.metrics.Meter;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.MessageService;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -120,7 +122,10 @@ public class ApproverStatusUpdateEventProcessor {
       IUserAccount requester, IKiosk kiosk, List<String> nextApproverNames) {
 
     String message = null;
-    ResourceBundle messages = Resources.get().getBundle("Messages", requester.getLocale());
+    DomainConfig domainConfig = DomainConfig.getInstance(requester.getDomainId());
+    ResourceBundle
+        messages =
+        Resources.get().getBundle("Messages", new Locale(domainConfig.getLangPreference()));
 
     Map<String, String> values = new HashMap<>();
     values.put("approvalType", ApprovalUtils.getApprovalType(orderApproval.getApprovalType()));

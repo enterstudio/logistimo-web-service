@@ -26,6 +26,7 @@ package com.logistimo.orders.approvals.utils;
 import com.codahale.metrics.Meter;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.MessageService;
+import com.logistimo.config.models.DomainConfig;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -92,12 +93,16 @@ public class ApprovalStatusUpdateEventProcessor {
 
         IUserAccount requester = usersService.getUserAccount(event.getRequesterId());
 
+        IUserAccount updatedBy = usersService.getUserAccount(event.getUpdatedBy());
+
         IKiosk kiosk = entitiesService.getKiosk(orderApprovalMapping.getKioskId());
 
         MessageService messageService = MessageService.getInstance(
             MessageService.SMS, requester.getCountry(), true, kiosk.getDomainId(), null, null);
 
-        String resolvedMessage = getMessage(event, orderApprovalMapping, requester, kiosk);
+        String
+            resolvedMessage =
+            getMessage(event, orderApprovalMapping, requester, kiosk, updatedBy);
 
         messageService.send(requester, resolvedMessage, MessageService.NORMAL, null, null, null);
 
@@ -119,9 +124,9 @@ public class ApprovalStatusUpdateEventProcessor {
   }
 
   private String getMessage(ApprovalStatusUpdateEvent event, IOrderApprovalMapping orderApproval,
-      IUserAccount requester, IKiosk kiosk) {
+                            IUserAccount requester, IKiosk kiosk, IUserAccount updatedBy) {
 
-    String message = getMessage(event.getStatus(), requester.getLocale());
+    String message = getMessage(event.getStatus(), requester);
     Map<String, String> values = new HashMap<>();
     values.put("approvalType", ApprovalUtils.getApprovalType(orderApproval.getApprovalType()));
     values.put("requestorName", requester.getFullName());
@@ -131,15 +136,20 @@ public class ApprovalStatusUpdateEventProcessor {
     values.put("orderId", event.getTypeId());
     values.put("statusChangedTime", LocalDateUtil.format(event.getUpdatedAt(),
         requester.getLocale(), requester.getTimezone()));
+    values.put("updatedBy", updatedBy.getFullName());
+    values.put("updatedByPhone", updatedBy.getMobilePhoneNumber());
 
     StrSubstitutor sub = new StrSubstitutor(values);
 
     return sub.replace(message);
   }
 
-  private String getMessage(String status, Locale locale) {
+  private String getMessage(String status, IUserAccount requester) {
     String message;
-    ResourceBundle messages = Resources.get().getBundle("Messages", locale);
+    DomainConfig domainConfig = DomainConfig.getInstance(requester.getDomainId());
+    ResourceBundle
+        messages =
+        Resources.get().getBundle("Messages", new Locale(domainConfig.getLangPreference()));
     switch (status) {
       case APPROVED_STATUS:
         message = messages.getString("approval.approved.message");

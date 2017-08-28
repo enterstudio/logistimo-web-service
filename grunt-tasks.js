@@ -169,6 +169,14 @@ module.exports = function(grunt, ref) {
                     }
                 ]
             },
+            hi: {
+                files: [
+                    {
+                        src: ['target/grunt/resources/Messages_hi.properties.orig'],
+                        dest: 'target/grunt/resources/Messages_hi.properties'
+                    }
+                ]
+            },
             resource : {
                 files: [
                     {src: ['target/grunt/webapp/v2/i18n/resourceBundle_en.json'], dest: 'target/grunt/webapp/v2/i18n/<%= now %>-resourceBundle_en.json'},
@@ -553,14 +561,14 @@ module.exports = function(grunt, ref) {
     grunt.loadNpmTasks('grunt-shell');
 
 
-    grunt.registerTask('default',['copy:main','copy:properties','rename:en','rename:fr','propertiesToJSON:en',
+    grunt.registerTask('default', ['copy:main', 'copy:properties', 'rename:en', 'rename:fr', 'rename:hi', 'propertiesToJSON:en',
         'propertiesToJSON:fr','shell:convertUTF8','copy:res2src','copy:rb2src']);
     grunt.registerTask('development',['clean:dist', 'env:dev', 'copy:src','copy:main','copy:properties','if:default',
-        'rename:en', 'rename:fr', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',
+        'rename:en', 'rename:fr', 'rename:hi', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',
         'rename:resource','cssmin:prod', 'preprocess:beforeUglify', 'toggleComments', 'html2js', 'ngAnnotate',
         'string-replace:dist', 'uglify', 'preprocess:afterUglify']);
     grunt.registerTask('production',['clean:dist', 'env:prod', 'copy:src','copy:main','copy:properties', 'if:default',
-        'rename:en', 'rename:fr', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',
+        'rename:en', 'rename:fr', 'rename:hi', 'propertiesToJSON:en', 'propertiesToJSON:fr', 'shell:convertUTF8', 'if:rb',
         'rename:resource', 'cssmin:prod', 'preprocess:beforeUglify', 'toggleComments', 'html2js', 'ngAnnotate',
         'string-replace:dist', 'uglify', 'preprocess:afterUglify']);
 

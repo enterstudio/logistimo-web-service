@@ -53,7 +53,7 @@ public class EntityBuilder {
     EntityMinModel minModel = new EntityMinModel();
     minModel.setId(kioskId);
     try {
-      IKiosk kiosk = entitiesService.getKioskIfPresent(kioskId);
+      IKiosk kiosk = entitiesService.getKioskIfPresent(kioskId, false);
       minModel.setName(kiosk.getName());
       minModel.setAddress(CommonUtils.getAddress(kiosk.getCity(), kiosk.getTaluk(),
           kiosk.getDistrict(), kiosk.getState()));
