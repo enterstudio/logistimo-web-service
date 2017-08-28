@@ -50,6 +50,7 @@ import com.logistimo.pagination.Results;
 import com.logistimo.services.Resources;
 import com.logistimo.services.ServiceException;
 import com.logistimo.services.impl.PMF;
+import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.StringUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -269,24 +270,27 @@ public class OrderAutomationAction {
   }
 
   private Optional<ITransaction> getTransaction(IInvntry invntry) {
-    try {
-      ITransaction t = JDOUtils.createInstance(ITransaction.class);
-      t.setKioskId(invntry.getKioskId());
-      t.setMaterialId(invntry.getMaterialId());
-      t.setQuantity(orderManagementService.computeRecommendedOrderQuantity(invntry));
-      t.setType(ITransaction.TYPE_ORDER);
-      t.setDomainId(invntry.getDomainId());
-      t.setSourceUserId(invntry.getUpdatedBy());
-      t.setTimestamp(new Date());
-      t.setBatchId(null);
-      t.setBatchExpiry(null);
-      t.setReason("AUTOMATED");
-      Optional<IKioskLink> vendor = chooseVendor(invntry.getKioskId(), invntry.getMaterialId());
-      t.setLinkedKioskId(vendor.isPresent() ? vendor.get().getLinkedKioskId() : null);
-      return Optional.of(t);
-    } catch (ServiceException e) {
-      LOGGER.warn("Error choosing vendor for inventory {0}:{1}", invntry.getKioskId(),
-          invntry.getMaterialId(), e);
+    BigDecimal roq = orderManagementService.computeRecommendedOrderQuantity(invntry);
+    if(BigUtil.greaterThanZero(roq)) {
+      try {
+        ITransaction t = JDOUtils.createInstance(ITransaction.class);
+        t.setKioskId(invntry.getKioskId());
+        t.setMaterialId(invntry.getMaterialId());
+        t.setQuantity(roq);
+        t.setType(ITransaction.TYPE_ORDER);
+        t.setDomainId(invntry.getDomainId());
+        t.setSourceUserId(Constants.SYSTEM_USER_ID);
+        t.setTimestamp(new Date());
+        t.setBatchId(null);
+        t.setBatchExpiry(null);
+        t.setReason("AUTOMATED");
+        Optional<IKioskLink> vendor = chooseVendor(invntry.getKioskId(), invntry.getMaterialId());
+        t.setLinkedKioskId(vendor.isPresent() ? vendor.get().getLinkedKioskId() : null);
+        return Optional.of(t);
+      } catch (ServiceException e) {
+        LOGGER.warn("Error choosing vendor for inventory {0}:{1}", invntry.getKioskId(),
+            invntry.getMaterialId(), e);
+      }
     }
     return Optional.empty();
   }
