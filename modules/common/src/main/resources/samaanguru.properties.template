@@ -1,0 +1,177 @@
+#
+# Copyright © 2017 Logistimo.
+#
+# This file is part of Logistimo.
+#
+# Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+# low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# You can be released from the requirements of the license by purchasing a commercial license. To know more about
+# the commercial license, please contact us at opensource@logistimo.com
+#
+
+# Related entities specification (used when, say, deleting all related entities)
+# Format: <class-name>:<key-name1>&<key-name2>...
+com.logistimo.entities.entity.Kiosk.relations=com.logistimo.entities.entity.UserToKiosk:kioskId,com.logistimo.entities.entity.KioskToPoolGroup:kioskId,com.logistimo.inventory.entity.Invntry:kId,com.logistimo.inventory.entity.InvntryBatch:kId,com.logistimo.inventory.entity.Transaction:kId,com.logistimo.inventory.entity.InvntryLog:kId,com.logistimo.inventory.entity.InvntryEvntLog:kId,com.logistimo.entities.entity.KioskLink:kioskId,com.logistimo.entities.entity.KioskLink:linkedKioskId,com.logistimo.orders.entity.Order:kId,com.logistimo.orders.entity.DemandItem:kId
+com.logistimo.materials.entity.Material.relations=com.logistimo.inventory.entity.Invntry:mId,com.logistimo.inventory.entity.Transaction:mId,com.logistimo.inventory.entity.InvntryLog:mId,com.logistimo.inventory.entity.InvntryEvntLog:mId,com.logistimo.inventory.entity.InvntryBatch:mId,com.logistimo.orders.entity.DemandItem:mId
+com.logistimo.entities.entity.PoolGroup.relations=com.logistimo.entities.entity.KioskToPoolGroup:poolGroupId
+com.logistimo.inventory.entity.Invntry.relations=com.logistimo.inventory.entity.Invntry:kId&mId,com.logistimo.inventory.entity.InvntryBatch:kId&mId
+com.logistimo.domains.entity.Domain.relations=com.logistimo.inventory.entity.Invntry:sdId,com.logistimo.inventory.entity.InvntryEvntLog:sdId,com.logistimo.inventory.entity.InvntryLog:sdId,com.logistimo.inventory.entity.Transaction:sdId,com.logistimo.entities.entity.Kiosk:sdId,com.logistimo.entities.entity.KioskLink:sdId,com.logistimo.entities.entity.KioskToPoolGroup:dId,com.logistimo.materials.entity.Material:sdId,com.logistimo.materials.entity.HandlingUnit:sdId,com.logistimo.inventory.optimization.entity.OptimizerLog:dId,com.logistimo.entities.entity.PoolGroup:dId,com.logistimo.users.entity.UserAccount:sdId,com.logistimo.entities.entity.UserToKiosk:dId,com.logistimo.events.entity.Event:sdId,com.logistimo.config.entity.Config:dId,com.logistimo.orders.entity.Order:sdId,com.logistimo.orders.entity.DemandItem:sdId,com.logistimo.entity.MessageLog:dId,com.logistimo.accounting.entity.Account:dId,com.logistimo.entity.Uploaded:dId,com.logistimo.entity.UploadedMsgLog:dId,com.logistimo.entity.BBoard:sdId,com.logistimo.entity.ALog:dId,com.logistimo.inventory.entity.InvntryBatch:sdId,com.logistimo.reports.entity.slices.DaySlice:dId,com.logistimo.reports.entity.slices.MonthSlice:dId,com.logistimo.domains.entity.DomainPermission:dId
+entity.move.relations=com.logistimo.users.entity.UserAccount:userId&sdId,com.logistimo.entities.entity.Kiosk:kioskId&sdId,com.logistimo.entities.entity.UserToKiosk:kioskId&dId,com.logistimo.inventory.entity.Invntry:kId&sdId,com.logistimo.inventory.entity.InvntryBatch:kId&sdId,com.logistimo.assets.entity.Asset:kId&sdId,com.logistimo.entities.entity.KioskLink:kioskId&sdId,com.logistimo.orders.entity.Order:kId&sdId,com.logistimo.orders.entity.DemandItem:kId&sdId,com.logistimo.orders.entity.DemandItemBatch:kId&sdId,com.logistimo.inventory.entity.Transaction:kId&sdId,com.logistimo.inventory.entity.InvntryLog:kId&sdId,com.logistimo.inventory.entity.InvntryEvntLog:kId&sdId,com.logistimo.assets.entity.Asset:kId&sdId
+entity.domain.update.relations=com.logistimo.entities.entity.Kiosk:kioskId,com.logistimo.inventory.entity.Invntry:kId,com.logistimo.inventory.entity.InvntryBatch:kId,com.logistimo.assets.entity.Asset:kId,com.logistimo.entities.entity.KioskLink:kioskId,com.logistimo.orders.entity.Order:kId,com.logistimo.orders.entity.DemandItem:kId,com.logistimo.orders.entity.DemandItemBatch:kId,com.logistimo.inventory.entity.Transaction:kId,com.logistimo.inventory.entity.InvntryLog:kId,com.logistimo.inventory.entity.InvntryEvntLog:kId
+unique.query=SELECT COUNT(TOKEN_IC) AS count, 'TOKEN_DMN' AS VALUE FROM (SELECT DISTINCT (TOKEN_IC) FROM TRANSACTION tt WHERE tt.t BETWEEN TIMESTAMP('TOKEN_SD') AND TIMESTAMP('TOKEN_ED') AND EXISTS(SELECT 1 FROM TRANSACTION_DOMAINS tdt WHERE tdt.KEY_OID = tt.`KEY` AND tdt.DOMAIN_ID = TOKEN_DMN) UNION SELECT DISTINCT (TOKEN_IC) FROM `ORDER` ot WHERE ot.con BETWEEN TIMESTAMP('TOKEN_SD') AND TIMESTAMP('TOKEN_ED') AND ot.ID = (SELECT ID_OID FROM ORDER_DOMAINS odt WHERE odt.ID_OID = ot.ID AND odt.DOMAIN_ID = TOKEN_DMN)) u
+unique.mt.query=SELECT COUNT(TOKEN_IC) AS COUNT, VALUE FROM (SELECT DISTINCT TOKEN_IC, (SELECT NAME FROM TAG WHERE TYPE = 1 AND ID = MT.ID) AS VALUE FROM TRANSACTION T, MATERIAL_TAGS MT WHERE EXISTS(SELECT 1 FROM TRANSACTION_DOMAINS tdt WHERE tdt.DOMAIN_ID = TOKEN_DMN AND tdt.KEY_OID = T.`KEY`) AND T.MID = MT.MATERIALID AND T.t BETWEEN TIMESTAMP('TOKEN_SD') AND TIMESTAMP('TOKEN_ED') UNION SELECT DISTINCT TOKEN_IC, (SELECT NAME FROM TAG WHERE TYPE = 1 AND ID = MT.ID) AS VALUE FROM DEMANDITEM D, MATERIAL_TAGS MT WHERE D.ID = (SELECT ID_OID FROM DEMANDITEM_DOMAINS ddt WHERE ddt.DOMAIN_ID = TOKEN_DMN AND ddt.ID_OID = D.ID) AND D.MID = MT.MATERIALID AND D.t BETWEEN TIMESTAMP('TOKEN_SD') AND TIMESTAMP('TOKEN_ED')) T GROUP BY VALUE
+unique.mn.query=SELECT COUNT(TOKEN_IC) AS COUNT, VALUE FROM (SELECT TOKEN_IC,MID AS VALUE FROM TRANSACTION T WHERE EXISTS(SELECT 1 FROM TRANSACTION_DOMAINS tdt WHERE tdt.DOMAIN_ID = TOKEN_DMN AND tdt.KEY_OID = T.`KEY`) AND T.t BETWEEN TIMESTAMP('TOKEN_SD') AND TIMESTAMP('TOKEN_ED') GROUP BY TOKEN_IC,VALUE UNION SELECT TOKEN_IC,MID AS VALUE FROM DEMANDITEM D WHERE D.`id` = (SELECT ID_OID FROM DEMANDITEM_DOMAINS ddt WHERE ddt.DOMAIN_ID = TOKEN_DMN AND ddt.ID_OID = D.`id`) AND D.t BETWEEN TIMESTAMP('TOKEN_SD') AND TIMESTAMP('TOKEN_ED') GROUP BY TOKEN_IC,VALUE) T GROUP BY VALUE
+unique.update=UPDATE TOKEN_TN SET TOKEN_UC = TOKEN_COUNT WHERE K = 'TOKEN_KEY'
+
+#Transaction deduplicate
+trans.dedup.duration.seconds=259200
+trans.dedup.duration.seconds.old=1800
+
+# From-address for sending email
+email.fromaddress=$EMAIL_FROMADDRESS
+email.fromname="$EMAIL_FROMNAME"
+
+# <!-- comments:comment # -->
+web.app.ver=
+# <!-- endcomments -->
+
+# <!-- comments:uncomment # -->
+#<!-- @if NODE_ENV == 'PRODUCTION'  || NODE_ENV == 'DEVELOPMENT' --><!-- @echo appVerInc -->
+#<!-- @endif -->
+# <!-- endcomments -->
+
+# Deployment Mode
+gae.deployment=false
+force.newui=true
+local.environment=$LOCAL_ENV
+logi.domain=1
+logi.host.server=$LOGI_HOST
+export.queue.size=2
+# Tasks
+task.server=$TASK_SERVER
+task.url=$TASK_URL
+task.queue.type=$TASK_QUEUE_TYPE
+task.queue.waittime=1000
+# Cron Scheduler
+cron.zoo.path=/logisticsCronLeader
+#export route flag
+export.route.start=$TASK_EXPORT
+task.queue.max.retry=3
+task.pool.size=10
+export.pool.size=3
+task.logger.type=log
+
+#Default Zookeeper properties
+zoo.servers=$ZKR_HOST
+zoo.timeout=3000
+
+#Cache
+redis.server=$REDIS_HOST
+redis.server.port=6379
+cache.expiry=84400
+
+redis.tasks.queue.name=delayed_tasks
+redis.task.pick.duration=5000
+
+memcached.url=localhost:11211
+
+#Database
+db.url=$MYSQL_HOST_URL
+db.schema=$MYSQL_DATABASE
+db.user=$MYSQL_USER
+db.password=$MYSQL_PASS
+
+reportsdb.url=jdbc:mariadb://127.0.0.1:3306/logireports
+reportsdb.schema=logireports
+reportsdb.user=logistimo
+reportsdb.password=logistimo
+reportsdb.tables=DAYACTIVECOUNTSSTATSSTORE,DAYSLICE,MONTHACTIVECOUNTSSTATSSTORE,MONTHSLICE,REPORTSCHEDULE
+jwt.key=Put@S3cureKeyH3r
+
+app.deployed.for=Logistimo-Opensource
+status.file.path=
+
+#Cache expiry - 15 minutes, Thread sleep duration - 2 minutes
+cache.expiry.for.transaction.signature=900
+thread.sleep.duration=120000
+
+#Notifications -- true/false enable/disable weekly and monthly notifiers
+notifications.weekly=false
+notification.monthly=false
+notifications.email.items.max.per.event=100
+
+zip.inflate.ratio=0.0001
+
+#Default support information
+support.email=support@logistimo.com
+support.phone=1800-XXX-XXXX
+
+#Default feedback configuration
+feedback.email=opensource.feedback@logistimo.com
+
+#media
+media.servingurllocal=$MEDIA_HOST_URL
+camel.file.name=camel-tasks.xml
+mail.smtp.host=$EMAIL_HOST
+mail.smtp.port=$EMAIL_PORT
+
+#Callisto
+callisto.url=$CALLISTO_HOST_URL
+reports.callisto.prefix=report.type
+reports.callisto.suffix=periodicity
+
+#location service url
+location.service.url=$LOC_URL
+location.service.path=/locations/ids
+location.service.timeout=5000
+#location.service.fallback=activemq:queue:location
+
+#Approval
+approval.url=$APPROVAL_URL
+approval.path=/v1/approvals
+
+#Cassandra
+cassandra.hosts=$CASSANDRA_HOST
+cassandra.keyspace=$CASSANDRA_KEYSPACE
+cassandra.password=$CASSANDRA_USER
+cassandra.password=$CASSANDRA_PASS
+
+
+#JDO properties
+javax.jdo.PersistenceManagerFactoryClass=org.datanucleus.api.jdo.JDOPersistenceManagerFactory
+javax.jdo.option.ConnectionURL=$MYSQL_HOST_URL
+javax.jdo.option.ConnectionDriverName=org.mariadb.jdbc.Driver
+javax.jdo.option.ConnectionUserName=$MYSQL_USER
+javax.jdo.option.ConnectionPassword=$MYSQL_PASS
+javax.jdo.option.Optimistic=true
+datanucleus.schema.autoCreateAll=false
+javax.jdo.listener.InstanceLifecycleListener.com.logistimo.events.entity.callbacks.PostPutCallbacks=com.logistimo.events.entity.Event
+datanucleus.connectionPoolingType=DBCP
+datanucleus.connectionPool.maxIdle=$CON_MAX_IDLE
+datanucleus.connectionPool.minIdle=$CON_MIX_IDLE
+datanucleus.connectionPool.maxActive=$CON_MAX_ACTIVE
+datanucleus.connectionPool.maxWait=$CON_MAX_WAIT
+datanucleus.connectionPool.maxStatements=20
+datanucleus.connectionPool.testSQL=SELECT 1
+datanucleus.connectionPool.timeBetweenEvictionRunsMillis=2400000
+datanucleus.connectionPool.minEvictableIdleTimeMillis=18000000
+datanucleus.cache.level2.type=$CACHE_TYPE
+datanucleus.cache.level2.cacheName=dn_
+datanucleus.cache.level2.redis.servers=$REDIS_HOST
+datanucleus.cache.level2.redis.database=1
+datanucleus.cache.level2.redis.port=6379
+datanucleus.cache.level2.redis.sentinels=$SENTINEL_HOST
+datanucleus.cache.level2.redis.timeout=5000
+datanucleus.cache.level2.redis.expirySeconds=86400

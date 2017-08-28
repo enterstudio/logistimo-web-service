@@ -29,7 +29,9 @@ ARG warname
 
 ENV TOMCAT_HOME /usr/local/tomcat
 
-RUN rm -rf $TOMCAT_HOME/webapps/*
+RUN rm -rf $TOMCAT_HOME/webapps/* \
+	&& apt-get update \
+        && apt-get install -y gettext-base
 
 ADD modules/web/target/$warname $TOMCAT_HOME/webapps/
 
@@ -70,6 +72,11 @@ ENV MYSQL_HOST_URL="jdbc:mariadb://localhost/logistimo?useUnicode=true&amp;chara
         JAVA_XMX=1024m \
         LOC_URL=http://localhost:9090 \
         APPROVAL_URL=http://localhost:6400 \
+        CON_MAX_IDLE=50 \
+        CON_MIX_IDLE=20 \
+        CON_MAX_ACTIVE=150 \
+        CON_MAX_WAIT=1000 \
+        CACHE_TYPE=none \
         JMX_AGENT_PORT=8088
 
 ENV JAVA_OPTS $JAVA_OPTS

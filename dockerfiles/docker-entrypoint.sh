@@ -42,32 +42,9 @@ then
   sed -ri "s~\(tcp:\/\/localhost:61616\)~$ACTIVEMQ_HOST~g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/camel-tasks.xml
 fi
 
+envsubst < $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties.template  > $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties
+
 JAVA_OPTS="-Xms$JAVA_XMS -Xmx$JAVA_XMX \
-        -Djavax.jdo.option.ConnectionURL=\"$MYSQL_HOST_URL\" \
-  -Djavax.jdo.option.ConnectionUserName=$MYSQL_USER \
-        -Djavax.jdo.option.ConnectionPassword=$MYSQL_PASS \
-        -Demail.fromaddress=$EMAIL_FROMADDRESS \
-        -Demail.fromname=\"$EMAIL_FROMNAME\" \
-        -Dlocal.environment=$LOCAL_ENV \
-        -Dtask.server=$TASK_SERVER \
-        -Dtask.url=$TASK_URL \
-        -Dtask.queue.type=$TASK_QUEUE_TYPE \
-        -Dexport.route.start=$TASK_EXPORT \
-        -Dzoo.servers=$ZKR_HOST \
-        -Dredis.server=$REDIS_HOST \
-        -Ddb.url=\"$MYSQL_HOST_URL\" \
-        -Ddb.schema=$MYSQL_DATABASE \
-        -Ddb.user=$MYSQL_USER \
-        -Ddb.password=$MYSQL_PASS \
-        -Dmedia.servingurllocal=$MEDIA_HOST_URL \
-        -Dmail.smtp.host=$EMAIL_HOST \
-        -Dmail.smtp.port=$EMAIL_PORT \
-        -Dcallisto.url=$CALLISTO_HOST_URL \
-        -Dredis.sentinels=$SENTINEL_HOST \
-        -Dlocation.service.url=$LOC_URL \
-        -Dapproval.url=$APPROVAL_URL \
-  -Ddatanucleus.cache.level2.redis.servers=$REDIS_HOST \
-  -Ddatanucleus.cache.level2.redis.sentinels=$SENTINEL_HOST \
-  -\"javaagent://$TOMCAT_HOME/jmx_prometheus_javaagent-0.7.jar=$JMX_AGENT_PORT:$TOMCAT_HOME/jmx_exporter.json\""
+        -\"javaagent://$TOMCAT_HOME/jmx_prometheus_javaagent-0.7.jar=$JMX_AGENT_PORT:$TOMCAT_HOME/jmx_exporter.json\""
 
 exec $TOMCAT_HOME/bin/catalina.sh run
