@@ -247,7 +247,7 @@ public class OrderServlet extends JsonRestServlet {
     } catch (UnauthorizedException e) {
       xLogger.severe(" User unauthorized", e);
       statusCode = HttpServletResponse.SC_UNAUTHORIZED;
-      message = backendMessages.getString("error.userNotAuthorized");
+      message = e.getMessage();
     } catch (ServiceException e) {
       xLogger.severe(" Service Exception", e);
       message = e.getMessage();
@@ -425,24 +425,6 @@ public class OrderServlet extends JsonRestServlet {
         }
         // FOR BACKWARD COMPATIBILITY: check if integer quantity is to be sent back (for app versions 1.2.0 or greater, floats are sent)
         boolean forceIntegerQuantity = RESTUtil.forceIntegerForStock(appVersion);
-                                /*
-                                if ( hasOrders ) {
-					 Long domainIdForFetching = ( kioskId == null && isUserAdminOrGreater ? domainId : null );
-					 Results results = RESTUtil.getOrderVector( domainIdForFetching, kioskId, statusStr, otype, loadAll, locale, timezone, forceIntegerQuantity, startDate, endDate, pageParams, incShpItems );
-					 orderOrMaterials = (List<Map>) results.getResults();
-				} else {
-					Results results = oms.getDemandItems( null, kioskId, null, null, null, null, new PageParams( maxResults ) ); // Should this be changed to take pageParams
-					List<IDemandItem> items = null;
-					if ( results != null )
-						items = results.getResults();
-					// Get order vector
-					orderOrMaterials = RESTUtil.getDemandItems( items, currency, locale, timezone, forceIntegerQuantity );
-				}
-				if ( orderOrMaterials == null || orderOrMaterials.isEmpty() ) {
-					status = false;
-					message = backendMessages.getString( "error.noorders" );
-				}*/
-
         if (hasOrders) {
           Results
               res =
@@ -484,7 +466,6 @@ public class OrderServlet extends JsonRestServlet {
     }
     // For the JSON output and send
     try {
-      // String jsonOrders = GsonUtil.getOrdersOutputToJson( status, orderOrMaterials, message, hasOrders, currency, localeStr, RESTUtil.VERSION_01 );
       String
           jsonOutput =
           GsonUtil.buildGetOrdersResponseModel(status, mom, message, RESTUtil.VERSION_01);
@@ -495,7 +476,6 @@ public class OrderServlet extends JsonRestServlet {
       status = false;
       message = backendMessages.getString("error.systemerror") + " [2]";
       try {
-        // String jsonOutput = GsonUtil.getOrdersOutputToJson( false, null, message, false, null, localeStr, RESTUtil.VERSION_01 );
         String
             jsonOutput =
             GsonUtil.buildGetOrdersResponseModel(status, mom, message, RESTUtil.VERSION_01);
