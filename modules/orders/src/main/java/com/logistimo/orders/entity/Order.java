@@ -1231,7 +1231,9 @@ public class Order implements IOrder {
   }
 
   public void setOrderType(Integer orderType) {
-    oty = orderType;
+    if(orderType != null) {
+      oty = orderType;
+    }
   }
 
   public String getReferenceID() {

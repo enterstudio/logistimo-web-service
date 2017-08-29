@@ -545,25 +545,24 @@ public class OrdersAPIBuilder {
    * Gives the types of approval to be shown to the user
    */
   public List<OrderApprovalTypesModel> buildOrderApprovalTypesModel(OrderModel orderModel,
-                                                                    OrderManagementService oms,
+                                                                    IOrder order,
                                                                     SecureUserDetails user)
       throws ServiceException, ObjectNotFoundException {
     List<OrderApprovalTypesModel> models = new ArrayList<>(1);
     ApprovalsDao approvalsDao = new ApprovalsDao();
-    IOrder order = oms.getOrder(orderModel.id);
-    if (IOrder.TRANSFER_ORDER == order.getOrderType() &&
+    if (order.isTransfer() &&
         (!(orderModel.isVisibleToCustomer() && orderModel.isVisibleToVendor()) ||
             (SecurityUtil.compareRoles(user.getRole(), SecurityConstants.ROLE_DOMAINOWNER) >= 0) ||
             user.getUsername().equals(order.getUserId()))
         && orderApprovalsService.isApprovalRequired(order, IOrder.TRANSFER_ORDER))  {
       buildTransferApprovalTypeModel(models, approvalsDao, order);
     } else {
-      if (IOrder.PURCHASE_ORDER == order.getOrderType() && orderModel.isVisibleToCustomer() &&
+      if (order.isPurchase() && orderModel.isVisibleToCustomer() &&
           orderModel.atc &&
           orderApprovalsService.isApprovalRequired(order, IOrder.PURCHASE_ORDER)) {
         buildPurchaseApprovalTypeModel(models, approvalsDao, order);
       }
-      if (IOrder.TRANSFER_ORDER != order.getOrderType() && orderModel.isVisibleToVendor() &&
+      if (!order.isTransfer() && orderModel.isVisibleToVendor() &&
           orderModel.atv &&
           orderApprovalsService.isApprovalRequired(order, IOrder.SALES_ORDER)) {
         buildSalesApprovalTypeModel(models, approvalsDao, order);
@@ -655,7 +654,7 @@ public class OrdersAPIBuilder {
                                 Long domainId, boolean includePermissions)
       throws ServiceException, ObjectNotFoundException {
     model.setApprovalTypesModels(buildOrderApprovalTypesModel(model,
-        Services.getService(OrderManagementServiceImpl.class, SecurityUtils.getLocale()), user));
+        order, user));
     Integer approvalType = orderApprovalsService.getApprovalType(order);
     boolean isApprovalRequired = false;
     if (approvalType != null) {
