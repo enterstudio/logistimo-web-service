@@ -141,9 +141,13 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
   private static final String
       UPDATE_ENTITYACTIVITYTIMESTAMPS_TASK =
       "/s2/api/entities/task/updateentityactivitytimestamps";
-  private static ITaskService taskService = AppFactory.get().getTaskService();
+
   private ITagDao tagDao = new TagDao();
   private IOrderDao orderDao = new OrderDao();
+
+  private static ITaskService getTaskService(){
+    return AppFactory.get().getTaskService();
+  }
 
   // Get a demand item with same material ID
   private static IDemandItem getDemandItemByMaterial(List<IDemandItem> demandList,
@@ -1686,7 +1690,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         params.put("entityId", String.valueOf(kid));
         params.put("timestamp", String.valueOf(o.getCreatedOn().getTime()));
         params.put("actType", String.valueOf(IKiosk.TYPE_ORDERACTIVITY));
-        taskService
+        getTaskService()
             .schedule(ITaskService.QUEUE_DEFAULT, UPDATE_ENTITYACTIVITYTIMESTAMPS_TASK, params,
                 ITaskService.METHOD_POST);
       } catch (TaskSchedulingException e) {

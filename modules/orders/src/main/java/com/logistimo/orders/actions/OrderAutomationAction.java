@@ -269,7 +269,7 @@ public class OrderAutomationAction {
     LOGGER.info("Created new order {0} for kiosk {1}", results.getOrder().getOrderId(), kioskId);
   }
 
-  private Optional<ITransaction> getTransaction(IInvntry invntry) {
+  protected Optional<ITransaction> getTransaction(IInvntry invntry) {
     BigDecimal roq = orderManagementService.computeRecommendedOrderQuantity(invntry);
     if(BigUtil.greaterThanZero(roq)) {
       try {
@@ -295,7 +295,7 @@ public class OrderAutomationAction {
     return Optional.empty();
   }
 
-  private Optional<IKioskLink> chooseVendor(Long kioskId, Long materialId) throws ServiceException {
+  protected Optional<IKioskLink> chooseVendor(Long kioskId, Long materialId) throws ServiceException {
     Results
         links =
         entitiesService.getKioskLinks(kioskId, IKioskLink.TYPE_VENDOR, null, null, null);

@@ -139,7 +139,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       "/s2/api/entities/task/updateentityactivitytimestamps";
   private static final int LOCK_RETRY_COUNT = 25;
   private static final int LOCK_RETRY_DELAY_IN_MILLISECONDS = 2400;
-  private static ITaskService taskService = AppFactory.get().getTaskService();
   private static Set<String> vldTransTypes = new HashSet<>(Arrays.asList(ITransaction.TYPE_ISSUE,
       ITransaction.TYPE_RECEIPT, ITransaction.TYPE_PHYSICALCOUNT, ITransaction.TYPE_TRANSFER,
       ITransaction.TYPE_WASTAGE, ITransaction.TYPE_RETURN));
@@ -147,6 +146,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   private IInvntryDao invntryDao = new InvntryDao();
   private ITransDao transDao = new TransDao();
 
+  private static ITaskService getTaskService(){
+    return AppFactory.get().getTaskService();
+  }
   // Post inv.-transaction-commit hook
   private static void doPostTransactionCommitHook(List<ITransaction> transList,
                                                   List<IInvntry> toBeOptimized) {
@@ -184,7 +186,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     xLogger
         .info("SCHEDULING: url = {0}, params = {1}", TransactionUtil.POSTTRANSCOMMIT_URL, params);
     try {
-      taskService
+      getTaskService()
           .schedule(ITaskService.QUEUE_OPTIMZER, TransactionUtil.POSTTRANSCOMMIT_URL, params, null,
               ITaskService.METHOD_POST, domainId, trans.getSourceUserId(), "POST_TRANSACTION");
     } catch (Exception e) {
@@ -208,7 +210,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           params.put("entityId", String.valueOf(kid));
           params.put("timestamp", String.valueOf(kidTransTimeMap.get(kid)));
           params.put("actType", String.valueOf(IKiosk.TYPE_INVENTORYACTIVITY));
-          taskService
+          getTaskService()
               .schedule(ITaskService.QUEUE_DEFAULT, UPDATE_ENTITYACTIVITYTIMESTAMPS_TASK, params,
                   ITaskService.METHOD_POST);
         } catch (TaskSchedulingException e) {
@@ -1588,7 +1590,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         try {
           params.put("invId", iInvntry.getKeyString());
           //Added 30 sec delay to let update inventory during post transaction
-          taskService.schedule(ITaskService.QUEUE_OPTIMZER, UPDATE_PREDICTION_TASK, params,
+          getTaskService().schedule(ITaskService.QUEUE_OPTIMZER, UPDATE_PREDICTION_TASK, params,
               null, ITaskService.METHOD_POST, System.currentTimeMillis() + 30000);
         } catch (TaskSchedulingException e) {
           xLogger.warn(

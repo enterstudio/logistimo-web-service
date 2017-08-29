@@ -23,18 +23,33 @@
 
 package com.logistimo.orders.actions;
 
+import com.logistimo.entities.entity.IKioskLink;
+import com.logistimo.entities.entity.KioskLink;
+import com.logistimo.entities.service.EntitiesServiceImpl;
+import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.ITransaction;
+import com.logistimo.inventory.entity.Invntry;
 import com.logistimo.inventory.entity.Transaction;
+import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.orders.entity.DemandItem;
 import com.logistimo.orders.entity.IDemandItem;
+import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
+import com.logistimo.pagination.Results;
+import com.logistimo.services.ServiceException;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by charan on 06/08/17.
@@ -44,9 +59,17 @@ public class OrderAutomationActionTest {
   private OrderAutomationAction orderAutomationAction;
 
   @Before
-  public void setup() {
+  public void setup() throws ServiceException {
+    OrderManagementServiceImpl orderManagementService = spy(OrderManagementServiceImpl.class);
+    EntitiesServiceImpl ems = mock(EntitiesServiceImpl.class);
+    when(ems.getKioskLinks(1l, IKioskLink.TYPE_VENDOR, null, null, null))
+        .thenReturn(new Results(null, null));
+    when(ems.getKioskLinks(2l, IKioskLink.TYPE_VENDOR, null, null, null))
+        .thenReturn(getKioskLink(2l));
+    InventoryManagementServiceImpl ims = mock(InventoryManagementServiceImpl.class);
+    when(ims.getInventory(2l, 2l)).thenReturn(getInvntry(1l, 2l, null, null));
     orderAutomationAction =
-        new OrderAutomationAction(null, null, null, null, null);
+        new OrderAutomationAction(ims, orderManagementService, ems, null, null);
   }
 
 
@@ -64,6 +87,28 @@ public class OrderAutomationActionTest {
     assertEquals(filteredTransactions.size(), 1);
   }
 
+  @Test
+  public void testGetTransactionWithROQGreaterThanZero() {
+    IInvntry invntry = getInvntry(1l, 2l, BigDecimal.TEN, new BigDecimal(100));
+    assertNotEquals(orderAutomationAction.getTransaction(invntry), Optional.empty());
+  }
+
+  @Test
+  public void testGetTransactionWithROQLessOrEqualThanZero() {
+    IInvntry invntry = getInvntry(1l, 2l, BigDecimal.ZERO, BigDecimal.ZERO);
+    assertEquals(orderAutomationAction.getTransaction(invntry), Optional.empty());
+  }
+
+  @Test
+  public void testChooseVendorWithNoVendor() throws ServiceException {
+    assertEquals(orderAutomationAction.chooseVendor(1l, null), Optional.empty());
+  }
+
+  @Test
+  public void testChooseVendorWithVendorExists() throws ServiceException {
+    assertNotEquals(orderAutomationAction.chooseVendor(2l, 2l), Optional.empty());
+  }
+
   private IDemandItem getDemandItem(long materialId, long kioskId) {
     IDemandItem item = new DemandItem();
     item.setMaterialId(materialId);
@@ -76,6 +121,25 @@ public class OrderAutomationActionTest {
     transaction.setMaterialId(materialId);
     transaction.setKioskId(kioskId);
     return transaction;
+  }
+
+  private IInvntry getInvntry(Long kioskId, Long materialId, BigDecimal stock,
+                              BigDecimal maxStock) {
+    Invntry invntry = new Invntry();
+    invntry.setMaterialId(materialId);
+    invntry.setKioskId(kioskId);
+    invntry.setStock(stock);
+    invntry.setMaxStock(maxStock);
+    return invntry;
+  }
+
+  private Results getKioskLink(Long kioskId) {
+    IKioskLink kioskLink = new KioskLink();
+    kioskLink.setLinkedKioskId(kioskId);
+    List results = new ArrayList<>();
+    results.add(kioskLink);
+
+    return new Results(results, null);
   }
 
 }
