@@ -110,7 +110,8 @@ public class ApproverStatusUpdateEventProcessor {
         String message = getMessage(event, orderApprovalMapping, requester, kiosk,
             nextApproverNames);
 
-        messageService.send(userAccount, message, MessageService.NORMAL, null, null, null);
+        messageService
+            .send(userAccount, message, MessageService.getMessageType(message), null, null, null);
 
       } catch (ObjectNotFoundException e) {
         xLogger.warn("Error in building message status", e);

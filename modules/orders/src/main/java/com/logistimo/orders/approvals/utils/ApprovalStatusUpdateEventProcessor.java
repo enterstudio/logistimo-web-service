@@ -104,11 +104,15 @@ public class ApprovalStatusUpdateEventProcessor {
             resolvedMessage =
             getMessage(event, orderApprovalMapping, requester, kiosk, updatedBy);
 
-        messageService.send(requester, resolvedMessage, MessageService.NORMAL, null, null, null);
+        messageService
+            .send(requester, resolvedMessage, MessageService.getMessageType(resolvedMessage), null,
+                null, null);
 
         for (String approverId : event.getApproverIds()) {
           IUserAccount approver = usersService.getUserAccount(approverId);
-          messageService.send(approver, resolvedMessage, MessageService.NORMAL, null, null, null);
+          messageService
+              .send(approver, resolvedMessage, MessageService.getMessageType(resolvedMessage), null,
+                  null, null);
         }
 
       } catch (ObjectNotFoundException e) {
