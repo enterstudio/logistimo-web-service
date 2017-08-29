@@ -517,6 +517,7 @@ public class MobileTransactionsBuilder {
     trans.setKioskId(kid);
     if (mobTrans.entm != null) {
       trans.setEntryTime(new Date(mobTrans.entm));
+      trans.setSortEt(trans.getEntryTime());
     }
     trans.setType(mobTrans.ty);
     trans.setQuantity(mobTrans.q);

@@ -4083,7 +4083,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   public class EntryTimeComparator implements Comparator<ITransaction> {
     @Override
     public int compare(ITransaction o1, ITransaction o2) {
-      return o1.getEntryTime().compareTo(o2.getEntryTime());
+      return o1.getSortEt().compareTo(o2.getSortEt());
     }
   }
 

@@ -43,7 +43,6 @@ import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.models.ErrorDetailModel;
-import com.logistimo.inventory.models.MobileTransactionCacheModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.proto.MobileUpdateInvTransRequest;
@@ -830,8 +829,8 @@ public class InventoryServlet extends JsonRestServlet {
     int statusCode = HttpServletResponse.SC_OK;
     Long domainId = null;
     String errorMessage = null;
-    boolean getResponseFromCache = false;
     Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap = null;
+    boolean isDuplicate = false;
     try {
       if (StringUtils.isEmpty(reqJsonStr)) {
         throw new InvalidDataException(backendMessages.getString("error.invaliddata.frommobile"));
@@ -840,11 +839,10 @@ public class InventoryServlet extends JsonRestServlet {
       validateMobileUpdateInvTransRequest(mobUpdateInvTransReq, backendMessages);
       IUserAccount u = RESTUtil.authenticate(mobUpdateInvTransReq.uid, null, mobUpdateInvTransReq.kid, req, resp);
       domainId = u.getDomainId();
-      boolean isDuplicate = false;
       // Deduplicate by transaction send time
       if (TransactionUtil
-          .deduplicateBySendTimePartial(String.valueOf(mobUpdateInvTransReq.sntm),
-              mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
+          .deduplicateBySaveTimePartial(String.valueOf(mobUpdateInvTransReq.sntm / 1000),
+              mobUpdateInvTransReq.uid, String.valueOf(mobUpdateInvTransReq.kid),
               mobUpdateInvTransReq.pid)) {
         isDuplicate = true;
       }
@@ -854,20 +852,19 @@ public class InventoryServlet extends JsonRestServlet {
         if (materialTransactionsMap == null || materialTransactionsMap.isEmpty()) {
           throw new InvalidDataException(backendMessages.getString("error.invaliddata.frommobile"));
         }
-        InventoryManagementService
-            ims =
+        InventoryManagementService ims =
             Services.getService(InventoryManagementServiceImpl.class);
         midErrorDetailModelsMap = ims.updateMultipleInventoryTransactions(materialTransactionsMap, domainId,
             mobUpdateInvTransReq.uid);
       } else {
-        MobileTransactionCacheModel mobileTransactionCacheModel = TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
+        Integer status = TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
             mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
             mobUpdateInvTransReq.pid);
-        if (mobileTransactionCacheModel.getStatus() == TransactionUtil.IN_PROGRESS) {
-            throw new LogiException(backendMessages.getString("transactions.processing.inprogress"));
-        } else if (mobileTransactionCacheModel.getStatus() == TransactionUtil.COMPLETED) {
-          // Get the response from the cache
-          getResponseFromCache = true;
+        if (status != null) {
+          if (TransactionUtil.IN_PROGRESS == status) {
+            throw new LogiException(
+                backendMessages.getString("transactions.processing.inprogress"));
+          }
         }
       }
     } catch (UnauthorizedException ue) {
@@ -878,10 +875,6 @@ public class InventoryServlet extends JsonRestServlet {
       xLogger.warn("Exception when updating inventory transactions {0}", e);
       statusCode = HttpServletResponse.SC_BAD_REQUEST;
       errorMessage = e.getMessage();
-    } catch (ServiceException e) {
-      xLogger.severe("Exception when updating inventory transactions {0}", e);
-      statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-      errorMessage = backendMessages.getString("error.systemerror");
     } catch (Exception e) {
       xLogger.severe("Exception when updating inventory transactions {0}", e);
       statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
@@ -891,7 +884,7 @@ public class InventoryServlet extends JsonRestServlet {
       String
           mobUpdateInvTransRespJsonStr = null;
       if (statusCode != HttpServletResponse.SC_BAD_REQUEST && statusCode != HttpServletResponse.SC_UNAUTHORIZED) {
-        mobUpdateInvTransRespJsonStr = createMobUpdateInvTransRespJsonStr(mobUpdateInvTransReq, errorMessage, midErrorDetailModelsMap, domainId, getResponseFromCache);
+        mobUpdateInvTransRespJsonStr = createMobUpdateInvTransRespJsonStr(mobUpdateInvTransReq, errorMessage, midErrorDetailModelsMap, domainId, isDuplicate);
       }
       if (mobUpdateInvTransRespJsonStr != null) {
         sendJsonResponse(resp, statusCode, mobUpdateInvTransRespJsonStr);
@@ -911,37 +904,18 @@ public class InventoryServlet extends JsonRestServlet {
     }
   }
 
-  private String createMobUpdateInvTransRespJsonStr(MobileUpdateInvTransRequest mobUpdateInvTransReq, String errorMessage, Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap, Long domainId, boolean getResponseFromCache) {
-    String mobUpdateInvTransRespJsonStr = null;
-    if (getResponseFromCache) {
-      String mobUpdateInvTransRespJsonStrInCache =
-          TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
-              mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
-              mobUpdateInvTransReq.pid).getResponse();
-      // If the response string from cache does not have part id, set it from the request
-      if(mobUpdateInvTransReq.pid != null) {
-        mobUpdateInvTransRespJsonStr =
-            mobTransBuilder
-                .buildUpdateInvTransResponseWithPartialID(mobUpdateInvTransRespJsonStrInCache,
-                    mobUpdateInvTransReq.pid);
-      } else {
-        return mobUpdateInvTransRespJsonStrInCache;
-      }
-    } else {
-      MobileUpdateInvTransResponse
-          mobUpdateInvTransResp =
-          mobTransBuilder.buildMobileUpdateInvTransResponse(
-              domainId, mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
-              mobUpdateInvTransReq.pid, errorMessage, midErrorDetailModelsMap,
-              mobUpdateInvTransReq.trns);
-      if (mobUpdateInvTransResp != null) {
-        mobUpdateInvTransRespJsonStr = new Gson().toJson(mobUpdateInvTransResp);
+  private String createMobUpdateInvTransRespJsonStr(MobileUpdateInvTransRequest mobUpdateInvTransReq, String errorMessage, Map<Long,List<ErrorDetailModel>> midErrorDetailModelsMap, Long domainId, boolean isDuplicate) {
+    MobileUpdateInvTransResponse
+        mobUpdateInvTransResp =
+        mobTransBuilder.buildMobileUpdateInvTransResponse(
+            domainId, mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
+            mobUpdateInvTransReq.pid, errorMessage, midErrorDetailModelsMap,
+            mobUpdateInvTransReq.trns);
+    String mobUpdateInvTransRespJsonStr = new Gson().toJson(mobUpdateInvTransResp);
+    if (!isDuplicate && mobUpdateInvTransResp != null) {
         TransactionUtil.setObjectInCache(String.valueOf(mobUpdateInvTransReq.sntm),
             mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
-            mobUpdateInvTransReq.pid,
-            new MobileTransactionCacheModel(TransactionUtil.COMPLETED,
-                mobUpdateInvTransRespJsonStr));
-      }
+            mobUpdateInvTransReq.pid,TransactionUtil.COMPLETED);
     }
     return mobUpdateInvTransRespJsonStr;
   }

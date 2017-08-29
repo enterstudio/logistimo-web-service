@@ -226,6 +226,13 @@ public class Transaction implements ITransaction {
   private Date et;
 
   /**
+   * To be used only for sorting for SMS and GPRS request
+   */
+  @NotPersistent
+  private Date sortEt;
+
+
+  /**
    * Only used by Rest API while updating order quantity. Mapped to sdrsn in DemandItem
    */
   @NotPersistent
@@ -804,6 +811,15 @@ public class Transaction implements ITransaction {
 
   public void setSystemCreated(boolean systemCreated) {
     this.systemCreated = systemCreated;
+  }
+
+
+  public Date getSortEt() {
+    return sortEt;
+  }
+
+  public void setSortEt(Date sortEt) {
+    this.sortEt = sortEt;
   }
 
   @Override

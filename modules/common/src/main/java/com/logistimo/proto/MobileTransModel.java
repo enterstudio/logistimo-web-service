@@ -81,4 +81,9 @@ public class MobileTransModel {
    * Geo model
    */
   public MobileGeoModel geo;
+
+  /**
+   * For sorting the entry time
+   */
+  public Long sortEtm;
 }

@@ -96,8 +96,9 @@ public class RejectOldMobileTransactionsPolicy implements MobileTransactionsHand
       // Set the entry time of this stock count transaction to 1 ms less than the entry time of trans
       Date et = trans.getEntryTime();
       Calendar etCal = Calendar.getInstance();
-      etCal.setTimeInMillis(et.getTime() - 1);
       scTrans.setEntryTime(etCal.getTime());
+      etCal.setTimeInMillis(et.getTime() - 1);
+      scTrans.setSortEt(etCal.getTime());
       scTrans.setType(ITransaction.TYPE_PHYSICALCOUNT);
       scTrans.setReason(backendMessages.getString("openingstock.mismatch"));
       scTrans.setSystemCreated(true);

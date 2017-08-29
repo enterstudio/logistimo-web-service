@@ -227,4 +227,8 @@ public interface ITransaction
   BigDecimal getOpeningStock(boolean returnActualValue);
 
   BigDecimal getOpeningStockByBatch(boolean returnActualValue);
+
+  Date getSortEt();
+
+  void setSortEt(Date sortEt);
 }

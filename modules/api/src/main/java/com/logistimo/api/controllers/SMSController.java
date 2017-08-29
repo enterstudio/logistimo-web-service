@@ -35,10 +35,10 @@ import com.logistimo.api.util.SMSUtil;
 import com.logistimo.auth.GenericAuthoriser;
 import com.logistimo.communications.service.MessageService;
 import com.logistimo.exception.InvalidDataException;
+import com.logistimo.exception.LogiException;
 import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.models.ErrorDetailModel;
-import com.logistimo.inventory.models.MobileTransactionCacheModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.logger.XLog;
@@ -114,14 +114,23 @@ public class SMSController {
         return;
       }
       isDuplicate =
-          SMSUtil.isDuplicateMsg(model.getSendTime(), model.getUserId(), model.getKioskId(),
+          SMSUtil.isDuplicateMsg(model.getSendTime() / 1000, model.getUserId(), model.getKioskId(),
               model.getPartialId());
       //check if duplicate transaction
+      Map<Long, List<ITransaction>> transactionMap = builder.buildTransaction(model);
+
       if (isDuplicate) {
-        xLogger.info("Duplicate transaction found while processing SMS {0}",
-            smsMessage.getMessage());
+        Integer
+            status =
+            TransactionUtil.getObjectFromCache(String.valueOf(model.getSendTime()),
+                model.getUserId(), model.getKioskId(),
+                model.getPartialId());
+        if (status != null) {
+          if (TransactionUtil.IN_PROGRESS == status) {
+            throw new LogiException("Transaction is in progress");
+          }
+        }
       } else {
-        Map<Long, List<ITransaction>> transactionMap = builder.buildTransaction(model);
         InventoryManagementService
             ims =
             Services.getService(InventoryManagementServiceImpl.class);
@@ -190,29 +199,16 @@ public class SMSController {
   private MobileUpdateInvTransResponse createResponse(SMSTransactionModel model,
                                                       Map<Long, List<ErrorDetailModel>> midErrorDetailModelsMap,
                                                       Long domainId, boolean isDuplicate) {
-    MobileUpdateInvTransResponse mobUpdateInvTransResp = null;
-    if (isDuplicate) {
-      MobileTransactionCacheModel
-          cacheModel =
-          TransactionUtil.getObjectFromCache(String.valueOf(model.getSendTime()), model.getUserId(),
-              model.getKioskId(), model.getPartialId());
-      if (cacheModel != null) {
-        mobUpdateInvTransResp =
-            new Gson().fromJson(cacheModel.getResponse(), MobileUpdateInvTransResponse.class);
-      }
-    } else {
-      mobUpdateInvTransResp =
-          new MobileTransactionsBuilder()
-              .buildMobileUpdateInvTransResponse(domainId, model.getUserId(), model.getKioskId(),
-                  model.getPartialId(),
-                  null, midErrorDetailModelsMap, populateMaterialList(model));
-      if (mobUpdateInvTransResp != null) {
+    MobileUpdateInvTransResponse mobUpdateInvTransResp =
+        new MobileTransactionsBuilder()
+            .buildMobileUpdateInvTransResponse(domainId, model.getUserId(), model.getKioskId(),
+                model.getPartialId(),
+                null, midErrorDetailModelsMap, populateMaterialList(model));
+    if (!isDuplicate && mobUpdateInvTransResp != null) {
         String mobUpdateInvTransRespJsonStr = new Gson().toJson(mobUpdateInvTransResp);
         TransactionUtil.setObjectInCache(String.valueOf(model.getSendTime()), model.getUserId(),
             model.getKioskId(), model.getPartialId(),
-            new MobileTransactionCacheModel(TransactionUtil.COMPLETED,
-                mobUpdateInvTransRespJsonStr));
-      }
+            TransactionUtil.COMPLETED);
     }
     return mobUpdateInvTransResp;
   }

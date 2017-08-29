@@ -46,7 +46,6 @@ import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.IInvntryEvntLog;
 import com.logistimo.inventory.entity.ITransaction;
-import com.logistimo.inventory.models.MobileTransactionCacheModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
 import com.logistimo.logger.XLog;
@@ -113,19 +112,19 @@ public class TransactionUtil {
   private static IInvntryDao invntryDao = new InvntryDao();
   private static ITransDao transDao = new TransDao();
 
-  public static boolean deduplicateBySaveTimePartial(String timestampSaveMillis, String userId,
+  public static boolean deduplicateBySaveTimePartial(String saveTime, String userId,
                                                      String kioskId, String partialId) {
     // Global checking without partial ID - skip write when partial id is available
     return
-        deduplicateBySaveTimePartial(timestampSaveMillis, userId, kioskId, null,
+        deduplicateBySaveTimePartial(saveTime, userId, kioskId, null,
             partialId != null)
             ||
-            (partialId != null && deduplicateBySaveTimePartial(timestampSaveMillis, userId,
+            (partialId != null && deduplicateBySaveTimePartial(saveTime, userId,
                 kioskId,
                 partialId, false)); //Check with partial ID
   }
 
-  public static boolean deduplicateBySaveTimePartial(String timestampSaveMillis, String userId,
+  public static boolean deduplicateBySaveTimePartial(String saveTime, String userId,
                                                      String kioskId, String partialId,
                                                      boolean skipWrite) {
     try {
@@ -133,7 +132,7 @@ public class TransactionUtil {
       String
           cacheKey =
           TRANSACTION_CHECKSUM_KEY_PREFIX + userId + CharacterConstants.DOT + kioskId
-              + CharacterConstants.DOT + timestampSaveMillis;
+              + CharacterConstants.DOT + saveTime;
       if (partialId != null) {
         cacheKey += CharacterConstants.DOT + partialId;
       }
@@ -143,7 +142,7 @@ public class TransactionUtil {
           return true;
         } else if (!skipWrite) {
           // Put new checksum back into cache
-          cache.put(cacheKey, 1, DEDUPLICATION_DURATION_NEW);
+          cache.put(cacheKey, TransactionUtil.IN_PROGRESS, DEDUPLICATION_DURATION_NEW);
         }
       }
     } catch (Exception e) {
@@ -427,57 +426,16 @@ public class TransactionUtil {
     return name;
   }
 
-  public static boolean deduplicateBySendTimePartial(String timestampSendMillis, String userId,
-                                                     Long kioskId,
-                                                     String partialId) {
-    // Global checking without partial ID - skip write when partial id is available
-    return
-        deduplicateBySendTimePartial(timestampSendMillis, userId, kioskId, null,
-            partialId != null)
-            ||
-            (partialId != null && deduplicateBySendTimePartial(timestampSendMillis, userId, kioskId,
-                partialId, false)); //Check with partial ID
-  }
-
-  public static boolean deduplicateBySendTimePartial(String timestampSendMillis, String userId,
-                                                     Long kioskId,
-                                                     String partialId,
-                                                     boolean skipWrite) {
-    try {
-      MemcacheService cache = AppFactory.get().getMemcacheService();
-      String
-          cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
-      if (cache != null) {
-        // Get last checksum
-        if (cache.get(cacheKey) != null) {
-          return true;
-        } else if (!skipWrite) {
-          // Put new checksum back into cache
-          MobileTransactionCacheModel
-              mobileTransactionCacheModel =
-              new MobileTransactionCacheModel(TransactionUtil.IN_PROGRESS, null);
-          cache.put(cacheKey, mobileTransactionCacheModel, DEDUPLICATION_DURATION_NEW);
-        }
-      }
-    } catch (Exception e) {
-      xLogger
-          .warn(
-              "Exception when deduplicating transactions: userId: {0}, timestampSendMillis: {1}, partialId: {2}",
-              userId, timestampSendMillis, partialId, e);
-    }
-    return false;
-  }
-
   public static void setObjectInCache(String timestampSendMillis, String userId, Long kioskId,
                                       String partialId,
-                                      MobileTransactionCacheModel mobileTransactionCacheModel) {
+                                      Integer status) {
     try {
       MemcacheService cache = AppFactory.get().getMemcacheService();
       String cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
       if (cache != null) {
         // Get last checksum
         cache
-            .put(cacheKey, mobileTransactionCacheModel, TransactionUtil.DEDUPLICATION_DURATION_NEW);
+            .put(cacheKey, status, TransactionUtil.DEDUPLICATION_DURATION_NEW);
       }
     } catch (Exception e) {
       xLogger
@@ -487,23 +445,19 @@ public class TransactionUtil {
     }
   }
 
-  public static MobileTransactionCacheModel getObjectFromCache(String timestampSendMillis,
+  public static Integer getObjectFromCache(String timestampSendMillis,
                                                                String userId, Long kioskId,
                                                                String partialId) {
     try {
       MemcacheService cache = AppFactory.get().getMemcacheService();
       if (cache != null) {
         String cacheKey = createKey(timestampSendMillis, userId, kioskId, partialId);
-        MobileTransactionCacheModel cacheModel = null;
         Object value = cache.get(cacheKey);
         if (value == null) {
           cacheKey = createKey(timestampSendMillis, userId, kioskId, null);
           value = cache.get(cacheKey);
         }
-        if (value instanceof MobileTransactionCacheModel) {
-          cacheModel = (MobileTransactionCacheModel) value;
-        }
-        return cacheModel;
+          return  (Integer)value;
       }
     } catch (Exception e) {
       xLogger

@@ -277,18 +277,22 @@ public class SMSBuilder {
       String[] transactions = mat[i].split(SMSConstants.TRANSACTION_SEPARATOR);
       //set entry time
       Long entryTimeInMinutes = null;
+      Long sortEntryTime=null;
       if (transactions[0] != null && !transactions[0].equalsIgnoreCase(CharacterConstants.EMPTY)) {
         entryTimeInMinutes =
             sendTime - (Long.parseLong(transactions[0])
                 * SMSConstants.MIN_IN_MILLI_SEC);
+      }else{
+        entryTimeInMinutes=sendTime;
       }
+      sortEntryTime = entryTimeInMinutes;
       for (int j = 1; j < transactions.length; j++) {
         MobileTransModel
             mobileTransModel =
             populateTransModel(transactions[j], sendTime, entryTimeInMinutes,
                 actualTransactionDate);
         //Increase entry time by one millisecond for every transaction since the service sorts it based on entry time
-        entryTimeInMinutes += 1;
+        mobileTransModel.sortEtm=sortEntryTime++;
         mobileTransModels.add(mobileTransModel);
       }
     }
@@ -310,6 +314,7 @@ public class SMSBuilder {
     SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT);
     MobileTransModel mobileTransModel = new MobileTransModel();
     mobileTransModel.entm = entryTimeInMinutes;
+
     String[] transactionDet = transaction.split(SMSConstants.COMMA_SEPARATOR);
     mobileTransModel.ty = transactionDet[0];
     mobileTransModel.ostk = transactionDet[1] != null ? new BigDecimal(transactionDet[1]) : null;
@@ -738,6 +743,8 @@ public class SMSBuilder {
     transaction.setTimestamp(new Date());
     calendar.setTimeInMillis(mobileTransModel.entm);
     transaction.setEntryTime(calendar.getTime());
+    calendar.setTimeInMillis(mobileTransModel.sortEtm);
+    transaction.setSortEt(calendar.getTime());
     if (mobileTransModel.lkid != null) {
       transaction.setLinkedKioskId(mobileTransModel.lkid);
     }
