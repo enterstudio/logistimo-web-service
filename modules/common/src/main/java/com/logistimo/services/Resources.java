@@ -27,11 +27,13 @@
 package com.logistimo.services;
 
 import com.logistimo.logger.XLog;
+import com.logistimo.utils.UTF8PropertyResourceBundle;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**
@@ -51,16 +53,15 @@ public class Resources {
     return SINGLETON;
   }
 
-  // Get a resource bundle read in UTF-8 format (by default, ResourceBunndle would read it in ISO-8859-1 format)
+  // Get a resource bundle read in UTF-8 format (by default, ResourceBundle would read it in ISO-8859-1 format)
   private static ResourceBundle getUTF8Bundle(String baseName, Locale locale) {
     ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale);
     xLogger.fine("Resources.getUTF8Bundle: bundle = {0}, locale = {1}", bundle, bundle.getLocale());
-    return bundle;
-                /*
-                if ( !( bundle instanceof PropertyResourceBundle ) )
-			return bundle;
-		return new UTF8PropertyResourceBundle( (PropertyResourceBundle) bundle );
-		*/
+    if (!(bundle instanceof PropertyResourceBundle)) {
+      return bundle;
+    }
+    return new UTF8PropertyResourceBundle((PropertyResourceBundle) bundle, locale);
+
   }
 
   public ResourceBundle getBundle(String baseName, Locale locale) throws MissingResourceException {
