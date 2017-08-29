@@ -3091,6 +3091,9 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         Results<IInvntryBatch> rs = getValidBatches(mid, kid, null);
         List<IInvntryBatch> batches = rs.getResults();
         for (IInvntryBatch ib : batches) {
+          if (ib.isExpired()) {
+            continue;
+          }
           ShipmentItemBatchModel model = new ShipmentItemBatchModel();
           model.id = ib.getBatchId();
           if (BigUtil.lesserThanEquals(quantity, ib.getAvailableStock())) {
