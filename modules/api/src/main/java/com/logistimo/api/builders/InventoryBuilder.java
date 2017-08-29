@@ -742,7 +742,7 @@ public class InventoryBuilder {
     return models;
   }
 
-  public List<InvntryBatchModel> buildInvntryBatchModel(Results results, boolean allBatches,
+  public List<InvntryBatchModel> buildInvntryBatchModel(Results<IInvntryBatch> results, boolean allBatches,
                                                         SecureUserDetails sUser, Long allocOrderId)
       throws ServiceException {
     if (results.getResults() != null) {

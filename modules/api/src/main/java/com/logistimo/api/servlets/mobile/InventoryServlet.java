@@ -551,10 +551,10 @@ public class InventoryServlet extends JsonRestServlet {
         InventoryManagementService
             ims =
             Services.getService(InventoryManagementServiceImpl.class);
-        Results results = ims.getValidBatches(materialId, kioskId, pageParams);
+        Results<IInvntryBatch> results = ims.getValidBatches(materialId, kioskId, pageParams);
         batches = results.getResults();
         if (batches == null) {
-          batches = new ArrayList<IInvntryBatch>(); // empty list
+          batches = new ArrayList<>(); // empty list
         }
         // TODO: change time to locale times?
       } catch (ServiceException e) {
@@ -918,7 +918,7 @@ public class InventoryServlet extends JsonRestServlet {
           TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
               mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
               mobUpdateInvTransReq.pid).getResponse();
-      // If the response string from cache does not have part if, set it from the request
+      // If the response string from cache does not have part id, set it from the request
       if(mobUpdateInvTransReq.pid != null) {
         mobUpdateInvTransRespJsonStr =
             mobTransBuilder

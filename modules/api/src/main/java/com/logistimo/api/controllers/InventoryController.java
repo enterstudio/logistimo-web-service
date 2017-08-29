@@ -425,7 +425,7 @@ public class InventoryController {
       InventoryManagementService
           ims =
           Services.getService(InventoryManagementServiceImpl.class);
-      Results results = ims.getBatches(mid, kid, pageParams);
+      Results<IInvntryBatch> results = ims.getBatches(mid, kid, pageParams);
       return builder.buildInvntryBatchModel(results, allBatch, sUser, allocOrderId);
     } catch (ServiceException e) {
       xLogger.severe("InventoryController Exception: {0}", e.getMessage(), e);

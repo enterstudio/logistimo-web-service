@@ -579,7 +579,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     return new Results(results, cursor);
   }
 
-  public Results getBatches(Long materialId, Long kioskId, PageParams pageParams)
+  public Results<IInvntryBatch> getBatches(Long materialId, Long kioskId, PageParams pageParams)
       throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     String
@@ -612,15 +612,13 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       }
       pm.close();
     }
-    xLogger.fine("Exiting getValidBatches");
-
-    return new Results(results, cursor);
+    return new Results<>(results, cursor);
   }
 
   /**
    * Get valid batches for a given inventory item - this includes active batches with non-zero stock
    */
-  public Results getValidBatches(Long materialId, Long kioskId, PageParams pageParams)
+  public Results<IInvntryBatch> getValidBatches(Long materialId, Long kioskId, PageParams pageParams)
       throws ServiceException {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     try {
@@ -631,7 +629,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
   }
 
   @SuppressWarnings("unchecked")
-  private Results getValidBatches(Long materialId, Long kioskId, PageParams pageParams,
+  private Results<IInvntryBatch> getValidBatches(Long materialId, Long kioskId, PageParams pageParams,
                                   PersistenceManager pm) throws ServiceException {
     xLogger.fine("Entered getValidBatches");
     // Form query
@@ -643,7 +641,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     if (pageParams != null) {
       QueryUtil.setPageParams(q, pageParams);
     }
-    Map<String, Object> params = new HashMap<String, Object>();
+    Map<String, Object> params = new HashMap<>();
     params.put("mIdParam", materialId);
     params.put("kIdParam", kioskId);
     params.put("vldParam", Boolean.TRUE);
@@ -662,7 +660,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
       q.closeAll();
     }
     xLogger.fine("Exiting getValidBatches");
-    return new Results(results, cursor);
+    return new Results<>(results, cursor);
   }
 
   /**
@@ -3090,8 +3088,8 @@ public class InventoryManagementServiceImpl extends ServiceImpl
         quantity = quantity.subtract(existingAllocation);
         List<ShipmentItemBatchModel> shipmentModel = new ArrayList<>(1);
 
-        Results rs = getValidBatches(mid, kid, null);
-        List<IInvntryBatch> batches = (List<IInvntryBatch>) rs.getResults();
+        Results<IInvntryBatch> rs = getValidBatches(mid, kid, null);
+        List<IInvntryBatch> batches = rs.getResults();
         for (IInvntryBatch ib : batches) {
           ShipmentItemBatchModel model = new ShipmentItemBatchModel();
           model.id = ib.getBatchId();

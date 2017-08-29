@@ -652,15 +652,13 @@ public class BulkExportMgr {
         IKiosk k = as.getKiosk(inv.getKioskId());
         List<InvntryWithBatchInfo> tempList = new ArrayList<>();
         if (m.isBatchEnabled() && k.isBatchMgmtEnabled()) {
-          List<IInvntryBatch> invBatchList;
-          Results results = ims.getValidBatches(mId, kId, null);
+          Results<IInvntryBatch> results = ims.getValidBatches(mId, kId, null);
           // results is never null because getValidBatches
           List<IInvntryBatch> resultsList = results.getResults();
 
           if (resultsList != null && !resultsList.isEmpty()) {
-            invBatchList = results.getResults();
             // Iterate through the invBatchList
-            for (IInvntryBatch invBatch : invBatchList) {
+            for (IInvntryBatch invBatch : resultsList) {
               InvntryWithBatchInfo invWithBatchInfo = new InvntryWithBatchInfo();
               invWithBatchInfo.setInvntryParameters(inv);
               invWithBatchInfo.setBatchInfoParameters(invBatch);
@@ -695,7 +693,6 @@ public class BulkExportMgr {
         xLogger.severe(
             "{0} when trying to get material with mId {1}. Message: {2}",
             e.getClass().getName(), mId, e.getMessage());
-        continue;
       }
     } // end while
     return invWithBatchInfoList;

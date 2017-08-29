@@ -174,11 +174,10 @@ public class DemandBuilder {
     model.tm = mcs.getMaterial(model.id).isTemperatureSensitive();
     model.astk = BigDecimal.ZERO;
     List<DemandBreakdownModel> list = new ArrayList<>();
-    Results rs = ims.getValidBatches(materialId, kioskId, null);
+    Results<IInvntryBatch> rs = ims.getValidBatches(materialId, kioskId, null);
     if (rs.getSize() > 0) {
       model.isBa = true;
-      for (Object o : rs.getResults()) {
-        IInvntryBatch ib = (IInvntryBatch) o;
+      for (IInvntryBatch ib : rs.getResults()) {
         DemandBreakdownModel breakdownModel = new DemandBreakdownModel();
         breakdownModel.bid = ib.getBatchId();
         if (ib.getBatchExpiry() != null) {

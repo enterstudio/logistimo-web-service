@@ -135,10 +135,10 @@ public interface InventoryManagementService extends Service {
   /**
    * Get valid batches for a given inventory item - this includes active batches with non-zero stock
    */
-  Results getValidBatches(Long materialId, Long kioskId, PageParams pageParams)
+  Results<IInvntryBatch> getValidBatches(Long materialId, Long kioskId, PageParams pageParams)
       throws ServiceException;
 
-  Results getBatches(Long materialId, Long kioskId, PageParams pageParams) throws ServiceException;
+  Results<IInvntryBatch> getBatches(Long materialId, Long kioskId, PageParams pageParams) throws ServiceException;
 
   /**
    * Add a new inventory items to the data store.

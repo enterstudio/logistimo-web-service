@@ -34,11 +34,11 @@ import java.util.Locale;
  *
  * @author Arun
  */
-public class Results {
+public class Results <T> {
 
   protected String cursor = null;
   @SuppressWarnings("rawtypes")
-  protected List results = null;
+  protected List<T> results = null;
   protected Locale
       locale =
       null;
@@ -51,13 +51,13 @@ public class Results {
   protected int offset;
 
   @SuppressWarnings("rawtypes")
-  public Results(List results, String cursor) {
+  public Results(List<T> results, String cursor) {
     this.results = results;
     this.cursor = cursor;
   }
 
   @SuppressWarnings("rawtypes")
-  public Results(List results, String cursor,
+  public Results(List<T> results, String cursor,
                  int numFound, int offset) {
     this(results, cursor);
     this.numFound = numFound;
@@ -85,7 +85,7 @@ public class Results {
   }
 
   @SuppressWarnings("rawtypes")
-  public List getResults() {
+  public List<T> getResults() {
     return results;
   }
 

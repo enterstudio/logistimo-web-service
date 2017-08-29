@@ -206,9 +206,9 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
                 IInvAllocation.Type.ORDER, String.valueOf(model.orderId));
             if (allocations != null) {
               item.bq = new ArrayList<>(allocations.size());
-              Results results = ims.getBatches(item.mId, model.vendorId, null);
+              Results<IInvntryBatch> results = ims.getBatches(item.mId, model.vendorId, null);
               if (results != null) {
-                List<IInvntryBatch> allBatches = (List<IInvntryBatch>) results.getResults();
+                List<IInvntryBatch> allBatches = results.getResults();
                 boolean complete = false;
                 for (IInvntryBatch allBatch : allBatches) {
                   for (IInvAllocation allocation : allocations) {
@@ -639,9 +639,9 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
               batch =
               (List<IShipmentItemBatch>) shipmentItem.getShipmentItemBatch();
           if (batch != null && batch.size() > 0) {
-            Results rs = ims.getBatches(shipmentItem.getMaterialId(),
+            Results<IInvntryBatch> rs = ims.getBatches(shipmentItem.getMaterialId(),
                 shipment.getServicingKiosk(), null);
-            List<IInvntryBatch> results = (List<IInvntryBatch>) rs.getResults();
+            List<IInvntryBatch> results = rs.getResults();
             for (IShipmentItemBatch ib : batch) {
               for (IInvntryBatch invntryBatch : results) {
                 if (ib.getBatchId().equals(invntryBatch.getBatchId())) {

@@ -1929,15 +1929,13 @@ public class RESTUtil {
     // Only if kiosk is batch management enabled, return batches. Otherwise, return null.
     if (isBatchMgmtEnabled) {
       try {
-        Results
+        Results<IInvntryBatch>
             results =
             ims.getValidBatches(inv.getMaterialId(), inv.getKioskId(), new PageParams(null,
                 PageParams.DEFAULT_SIZE)); // NOTE: Get only up to the 50 last batches
         if (results != null && results.getResults() != null) {
-          batches = new Vector<Hashtable<String, String>>();
-          Iterator<IInvntryBatch> it = results.getResults().iterator();
-          while (it.hasNext()) {
-            IInvntryBatch batch = it.next();
+          batches = new Vector<>();
+          for (IInvntryBatch batch : results.getResults()) {
             if (!batch.isExpired()) {
               batches.add(batch.toMapZ(locale, timezone, isAutoPostingIssuesEnabled));
             }
@@ -1963,15 +1961,13 @@ public class RESTUtil {
     // Only if kiosk is batch management enabled, return batches. Otherwise, return null.
     if (isBatchMgmtEnabled) {
       try {
-        Results
+        Results<IInvntryBatch>
             results =
             ims.getBatches(inv.getMaterialId(), inv.getKioskId(), new PageParams(null,
                 PageParams.DEFAULT_SIZE)); // NOTE: Get only up to the 50 last batches
         if (results != null && results.getResults() != null) {
           expiredBatches = new Vector<>();
-          Iterator<IInvntryBatch> it = results.getResults().iterator();
-          while (it.hasNext()) {
-            IInvntryBatch batch = it.next();
+          for (IInvntryBatch batch : results.getResults()) {
             if (batch.isExpired() && BigUtil.greaterThanZero(batch.getQuantity())) {
               expiredBatches.add(batch.toMapZ(locale, timezone, isAutoPostingIssuesEnabled));
             }
@@ -2111,7 +2107,7 @@ public class RESTUtil {
   }
 
   private static Hashtable<String, String> getInventoryTagsToHide(Serializable config) {
-    Hashtable<String, String> invTgsToHide = new Hashtable<String, String>();
+    Hashtable<String, String> invTgsToHide = new Hashtable<>();
     Map<String, String> tagsByInvOp = null;
     if (config instanceof CapabilityConfig) {
       tagsByInvOp = ((CapabilityConfig) config).gettagsInvByOperation();

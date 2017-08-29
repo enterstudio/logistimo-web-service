@@ -37,7 +37,6 @@ import com.logistimo.inventory.TransactionUtil;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.IInvntryBatch;
 import com.logistimo.inventory.entity.ITransaction;
-import com.logistimo.inventory.entity.InvntryBatch;
 import com.logistimo.inventory.models.ErrorDetailModel;
 import com.logistimo.inventory.service.InventoryManagementService;
 import com.logistimo.inventory.service.impl.InventoryManagementServiceImpl;
@@ -351,15 +350,15 @@ public class MobileTransactionsBuilder {
     try {
       InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
       // NOTE: Get only up to the 50 last batches
-      Results
+      Results<IInvntryBatch>
           results =
           ims.getBatches(mid, kid, new PageParams(null,
               PageParams.DEFAULT_SIZE));
       if (results != null) {
-        List<InvntryBatch> batches = results.getResults();
+        List<IInvntryBatch> batches = results.getResults();
         if (batches != null && !batches.isEmpty()) {
           mobileInvBatchModelList = new ArrayList<>(batches.size());
-          for (InvntryBatch invBatch : batches) {
+          for (IInvntryBatch invBatch : batches) {
             MobileInvBatchModel
                 mibm =
                 buildMobileInvBatchModel(invBatch, isAutoPostingIssuesEnabled, locale, timezone,
