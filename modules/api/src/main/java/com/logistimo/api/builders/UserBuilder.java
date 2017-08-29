@@ -23,6 +23,7 @@
 
 package com.logistimo.api.builders;
 
+import com.logistimo.api.models.EventConfigModel;
 import com.logistimo.api.models.LocationModel;
 import com.logistimo.api.models.UserConfigModel;
 import com.logistimo.api.models.UserDashboardConfigModel;
@@ -34,6 +35,7 @@ import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.AdminContactConfig;
 import com.logistimo.config.models.AssetSystemConfig;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.config.models.GeneralConfig;
 import com.logistimo.constants.Constants;
 import com.logistimo.context.StaticApplicationContext;
 import com.logistimo.dao.JDOUtils;
@@ -149,7 +151,12 @@ public class UserBuilder {
           StringUtil.getArray(dc.getDashboardConfig().getDbOverConfig().dutg));
       model.config.adboard = dc.getAssetConfig();
       model.config.adboard.setConfiguration(null);
-
+      //getting system config
+      GeneralConfig gc = GeneralConfig.getInstance();
+      model.config.dboard.rfrshint = gc.getDashboardRefreshIntervalInMinutes();
+      //event config
+      model.config.evtsum = new EventConfigModel();
+      model.config.evtsum.rfrshint = gc.getEventsRefreshIntervalInMinutes();
       //Get asset config
       AssetConfigModel assetConfigModel = new AssetConfigModel();
       AssetSystemConfig asc = AssetSystemConfig.getInstance();

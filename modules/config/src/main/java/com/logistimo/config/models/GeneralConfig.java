@@ -53,6 +53,8 @@ public class GeneralConfig {
   public static final String DOMAIN = "domain";
   public static final String DEDUP_DUR = "dedupMinutes";
   public static final String APP_UPGRADE = "aupg";
+  public static final String DB_RFINT = "dboardrefreshinterval";
+  public static final String ES_RFINT = "eventrefreshinterval";
   // Logger
   private static final XLog xLogger = XLog.getLog(GeneralConfig.class);
   private String supportEmail;
@@ -63,6 +65,9 @@ public class GeneralConfig {
   private Integer smsDedupDuration = 10;
   private JSONObject appUrls;
   private JSONObject aupg;
+  private Integer dashboardRefreshIntervalInMinutes = 30;
+  private Integer eventsRefreshIntervalInMinutes = 1440;
+
 
   public GeneralConfig() {
 
@@ -111,6 +116,16 @@ public class GeneralConfig {
           } catch (Exception ignored) {
           }
         } catch (Exception ignored) {
+        }
+        try {
+          this.dashboardRefreshIntervalInMinutes = jsonObject.getInt(DB_RFINT);
+        } catch (Exception e) {
+          this.dashboardRefreshIntervalInMinutes = 30;
+        }
+        try {
+          this.eventsRefreshIntervalInMinutes = jsonObject.getInt(ES_RFINT);
+        } catch (Exception e) {
+          this.eventsRefreshIntervalInMinutes = 1440;
         }
       }
     } catch (Exception e) {
@@ -196,5 +211,21 @@ public class GeneralConfig {
 
   public void setSmsDedupDuration(Integer smsDedupDuration) {
     this.smsDedupDuration = smsDedupDuration;
+  }
+
+  public Integer getDashboardRefreshIntervalInMinutes() {
+    return dashboardRefreshIntervalInMinutes;
+  }
+
+  public void setDashboardRefreshIntervalInMinutes(Integer dashboardRefreshIntervalInMinutes) {
+    this.dashboardRefreshIntervalInMinutes = dashboardRefreshIntervalInMinutes;
+  }
+
+  public Integer getEventsRefreshIntervalInMinutes() {
+    return eventsRefreshIntervalInMinutes;
+  }
+
+  public void setEventsRefreshIntervalInMinutes(Integer eventsRefreshIntervalInMinutes) {
+    this.eventsRefreshIntervalInMinutes = eventsRefreshIntervalInMinutes;
   }
 }

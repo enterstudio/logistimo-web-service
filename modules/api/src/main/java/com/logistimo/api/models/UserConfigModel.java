@@ -27,6 +27,7 @@ package com.logistimo.api.models;
 import com.logistimo.api.models.configuration.AdminContactConfigModel;
 import com.logistimo.api.models.configuration.AssetConfigModel;
 import com.logistimo.config.models.AssetConfig;
+import com.logistimo.config.models.EventSummaryConfigModel;
 
 import java.util.Map;
 
@@ -40,5 +41,6 @@ public class UserConfigModel {
   public String[] mtags;
   public boolean isApprover;
   public Map<String,AdminContactConfigModel> adminContact;
+  public EventConfigModel evtsum;
 
 }

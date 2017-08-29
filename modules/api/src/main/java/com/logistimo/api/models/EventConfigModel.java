@@ -23,19 +23,11 @@
 
 package com.logistimo.api.models;
 
-import java.util.List;
+/**
+ * Created by kumargaurav on 28/08/17.
+ */
+public class EventConfigModel {
 
-
-public class UserDashboardConfigModel {
-
-  public List<String> dmtgs;
-  public String aper;
-  public String dtt;
-  public Boolean edm;
-  public Boolean atdd;
-  public List<String> exetgs;
-  public List<String> extstts;
-  public List<String> dutgs;
   public Integer rfrshint;
 
 }
