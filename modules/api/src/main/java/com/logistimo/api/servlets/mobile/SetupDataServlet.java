@@ -389,7 +389,7 @@ public class SetupDataServlet extends JsonRestServlet {
 			*/
     } catch (ServiceException e) {
       xLogger.severe("Authentication of caller failed: Exception: {0}, Msg: {1} ",
-          e.getClass().getName(), e.getMessage());
+          e.getClass().getName(), e.getMessage(), e);
       errMsg = e.getMessage();
       status = false;
     } catch (UnauthorizedException e) {
@@ -574,8 +574,7 @@ public class SetupDataServlet extends JsonRestServlet {
         }
       }
     } catch (Exception e) {
-      xLogger.severe("SetupDataServlet Protocol Exception: {0} : {1}", e.getClass().getName(),
-          e.getMessage());
+      xLogger.severe("SetupDataServlet Protocol Exception: {0}", e.getClass().getName(), e);
       errMsg = backendMessages.getString("error.systemerror");
       status = false;
       sendSetupDataError(resp, uId, kioskId, dataErrors, localeStr, errMsg, statusCode);
@@ -599,8 +598,7 @@ public class SetupDataServlet extends JsonRestServlet {
       }
     } catch (Exception e) {
       xLogger
-          .severe("SetupDataServlet Protocol Exception: Class: {0} : {1}", e.getClass().getName(),
-              e.getMessage());
+          .severe("SetupDataServlet Protocol Exception: Class: {0}", e.getClass().getName(), e);
       resp.setStatus(500);
     }
     xLogger.fine("Exiting setupData");
@@ -678,7 +676,7 @@ public class SetupDataServlet extends JsonRestServlet {
       as.changePassword(userId, password, upPassword);
     } catch (ServiceException e) {
       xLogger.severe("ServiceException while changing password for user {0}, Msg: {1}", userId,
-          e.getMessage());
+          e.getMessage(), e);
       errMsg = e.getMessage();
       status = false;
       sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -698,8 +696,7 @@ public class SetupDataServlet extends JsonRestServlet {
 
     } catch (Exception e) {
       xLogger
-          .severe("SetupDataServlet Protocol Exception: Class: {0} : {1}", e.getClass().getName(),
-              e.getMessage());
+          .severe("SetupDataServlet Protocol Exception: Class: {0}", e.getClass().getName(), e);
       resp.setStatus(500);
     }
 
@@ -799,7 +796,7 @@ public class SetupDataServlet extends JsonRestServlet {
       } catch (ServiceException e) {
         xLogger
             .severe("ServiceException while resetting password for user {0}, Msg: {1}", endUserId,
-                e.getMessage());
+                e.getMessage(), e);
         errMsg = e.getMessage();
         status = false;
         sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -837,7 +834,7 @@ public class SetupDataServlet extends JsonRestServlet {
         ms.send(endUserAccount, msg, MessageService.NORMAL, "Password updated", null, logMsg);
       } catch (MessageHandlingException e) {
         xLogger.severe("{0} while sending message during reset password for user {1}. Message: {2}",
-            e.getClass().getName(), endUserId, e.getMessage());
+            e.getClass().getName(), endUserId, e.getMessage(), e);
         errMsg = e.getMessage();
         status = false;
         sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -845,7 +842,7 @@ public class SetupDataServlet extends JsonRestServlet {
       } catch (ObjectNotFoundException onfe) {
         xLogger.severe(
             "{0} while getting user account for user {1} during reset password. Message: {2}",
-            onfe.getClass().getName(), endUserId, onfe.getMessage());
+            onfe.getClass().getName(), endUserId, onfe.getMessage(), onfe);
         errMsg = onfe.getMessage();
         status = false;
         sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -868,7 +865,7 @@ public class SetupDataServlet extends JsonRestServlet {
     } catch (Exception e) {
       xLogger
           .severe("SetupDataServlet Protocol Exception: Class: {0} : {1}", e.getClass().getName(),
-              e.getMessage());
+              e.getMessage(), e);
       resp.setStatus(500);
     }
     xLogger.fine("Exiting resetPassword");
@@ -967,7 +964,7 @@ public class SetupDataServlet extends JsonRestServlet {
           as.deleteKiosks(domainId, kioskIdsList, u.getUserId());
         } catch (ServiceException e) {
           xLogger.severe("ServiceException while deleting kiosks {0} for domain {1}, Msg: {2}",
-              kioskIdsList, domainId, e.getMessage());
+              kioskIdsList, domainId, e.getMessage(), e);
           errMsg = e.getMessage();
           status = false;
           sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -983,7 +980,7 @@ public class SetupDataServlet extends JsonRestServlet {
         us.deleteAccounts(domainId, endUserIdsList, null);
       } catch (ServiceException e) {
         xLogger.severe("ServiceException while deleting users {0} for domain {1}, Msg: {2}",
-            endUserIds, domainId, e.getMessage());
+            endUserIds, domainId, e.getMessage(), e);
         errMsg = e.getMessage();
         status = false;
         sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -1014,7 +1011,7 @@ public class SetupDataServlet extends JsonRestServlet {
           ms.deleteMaterials(domainId, materialIdsList);
         } catch (ServiceException e) {
           xLogger.severe("ServiceException while deleting materials {0} for domain {1}, Msg: {2}",
-              materialIdsList, domainId, e.getMessage());
+              materialIdsList, domainId, e.getMessage(), e);
           errMsg = e.getMessage();
           status = false;
           sendBasicError(resp, locale.toString(), errMsg, null, HttpServletResponse.SC_OK);
@@ -1039,7 +1036,7 @@ public class SetupDataServlet extends JsonRestServlet {
       } catch (Exception e) {
         xLogger
             .severe("SetupDataServlet Protocol Exception: Class: {0} : {1}", e.getClass().getName(),
-                e.getMessage());
+                e.getMessage(), e);
         resp.setStatus(500);
       }
     }
@@ -1259,7 +1256,7 @@ public class SetupDataServlet extends JsonRestServlet {
     } catch (Exception e) {
       xLogger
           .severe("SetupDataServlet Protocol Exception: Class: {0} : {1}", e.getClass().getName(),
-              e.getMessage());
+              e.getMessage(), e);
       resp.setStatus(500);
     }
     xLogger.fine("Exiting sendSetupDataError");
@@ -1409,7 +1406,7 @@ public class SetupDataServlet extends JsonRestServlet {
       errMsg = e.getMessage();
       status = false;
       sendBasicError(resp, locale.toString(), errMsg, errMsgs, HttpServletResponse.SC_OK);
-      xLogger.severe("{0} while managing relationship. Message: {1}", e.getClass(), e.getMessage());
+      xLogger.severe("{0} while managing relationship. Message: {1}", e.getClass(), e.getMessage(), e);
     }
     if (status) {
       try {
@@ -1608,7 +1605,7 @@ public class SetupDataServlet extends JsonRestServlet {
           u = RESTUtil.authenticate(userId, password, null, req, resp);
         } catch (ServiceException e) {
           xLogger.severe("Authentication of caller failed: Exception: {0}, Msg: {1} ",
-              e.getClass().getName(), e.getMessage());
+              e.getClass().getName(), e.getMessage(), e);
           errMsg = e.getMessage();
           status = false;
         }
@@ -1697,7 +1694,7 @@ public class SetupDataServlet extends JsonRestServlet {
       } catch (Exception e) {
         xLogger.severe(
             "{0} when sending JSON response for getRelatedEntities for kiosk {1} and relationships {2}: {3}",
-            e.getClass().getName(), kioskIdStr, relationshipType, e.getMessage());
+            e.getClass().getName(), kioskIdStr, relationshipType, e.getMessage(), e);
         resp.setStatus(500);
       }
     }
@@ -1718,7 +1715,7 @@ public class SetupDataServlet extends JsonRestServlet {
     } catch (Exception e) {
       xLogger
           .severe("SetupDataServlet Protocol Exception: Class: {0} : {1}", e.getClass().getName(),
-              e.getMessage());
+              e.getMessage(), e);
       resp.setStatus(500);
     }
     xLogger.fine("Exiting sendBasicError");

@@ -486,7 +486,9 @@ public class MobileOrderBuilder {
     Map<Long, Kiosk> kioskMap = new HashMap<>();
     for (IOrder order : orderList) {
       getKioskDetails(kioskIdList, entitiesService, kioskMap, order.getKioskId());
-      getKioskDetails(kioskIdList, entitiesService, kioskMap, order.getServicingKiosk());
+      if(order.getServicingKiosk() != null) {
+        getKioskDetails(kioskIdList, entitiesService, kioskMap, order.getServicingKiosk());
+      }
     }
     return kioskMap;
   }

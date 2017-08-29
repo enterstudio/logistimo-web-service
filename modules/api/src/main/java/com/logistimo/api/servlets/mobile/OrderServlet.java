@@ -245,7 +245,7 @@ public class OrderServlet extends JsonRestServlet {
       xLogger.severe(" Exception when getting kiosk", e);
       message = backendMessages.getString("error.nokiosk");
     } catch (UnauthorizedException e) {
-      xLogger.severe(" User unauthorized", e);
+      xLogger.warn(" User unauthorized", e);
       statusCode = HttpServletResponse.SC_UNAUTHORIZED;
       message = e.getMessage();
     } catch (ServiceException e) {
