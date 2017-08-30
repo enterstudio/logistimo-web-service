@@ -56,13 +56,11 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.Element;
@@ -243,38 +241,6 @@ public class Order implements IOrder {
     return String.format("%.2f", price);
   }
 
-  // Get estimated fulfillment time-ranges as a string, from a vector of hashtable (as coming in from the REST API)
-  public static String getEstimatedFulfillmentTimeRangesAsUTCString(
-      Vector<Hashtable<String, String>> timeRanges, Locale locale, String timezone) {
-    if (timeRanges == null || timeRanges.isEmpty()) {
-      return null;
-    }
-    Iterator<Hashtable<String, String>> it = timeRanges.iterator();
-    List<Map<String, Date>> utcTimeRanges = new ArrayList<Map<String, Date>>();
-    while (it.hasNext()) {
-      Hashtable<String, String> timeRange = it.next();
-      String timeRangeStr = timeRange.get(JsonTagsZ.TIME_START);
-      if (timeRangeStr == null || timeRangeStr.isEmpty()) {
-        continue;
-      }
-      try {
-        Map<String, Date>
-            utcTimeRange =
-            LocalDateUtil.parseTimeRange(timeRangeStr, locale, timezone);
-        if (utcTimeRange != null && !utcTimeRange.isEmpty()) {
-          utcTimeRanges.add(utcTimeRange);
-        }
-      } catch (ParseException e) {
-        xLogger.warn("Error parsing time range {0}", timeRangeStr);
-      }
-    }
-    if (!utcTimeRanges.isEmpty()) {
-      return LocalDateUtil.formatTimeRanges(utcTimeRanges, null, null);
-    } else {
-      return null;
-    }
-  }
-
   public Long getId() {
     return id;
   }
@@ -431,7 +397,7 @@ public class Order implements IOrder {
 
   @Override
   public void setTotalPrice(BigDecimal tp) {
-    this.tp = tp;
+    this.tp = tp.setScale(4, RoundingMode.HALF_UP);
   }
 
   @Override
@@ -868,7 +834,7 @@ public class Order implements IOrder {
     if (tp == null) {
       return "0.0";
     }
-    return getFormattedPrice(tp); // String.format( "%.2f", tp );
+    return getFormattedPrice(tp);
   }
 
   // Check if issues have to be done automatically
@@ -1059,8 +1025,6 @@ public class Order implements IOrder {
     if (cdrsn != null && !cdrsn.isEmpty()) {
       map.put(JsonTagsZ.REASONS_FOR_CANCELLING_ORDER, cdrsn);
     }
-//		if ( ms != null ) // Send message
-//			ht.put( JsonTagsZ.MESSAGE, ms );
     if (includeItems && items != null && !items.isEmpty()) {
       IDemandService ds = null;
       ds = Services.getService(DemandService.class, locale);
@@ -1121,11 +1085,6 @@ public class Order implements IOrder {
       xLogger.severe("{0} when getting custom ID for order {1}: {2}", e.getClass().getName(),
           getOrderId(), e.getMessage());
     }
-    // If a transporter has been set for an order, put it into the ht.
-//		String transporterName =  getTransporterName();
-//		if ( transporterName != null && !transporterName.isEmpty() ) {
-//			ht.put( JsonTagsZ.TRANSPORTER, transporterName );
-//		}
     return map;
   }
 
