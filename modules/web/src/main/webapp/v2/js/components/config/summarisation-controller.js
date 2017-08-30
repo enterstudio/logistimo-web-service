@@ -41,13 +41,15 @@ domainCfgControllers.controller('SummarisationMenuController', ['$scope', 'domai
         domainCfgService.getEventSummaryConfig().then(function (data) {
             var esConfig = data.data;
             $scope.config = {};
-
+            $scope.tags = {};
             if (checkNotNullEmpty(esConfig)) {
                 $scope.config.eventdistribution = [];
-                checkNotNullEmpty(esConfig.tag) ? $scope.tags = {
-                    ttag: esConfig.tag,
-                    tag: esConfig.tag
-                } : $scope.tags = {};
+                if(!checkNullEmptyObject(esConfig.tag)) {
+                    $scope.tags = {
+                        ttag: esConfig.tag,
+                        tag: esConfig.tag
+                    }
+                }
                 if (checkNotNullEmpty(esConfig.tag_distribution)) {
                     angular.forEach(esConfig.tag_distribution, function (tag) {
                         $scope.config.eventdistribution.push({text: tag, id: tag});
