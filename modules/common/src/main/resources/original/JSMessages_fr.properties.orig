@@ -1103,3 +1103,5 @@ approvals.rejected.lower=rejeté
 approvals.cancelled.lower=annulé
 approvals.approved.lower=approuvé
 likelytostockout.days=Probabilité de décharger (jours)
+approvals.expired.lower=expiré
+request.sent.to=Cette demande a été envoyée à

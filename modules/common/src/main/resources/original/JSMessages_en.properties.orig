@@ -1104,3 +1104,5 @@ approvals.rejected.lower=rejected
 approvals.cancelled.lower=cancelled
 approvals.approved.lower=approved
 likelytostockout.days=Likely to stock out (days)
+approvals.expired.lower=expired
+request.sent.to=This request was sent to

@@ -30,19 +30,19 @@
                 <span ng-show="type == 's' && typeCount == 2">{{resourceBundle['order.sales']}} {{resourceBundle['approval.lowercase']}}: </span>
                 <span ng-show="!cancelApproval">
                     <span class="control-label"
-                          ng-show="(type == 'p' && request == true || type == 'p' && approve == true) && !(cancelled || approved || rejected)"><span class="glyphicons glyphicons-exclamation-sign c-red" style="top:2px;"></span> {{resourceBundle['approvals.purchase.required']}}</span>
+                          ng-show="(type == 'p' && request == true || type == 'p' && approve == true) && !(cancelled || approved || rejected || expired)"><span class="glyphicons glyphicons-exclamation-sign c-red mt2"></span> {{resourceBundle['approvals.purchase.required']}}</span>
                     <span class="control-label"
-                          ng-show="(type == 's' && request == true || type == 's' && approve == true) && !(cancelled || approved || rejected)"><span class="glyphicons glyphicons-exclamation-sign c-red" style="top:2px;"></span> {{resourceBundle['approvals.shipping.required']}}</span>
+                          ng-show="(type == 's' && request == true || type == 's' && approve == true) && !(cancelled || approved || rejected || expired)"><span class="glyphicons glyphicons-exclamation-sign c-red mt2"></span> {{resourceBundle['approvals.shipping.required']}}</span>
                     <span class="control-label"
-                          ng-show="(type == 't' && request == true || type == 't' && approve == true) && !(cancelled || approved || rejected)"><span class="glyphicons glyphicons-exclamation-sign c-red" style="top:2px;"></span> {{resourceBundle['approvals.transfer.required']}}</span>
+                          ng-show="(type == 't' && request == true || type == 't' && approve == true) && !(cancelled || approved || rejected || expired)"><span class="glyphicons glyphicons-exclamation-sign c-red mt2"></span> {{resourceBundle['approvals.transfer.required']}}</span>
                     <span class="control-label" ng-show="approved == true"><span
-                            class="glyphicons glyphicons-ok-circle c-green" style="top:2px;"></span> {{resourceBundle['order']}} {{resourceBundle['approvals.approved.lower']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lower']}} <a
+                            class="glyphicons glyphicons-ok-circle c-green mt2"></span> {{resourceBundle['order']}} {{resourceBundle['approvals.approved.lower']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </span>
                 <span ng-show="cancelApproval">
-                    <span class="glyphicons glyphicons-clock c-red small"
+                    <span class="glyphicons glyphicons-clock c-timer-orange mt2"
                           uib-tooltip="Expiring {{approval.expires_at | fromNow:this}}"
-                          tooltip-append-to-body="true" style="top:2px;"></span>
+                          tooltip-append-to-body="true"></span>
                     <span ng-show="approval.status.status = 'pn'">{{resourceBundle['approvals.pending']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['by.lower']}}</span>
                     <span ng-repeat="item in approval.approvers" style="display:inline-block;">
                         <a ng-hide="$index == approval.approvers.length - 1"
@@ -52,10 +52,10 @@
                     </span>
                 </span>
                 <span ng-show="request">
-                    <span ng-show="cancelled && !isApprover" class="control-label"><span class="glyphicons glyphicons-remove-circle c-orange" style="top:2px;"></span> {{resourceBundle['approval.request']}} {{resourceBundle['approvals.cancelled.lower']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="cancelled && !isApprover" class="control-label"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approval.request']}} {{resourceBundle['approvals.cancelled.lower']}} {{resourceBundle['on.lower']}}</span>
                     <span ng-show="approved && !isApprover" class="control-label"> {{resourceBundle['order']}} {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="rejected" class="control-label"><span class="glyphicons glyphicons-remove-circle c-red" style="top:2px;"></span> {{resourceBundle['order']}} {{resourceBundle['approvals.rejected.lower']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="expired" class="control-label"><span class="glyphicons glyphicons-remove-circle c-grey" style="top:2px;"></span> {{resourceBundle['approval.request']}} {{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}</span>
+                    <span ng-show="rejected" class="control-label"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['order']}} {{resourceBundle['approvals.rejected.lower']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="expired" class="control-label"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approval.request']}} {{resourceBundle['approvals.expired.lower']}} {{approval.status.updated_at | fromNow:this }}</span>
                     <span ng-show="cancelled || approved || rejected" class="control-label">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </span>
@@ -89,10 +89,13 @@
                     <span class="control-label"
                           ng-show="type == 't' && request == true || type == 't' && approve == true">{{resourceBundle['approvals.transfer.required']}}</span>
                     <span class="control-label" ng-show="approved == true"><span
-                            class="glyphicons glyphicons-ok-circle c-green"></span> {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lowercase']}} <a
+                            class="glyphicons glyphicons-ok-circle c-green"></span> {{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}} {{approval.status.updated_at | formatDate:this }} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
                 <div class="col-sm-9" ng-show="cancelApproval">
+                    <span class="glyphicons glyphicons-clock c-timer-orange mt2"
+                          uib-tooltip="Expiring {{approval.expires_at | fromNow:this}}"
+                          tooltip-append-to-body="true"></span>
                     <span ng-show="approval.status.status = 'pn'">{{resourceBundle['approvals.pending']}} {{resourceBundle['approval.lowercase']}} {{resourceBundle['by.lower']}}</span>
                     <span ng-repeat="item in approval.approvers" style="display:inline-block;">
                         <a ng-hide="$index == approval.approvers.length - 1"
@@ -100,9 +103,6 @@
                         <a ng-show="$index == approval.approvers.length - 1"
                            href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}}</a>
                     </span>
-                    <span class="glyphicons glyphicons-clock c-red large"
-                          uib-tooltip="Expiring {{approval.expires_at | fromNow:this}}"
-                          tooltip-append-to-body="true"></span>
                 </div>
                 <div class="col-sm-9" ng-show="cancelApproval">
                     <span class="litetext" style="display: inline-block">{{resourceBundle['approvals.requested']}} {{resourceBundle['on.lower']}} {{approval.created_at | formatDate:this }} {{resourceBundle['by.lower']}} </span>
@@ -112,16 +112,16 @@
                 <div class="col-sm-3">
                     <div class="pull-right">
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && !isApprover && isUndef(approval.approvers) && latest"
+                                ng-show="request == true && !isApprover && isUndef(approval.approvers) && latest && !order.st == 'cn' && !dp.vp"
                                 disabled>{{resourceBundle['approvals.request']}}
                             {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rq')"
-                                ng-show="request == true && isDef(approval.approvers) && latest">
+                                ng-show="request == true && isDef(approval.approvers) && latest && !(order.st == 'cn') && !dp.vp">
                             {{resourceBundle['approvals.request']}} {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('cn')"
-                                ng-show="cancelApproval == true && !isApprover">
+                                ng-show="cancelApproval == true && !isApprover && !dp.vp">
                             {{resourceBundle['approvals.cancel']}} {{resourceBundle['approval.lowercase']}}
                         </button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="openApproval('rj')"
@@ -133,10 +133,17 @@
                     </div>
                 </div>
                 <div class="col-sm-12 pt5" ng-show="request">
-                    <span ng-show="cancelled && !isApprover">{{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="cancelled && !isApprover"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lower']}}</span>
                     <span ng-show="approved && !isApprover">{{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-red"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="expired">{{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}</span>
+                    <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lower']}}</span>
+                    <span ng-show="expired"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}. {{resourceBundle['request.sent.to']}}:
+                    <span ng-repeat="item in approval.approvers" style="display:inline-block;">
+                        <a ng-hide="$index == approval.approvers.length - 1"
+                           href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
+                        <a ng-show="$index == approval.approvers.length - 1"
+                           href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}}</a>
+                    </span>
+                    </span>
                     <span ng-show="cancelled || approved || rejected">{{approval.status.updated_at | formatDate:this}} {{resourceBundle['by.lower']}} <a
                             href="#/setup/users/all/details?userId={{approval.status_updated_by.user_id}}">{{approval.status_updated_by.name}}</a></span>
                 </div>
@@ -145,7 +152,7 @@
                 <div class="col-sm-12 lPad10 rPad10" ng-show="isDef(id)">
                     <div class="bgr">
                         <div ng-include="'views/conversation/messages.html'"
-                             ng-init="objId = id;objType = 'APPROVAL'"></div>
+                             ng-init="objId = id;objType = 'APPROVAL';status = order.st"></div>
                     </div>
                 </div>
             </div>

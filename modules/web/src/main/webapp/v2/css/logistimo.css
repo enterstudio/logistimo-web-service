@@ -2948,6 +2948,14 @@ widget-panel .panel {
     color: darkorange;
 }
 
+.c-timer-orange {
+    color: #f37600;
+}
+
+.c-status-red {
+    color: #FF0000;
+}
+
 .c-yellow {
     color: #f0ad4e !important;
 }

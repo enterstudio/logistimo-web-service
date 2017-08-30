@@ -189,17 +189,14 @@
                                 ng-href="#/setup/users/all/details?userId={{item.requester.user_id}}" target="_blank">{{item.requester.name}}</a>
                             <span class="litetext">{{item.created_at | formatDate:this}}</span></td>
                         <td ng-click="toggle($index)">
-                                <span ng-show="'pn' == item.status.status">
+                                <span ng-show="'pn' == item.status.status || 'ex' == item.status.status || 'cn' == item.status.status">
                                     <span class="litetext">{{resourceBundle['approvals.sent.to']}}:</span>
                                     <span ng-repeat="it in item.approvers">
-                                        <span ng-show="it.approver_status == 'ac'">
+                                        <span ng-show="('pn' == item.status.status && it.approver_status == 'ac') || ('ex' == item.status.status && it.approver_status == 'ex') || 'cn' == item.status.status">
                                             <span ng-hide="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a>,&nbsp;</span>
                                             <span ng-show="$index == item.approvers.length - 1"><a href="#/setup/users/all/details?userId={{it.user_id}}">{{it.name}}</a></span>
                                         </span>
                                     </span>
-                                </span>
-                                <span ng-show="item.status.status == 'ex' || item.status.status == 'cn'">
-                                    {{resourceBundle['approvals.approvers.none']}}
                                 </span>
                                 <span ng-show="item.status.status == 'rj' || item.status.status == 'ap'">
                                     <a href="#/setup/users/all/details?userId={{item.status.updated_by}}">{{item.status.name}}</a>
