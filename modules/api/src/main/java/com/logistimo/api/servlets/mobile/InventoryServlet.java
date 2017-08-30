@@ -860,11 +860,9 @@ public class InventoryServlet extends JsonRestServlet {
         Integer status = TransactionUtil.getObjectFromCache(String.valueOf(mobUpdateInvTransReq.sntm),
             mobUpdateInvTransReq.uid, mobUpdateInvTransReq.kid,
             mobUpdateInvTransReq.pid);
-        if (status != null) {
-          if (TransactionUtil.IN_PROGRESS == status) {
+        if (status != null && TransactionUtil.IN_PROGRESS == status) {
             throw new LogiException(
                 backendMessages.getString("transactions.processing.inprogress"));
-          }
         }
       }
     } catch (UnauthorizedException ue) {

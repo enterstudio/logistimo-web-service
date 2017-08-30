@@ -23,7 +23,6 @@
 
 package com.logistimo.api.controllers;
 
-import com.google.gson.Gson;
 
 import com.logistimo.api.builders.SMSBuilder;
 import com.logistimo.api.constants.SMSConstants;
@@ -125,10 +124,8 @@ public class SMSController {
             TransactionUtil.getObjectFromCache(String.valueOf(model.getSendTime()),
                 model.getUserId(), model.getKioskId(),
                 model.getPartialId());
-        if (status != null) {
-          if (TransactionUtil.IN_PROGRESS == status) {
+        if (status != null && TransactionUtil.IN_PROGRESS == status) {
             throw new LogiException("Transaction is in progress");
-          }
         }
       } else {
         InventoryManagementService
@@ -205,7 +202,6 @@ public class SMSController {
                 model.getPartialId(),
                 null, midErrorDetailModelsMap, populateMaterialList(model));
     if (!isDuplicate && mobUpdateInvTransResp != null) {
-        String mobUpdateInvTransRespJsonStr = new Gson().toJson(mobUpdateInvTransResp);
         TransactionUtil.setObjectInCache(String.valueOf(model.getSendTime()), model.getUserId(),
             model.getKioskId(), model.getPartialId(),
             TransactionUtil.COMPLETED);
