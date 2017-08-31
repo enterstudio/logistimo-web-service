@@ -135,8 +135,8 @@ public class DemandService extends ServiceImpl implements IDemandService {
       parameters.add(IOrder.BACKORDERED);
     }
     if (excludeTransfer) {
-      query.append(" AND OTY = ?");
-      parameters.add(String.valueOf(IOrder.NONTRANSFER));
+      query.append(" AND OTY != ?");
+      parameters.add(String.valueOf(IOrder.TRANSFER));
     }
     query.append(CharacterConstants.C_BRACKET);
     if (mId != null) {
@@ -525,8 +525,8 @@ public class DemandService extends ServiceImpl implements IDemandService {
     }
     StringBuilder orderQuery = new StringBuilder("SELECT ID FROM `ORDER` WHERE ");
     if (excludeTransfer) {
-      orderQuery.append("OTY = ").append(CharacterConstants.QUESTION);
-      parameters.add(String.valueOf(IOrder.NONTRANSFER));
+      orderQuery.append("OTY != ").append(CharacterConstants.QUESTION);
+      parameters.add(String.valueOf(IOrder.TRANSFER));
       orderQuery.append(" AND (");
     }
     // kioskIds can be present with out without kioskId
