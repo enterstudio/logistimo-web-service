@@ -32,7 +32,7 @@
                         ng-disabled="sel.selectedRows.length<=0">{{resourceBundle['create.shipment']}}
                 </button>
                 <button type="button" class="btn btn-sm btn-primary ml10"
-                        ng-show="editPermission && (( (order.st == ORDER.PENDING && ( order.oty!=0  || order.atv ))) ||
+                        ng-show="order.alc && editPermission && (( (order.st == ORDER.PENDING && ( order.oty!=0  || order.atv ))) ||
                         ((order.st == ORDER.BACKORDERED || order.st == ORDER.CONFIRMED) && order.atv))"
                         ng-click="startEditMats()">{{resourceBundle['edit']}}
                 </button>
