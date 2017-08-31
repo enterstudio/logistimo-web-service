@@ -68,7 +68,7 @@ public class OrdersConfig implements Serializable {
   private static final String CANCELLING_ORDER_REASONS = "cor";
   private static final String CANCELLING_ORDER_REASONS_MANDATORY = "corm";
   private static final String ALLOW_CREATING_SHIPMENTS = "acs";
-  private static final String AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION = "aafmsc";
+  private static final String AUTO_ASSIGN_FIRST_MATERIAL_STATUS = "aafmsc";
   private static final String CREATION_AUTOMATED = "auto_create";
   private static final String AUTO_CREATE_ON_MIN = "ac_on_min";
   private static final String AUTO_CREATE_PDOS = "ac_pdos";
@@ -103,7 +103,7 @@ public class OrdersConfig implements Serializable {
   private String coReasons;
   private boolean coReasonsMandatory;
   private boolean allowCreatingShipments;
-  private boolean autoAssignFirstMatStOnConfirmation;
+  private boolean autoAssignFirstMatStatus;
   private boolean creationAutomated = false;
   private boolean autoCreateOnMin = false;
   private int autoCreatePdos = 0;
@@ -232,7 +232,7 @@ public class OrdersConfig implements Serializable {
       //ignore
     }
     try {
-      autoAssignFirstMatStOnConfirmation = json.getBoolean(AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION);
+      autoAssignFirstMatStatus = json.getBoolean(AUTO_ASSIGN_FIRST_MATERIAL_STATUS);
     } catch (JSONException e) {
       // ignore
     }
@@ -366,7 +366,7 @@ public class OrdersConfig implements Serializable {
       json.put(ALLOCATE_STOCK_ON_CONFIRMATION, allocateStockOnConfirmation);
       json.put(TRANSFER_RELEASE, transferRelease);
       json.put(ALLOW_CREATING_SHIPMENTS, allowCreatingShipments);
-      json.put(AUTO_ASSIGN_FIRST_MATERIAL_STATUS_ON_CONFIRMATION, autoAssignFirstMatStOnConfirmation);
+      json.put(AUTO_ASSIGN_FIRST_MATERIAL_STATUS, autoAssignFirstMatStatus);
       json.put(CREATION_AUTOMATED, creationAutomated);
       json.put(AUTO_CREATE_ON_MIN, autoCreateOnMin);
       json.put(AUTO_CREATE_PDOS, autoCreatePdos);
@@ -560,12 +560,12 @@ public class OrdersConfig implements Serializable {
     this.allowCreatingShipments = allowCreatingShipments;
   }
 
-  public boolean autoAssignFirstMatStOnConfirmation() {
-    return autoAssignFirstMatStOnConfirmation;
+  public boolean autoAssignFirstMatStatus() {
+    return autoAssignFirstMatStatus;
   }
 
-  public void setAutoAssignFirstMaterialStatusOnConfirmation(boolean assignMatStatus) {
-    autoAssignFirstMatStOnConfirmation = assignMatStatus;
+  public void setAutoAssignFirstMaterialStatus(boolean assignMatStatus) {
+    autoAssignFirstMatStatus = assignMatStatus;
   }
 
   public boolean isCreationAutomated() {

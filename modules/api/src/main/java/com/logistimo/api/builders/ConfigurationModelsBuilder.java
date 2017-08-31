@@ -1222,7 +1222,7 @@ public class ConfigurationModelsBuilder {
            /* if (oc.getExportUserIds() != null) {
                 model.an = oc.getExportUserIds();
             }*/
-      model.aafmsc = oc.autoAssignFirstMatStOnConfirmation();
+      model.aafmsc = oc.autoAssignFirstMatStatus();
       model.autoCreate = oc.isCreationAutomated();
       model.autoCreateOnMin = oc.isAutoCreateOnMin();
       model.pdos = oc.getAutoCreatePdos();

@@ -198,7 +198,11 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
       IKiosk vendor = ems.getKiosk(model.vendorId, false);
       DomainConfig dc = DomainConfig.getInstance(vendor.getDomainId());
       InventoryManagementService ims = Services.getService(InventoryManagementServiceImpl.class);
+      boolean containsBatchMaterial = false;
       for (ShipmentItemModel item : model.items) {
+        if(item.isBa) {
+          containsBatchMaterial = true;
+        }
         if (dc.autoGI() && item.afo) {
           BigDecimal transferQuantity = item.q;
           if (item.isBa) {
@@ -261,7 +265,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
           model.status != null && !model.status.equals(ShipmentStatus.OPEN);
       String tempSensitiveStatus = null;
       String materialStatus = null;
-      if (dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation()) {
+      if (!containsBatchMaterial && dc.getOrdersConfig().autoAssignFirstMatStatus()) {
         tempSensitiveStatus = dc.getInventoryConfig().getFirstMaterialStatus(true);
         materialStatus = dc.getInventoryConfig().getFirstMaterialStatus(false);
       }

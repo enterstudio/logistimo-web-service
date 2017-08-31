@@ -2183,7 +2183,7 @@ public class RESTUtil {
       ordCfg.put(JsonTagsZ.TRANSFER_RELEASE, oc.isTransferRelease());
       // Configuration for automatic allocation and material status assignment to order
       ordCfg.put(JsonTagsZ.AUTO_ALLOCATE_INVENTORY_TO_ORDERS, oc.allocateStockOnConfirmation());
-      ordCfg.put(JsonTagsZ.AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS, oc.autoAssignFirstMatStOnConfirmation());
+      ordCfg.put(JsonTagsZ.AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS, oc.autoAssignFirstMatStatus());
     }
     if (dc.isTransporterMandatory()) {
       ordCfg.put(JsonTagsZ.TRANSPORTER_MANDATORY, dc.isTransporterMandatory());

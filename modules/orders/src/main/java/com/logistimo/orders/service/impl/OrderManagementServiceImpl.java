@@ -379,7 +379,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
 
       } else if (newStatus.equals(IOrder.CONFIRMED) && dc.autoGI() && dc.getOrdersConfig()
           .allocateStockOnConfirmation()) {
-        boolean autoAssignStatus = dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation();
+        boolean autoAssignStatus = dc.getOrdersConfig().autoAssignFirstMatStatus();
         for (IDemandItem d : demandList) {
           try {
             ims.allocateAutomatically(o.getServicingKiosk(), d.getMaterialId(),
@@ -1076,7 +1076,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
               .allowSalesOrderAsConfirmed()) {
             o.setStatus(IOrder.CONFIRMED);
             if (dc.autoGI() && dc.getOrdersConfig().allocateStockOnConfirmation()) {
-              boolean autoAssignStatus = dc.getOrdersConfig().autoAssignFirstMatStOnConfirmation();
+              boolean autoAssignStatus = dc.getOrdersConfig().autoAssignFirstMatStatus();
               for (IDemandItem d : demandList) {
                 String tag = IInvAllocation.Type.ORDER.toString().concat(":")
                     .concat(String.valueOf(d.getOrderId()));
