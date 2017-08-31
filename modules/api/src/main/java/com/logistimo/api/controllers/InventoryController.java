@@ -298,6 +298,7 @@ public class InventoryController {
         filters.put(ReportsConstants.FILTER_EXCLUDED_KIOSKTAG, eetag);
         filters.put(ReportsConstants.FILTER_MATERIAL, materialId);
         filters.put(ReportsConstants.FILTER_LATEST, true);
+        filters.put(ReportsConstants.FILTER_ABNORMALSTOCKVIEW, true);
 
         ReportsService reportsService = Services.getService(ReportsServiceImpl.class);
         ReportData

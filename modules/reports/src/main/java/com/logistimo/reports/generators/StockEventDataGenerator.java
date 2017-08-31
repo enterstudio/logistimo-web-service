@@ -212,7 +212,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
           declaration += "Long mIdParam";
           params.put("mIdParam", materialId);
       }
-      if (kioskId == null && !hasKioskIds && materialId == null && domainId != null) {
+      if (kioskId == null && !hasKioskIds) {
           if (!filterStr.isEmpty()) {
               filterStr += " && ";
               declaration += ",";
