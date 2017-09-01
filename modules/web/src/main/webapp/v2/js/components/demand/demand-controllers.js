@@ -621,7 +621,7 @@ demandControllers.controller('MatDemandListMapCtrl', ['$scope', 'demandService',
 demandControllers.controller('DiscrepanciesListingCtrl', ['$scope', 'demandService', 'domainCfgService', 'entityService', 'matService', 'exportService', 'ordService', 'requestContext', '$location',
     function ($scope, demandService, domainCfgService, entityService, matService, exportService, ordService , requestContext, $location) {
         $scope.wparams = [["etag", "eTag"], ["mtag", "mTag"], ["o", "offset"], ["s", "size"], ["eid", "entity.id"], ["mid", "material.mId"],["oid", "orderId"],["from", "from", "", formatDate2Url],["to", "to", "", formatDate2Url],["dt", "discType"],["otype","oType","sle"], ["etrn", "etrn"]];
-        $scope.localFilters = ['entity', 'material', 'discType', 'etrn', 'ordId', 'from', 'to', 'eTag', 'mTag'];
+        $scope.localFilters = ['entity', 'material', 'discType', 'etrn', 'orderId', 'from', 'to', 'eTag', 'mTag'];
         $scope.demandWithDisc;
         $scope.eTag;
         $scope.mTag;
@@ -758,6 +758,7 @@ demandControllers.controller('DiscrepanciesListingCtrl', ['$scope', 'demandServi
             $scope.from = undefined;
             $scope.to = undefined;
             $scope.orderId = undefined;
+            $scope.ordId = undefined;
             $scope.discType = undefined;
             $scope.oType = "sle";
             $scope.etrn = false;
