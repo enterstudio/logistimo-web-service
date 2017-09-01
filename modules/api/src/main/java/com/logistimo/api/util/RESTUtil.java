@@ -1398,8 +1398,8 @@ public class RESTUtil {
       String transMenu = null, tagsInventory = null, tagsOrders = null, geoCodingStrategy = null,
           creatableEntityTypes =
               null;
-      boolean allowRouteTagEditing = false, loginAsReconnect = false;
-      boolean sendVendors = false, sendCustomers = false, enableShippingOnMobile = false;
+      boolean allowRouteTagEditing, loginAsReconnect;
+      boolean sendVendors, sendCustomers, disableShippingOnMobile;
       // Inventory tags to hide by operation, if any
       Hashtable<String, String> invTgsToHide = null;
       if (cconf != null) { // send role-specific configuration
@@ -1412,7 +1412,7 @@ public class RESTUtil {
         creatableEntityTypes = StringUtil.getCSV(cconf.getCreatableEntityTypes());
         allowRouteTagEditing = cconf.allowRouteTagEditing();
         loginAsReconnect = cconf.isLoginAsReconnect();
-        enableShippingOnMobile = cconf.isEnableShippingOnMobile();
+        disableShippingOnMobile = cconf.isDisableShippingOnMobile();
         invTgsToHide = getInventoryTagsToHide(cconf);
       } else { // send generic configuration
         transMenu = dc.getTransactionMenusString();
@@ -1424,7 +1424,7 @@ public class RESTUtil {
         creatableEntityTypes = StringUtil.getCSV(dc.getCreatableEntityTypes());
         allowRouteTagEditing = dc.allowRouteTagEditing();
         loginAsReconnect = dc.isLoginAsReconnect();
-        enableShippingOnMobile = dc.isEnableShippingOnMobile();
+        disableShippingOnMobile = dc.isDisableShippingOnMobile();
         invTgsToHide = getInventoryTagsToHide(dc);
       }
       if (invTgsToHide != null && !invTgsToHide.isEmpty()) {
@@ -1468,14 +1468,13 @@ public class RESTUtil {
         config.put(JsonTagsZ.CREATABLE_ENTITY_TYPES, creatableEntityTypes);
       }
       if (allowRouteTagEditing) {
-        config.put(JsonTagsZ.ALLOW_ROUTETAG_EDITING, String.valueOf(allowRouteTagEditing));
+        config.put(JsonTagsZ.ALLOW_ROUTETAG_EDITING, String.valueOf(true));
       }
       if (loginAsReconnect) {
-        config.put(JsonTagsZ.LOGIN_AS_RECONNECT, String.valueOf(loginAsReconnect));
+        config.put(JsonTagsZ.LOGIN_AS_RECONNECT, String.valueOf(true));
       }
-      if (enableShippingOnMobile) // Set the eshp flag only if it has to be true.
-      {
-        config.put(JsonTagsZ.ENABLE_SHIPPING_MOBILE, String.valueOf(enableShippingOnMobile));
+      if (!disableShippingOnMobile) {
+        config.put(JsonTagsZ.ENABLE_SHIPPING_MOBILE, String.valueOf(true));
       }
       // Send transaction reasons
       // Get wastage reason from the higest level, always

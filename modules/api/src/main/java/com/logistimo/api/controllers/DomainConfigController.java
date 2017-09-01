@@ -899,7 +899,7 @@ public class DomainConfigController {
         cconf.setCreatableEntityTypes(creatableEntityTypes);
         cconf.setAllowRouteTagEditing(model.er);
         cconf.setLoginAsReconnect(model.lr);
-        cconf.setEnableShippingOnMobile(model.eshp);
+        cconf.setDisableShippingOnMobile(model.dshp);
         cc.dc.setCapabilityByRole(model.ro, cconf);
 
         String issueTags = StringUtils.join(model.hii, ',');
@@ -937,7 +937,7 @@ public class DomainConfigController {
         cc.dc.setCreatableEntityTypes(creatableEntityTypes);
         cc.dc.setAllowRouteTagEditing(model.er);
         cc.dc.setLoginAsReconnect(model.lr);
-        cc.dc.setEnableShippingOnMobile(model.eshp);
+        cc.dc.setDisableShippingOnMobile(model.dshp);
         cc.dc.setStoreAppTheme(model.getTheme());
 
         String issueTags = TagUtil.getCleanTags(StringUtils.join(model.hii, ','), true);

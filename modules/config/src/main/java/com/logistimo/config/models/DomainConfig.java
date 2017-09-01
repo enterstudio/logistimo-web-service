@@ -271,7 +271,7 @@ public class DomainConfig implements ILocation, Serializable {
   //Admin contact configuration
   private AdminContactConfig adminContactConfig = null;
   // Disable shipping on mobile
-  private boolean enableShippingOnMobile = false;
+  private boolean disableShippingOnMobile = false;
   // Enable switching to new host
   private boolean enableSwitchToNewHost = false;
   // New host name field
@@ -716,7 +716,7 @@ public class DomainConfig implements ILocation, Serializable {
       }
 
       try {
-        this.enableShippingOnMobile = json.getBoolean(CapabilityConfig.ENABLE_SHIPPING_ON_MOBILE);
+        this.disableShippingOnMobile = json.getBoolean(CapabilityConfig.DISABLE_SHIPPING_ON_MOBILE);
       } catch (JSONException e) {
         // do nothing
       }
@@ -1020,11 +1020,10 @@ public class DomainConfig implements ILocation, Serializable {
         json.put(LANGUAGE_PREFERENCE, langPreference);
       }
 
-      json.put(CapabilityConfig.ENABLE_SHIPPING_ON_MOBILE, enableShippingOnMobile);
+      json.put(CapabilityConfig.DISABLE_SHIPPING_ON_MOBILE, disableShippingOnMobile);
 
       if (loginAsReconnect) {
-        json.put(CapabilityConfig.LOGIN_AS_RECONNECT,
-            loginAsReconnect);                        // Get JSON String
+        json.put(CapabilityConfig.LOGIN_AS_RECONNECT, true);
       }
 
       if (domainData != null) {
@@ -1037,7 +1036,7 @@ public class DomainConfig implements ILocation, Serializable {
         json.put(ENTITY_TAGS_ORDER, jsonEntityTagOrder);
       }
       if (enableSwitchToNewHost) {
-        json.put(ENABLE_SWITCH_TO_NEW_HOST, enableSwitchToNewHost);
+        json.put(ENABLE_SWITCH_TO_NEW_HOST, true);
       }
 
       if (newHostName != null && !newHostName.isEmpty()) {
@@ -1684,12 +1683,12 @@ public class DomainConfig implements ILocation, Serializable {
     this.adminContactConfig = adminContactConfig;
   }
 
-  public boolean isEnableShippingOnMobile() {
-    return enableShippingOnMobile;
+  public boolean isDisableShippingOnMobile() {
+    return disableShippingOnMobile;
   }
 
-  public void setEnableShippingOnMobile(boolean enableShippingOnMobile) {
-    this.enableShippingOnMobile = enableShippingOnMobile;
+  public void setDisableShippingOnMobile(boolean disableShippingOnMobile) {
+    this.disableShippingOnMobile = disableShippingOnMobile;
   }
 
   public boolean isEnableSwitchToNewHost() {

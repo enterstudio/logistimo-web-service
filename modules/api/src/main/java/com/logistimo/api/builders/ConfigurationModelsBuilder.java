@@ -745,7 +745,7 @@ public class ConfigurationModelsBuilder {
     if (dc.getTagsOrders() != null) {
       model.ho = new ArrayList<String>(Arrays.asList(dc.getTagsOrders().split(",")));
     }
-    model.eshp = dc.isEnableShippingOnMobile();
+    model.dshp = dc.isDisableShippingOnMobile();
     model.ro = "";
     Map<String, CapabilitiesConfigModel> roleMap = new HashMap<String, CapabilitiesConfigModel>(4);
     roleMap.put(SecurityConstants.ROLE_KIOSKOWNER,
@@ -834,7 +834,7 @@ public class ConfigurationModelsBuilder {
       if (config.getTagsOrders() != null) {
         model.ho = new ArrayList<String>(Arrays.asList(config.getTagsOrders().split(",")));
       }
-      model.eshp = config.isEnableShippingOnMobile();
+      model.dshp = config.isDisableShippingOnMobile();
     }
     if (dc != null) {
       model.atexp = dc.getAuthenticationTokenExpiry();

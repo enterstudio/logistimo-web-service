@@ -44,7 +44,7 @@ public class CapabilitiesConfigModel {
   public String createdBy; //userId last saved configuration
   public String lastUpdated; //last updated time
   public String fn; //first name
-  public boolean eshp; // Enable shipping orders on mobile
+  public boolean dshp; // Disable shipping orders on mobile
   public int atexp; // Authentication token expiry
   public boolean llr; // Local login required
 

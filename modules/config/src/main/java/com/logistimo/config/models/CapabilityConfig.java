@@ -57,7 +57,7 @@ public class CapabilityConfig implements Serializable {
   public static final String WASTAGE_REASONS = "wrsns";
   public static final String CREATABLE_ENTITY_TYPES = "crenty";
   public static final String ALLOW_ROUTETAG_EDITING = "arte";
-  public static final String ENABLE_SHIPPING_ON_MOBILE = "enshponmob";
+  public static final String DISABLE_SHIPPING_ON_MOBILE = "disponmob";
   public static final String DISABLE_TAGS_INVENTRY_OPERATION = "tgiov";
   // Creatable entity types
   public static final String TYPE_VENDOR = "vnds";
@@ -80,7 +80,7 @@ public class CapabilityConfig implements Serializable {
   private List<String> creatableEntityTypes; // the types of entities that can be created
   private boolean allowRouteTagEditing = false;
   private boolean loginAsReconnect = false;
-  private boolean enableShippingOnMobile = false; // By default disable shipping on mobile.
+  private boolean disableShippingOnMobile = false; // By default disable shipping on mobile.
   private Map<String, String> tagsInvByOperation = new HashMap<>();
 
   public CapabilityConfig() {
@@ -138,7 +138,7 @@ public class CapabilityConfig implements Serializable {
     }
     // Flags to disable shipping on mobile.
     try {
-      this.enableShippingOnMobile = json.getBoolean(ENABLE_SHIPPING_ON_MOBILE);
+      this.disableShippingOnMobile = json.getBoolean(DISABLE_SHIPPING_ON_MOBILE);
     } catch (JSONException e) {
       // do nothing
     }
@@ -215,11 +215,11 @@ public class CapabilityConfig implements Serializable {
         json.put(CREATABLE_ENTITY_TYPES, StringUtil.getCSV(creatableEntityTypes));
       }
       if (loginAsReconnect) {
-        json.put(LOGIN_AS_RECONNECT, loginAsReconnect);
+        json.put(LOGIN_AS_RECONNECT, true);
       }
       // Allow route tag editing
       json.put(ALLOW_ROUTETAG_EDITING, allowRouteTagEditing);
-      json.put(ENABLE_SHIPPING_ON_MOBILE, enableShippingOnMobile);
+      json.put(DISABLE_SHIPPING_ON_MOBILE, disableShippingOnMobile);
       if (!tagsInvByOperation.isEmpty()) {
         JSONObject invTags = new JSONObject();
         Iterator<String> it = tagsInvByOperation.keySet().iterator();
@@ -334,12 +334,12 @@ public class CapabilityConfig implements Serializable {
     this.allowRouteTagEditing = allow;
   }
 
-  public boolean isEnableShippingOnMobile() {
-    return enableShippingOnMobile;
+  public boolean isDisableShippingOnMobile() {
+    return disableShippingOnMobile;
   }
 
-  public void setEnableShippingOnMobile(boolean enableShippingOnMobile) {
-    this.enableShippingOnMobile = enableShippingOnMobile;
+  public void setDisableShippingOnMobile(boolean disableShippingOnMobile) {
+    this.disableShippingOnMobile = disableShippingOnMobile;
   }
 
   public Map<String, String> gettagsInvByOperation() {
