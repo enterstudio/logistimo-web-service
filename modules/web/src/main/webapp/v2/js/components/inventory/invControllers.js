@@ -341,8 +341,15 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
             }
         };
 
+        function updateFetchFiltersForManager() {
+            if($scope.iMan) {
+                $scope.loc =  $scope.locationSelected = undefined;
+            }
+        }
+
         $scope.fetch = function () {
             $scope.exRow = [];
+            updateFetchFiltersForManager();
             if (checkNotNullEmpty($scope.entityId)) {
                 if (!$scope.showFullAbnormalStock) {
                     $scope.loading = true;
