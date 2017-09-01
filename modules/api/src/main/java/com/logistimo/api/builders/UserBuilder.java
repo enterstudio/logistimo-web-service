@@ -230,6 +230,7 @@ public class UserBuilder {
           model.config.adminContact.remove(AdminContactConfig.SECONDARY_ADMIN_CONTACT);
         }
       }
+      model.tz = user.getTimezone();
     } catch (Exception e) {
       xLogger.warn("Unable to fetch the domain details", e);
     }
