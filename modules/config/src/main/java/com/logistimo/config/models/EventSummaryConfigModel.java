@@ -280,10 +280,16 @@ public class EventSummaryConfigModel implements Serializable {
     }
     for (Events categoryEvents : this.getEvents()) {
       int counter = 0;
-      for (Threshold threshold : categoryEvents.getThresholds()) {
-        threshold.setId(String.valueOf(Math.abs((categoryEvents.getCategory() +
-            categoryEvents.getType() +
-            threshold.hashCode() + counter++).hashCode())));
+      final Iterator<Threshold> iterator = categoryEvents.getThresholds().iterator();
+      while (iterator.hasNext()) {
+        Threshold threshold = iterator.next();
+        if (!threshold.conditions.isEmpty() ) {
+          threshold.setId(String.valueOf(Math.abs((categoryEvents.getCategory() +
+              categoryEvents.getType() +
+              threshold.hashCode() + counter++).hashCode())));
+        } else {
+          iterator.remove();
+        }
       }
     }
   }

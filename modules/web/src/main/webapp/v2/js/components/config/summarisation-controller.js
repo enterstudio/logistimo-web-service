@@ -204,8 +204,6 @@ domainCfgControllers.controller('SummarisationConfigurationController', ['$scope
                     });
                     thresholds.push({conditions: conditions});
                 });
-            } else {
-                thresholds.push({conditions: []});
             }
             event.category = $scope.subview;
             event.event_type = th;
