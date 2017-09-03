@@ -27,6 +27,7 @@ import com.codahale.metrics.Meter;
 import com.logistimo.communications.MessageHandlingException;
 import com.logistimo.communications.service.MessageService;
 import com.logistimo.config.models.DomainConfig;
+import com.logistimo.constants.Constants;
 import com.logistimo.entities.entity.IKiosk;
 import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
@@ -98,7 +99,8 @@ public class ApprovalStatusUpdateEventProcessor {
         IKiosk kiosk = entitiesService.getKiosk(orderApprovalMapping.getKioskId());
 
         MessageService messageService = MessageService.getInstance(
-            MessageService.SMS, requester.getCountry(), true, kiosk.getDomainId(), null, null);
+            MessageService.SMS, requester.getCountry(), true, kiosk.getDomainId(),
+            Constants.SYSTEM_USER_ID, null);
 
         String
             resolvedMessage =
