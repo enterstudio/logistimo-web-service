@@ -138,6 +138,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1392,7 +1393,7 @@ public class DomainConfigController {
             backendMessages.getString("inventory.config.fetch.error"));
       }
       return builder.buildOrderConfigModel(request, domainId, locale, sUser.getTimezone());
-    } catch (ConfigurationException | ServiceException | ObjectNotFoundException e) {
+    } catch (ConfigurationException | ServiceException | ObjectNotFoundException | UnsupportedEncodingException e) {
       xLogger.severe("Error in fetching Inventory configuration", e);
       throw new InvalidServiceException(backendMessages.getString("inventory.config.fetch.error"));
     }

@@ -95,6 +95,8 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -119,6 +121,7 @@ public class ConfigurationModelsBuilder {
   private static final String LOGO = "logo.png";
   private static final String INVOICE_TEMPLATE = "logistimo_invoice.jrxml";
   private static final String SHIPMENT_TEMPLATE = "logistimo_shipment.jrxml";
+  private static final String DOWNLOAD_LINK = "/s2/api/export/download?isBlobKey=true";
 
   public MenuStatsModel buildMenuStats(SecureUserDetails user, DomainConfig config, Locale locale,
                                        String timezone, HttpServletRequest request)
@@ -1139,10 +1142,10 @@ public class ConfigurationModelsBuilder {
 
   public OrdersConfigModel buildOrderConfigModel(HttpServletRequest request, Long domainId,
                                                  Locale locale, String timezone)
-      throws ConfigurationException, ServiceException, ObjectNotFoundException {
+      throws ConfigurationException, ServiceException, ObjectNotFoundException,
+      UnsupportedEncodingException {
     DomainConfig dc = DomainConfig.getInstance(domainId);
     OrdersConfigModel model = new OrdersConfigModel();
-    StorageUtil storageUtil = AppFactory.get().getStorageUtil();
     if (dc == null) {
       throw new ConfigurationException();
     }
@@ -1230,14 +1233,13 @@ public class ConfigurationModelsBuilder {
       model.autoCreateMaterialTags = oc.getAutoCreateMaterialTags();
       model.setLogo(oc.getInvoiceLogo());
       model.setLogoName(oc.getInvoiceLogoName() != null ? oc.getInvoiceLogoName() : LOGO);
+      model.setLogoDownloadLink(buildDownloadLink(oc.getInvoiceLogo(), oc.getInvoiceLogoName(), LOGO));
       model.setInvoiceTemplate(oc.getInvoiceTemplate());
       model.setInvoiceTemplateName(oc.getInvoiceTemplateName() != null ? oc.getInvoiceTemplateName() : INVOICE_TEMPLATE);
+      model.setInvoiceTemplateDownloadLink(buildDownloadLink(oc.getInvoiceTemplate(), oc.getInvoiceTemplateName(), INVOICE_TEMPLATE));
       model.setShipmentTemplate(oc.getShipmentTemplate());
       model.setShipmentTemplateName(oc.getShipmentTemplateName() != null ? oc.getShipmentTemplateName() : SHIPMENT_TEMPLATE);
-      model.setLogoDownloadLink(storageUtil.getExternalUrl(UPLOADS, oc.getInvoiceLogoName() != null ? oc.getInvoiceLogoName() : LOGO));
-      model.setInvoiceTemplateDownloadLink(storageUtil.getExternalUrl(UPLOADS, oc.getInvoiceTemplateName() != null ? oc.getInvoiceTemplateName() : INVOICE_TEMPLATE));
-      model.setShipmentTemplateDownloadLink(
-          storageUtil.getExternalUrl(UPLOADS, oc.getShipmentTemplateName() != null ? oc.getShipmentTemplateName() : SHIPMENT_TEMPLATE));
+      model.setShipmentTemplateDownloadLink(buildDownloadLink(oc.getShipmentTemplate(), oc.getShipmentTemplateName(), SHIPMENT_TEMPLATE));
     }
     if (dbc != null) {
       if (dbc.isPublic()) {
@@ -1258,6 +1260,19 @@ public class ConfigurationModelsBuilder {
       model.url = "https://" + request.getServerName() + "/pub/demand?id=" + domainId;
     }
     return model;
+  }
+
+  private String buildDownloadLink(String key, String fileName, String defaultFileName)
+      throws UnsupportedEncodingException {
+    String downloadLink;
+    if(StringUtils.isNotEmpty(key)) {
+        downloadLink = DOWNLOAD_LINK + "&fileName=" + URLEncoder.encode(fileName, "UTF-8") + "&key=" + URLEncoder.encode(key, "UTF-8");
+    } else {
+      StorageUtil storageUtil = AppFactory.get().getStorageUtil();
+      downloadLink = storageUtil.getExternalUrl(UPLOADS, fileName != null ? fileName : defaultFileName);
+    }
+
+    return downloadLink;
   }
 
   /**

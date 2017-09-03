@@ -369,7 +369,11 @@ module.exports = function(grunt, ref) {
                         "Sales orders": "Indents - Issues",
                         "Purchase orders": "Indents - Receipts",
                         "stock on hand": "total stock",
-                        "Stock on hand":"Total stock"
+                        "Stock on hand":"Total stock",
+                        "Purchase approval":"Indent (receipt) approval",
+                        "Sales approval":"Indent (issue) approval",
+                        "Purchase":"Receipt",
+                        "Sales":"Issue"
                     },
                     global: true
                 },
@@ -403,7 +407,11 @@ module.exports = function(grunt, ref) {
                         "Sales orders": "Indents - Issues",
                         "Purchase orders": "Indents - Receipts",
                         "stock on hand": "total stock",
-                        "Stock on hand":"Total stock"
+                        "Stock on hand":"Total stock",
+                        "Purchase approval":"Indent (receipt) approval",
+                        "Sales approval":"Indent (issue) approval",
+                        "Purchase":"Receipt",
+                        "Sales":"Issue"
                     },
                     global: true,
                     type: 'props'

@@ -88,7 +88,8 @@ public class ExportController {
   @RequestMapping(value = "/download", method = RequestMethod.GET)
   public
   @ResponseBody
-  void downloadFile(@RequestParam String key, HttpServletRequest request,
+  void downloadFile(@RequestParam String key, @RequestParam(required = false) boolean isBlobKey,
+                    @RequestParam(required = false) String fileName, HttpServletRequest request,
                     HttpServletResponse response) {
     SecureUserDetails sUser = SecurityUtils.getUserDetails(request);
     Locale locale = sUser.getLocale();
@@ -97,14 +98,23 @@ public class ExportController {
       throw new BadRequestException(backendMessages.getString("file.download.error"));
     }
     try {
-      UploadService us = Services.getService(UploadServiceImpl.class);
-      IUploaded uploaded = us.getUploaded(key);
-      response.setCharacterEncoding("UTF-8");
-      response.addHeader("Content-Disposition", "inline; filename=" + uploaded.getFileName());
-      String blobKeyStr = uploaded.getBlobKey();
+      String blobKeyStr;
+      String downloadFileName;
+      if(!isBlobKey) {
+        UploadService us = Services.getService(UploadServiceImpl.class);
+        IUploaded uploaded = us.getUploaded(key);
+         blobKeyStr = uploaded.getBlobKey();
+        downloadFileName = uploaded.getFileName();
+      } else {
+        blobKeyStr = key;
+        downloadFileName = fileName;
+      }
+      response.addHeader("Content-Disposition", "attachment; filename=" + downloadFileName);
+      response.setBufferSize(32*1024);
       if (blobKeyStr != null) {
         AppFactory.get().getBlobstoreService().serve(blobKeyStr, response);
       }
+      response.flushBuffer();
     } catch (ServiceException | ObjectNotFoundException | IOException e) {
       xLogger.warn("Error in downloading file", e);
       throw new InvalidServiceException(backendMessages.getString("file.download.error"));
