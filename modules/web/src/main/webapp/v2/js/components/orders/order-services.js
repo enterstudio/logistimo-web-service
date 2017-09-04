@@ -32,7 +32,7 @@ ordServices.factory('ordService', ['$http', function ($http) {
             var promise = $http({method: 'POST', data: data, url: urlStr});
             return promise;
         },
-        getEntityOrders: function (entityId, orderType, status, tgType, tag, from, to, offset, size, oType, rid) {
+        getEntityOrders: function (entityId, orderType, status, tgType, tag, from, to, offset, size, oType, rid, approvalStatus) {
             offset = typeof offset !== 'undefined' ? offset : 0;
             size = typeof size !== 'undefined' ? size : 50;
             var urlStr = '/s2/api/orders/entity/' + entityId + "?offset=" + offset + "&size=" + size;
@@ -59,6 +59,9 @@ ordServices.factory('ordService', ['$http', function ($http) {
             }
             if (checkNotNullEmpty(rid)) {
                 urlStr = urlStr + "&rid=" + encodeURIComponent(rid);
+            }
+            if (checkNotNullEmpty(approvalStatus)) {
+                urlStr = urlStr + "&approval_status=" + approvalStatus;
             }
             return this.fetch(urlStr);
         },
