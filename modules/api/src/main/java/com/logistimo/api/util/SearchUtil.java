@@ -125,12 +125,12 @@ public class SearchUtil {
       List<IKiosk> kiosks = results.getResults();
       EntitiesService entitiesService = Services.getService(EntitiesServiceImpl.class);
       Results entityResults = entitiesService.getKiosksForUser(user, null, null);
-      List<IKiosk> userKiosks = null;
-      if(entityResults.getNumFound() > 0) {
-        userKiosks = (List<IKiosk>) entityResults.getResults();
-        if (userKiosks == null || userKiosks.isEmpty()) {
-          return null;
-        }
+      if(entityResults.getNumFound() <= 0) {
+        return null;
+      }
+      List<IKiosk> userKiosks = (List<IKiosk>) entityResults.getResults();
+      if (userKiosks == null || userKiosks.isEmpty()) {
+        return null;
       }
       // Filter kiosks
       if (kiosks != null) {
