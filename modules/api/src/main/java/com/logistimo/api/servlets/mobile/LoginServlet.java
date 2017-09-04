@@ -148,7 +148,7 @@ public class LoginServlet extends JsonRestServlet {
       try {
         actionInitiator = Integer.parseInt(sourceInitiatorStr);
       } catch (NumberFormatException e) {
-
+        // ignore
       }
     }
     if (authtoken != null) {
@@ -164,7 +164,6 @@ public class LoginServlet extends JsonRestServlet {
         message = "Invalid token";
         status = false;
         try {
-          //	jsonString = RESTUtil.getJsonOutputAuthenticate(status, null, message, null, locale, null, backendMessages, false, false, null, null).toJSONString();
           jsonString =
               RESTUtil.getJsonOutputAuthenticate(status, user, message, null, locale, null,
                   backendMessages, false, false, null, null);
@@ -184,7 +183,6 @@ public class LoginServlet extends JsonRestServlet {
       minResponseCode =
           req.getParameter(
               RestConstantsZ.MIN_RESPONSE); // whether min. data is to be sent back - "1" = only kiosk info., in case of multiple kiosks; "2" = same as "1", but also do NOT send related kiosks info. (for each kiosk); null implies send back everything (kiosk info., materials and related kiosk info.)
-      ///boolean minResponse = "1".equals( minResponseStr );
       String onlyAuthenticateStr = req.getParameter(RestConstantsZ.ONLY_AUTHENTICATE);
       onlyAuthenticate = (onlyAuthenticateStr != null);
 
@@ -215,7 +213,6 @@ public class LoginServlet extends JsonRestServlet {
       if (userAgentStr == null) {
         userAgentStr = "";
       }
-      ///if ( userAgentStr != null && userAgentStr.length() <= "UNTRUSTED/1.0,gzip(gfe)".length() ) {
       // Add device details to user-agent, if sent
       if (deviceDetails != null && !deviceDetails.isEmpty()) {
         userAgentStr += " [Device-details: " + deviceDetails + "]";
@@ -223,7 +220,6 @@ public class LoginServlet extends JsonRestServlet {
       if (deviceProfile != null && !deviceProfile.isEmpty()) {
         userAgentStr += " [Device-Profile: " + deviceProfile + "]";
       }
-      ///xLogger.info( "Device details: {0}; Device profile: {1}", deviceDetails, deviceProfile );
       // Get locale
       if (locale == null || locale.isEmpty()) {
         locale = Constants.LANG_DEFAULT;
@@ -351,8 +347,6 @@ public class LoginServlet extends JsonRestServlet {
         dc = DomainConfig.getInstance(domainId);
       }
       // Assemble the JSON return object
-      //AuthenticateOutput jsonOutput = RESTUtil.getJsonOutputAuthenticate(status, user, message, dc, locale, minResponseCode, backendMessages, onlyAuthenticate, forceIntegerForStock, start, pageParams);
-      //  jsonString = jsonOutput.toJSONString();
       jsonString =
           RESTUtil.getJsonOutputAuthenticate(status, user, message, dc, locale, minResponseCode,
               backendMessages, onlyAuthenticate, forceIntegerForStock, start, pageParams);
@@ -362,7 +356,6 @@ public class LoginServlet extends JsonRestServlet {
         status = false;
         message = backendMessages.getString("error.nomaterials");
         try {
-          // jsonString = RESTUtil.getJsonOutputAuthenticate(status, null, message, null, locale, minResponseCode, backendMessages, onlyAuthenticate, forceIntegerForStock, start, null).toJSONString();
           jsonString =
               RESTUtil
                   .getJsonOutputAuthenticate(status, null, message, null, locale, minResponseCode,
@@ -413,7 +406,7 @@ public class LoginServlet extends JsonRestServlet {
         xLogger.warn("Error while processing forgot password request: {0}, user: {1} and type: {2}",
             e.getMessage(), userId, sendType, e);
         message = backendMessages.getString("error.systemerror");
-      } catch (InputMismatchException e) {
+      } catch (InputMismatchException | ValidationException e) {
         xLogger.warn("Error while processing forgot password request: {0}, user: {1} and type: {2}",
             e.getMessage(), userId, sendType, e);
         message = backendMessages.getString("password.otp.invalid");
