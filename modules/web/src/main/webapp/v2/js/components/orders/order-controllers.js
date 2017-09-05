@@ -2697,7 +2697,7 @@ ordControllers.controller('ShipmentListingController', ['$scope','ordService','r
     $scope.wparams = [["o", "offset"], ["s", "size"],["status", "status"], ["cid", "custId.id"], ["vid", "vendId.id"], ["from", "from", "", formatDate2Url], ["to", "to", "", formatDate2Url],["eftf", "eftFrom", "", formatDate2Url], ["eftt", "eftTo", "", formatDate2Url], ["trans", "trans"], ["trackid", "trackId"]];
     $scope.today = new Date();
     $scope.localFilters = ['custId', 'vendId', 'status', 'sTrackId', 'from', 'to', 'eftFrom', 'eftTo', 'sTrans', 'trackId'];
-    $scope.filterMethods = ['searchTID'];
+    $scope.filterMethods = ['searchTID','updateTransporter'];
     ListingController.call(this, $scope, requestContext, $location);
     $scope.init = function() {
         $scope.status = requestContext.getParam("status") || "";
@@ -2768,7 +2768,7 @@ ordControllers.controller('ShipmentListingController', ['$scope','ordService','r
             });
         }
     };
-    $scope.fetchData = function() {
+    $scope.updateTransporter = function() {
         $scope.trans = $scope.sTrans;
     };
     $scope.$watch('sTrans',function(newValue){
