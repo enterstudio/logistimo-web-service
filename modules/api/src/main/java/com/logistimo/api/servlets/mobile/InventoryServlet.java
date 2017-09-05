@@ -824,8 +824,7 @@ public class InventoryServlet extends JsonRestServlet {
    */
   public void updateInventoryTransactions(HttpServletRequest req, HttpServletResponse resp, ResourceBundle backendMessages) throws IOException {
     String reqJsonStr = req.getParameter(RestConstantsZ.JSON_STRING);
-    MobileUpdateInvTransRequest
-        mobUpdateInvTransReq = null;
+    MobileUpdateInvTransRequest mobUpdateInvTransReq = null;
     int statusCode = HttpServletResponse.SC_OK;
     Long domainId = null;
     String errorMessage = null;

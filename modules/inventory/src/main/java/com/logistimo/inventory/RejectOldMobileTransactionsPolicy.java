@@ -47,7 +47,16 @@ import java.util.ResourceBundle;
 public class RejectOldMobileTransactionsPolicy implements MobileTransactionsHandler {
   private static final XLog xLogger = XLog.getLog(RejectOldMobileTransactionsPolicy.class);
 
-  public int applyPolicy(List<ITransaction> transactions, ITransaction lastWebTrans){
+  /**
+   * Filter the transactions based below conditions
+   * Condition: If the mobile entry time is greater than last transaction created time / last transaction's entry time
+   * In case if last transactions savetime is greater than its created time, consider created time for the validation.
+   *
+   * @param transactions - List of transactions
+   * @param lastWebTrans - Last web transaction for a kid, mid and/or bid
+   * @return index till where it got rejected
+   */
+  public int applyPolicy(List<ITransaction> transactions, ITransaction lastWebTrans) {
     if (transactions == null || transactions.isEmpty() || lastWebTrans == null) {
       return -1;
     }
@@ -55,9 +64,14 @@ public class RejectOldMobileTransactionsPolicy implements MobileTransactionsHand
     ListIterator<ITransaction> transactionListIterator = transactions.listIterator();
     while(transactionListIterator.hasNext()){
       //Last transaction time is the entry time if last transaction is from mobile, for web it is the created time
-      Long lastTransactionTime=lastWebTrans.getEntryTime()!=null?lastWebTrans.getEntryTime().getTime():lastWebTrans.getTimestamp().getTime();
-      if (lastTransactionTime > transactionListIterator.next()
-          .getEntryTime().getTime()) {
+      Long lastTransactionTime;
+      if (lastWebTrans.getEntryTime() == null
+          || lastWebTrans.getEntryTime().getTime() > lastWebTrans.getTimestamp().getTime()) {
+        lastTransactionTime = lastWebTrans.getTimestamp().getTime();
+      } else {
+        lastTransactionTime = lastWebTrans.getEntryTime().getTime();
+      }
+      if (lastTransactionTime > transactionListIterator.next().getEntryTime().getTime()) {
         transactionListIterator.remove();
         index++;
       }

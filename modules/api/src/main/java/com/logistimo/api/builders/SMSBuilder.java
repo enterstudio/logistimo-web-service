@@ -37,8 +37,6 @@ import com.logistimo.entities.service.EntitiesService;
 import com.logistimo.entities.service.EntitiesServiceImpl;
 import com.logistimo.exception.BadRequestException;
 import com.logistimo.exception.InvalidDataException;
-import com.logistimo.inventory.dao.ITransDao;
-import com.logistimo.inventory.dao.impl.TransDao;
 import com.logistimo.inventory.entity.IInvntry;
 import com.logistimo.inventory.entity.ITransaction;
 import com.logistimo.inventory.service.InventoryManagementService;
@@ -58,9 +56,7 @@ import com.logistimo.services.Services;
 import com.logistimo.users.entity.IUserAccount;
 import com.logistimo.users.service.UsersService;
 import com.logistimo.users.service.impl.UsersServiceImpl;
-import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
-
 
 import org.apache.commons.lang.StringUtils;
 
@@ -75,7 +71,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -113,7 +108,7 @@ public class SMSBuilder {
         case SMSConstants.PARTIAL_ID:
           model.partialId = keyValue[1];
           break;
-        case SMSConstants.SAVE_TIMESTAMP:
+        case SMSConstants.SEND_TIMESTAMP:
           model.saveTS = new Date(Long.parseLong(keyValue[1]));
           break;
         case SMSConstants.ACTUAL_TIMESTAMP:
@@ -171,7 +166,7 @@ public class SMSBuilder {
           case SMSConstants.VERSION:
             model.setVersion(keyValue[1]);
             break;
-          case SMSConstants.SAVE_TIMESTAMP:
+          case SMSConstants.SEND_TIMESTAMP:
             setSendTime(model, keyValue[1]);
             break;
           case SMSConstants.ACTUAL_TIMESTAMP:
@@ -222,15 +217,14 @@ public class SMSBuilder {
    */
   private void setSendTime(SMSTransactionModel model, String value) {
     Calendar calendar = GregorianCalendar.getInstance();
-    if (Long.parseLong(value) * SMSConstants.MILLISECONDS > calendar
-        .getTimeInMillis()) {
+    final long sendTime = Long.parseLong(value) * SMSConstants.MILLISECONDS;
+    if (sendTime > calendar.getTimeInMillis()) {
       //send time cannot be a future time
       throw new BadRequestException("M016");
     }
-    model.setSendTime(Long.parseLong(value) * SMSConstants.MILLISECONDS);
+    model.setSendTime(sendTime);
     if (model.getActualTransactionDate() != null) {
-      model.setActualTransactionDate(model.getSendTime()
-          - model.getActualTransactionDate());
+      model.setActualTransactionDate(model.getSendTime() - model.getActualTransactionDate());
     }
   }
 
@@ -276,23 +270,19 @@ public class SMSBuilder {
     for (int i = 1; i < mat.length; i++) {
       String[] transactions = mat[i].split(SMSConstants.TRANSACTION_SEPARATOR);
       //set entry time
-      Long entryTimeInMinutes = null;
-      Long sortEntryTime=null;
+      Long entryTimeInMillis;
       if (transactions[0] != null && !transactions[0].equalsIgnoreCase(CharacterConstants.EMPTY)) {
-        entryTimeInMinutes =
-            sendTime - (Long.parseLong(transactions[0])
+        entryTimeInMillis = sendTime - (Long.parseLong(transactions[0])
                 * SMSConstants.MIN_IN_MILLI_SEC);
-      }else{
-        entryTimeInMinutes=sendTime;
+      } else {
+        entryTimeInMillis = sendTime;
       }
-      sortEntryTime = entryTimeInMinutes;
       for (int j = 1; j < transactions.length; j++) {
-        MobileTransModel
-            mobileTransModel =
-            populateTransModel(transactions[j], sendTime, entryTimeInMinutes,
-                actualTransactionDate);
+        MobileTransModel mobileTransModel =
+            populateTransModel(transactions[j], sendTime, entryTimeInMillis, actualTransactionDate);
         //Increase entry time by one millisecond for every transaction since the service sorts it based on entry time
-        mobileTransModel.sortEtm=sortEntryTime++;
+        entryTimeInMillis += 1;
+        mobileTransModel.sortEtm = entryTimeInMillis;
         mobileTransModels.add(mobileTransModel);
       }
     }
@@ -305,15 +295,15 @@ public class SMSBuilder {
    *
    * @param transaction        Transaction String
    * @param sendTime           Send Time
-   * @param entryTimeInMinutes Entry Time in minutes
+   * @param entryTimeInMillis  Entry Time in millis
    * @param actualTransDate    Actual Transaction Date
    * @return Mobile Trans Model
    */
   private MobileTransModel populateTransModel(String transaction, Long sendTime,
-                                              Long entryTimeInMinutes, Long actualTransDate) {
+                                              Long entryTimeInMillis, Long actualTransDate) {
     SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT);
     MobileTransModel mobileTransModel = new MobileTransModel();
-    mobileTransModel.entm = entryTimeInMinutes;
+    mobileTransModel.entm = entryTimeInMillis;
 
     String[] transactionDet = transaction.split(SMSConstants.COMMA_SEPARATOR);
     mobileTransModel.ty = transactionDet[0];
@@ -332,7 +322,7 @@ public class SMSBuilder {
     mobileTransModel.lkid =
         (transactionDet.length > 5 && transactionDet[5] != null && !transactionDet[5]
             .equalsIgnoreCase(CharacterConstants.EMPTY)) ? Long.parseLong(transactionDet[5]) : null;
-    if(actualTransactionDate!=null){
+    if (actualTransactionDate != null) {
       mobileTransModel.atd = sdf.format(new Date(actualTransactionDate));
     }
     return mobileTransModel;
@@ -348,61 +338,6 @@ public class SMSBuilder {
         material.curStk = invntry.getStock();
       }
     }
-  }
-
-
-  public String constructSMS(SMSModel model, String failMessage) throws ServiceException {
-    return constructSMS(model, null, failMessage);
-  }
-
-  public String constructSMS(SMSModel model, Map<Long, String> errorCodes) throws ServiceException {
-    return constructSMS(model, errorCodes, null);
-  }
-
-  public String constructSMS(SMSModel model, Map<Long, String> errorCodes, String failMessage)
-      throws ServiceException {
-    updateMaterialDetails(model);
-    StringBuilder sms = new StringBuilder();
-    sms.append(SMSConstants.TRANSACTION_TYPE).append(SMSConstants.KEY_SEPARATOR).append(model.type);
-    if (model.partialId != null) {
-      sms.append(SMSConstants.FIELD_SEPARATOR).append(SMSConstants.PARTIAL_ID)
-          .append(SMSConstants.KEY_SEPARATOR).append(model.partialId);
-    }
-    sms.append(SMSConstants.FIELD_SEPARATOR).append(SMSConstants.SAVE_TIMESTAMP)
-        .append(SMSConstants.KEY_SEPARATOR).append(model.saveTS.getTime())
-        .append(SMSConstants.FIELD_SEPARATOR).append(SMSConstants.KIOSK_ID)
-        .append(SMSConstants.KEY_SEPARATOR).append(model.kioskId);
-    if (failMessage == null) {
-      StringBuilder successInventory = new StringBuilder();
-      StringBuilder failInventory = new StringBuilder();
-      for (SMSModel.SMSInv material : model.materials) {
-        if (!errorCodes.containsKey(material.matId)) {
-          if (successInventory.length() > 0) {
-            successInventory.append(SMSConstants.MATERIAL_SEPARATOR);
-          }
-          successInventory.append(material.id).append(CharacterConstants.COMMA)
-              .append(BigUtil.getFormattedValue(material.curStk));
-        } else {
-          if (failInventory.length() > 0) {
-            failInventory.append(SMSConstants.MATERIAL_SEPARATOR);
-          }
-          failInventory.append(material.id).append(CharacterConstants.COMMA)
-              .append(BigUtil
-                  .getFormattedValue(material.curStk == null ? BigDecimal.ZERO : material.curStk))
-              .append(CharacterConstants.COMMA)
-              .append(
-                  errorCodes.get(material.matId) == null ? "M004" : errorCodes.get(material.matId));
-        }
-      }
-      sms.append(SMSConstants.FIELD_SEPARATOR).append(SMSConstants.SUCCESS_INVENTORY)
-          .append(SMSConstants.KEY_SEPARATOR).append(successInventory);
-      sms.append(SMSConstants.FIELD_SEPARATOR).append(SMSConstants.FAIL_INVENTORY)
-          .append(SMSConstants.KEY_SEPARATOR).append(failInventory);
-    } else {
-      sms.append(SMSConstants.FIELD_SEPARATOR).append(SMSConstants.FAIL_MESSAGE)
-          .append(SMSConstants.KEY_SEPARATOR).append(failMessage);
-    }
-    return sms.toString();
   }
 
   /**
@@ -593,57 +528,6 @@ public class SMSBuilder {
     return map;
   }
 
-
-  public List<ITransaction> buildInventoryTransactions(SMSModel model) {
-    List<ITransaction> transactions = new ArrayList<>(model.materials.size());
-    Date now = new Date();
-    boolean checkBatchMgmt = ITransaction.TYPE_TRANSFER.equals(model.type);
-    MaterialCatalogServiceImpl mcs = null;
-    try {
-      if (checkBatchMgmt) {
-        EntitiesService as = Services.getService(EntitiesServiceImpl.class);
-        IKiosk kiosk = as.getKiosk(model.kioskId);
-        IKiosk linkedKiosk = as.getKiosk(model.destKioskId);
-        checkBatchMgmt =
-            !kiosk.isBatchMgmtEnabled() && linkedKiosk != null && linkedKiosk.isBatchMgmtEnabled();
-        mcs = Services.getService(MaterialCatalogServiceImpl.class, Locale.ENGLISH);
-      }
-    } catch (ServiceException e) {
-      xLogger.warn("ServiceException while getting kiosk details. Exception: {0)", e);
-    }
-    ITransDao transDao = new TransDao();
-    for (SMSModel.SMSInv material : model.materials) {
-      ITransaction transaction = JDOUtils.createInstance(ITransaction.class);
-      transaction.setKioskId(model.kioskId);
-      transaction.setMaterialId(material.matId);
-      transaction.setType(model.type);
-      transaction.setQuantity(material.quantity);
-      transaction.setSourceUserId(model.userId);
-      transaction.setTimestamp(now);
-      transaction.setLinkedKioskId(model.destKioskId);
-      if (model.actualTS != null) {
-        transaction.setAtd(model.actualTS);
-      }
-      transaction.setSrc(SourceConstants.SMS);
-      transDao.setKey(transaction);
-      if (checkBatchMgmt && mcs != null) {
-        try {
-          IMaterial mat = mcs.getMaterial(material.matId);
-          if (mat.isBatchEnabled()) {
-            transaction.setMessage(
-                "Transfer from batch disabled entity to batch enabled entity failed for Material"
-                    + mat.getName());
-            transaction.setMsgCode("M008");
-          }
-        } catch (ServiceException e) {
-          xLogger.warn("ServiceException while getting material details. Exception: {0}", e);
-        }
-      }
-      transactions.add(transaction);
-    }
-    return transactions;
-  }
-
   /**
    * Build the transaction map with material id as key and list of associated transactions
    *
@@ -686,6 +570,16 @@ public class SMSBuilder {
               transaction =
               setTransactionDetails(mobileTransModel, ua, model.getKioskId(),
                   model.getActualTransactionDate(), material.getMaterialId());
+
+          // Add 100 * partialID milliseconds to make the same entry time unique from multiple SMS
+          long partialTimeDiff = 0;
+          try {
+            partialTimeDiff = Integer.parseInt(model.getPartialId()) * 100;
+          } catch (Exception ignored) { }
+          if(partialTimeDiff > 0) {
+            transaction.setEntryTime(new Date(transaction.getEntryTime().getTime() + partialTimeDiff));
+          }
+
           transactionList = map.get(material.getMaterialId());
           if (transactionList == null) {
             transactionList = new ArrayList<>();
@@ -720,11 +614,6 @@ public class SMSBuilder {
                                              Long kioskId, Long actualTransactionDate,
                                              Long materialId) throws
       ParseException, ServiceException {
-    Calendar calendar = Calendar.getInstance();
-    TimeZone timeZone = SMSUtil.getUserTimeZone(ua);
-    if (timeZone != null) {
-      calendar.setTimeZone(timeZone);
-    }
     ITransaction transaction = JDOUtils.createInstance(ITransaction.class);
     transaction.setKioskId(kioskId);
     transaction.setType(mobileTransModel.ty);
@@ -741,6 +630,12 @@ public class SMSBuilder {
       transaction.setAtd(d);
     }
     transaction.setTimestamp(new Date());
+
+    Calendar calendar = Calendar.getInstance();
+    TimeZone timeZone = SMSUtil.getUserTimeZone(ua);
+    if (timeZone != null) {
+      calendar.setTimeZone(timeZone);
+    }
     calendar.setTimeInMillis(mobileTransModel.entm);
     transaction.setEntryTime(calendar.getTime());
     calendar.setTimeInMillis(mobileTransModel.sortEtm);

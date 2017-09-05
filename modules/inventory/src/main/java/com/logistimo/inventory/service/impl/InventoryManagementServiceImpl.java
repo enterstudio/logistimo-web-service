@@ -1459,9 +1459,6 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           }
           if (!trans.useCustomTimestamp()) {
             trans.setTimestamp(timestamp);
-            if (trans.getEntryTime() != null && trans.getEntryTime().getTime() > timestamp.getTime()) {
-              trans.setEntryTime(timestamp);
-            }
           }
           // Update tags for querying purpose
           List<String> tags = in.getTags(TagUtil.TYPE_MATERIAL);
@@ -3748,7 +3745,10 @@ public class InventoryManagementServiceImpl extends ServiceImpl
           }
         }
         ITransaction lastWebTrans = getLastWebTransaction(kioskId, materialId, null);
-        int rejectUntilPosition = mobTransHandler.applyPolicy(transactions, lastWebTrans);
+        int rejectUntilPosition = -1;
+        if (mobTransHandler != null) {
+          rejectUntilPosition = mobTransHandler.applyPolicy(transactions, lastWebTrans);
+        }
         if (rejectUntilPosition != -1) {
           updateMaterialErrorDetailModelsMap(mid, materialErrorDetailModelsMap, "M011", rejectUntilPosition);
           midCountMap.put(mid,rejectUntilPosition);

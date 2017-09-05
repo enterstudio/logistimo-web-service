@@ -119,17 +119,13 @@ public class SMSController {
       Map<Long, List<ITransaction>> transactionMap = builder.buildTransaction(model);
 
       if (isDuplicate) {
-        Integer
-            status =
-            TransactionUtil.getObjectFromCache(String.valueOf(model.getSendTime()),
-                model.getUserId(), model.getKioskId(),
-                model.getPartialId());
+        Integer status = TransactionUtil.getObjectFromCache(String.valueOf(model.getSendTime()),
+                model.getUserId(), model.getKioskId(), model.getPartialId());
         if (status != null && TransactionUtil.IN_PROGRESS == status) {
             throw new LogiException("Transaction is in progress");
         }
       } else {
-        InventoryManagementService
-            ims =
+        InventoryManagementService ims =
             Services.getService(InventoryManagementServiceImpl.class);
         midErrorDetailModelsMap =
             ims.updateMultipleInventoryTransactions(transactionMap, ua.getDomainId(),

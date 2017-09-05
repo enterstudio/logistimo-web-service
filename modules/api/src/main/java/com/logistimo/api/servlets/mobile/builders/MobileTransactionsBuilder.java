@@ -463,9 +463,7 @@ public class MobileTransactionsBuilder {
     if (mobileMaterialTransModels == null || mobileMaterialTransModels.isEmpty()) {
       return null;
     }
-    Map<Long, List<ITransaction>>
-        midTransModelMap =
-        new HashMap<>(mobileMaterialTransModels.size());
+    Map<Long, List<ITransaction>> midTransModelMap = new HashMap<>(mobileMaterialTransModels.size());
     for (MobileMaterialTransModel mobileMaterialTransModel : mobileMaterialTransModels) {
       Long mid = mobileMaterialTransModel.mid;
       List<ITransaction> transactionList = buildTransactions(userId, kid, mobileMaterialTransModel);

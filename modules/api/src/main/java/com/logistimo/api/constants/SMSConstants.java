@@ -33,7 +33,7 @@ public class SMSConstants {
   public static final String VERSION = "V";
   public static final String V2 = "2";
   public static final String PARTIAL_ID = "P";
-  public static final String SAVE_TIMESTAMP = "S";
+  public static final String SEND_TIMESTAMP = "S";
   public static final String ACTUAL_TIMESTAMP = "A";
   public static final String USER_ID = "U";
   public static final String KIOSK_ID = "K";
