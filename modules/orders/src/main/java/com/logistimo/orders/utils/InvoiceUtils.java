@@ -51,6 +51,7 @@ import com.logistimo.shipments.service.impl.ShipmentService;
 import com.logistimo.utils.BigUtil;
 import com.logistimo.utils.LocalDateUtil;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -108,7 +109,7 @@ public class InvoiceUtils {
 
   @Autowired
   public InvoiceUtils(InventoryManagementService inventoryService,
-                      MaterialCatalogService materialService,
+      MaterialCatalogService materialService,
       EntitiesService entitiesService, StorageUtil storageUtil) {
     this.inventoryService = inventoryService;
     this.materialService = materialService;
@@ -149,7 +150,7 @@ public class InvoiceUtils {
           invoiceItem.setRecommended(
               demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
         }
-        invoiceItem.setRemarks(demandItem.getReason());
+        invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
         invoiceItems.add(invoiceItem);
       }
       sno++;
@@ -204,8 +205,18 @@ public class InvoiceUtils {
         invoiceItem.setRecommended(
             demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
       }
-      invoiceItem.setRemarks(demandItem.getReason());
+      invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
       invoiceItems.add(invoiceItem);
+    }
+  }
+
+  private String getRemarks(Integer orderType, IDemandItem demandItem) {
+    if (StringUtils.isNotEmpty(demandItem.getShippedDiscrepancyReason())) {
+      return demandItem.getShippedDiscrepancyReason();
+    } else if (orderType == IOrder.SALES_ORDER) {
+      return demandItem.getReason();
+    } else {
+      return "";
     }
   }
 
