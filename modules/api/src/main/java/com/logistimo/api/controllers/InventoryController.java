@@ -417,43 +417,19 @@ public class InventoryController {
   List<InvntryBatchModel> getBatchMaterialById(@RequestParam Long kid, @RequestParam Long mid,
                                                @RequestParam(required = false) boolean allBatch,
                                                @RequestParam(required = false) Long allocOrderId,
-                                               @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
                                                HttpServletRequest request) {
-    PageParams pageParams = new PageParams(null, size);
     try {
       SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
       // RESTUtil.authenticate(uid, null, kid, request);
       InventoryManagementService
           ims =
           Services.getService(InventoryManagementServiceImpl.class);
-      Results<IInvntryBatch> results = ims.getBatches(mid, kid, pageParams);
+      Results<IInvntryBatch> results = ims.getBatches(mid, kid, null);
       return builder.buildInvntryBatchModel(results, allBatch, sUser, allocOrderId);
     } catch (ServiceException e) {
       xLogger.severe("InventoryController Exception: {0}", e.getMessage(), e);
     }
     return null;
-  }
-
-  @RequestMapping(value = "/batchmaterialcheck", method = RequestMethod.GET)
-  public
-  @ResponseBody
-  Boolean checkBatchMaterial(@RequestParam String bid, @RequestParam Long mid,
-                             @RequestParam Long kid,
-                             @RequestParam(defaultValue = "false") boolean expired,
-                             @RequestParam(defaultValue = PageParams.DEFAULT_SIZE_STR) int size,
-                             HttpServletRequest request) {
-    PageParams pageParams = new PageParams(null, size);
-    SecureUserDetails sUser = SecurityMgr.getUserDetails(request.getSession());
-    Long domainId = SessionMgr.getCurrentDomain(request.getSession(), sUser.getUsername());
-    InventoryManagementService
-        ims =
-        Services.getService(InventoryManagementServiceImpl.class);
-    Results results = ims.getValidBatchesByBatchId(bid, mid, kid, domainId, expired, pageParams);
-    if (results != null && results.getResults().size() > 0) {
-      return true;
-    }
-
-    return false;
   }
 
   @RequestMapping(value = "/history", method = RequestMethod.GET)

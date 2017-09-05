@@ -137,33 +137,13 @@ invServices.factory('invService', ['$http', function ($http) {
             return this.fetch(url);
         },
         getBatchDetail: function (mid, kid, allBatch,allocOrderId) {
-            var url = '/s2/api/inventory/batchmaterialbyid/?size=50';
-            if (checkNotNullEmpty(kid)) {
-                url = url + "&kid=" + kid;
-            }
-            if (checkNotNullEmpty(mid)) {
-                url = url + "&mid=" + mid;
-            }
+            var url = '/s2/api/inventory/batchmaterialbyid/?kid=' + kid + "&mid=" + mid;
             if (checkNotNullEmpty(allBatch)) {
                 url = url + "&allBatch=" + allBatch;
             }
             if (checkNotNullEmpty(allocOrderId)) {
                 url = url + "&allocOrderId=" + allocOrderId;
             }
-            return this.fetch(url);
-        },
-        checkDuplicateBatch: function(bid, mid, kid, expired) {
-            var url = '/s2/api/inventory/batchmaterialcheck/?size=50';
-            if (checkNotNullEmpty(bid)) {
-                url = url + "&bid=" + bid;
-            }
-            if (checkNotNullEmpty(mid)) {
-                url = url + "&mid=" + mid;
-            }
-            if (checkNotNullEmpty(kid)) {
-                url = url + "&kid=" + kid;
-            }
-            url = url + "&expired=" + expired;
             return this.fetch(url);
         },
         getAbnormalStockDetail: function (data, offset, size) {

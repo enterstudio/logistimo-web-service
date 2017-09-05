@@ -587,7 +587,7 @@ public class InventoryManagementServiceImpl extends ServiceImpl
     String
         queryStr =
         "SELECT FROM " + JDOUtils.getImplClass(IInvntryBatch.class).getName()
-            + " WHERE mId == mIdParam && kId == kIdParam PARAMETERS Long mIdParam, Long kIdParam ORDER BY bexp ASC";
+            + " WHERE mId == mIdParam && kId == kIdParam && q > 0 PARAMETERS Long mIdParam, Long kIdParam ORDER BY bexp ASC";
     Query q = pm.newQuery(queryStr);
     if (pageParams != null) {
       QueryUtil.setPageParams(q, pageParams);
