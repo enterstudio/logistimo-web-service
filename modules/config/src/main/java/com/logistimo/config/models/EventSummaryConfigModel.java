@@ -346,9 +346,20 @@ public class EventSummaryConfigModel implements Serializable {
   }
 
   private void updateThresholds(Events event, Map<String, Condition> templateConditionMap) {
+    if (event.getThresholds() == null || event.getThresholds().isEmpty()) {
+      getDefaultEvents(event, templateConditionMap);
+    } else {
+      buildConditions(event, templateConditionMap);
+    }
+  }
+
+  private void buildConditions(Events event,
+                               Map<String, Condition> templateConditionMap) {
+    List<Condition> allConditions;
     for (Threshold threshold : event.getThresholds()) {
-      List<Condition> allConditions = new ArrayList<>(templateConditionMap.size());
-      for (Map.Entry<String, Condition> templateConditionEntry : templateConditionMap.entrySet()) {
+      allConditions = new ArrayList<>(templateConditionMap.size());
+      for (Map.Entry<String, Condition> templateConditionEntry : templateConditionMap
+          .entrySet()) {
         Iterator<Condition> dbConditionIterator = threshold.getConditions().iterator();
         boolean isNew = true;
         while (dbConditionIterator.hasNext()) {
@@ -370,6 +381,20 @@ public class EventSummaryConfigModel implements Serializable {
       }
       threshold.setConditions(allConditions);
     }
+  }
+
+  private void getDefaultEvents(Events event,
+                                Map<String, Condition> templateConditionMap) {
+    List<Condition> allConditions;
+    allConditions = new ArrayList<>(templateConditionMap.size());
+    List<Threshold> thresholdList = new ArrayList<>(1);
+    allConditions
+        .addAll(templateConditionMap.entrySet().stream().map(Map.Entry::getValue).collect(
+            Collectors.toList()));
+    Threshold threshold = new Threshold();
+    threshold.setConditions(allConditions);
+    thresholdList.add(threshold);
+    event.setThresholds(thresholdList);
   }
 
   /**
