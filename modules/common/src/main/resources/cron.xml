@@ -51,12 +51,6 @@
         <schedule>every day 01:30</schedule> <!-- 07:00 am IST (this should be after the notification for previous day; else, this may get included in notifications for previous day) -->
     </cron>
     <cron>
-        <url>/s2/api/admin/location-failedjobs</url>
-        <description>Check and run failed jobs on Location service</description>
-        <schedule>every day 00:30</schedule>
-        <!-- 06:00 AM IST -->
-    </cron>
-    <cron>
         <url>/s2/api/orders/schedule-automation</url>
         <description>Runs order automation tasks for relevant domains</description>
         <schedule>every day 00:30</schedule>
