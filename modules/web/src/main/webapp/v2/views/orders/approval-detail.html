@@ -136,7 +136,9 @@
                     <span ng-show="cancelled && !isApprover"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approvals.cancelled']}} {{resourceBundle['on.lower']}}</span>
                     <span ng-show="approved && !isApprover">{{resourceBundle['approvals.approved']}} {{resourceBundle['on.lower']}}</span>
                     <span ng-show="rejected"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approvals.rejected']}} {{resourceBundle['on.lower']}}</span>
-                    <span ng-show="expired"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span> {{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}. {{resourceBundle['request.sent.to']}}:
+                    <span ng-show="expired"><span class="glyphicons glyphicons-remove-circle c-status-red mt2"></span>
+                        <span>{{resourceBundle['approvals.expired']}} {{approval.status.updated_at | fromNow:this }}.</span><br/>
+                        <span class="lPad">{{resourceBundle['request.sent.to']}}: </span>
                     <span ng-repeat="item in approval.approvers" style="display:inline-block;">
                         <a ng-hide="$index == approval.approvers.length - 1"
                            href="#/setup/users/all/details?userId={{item.user_id}}">{{item.name}},&nbsp;</a>
