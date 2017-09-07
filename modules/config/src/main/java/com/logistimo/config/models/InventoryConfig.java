@@ -823,6 +823,9 @@ public class InventoryConfig implements Serializable {
 
   public String getFirstMaterialStatus(boolean isTempSensitive) {
     MatStatusConfig msConfig = getMatStatusConfigByType("i");
+    if(msConfig == null) {
+      return null;
+    }
     String matStatus = isTempSensitive ? msConfig.getEtsm() : msConfig.getDf();
     if (StringUtils.isNotBlank(matStatus)) {
       matStatus = matStatus.split(CharacterConstants.COMMA, 2)[0];

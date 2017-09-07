@@ -36,6 +36,7 @@ import com.logistimo.orders.entity.IDemandItem;
 import com.logistimo.orders.service.impl.OrderManagementServiceImpl;
 import com.logistimo.pagination.Results;
 import com.logistimo.services.ServiceException;
+import com.logistimo.utils.BigUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -63,7 +65,7 @@ public class OrderAutomationActionTest {
     OrderManagementServiceImpl orderManagementService = spy(OrderManagementServiceImpl.class);
     EntitiesServiceImpl ems = mock(EntitiesServiceImpl.class);
     when(ems.getKioskLinks(1l, IKioskLink.TYPE_VENDOR, null, null, null))
-        .thenReturn(new Results(null, null));
+        .thenReturn(new Results<>(null, null));
     when(ems.getKioskLinks(2l, IKioskLink.TYPE_VENDOR, null, null, null))
         .thenReturn(getKioskLink(2l));
     InventoryManagementServiceImpl ims = mock(InventoryManagementServiceImpl.class);
@@ -91,6 +93,17 @@ public class OrderAutomationActionTest {
   public void testGetTransactionWithROQGreaterThanZero() {
     IInvntry invntry = getInvntry(1l, 2l, BigDecimal.TEN, new BigDecimal(100));
     assertNotEquals(orderAutomationAction.getTransaction(invntry), Optional.empty());
+  }
+
+  @Test
+  public void testRoundingROQ() {
+    IInvntry invntry = getInvntry(1l, 2l, BigDecimal.TEN, new BigDecimal(100));
+    invntry.setInventoryModel(IInvntry.MODEL_SQ);
+    invntry.setEconomicOrderQuantity(new BigDecimal(2.45));
+    Optional<ITransaction> transaction = orderAutomationAction.getTransaction(invntry);
+    assertNotEquals(transaction, Optional.empty());
+    assertTrue("Rounding failed expected 3 but was " + transaction.get().getQuantity(),
+        BigUtil.equals(transaction.get().getQuantity(), new BigDecimal(3)));
   }
 
   @Test
@@ -136,10 +149,10 @@ public class OrderAutomationActionTest {
   private Results getKioskLink(Long kioskId) {
     IKioskLink kioskLink = new KioskLink();
     kioskLink.setLinkedKioskId(kioskId);
-    List results = new ArrayList<>();
+    List<IKioskLink> results = new ArrayList<>();
     results.add(kioskLink);
 
-    return new Results(results, null);
+    return new Results<>(results, null);
   }
 
 }

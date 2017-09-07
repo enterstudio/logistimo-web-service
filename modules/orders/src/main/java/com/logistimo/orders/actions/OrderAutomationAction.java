@@ -57,6 +57,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -276,7 +277,7 @@ public class OrderAutomationAction {
         ITransaction t = JDOUtils.createInstance(ITransaction.class);
         t.setKioskId(invntry.getKioskId());
         t.setMaterialId(invntry.getMaterialId());
-        t.setQuantity(roq);
+        t.setQuantity(roq.setScale(0, RoundingMode.CEILING));
         t.setType(ITransaction.TYPE_ORDER);
         t.setDomainId(invntry.getDomainId());
         t.setSourceUserId(Constants.SYSTEM_USER_ID);

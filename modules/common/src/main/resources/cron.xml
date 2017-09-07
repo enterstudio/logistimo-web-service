@@ -51,6 +51,11 @@
         <schedule>every day 01:30</schedule> <!-- 07:00 am IST (this should be after the notification for previous day; else, this may get included in notifications for previous day) -->
     </cron>
     <cron>
+        <url>/task/mrstarter?name=Optimizer&amp;kind=Domain</url>
+        <description>Optimize inventory and/or compute consumption/other parameters</description>
+        <schedule>every day 00:30</schedule> <!-- 06:00 AM IST -->
+    </cron>
+    <cron>
         <url>/s2/api/orders/schedule-automation</url>
         <description>Runs order automation tasks for relevant domains</description>
         <schedule>every day 00:30</schedule>
