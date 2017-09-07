@@ -421,7 +421,7 @@ public class ReportServiceUtil {
       if (newRow) {
         treeBasedTable.remove(rowHeadings.getString(0), ZERO);
       }
-      if (rowHeadings != null) {
+      if (rowHeadings != null && !treeBasedTable.columnKeySet().isEmpty()) {
         for (int i = 0; i < rowHeadings.length(); i++) {
           if (!treeBasedTable.containsRow(rowHeadings.get(i)) || newRow) {
             String[] arr = new String[finalDataSize];
@@ -434,9 +434,8 @@ public class ReportServiceUtil {
           }
         }
       }
-
-    } catch (ParseException e) {
-      xLogger.warn("Error in parsing from date while filling table", e);
+    } catch (Exception e) {
+      xLogger.warn("Exception in fillTable", e);
     }
     return treeBasedTable;
   }
