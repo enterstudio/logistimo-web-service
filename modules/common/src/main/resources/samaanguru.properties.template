@@ -101,7 +101,7 @@ reportsdb.tables=DAYACTIVECOUNTSSTATSSTORE,DAYSLICE,MONTHACTIVECOUNTSSTATSSTORE,
 jwt.key=Put@S3cureKeyH3r
 
 app.deployed.for=Logistimo-Opensource
-status.file.path=
+status.file.path=$STATUS_FILE
 
 #Cache expiry - 15 minutes, Thread sleep duration - 2 minutes
 cache.expiry.for.transaction.signature=900
