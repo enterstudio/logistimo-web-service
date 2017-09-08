@@ -223,6 +223,8 @@ public final class Constants {
   // Attributes for store app theme
   public static final int GUI_THEME_BLACK = 0;
   public static final int GUI_THEME_RED = 1;
+  public static final int GUI_THEME_DEFAULT = -1;
+
   public static final String JAVAX_JDO_QUERY_SQL = "javax.jdo.query.SQL";
 
   public static final String SYSTEM_USER_ID = "system";

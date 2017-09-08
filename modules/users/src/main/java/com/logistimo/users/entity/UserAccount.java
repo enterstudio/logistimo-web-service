@@ -252,7 +252,7 @@ public class UserAccount implements IUserAccount, ILocation {
   @Persistent(column = "CITY_ID")
   private String cityId;
   @Persistent
-  private Integer theme;
+  private Integer theme = Constants.GUI_THEME_DEFAULT;
 
   // Get the difference of two user lists: a - b
   public static List<IUserAccount> getDifference(List<IUserAccount> a, List<IUserAccount> b) {
