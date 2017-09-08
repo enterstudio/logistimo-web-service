@@ -79,7 +79,7 @@ public interface IShipmentService extends Service {
   boolean updateShipment(ShipmentMaterialsModel model) throws LogiException;
 
   IShipment updateShipmentData(String updType, String updValue, String orderUpdatedAt, String sId,
-                             String userId) throws ServiceException;
+                             String userId) throws ServiceException, LogiException;
 
   ResponseModel fulfillShipment(String shipmentId, String userId, int source)
       throws ServiceException;

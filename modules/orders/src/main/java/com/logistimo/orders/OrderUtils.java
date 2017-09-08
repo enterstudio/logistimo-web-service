@@ -173,11 +173,14 @@ public class OrderUtils {
 
   public static UpdatedOrder updateOrdStatus(UpdateOrderStatusRequest uosReq, DomainConfig dc,
                                              int source, ResourceBundle backendMessages)
-      throws ObjectNotFoundException, ServiceException, ValidationException {
+      throws ObjectNotFoundException, LogiException {
     OrderManagementService
         oms =
         Services.getService(OrderManagementServiceImpl.class, dc.getLocale());
     IOrder o = oms.getOrder(uosReq.tid, true);
+    if (!OrderUtils.validateOrderUpdatedTime(uosReq.tm, o.getUpdatedOn())) {
+      throw new LogiException("O004", uosReq.uid,uosReq.tm);
+    }
     UpdatedOrder uo = new UpdatedOrder();
     if (IOrder.FULFILLED.equals(uosReq.ost)) {
       IShipmentService ss;

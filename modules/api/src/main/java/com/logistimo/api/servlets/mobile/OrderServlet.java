@@ -1233,7 +1233,6 @@ public class OrderServlet extends JsonRestServlet {
     String password = req.getParameter(RestConstantsZ.PASSWORD); // sent when SMS message is sent
     // Get JSON input
     String jsonInput = req.getParameter(RestConstantsZ.JSON_STRING);
-    String previousUpdatedTime = req.getParameter(RestConstantsZ.PREVIOUS_UPDATED_TIME);
     UpdateOrderStatusRequest uosReq = GsonUtil.buildUpdateOrderStatusRequestFromJson(jsonInput);
 
     boolean status = true;
@@ -1285,6 +1284,7 @@ public class OrderServlet extends JsonRestServlet {
     }
     // Update order status
     IOrder order = null;
+    String errorCode = null;
     if (status) {
       String signature = CommonUtils.getMD5(jsonInput);
       MemcacheService cache = AppFactory.get().getMemcacheService();
@@ -1329,7 +1329,7 @@ public class OrderServlet extends JsonRestServlet {
               if (uosReq.tid == null) {
                 uo = OrderUtils.updateShpStatus(uosReq,
                     dc, SourceConstants.MOBILE,
-                    backendMessages, previousUpdatedTime);
+                    backendMessages, uosReq.tm);
               } else {
                 uo = OrderUtils.updateOrdStatus(uosReq,
                     dc, SourceConstants.MOBILE,
@@ -1386,7 +1386,12 @@ public class OrderServlet extends JsonRestServlet {
           xLogger.severe("Logi exception when updating shipment with ID {0}: {1}",
               uosReq.sid, e.getMessage());
           status = false;
-          message = backendMessages.getString("error.systemerror");
+          if (StringUtils.isNotEmpty(e.getCode())) {
+            errorCode = e.getCode();
+            message = e.getMessage();
+          } else{
+            message = backendMessages.getString("error.systemerror");
+          }
           setSignatureAndStatus(cache, signature, IJobStatus.FAILED);
         }
       } else {
@@ -1413,9 +1418,8 @@ public class OrderServlet extends JsonRestServlet {
         MobileOrderBuilder mob = new MobileOrderBuilder();
         mom = mob.build(order, locale, timezone, true, isAccounting, true, includeBatchDetails);
       }
-      String json = GsonUtil.buildGetOrderResponseModel(status, mom, message, RESTUtil.VERSION_01);
-      sendJsonResponse(resp, statusCode, json);
-
+      String jsonString = buildJsonResponse(resp, status, mom, message, errorCode);
+      sendJsonResponse(resp, statusCode, jsonString);
     } catch (Exception e) {
       xLogger.severe("Protocol exception when sending order with ID {0}: {1}", uosReq.tid,
           e.getMessage());

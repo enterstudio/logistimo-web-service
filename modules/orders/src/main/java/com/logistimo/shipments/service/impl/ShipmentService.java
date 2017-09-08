@@ -1180,7 +1180,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
 
   public IShipment updateShipmentData(String updType, String updValue, String orderUpdatedAt,
                                     String sId, String userId)
-      throws ServiceException {
+      throws ServiceException, LogiException {
     Long orderId = extractOrderId(sId);
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + orderId);
     if (!LockUtil.isLocked(lockStatus)) {
@@ -1233,7 +1233,7 @@ public class ShipmentService extends ServiceImpl implements IShipmentService {
         xLogger.warn("Error while updating shipment", e);
         throw e;
       } catch (LogiException le) {
-        throw new ServiceException(le.getMessage());
+        throw le;
       } catch (Exception e) {
         xLogger.warn("Error while updating shipment", e);
         throw new ServiceException(e);

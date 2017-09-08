@@ -95,5 +95,8 @@ public class UpdateOrderStatusRequest {
    * Package size
    */
   public String pksz;
-
+  /**
+   * Updated time sent in the last response
+   */
+  public String tm;
 }
