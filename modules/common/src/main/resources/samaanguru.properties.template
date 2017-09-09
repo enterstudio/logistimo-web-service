@@ -146,7 +146,7 @@ approval.path=/v1/approvals
 #Cassandra
 cassandra.hosts=$CASSANDRA_HOST
 cassandra.keyspace=$CASSANDRA_KEYSPACE
-cassandra.password=$CASSANDRA_USER
+cassandra.username=$CASSANDRA_USER
 cassandra.password=$CASSANDRA_PASS
 
 
