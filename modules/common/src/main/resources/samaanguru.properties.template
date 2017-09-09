@@ -79,6 +79,7 @@ zoo.timeout=3000
 
 #Cache
 redis.server=$REDIS_HOST
+redis.sentinels=$SENTINEL_HOST
 redis.server.port=6379
 cache.expiry=84400
 
