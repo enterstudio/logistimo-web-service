@@ -195,7 +195,8 @@ public class ReportPluginService implements Service {
     //parse response
     if (response != null) {
       JSONObject jsonObject = new JSONObject(response.readEntity(String.class));
-      JSONArray rows = jsonObject.getJSONArray(ReportsConstants.ROWS);
+      JSONArray rows = jsonObject.has(ReportsConstants.ROWS) ? jsonObject.getJSONArray
+          (ReportsConstants.ROWS) : null;
       if (rows != null && !rows.isNull(0) && rows.getJSONArray(0).get(0) != null) {
         try {
           return LocalDateUtil
