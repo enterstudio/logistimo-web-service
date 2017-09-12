@@ -29,11 +29,14 @@
         <div ng-hide="loading">
             <div ng-show="showFilters">
                 <div class="filter-box filter-box-fit">
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
-                            <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                    <div ng-controller="ResetController">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <span class="filter-label">{{resourceBundle['material']}} {{resourceBundle['tag.lower']}}:</span>
+                                <tag-filter ng-model="mtag" tag-type="material"></tag-filter>
+                            </div>
                         </div>
+                        <fieldset ng-disabled="loading" ng-include="'views/common/reset-filters.html'"/>
                     </div>
                 </div>
                 <div class="row action-bar">

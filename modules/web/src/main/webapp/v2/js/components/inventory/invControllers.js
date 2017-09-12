@@ -220,6 +220,15 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
         $scope.wparams = [['alert', 'searchAlert'], ["o", "offset"], ["s", "size"], ["eid", "entityId"],
             ["abntype", "abntype"], ["dur", "dur"], ["mid", "mid"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
         $scope.reqparams = ["mtag", "etag", "eetag", "state", "district", "taluk"];
+        $scope.localFilters = ['mtag'];
+        $scope.filters = {changed: false};
+        $scope.$watch("mtag",function(newVal, oldVal){
+            if(newVal != oldVal){
+                $scope.tag = newVal;
+                $scope.fetchInv();
+
+            }
+        });
         $scope.init = function () {
             $scope.showFullAbnormalStock = false;
             $scope.tag = requestContext.getParam("mtag") || "";
@@ -242,6 +251,7 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
             $scope.onlyNZStk = requestContext.getParam("onlyNZStk") || false;
             $scope.pdos = requestContext.getParam("pdos");
             $scope.tpdos = $scope.pdos;
+            $scope.mtag = requestContext.getParam("mtag") || "";
         };
 
         $scope.init();
