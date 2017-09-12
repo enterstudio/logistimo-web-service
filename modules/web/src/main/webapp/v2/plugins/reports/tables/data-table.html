@@ -74,14 +74,15 @@
                                 (key.split('|')[4] ? ', ':'') + key.split('|')[5]
                                 }}</span>
                         </td>
-                        <td ng-init="sId = key.split('_').splice(1,key.split('_').length).join().split('|||')[0];
-                                vId = key.split('|||')[1];
-                                metadata = key.substring(key.split('|||')[0].length+'|||'.length).split('|||');"
-                            class="text-left" ng-if="activeMetric == 'at'">
-                            <a href="#/assets/detail/{{key.split('_')[0]}}/{{encodeURIParam(sId)}}" target="_blank">{{sId}} </a>
-                            {{' - ' + metadata[1] + ' (' + vId + ')'}}
+                        <td ng-if="activeMetric == 'at'"
+                            ng-init="data = constructLocationMetaData(key)"
+                            class="text-left">
+                            <a href="#/assets/detail/{{key.split('_')[0]}}/{{encodeURIParam(data.sId)}}"
+                               target="_blank">{{data.sId}} </a>
+                            {{' - ' + data.title[1] + ' (' + data.vId + ')'}}
                             <span class="litetext">
-                                <a href="#/setup/entities/detail/{{metadata[2]}}" target="_blank">{{metadata[3]}}</a>{{(metadata[3] ? ', ':'') + metadata[4]}}
+                                <a href="#/setup/entities/detail/{{data.title[2]}}" target="_blank">
+                                    {{data.title[3]}}</a>{{(data.title[3] ? ', ':'') + data.subTitle}}
                             </span>
                         </td>
                         <td class="text-left" ng-if="activeMetric == 'mt'">

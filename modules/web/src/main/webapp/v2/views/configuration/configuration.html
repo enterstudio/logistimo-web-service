@@ -33,7 +33,7 @@
             <li ng-if="!isTempMonOnly" ng-class="{ enable: subview == 'orders' }">
                 <a href="#/configuration/orders/">{{resourceBundle['orders']}}</a></li>
             <li ng-class="{ enable: subview == 'approvals'}">
-                <a href="#/configuration/approvals">Approvals</a>
+                <a href="#/configuration/approvals">{{resourceBundle['approvals.upper.case']}}</a>
             </li>
             <li ng-class="{ enable: subview == 'notifications' }">
                 <a ng-if="!isTempMonOnly" href="#/configuration/notifications/">{{resourceBundle['notifications']}}</a>

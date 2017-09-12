@@ -138,7 +138,8 @@ public class LoginServlet extends JsonRestServlet {
     String jsonString = null;
     boolean onlyAuthenticate = false;
     Date start = null;
-    String minResponseCode = null;
+    // whether min. data is to be sent back - "1" = only kiosk info., in case of multiple kiosks; "2" = same as "1", but also do NOT send related kiosks info. (for each kiosk); null implies send back everything (kiosk info., materials and related kiosk info.)
+    String minResponseCode = req.getParameter(RestConstantsZ.MIN_RESPONSE);
     String locale = String.valueOf(new Locale(Constants.LANG_DEFAULT));
     // Getting config by token
     String authtoken = req.getHeader(Constants.TOKEN);
@@ -151,6 +152,28 @@ public class LoginServlet extends JsonRestServlet {
         // ignore
       }
     }
+
+    // Get the size & offset, if available
+    String sizeStr = req.getParameter(RestConstantsZ.SIZE);
+    String offsetStr = req.getParameter(Constants.OFFSET);
+    int offset = 0;
+    if (StringUtils.isNotBlank(offsetStr)) {
+      try {
+        offset = Integer.parseInt(offsetStr);
+      } catch (Exception e) {
+        xLogger.warn("Invalid offset {0}: {1}", offsetStr, e.getMessage());
+      }
+    }
+    // Get page params, if any (allow NULL possibility to enable backward compatibility, where size/cursor is never sent)
+    if (sizeStr != null && !sizeStr.isEmpty()) {
+      try {
+        int size = Integer.parseInt(sizeStr);
+        pageParams = new PageParams(offset, size);
+      } catch (Exception e) {
+        xLogger.warn("Invalid size {0}: {1}", sizeStr, e.getMessage());
+      }
+    }
+
     if (authtoken != null) {
       try {
         user = AuthenticationUtil.authenticateToken(authtoken, actionInitiator);
@@ -180,32 +203,10 @@ public class LoginServlet extends JsonRestServlet {
       String password = req.getParameter(RestConstantsZ.PASSWORD);
       String version = req.getParameter(RestConstantsZ.VERSION);
       locale = req.getParameter(RestConstantsZ.LOCALE);
-      minResponseCode =
-          req.getParameter(
-              RestConstantsZ.MIN_RESPONSE); // whether min. data is to be sent back - "1" = only kiosk info., in case of multiple kiosks; "2" = same as "1", but also do NOT send related kiosks info. (for each kiosk); null implies send back everything (kiosk info., materials and related kiosk info.)
       String onlyAuthenticateStr = req.getParameter(RestConstantsZ.ONLY_AUTHENTICATE);
       onlyAuthenticate = (onlyAuthenticateStr != null);
 
-      // Get the size & offset, if available
-      String sizeStr = req.getParameter(RestConstantsZ.SIZE);
-      String offsetStr = req.getParameter(Constants.OFFSET);
-      int offset = 0;
-      if (StringUtils.isNotBlank(offsetStr)) {
-        try {
-          offset = Integer.parseInt(offsetStr);
-        } catch (Exception e) {
-          xLogger.warn("Invalid offset {0}: {1}", offsetStr, e.getMessage());
-        }
-      }
-      // Get page params, if any (allow NULL possibility to enable backward compatibility, where size/cursor is never sent)
-      if (sizeStr != null && !sizeStr.isEmpty()) {
-        try {
-          int size = Integer.parseInt(sizeStr);
-          pageParams = new PageParams(offset, size);
-        } catch (Exception e) {
-          xLogger.warn("Invalid size {0}: {1}", sizeStr, e.getMessage());
-        }
-      }
+
       // Get the user-agent and device details from header, if available
       String userAgentStr = req.getHeader(USER_AGENT);
       String deviceDetails = req.getHeader(DEVICE_DETAILS);

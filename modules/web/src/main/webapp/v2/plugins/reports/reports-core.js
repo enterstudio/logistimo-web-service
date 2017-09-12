@@ -185,8 +185,12 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
                     var assetMetaData = key.split("|||");
                     var vid_sid = assetMetaData[0].split('_');
                     csvData += vid_sid.splice(1).join() + comma;
-                    csvData += assetMetaData[2] + comma + assetMetaData[1] + comma + assetMetaData[4]
-                        + comma + "\""+assetMetaData[5]+ "\"";
+                    csvData += assetMetaData[2] + comma + assetMetaData[1] + comma + assetMetaData[4];
+                    csvData += comma + cleanupLocationField(assetMetaData[5]);
+                    csvData += comma + cleanupLocationField(assetMetaData[6]);
+                    csvData += comma + cleanupLocationField(assetMetaData[7]);
+                    csvData += comma + cleanupLocationField(assetMetaData[8]);
+                    csvData += comma + cleanupLocationField(assetMetaData[9]);
                 }else {
                     csvData += location[0];
                 }
@@ -198,10 +202,20 @@ function registerWidget(id, widget, report, subReport, helpFilePath) {
             return csvData;
         }
 
+        function cleanupLocationField(location){
+            var value = ((checkNullEmpty(location) || location.trim() == ',') ? '':  location);
+            if(checkNotNullEmpty(value) && value.charAt(0) == ','){
+                value = value.substring(1);
+            }
+            return "\"" + value.trim() + "\"";
+        }
+
         function getAssetColumns(csvHeading){
             return csvHeading[0] + ',' + $scope.resourceBundle['assetModel'] + ','
                 + $scope.resourceBundle['manufacturer'] + ',' + $scope.resourceBundle['kiosk']
-                + ',' + $scope.resourceBundle['location'] + ',' + csvHeading.splice(1).join(',');
+                + ',' + $scope.resourceBundle['city'] +',' + $scope.resourceBundle['taluk'] +','
+                + $scope.resourceBundle['district'] +',' + $scope.resourceBundle['state'] + ','
+                + $scope.resourceBundle['country'] + ',' + csvHeading.splice(1).join(',');
         }
 
         $scope.exportAsCSV = function (data, headings, fileName, tableSeriesNo) {
