@@ -1214,3 +1214,7 @@ user.tag=Étiquette utilisateur
 user.activity.by.user=Par utilisateur
 user.activity.by.users=Par les utilisateurs
 payment.enter.amount=Entrer le montant
+approvals.upper.case=Homologations
+purchase.order.approval.enable=Activer les approbations pour les bons de commande
+sales.order.approval.enable=Activer les approbations pour les commandes de vente
+approval.status=Statut approuvé

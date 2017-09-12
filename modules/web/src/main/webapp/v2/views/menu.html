@@ -82,7 +82,7 @@
                         <li><a href="#/orders/shipment/">{{resourceBundle.shipments}}</a></li>
                         <li><a href="#/orders/discrepancies/">{{resourceBundle.discrepancies}}</a></li>
                         <li><a href="#/orders/demand/">{{resourceBundle.demand}}</a></li>
-                        <li><a href="#/orders/approvals/">Approvals</a></li>
+                        <li><a href="#/orders/approvals/">{{resourceBundle['approvals.upper.case']}}</a></li>
                     </ul>
                 </li>
                 <li ng-if="invTabEnabled" ng-class="{active:subview == 'inventory' }">
@@ -136,7 +136,7 @@
                         <li ng-if="!isTempMonOnly"><a href="#/configuration/inventory/">{{resourceBundle.inventory}}</a>
                         </li>
                         <li ng-if="!isTempMonOnly"><a href="#/configuration/orders/">{{resourceBundle.orders}}</a></li>
-                        <li><a href="#/configuration/approvals/">Approvals</a></li>
+                        <li><a href="#/configuration/approvals/">{{resourceBundle['approvals.upper.case']}}</a></li>
                         <li ng-show="isTempMonOnly"><a href="#/configuration/notifications/event/assets">{{resourceBundle.notifications}}</a></li>
                         <li ng-hide="isTempMonOnly"><a href="#/configuration/notifications/">{{resourceBundle.notifications}}</a></li>
                         <li><a href="#/configuration/tags">{{resourceBundle.tags}}</a></li>

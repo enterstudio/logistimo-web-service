@@ -48,7 +48,7 @@
                                                             <tbody>
                                                             <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
                                                                 <th class="col-sm-3 text-center">Entity tags</th>
-                                                                <th class="col-sm-4 text-center">Approvals</th>
+                                                                <th class="col-sm-4 text-center">{{resourceBundle['approvals.upper.case']}}</th>
                                                                 <th class="col-sm-0-2 text-center"></th>
                                                             </tr>
                                                             </tbody>
@@ -64,8 +64,8 @@
                                                                             <div class="form-group">
                                                                                 <label class="col-sm-2 control-label"></label>
                                                                                 <div class="col-sm-10 cbx">
-                                                                                    <input type="checkbox" ng-model="ps.poa"> Enable approvals for purchase orders <br/>
-                                                                                    <input type="checkbox" ng-model="ps.soa"> Enable approvals for sales orders <br/>
+                                                                                    <input type="checkbox" ng-model="ps.poa"> {{resourceBundle['purchase.order.approval.enable']}} <br/>
+                                                                                    <input type="checkbox" ng-model="ps.soa"> {{resourceBundle['sales.order.approval.enable']}} <br/>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -95,7 +95,7 @@
                                                 <div class="row">
                                                     <div class="col-sm-11 mt10">
                                                         <div class="form-group">
-                                                            <label class="col-sm-3 control-label">Primary approvers</label>
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['approvals.primary.approvers']}}</label>
                                                             <div class="col-sm-6">
                                                                 <domain-user-select only-active="true" users-model="orderCfg.pa" pre-selected="orderCfg.sa" limit="3" role="admin" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
                                                             </div>
@@ -105,7 +105,7 @@
                                                 <div class="row">
                                                     <div class="col-sm-11 mt10">
                                                         <div class="form-group">
-                                                            <label class="col-sm-3 control-label">Secondary approvers</label>
+                                                            <label class="col-sm-3 control-label">{{resourceBundle['approvals.secondary.approvers']}}</label>
                                                             <div class="col-sm-6">
                                                                 <domain-user-select only-active="true" users-model="orderCfg.sa" disable="isUndef(orderCfg.pa)" pre-selected="orderCfg.pa" limit="3" role="admin" place-holder="{{resourceBundle['config.enter.users']}}"></domain-user-select>
                                                             </div>
