@@ -218,7 +218,7 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
     function ($scope, invService, domainCfgService, requestContext, $location,INVENTORY) {
         //$scope.map = {};
         $scope.wparams = [['alert', 'searchAlert'], ["o", "offset"], ["s", "size"], ["eid", "entityId"],
-            ["abntype", "abntype"], ["dur", "dur"], ["mid", "mid"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
+            ["abntype", "abntype"],["mtag","mtag"], ["dur", "dur"], ["mid", "mid"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
         $scope.reqparams = ["mtag", "etag", "eetag", "state", "district", "taluk"];
         $scope.filterMethods = ['getTag','fetchInv'];
         $scope.localFilters = ['mtag'];
@@ -228,7 +228,7 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
         };
         $scope.init = function () {
             $scope.showFullAbnormalStock = false;
-            $scope.tag = requestContext.getParam("mtag") || "";
+            $scope.tag = $scope.mtag = requestContext.getParam("mtag") || "";
             $scope.searchAlert = requestContext.getParam("alert") || "";
             $scope.search = {};
             $scope.search.mnm = requestContext.getParam("search") || "";
