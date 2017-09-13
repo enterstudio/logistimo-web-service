@@ -164,7 +164,7 @@
         <text><![CDATA[INVOICE]]></text>
       </staticText>
       <staticText>
-        <reportElement mode="Opaque" x="20" y="37" width="60" height="15" forecolor="#333333" backcolor="#FFFFFF" uuid="f99e5c80-5a59-408e-8e2f-8fb7bb9a53b6">
+        <reportElement mode="Opaque" x="0" y="37" width="80" height="15" forecolor="#333333" backcolor="#FFFFFF" uuid="f99e5c80-5a59-408e-8e2f-8fb7bb9a53b6">
           <property name="com.jaspersoft.studio.unit.height" value="pixel"/>
         </reportElement>
         <box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="5"/>
@@ -264,8 +264,8 @@
         </textElement>
         <textFieldExpression><![CDATA[$P{VendorPhone}]]></textFieldExpression>
       </textField>
-      <image scaleImage="FillFrame">
-        <reportElement x="0" y="-3" width="120" height="34" uuid="f267863c-d114-42c3-b04d-734800eb128c"/>
+      <image scaleImage="RetainShape">
+        <reportElement x="1" y="-3" width="120" height="34" uuid="f267863c-d114-42c3-b04d-734800eb128c"/>
         <imageExpression><![CDATA[$P{logo}]]></imageExpression>
       </image>
       <line>

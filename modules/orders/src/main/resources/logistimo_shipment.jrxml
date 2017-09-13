@@ -264,8 +264,8 @@
                 </textElement>
                 <textFieldExpression><![CDATA[$P{VendorPhone}]]></textFieldExpression>
             </textField>
-            <image scaleImage="FillFrame">
-                <reportElement x="0" y="-3" width="120" height="34" uuid="f267863c-d114-42c3-b04d-734800eb128c"/>
+            <image scaleImage="RetainShape" vAlign="Middle">
+                <reportElement x="1" y="-3" width="120" height="34" uuid="f267863c-d114-42c3-b04d-734800eb128c"/>
                 <imageExpression><![CDATA[$P{logo}]]></imageExpression>
             </image>
             <line>
