@@ -2480,16 +2480,16 @@ public class DomainConfigController {
         model = dc.getEventSummaryConfig();
       }
       //Get the template
-      EventSummaryConfigModel templateModel = EventSummaryTemplateLoader.getDefaultTemplate();
-      if (templateModel != null) {
-        if (model == null ) {
-            return templateModel;
-        } else if(model.getEvents().isEmpty()) {
-          templateModel.setTagDistribution(model.getTagDistribution());
-          templateModel.setTag(model.getTag());
-          return templateModel;
-        } else{
-          model.buildEvents(templateModel.getEvents());
+      EventSummaryConfigModel templateEvent = EventSummaryTemplateLoader.getDefaultTemplate();
+      if (templateEvent != null) {
+        if (model == null) {
+          return templateEvent;
+        } else if (model.getEvents().isEmpty()) {
+          templateEvent.setTagDistribution(model.getTagDistribution());
+          templateEvent.setTag(model.getTag());
+          return templateEvent;
+        } else {
+          model.buildEvents(templateEvent.getEvents());
           xLogger.info(" Event summary events built based on template");
         }
       }
@@ -2706,7 +2706,7 @@ public class DomainConfigController {
     } catch (ConfigurationException | ServiceException e) {
       xLogger
           .severe("Invalid format of configuration for domain {0}: {1}", domainId,
-              e.getMessage());
+              e);
       throw new ConfigurationServiceException(
           backendMessages.getString("invalid.domain.config") + " " + domainId);
     }

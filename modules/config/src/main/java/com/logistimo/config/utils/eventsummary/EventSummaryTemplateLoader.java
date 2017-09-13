@@ -52,7 +52,8 @@ public class EventSummaryTemplateLoader {
    *
    * @return json string
    */
-  public static EventSummaryConfigModel getDefaultTemplate() {
+  public static EventSummaryConfigModel getDefaultTemplate()
+      throws IOException, ClassNotFoundException {
     if (eventSummaryConfigModel == null) {
       //load the template json file
       try (InputStream inputStream =
@@ -64,7 +65,9 @@ public class EventSummaryTemplateLoader {
         xLogger.warn("Exception loading the template", e);
       }
     }
-    return eventSummaryConfigModel;
+    return eventSummaryConfigModel != null ? eventSummaryConfigModel.copy() : null;
   }
+
+
 
 }
