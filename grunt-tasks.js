@@ -374,13 +374,14 @@ module.exports = function(grunt, ref) {
                         "Sales approval":"Indent (issue) approval",
                         "Purchase":"Receipt",
                         "Sales":"Issue",
-                        "Purchases and sales": "Receipts and issues",
+                        "purchase and sales orders":"indents - receipts and issues",
+                        "purchase or sales orders":"indents - receipts or issues",
                         "sales orders": "indents - issues",
                         "purchase orders": "indents - receipts",
                         "purchase order": "indent - receipt",
                         "sales order":"indent - issue",
-                        "purchase and sales orders":"indents - receipts and issues",
-                        "purchase or sales orders":"indents - receipts or issues"
+                        "sales": "issues",
+                        "purchase": "receipt"
                     },
                     global: true
                 },
@@ -419,13 +420,14 @@ module.exports = function(grunt, ref) {
                         "Sales approval":"Indent (issue) approval",
                         "Purchase":"Receipt",
                         "Sales":"Issue",
-                        "Purchases and sales": "Receipts and issues",
+                        "purchase and sales orders":"indents - receipts and issues",
+                        "purchase or sales orders":"indents - receipts or issues",
                         "sales orders": "indents - issues",
                         "purchase orders": "indents - receipts",
                         "purchase order": "indent - receipt",
                         "sales order":"indent - issue",
-                        "purchase and sales orders":"indents - receipts and issues",
-                        "purchase or sales orders":"indents - receipts or issues"
+                        "sales": "issues",
+                        "purchase": "receipt"
                     },
                     global: true,
                     type: 'props'
