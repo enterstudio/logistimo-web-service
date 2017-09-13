@@ -87,7 +87,7 @@ ordControllers.controller('OrdersCtrl', ['$scope', 'ordService', 'domainCfgServi
             $scope.etag = requestContext.getParam("etag") || "";
             $scope.otag = requestContext.getParam("otag") || "";
             $scope.approval_status = requestContext.getParam("approval_status") || "";
-            $scope.astatus = requestContext.getParam("astatus") || "";
+            $scope.status = requestContext.getParam("status") || "";
             $scope.search.vnm = requestContext.getParam("vendor") || "";
             $scope.from = parseUrlDate(requestContext.getParam("from"));
             $scope.to = parseUrlDate(requestContext.getParam("to"));
