@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="domain-title-heading">
-                            <h4>Approval {{resourceBundle['domain.configuration.lowercase']}}</h4>
+                            <h4>{{resourceBundle['approval.upper.case']}} {{resourceBundle['domain.configuration.lowercase']}}</h4>
                             <span ng-show="orderCfg.lastUpdated" class="caption pull-right">{{resourceBundle['lastupdated']}} {{resourceBundle['on']}} {{orderCfg.lastUpdated}} {{resourceBundle['by']}}
                                 <a href="#setup/users/all/details?userId={{orderCfg.createdBy}}" target="_new">{{orderCfg.fn}}</a>
                             </span>
@@ -16,10 +16,10 @@
                     <div class="row">
                         <div class="col-sm-11">
                             <div class="title-heading">
-                                Order approvals
+                                {{resourceBundle['order.approvals']}}
                             </div>
                             <p class="litetext">
-                                Specify configuration parameters for order approvals, including purchase orders, sales orders and transfer orders. Approvals can be configured by groups of entities identified by entity tags for purchase and sales orders.
+                                {{resourceBundle['order.approvals.info']}}
                             </p>
                         </div>
                     </div>
@@ -27,8 +27,8 @@
                         <div class="row overflowYHide">
                             <div class="col-sm-2 " style="min-height:280px;">
                                 <ul class="nav nav-tabs-left extend">
-                                    <li ng-class="{active : orderType.ps}"><a href="" ng-click="tabContent('ps')">Purchases and sales</a></li>
-                                    <li ng-class="{active : orderType.t}"><a href="" ng-click="tabContent('t')">Transfers/Releases</a></li>
+                                    <li ng-class="{active : orderType.ps}"><a href="" ng-click="tabContent('ps')">{{resourceBundle['purchases.sales.approvals']}}</a></li>
+                                    <li ng-class="{active : orderType.t}"><a href="" ng-click="tabContent('t')">{{resourceBundle['transfer.approvals']}}</a></li>
                                 </ul>
                             </div>
                             <div class="col-sm-10">
@@ -47,7 +47,7 @@
                                                         <table class="table table-bordered table-condensed table-hover table-logistimo">
                                                             <tbody>
                                                             <tr><th class="col-sm-1 text-center">{{resourceBundle['serialnum']}}</th>
-                                                                <th class="col-sm-3 text-center">Entity tags</th>
+                                                                <th class="col-sm-3 text-center">{{resourceBundle['kiosk.tags']}}</th>
                                                                 <th class="col-sm-4 text-center">{{resourceBundle['approvals.upper.case']}}</th>
                                                                 <th class="col-sm-0-2 text-center"></th>
                                                             </tr>
@@ -120,13 +120,13 @@
                                     <div class="col-sm-12">
                                     <div class="bgr" style="margin: 0px;min-height:180px;">
                                         <div class="title-heading">
-                                            Approval request expiry times
+                                            {{resourceBundle['approval.expiry.time']}}
                                         </div>
                                         <div class="mt10">
                                             <div class="row" ng-show="orderType.ps">
                                                 <div class="col-sm-10">
                                                     <div class="form-group">
-                                                        <label class="col-sm-6 control-label">Expiry time for purchase order approval requests</label>
+                                                        <label class="col-sm-6 control-label">{{resourceBundle['purchase.approval.expiry.time']}}</label>
                                                         <div class="col-sm-6">
                                                             <input type="text" class="form-control w20 dinline" id="px"
                                                                    autocomplete="off"
@@ -140,7 +140,7 @@
                                             <div class="row" ng-show="orderType.ps">
                                                 <div class="col-sm-10">
                                                     <div class="form-group">
-                                                        <label class="col-sm-6 control-label">Expiry time for sales order approval requests</label>
+                                                        <label class="col-sm-6 control-label">{{resourceBundle['sales.approval.expiry.time']}}</label>
                                                         <div class="col-sm-6">
                                                             <input type="text" class="form-control w20 dinline" id="sx"
                                                                    autocomplete="off"
@@ -154,7 +154,7 @@
                                             <div class="row" ng-show="orderType.t">
                                                 <div class="col-sm-10">
                                                     <div class="form-group">
-                                                        <label class="col-sm-6 control-label">Expiry time for transfer/release order approval requests</label>
+                                                        <label class="col-sm-6 control-label">{{resourceBundle['transfer.approval.expiry.time']}}</label>
                                                         <div class="col-sm-6">
                                                             <input type="text" class="form-control w20 dinline" id="tx"
                                                                    autocomplete="off"

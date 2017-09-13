@@ -373,7 +373,14 @@ module.exports = function(grunt, ref) {
                         "Purchase approval":"Indent (receipt) approval",
                         "Sales approval":"Indent (issue) approval",
                         "Purchase":"Receipt",
-                        "Sales":"Issue"
+                        "Sales":"Issue",
+                        "Purchases and sales": "Receipts and issues",
+                        "sales orders": "indents - issues",
+                        "purchase orders": "indents - receipts",
+                        "purchase order": "indent - receipt",
+                        "sales order":"indent - issue",
+                        "purchase and sales orders":"indents - receipts and issues",
+                        "purchase or sales orders":"indents - receipts or issues"
                     },
                     global: true
                 },
@@ -411,7 +418,14 @@ module.exports = function(grunt, ref) {
                         "Purchase approval":"Indent (receipt) approval",
                         "Sales approval":"Indent (issue) approval",
                         "Purchase":"Receipt",
-                        "Sales":"Issue"
+                        "Sales":"Issue",
+                        "Purchases and sales": "Receipts and issues",
+                        "sales orders": "indents - issues",
+                        "purchase orders": "indents - receipts",
+                        "purchase order": "indent - receipt",
+                        "sales order":"indent - issue",
+                        "purchase and sales orders":"indents - receipts and issues",
+                        "purchase or sales orders":"indents - receipts or issues"
                     },
                     global: true,
                     type: 'props'
