@@ -40,6 +40,7 @@ public class InvoiceItem {
   String manufacturer;
   String expiry;
   String batchQuantity;
+  String materialStatus;
 
   public String getSno() {
     return sno;
@@ -117,11 +118,22 @@ public class InvoiceItem {
     return this;
   }
 
-  public String getBatch(){
+  public String getMaterialStatus() {
+    return materialStatus;
+  }
+
+  public void setMaterialStatus(String materialStatus) {
+    this.materialStatus = materialStatus;
+  }
+
+  public String getBatch() {
     if (batchId != null) {
-      return batchId + ", " + manufacturer + ", " + expiry;
+      if (materialStatus != null) {
+        return batchId + ", " + manufacturer + ", " + expiry + "(" + materialStatus + ")";
+      } else {
+        return batchId + ", " + manufacturer + ", " + expiry;
+      }
     }
     return null;
   }
-
 }

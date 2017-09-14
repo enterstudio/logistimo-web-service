@@ -109,8 +109,8 @@ public class InvoiceUtils {
 
   @Autowired
   public InvoiceUtils(InventoryManagementService inventoryService,
-      MaterialCatalogService materialService,
-      EntitiesService entitiesService, StorageUtil storageUtil) {
+      MaterialCatalogService materialService, EntitiesService entitiesService,
+      StorageUtil storageUtil) {
     this.inventoryService = inventoryService;
     this.materialService = materialService;
     this.entitiesService = entitiesService;
@@ -125,18 +125,36 @@ public class InvoiceUtils {
   public List<InvoiceItem> getInvoiceItems(IOrder order, IShipment shipment)
       throws ServiceException {
 
-    Map<Long, Map<String, BigDecimal>> quantityByBatches = shipment == null
+    Map<Long, Map<String, BatchInfo>> quantityByBatches = shipment == null
         ? getQuantityByBatches(order.getOrderId()) : getQuantityByBatches(shipment);
 
     List<InvoiceItem> invoiceItems = new ArrayList<>();
 
     int sno = 1;
+
+    IShipmentService shipmentService = Services.getService(ShipmentService.class);
+
     for (IDemandItem demandItem : order.getItems()) {
 
-      if (shipment != null && !shipment.getShipmentItems().stream()
-          .anyMatch(iShipmentItem ->
-              iShipmentItem.getMaterialId().equals(demandItem.getMaterialId()))) {
-        continue;
+      String materialStatus = null;
+
+      if (shipment != null) {
+        IShipmentItem shipmentItem = getShipmentItemByMaterialId(shipment,
+            demandItem.getMaterialId());
+        if (shipmentItem == null) {
+          continue;
+        } else {
+          materialStatus = shipmentItem.getShippedMaterialStatus();
+        }
+      } else {
+        List<IShipment> shipments = shipmentService.getShipmentsByOrderId(order.getOrderId());
+        if (shipments.size() == 1) {
+          IShipmentItem shipmentItem = getShipmentItemByMaterialId(shipments.get(0),
+              demandItem.getMaterialId());
+          if (shipmentItem != null) {
+            materialStatus = shipmentItem.getShippedMaterialStatus();
+          }
+        }
       }
 
       IMaterial material = materialService.getMaterial(demandItem.getMaterialId());
@@ -147,11 +165,12 @@ public class InvoiceUtils {
         invoiceItem.setItem(material.getName());
         invoiceItem.setQuantity(demandItem.getQuantity().toBigInteger().toString());
         if (BigUtil.greaterThanZero(demandItem.getRecommendedOrderQuantity())) {
-          invoiceItem.setRecommended(
-              demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
+          invoiceItem
+              .setRecommended(demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
         }
         invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
         invoiceItems.add(invoiceItem);
+        invoiceItem.setMaterialStatus(materialStatus);
       }
       sno++;
     }
@@ -170,12 +189,17 @@ public class InvoiceUtils {
     return invoiceItems;
   }
 
+  private IShipmentItem getShipmentItemByMaterialId(IShipment shipment, Long materialId) {
+    return shipment.getShipmentItems().stream().filter(item -> item.getMaterialId()
+        .equals(materialId)).findAny().orElse(null);
+  }
+
   private void buildInvoiceItemByBatch(IOrder order,
-      Map<Long, Map<String, BigDecimal>> quantityByBatches, List<InvoiceItem> invoiceItems,
+      Map<Long, Map<String, BatchInfo>> quantityByBatches, List<InvoiceItem> invoiceItems,
       IDemandItem demandItem, IMaterial material) {
-    Map<String, BigDecimal> shipmentItemBatchQuantityMap = quantityByBatches
+    Map<String, BatchInfo> shipmentItemBatchQuantityMap = quantityByBatches
         .get(demandItem.getMaterialId());
-    for (Map.Entry<String, BigDecimal> batchEntry : shipmentItemBatchQuantityMap.entrySet()) {
+    for (Map.Entry<String, BatchInfo> batchEntry : shipmentItemBatchQuantityMap.entrySet()) {
       String batchId = batchEntry.getKey();
       InvoiceItem invoiceItem = new InvoiceItem();
       invoiceItem.setItem(material.getName());
@@ -189,6 +213,7 @@ public class InvoiceUtils {
         batch = inventoryService.getInventoryBatch(order.getKioskId(),
             demandItem.getMaterialId(), batchId, null);
       }
+
       if (batch == null) {
         xLogger.warn("Error while getting inventory batch for kiosk {0}, material {1}, "
                 + "batch id {2}, order id: {3}", order.getServicingKiosk(),
@@ -200,11 +225,12 @@ public class InvoiceUtils {
           .formatCustom(batch.getBatchExpiry(), Constants.DATE_FORMAT, null));
       invoiceItem.setManufacturer(batch.getBatchManufacturer());
       invoiceItem.setBatchQuantity(
-          batchEntry.getValue().toBigInteger().toString());
+          batchEntry.getValue().getQuantity().toBigInteger().toString());
       if (BigUtil.greaterThanZero(demandItem.getRecommendedOrderQuantity())) {
         invoiceItem.setRecommended(
             demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
       }
+      invoiceItem.setMaterialStatus(batchEntry.getValue().getMaterialStatus());
       invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
       invoiceItems.add(invoiceItem);
     }
@@ -220,12 +246,12 @@ public class InvoiceUtils {
     }
   }
 
-  private Map<Long, Map<String, BigDecimal>> getQuantityByBatches(Long orderId) {
+  private Map<Long, Map<String, BatchInfo>> getQuantityByBatches(Long orderId) {
 
     IShipmentService shipmentService = Services.getService(ShipmentService.class);
 
     List<IShipment> shipments = shipmentService.getShipmentsByOrderId(orderId);
-    Map<Long, Map<String, BigDecimal>> quantityByBatches = new HashMap<>();
+    Map<Long, Map<String, BatchInfo>> quantityByBatches = new HashMap<>();
 
     shipments.forEach(shipmentService::includeShipmentItems);
 
@@ -241,9 +267,9 @@ public class InvoiceUtils {
     return quantityByBatches;
   }
 
-  private Map<Long, Map<String, BigDecimal>> getQuantityByBatches(IShipment shipment) {
+  private Map<Long, Map<String, BatchInfo>> getQuantityByBatches(IShipment shipment) {
 
-    Map<Long, Map<String, BigDecimal>> quantityByBatches = new LinkedHashMap<>();
+    Map<Long, Map<String, BatchInfo>> quantityByBatches = new LinkedHashMap<>();
 
     shipment.getShipmentItems().stream()
         .filter(shipmentItem -> shipmentItem.getShipmentItemBatch() != null &&
@@ -252,19 +278,53 @@ public class InvoiceUtils {
     return quantityByBatches;
   }
 
-  private void getQuantityByBatches(Map<Long, Map<String, BigDecimal>> quantityByBatches,
+  private void getQuantityByBatches(Map<Long, Map<String, BatchInfo>> quantityByBatches,
       IShipmentItem shipmentItem) {
     for (IShipmentItemBatch shipmentItemBatch : shipmentItem.getShipmentItemBatch()) {
       if (!quantityByBatches.containsKey(shipmentItem.getMaterialId())) {
         quantityByBatches.put(shipmentItem.getMaterialId(), new HashMap<>());
       }
-      Map<String, BigDecimal> batches = quantityByBatches.get(shipmentItem.getMaterialId());
+      Map<String, BatchInfo> batches = quantityByBatches.get(shipmentItem.getMaterialId());
       if (batches.containsKey(shipmentItemBatch.getBatchId())) {
-        batches.put(shipmentItemBatch.getBatchId(), batches.get(
-            shipmentItemBatch.getBatchId()).add(shipmentItemBatch.getQuantity()));
+        BatchInfo batchInfo = batches.get(shipmentItemBatch.getBatchId());
+        batchInfo.addQuantity(shipmentItemBatch.getQuantity());
+        batches.put(shipmentItemBatch.getBatchId(), batchInfo);
       } else {
-        batches.put(shipmentItemBatch.getBatchId(), shipmentItemBatch.getQuantity());
+        batches.put(shipmentItemBatch.getBatchId(), new BatchInfo(shipmentItemBatch.getQuantity(),
+            shipmentItemBatch.getShippedMaterialStatus()));
       }
+    }
+  }
+
+  private class BatchInfo {
+
+    private BigDecimal quantity;
+
+    private String materialStatus;
+
+    BatchInfo(BigDecimal quantity, String materialStatus) {
+      this.quantity = quantity;
+      this.materialStatus = materialStatus;
+    }
+
+    public BigDecimal getQuantity() {
+      return quantity;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+      this.quantity = quantity;
+    }
+
+    public String getMaterialStatus() {
+      return materialStatus;
+    }
+
+    public void setMaterialStatus(String materialStatus) {
+      this.materialStatus = materialStatus;
+    }
+
+    public void addQuantity(BigDecimal x) {
+      quantity = quantity.add(x);
     }
   }
 
