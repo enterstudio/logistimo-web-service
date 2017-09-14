@@ -38,6 +38,7 @@ public final class PermissionConstants {
   public static final String CONFIRM = "confirm";
   public static final String REOPEN = "reopen";
   public static final String APPROVAL_REQUIRED = "required";
+  public static final String EDIT_META_DATA = "edit_meta_data";
 
   //Approval constants
   public static final String REQUEST_APPROVAL = "request";

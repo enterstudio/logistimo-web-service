@@ -52,7 +52,7 @@
                                 </div>
                                 <a ng-show="!edit.rid && (dp.vp || order.st == ORDER.PENDING || order.st == ORDER.CONFIRMED || order.st == ORDER.BACKORDERED)"
                                    uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true" ng-click="editRID()">
-                                    <span ng-show="editPermission" class="glyphicons glyphicons-edit pt2 ml15"></span>
+                                    <span ng-hide="!editMetaDataPermission" class="glyphicons glyphicons-edit pt2 ml15"></span>
                                 </a>
                             </div>
                         </div>
@@ -100,7 +100,7 @@
                         <div ng-logi-tags tgs="order.tgs" style="border-radius: 10px;"></div>
                         <span ng-show="isUndef(order.tgs)" class="dinline cbx control-label">Add order tags</span>
                         <a uib-tooltip="Edit" ng-click="editTags()" tooltip-append-to-body="true">
-                            <span ng-hide="dp.vp || !editPermission" class="ml15 glyphicons glyphicons-edit cbx"></span>
+                            <span ng-hide="dp.vp || !editMetaDataPermission" class="ml15 glyphicons glyphicons-edit cbx"></span>
                         </a>
                     </span>
                     <span ng-hide="!edit.otags">

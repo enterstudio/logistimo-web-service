@@ -441,29 +441,31 @@ public class OrdersAPIBuilder {
             if (orderModel.atc) {
               permissions.add(PermissionConstants.CANCEL);
               permissions.add(PermissionConstants.EDIT);
+              permissions.add(PermissionConstants.EDIT_META_DATA);
             }
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
+            if(orderModel.atc) {
+              permissions.add(PermissionConstants.EDIT_META_DATA);
+            }
             if (orderModel.atv) {
               permissions.add(PermissionConstants.ALLOCATE);
               permissions.add(PermissionConstants.EDIT);
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.CANCEL);
               permissions.add(PermissionConstants.REOPEN);
+              permissions.add(PermissionConstants.EDIT_META_DATA);
             }
           }
         } else {
           if (orderModel.atc) {
             permissions.add(PermissionConstants.CANCEL);
             permissions.add(PermissionConstants.EDIT);
+            permissions.add(PermissionConstants.EDIT_META_DATA);
           }
         }
       } else if (IOrder.SALES_ORDER == approvalType) {
         if (approvalMapping != null) {
-          if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
-            if (orderModel.atv) {
-              //permissions.add(PermissionConstants.CANCEL);
-            }
-          } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
+          if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.REJECTED.equals(approvalMapping.getStatus()) ||
               ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
             if (orderModel.atv) {
@@ -472,6 +474,10 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.EDIT);
               permissions.add(PermissionConstants.REOPEN);
+              permissions.add(PermissionConstants.EDIT_META_DATA);
+            }
+            if(orderModel.atc) {
+              permissions.add(PermissionConstants.EDIT_META_DATA);
             }
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
             if (orderModel.atv) {
@@ -480,6 +486,10 @@ public class OrdersAPIBuilder {
               permissions.add(PermissionConstants.CREATE_SHIPMENT);
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.CANCEL);
+              permissions.add(PermissionConstants.EDIT_META_DATA);
+            }
+            if (orderModel.atc) {
+              permissions.add(PermissionConstants.EDIT_META_DATA);
             }
           }
         } else {
@@ -489,33 +499,40 @@ public class OrdersAPIBuilder {
             permissions.add(PermissionConstants.ALLOCATE);
             permissions.add(PermissionConstants.EDIT);
             permissions.add(PermissionConstants.REOPEN);
+            permissions.add(PermissionConstants.EDIT_META_DATA);
+          }
+          if(orderModel.atc) {
+            permissions.add(PermissionConstants.EDIT_META_DATA);
           }
         }
       } else if (IOrder.TRANSFER_ORDER == approvalType) {
         if (approvalMapping != null) {
-          if (ApprovalConstants.PENDING.equals(approvalMapping.getStatus())) {
-            //permissions.add(PermissionConstants.CANCEL);
-
-          } else if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus())
+          if (ApprovalConstants.CANCELLED.equals(approvalMapping.getStatus())
               || ApprovalConstants.REJECTED.equals(approvalMapping.getStatus())
               || ApprovalConstants.EXPIRED.equals(approvalMapping.getStatus())) {
             permissions.add(PermissionConstants.EDIT);
             permissions.add(PermissionConstants.CANCEL);
+            permissions.add(PermissionConstants.EDIT_META_DATA);
           } else if (ApprovalConstants.APPROVED.equals(approvalMapping.getStatus())) {
             if (userName.equals(approvalMapping.getCreatedBy())) {
               permissions.add(PermissionConstants.CANCEL);
+            }
+            if(orderModel.atc) {
+              permissions.add(PermissionConstants.EDIT_META_DATA);
             }
             if (orderModel.atv) {
               permissions.add(PermissionConstants.CONFIRM);
               permissions.add(PermissionConstants.ALLOCATE);
               permissions.add(PermissionConstants.SHIP);
               permissions.add(PermissionConstants.CREATE_SHIPMENT);
+              permissions.add(PermissionConstants.EDIT_META_DATA);
             }
           }
         } else {
           if (!(order.isVisibleToCustomer() && order.isVisibleToVendor())) {
             permissions.add(PermissionConstants.CANCEL);
             permissions.add(PermissionConstants.EDIT);
+            permissions.add(PermissionConstants.EDIT_META_DATA);
           } else {
             permissions.add(PermissionConstants.CANCEL);
             permissions.add(PermissionConstants.CONFIRM);
@@ -524,6 +541,7 @@ public class OrdersAPIBuilder {
             permissions.add(PermissionConstants.SHIP);
             permissions.add(PermissionConstants.CREATE_SHIPMENT);
             permissions.add(PermissionConstants.REOPEN);
+            permissions.add(PermissionConstants.EDIT_META_DATA);
           }
         }
       }
@@ -535,6 +553,7 @@ public class OrdersAPIBuilder {
       permissions.add(PermissionConstants.SHIP);
       permissions.add(PermissionConstants.CREATE_SHIPMENT);
       permissions.add(PermissionConstants.REOPEN);
+      permissions.add(PermissionConstants.EDIT_META_DATA);
     }
     model.setPermissions(permissions);
     return model;
