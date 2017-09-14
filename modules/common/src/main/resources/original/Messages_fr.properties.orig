@@ -1044,7 +1044,8 @@ trackingid=Tracking ID
 trackingobjecttype=Tracking Object Type
 transactionid=Transaction ID
 web=toile
-mob=Mobile
+mob=Iota app
+mob.mma=Pulse app
 upl=Ajouter vrac
 sms=Mobile SMS
 config.customreports.maxrowmsg=NOTE: Maximum de 60,000 lignes peut être exporté par feuille dans le fichier Excel. S'il vous plaît choisir la durée de données en conséquence.config.customreports.maxrowmsg=NOTE: Maximum de 60,000 lignes peut être exporté par feuille dans le fichier Excel. S'il vous plaît choisir la durée de données en conséquence.

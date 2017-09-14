@@ -95,6 +95,12 @@ public class AuthControllerMV1 {
     String initiator = req.getHeader(Constants.ACCESS_INITIATOR);
     Integer actionInitiator = StringUtils.isEmpty(initiator) ? -1 : Integer.parseInt(initiator);
     headers.put(Constants.REQ_ID, req.getHeader(Constants.REQ_ID));
+    String appName = req.getHeader(Constants.APP_NAME);
+    String appVer = req.getHeader(Constants.APP_VER);
+    int src = SourceConstants.MOBILE;
+    if (!StringUtils.isEmpty(appName) && appName.equals(Constants.MMA_NAME)) {
+      src = SourceConstants.MMA;
+    }
     if (authToken != null) {
       user = AuthenticationUtil.authenticateToken(authToken, actionInitiator);
     } else {
@@ -118,7 +124,7 @@ public class AuthControllerMV1 {
       String password = loginModel.password;
 
       as = Services.getService(UsersServiceImpl.class);
-      user = as.authenticateUser(userid, password, SourceConstants.MOBILE);
+      user = as.authenticateUser(userid, password, src);
       if (user == null) {
         throw new BadCredentialsException("Invalid user name or password");
       }
@@ -128,8 +134,8 @@ public class AuthControllerMV1 {
       generateUserToken(headers, userid);
 
       //to store the history of user login's
-      as.updateUserLoginHistory(userid, SourceConstants.MOBILE, userAgentStr,
-          ipaddr, new Date(), null);
+      as.updateUserLoginHistory(userid, src, userAgentStr,
+          ipaddr, new Date(), appVer);
 
     }
     //setting response headers
