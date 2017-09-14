@@ -332,8 +332,8 @@ public class DemandService extends ServiceImpl implements IDemandService {
       }
     }
     if (excludeTransfer) {
-      query.append(" AND OTY = ?");
-      parameters.add(String.valueOf(IOrder.NONTRANSFER));
+      query.append(" AND OTY != ?");
+      parameters.add(String.valueOf(IOrder.TRANSFER));
     }
     query.append(CharacterConstants.C_BRACKET);
     query.append("AND MID = ?)D LEFT JOIN INVNTRY I ON D.KID = I.KID AND D.MID = I.MID");
