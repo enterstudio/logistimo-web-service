@@ -24,6 +24,7 @@
 package com.logistimo.orders.service.impl;
 
 import com.logistimo.constants.Constants;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Created by nitisha.khandelwal on 01/08/17.
@@ -128,7 +129,7 @@ public class InvoiceItem {
 
   public String getBatch() {
     if (batchId != null) {
-      if (materialStatus != null) {
+      if (StringUtils.isNotEmpty(materialStatus)) {
         return batchId + ", " + manufacturer + ", " + expiry + "(" + materialStatus + ")";
       } else {
         return batchId + ", " + manufacturer + ", " + expiry;

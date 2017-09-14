@@ -149,6 +149,7 @@ public class InvoiceUtils {
       } else {
         List<IShipment> shipments = shipmentService.getShipmentsByOrderId(order.getOrderId());
         if (shipments.size() == 1) {
+          shipmentService.includeShipmentItems(shipments.get(0));
           IShipmentItem shipmentItem = getShipmentItemByMaterialId(shipments.get(0),
               demandItem.getMaterialId());
           if (shipmentItem != null) {
