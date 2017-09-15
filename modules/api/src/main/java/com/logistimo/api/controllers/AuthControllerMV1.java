@@ -132,11 +132,16 @@ public class AuthControllerMV1 {
         throw new UserDisabledException("You account is disabled");
       }
       generateUserToken(headers, userid);
-
+      user.setIPAddress(ipaddr);
+      user.setLoginSource(src);
+      user.setPreviousUserAgent(user.getUserAgent());
+      user.setUserAgent(userAgentStr);
+      user.setAppVersion(appVer);
       //to store the history of user login's
       as.updateUserLoginHistory(userid, src, userAgentStr,
           ipaddr, new Date(), appVer);
-
+      //update user account
+      as.updateMobileLoginFields(user);
     }
     //setting response headers
     setResponseHeaders(res, headers);
