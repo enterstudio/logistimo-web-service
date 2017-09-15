@@ -133,6 +133,7 @@ public class InvoiceUtils {
     int sno = 1;
 
     IShipmentService shipmentService = Services.getService(ShipmentService.class);
+    String shipmentQuantity = null;
 
     for (IDemandItem demandItem : order.getItems()) {
 
@@ -145,6 +146,7 @@ public class InvoiceUtils {
           continue;
         } else {
           materialStatus = shipmentItem.getShippedMaterialStatus();
+          shipmentQuantity = shipmentItem.getQuantity().toBigInteger().toString();
         }
       } else {
         List<IShipment> shipments = shipmentService.getShipmentsByOrderId(order.getOrderId());
@@ -160,11 +162,16 @@ public class InvoiceUtils {
 
       IMaterial material = materialService.getMaterial(demandItem.getMaterialId());
       if (quantityByBatches.containsKey(demandItem.getMaterialId())) {
-        buildInvoiceItemByBatch(order, quantityByBatches, invoiceItems, demandItem, material);
+        buildInvoiceItemByBatch(order, quantityByBatches, invoiceItems, demandItem, material,
+            shipmentQuantity);
       } else {
         InvoiceItem invoiceItem = new InvoiceItem();
         invoiceItem.setItem(material.getName());
-        invoiceItem.setQuantity(demandItem.getQuantity().toBigInteger().toString());
+        if (shipmentQuantity != null) {
+          invoiceItem.setQuantity(shipmentQuantity);
+        } else {
+          invoiceItem.setQuantity(demandItem.getQuantity().toBigInteger().toString());
+        }
         if (BigUtil.greaterThanZero(demandItem.getRecommendedOrderQuantity())) {
           invoiceItem
               .setRecommended(demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
@@ -198,44 +205,48 @@ public class InvoiceUtils {
 
   private void buildInvoiceItemByBatch(IOrder order,
       Map<Long, Map<String, BatchInfo>> quantityByBatches, List<InvoiceItem> invoiceItems,
-      IDemandItem demandItem, IMaterial material) {
+      IDemandItem demandItem, IMaterial material, String shipmentQuantity) {
+
     Map<String, BatchInfo> shipmentItemBatchQuantityMap = quantityByBatches
         .get(demandItem.getMaterialId());
     for (Map.Entry<String, BatchInfo> batchEntry : shipmentItemBatchQuantityMap.entrySet()) {
-      String batchId = batchEntry.getKey();
-      InvoiceItem invoiceItem = new InvoiceItem();
-      invoiceItem.setItem(material.getName());
-      invoiceItem.setQuantity(demandItem.getQuantity().toBigInteger().toString());
-      invoiceItem.setBatchId(batchId);
+      if (BigUtil.greaterThanZero(batchEntry.getValue().getQuantity())) {
+        String batchId = batchEntry.getKey();
+        InvoiceItem invoiceItem = new InvoiceItem();
+        invoiceItem.setItem(material.getName());
+        if (shipmentQuantity != null) {
+          invoiceItem.setQuantity(shipmentQuantity);
+        } else {
+          invoiceItem.setQuantity(demandItem.getQuantity().toBigInteger().toString());
+        }
+        invoiceItem.setBatchId(batchId);
+        IInvntryBatch batch = inventoryService.getInventoryBatch(
+            order.getServicingKiosk(), demandItem.getMaterialId(), batchId, null);
+        if (batch == null) {
+          batch = inventoryService.getInventoryBatch(order.getKioskId(),
+              demandItem.getMaterialId(), batchId, null);
+        }
+        if (batch == null) {
+          xLogger.warn("Error while getting inventory batch for kiosk {0}, material {1}, "
+                  + "batch id {2}, order id: {3}", order.getServicingKiosk(),
+              demandItem.getMaterialId(), batchId, order.getOrderId());
+          continue;
+        }
 
-      IInvntryBatch batch = inventoryService.getInventoryBatch(
-          order.getServicingKiosk(), demandItem.getMaterialId(), batchId, null);
-
-      if (batch == null) {
-        batch = inventoryService.getInventoryBatch(order.getKioskId(),
-            demandItem.getMaterialId(), batchId, null);
+        invoiceItem.setExpiry(LocalDateUtil
+            .formatCustom(batch.getBatchExpiry(), Constants.DATE_FORMAT, null));
+        invoiceItem.setManufacturer(batch.getBatchManufacturer());
+        invoiceItem.setBatchQuantity(
+            batchEntry.getValue().getQuantity().toBigInteger().toString());
+        if (BigUtil.greaterThanZero(demandItem.getRecommendedOrderQuantity())) {
+          invoiceItem.setRecommended(
+              demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
+        }
+        invoiceItem.setMaterialStatus(batchEntry.getValue().getMaterialStatus());
+        invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
+        invoiceItems.add(invoiceItem);
+        invoiceItem.setBatchEnabled(Boolean.TRUE);
       }
-
-      if (batch == null) {
-        xLogger.warn("Error while getting inventory batch for kiosk {0}, material {1}, "
-                + "batch id {2}, order id: {3}", order.getServicingKiosk(),
-            demandItem.getMaterialId(), batchId, order.getOrderId());
-        continue;
-      }
-
-      invoiceItem.setExpiry(LocalDateUtil
-          .formatCustom(batch.getBatchExpiry(), Constants.DATE_FORMAT, null));
-      invoiceItem.setManufacturer(batch.getBatchManufacturer());
-      invoiceItem.setBatchQuantity(
-          batchEntry.getValue().getQuantity().toBigInteger().toString());
-      if (BigUtil.greaterThanZero(demandItem.getRecommendedOrderQuantity())) {
-        invoiceItem.setRecommended(
-            demandItem.getRecommendedOrderQuantity().toBigInteger().toString());
-      }
-      invoiceItem.setMaterialStatus(batchEntry.getValue().getMaterialStatus());
-      invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
-      invoiceItems.add(invoiceItem);
-      invoiceItem.setBatchEnabled(Boolean.TRUE);
     }
   }
 
@@ -288,13 +299,15 @@ public class InvoiceUtils {
         quantityByBatches.put(shipmentItem.getMaterialId(), new HashMap<>());
       }
       Map<String, BatchInfo> batches = quantityByBatches.get(shipmentItem.getMaterialId());
-      if (batches.containsKey(shipmentItemBatch.getBatchId())) {
-        BatchInfo batchInfo = batches.get(shipmentItemBatch.getBatchId());
-        batchInfo.addQuantity(shipmentItemBatch.getQuantity());
-        batches.put(shipmentItemBatch.getBatchId(), batchInfo);
-      } else {
-        batches.put(shipmentItemBatch.getBatchId(), new BatchInfo(shipmentItemBatch.getQuantity(),
-            shipmentItemBatch.getShippedMaterialStatus()));
+      if(BigUtil.greaterThanZero(shipmentItemBatch.getQuantity())) {
+        if (batches.containsKey(shipmentItemBatch.getBatchId())) {
+          BatchInfo batchInfo = batches.get(shipmentItemBatch.getBatchId());
+          batchInfo.addQuantity(shipmentItemBatch.getQuantity());
+          batches.put(shipmentItemBatch.getBatchId(), batchInfo);
+        } else {
+          batches.put(shipmentItemBatch.getBatchId(), new BatchInfo(shipmentItemBatch.getQuantity(),
+              shipmentItemBatch.getShippedMaterialStatus()));
+        }
       }
     }
   }
