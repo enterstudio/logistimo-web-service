@@ -52,8 +52,9 @@
         <fieldDescription><![CDATA[batch]]></fieldDescription>
     </field>
     <sortField name="item"/>
-    <variable name="ItemNumber" class="java.lang.Integer" incrementType="Group" incrementGroup="ItemGroup" calculation="Count">
-        <variableExpression><![CDATA[Boolean.TRUE]]></variableExpression>
+    <variable name="ItemNumber" class="java.lang.Integer" incrementType="Group" incrementGroup="ItemGroup">
+        <variableExpression>
+            <![CDATA[($V{ItemGroup_COUNT} == 1) ? $V{ItemNumber} + 1 : $V{ItemNumber}]]></variableExpression>
         <initialValueExpression><![CDATA[1]]></initialValueExpression>
     </variable>
     <group name="ItemGroup" minHeightToStartNewPage="60">
@@ -74,7 +75,7 @@
                     <textElement textAlignment="Center" verticalAlignment="Middle">
                         <font fontName="Arial" size="9"/>
                     </textElement>
-                    <textFieldExpression><![CDATA[$F{sno}]]></textFieldExpression>
+                    <textFieldExpression><![CDATA[$V{ItemNumber}]]></textFieldExpression>
                 </textField>
                 <textField isStretchWithOverflow="true">
                     <reportElement key="" positionType="Float" stretchType="RelativeToTallestObject" mode="Opaque" x="36" y="0" width="230" height="15" isPrintWhenDetailOverflows="true" forecolor="#333333" backcolor="#F5F5F5" uuid="36fe2e36-6fac-4f80-8ce7-7ae635ed55d6">
