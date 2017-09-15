@@ -219,7 +219,6 @@ public final class Constants {
   public static final String APP_VER = "x-app-ver";
   public static final String MMA_NAME = "mma";
 
-
   public static final int FREQ_TYPE_DAILY = 0;
   public static final int FREQ_TYPE_WEEKLY = 1;
   public static final int FREQ_TYPE_MONTHLY = 2;
