@@ -171,6 +171,7 @@ public class InvoiceUtils {
         }
         invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
         invoiceItems.add(invoiceItem);
+        invoiceItem.setBatchEnabled(Boolean.FALSE);
         invoiceItem.setMaterialStatus(materialStatus);
       }
       sno++;
@@ -234,6 +235,7 @@ public class InvoiceUtils {
       invoiceItem.setMaterialStatus(batchEntry.getValue().getMaterialStatus());
       invoiceItem.setRemarks(getRemarks(order.getOrderType(), demandItem));
       invoiceItems.add(invoiceItem);
+      invoiceItem.setBatchEnabled(Boolean.TRUE);
     }
   }
 

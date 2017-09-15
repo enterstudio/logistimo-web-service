@@ -33,14 +33,23 @@ import org.apache.commons.lang.StringUtils;
 public class InvoiceItem {
 
   String sno;
+
   String item;
+
   String remarks = Constants.EMPTY;
+
   String recommended = Constants.EMPTY;
+
   String quantity;
+
   String batchId;
   String manufacturer;
   String expiry;
   String batchQuantity;
+
+
+  Boolean batchEnabled;
+
   String materialStatus;
 
   public String getSno() {
@@ -52,7 +61,11 @@ public class InvoiceItem {
   }
 
   public String getItem() {
-    return item;
+    if (!batchEnabled && StringUtils.isNotEmpty(materialStatus)) {
+      return item + "(" + materialStatus + ")";
+    } else {
+      return item;
+    }
   }
 
   public void setItem(String item) {
@@ -125,6 +138,14 @@ public class InvoiceItem {
 
   public void setMaterialStatus(String materialStatus) {
     this.materialStatus = materialStatus;
+  }
+
+  public Boolean getBatchEnabled() {
+    return batchEnabled;
+  }
+
+  public void setBatchEnabled(Boolean batchEnabled) {
+    this.batchEnabled = batchEnabled;
   }
 
   public String getBatch() {
