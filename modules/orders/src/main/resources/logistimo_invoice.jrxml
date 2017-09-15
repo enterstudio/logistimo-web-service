@@ -68,7 +68,7 @@
             <pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
             <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
             <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-            <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+              <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
             <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           </box>
           <textElement textAlignment="Center" verticalAlignment="Middle">
@@ -84,7 +84,7 @@
             <pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
             <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
             <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-            <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+              <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
             <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           </box>
           <textElement verticalAlignment="Middle">
@@ -100,7 +100,7 @@
             <pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
             <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
             <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-            <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+              <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
             <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           </box>
           <textElement textAlignment="Right" verticalAlignment="Middle">
@@ -116,7 +116,7 @@
             <pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
             <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
             <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-            <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+              <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
             <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           </box>
           <textElement textAlignment="Right" verticalAlignment="Middle">
@@ -132,7 +132,7 @@
             <pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
             <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
             <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-            <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+              <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
             <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           </box>
           <textElement verticalAlignment="Middle">
@@ -140,13 +140,6 @@
           </textElement>
           <textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression>
         </textField>
-        <line>
-          <reportElement x="0" y="14" width="555" height="1" forecolor="#FAFAFA" backcolor="rgba(215, 214, 215, 0.0)" uuid="66fc99c4-8fea-4fee-b5ba-0a96fbe9c2f6">
-            <property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-            <property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-            <property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-          </reportElement>
-        </line>
       </band>
     </groupHeader>
   </group>
@@ -453,7 +446,7 @@
           <pen lineWidth="1.0" lineStyle="Solid" lineColor="#999999"/>
           <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-          <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+            <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
           <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
         </box>
         <textElement verticalAlignment="Middle">
@@ -462,7 +455,8 @@
         <textFieldExpression><![CDATA[$F{batch}]]></textFieldExpression>
       </textField>
       <textField isBlankWhenNull="true">
-        <reportElement positionType="FixRelativeToBottom" mode="Opaque" x="267" y="0" width="90" height="15" isRemoveLineWhenBlank="true" forecolor="#666666" backcolor="#FFFFFF" uuid="c1a36896-3738-4da9-affb-a20e8aa6d87b">
+          <reportElement mode="Opaque" x="267" y="0" width="90" height="15" isRemoveLineWhenBlank="true"
+                         forecolor="#666666" backcolor="#FFFFFF" uuid="c1a36896-3738-4da9-affb-a20e8aa6d87b">
           <property name="com.jaspersoft.studio.unit.width" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.y" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.x" value="pixel"/>
@@ -471,7 +465,7 @@
           <pen lineColor="#999999"/>
           <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-          <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+            <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
           <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
         </box>
         <textElement textAlignment="Right" verticalAlignment="Middle">
@@ -480,7 +474,8 @@
         <textFieldExpression><![CDATA[$F{batchQuantity}]]></textFieldExpression>
       </textField>
       <textField isBlankWhenNull="true">
-        <reportElement positionType="FixRelativeToBottom" mode="Opaque" x="358" y="0" width="90" height="15" isRemoveLineWhenBlank="true" backcolor="#FFFFFF" uuid="ad955c7b-4033-4c44-ac67-fcdb2c1b699b">
+          <reportElement mode="Opaque" x="358" y="0" width="90" height="15" isRemoveLineWhenBlank="true"
+                         backcolor="#FFFFFF" uuid="ad955c7b-4033-4c44-ac67-fcdb2c1b699b">
           <property name="com.jaspersoft.studio.unit.y" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.width" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.x" value="pixel"/>
@@ -489,7 +484,7 @@
           <pen lineWidth="1.0" lineStyle="Solid"/>
           <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-          <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+            <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
           <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
         </box>
         <textElement verticalAlignment="Middle">
@@ -497,7 +492,8 @@
         </textElement>
       </textField>
       <textField isBlankWhenNull="true">
-        <reportElement positionType="Float" mode="Opaque" x="449" y="0" width="106" height="15" isRemoveLineWhenBlank="true" backcolor="#FFFFFF" uuid="ff27a196-a506-4959-8019-f18f0ddac922">
+          <reportElement mode="Opaque" x="449" y="0" width="106" height="15" isRemoveLineWhenBlank="true"
+                         backcolor="#FFFFFF" uuid="ff27a196-a506-4959-8019-f18f0ddac922">
           <property name="com.jaspersoft.studio.unit.y" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.width" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.x" value="pixel"/>
@@ -506,7 +502,7 @@
           <pen lineColor="#999999"/>
           <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-          <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+            <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
           <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
         </box>
         <textElement verticalAlignment="Middle">
@@ -514,7 +510,8 @@
         </textElement>
       </textField>
       <textField isBlankWhenNull="true">
-        <reportElement positionType="FixRelativeToBottom" mode="Opaque" x="0" y="0" width="35" height="15" isRemoveLineWhenBlank="true" backcolor="#FFFFFF" uuid="8de894ae-28d0-4f67-a599-b5b3ca9146c1">
+          <reportElement mode="Opaque" x="0" y="0" width="35" height="15" isRemoveLineWhenBlank="true"
+                         backcolor="#FFFFFF" uuid="8de894ae-28d0-4f67-a599-b5b3ca9146c1">
           <property name="com.jaspersoft.studio.unit.y" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.width" value="pixel"/>
           <property name="com.jaspersoft.studio.unit.x" value="pixel"/>
@@ -523,7 +520,7 @@
           <pen lineColor="#999999"/>
           <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
           <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-          <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+            <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#FAFAFA"/>
           <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
         </box>
         <textElement verticalAlignment="Middle">
