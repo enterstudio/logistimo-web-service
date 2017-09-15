@@ -382,7 +382,9 @@ module.exports = function(grunt, ref) {
                         "purchase order": "indent (receipt)",
                         "sales order":"indent (issue)",
                         "sales": "issues",
-                        "purchase": "receipt"
+                        "purchase": "receipt",
+                        "Iota app": "Stores app",
+                        "Pulse app": "Monitor app"
                     },
                     global: true
                 },
@@ -429,7 +431,9 @@ module.exports = function(grunt, ref) {
                         "purchase order": "indent (receipt)",
                         "sales order":"indent (issue)",
                         "sales": "issues",
-                        "purchase": "receipt"
+                        "purchase": "receipt",
+                        "Iota app": "Stores app",
+                        "Pulse app": "Monitor app"
                     },
                     global: true,
                     type: 'props'
