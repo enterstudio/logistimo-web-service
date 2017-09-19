@@ -41,7 +41,7 @@ trans.dedup.duration.seconds.old=1800
 
 # From-address for sending email
 email.fromaddress=$EMAIL_FROMADDRESS
-email.fromname="$EMAIL_FROMNAME"
+email.fromname=$EMAIL_FROMNAME
 
 # <!-- comments:comment # -->
 web.app.ver=
