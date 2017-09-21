@@ -23,7 +23,9 @@
 
 package com.logistimo.api.servlets.mobile.builders;
 
+import com.logistimo.config.models.AccountingConfig;
 import com.logistimo.config.models.ApprovalsConfig;
+import com.logistimo.proto.MobileAccountingConfigModel;
 import com.logistimo.proto.MobileApprovalsConfigModel;
 import com.logistimo.proto.MobileApproversModel;
 import com.logistimo.proto.MobilePurchaseSalesOrdersApprovalModel;
@@ -44,6 +46,8 @@ public class MobileConfigBuilder {
 
   /**
    * Builds the approval configuration model as required by the mobile from approvals configuration as obtained from domain configuration
+   * @param approvalsConfig
+   * @return
    */
   public MobileApprovalsConfigModel buildApprovalConfiguration(ApprovalsConfig approvalsConfig) {
     if (approvalsConfig == null) {
@@ -55,6 +59,25 @@ public class MobileConfigBuilder {
         ordersConfig);
     mobileApprovalsConfigModel.trf = buildTransfersApprovalConfigModel(ordersConfig);
     return mobileApprovalsConfigModel;
+  }
+
+  /**
+   * Builds the accounting configuration model as required by the mobile from accounting configuration as obtained from domain configuration
+   * @param isAccountingEnabled
+   * @param accountingConfig
+   * @return
+   */
+  public MobileAccountingConfigModel buildAccountingConfiguration(boolean isAccountingEnabled, AccountingConfig accountingConfig) {
+    MobileAccountingConfigModel mobileAccountingConfigModel = new MobileAccountingConfigModel();
+    mobileAccountingConfigModel.enb = isAccountingEnabled;
+    if (isAccountingEnabled) {
+      if (accountingConfig.enforceConfirm()) {
+        mobileAccountingConfigModel.enfcrl = MobileAccountingConfigModel.ENFORCE_CREDIT_LIMIT_ON_CONFIRM_ORDER;
+      } else if (accountingConfig.enforceShipped()) {
+        mobileAccountingConfigModel.enfcrl = MobileAccountingConfigModel.ENFORCE_CREDIT_LIMIT_ON_SHIP_ORDER;
+      }
+    }
+    return mobileAccountingConfigModel;
   }
 
   private Map<String, MobilePurchaseSalesOrdersApprovalModel> buildPurchaseSalesOrderApprovalConfigModel(

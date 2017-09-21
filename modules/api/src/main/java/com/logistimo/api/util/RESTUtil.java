@@ -41,6 +41,7 @@ import com.logistimo.auth.service.AuthenticationService;
 import com.logistimo.auth.service.impl.AuthenticationServiceImpl;
 import com.logistimo.auth.utils.SessionMgr;
 import com.logistimo.communications.service.SMSService;
+import com.logistimo.config.models.AccountingConfig;
 import com.logistimo.config.models.ActualTransConfig;
 import com.logistimo.config.models.ApprovalsConfig;
 import com.logistimo.config.models.CapabilityConfig;
@@ -91,6 +92,7 @@ import com.logistimo.pagination.Results;
 import com.logistimo.proto.BasicOutput;
 import com.logistimo.proto.JsonTagsZ;
 import com.logistimo.proto.MaterialRequest;
+import com.logistimo.proto.MobileAccountingConfigModel;
 import com.logistimo.proto.MobileApprovalsConfigModel;
 import com.logistimo.proto.ProtocolException;
 import com.logistimo.proto.RestConstantsZ;
@@ -1682,10 +1684,10 @@ public class RESTUtil {
           }
           config.put(JsonTagsZ.SMS, sms);
         }
+        MobileConfigBuilder mobileConfigBuilder = new MobileConfigBuilder();
         // Approval configuration
         ApprovalsConfig approvalsConfig = dc.getApprovalsConfig();
         if (approvalsConfig != null) {
-          MobileConfigBuilder mobileConfigBuilder = new MobileConfigBuilder();
           MobileApprovalsConfigModel
               mobileApprovalsConfigModel =
               mobileConfigBuilder.buildApprovalConfiguration(approvalsConfig);
@@ -1695,6 +1697,13 @@ public class RESTUtil {
         }
         // Add the domain specific Store app theme configuration
         config.put(JsonTagsZ.GUI_THEME, dc.getStoreAppTheme());
+        // Accounting configuration
+        AccountingConfig acctConfig = dc.getAccountingConfig();
+        if (acctConfig != null) {
+          MobileAccountingConfigModel mobileAccountingConfigModel = mobileConfigBuilder.buildAccountingConfiguration(
+              dc.isAccountingEnabled(), acctConfig);
+          config.put(JsonTagsZ.ACCOUNTING_CONFIG, mobileAccountingConfigModel);
+        }
       } catch (Exception e) {
         xLogger.warn("Error in getting system configuration: {0}", e);
       }
