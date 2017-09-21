@@ -206,7 +206,6 @@ public class AssetEventGenerator extends EventGenerator {
         }
 
       }
-      return super.isEventValid(event, pm);
     } catch (Exception e1) {
       xLogger
           .warn("Object {0} ({1}) not found when notify event in domain {2}", objectId, objectType,
