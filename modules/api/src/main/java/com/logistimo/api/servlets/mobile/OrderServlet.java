@@ -99,7 +99,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.jdo.PersistenceManager;
@@ -423,8 +422,6 @@ public class OrderServlet extends JsonRestServlet {
         if (currency == null || currency.isEmpty()) {
           currency = dc.getCurrency();
         }
-        // FOR BACKWARD COMPATIBILITY: check if integer quantity is to be sent back (for app versions 1.2.0 or greater, floats are sent)
-        boolean forceIntegerQuantity = RESTUtil.forceIntegerForStock(appVersion);
         if (hasOrders) {
           Results
               res =
@@ -459,11 +456,7 @@ public class OrderServlet extends JsonRestServlet {
         mom = mob.buildOrders(orders, locale, timezone, loadAll, incShpItems, includeBatchDetails);
       }
     }
-    // Get the locale string
-    String localeStr = Constants.LANG_DEFAULT;
-    if (locale != null) {
-      localeStr = locale.toString();
-    }
+
     // For the JSON output and send
     try {
       String
@@ -623,8 +616,7 @@ public class OrderServlet extends JsonRestServlet {
         message = backendMessages.getString("error.systemerror");
         setSignatureAndStatus(cache, signature, IJobStatus.FAILED);
       }
-    } // end if ( status )
-
+    }
     // For the JSON output and send
     try {
       MobileOrderModel mom = null;
@@ -788,7 +780,6 @@ public class OrderServlet extends JsonRestServlet {
               Services.getService(OrderManagementServiceImpl.class,
                   locale);
           if (RestConstantsZ.TYPE_REORDER.equalsIgnoreCase(type)) {
-
             o = oms.getOrder(uoReq.tid);
             if (!OrderUtils.validateOrderUpdatedTime(uoReq.tm, o.getUpdatedOn())) {
               errorCode = "O004";
@@ -797,10 +788,9 @@ public class OrderServlet extends JsonRestServlet {
             }
 
           }
-
           if (status) {
-            if ("oo".equals(type)) {
-
+            if (RestConstantsZ.TYPE_REORDER.equals(type)) {
+              tOrNt = o.getOrderType();
               signature = CommonUtils.getMD5(jsonInput);
               cache = AppFactory.get().getMemcacheService();
               Integer lastStatus = (Integer) cache.get(signature);
@@ -818,9 +808,7 @@ public class OrderServlet extends JsonRestServlet {
                 }
               }
             }
-
             if (!isAlreadyProcessed) {
-
               // Get the IMS service
               InventoryManagementService
                   ims =
@@ -855,7 +843,6 @@ public class OrderServlet extends JsonRestServlet {
                 if (or != null) {
                   o = or.getOrder();
                 }
-
                 if (uoReq.oty.equals(IOrder.TYPE_PURCHASE)) {
                   IKiosk k = as.getKiosk(uoReq.kid, false);
                   includeBatchDetails = k.isBatchMgmtEnabled();
@@ -871,7 +858,6 @@ public class OrderServlet extends JsonRestServlet {
                       IInvAllocation.Type.ORDER.toString()
                           + CharacterConstants.COLON + o.getOrderId();
                   if (dc.autoGI() && o.getServicingKiosk() != null) {
-
                     if (uoReq.mt != null) {
                       for (MaterialRequest item : uoReq.mt) {
                         List<IInvAllocation>
@@ -1189,9 +1175,6 @@ public class OrderServlet extends JsonRestServlet {
     }
     // For the JSON output and send
     try {
-      // FOR BACKWARD COMPATIBILITY: check whether integer quantity is to be sent back (for app versions >= 1.2.0, floats are sent)
-      boolean forceIntegerQuantity = RESTUtil.forceIntegerForStock(appVersion);
-      Map orderMap = null;
       MobileOrderModel mom = null;
       if (order != null) {
         dc = DomainConfig.getInstance(order.getDomainId());
