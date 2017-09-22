@@ -1107,3 +1107,5 @@ approvals.expired.lower=expiré
 request.sent.to=Cette demande a été envoyée à
 purchase.orders=Acheter en ligne
 sales.orders=Commandes
+purchase.order.lowercase=acheter en ligne
+sales.order.lowercase=commandes

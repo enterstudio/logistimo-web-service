@@ -1108,3 +1108,5 @@ approvals.expired.lower=expired
 request.sent.to=This request was sent to
 purchase.orders=Purchase orders
 sales.orders=Sales orders
+purchase.order.lowercase=purchase order
+sales.order.lowercase=sales order
