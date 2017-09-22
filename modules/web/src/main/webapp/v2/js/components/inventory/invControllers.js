@@ -1110,10 +1110,10 @@ invControllers.controller('BatchDetailCtrl', ['$scope', 'invService','trnService
                 }
                 ft['bmaterials'][m.mId + "\t" + m.bid] = {
                     q: '' + m.q,
-                    e: formatDate(parseUrlDate(m.bexp)),
+                    e: formatDate(parseUrlDate(m.bexp,true)),
                     mr: m.bmfnm,
                     r : reason,
-                    md: formatDate(parseUrlDate(m.bmfdt))
+                    md: formatDate(parseUrlDate(m.bmfdt,true))
                 };
             }
             return ft;
