@@ -1281,9 +1281,9 @@ trnControllers.controller('BatchTransactionCtrl', ['$scope', 'invService','$time
                     if (checkNotNullEmpty($scope.batchDet)) {
                         $scope.updateQuantity();
                         $scope.batchDet.forEach(function (det) {
-                            det.bexp = formatDate(new Date(det.bexp));
+                            det.bexp = formatDate(parseUrlDate(det.bexp, true));
                             if (checkNotNullEmpty(det.bmfdt)) {
-                                det.bmfdt = formatDate(new Date(det.bmfdt));
+                                det.bmfdt = formatDate(parseUrlDate(det.bmfdt, true));
                             }
                             det.mId = $scope.mid;
                         });
@@ -1671,9 +1671,9 @@ trnControllers.controller('StockBatchTransactionCtrl',['$scope','invService','$t
                     if (checkNotNullEmpty($scope.batchDet)) {
                         $scope.updateQuantity();
                         $scope.batchDet.forEach(function (det) {
-                            det.bexp = formatDate(new Date(det.bexp));
+                            det.bexp = formatDate(parseUrlDate(det.bexp, true));
                             if (checkNotNullEmpty(det.bmfdt)) {
-                                det.bmfdt = formatDate(new Date(det.bmfdt));
+                                det.bmfdt = formatDate(parseUrlDate(det.bmfdt, true));
                             }
                             det.mId = $scope.mid;
                         });
