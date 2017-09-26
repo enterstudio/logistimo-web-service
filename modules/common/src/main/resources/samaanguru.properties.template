@@ -44,7 +44,7 @@ email.fromaddress=$EMAIL_FROMADDRESS
 email.fromname=$EMAIL_FROMNAME
 
 # <!-- comments:comment # -->
-web.app.ver=
+web.app.ver=$WEB_APP_VER
 # <!-- endcomments -->
 
 # <!-- comments:uncomment # -->
