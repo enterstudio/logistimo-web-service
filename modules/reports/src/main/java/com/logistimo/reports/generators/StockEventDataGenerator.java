@@ -82,7 +82,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
     xLogger.fine("Entered StockEventDataGenerator.getReportData");
     // Execute query
     PersistenceManager pm = PMF.get().getPersistenceManager();
-    int count;
+    int count = 0;
     // Query q = pm.newQuery( queryStr );
     boolean isAbnormalStockReport =
         ((filters.get(ReportsConstants.FILTER_ABNORMALSTOCKVIEW) != null)
@@ -106,12 +106,15 @@ public class StockEventDataGenerator implements ReportDataGenerator {
     xLogger.fine("Query: {0}, QueryParams: {1}", q, queryParams.params);
     try {
       // results = (List<InvntryEvntLog>) q.executeWithMap( params );
-      results = (List<IInvntryEvntLog>) q.executeWithMap(queryParams.params);
-      queryParams =
-          getReportQuery(
-              from, until, frequency, filters, locale, timezone, pageParams, dc, sourceUserId, true);
-      q = pm.newQuery("javax.jdo.query.SQL", queryParams.query);
-      count = ((Long) ((List)q.executeWithMap(queryParams.params)).iterator().next()).intValue();
+        results = (List<IInvntryEvntLog>) q.executeWithMap(queryParams.params);
+      if(isAbnormalStockReport) {
+        queryParams =
+            getReportQuery(
+                from, until, frequency, filters, locale, timezone, pageParams, dc, sourceUserId,
+                true);
+        q = pm.newQuery("javax.jdo.query.SQL", queryParams.query);
+        count = ((Long) ((List) q.executeWithMap(queryParams.params)).iterator().next()).intValue();
+      }
       if (results != null) {
         results.size();
         cursor = QueryUtil.getCursor(results);
