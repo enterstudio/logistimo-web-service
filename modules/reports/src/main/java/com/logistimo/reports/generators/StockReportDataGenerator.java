@@ -115,6 +115,7 @@ public class StockReportDataGenerator implements ReportDataGenerator {
       } finally {
         q.closeAll();
       }
+
       // Check if optimization is on
       optimizationOn = false;
       if (kioskId != null) {

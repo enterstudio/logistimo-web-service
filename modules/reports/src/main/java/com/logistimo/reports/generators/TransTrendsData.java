@@ -107,7 +107,7 @@ public class TransTrendsData extends ReportData {
                          String timezone,
                          List<? extends ISlice> results, String cursor, String reportType,
                          DomainConfig dc) {
-    super(from, until, filters, locale, timezone, results, cursor);
+    super(from, until, filters, locale, timezone, results, cursor, null);
     this.reportType = reportType;
     this.dc = dc;
   }

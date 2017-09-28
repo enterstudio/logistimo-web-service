@@ -90,7 +90,7 @@ public class StockReportData extends ReportData {
   public StockReportData(Date from, Date until, Map<String, Object> filters, Locale locale,
                          String timezone,
                          List<IInvntry> inventories, String cursor, boolean optimizationOn) {
-    super(from, until, filters, locale, timezone, inventories, cursor);
+    super(from, until, filters, locale, timezone, inventories, cursor, null);
     this.optimizationOn = optimizationOn;
   }
 

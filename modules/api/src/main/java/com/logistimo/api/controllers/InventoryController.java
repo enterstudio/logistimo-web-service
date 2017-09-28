@@ -172,6 +172,7 @@ public class InventoryController {
 
           filters.put(ReportsConstants.FILTER_KIOSK, entityId);
           filters.put(ReportsConstants.FILTER_LATEST, true);
+          filters.put(ReportsConstants.FILTER_ABNORMALSTOCKVIEW, true);
 
           ReportsService reportsService = Services.getService(ReportsServiceImpl.class);
           ReportData
@@ -181,6 +182,7 @@ public class InventoryController {
                       ReportsConstants.FREQ_DAILY, filters,
                       locale, timezone, pageParams, dc, userId);
           results = new Results(reportData.getResults(), null);
+          results.setNumFound(reportData.getNumFound());
         } else {
           results =
               ims.getInventory(domainId, entityId, null, null, null, null, tag, matType, onlyNZStk, pdos,
@@ -308,6 +310,7 @@ public class InventoryController {
                     ReportsConstants.FREQ_DAILY, filters,
                     locale, timezone, pageParams, dc, userId);
         results = new Results(reportData.getResults(), null);
+        results.setNumFound(reportData.getNumFound());
       }else {
           results =
             ims.getInventory(domainId, null, kioskIds, etag, eetag, materialId, null, matType, onlyNZStk,
@@ -641,7 +644,7 @@ public class InventoryController {
             }
             modelList = abnModelList;
       }
-      return new Results(modelList, cursor, -1, offset);
+      return new Results(modelList, cursor, reportData.getNumFound(), offset);
     } catch (Exception e) {
       xLogger.severe("Abnormal stock: Error in reading stock event data: {0}", e);
       throw new InvalidServiceException(backendMessages.getString("abnormal.stock.error"));

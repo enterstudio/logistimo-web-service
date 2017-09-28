@@ -30,6 +30,7 @@ import com.logistimo.auth.SecurityConstants;
 import com.logistimo.config.models.DomainConfig;
 import com.logistimo.constants.CharacterConstants;
 import com.logistimo.constants.Constants;
+import com.logistimo.constants.QueryConstants;
 import com.logistimo.dao.JDOUtils;
 import com.logistimo.entities.models.LocationSuggestionModel;
 import com.logistimo.entities.service.EntitiesService;
@@ -81,6 +82,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
     xLogger.fine("Entered StockEventDataGenerator.getReportData");
     // Execute query
     PersistenceManager pm = PMF.get().getPersistenceManager();
+    int count;
     // Query q = pm.newQuery( queryStr );
     boolean isAbnormalStockReport =
         ((filters.get(ReportsConstants.FILTER_ABNORMALSTOCKVIEW) != null)
@@ -105,6 +107,11 @@ public class StockEventDataGenerator implements ReportDataGenerator {
     try {
       // results = (List<InvntryEvntLog>) q.executeWithMap( params );
       results = (List<IInvntryEvntLog>) q.executeWithMap(queryParams.params);
+      queryParams =
+          getReportQuery(
+              from, until, frequency, filters, locale, timezone, pageParams, dc, sourceUserId, true);
+      q = pm.newQuery("javax.jdo.query.SQL", queryParams.query);
+      count = ((Long) ((List)q.executeWithMap(queryParams.params)).iterator().next()).intValue();
       if (results != null) {
         results.size();
         cursor = QueryUtil.getCursor(results);
@@ -120,7 +127,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
     }
 
     xLogger.fine("Exiting StockEventDataGenerator.getReportData");
-    return new StockEventData(from, until, filters, locale, timezone, results, cursor);
+    return new StockEventData(from, until, filters, locale, timezone, results, cursor, count);
   }
 
   @SuppressWarnings("unchecked")
@@ -128,6 +135,12 @@ public class StockEventDataGenerator implements ReportDataGenerator {
   public QueryParams getReportQuery(Date from, Date until, String frequency,
                                     Map<String, Object> filters, Locale locale, String timezone,
                                     PageParams pageParams, DomainConfig dc, String sourceUserId) {
+    return getReportQuery(from, until, frequency, filters, locale, timezone, pageParams, dc, sourceUserId, false);
+  }
+
+  public QueryParams getReportQuery(Date from, Date until, String frequency,
+                                    Map<String, Object> filters, Locale locale, String timezone,
+                                    PageParams pageParams, DomainConfig dc, String sourceUserId, boolean countQuery) {
       if (filters == null || filters.isEmpty()) {
           throw new IllegalArgumentException("Filters not specified");
       }
@@ -135,7 +148,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
               ((filters.get(ReportsConstants.FILTER_ABNORMALSTOCKVIEW) != null)
                       && (boolean) filters.get(ReportsConstants.FILTER_ABNORMALSTOCKVIEW));
       if(isAbnormalStockReport){
-          return getReportSqlQuery(from,until,filters,locale,dc,sourceUserId,pageParams);
+          return getReportSqlQuery(from,until,filters,locale,dc,sourceUserId,pageParams, countQuery);
       }
       Integer eventType = (Integer) filters.get(ReportsConstants.FILTER_EVENT);
       Long domainId = (Long) filters.get(ReportsConstants.FILTER_DOMAIN);
@@ -259,7 +272,7 @@ public class StockEventDataGenerator implements ReportDataGenerator {
    * @return returns SQL QueryParams for Full abnormal inventory
    */
   public QueryParams getReportSqlQuery(Date from, Date until, Map<String, Object> filters,
-      Locale locale, DomainConfig dc, String sourceUserId, PageParams pageParams) {
+      Locale locale, DomainConfig dc, String sourceUserId, PageParams pageParams, boolean countQuery) {
     Integer abnormalBefore = (Integer) filters.get(ReportsConstants.FILTER_ABNORMALDURATION);
     Date abnormalBeforeDate =
         (abnormalBefore != null) ? LocalDateUtil.getOffsetDate(new Date(), -1*abnormalBefore) : null;
@@ -403,11 +416,17 @@ public class StockEventDataGenerator implements ReportDataGenerator {
       }
       filterStr.append(")");
     }
-    String limitStr =
-        (pageParams != null)
-            ? " LIMIT " + pageParams.getOffset() + CharacterConstants.COMMA + pageParams.getSize()
-            : "";
-    queryStr.append(filterStr.toString()).append(orderBy).append(limitStr);
+    if(countQuery) {
+      String query = queryStr.append(filterStr.toString()).toString();
+      query = query.replace("*", QueryConstants.ROW_COUNT);
+      return new QueryParams(query, params, QueryParams.QTYPE.SQL, IInvntry.class);
+    } else {
+      String limitStr =
+          (pageParams != null)
+              ? " LIMIT " + pageParams.getOffset() + CharacterConstants.COMMA + pageParams.getSize()
+              : "";
+      queryStr.append(filterStr.toString()).append(orderBy).append(limitStr);
+    }
     return new QueryParams(queryStr.toString(), params, QueryParams.QTYPE.SQL, IInvntry.class);
   }
 }

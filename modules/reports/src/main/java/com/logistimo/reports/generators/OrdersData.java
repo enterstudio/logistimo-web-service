@@ -85,7 +85,7 @@ public class OrdersData extends ReportData {
    */
   public OrdersData(Date from, Date until, Map<String, Object> filters, Locale locale,
                     String timezone, List<IOrder> orders, String cursor) {
-    super(from, until, filters, locale, timezone, orders, cursor);
+    super(from, until, filters, locale, timezone, orders, cursor, null);
   }
 
   /* (non-Javadoc)

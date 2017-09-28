@@ -94,7 +94,7 @@ public class DemandBoardData extends ReportData {
    */
   public DemandBoardData(Date from, Date until, Map<String, Object> filters, Locale locale,
                          String timezone, List<IDemandItem> items, String cursor) {
-    super(from, until, filters, locale, timezone, items, cursor);
+    super(from, until, filters, locale, timezone, items, cursor, null);
   }
 
   /* (non-Javadoc)

@@ -61,7 +61,7 @@ public class StockLevelData extends ReportData {
   public StockLevelData(Date from, Date until, Map<String, Object> filters,
                         Locale locale, String timezone, List<IInvntryLog> results, String cursor,
                         BigDecimal reorderLevel) {
-    super(from, until, filters, locale, timezone, results, cursor);
+    super(from, until, filters, locale, timezone, results, cursor, null);
     this.reorderLevel = reorderLevel;
   }
 

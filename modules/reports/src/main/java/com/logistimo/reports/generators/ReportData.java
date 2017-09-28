@@ -61,6 +61,7 @@ public abstract class ReportData {
   protected String cursor = null; // pagination cursor pointing to next set of results
   protected ResourceBundle messages = null;
   protected ResourceBundle jsMessages = null;
+  protected Integer numFound = null;
 
   @SuppressWarnings("rawtypes")
   protected List results = null;
@@ -75,7 +76,7 @@ public abstract class ReportData {
           Locale locale,
           String timezone,
           List results,
-          String cursor) {
+          String cursor, Integer numFound) {
     this.from = from;
     this.until = until;
     this.filters = filters;
@@ -83,6 +84,7 @@ public abstract class ReportData {
     this.timezone = timezone;
     this.results = results;
     this.cursor = cursor;
+    this.numFound = numFound;
     try {
       this.messages =
           Resources.get()
@@ -136,7 +138,7 @@ public abstract class ReportData {
             || ReportsConstants.TYPE_DOMAINACTIVITY.equals(reportType)) {
       return new ActivityData(null, null, null, locale, timezone, results, null);
     } else if (ReportsConstants.TYPE_STOCKEVENT.equals(reportType)) {
-      return new StockEventData(null, null, null, locale, timezone, results, null);
+      return new StockEventData(null, null, null, locale, timezone, results, null, null);
     } else {
       return null;
     }
@@ -177,6 +179,8 @@ public abstract class ReportData {
   public String getCursor() {
     return cursor;
   }
+
+  public Integer getNumFound() { return numFound; }
 
   @SuppressWarnings("rawtypes")
   public List getResults() {

@@ -76,8 +76,8 @@ public class StockEventData extends ReportData {
    */
   @SuppressWarnings("rawtypes")
   public StockEventData(Date from, Date until, Map<String, Object> filters,
-                        Locale locale, String timezone, List results, String cursor) {
-    super(from, until, filters, locale, timezone, results, cursor);
+                        Locale locale, String timezone, List results, String cursor, Integer numFound) {
+    super(from, until, filters, locale, timezone, results, cursor, numFound);
   }
 
   @SuppressWarnings("unchecked")
