@@ -824,11 +824,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       try {
         List<IDemandItem> items = (List<IDemandItem>) q.executeWithMap(paramMap);
         items.size(); // to ensure objects are retrieved before PM is closed.
-        // Filter the results to ONLY include un-fuliflled or un-cancelled demand
-                                /*List<String> statusList = new ArrayList<String>();
-                                statusList.add( IOrder.FULFILLED );
-				statusList.add( IOrder.CANCELLED );
-				List<IDemandItem> filteredResults = filterDemandItems( items, statusList );*/
         // Get the cursor of the next element in the result set (for future iteration, efficiently)
         String cursorStr = QueryUtil.getCursor(items);
         items = (List<IDemandItem>) pm.detachCopyAll(items);
@@ -937,7 +932,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
         o.setExpectedArrivalDate(eta);
         modifyOrder(o, userId, inventoryTransactions, now, domainId, transType, message,
             utcExpectedFulfillmentTimeRangesCSV, utcConfirmedFulfillmentTimeRange, payment,
-            paymentOption, packageSize, allowEmptyOrders, orderTags, orderType, referenceId, pm);
+            paymentOption, packageSize, allowEmptyOrders, orderTags, referenceId, pm);
         // Prevent an order from being edited out of all items, unless empty orders are allowed
         if (!allowEmptyOrders && o.size() == 0) {
           throw new ServiceException("Order has no items with a quantity greater than zero");
@@ -1104,8 +1099,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
           if (useLocalPM) {
             tx.commit();
           }
-          // Increment order counter
-//					incrementOrderCounter( o, 1, pm );
           // Generate event only if order is visible to both parties.
           if (o.isVisibleToCustomer() && o.isVisibleToVendor()) {
             generateEvent(domainId, IEvent.CREATED, o, null, null);
@@ -1155,11 +1148,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       }
     }
   }
-
-	/*@Override
-        public void modifyOrder ( IOrder o, String userId, List<ITransaction> transactions, Date timestamp, Long domainId, String transType, String message, String utcEstimatedFulfillmentTimeRanges, String utcConfirmedFulfillmentTimeRange, BigDecimal payment, String paymentOption, String packageSize, boolean allowEmptyOrders ) throws ServiceException {
-		modifyOrder(o, userId, transactions, timestamp, domainId, transType, message, utcEstimatedFulfillmentTimeRanges, utcConfirmedFulfillmentTimeRange, payment, paymentOption, packageSize, allowEmptyOrders, null, null, null);
-	}*/
 
   // Get an order given a demand list
   private void createOrder(
@@ -1240,11 +1228,11 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       String utcEstimatedFulfillmentTimeRanges,
       String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
       String paymentOption, String packageSize, boolean allowEmptyOrders,
-      List<String> orderTags, Integer orderType, String referenceId)
+      List<String> orderTags, String referenceId)
       throws ServiceException {
     modifyOrder(o, userId, transactions, timestamp, domainId, transType, message,
         utcEstimatedFulfillmentTimeRanges, utcConfirmedFulfillmentTimeRange, payment, paymentOption,
-        packageSize, allowEmptyOrders, orderTags, orderType, referenceId, null);
+        packageSize, allowEmptyOrders, orderTags, referenceId, null);
   }
 
   @Override
@@ -1256,7 +1244,7 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
       String utcConfirmedFulfillmentTimeRange,
       BigDecimal payment, String paymentOption, String packageSize,
       boolean allowEmptyOrders,
-      List<String> orderTags, Integer orderType, String referenceId,
+      List<String> orderTags, String referenceId,
       PersistenceManager pm) throws ServiceException {
     Date t = null;
     MaterialCatalogService mcs = Services.getService(MaterialCatalogServiceImpl.class);
@@ -1345,7 +1333,6 @@ public class OrderManagementServiceImpl extends ServiceImpl implements OrderMana
     // Recompute the order's price based on the above
     o.setTotalPrice(o.computeTotalPrice());
     o.setTgs(tagDao.getTagsByNames(orderTags, ITag.ORDER_TAG), TagUtil.TYPE_ORDER);
-    o.setOrderType(orderType);
     DomainsUtil.addToDomain(o, o.getDomainId(), null);
     // Update other order metadata
     updateOrderMetadata(o, utcEstimatedFulfillmentTimeRanges, utcConfirmedFulfillmentTimeRange,

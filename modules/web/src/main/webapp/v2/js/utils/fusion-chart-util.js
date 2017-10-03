@@ -51,9 +51,15 @@ function formatLabel(value, format) {
             return value;
     }
 }
-function constructDate(label) {
+function constructDate(label,ignoreTime) {
     if (typeof label == "string" && label.indexOf("-") > 0) {
         var dateSplit = label.split("-");
+        if(ignoreTime) {
+            var index = dateSplit[2].indexOf('T');
+            if (index >= 0) {
+                dateSplit[2] = dateSplit[2].substring(0, index);
+            }
+        }
         return new Date(dateSplit[0] + "/" + dateSplit[1] + "/" + dateSplit[2]);
     } else {
         return new Date(label);

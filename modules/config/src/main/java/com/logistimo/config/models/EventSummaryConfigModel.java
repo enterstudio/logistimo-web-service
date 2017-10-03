@@ -28,6 +28,11 @@ import com.google.gson.annotations.SerializedName;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -418,5 +423,16 @@ public class EventSummaryConfigModel implements Serializable {
   }
 
 
+  public EventSummaryConfigModel copy() throws IOException, ClassNotFoundException {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(this);
+      ByteArrayInputStream
+          byteArrayInputStream =
+          new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+      return (EventSummaryConfigModel) objectInputStream.readObject();
+
+  }
 }
 

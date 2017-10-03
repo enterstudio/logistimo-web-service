@@ -3027,9 +3027,9 @@ domainControllers.controller('PredictiveController', ['$scope', '$timeout', '$sc
                                 }
                                 bd.link = "JavaScript: angular.element(document.getElementById('cid')).scope().addFilter('" + filter + "','" + level + "')";
                             } else if(event == 'so' || event == 'n') {
-                                var search = {eid: kid};
+                                bd.link = "N-#/inventory/?eid="+kid;
                                 if(checkNotNullEmpty($scope.mtag) && $scope.mtag.length == 1) {
-                                    search['mtag'] = $scope.mtag[0].text;
+                                    bd.link += "&mtag=" + $scope.mtag[0].text;
                                 }
                             }
                             var found = false;

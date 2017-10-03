@@ -137,6 +137,7 @@ public class OrdersController {
 
   private static final XLog xLogger = XLog.getLog(OrdersController.class);
   private static final String CACHE_KEY = "order";
+  private static final String BACKEND_MESSAGES = "BackendMessages";
 
   private OrdersAPIBuilder builder;
 
@@ -296,7 +297,7 @@ public class OrdersController {
                                   HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    ResourceBundle backendMessages = Resources.get().getBundle(BACKEND_MESSAGES, locale);
     Long domainId = SecurityUtils.getCurrentDomainId();
     try {
       UpdatedOrder updOrder;
@@ -435,7 +436,6 @@ public class OrdersController {
     Locale locale = user.getLocale();
     ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
-    EventsConfig ec = DomainConfig.getInstance(domainId).getEventsConfig();
     OrderManagementService oms;
     try {
       oms = Services.getService(OrderManagementServiceImpl.class, user.getLocale());
@@ -459,7 +459,7 @@ public class OrdersController {
                                        HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    ResourceBundle backendMessages = Resources.get().getBundle(BACKEND_MESSAGES, locale);
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
     LockUtil.LockStatus lockStatus = LockUtil.lock(Constants.TX_O + orderId);
     if (!LockUtil.isLocked(lockStatus)) {
@@ -495,7 +495,7 @@ public class OrdersController {
 
             modifyOrder(order, user.getUsername(), transactions, new Date(), domainId,
                 ITransaction.TYPE_REORDER, model.msg, null, null, BigDecimal.ZERO, null, null,
-                dc.allowEmptyOrders(), order.getTags(TagUtil.TYPE_ORDER), order.getOrderType(),
+                dc.allowEmptyOrders(), order.getTags(TagUtil.TYPE_ORDER),
                 order.getReferenceID());
       }
       order = builder.buildOrderMaterials(order, model.items);
@@ -589,7 +589,7 @@ public class OrdersController {
                                          List<String> tags, HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    ResourceBundle backendMessages = Resources.get().getBundle(BACKEND_MESSAGES, locale);
     try {
       Long domainId = SessionMgr.getCurrentDomain(request.getSession(), user.getUsername());
       OrderManagementService oms =
@@ -676,7 +676,7 @@ public class OrdersController {
                            HttpServletRequest request) {
     SecureUserDetails user = SecurityUtils.getUserDetails(request);
     Locale locale = user.getLocale();
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    ResourceBundle backendMessages = Resources.get().getBundle(BACKEND_MESSAGES, locale);
     try {
       Long domainId = SessionMgr.getCurrentDomain(request.getSession(),
           user.getUsername());
@@ -731,7 +731,7 @@ public class OrdersController {
     } else {
       locale = new Locale(Constants.LANG_DEFAULT, Constants.COUNTRY_DEFAULT);
     }
-    ResourceBundle backendMessages = Resources.get().getBundle("BackendMessages", locale);
+    ResourceBundle backendMessages = Resources.get().getBundle(BACKEND_MESSAGES, locale);
     ResourceBundle messages = Resources.get().getBundle("Messages", locale);
     String userId = sUser.getUsername();
     Long domainId = SessionMgr.getCurrentDomain(request.getSession(), userId);
@@ -827,9 +827,6 @@ public class OrdersController {
                 oType == 2,
                 referenceId, edd, efd, SourceConstants.WEB);
         IOrder order = orderResults.getOrder();
-//            String strPrice = null; // get price statement
-//            if ( order != null && BigUtil.greaterThanZero(order.getTotalPrice()))
-//               strPrice = backendMessages.getString("order.price") + " <b>" + order.getPriceStatement() + "</b>.";
         String prefix = CharacterConstants.EMPTY;
         if (oType == 0) {
           if (dc.getOrdersConfig() != null && dc.getOrdersConfig().isTransferRelease()) {

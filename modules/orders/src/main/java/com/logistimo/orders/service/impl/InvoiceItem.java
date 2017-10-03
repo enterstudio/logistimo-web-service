@@ -24,6 +24,7 @@
 package com.logistimo.orders.service.impl;
 
 import com.logistimo.constants.Constants;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Created by nitisha.khandelwal on 01/08/17.
@@ -32,14 +33,24 @@ import com.logistimo.constants.Constants;
 public class InvoiceItem {
 
   String sno;
+
   String item;
+
   String remarks = Constants.EMPTY;
+
   String recommended = Constants.EMPTY;
+
   String quantity;
+
   String batchId;
   String manufacturer;
   String expiry;
   String batchQuantity;
+
+
+  Boolean batchEnabled;
+
+  String materialStatus;
 
   public String getSno() {
     return sno;
@@ -50,7 +61,11 @@ public class InvoiceItem {
   }
 
   public String getItem() {
-    return item;
+    if (!batchEnabled && StringUtils.isNotEmpty(materialStatus)) {
+      return item + "(" + materialStatus + ")";
+    } else {
+      return item;
+    }
   }
 
   public void setItem(String item) {
@@ -117,11 +132,30 @@ public class InvoiceItem {
     return this;
   }
 
-  public String getBatch(){
+  public String getMaterialStatus() {
+    return materialStatus;
+  }
+
+  public void setMaterialStatus(String materialStatus) {
+    this.materialStatus = materialStatus;
+  }
+
+  public Boolean getBatchEnabled() {
+    return batchEnabled;
+  }
+
+  public void setBatchEnabled(Boolean batchEnabled) {
+    this.batchEnabled = batchEnabled;
+  }
+
+  public String getBatch() {
     if (batchId != null) {
-      return batchId + ", " + manufacturer + ", " + expiry;
+      if (StringUtils.isNotEmpty(materialStatus)) {
+        return batchId + ", " + manufacturer + ", " + expiry + "(" + materialStatus + ")";
+      } else {
+        return batchId + ", " + manufacturer + ", " + expiry;
+      }
     }
     return null;
   }
-
 }

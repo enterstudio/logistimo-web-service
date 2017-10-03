@@ -220,12 +220,9 @@ invControllers.controller('InventoryCtrl', ['$scope', 'invService', 'domainCfgSe
         $scope.wparams = [['alert', 'searchAlert'], ["o", "offset"], ["s", "size"], ["eid", "entityId"],
             ["abntype", "abntype"],["mtag","mtag"], ["dur", "dur"], ["mid", "mid"],["matType","matType"],["onlyNZStk","onlyNZStk"],["pdos","pdos"]];
         $scope.reqparams = ["mtag", "etag", "eetag", "state", "district", "taluk"];
-        $scope.filterMethods = ['setTag','fetchInv'];
         $scope.localFilters = ['mtag'];
         $scope.filters = {changed: false};
-        $scope.setTag = function(){
-            $scope.tag = $scope.mtag;
-        };
+
         $scope.init = function () {
             $scope.showFullAbnormalStock = false;
             $scope.tag = $scope.mtag = requestContext.getParam("mtag") || "";
@@ -1113,10 +1110,10 @@ invControllers.controller('BatchDetailCtrl', ['$scope', 'invService','trnService
                 }
                 ft['bmaterials'][m.mId + "\t" + m.bid] = {
                     q: '' + m.q,
-                    e: formatDate(parseUrlDate(m.bexp)),
+                    e: formatDate(parseUrlDate(m.bexp,true)),
                     mr: m.bmfnm,
                     r : reason,
-                    md: formatDate(parseUrlDate(m.bmfdt))
+                    md: formatDate(parseUrlDate(m.bmfdt,true))
                 };
             }
             return ft;

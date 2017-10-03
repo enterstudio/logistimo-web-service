@@ -194,8 +194,8 @@ function changeToLastDayOfMonth(dt){
     return new Date(dt.getFullYear(), dt.getMonth() + 1, 0);
 }
 
-function parseUrlDate(dateString) {
-    return checkNotNullEmpty(dateString) ? constructDate(dateString) : "";
+function parseUrlDate(dateString, ignoreTime) {
+    return checkNotNullEmpty(dateString) ? constructDate(dateString,ignoreTime) : "";
 }
 function getFlotData(data, min, max) {
     var d = [];

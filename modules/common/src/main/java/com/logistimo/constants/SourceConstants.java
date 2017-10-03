@@ -29,6 +29,7 @@ package com.logistimo.constants;
 public class SourceConstants {
   public static final Integer WEB = 1;
   public static final Integer MOBILE = 2;
+  public static final Integer MMA = 5;
   public static final Integer UPLOAD = 3;
   public static final Integer SMS = 4;
 

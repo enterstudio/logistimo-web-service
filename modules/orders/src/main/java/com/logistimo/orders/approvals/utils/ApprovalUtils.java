@@ -61,7 +61,7 @@ public class ApprovalUtils {
 
     if (ApprovalType.TRANSFERS.equals(approvalType)) {
       orderConfig = DomainConfig.getInstance(order.getDomainId()).getApprovalsConfig().getOrderConfig();
-      expiry = orderConfig.getExpiry(order.getOrderType());
+      expiry = orderConfig.getExpiry(approvalType.getValue());
       primaryApprovers = orderConfig.getPrimaryApprovers();
       secondaryApprovers = orderConfig.getSecondaryApprovers();
     } else {
@@ -94,7 +94,7 @@ public class ApprovalUtils {
           throw new ValidationException("OA016", kioskId);
         }
         orderConfig = DomainConfig.getInstance(kiosk.getDomainId()).getApprovalsConfig().getOrderConfig();
-        expiry = orderConfig.getExpiry(order.getOrderType());
+        expiry = orderConfig.getExpiry(approvalType.getValue());
         if (!orderConfig.isSaleApprovalEnabled(kiosk.getTags())) {
           throw new ValidationException("OA014", kiosk.getName());
         }

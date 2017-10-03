@@ -68,7 +68,7 @@ public class ActivityData extends ReportData {
   public ActivityData(Date from, Date until, Map<String, Object> filters,
                       Locale locale, String timezone, List<? extends ISlice> slices,
                       String cursor) {
-    super(from, until, filters, locale, timezone, slices, cursor);
+    super(from, until, filters, locale, timezone, slices, cursor, null);
   }
 
   @SuppressWarnings("unchecked")

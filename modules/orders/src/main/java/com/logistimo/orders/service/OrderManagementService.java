@@ -108,9 +108,6 @@ public interface OrderManagementService extends Service {
   UpdatedOrder updateOrder(IOrder order, int source, boolean isLocked, boolean validateHU)
       throws LogiException;
 
-    /*UpdatedOrder updateOrderWithAllocations(IOrder order, int source, boolean isLocked,
-                                            boolean validateHU, String userId) throws LogiException;*/
-
   UpdatedOrder updateOrder(IOrder order, int source, boolean isLocked, boolean validateHU,
       String user) throws LogiException;
 
@@ -215,14 +212,12 @@ public interface OrderManagementService extends Service {
       String message, List<String> userIdsToBeNotified, int source,
       PersistenceManager pm, String reason) throws ServiceException;
 
-  // Modify order status and its items
-//	void modifyOrder(IOrder o, String userId, List<ITransaction> transactions, Date timestamp, Long domainId, String transType, String message, String utcEstimatedFulfillmentTimeRanges, String utcConfirmedFulfillmentTimeRange, BigDecimal payment, String paymentOption, String packageSize, boolean allowEmptyOrders) throws ServiceException;
   void modifyOrder(IOrder o, String userId, List<ITransaction> transactions, Date timestamp,
       Long domainId, String transType, String message,
       String utcEstimatedFulfillmentTimeRanges,
       String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
       String paymentOption, String packageSize, boolean allowEmptyOrders,
-      List<String> orderTags, Integer orderType, String referenceId)
+      List<String> orderTags, String referenceId)
       throws ServiceException;
 
   void modifyOrder(IOrder o, String userId, List<ITransaction> transactions, Date timestamp,
@@ -230,7 +225,7 @@ public interface OrderManagementService extends Service {
       String utcEstimatedFulfillmentTimeRanges,
       String utcConfirmedFulfillmentTimeRange, BigDecimal payment,
       String paymentOption, String packageSize, boolean allowEmptyOrders,
-      List<String> orderTags, Integer orderType, String referenceId,
+      List<String> orderTags, String referenceId,
       PersistenceManager pm) throws ServiceException;
 
 

@@ -58,7 +58,7 @@
     <cron>
         <url>/s2/api/orders/schedule-automation</url>
         <description>Runs order automation tasks for relevant domains</description>
-        <schedule>every day 00:30</schedule>
+        <schedule>every day 02:30</schedule>
         <!-- 06:00 AM IST -->
     </cron>
 

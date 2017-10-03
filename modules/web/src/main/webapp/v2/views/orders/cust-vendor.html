@@ -56,7 +56,7 @@
                                 {{resourceBundle['cancel']}}
                             </button>
                         </div>
-                        <a ng-hide="!editPermission || dp.vp || order.st == ORDER.FULFILLED || order.st == ORDER.CANCELLED || edit.etdate || !order.atc" ng-click="toggleEdit('etdate',true)"
+                        <a ng-hide="!editMetaDataPermission || dp.vp || order.st == ORDER.FULFILLED || order.st == ORDER.CANCELLED || edit.etdate || !order.atc" ng-click="toggleEdit('etdate',true)"
                            uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
                             <span class="glyphicons glyphicons-edit"></span>
                         </a>
@@ -119,7 +119,7 @@
                                 {{resourceBundle['cancel']}}
                             </button>
                         </div>
-                        <a ng-hide="!editPermission || dp.vp || order.st == ORDER.FULFILLED || edit.efdate || !order.atv" ng-click="toggleEdit('efdate',true)"
+                        <a ng-hide="!editMetaDataPermission || dp.vp || order.st == ORDER.FULFILLED || edit.efdate || !order.atv" ng-click="toggleEdit('efdate',true)"
                            uib-tooltip="{{resourceBundle['edit']}}" tooltip-append-to-body="true">
                             <span class="glyphicons glyphicons-edit" ng-if="order.st != ORDER.CANCELLED"></span>
                         </a>

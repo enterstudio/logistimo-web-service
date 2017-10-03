@@ -82,6 +82,8 @@ ENV MYSQL_HOST_URL="jdbc:mariadb://localhost/logistimo?useUnicode=true&amp;chara
 
 ENV JAVA_OPTS $JAVA_OPTS
 
+ENV WEB_APP_VER $WEB_APP_VER
+
 RUN cd $TOMCAT_HOME && wget http://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.7/jmx_prometheus_javaagent-0.7.jar
 
 ADD dockerfiles/jmx_exporter.json $TOMCAT_HOME/jmx_exporter.json

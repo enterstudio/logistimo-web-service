@@ -2152,12 +2152,12 @@ entityControllers.controller('EntityApproversController',['$scope','entityServic
 
         function validateApprovers() {
             if($scope.ipa && (checkNullEmpty($scope.eapr.pap))) {
-                $scope.showWarning("Primary approvers not configured for purchases order.");
+                $scope.showWarning($scope.resourceBundle['primary.approvers.purchase.config.error']);
                 $scope.continue = false;
                 return;
             }
             if($scope.isa && (checkNullEmpty($scope.eapr.pas))) {
-                $scope.showWarning("Primary approvers are not configured for sales order.");
+                $scope.showWarning($scope.resourceBundle['primary.approvers.sales.config.error']);
                 $scope.continue = false;
                 return;
             }

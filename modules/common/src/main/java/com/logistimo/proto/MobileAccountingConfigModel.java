@@ -21,30 +21,26 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.constants;
+package com.logistimo.proto;
+
+import com.google.gson.annotations.Expose;
 
 /**
- * Created by naveensnair on 11/07/17.
+ * Created by vani on 21/09/17.
  */
-public final class PermissionConstants {
+public class MobileAccountingConfigModel {
+  public static final String ENFORCE_CREDIT_LIMIT_ON_CONFIRM_ORDER = "cf";
+  public static final String ENFORCE_CREDIT_LIMIT_ON_SHIP_ORDER = "sp";
 
-  //Order constants
-  public static final String EDIT = "edit";
-  public static final String ALLOCATE = "allocate";
-  public static final String SHIP = "ship";
-  public static final String FULFILL = "fulfill";
-  public static final String CANCEL = "cancel";
-  public static final String CREATE_SHIPMENT = "create_shipment";
-  public static final String CONFIRM = "confirm";
-  public static final String REOPEN = "reopen";
-  public static final String APPROVAL_REQUIRED = "required";
-  public static final String EDIT_META_DATA = "edit_meta_data";
-
-  //Approval constants
-  public static final String REQUEST_APPROVAL = "request";
-  public static final String SHOW_HISTORY = "history";
-  public static final String APPROVE = "approve";
-  public static final String REJECT = "reject";
-
+  /**
+   * Whether accounting is enabled or not
+   */
+  @Expose
+  public Boolean enb;
+  /**
+   * When to enforce credit limit, "cf" if it is to be enforced when order is confirmed and "sp" if it is to be enforced when order is shipped
+   */
+  @Expose
+  public String enfcrl;
 
 }

@@ -82,7 +82,7 @@ public class TransReportData extends ReportData {
 
   public TransReportData(Date from, Date until, Map<String, Object> filters, Locale locale,
                          String timezone, List<ITransaction> trans, String cursor) {
-    super(from, until, filters, locale, timezone, trans, cursor);
+    super(from, until, filters, locale, timezone, trans, cursor, null);
   }
 
   /**

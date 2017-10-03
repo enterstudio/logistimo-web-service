@@ -42,6 +42,8 @@ then
   sed -ri "s~\(tcp:\/\/localhost:61616\)~$ACTIVEMQ_HOST~g" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/camel-tasks.xml
 fi
 
+WEB_APP_VER=`grep "web.app.ver=[0-9]" $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties | awk -F"=" '{print $2}'`
+
 envsubst < $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties.template  > $TOMCAT_HOME/webapps/ROOT/WEB-INF/classes/samaanguru.properties
 
 JAVA_OPTS="-Xms$JAVA_XMS -Xmx$JAVA_XMX \

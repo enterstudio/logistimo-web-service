@@ -312,7 +312,9 @@
                                     <label class="control-label">{{resourceBundle['user.mobileappversion']}}:</label>
                                 </div>
                                 <div class="col-sm-9 cbx">
-                                    {{user.av}}
+                                    <span ng-if="user.lgSrc === 1">{{resourceBundle['web']}}</span>
+                                    <span ng-if="user.lgSrc === 2">{{resourceBundle['mob']}} [{{user.av}}]</span>
+                                    <span ng-if="user.lgSrc === 5">{{resourceBundle['mob.mma']}} [{{user.av}}]</span>
                                 </div>
                             </div>
                             <div class="row" ng-if="isDef(user.br)">

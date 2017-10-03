@@ -1103,6 +1103,7 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                 $scope.confirmPermission = false;
                 $scope.allocatePermission = false;
                 $scope.reOpenPermission = false;
+                $scope.editMetaDataPermission = false;
                 if (checkNotNullEmpty($scope.order.permissions) &&
                     checkNotNullEmpty($scope.order.permissions.permissions) && !$scope.dp.vp) {
                     $scope.order.permissions.permissions.forEach(function(data) {
@@ -1124,6 +1125,9 @@ ordControllers.controller('OrderDetailCtrl', ['$scope', 'ordService', 'ORDER', '
                         }
                         if(data == 'reopen') {
                             $scope.reOpenPermission = true;
+                        }
+                        if(data == 'edit_meta_data') {
+                            $scope.editMetaDataPermission = true;
                         }
                     });
                 }

@@ -1025,7 +1025,28 @@
     "KE": {
       "name": "Kenya",
       "states": {
+        "Central": {
+          "districts": {}
+        },
+        "Coast": {
+          "districts": {}
+        },
+        "Eastern": {
+          "districts": {}
+        },
         "Nairobi": {
+          "districts": {}
+        },
+        "North Eastern": {
+          "districts": {}
+        },
+        "Nyanza": {
+          "districts": {}
+        },
+        "Rift Valley": {
+          "districts": {}
+        },
+        "Western": {
           "districts": {}
         }
       }
@@ -1414,7 +1435,10 @@
               ]
             },
             "Latur": {},
-            "Osmanabad": {}
+            "Osmanabad": {},
+            "Sangli": {},
+            "Satara": {},
+            "Kolhapur": {}
           }
         },
         "Odisha": {
@@ -1947,6 +1971,7 @@
           "districts": {
             "Ambala": {},
             "Bhiwani": {},
+            "Charkhi Dadri": {},
             "Faridabad": {},
             "Fatehabad": {},
             "Gurgaon": {},
@@ -4450,7 +4475,30 @@
       "name": "Bahrain"
     },
     "BD": {
-      "name": "Bangladesh"
+      "name": "Bangladesh",
+      "states": {
+        "Barisal": {
+          "districts": {}
+        },
+        "Chittagong": {
+          "districts": {}
+        },
+        "Dhaka": {
+          "districts": {}
+        },
+        "Khulna": {
+          "districts": {}
+        },
+        "Rajshahi": {
+          "districts": {}
+        },
+        "Rangpur": {
+          "districts": {}
+        },
+        "Sylhet": {
+          "districts": {}
+        }
+      }
     },
     "BB": {
       "name": "Barbados"
@@ -4564,7 +4612,42 @@
       "name": "Czech Republic"
     },
     "CD": {
-      "name": "Democratic Republic of the Congo"
+      "name": "Democratic Republic of Congo",
+      "states": {
+        "Bandundu": {
+          "districts": {}
+        },
+        "Bas Congo": {
+          "districts": {}
+        },
+        "Equateur": {
+          "districts": {}
+        },
+        "Kasai Occidental": {
+          "districts": {}
+        },
+        "Kasai Oriental": {
+          "districts": {}
+        },
+        "Katanga": {
+          "districts": {}
+        },
+        "Kinshasa City": {
+          "districts": {}
+        },
+        "Maniema": {
+          "districts": {}
+        },
+        "Nord Kivu": {
+          "districts": {}
+        },
+        "Orientale": {
+          "districts": {}
+        },
+        "Sud Kivu": {
+          "districts": {}
+        }
+      }
     },
     "DK": {
       "name": "Denmark",
@@ -4662,7 +4745,106 @@
     "RI": {
       "name": "Indonesia",
       "states": {
+        "Aceh": {
+          "districts": {}
+        },
+        "Bali": {
+          "districts": {}
+        },
+        "Bangka-Belitung": {
+          "districts": {}
+        },
+        "Banten": {
+          "districts": {}
+        },
+        "Bengkulu": {
+          "districts": {}
+        },
+        "Central Java": {
+          "districts": {}
+        },
+        "Central Kalimantan": {
+          "districts": {}
+        },
+        "Central Sulawesi": {
+          "districts": {}
+        },
+        "East Java": {
+          "districts": {}
+        },
+        "East Kalimantan": {
+          "districts": {}
+        },
+        "East Nusa Tenggara": {
+          "districts": {}
+        },
+        "Gorontalo": {
+          "districts": {}
+        },
         "Jakarta": {
+          "districts": {}
+        },
+        "Jambi": {
+          "districts": {}
+        },
+        "Lampung": {
+          "districts": {}
+        },
+        "Maluku": {
+          "districts": {}
+        },
+        "North Kalimantan": {
+          "districts": {}
+        },
+        "North Maluku": {
+          "districts": {}
+        },
+        "North Sulawesi": {
+          "districts": {}
+        },
+        "North Sumatra": {
+          "districts": {}
+        },
+        "Papua": {
+          "districts": {}
+        },
+        "Riau": {
+          "districts": {}
+        },
+        "Riau Islands": {
+          "districts": {}
+        },
+        "South East Sulawesi": {
+          "districts": {}
+        },
+        "South Kalimantan": {
+          "districts": {}
+        },
+        "South Sulawesi": {
+          "districts": {}
+        },
+        "South Sumatra": {
+          "districts": {}
+        },
+        "West Java": {
+          "districts": {}
+        },
+        "West Kalimantan": {
+          "districts": {}
+        },
+        "West Nusa Tenggara": {
+          "districts": {}
+        },
+        "West Papua": {
+          "districts": {}
+        },
+        "West Sulawesi": {
+          "districts": {}
+        },
+        "West Sumatra": {
+          "districts": {}
+        },
+        "Yogyakarta": {
           "districts": {}
         }
       }
@@ -4929,7 +5111,57 @@
       "name": "Sri Lanka"
     },
     "SD": {
-      "name": "Sudan"
+      "name": "Sudan",
+      "states": {
+        "Al Jazirah": {
+          "districts": {}
+        },
+        "Al Qadarif": {
+          "districts": {}
+        },
+        "Blue Nile": {
+          "districts": {}
+        },
+        "Kassala": {
+          "districts": {}
+        },
+        "Khartoum": {
+          "districts": {}
+        },
+        "North Darfur": {
+          "districts": {}
+        },
+        "North Kurdufan": {
+          "districts": {}
+        },
+        "Northern": {
+          "districts": {}
+        },
+        "Red Sea": {
+          "districts": {}
+        },
+        "River Nile": {
+          "districts": {}
+        },
+        "Sennar": {
+          "districts": {}
+        },
+        "South Darfur": {
+          "districts": {}
+        },
+        "South Kurdufan": {
+          "districts": {}
+        },
+        "West Darfur": {
+          "districts": {}
+        },
+        "West Kurdufan": {
+          "districts": {}
+        },
+        "White Nile": {
+          "districts": {}
+        }
+      }
     },
     "SR": {
       "name": "Suriname"
@@ -5296,7 +5528,5 @@
         }
       }
     }
-  },
-  "statusCode": 200,
-  "message": "OK"
+  }
 }

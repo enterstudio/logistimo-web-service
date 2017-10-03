@@ -41,6 +41,7 @@ import com.logistimo.utils.LocalDateUtil;
 import com.logistimo.utils.StringUtil;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -149,7 +150,7 @@ public class UserExportHandler implements IExportHandler {
         .append(CharacterConstants.COMMA)
         .append(pkName != null ? StringEscapeUtils.escapeCsv(pkName) : CharacterConstants.EMPTY)
         .append(CharacterConstants.COMMA)
-        .append(user.getAppVersion() != null ? StringEscapeUtils.escapeCsv(user.getAppVersion()) : CharacterConstants.EMPTY)
+        .append(getAppVersion(user.getLoginSource(),user.getAppVersion(),locale))
         .append(CharacterConstants.COMMA)
         .append(user.getLastLogin() != null ? LocalDateUtil
             .formatCustom(user.getLastLogin(), Constants.DATETIME_CSV_FORMAT, timezone)
@@ -253,4 +254,27 @@ public class UserExportHandler implements IExportHandler {
   }
 
 
+  private String getAppVersion (Integer lgsrc, String appver, Locale locale) {
+    ResourceBundle bundle = Resources.get().getBundle("Messages", locale);
+    String res = CharacterConstants.EMPTY;
+    if (lgsrc != null) {
+      if (lgsrc.intValue() == 2) {
+        res =  bundle.getString("mob");
+      } else if (lgsrc.intValue() == 5) {
+        res =  bundle.getString("mob.mma");
+      }
+    }
+    if (StringUtils.isEmpty(res)) {
+      if (appver != null) {
+        res = appver;
+      } else {
+        return res;
+      }
+    } else {
+      if (appver != null) {
+        res = res + CharacterConstants.O_SBRACKET + appver + CharacterConstants.C_SBRACKET;
+      }
+    }
+    return StringEscapeUtils.escapeCsv(res);
+  }
 }

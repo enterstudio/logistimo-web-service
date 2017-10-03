@@ -528,8 +528,8 @@ public class TransactionsController {
       IKiosk destKiosk = null;
       if (checkBatchMgmt) {
         as = Services.getService(EntitiesServiceImpl.class, locale);
-        kiosk = as.getKiosk(kioskId);
-        destKiosk = as.getKiosk(linkedKioskId);
+        kiosk = as.getKiosk(kioskId, false);
+        destKiosk = as.getKiosk(linkedKioskId, false);
         checkBatchMgmt = !kiosk.isBatchMgmtEnabled() && destKiosk.isBatchMgmtEnabled();
         mcs = Services.getService(MaterialCatalogServiceImpl.class, locale);
       }

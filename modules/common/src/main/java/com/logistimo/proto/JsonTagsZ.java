@@ -305,5 +305,6 @@ public class JsonTagsZ {
   // Automatic allocation and automatic assignment of material status to order related keys
   public static final String AUTO_ALLOCATE_INVENTORY_TO_ORDERS = "atallc";
   public static final String AUTO_ASSIGN_MATERIAL_STATUS_TO_ORDERS = "atasgnmst";
+  public static final String ACCOUNTING_CONFIG = "acct";
 
 }

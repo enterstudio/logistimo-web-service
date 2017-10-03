@@ -27,7 +27,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="col-sm-6 lPad5" ng-hide="edit.pmt">
-                    <span ng-show="order.pd != 0">{{order.cur}} {{order.pd | number : 2}} [{{order.po}}] </span>
+                    <span ng-show="order.pd != 0">{{order.cur}} {{order.pd | number : 2}} <span ng-show="isDef(order.po)">[{{order.po}}]</span></span>
                     <span ng-show="order.pd >= order.tp" class="greentxt">{{resourceBundle['amount']}} {{resourceBundle['paid']}}</span>
                     <span ng-show="order.pd < order.tp">
                         <br/>
